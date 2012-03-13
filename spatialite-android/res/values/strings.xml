@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Spatialite-Android</string>
+    <string name="test_db">test-2.3.sqlite</string>
+    <string name="browse_data">Browse Data</string>
+    <string name="browse_description">Step 3: Select \"Browse Data\" to view the contents of the test database.</string>
+    <string name="run_tests">Run Tests</string>
+    <string name="run_description">Step 2: Select \"Run Tests\" to verify basic functionality.</string>
+    <string name="install_to_external">External Storage</string>
+    <string name="install_to_application">Application Storage</string>
+    <string name="install_directions">Step 1: Select the location you would like to install the Spatialite test Database.\nNOTE: You only need to do this once.</string>
+	<string name="error_copy_failed">Failed to copy test database to requested location.  Check error log for more information.</string>
+</resources>
