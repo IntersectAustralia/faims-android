@@ -15,6 +15,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.TestActivity"></activity>
+        <activity android:name=".activities.TableListActivity"></activity>
 
     </application>
 </manifest>

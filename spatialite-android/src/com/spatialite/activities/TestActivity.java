@@ -43,10 +43,14 @@ public class TestActivity extends Activity implements OnClickListener {
 		if (v.getId() == R.id.button1) {
 			try {
 
+				TextView view = (TextView)findViewById(R.id.txt_result);
+				view.setText("Result: Failed");
+				
 				String dbFile = ActivityHelper.getDataBase(this,
 						getString(R.string.test_db));
 				if (dbFile == null) {
-					throw new IOException("Unable to open database file");
+					ActivityHelper.showAlert(this, getString(R.string.error_locate_failed));
+					throw new IOException(getString(R.string.error_locate_failed));
 				}
 
 				jsqlite.Database db = new jsqlite.Database();
@@ -68,14 +72,9 @@ public class TestActivity extends Activity implements OnClickListener {
 					public boolean newrow(String[] rowdata) {
 						Log.v(TAG, "Row: " + Arrays.toString(rowdata));
 
-						// Careful (from parent javadoc):
-						// "If true is returned the running SQLite query is aborted."
 						return false;
 					}
 				};
-
-				TextView view = (TextView)findViewById(R.id.txt_result);
-				view.setText("Result: Failed");
 				
 				String query = "SELECT name, peoples, AsText(Geometry) from Towns where peoples > 350000";
 				Stmt st = db.prepare(query);
@@ -89,6 +88,7 @@ public class TestActivity extends Activity implements OnClickListener {
 				db.exec("SELECT Distance( Transform(MakePoint(4.430174797, 51.01047063, 4326), 32631), Transform(MakePoint(4.43001276, 51.01041585, 4326),32631));",
 						cb);
 
+				db.close();
 				view.setText("Result: Passed");
 			} catch (jsqlite.Exception e) {
 				Log.e(TAG, e.getMessage());

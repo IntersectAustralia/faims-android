@@ -7,6 +7,7 @@ import com.spatialite.R;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 
 public class ActivityHelper {
 	private static final String TAG = "ActivityHelper";
@@ -28,12 +29,14 @@ public class ActivityHelper {
 
 		// Check application storage first
 		db = new File(getPath(ctx, false), filename);
+		Log.d(TAG, "Checking: " + db.toString());
 		if (db.exists()) {
 			return db.toString();
 		}
 
 		// Check external storage second
 		db = new File(getPath(ctx, true), filename);
+		Log.d(TAG, "Checking: " + db.toString());
 		if (db.exists()) {
 			return db.toString();
 		}

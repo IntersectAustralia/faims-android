@@ -10,4 +10,5 @@
     <string name="install_to_application">Application Storage</string>
     <string name="install_directions">Step 1: Select the location you would like to install the Spatialite test Database.\nNOTE: You only need to do this once.</string>
 	<string name="error_copy_failed">Failed to copy test database to requested location.  Check error log for more information.</string>
+	<string name="error_locate_failed">Unable to locate database file. Check error log for more information.</string>
 </resources>

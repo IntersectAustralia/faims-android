@@ -43,6 +43,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		} else if (v.getId() == R.id.btn_run_tests) {
 			Intent myIntent = new Intent(this, TestActivity.class);
 			startActivity(myIntent);
+		} else if (v.getId() == R.id.btn_browse_data) {
+			Intent myIntent = new Intent(this, TableListActivity.class);
+			startActivity(myIntent);
 		}
 	}
 }
