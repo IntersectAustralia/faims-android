@@ -459,7 +459,6 @@ include $(CLEAR_VARS)
 # ./configure --build=x86_64-pc-linux-gnu --host=arm-linux-eabi
 LOCAL_MODULE    := spatialite
 LOCAL_CFLAGS    := -Dfdatasync=fsync \
-	-DOMIT_GEOCALLBACKS \
 	-DOMIT_FREEXL \
 	-DVERSION=\"3.0.1\" \
 	-D__ANDROID__ \
