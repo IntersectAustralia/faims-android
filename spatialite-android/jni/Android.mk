@@ -458,7 +458,12 @@ include $(CLEAR_VARS)
 # -DOMIT_GEOS=0
 # ./configure --build=x86_64-pc-linux-gnu --host=arm-linux-eabi
 LOCAL_MODULE    := spatialite
-LOCAL_CFLAGS    := -Dfdatasync=fsync -DOMIT_GEOCALLBACKS -DOMIT_FREEXL -DVERSION=\"3.0.1\" -D__ANDROID__
+LOCAL_CFLAGS    := -Dfdatasync=fsync \
+	-DOMIT_GEOCALLBACKS \
+	-DOMIT_FREEXL \
+	-DVERSION=\"3.0.1\" \
+	-D__ANDROID__ \
+	-DSQLITE_ENABLE_RTREE=1
 LOCAL_LDLIBS	:= -llog 
 LOCAL_C_INCLUDES := \
     libiconv-1.13.1/include \
@@ -476,7 +481,9 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := jsqlite
 LOCAL_CFLAGS	:= -D__ANDROID__ \
+	-DHAVE_SQLITE2=0 \
 	-DHAVE_SQLITE3=1 \
+	-DHAVE_SQLITE3_MALLOC=1 \
 	-DHAVE_SQLITE3_PREPARE_V2=1 \
 	-DHAVE_SQLITE3_CLEAR_BINDINGS=1 \
 	-DHAVE_SQLITE3_BIND_PARAMETER_COUNT=1 \
@@ -484,7 +491,8 @@ LOCAL_CFLAGS	:= -D__ANDROID__ \
 	-DHAVE_SQLITE3_BIND_PARAMETER_INDEX=1 \
 	-DHAVE_SQLITE3_LOAD_EXTENSION=1 \
 	-DCANT_PASS_VALIST_AS_CHARPTR=1 \
-	-Dfdatasync=fsync
+	-Dfdatasync=fsync \
+	-DSQLITE_ENABLE_RTREE=1
 LOCAL_LDLIBS	:= -llog
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/libspatialite-amalgamation-3.0.1/headers/spatialite \

@@ -935,6 +935,8 @@ public class Database {
 	return d;
     }
 
+    public native void spatialite_create();
+    
     /**
      * Static initializer to load the native part.
      */

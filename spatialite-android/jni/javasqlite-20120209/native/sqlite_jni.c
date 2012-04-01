@@ -5025,6 +5025,54 @@ spatialite_init(1);
 			    "([BLjava/lang/String;)V");
 }
 
+JNIEXPORT void JNICALL
+Java_jsqlite_Database_spatialite_1create(JNIEnv *env, jobject obj)
+{
+/* attempting to perform self-initialization for a newly created DB */
+    int ret;
+    char sql[1024];
+    char *err_msg = NULL;
+    int count;
+    int i;
+    char **results;
+    int rows;
+    int columns;
+
+    sqlite3 * db;
+    handle *h = gethandle(env, obj);
+    if (h != NULL && h->sqlite != NULL) {
+    	db = h->sqlite;
+    }
+
+/* checking if this DB is really empty */
+    strcpy (sql, "SELECT Count(*) from sqlite_master");
+    ret = sqlite3_get_table (db, sql, &results, &rows, &columns, NULL);
+    if (ret != SQLITE_OK)
+	return;
+    if (rows < 1)
+	;
+    else
+      {
+	  for (i = 1; i <= rows; i++)
+	      count = atoi (results[(i * columns) + 0]);
+      }
+    sqlite3_free_table (results);
+
+    if (count > 0)
+	return;
+
+/* all right, it's empty: proceding to initialize */
+    strcpy (sql, "SELECT InitSpatialMetadata()");
+    ret = sqlite3_exec (db, sql, NULL, NULL, &err_msg);
+    if (ret != SQLITE_OK)
+      {
+	  fprintf (stderr, "InitSpatialMetadata() error: %s\n", err_msg);
+	  sqlite3_free (err_msg);
+	  return;
+      }
+    spatial_ref_sys_init (db, 1);
+}
+
 #if !defined(DONT_USE_JNI_ONLOAD) && defined(JNI_VERSION_1_2)
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *reserved)

@@ -27,11 +27,11 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
-					<value>usr/local/android-ndk-r5b/ndk-build</value>
+					<value>usr/local/android-ndk-r7b/ndk-build</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/spatialite/jni}</value>
+					<value>/home/efrohnho/git/spatialite-android/spatialite-android/jni</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
