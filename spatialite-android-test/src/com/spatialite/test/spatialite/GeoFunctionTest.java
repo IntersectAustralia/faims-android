@@ -1,11 +1,11 @@
-package com.spatialite.test;
+package com.spatialite.test.spatialite;
 
 import jsqlite.Stmt;
 import android.os.Environment;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class SpatialiteGeoFunctionTest extends AndroidTestCase {
+public class GeoFunctionTest extends AndroidTestCase {
 	private static final String TAG = "SpatialiteGeoFunctionTest";
 	jsqlite.Database db = null;
 
@@ -30,24 +30,6 @@ public class SpatialiteGeoFunctionTest extends AndroidTestCase {
 		db.open(Environment.getExternalStorageDirectory()
 				+ "/Download/test-2.3.sqlite",
 				jsqlite.Constants.SQLITE_OPEN_READONLY);
-	}
-	
-	public void testVersions() throws Exception {
-		Stmt stmt01 = db.prepare("SELECT spatialite_version();");
-		if (stmt01.step()) {
-			assertEquals("3.0.1",stmt01.column_string(0));
-		}
-		
-		stmt01 = db.prepare("SELECT proj4_version();");
-		if (stmt01.step()) {
-			assertEquals("Rel. 4.7.1, 23 September 2009",stmt01.column_string(0));
-		}
-		
-		stmt01 = db.prepare("SELECT geos_version();");
-		if (stmt01.step()) {
-			assertEquals("3.2.2-CAPI-1.6.2",stmt01.column_string(0));
-		}
-		stmt01.close();
 	}
 	
 	public void testGeometryRepresentation01() throws Exception {

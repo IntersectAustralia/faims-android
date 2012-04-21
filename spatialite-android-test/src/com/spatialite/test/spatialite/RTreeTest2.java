@@ -1,4 +1,4 @@
-package com.spatialite.test;
+package com.spatialite.test.spatialite;
 
 import jsqlite.Callback;
 import jsqlite.Stmt;
@@ -6,7 +6,7 @@ import android.os.Environment;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class SpatialiteRTreeTest2 extends AndroidTestCase {
+public class RTreeTest2 extends AndroidTestCase {
 	private static final String TAG = "SpatialiteGeoFunctionTest";
 	jsqlite.Database db = null;
 

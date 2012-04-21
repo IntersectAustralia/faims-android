@@ -1,4 +1,4 @@
-package com.spatialite.test;
+package com.spatialite.test.spatialite;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import android.os.Environment;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class SpatialiteRTreeTest extends AndroidTestCase {
+public class RTreeTest extends AndroidTestCase {
 	private static final String TAG = "SpatialiteRTreeTest";
 	jsqlite.Database db = null;
 

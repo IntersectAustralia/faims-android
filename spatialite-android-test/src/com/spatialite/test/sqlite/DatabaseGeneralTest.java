@@ -1,4 +1,4 @@
-package com.spatialite.test;
+package com.spatialite.test.sqlite;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import android.os.Environment;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class SpatialiteDatabaseGeneralTest extends AndroidTestCase {
+public class DatabaseGeneralTest extends AndroidTestCase {
 	private static final String TAG = "SpatialiteDatabaseGeneralTest";
 	jsqlite.Database db = null;
 
