@@ -2,7 +2,6 @@ package com.spatialite.test.sqlite;
 
 import java.io.File;
 
-import jsqlite.Callback;
 import jsqlite.Stmt;
 import android.os.Environment;
 import android.test.AndroidTestCase;
