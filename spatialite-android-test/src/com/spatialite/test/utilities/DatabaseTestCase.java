@@ -26,14 +26,15 @@ public abstract class DatabaseTestCase extends AndroidTestCase {
 		}
 
 		db = new jsqlite.Database();
-		db.open(dbPath.toString(), jsqlite.Constants.SQLITE_OPEN_CREATE);
+		db.open(dbPath.toString(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
 	}
 
 	public void openNewDatabase(String dbName) throws Exception, IOException {
 		dbPath = getDatabaseName(dbName);
 
 		db = new jsqlite.Database();
-		db.open(dbPath.toString(), jsqlite.Constants.SQLITE_OPEN_CREATE);
+		db.open(dbPath.toString(), jsqlite.Constants.SQLITE_OPEN_READWRITE
+				| jsqlite.Constants.SQLITE_OPEN_CREATE);
 	}
 
 	private File getDatabaseName(String dbName) {

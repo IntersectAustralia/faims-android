@@ -100,20 +100,22 @@ public class DatabaseGeneralTest extends DatabaseTestCase {
 	}
 
 	public void testSimpleStringBinding03() throws Exception {
-		/*
-		 * db.exec("CREATE TABLE test (num TEXT, value TEXT);", null);
-		 * 
-		 * String args[] = new String[1]; args[0] = "foo";
-		 * db.exec("INSERT INTO test (num, value) VALUES (%q,'ss');", null,
-		 * args);
-		 * 
-		 * Stmt stmt01 = db.prepare("SELECT * from test;"); if (stmt01.step()) {
-		 * assertEquals("foo", stmt01.column_string(0)); assertEquals("ss",
-		 * stmt01.column_string(1)); } else { fail("Query failed"); }
-		 * stmt01.close();
-		 * 
-		 * db.exec("DROP TABLE test;", null);
-		 */
+		db.exec("CREATE TABLE test (num TEXT, value TEXT);", null);
+
+		String args[] = new String[1];
+		args[0] = "foo";
+		db.exec("INSERT INTO test (num, value) VALUES (%Q,'ss');", null, args);
+
+		Stmt stmt01 = db.prepare("SELECT * from test;");
+		if (stmt01.step()) {
+			assertEquals("foo", stmt01.column_string(0));
+			assertEquals("ss", stmt01.column_string(1));
+		} else {
+			fail("Query failed");
+		}
+		stmt01.close();
+
+		db.exec("DROP TABLE test;", null);
 	}
 
 	public void testErrorConditions() throws Exception {
@@ -178,7 +180,7 @@ public class DatabaseGeneralTest extends DatabaseTestCase {
 
 	public void testErrorConditionsInvalidSql() throws Exception {
 		db.exec("CREATE TABLE test (num TEXT, value TEXT);", null);
-		
+
 		// Invalid SQL
 		try {
 			db.prepare("INSERT INTO test (num, value) VLUES (@ONE,?);");

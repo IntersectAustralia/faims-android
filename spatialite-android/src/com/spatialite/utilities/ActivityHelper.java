@@ -2,8 +2,6 @@ package com.spatialite.utilities;
 
 import java.io.File;
 
-import com.spatialite.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,11 +14,12 @@ public class ActivityHelper {
 		AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
 		alertDialog.setTitle("Application Error");
 		alertDialog.setMessage(message);
-		alertDialog.setButton("Dismiss", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				// Do nothing
-			}
-		});
+		alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Dismiss",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						// Do nothing
+					}
+				});
 		alertDialog.show();
 	}
 
