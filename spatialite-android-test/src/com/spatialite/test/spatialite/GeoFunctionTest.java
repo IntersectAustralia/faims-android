@@ -1,35 +1,22 @@
 package com.spatialite.test.spatialite;
 
-import jsqlite.Stmt;
-import android.os.Environment;
-import android.test.AndroidTestCase;
-import android.util.Log;
+import com.spatialite.test.utilities.DatabaseTestCase;
 
-public class GeoFunctionTest extends AndroidTestCase {
-	private static final String TAG = "SpatialiteGeoFunctionTest";
-	jsqlite.Database db = null;
+import jsqlite.Stmt;
+
+public class GeoFunctionTest extends DatabaseTestCase {
+	private static final String TAG = "GeoFunctionTest";
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		dbSetUp();
+		openExistingDatabase("test-2.3.sqlite");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		dbTeardown();
+		closeDatabase();
 		super.tearDown();
-	}
-
-	private void dbTeardown() throws Exception {
-		db.close();
-	}
-
-	private void dbSetUp() throws Exception {
-		db = new jsqlite.Database();
-		db.open(Environment.getExternalStorageDirectory()
-				+ "/Download/test-2.3.sqlite",
-				jsqlite.Constants.SQLITE_OPEN_READONLY);
 	}
 	
 	public void testGeometryRepresentation01() throws Exception {

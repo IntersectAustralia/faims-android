@@ -1,10 +1,11 @@
 package com.spatialite.test.spatialite;
 
-import jsqlite.Stmt;
-import android.test.AndroidTestCase;
+import com.spatialite.test.utilities.DatabaseTestCase;
 
-public class DatabaseVersionTest extends AndroidTestCase {
-	jsqlite.Database db = null;
+import jsqlite.Stmt;
+
+public class DatabaseVersionTest extends DatabaseTestCase {
+	private static final String TAG = "DatabaseVersionTest";
 
 	// Place version information here so that it can be changed easily when the
 	// libraries change.
@@ -12,6 +13,19 @@ public class DatabaseVersionTest extends AndroidTestCase {
 	private static final String PROJ4_VERSION = "Rel. 4.7.1, 23 September 2009";
 	private static final String GEOS_VERSION = "3.2.2-CAPI-1.6.2";
 
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		openNewDatabase("test.sqlite");
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		closeDatabase();
+		deleteDatabase();
+		super.tearDown();
+	}
+	
 	public void testVersions() throws Exception {
 		Stmt stmt01 = db.prepare("SELECT spatialite_version();");
 		if (stmt01.step()) {

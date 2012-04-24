@@ -1,51 +1,25 @@
 package com.spatialite.test.spatialite;
 
-import java.io.File;
+import com.spatialite.test.utilities.DatabaseTestCase;
 
 import jsqlite.Stmt;
 
-import android.os.Environment;
-import android.test.AndroidTestCase;
 import android.util.Log;
 
-public class RTreeTest extends AndroidTestCase {
-	private static final String TAG = "SpatialiteRTreeTest";
-	jsqlite.Database db = null;
+public class RTreeTest extends DatabaseTestCase {
+	private static final String TAG = "RTreeTest";
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		dbSetUp();
+		openNewDatabase("test.sqlite");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		dbTeardown();
+		closeDatabase();
+		deleteDatabase();
 		super.tearDown();
-	}
-
-	private void dbTeardown() throws Exception {
-		db.close();
-		deleteDatabase();
-	}
-
-	private void dbSetUp() throws Exception {
-		deleteDatabase();
-
-		db = new jsqlite.Database();
-		db.open(Environment.getExternalStorageDirectory()
-				+ "/Download/testdb.sqlite",
-				jsqlite.Constants.SQLITE_OPEN_CREATE);
-
-		db.spatialite_create();
-	}
-
-	private void deleteDatabase() {
-		File file = new File(Environment.getExternalStorageDirectory()
-				+ "/Download/testdb.sqlite");
-		if (file.exists()) {
-			file.delete();
-		}
 	}
 
 	private void insertSpatialData() throws Exception {
@@ -76,6 +50,8 @@ public class RTreeTest extends AndroidTestCase {
 	}
 
 	public void testCreateSpatialTableWithIndex() throws Exception {
+		db.spatialite_create();
+		
 		db.exec("CREATE TABLE test_geom (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, measured_value DOUBLE NOT NULL);",
 				null);
 

@@ -1,48 +1,23 @@
 package com.spatialite.test.sqlite;
 
-import java.io.File;
+import com.spatialite.test.utilities.DatabaseTestCase;
 
 import jsqlite.Stmt;
-import android.os.Environment;
-import android.test.AndroidTestCase;
-import android.util.Log;
 
-public class DatabaseGeneralTest extends AndroidTestCase {
-	private static final String TAG = "SpatialiteDatabaseGeneralTest";
-	jsqlite.Database db = null;
+public class DatabaseGeneralTest extends DatabaseTestCase {
+	private static final String TAG = "DatabaseGeneralTest";
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		dbSetUp();
+		openNewDatabase("test.sqlite");
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		dbTeardown();
+		closeDatabase();
+		deleteDatabase();
 		super.tearDown();
-	}
-
-	private void dbTeardown() throws Exception {
-		db.close();
-		deleteDatabase();
-	}
-
-	private void dbSetUp() throws Exception {
-		deleteDatabase();
-
-		db = new jsqlite.Database();
-		db.open(Environment.getExternalStorageDirectory()
-				+ "/Download/testdb.sqlite",
-				jsqlite.Constants.SQLITE_OPEN_CREATE);
-	}
-
-	private void deleteDatabase() {
-		File file = new File(Environment.getExternalStorageDirectory()
-				+ "/Download/testdb.sqlite");
-		if (file.exists()) {
-			file.delete();
-		}
 	}
 
 	public void testSimpleStringBinding01() throws Exception {
@@ -206,8 +181,7 @@ public class DatabaseGeneralTest extends AndroidTestCase {
 		
 		// Invalid SQL
 		try {
-			Stmt stmt01 = db
-					.prepare("INSERT INTO test (num, value) VLUES (@ONE,?);");
+			db.prepare("INSERT INTO test (num, value) VLUES (@ONE,?);");
 			fail("expected exception not thrown");
 		} catch (jsqlite.Exception e) {
 			// expected
