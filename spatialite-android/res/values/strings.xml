@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">Spatialite-Android</string>
     <string name="test_db">test-2.3.sqlite</string>
+    <string name="map_view">Map View</string>
+    <string name="map_view_description">Map Example: Tap on map in Italy to display region.</string>
     <string name="browse_data">Browse Data</string>
     <string name="browse_description">Step 3: Select \"Browse Data\" to view the contents of the test database.</string>
     <string name="run_tests">Run Tests</string>
