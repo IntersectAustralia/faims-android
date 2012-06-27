@@ -3,7 +3,9 @@ include $(CLEAR_VARS)
 # find $(GEOS_PATH)/ -name "*.cpp" | grep -Ev "tests|doc" | sort | awk '{ print "\t"$1" \\" }'
 LOCAL_MODULE := geos
 LOCAL_C_INCLUDES := $(GEOS_PATH)/source/headers
-LOCAL_CFLAGS := $(LOCAL_C_INCLUDES:%=-I%) -DHAVE_LONG_LONG_INT_64
+LOCAL_CFLAGS := \
+	$(LOCAL_C_INCLUDES:%=-I%) \
+	-DHAVE_LONG_LONG_INT_64
 LOCAL_SRC_FILES := \
         $(GEOS_PATH)/capi/geos_c.cpp \
         $(GEOS_PATH)/capi/geos_ts_c.cpp \
