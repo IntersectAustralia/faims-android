@@ -1,6 +1,9 @@
 package com.spatialite.utilities;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+
+import com.spatialite.R;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -23,7 +26,7 @@ public class ActivityHelper {
 		alertDialog.show();
 	}
 
-	static public String getDataBase(Context ctx, String filename) {
+	static public String getDataBase(Context ctx, String filename) throws FileNotFoundException {
 		File db = null;
 
 		// Check application storage first
@@ -40,7 +43,8 @@ public class ActivityHelper {
 			return db.toString();
 		}
 
-		return null;
+		// Database not found
+		throw new FileNotFoundException(ctx.getString(R.string.error_locate_failed));
 	}
 
 	static public File getPath(Context ctx, boolean externalStorage) {

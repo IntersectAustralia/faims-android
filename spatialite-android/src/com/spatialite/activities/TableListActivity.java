@@ -1,6 +1,6 @@
 package com.spatialite.activities;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,45 +19,54 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 public class TableListActivity extends ListActivity {
-	private static final String TAG = "TableListActivity";
-	TableListAdapter listAdapter = null;
+	private static final String TAG = TableListActivity.class.getName();
+	TableListAdapter mListAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tablelist);
 
-		listAdapter = new TableListAdapter(this, R.layout.tablelist_row,
+		mListAdapter = new TableListAdapter(this, R.layout.tablelist_row,
 				new ArrayList<TableInfo>());
-		setListAdapter(listAdapter);
+		setListAdapter(mListAdapter);
 		fillList();
 	}
 
 	private void fillList() {
 		try {
-			String dbFile = ActivityHelper.getDataBase(this,
-					getString(R.string.test_db));
-			if (dbFile == null) {
+			
+			String dbFile;
+			try {
+				// Find the database
+				dbFile = ActivityHelper.getDataBase(this,
+						getString(R.string.test_db));
+			} catch (FileNotFoundException e) {
 				ActivityHelper.showAlert(this,
 						getString(R.string.error_locate_failed));
-				throw new IOException(getString(R.string.error_locate_failed));
+				throw e;
 			}
 
+			// Open the database
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbFile.toString(), jsqlite.Constants.SQLITE_OPEN_READONLY);
 
 			Stmt stmt = db
 					.prepare("SELECT f_table_name, type, srid FROM geometry_columns;");
+			
+			// Insert results into list
 			while (stmt.step()) {
 				String tableName = stmt.column_string(0);
 				String type = stmt.column_string(1);
 				String srid = stmt.column_string(2);
-				listAdapter.add(new TableInfo(tableName, type, srid));
+				mListAdapter.add(new TableInfo(tableName, type, srid));
 			}
+			
+			// Close database
 			db.close();
 		} catch (jsqlite.Exception e) {
 			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
+		} catch (FileNotFoundException e) {
 			Log.e(TAG, e.getMessage());
 		}
 	}
@@ -107,7 +116,7 @@ public class TableListActivity extends ListActivity {
 
 			TextView name = (TextView) v.findViewById(R.id.table_name);
 			name.setText(objects.get(position).getTableName());
-			
+
 			TextView type = (TextView) v.findViewById(R.id.type);
 			type.setText(objects.get(position).getType());
 

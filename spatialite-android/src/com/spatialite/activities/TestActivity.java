@@ -1,6 +1,6 @@
 package com.spatialite.activities;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 import com.spatialite.R;
@@ -36,20 +36,27 @@ public class TestActivity extends Activity implements OnClickListener {
 	private void runTest() {
 		try {
 
+			// Reset TextView to failed
 			TextView view = (TextView) findViewById(R.id.txt_result);
 			view.setText("Result: Failed");
 
-			String dbFile = ActivityHelper.getDataBase(this,
-					getString(R.string.test_db));
-			if (dbFile == null) {
+			String dbFile;
+			try {
+				// Find the database
+				dbFile = ActivityHelper.getDataBase(this,
+						getString(R.string.test_db));
+			} catch (FileNotFoundException e) {
+				// Database was not found alert the user and stop the test
 				ActivityHelper.showAlert(this,
 						getString(R.string.error_locate_failed));
-				throw new IOException(getString(R.string.error_locate_failed));
+				throw e;
 			}
 
+			// Open the database
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbFile.toString(), jsqlite.Constants.SQLITE_OPEN_READONLY);
 
+			// Callback used to display query results in Android LogCat
 			Callback cb = new Callback() {
 				@Override
 				public void columns(String[] coldata) {
@@ -69,11 +76,13 @@ public class TestActivity extends Activity implements OnClickListener {
 				}
 			};
 
+			// Test prepare statements
 			String query = "SELECT name, peoples, AsText(Geometry) from Towns where peoples > 350000";
 			Stmt st = db.prepare(query);
 			st.step();
 			st.close();
 
+			// Test various queries
 			db.exec("select Distance(PointFromText('point(-77.35368 39.04106)', 4326), PointFromText('point(-77.35581 39.01725)', 4326));",
 					cb);
 			db.exec("SELECT name, peoples, AsText(Geometry), GeometryType(Geometry), NumPoints(Geometry), SRID(Geometry), IsValid(Geometry) from Towns where peoples > 350000;",
@@ -81,11 +90,14 @@ public class TestActivity extends Activity implements OnClickListener {
 			db.exec("SELECT Distance( Transform(MakePoint(4.430174797, 51.01047063, 4326), 32631), Transform(MakePoint(4.43001276, 51.01041585, 4326),32631));",
 					cb);
 
+			// Close the database
 			db.close();
+
+			// If we got here everything "worked"
 			view.setText("Result: Passed");
 		} catch (jsqlite.Exception e) {
 			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
+		} catch (FileNotFoundException e) {
 			Log.e(TAG, e.getMessage());
 		}
 	}
