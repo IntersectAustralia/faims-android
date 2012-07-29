@@ -4,12 +4,12 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := geos
 LOCAL_C_INCLUDES := \
 		$(GEOS_PATH)/src \
-        $(GEOS_PATH)/include \
+    $(GEOS_PATH)/include
 LOCAL_CFLAGS := \
 	$(LOCAL_C_INCLUDES:%=-I%) \
 	-DHAVE_LONG_LONG_INT_64
 LOCAL_SRC_FILES := \
-        $(GEOS_PATH)/capi/geos_c.cpp \
+    $(GEOS_PATH)/capi/geos_c.cpp \
 		$(GEOS_PATH)/capi/geos_ts_c.cpp \
 		$(GEOS_PATH)/src/algorithm/Angle.cpp \
 		$(GEOS_PATH)/src/algorithm/BoundaryNodeRule.cpp \
