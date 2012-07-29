@@ -30,7 +30,7 @@ LOCAL_CFLAGS    := \
         
 LOCAL_LDLIBS    := -llog 
 LOCAL_C_INCLUDES := \
-        $(GEOS_PATH)/source/headers \
+        $(GEOS_PATH)/include \
         $(GEOS_PATH)/capi \
         $(PROJ4_PATH)/src
 LOCAL_SRC_FILES := \

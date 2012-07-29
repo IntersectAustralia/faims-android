@@ -11,7 +11,7 @@ public class DatabaseVersionTest extends DatabaseTestCase {
 	// libraries change.
 	private static final String SPATIALITE_VERSION = "3.0.1";
 	private static final String PROJ4_VERSION = "Rel. 4.7.1, 23 September 2009";
-	private static final String GEOS_VERSION = "3.2.2-CAPI-1.6.2";
+	private static final String GEOS_VERSION = "3.3.3-CAPI-1.7.3";
 
 	@Override
 	protected void setUp() throws Exception {
