@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+  <item android:id="@+id/fetch_project"
+    android:title="Fetch Project"
+    android:icon="@drawable/ic_menu_add" 
+    android:showAsAction="ifRoom"/>
+  
+</menu>
