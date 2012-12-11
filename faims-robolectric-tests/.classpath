@@ -2,10 +2,12 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/faims"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="libs/android.jar"/>
 	<classpathentry kind="lib" path="libs/maps.jar"/>
 	<classpathentry kind="lib" path="libs/robolectric-1.1-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="libs/roboguice-2.0.jar"/>
+	<classpathentry kind="lib" path="libs/guice-2.0-no_aop.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/faims-android-app"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

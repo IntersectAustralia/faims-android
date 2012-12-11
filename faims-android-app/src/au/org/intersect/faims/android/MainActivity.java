@@ -1,11 +1,11 @@
 package au.org.intersect.faims.android;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import au.org.intersect.faims.android.net.DiscoverServer;
 
 public class MainActivity extends Activity {
 
@@ -13,6 +13,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Need to set the application to get state information
+        DiscoverServer.getInstance().setApplication(getApplication());
     }
 
     @Override
@@ -25,31 +27,19 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.fetch_project:
-				showProjectList();
+				fetchProjectsFromServer();
 				return (true);
 			default:
 				return (super.onOptionsItemSelected(item));
 		}
 	}
 	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		   if (requestCode == 1) {
-		      if (resultCode == RESULT_OK) {
-		        String project = data.getStringExtra("PROJECT");
-		        
-		        TextView tv = (TextView)findViewById(R.id.hello_text);
-		        tv.setText("You chose project: " + project);
-		      }
-		   }
-	}
-	
 	/**
-	 * Open a new activity to show a list of projects from the server
+	 * Open a new activity and shows a list of projects from the server
 	 */
-	private void showProjectList(){
-		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectsActivity.class);
-		MainActivity.this.startActivityForResult(showProjectsIntent,1);
+	private void fetchProjectsFromServer(){
+		Intent fetchProjectsIntent = new Intent(MainActivity.this, FetchProjectsActivity.class);
+		MainActivity.this.startActivityForResult(fetchProjectsIntent,1);
 	}
     
 }

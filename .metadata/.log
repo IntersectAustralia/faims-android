@@ -1,0 +1,23 @@
+!SESSION 2012-12-10 15:12:44.999 -----------------------------------------------
+eclipse.buildId=v21.0.0-519525
+java.version=1.6.0_37
+java.vendor=Apple Inc.
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product com.android.ide.eclipse.adt.package.product -product com.android.ide.eclipse.adt.package.product -keyring /Users/theeban/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product com.android.ide.eclipse.adt.package.product -data /Users/theeban/Projects/faims-android -product com.android.ide.eclipse.adt.package.product -keyring /Users/theeban/.eclipse_keyring -showlocation
+
+!ENTRY org.eclipse.core.net 1 0 2012-12-10 15:12:51.797
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY com.android.ide.eclipse.ddms 4 0 2012-12-10 15:12:52.032
+!MESSAGE DDMS files not found: /Users/theeban/Downloads/adt-bundle-mac/eclipse/Eclipse.app/Contents/MacOS/platform-tools/adb /Users/theeban/Downloads/adt-bundle-mac/eclipse/Eclipse.app/Contents/MacOS/tools/hprof-conv /Users/theeban/Downloads/adt-bundle-mac/eclipse/Eclipse.app/Contents/MacOS/tools/traceview 
+!SESSION 2012-12-10 15:13:16.695 -----------------------------------------------
+eclipse.buildId=v21.0.0-519525
+java.version=1.6.0_37
+java.vendor=Apple Inc.
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product com.android.ide.eclipse.adt.package.product -keyring /Users/theeban/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product com.android.ide.eclipse.adt.package.product -keyring /Users/theeban/.eclipse_keyring -showlocation
+
+!ENTRY org.eclipse.core.net 1 0 2012-12-10 15:13:21.765
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences

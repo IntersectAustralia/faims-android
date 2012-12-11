@@ -29,7 +29,7 @@ public class ShowProjectsActivityTest {
     @Test
     public void testProjectList() throws Exception {
     	
-    	ShowProjectsActivity activity = new ShowProjectsActivity();
+    	FetchProjectsActivity activity = new FetchProjectsActivity();
         
         activity.onCreate(null);
 		 
