@@ -1,11 +1,15 @@
 package au.org.intersect.faims.android.net;
 
-import java.util.List;
+import java.util.LinkedList;
 
 import au.org.intersect.faims.android.projects.ProjectInfo;
 
 public interface IFAIMSClient {
+	
+	public interface FAIMClientListener<T> {
+		void handleResponse(boolean success, T content);
+	}
 
-	void fetchProjectList(FAIMSResponseHandler<List<ProjectInfo>> handler);
-	void downloadProjectArchive(FAIMSResponseHandler<String> handler);
+	void fetchProjectList(FAIMClientListener<LinkedList<ProjectInfo>> handler);
+	void downloadProjectArchive(FAIMClientListener<ProjectInfo> handler, ProjectInfo project);
 }

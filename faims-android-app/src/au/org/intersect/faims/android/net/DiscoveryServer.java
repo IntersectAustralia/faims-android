@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.net;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -11,17 +12,22 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Application;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
-public class DiscoverServer implements Runnable {
+import com.google.gson.JsonArray;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+
+public class DiscoveryServer implements Runnable {
 	
-	public static final int SEVER_PORT = 4000;
+	public static final int SERVER_DISCOVERY_PORT = 4000;
+	public static final int ANDROID_RECEIVER_PORT = 5432;
+	public static final int ANDROID_BROADCAST_PORT = 6543;
 	public static final String BROADCAST_ADDR = "255.255.255.255";
 	
 	public interface ServerFoundHandler {
@@ -30,21 +36,22 @@ public class DiscoverServer implements Runnable {
 		
 	}
 	
-	private static DiscoverServer instance;
+	private static DiscoveryServer instance;
 	
 	private LinkedList<ServerFoundHandler> handlerList;
 	private Application application;
 	private ReentrantLock lock;
 	
 	private String serverIP;
+	private String serverPort;
 	
-	public DiscoverServer() {
+	public DiscoveryServer() {
 		handlerList = new LinkedList<ServerFoundHandler>();
 		lock = new ReentrantLock();
 	}
 	
-	public static DiscoverServer getInstance() {
-		if (instance == null) instance = new DiscoverServer();
+	public static DiscoveryServer getInstance() {
+		if (instance == null) instance = new DiscoveryServer();
 		return instance;
 	}
 	
@@ -57,22 +64,23 @@ public class DiscoverServer implements Runnable {
 	}
 	
 	public String getServerPort() {
-		return String.valueOf(SEVER_PORT);
+		return String.valueOf(serverPort);
 	}
 	
 	public String getServerHost() {
-		return "http://" + serverIP + ":" + String.valueOf(SEVER_PORT);
+		return "http://" + serverIP + ":" + String.valueOf(serverPort);
 	}
 	
 	public void findServer(ServerFoundHandler handler) {
 		// make sure only one discovery thread is executing at a time
-		lock.lock();
 		
 		handlerList.add(handler);
 		
+		Log.d("debug", "DiscoveryServer.findServer");
+		
 		// check if server is valid or look for server
 		if (isSeverIPValid()) {
-			lock.unlock();
+			
 			foundServer(true);
 		} else {
 			startDiscovery();
@@ -89,30 +97,30 @@ public class DiscoverServer implements Runnable {
 		discoveryThread.start();
 	}
 	
-	private synchronized void foundServer(boolean success) {
+	private void foundServer(boolean success) {
+		Log.d("debug", "DiscoveryServer.foundServer: " + String.valueOf(success));
+		LinkedList<ServerFoundHandler> callbacks = new LinkedList<ServerFoundHandler>();
+		
 		while(!handlerList.isEmpty()) {
-			ServerFoundHandler handler = handlerList.pop(); // note: maybe shift to execute in correct order
-			handler.handleServerFound(success);
+			callbacks.push(handlerList.pop());
 		}
 		
-		lock.unlock();
+		while(!callbacks.isEmpty()) {
+			ServerFoundHandler handler = callbacks.pop(); // note: maybe shift to execute in correct order
+			handler.handleServerFound(success);
+		}
 	}
 	
 	@Override
 	public void run() {
 		try {
-			DatagramSocket s = new DatagramSocket();
+			DatagramSocket s = new DatagramSocket(ANDROID_BROADCAST_PORT);
 	    	s.setBroadcast(true);
-	    	s.setSoTimeout(200);
-	    	int androidPort = s.getLocalPort();
-	    	
-	    	JSONObject object = new JSONObject();
-	    	try {
-	    		object.put("ip", getIPAddress());
-	    		object.put("port", androidPort);
-	    	} catch (JSONException e) {
-	    		Log.d("debug", e.toString());
-	    	}
+	    	s.setSoTimeout(1000);
+
+	    	JsonObject object = new JsonObject();
+	    	object.addProperty("ip", getIPAddress());
+	    	object.addProperty("port", ANDROID_RECEIVER_PORT);
 	    	
 	    	// broadcast discovery packet using current network details
 	    	InetAddress local = InetAddress.getByName(BROADCAST_ADDR);
@@ -121,24 +129,37 @@ public class DiscoverServer implements Runnable {
 	    	
 	    	int msg_length = object.toString().length();
 	    	byte[] message = object.toString().getBytes();
-	    	DatagramPacket p = new DatagramPacket(message, msg_length, local, SEVER_PORT);
+	    	DatagramPacket p = new DatagramPacket(message, msg_length, local, SERVER_DISCOVERY_PORT);
 	    	s.send(p);
 	    	s.close();
+	    	s.disconnect();
+	    	
+	    	Log.d("debug", "sent broadcast");
 	    	
 	    	// receive packet
 	    	byte[] buffer = new byte[1024];
-	    	DatagramSocket r = new DatagramSocket(androidPort);
+	    	DatagramSocket r = new DatagramSocket(ANDROID_RECEIVER_PORT);
+	    	r.setSoTimeout(1000);
 	        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 	        r.receive(packet);
+	        r.close();
+	        r.disconnect();
 	        
 	        InputStreamReader input = new InputStreamReader(new ByteArrayInputStream(packet.getData()), Charset.forName("UTF-8"));
-
 	        StringBuilder str = new StringBuilder();
 	        int value;
-	        while((value = input.read()) != -1)
+	        while((value = input.read()) > 0)
 	            str.append((char) value);
 	        
-	        Log.d("debug", str.toString());
+	        JsonReader reader = new JsonReader(new StringReader(str.toString()));
+	        JsonParser parser = new JsonParser();
+	        JsonObject data = parser.parse(reader).getAsJsonObject();
+	        
+	        serverIP = data.get("ip").getAsString();
+	        serverPort = data.get("port").getAsString();
+	        
+	        Log.d("debug", "JsonObject: " + data.toString());
+	        Log.d("debug", "ServerIP: " + serverIP.toString());
 	        
 	        foundServer(true);
 	        
@@ -146,6 +167,9 @@ public class DiscoverServer implements Runnable {
 			Log.d("debug", e.toString());
 			foundServer(false);
 		} catch(IOException e) {
+			Log.d("debug", e.toString());
+			foundServer(false);
+		} catch(JsonIOException e) {
 			Log.d("debug", e.toString());
 			foundServer(false);
 		}
