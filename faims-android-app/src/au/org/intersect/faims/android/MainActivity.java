@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import au.org.intersect.faims.android.net.DiscoveryServer;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 
 public class MainActivity extends Activity {
 
@@ -15,7 +15,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         // Need to set the application to get state information
-        DiscoveryServer.getInstance().setApplication(getApplication());
+        ServerDiscovery.getInstance().setApplication(getApplication());
     }
 
     @Override

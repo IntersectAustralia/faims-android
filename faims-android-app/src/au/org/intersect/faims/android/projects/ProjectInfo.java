@@ -10,7 +10,7 @@ public class ProjectInfo {
 	public static ProjectInfo fromJson(JsonObject object) {
 		ProjectInfo p = new ProjectInfo();
 		p.name = object.get("name").getAsString();
-		p.name = object.get("id").getAsString();
+		p.id = object.get("id").getAsString();
 		return p;
 	}
 	
