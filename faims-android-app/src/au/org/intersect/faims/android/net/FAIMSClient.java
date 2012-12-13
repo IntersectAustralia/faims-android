@@ -1,13 +1,6 @@
 package au.org.intersect.faims.android.net;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -15,7 +8,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import android.net.http.AndroidHttpClient;
-import android.os.Environment;
 import android.util.Log;
 import au.org.intersect.faims.android.projects.ProjectInfo;
 import au.org.intersect.faims.util.FileUtil;

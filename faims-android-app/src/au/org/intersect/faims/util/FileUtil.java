@@ -18,6 +18,10 @@ import android.os.StatFs;
 import android.util.Log;
 
 public class FileUtil {
+	
+	private static funciton toPath(String path) {
+		
+	}
 
 	public static void makeDirs(String path) {
 		String dir = Environment.getExternalStorageDirectory() + path;
@@ -39,14 +43,14 @@ public class FileUtil {
 	    		 writeTarFile(ts, e, new File(Environment.getExternalStorageDirectory() + dir + "/" + e.getName()));
 	    	 }
 	     }
-		} catch (IOException e) {
+		} finally {
 			if (ts != null) ts.close();
-			throw e;
 		}
 	}
 	
 	public static long getExternalStorageSpace() throws Exception {
 	    long availableSpace = -1L;
+	    
 	    try {
 	        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
 	        stat.restat(Environment.getExternalStorageDirectory().getPath());
@@ -70,9 +74,8 @@ public class FileUtil {
 	        while ( (bufferLength = input.read(buffer)) > 0 ) {
 	            fileOutput.write(buffer, 0, bufferLength);
 	        }
-		} catch(IOException e) {
+		} finally {
 			if (fileOutput != null) fileOutput.close();
-			throw e;
 		}
         
         Log.d("debug", "Finished Writing file: " + filename);
@@ -93,9 +96,8 @@ public class FileUtil {
 			}
 			
 			return new BigInteger(1, digester.digest()).toString(16);
-		} catch(IOException e) {
+		} finally {
 			if (input != null) input.close();
-			throw e;
 		}
 	}
 	
@@ -114,9 +116,8 @@ public class FileUtil {
 	        while ( (bufferLength = input.read(buffer)) > 0 ) {
 	            fileOutput.write(buffer, 0, bufferLength);
 	        }
-		} catch(IOException e) {
+		} finally {
 			if (fileOutput != null) fileOutput.close();
-			throw e;
 		}
         Log.d("debug", "Finished Writing Tar file: " + file.getName());
 	}

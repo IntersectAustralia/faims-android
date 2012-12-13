@@ -56,18 +56,12 @@ public class JsonUtil {
 	}
 	
 	private static StringReader streamToReader(InputStream stream) throws IOException {
-		InputStreamReader input = null;
-		try {
-			input = new InputStreamReader(stream);
-	        StringBuilder sb = new StringBuilder();
-	        int value;
-	        while((value = input.read()) > 0)
-	            sb.append((char) value);
-	        return new StringReader(sb.toString());
-		} catch (IOException e) {
-			if (input != null) input.close();
-			throw e;
-		}
+		InputStreamReader reader = new InputStreamReader(stream);
+        StringBuilder sb = new StringBuilder();
+        int value;
+        while((value = reader.read()) > 0)
+            sb.append((char) value);
+        return new StringReader(sb.toString());
 	}
 
 }

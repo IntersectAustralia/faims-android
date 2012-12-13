@@ -23,7 +23,7 @@
         <activity
             android:name="au.org.intersect.faims.android.MainActivity"
             android:label="@string/app_name"
-			android:screenOrientation="portrait" >
+			android:configChanges="orientation|keyboardHidden|screenSize" >
              <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,12 +33,12 @@
         <activity
             android:name="au.org.intersect.faims.android.FetchProjectsActivity"
             android:label="@string/fetch_projects_name"
-            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize"
              />
 
         <activity
             android:name="au.org.intersect.faims.android.ShowProjectActivity" 
-            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/show_projects_name" >
              <meta-data
             android:name="android.support.PARENT_ACTIVITY"
