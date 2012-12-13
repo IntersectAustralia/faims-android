@@ -51,17 +51,23 @@ public class JsonUtil {
 	
 	public static JsonArray deserializeJsonArray(InputStream stream) throws IOException {
 		JsonReader reader = new JsonReader(streamToReader(stream));
-        JsonParser parser = new JsonParser();
-        return parser.parse(reader).getAsJsonArray();
+	    JsonParser parser = new JsonParser();
+	    return parser.parse(reader).getAsJsonArray();
 	}
 	
 	private static StringReader streamToReader(InputStream stream) throws IOException {
-		InputStreamReader input = new InputStreamReader(stream);
-        StringBuilder sb = new StringBuilder();
-        int value;
-        while((value = input.read()) > 0)
-            sb.append((char) value);
-        return new StringReader(sb.toString());
+		InputStreamReader input = null;
+		try {
+			input = new InputStreamReader(stream);
+	        StringBuilder sb = new StringBuilder();
+	        int value;
+	        while((value = input.read()) > 0)
+	            sb.append((char) value);
+	        return new StringReader(sb.toString());
+		} catch (IOException e) {
+			if (input != null) input.close();
+			throw e;
+		}
 	}
 
 }

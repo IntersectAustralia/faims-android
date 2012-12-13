@@ -39,6 +39,7 @@ public class ServerDiscovery {
 	private LinkedList<ServerDiscoveryListener> listenerList;
 	private Application application;
 	private boolean isFindingServer;
+	private int timeout;
 	
 	private String serverIP;
 	private String serverPort;
@@ -104,10 +105,11 @@ public class ServerDiscovery {
 		}).start();
 	}
 	
-	public void findServer(ServerDiscoveryListener handler) {
+	public void findServer(ServerDiscoveryListener handler, int attempts) {
 		Log.d("debug", "ServerDiscovery.findServer");
 		
 		isFindingServer = true;
+		timeout = (1 + attempts) * PACKET_TIMEOUT;
 		
 		listenerList.add(handler);
 		
@@ -148,7 +150,7 @@ public class ServerDiscovery {
 		DatagramSocket s = new DatagramSocket();
 		try {
 	    	s.setBroadcast(true);
-	    	s.setSoTimeout(PACKET_TIMEOUT);
+	    	s.setSoTimeout(timeout);
 	    	//s.bind(new InetSocketAddress(InetAddress.getLocalHost(), ANDROID_BROADCAST_PORT));
 	        
 	    	String packet = JsonUtil.serializeServerPacket(getIPAddress(), String.valueOf(ANDROID_RECEIVER_PORT));
@@ -170,7 +172,7 @@ public class ServerDiscovery {
 		// receive packet
 		DatagramSocket r = new DatagramSocket(ANDROID_RECEIVER_PORT);
 		try {
-			r.setSoTimeout(PACKET_TIMEOUT);
+			r.setSoTimeout(timeout);
 			
 	    	byte[] buffer = new byte[1024];
 	    	DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -209,5 +211,9 @@ public class ServerDiscovery {
 		quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
 		return InetAddress.getByAddress(quads).getHostAddress();
     }
+	
+	public void clearListeners() {
+		listenerList.clear();
+	}
 
 }

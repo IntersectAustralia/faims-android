@@ -6,13 +6,9 @@ import android.content.DialogInterface;
 
 public class ConfirmDialog extends AlertDialog {
 
-	public static final int YES = 0;
-	public static final int NO = 1;
+	public static final int OK = 0;
 	
-	public static final String SERVER_DISCOVERY_FAILURE = "SERVER_DISCOVERY_FAILURE";
-	public static final String SERVER_REQUEST_FAILURE = "SERVER_REQUEST_FAILURE";
-	public static final String DOWNLOAD_PROJECT_FAILURE = "DOWNLOAD_PROJECT_FAILURE";
-	public static final String DOWNLOAD_PROJECT = "DOWNLOAD_PROJECT";
+	public static final String DOWNLOAD_PROJECT_TO_BIG_ERROR = "DOWNLOAD_PROJECT_TO_BIG_ERROR";
 	
 	private String type;
 	private IFAIMSDialogListener listener;
@@ -23,17 +19,10 @@ public class ConfirmDialog extends AlertDialog {
 		this.listener = (IFAIMSDialogListener) activity;
 		setTitle(title);
 		setMessage(message);
-		setButton(BUTTON_NEGATIVE, activity.getString(R.string.confirm_negative_button), new DialogInterface.OnClickListener() {
-			
+		setButton(BUTTON_NEUTRAL, activity.getString(R.string.confirm_dialog_button), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				listener.handleDialogResponse(ConfirmDialog.NO, ConfirmDialog.this.type, ConfirmDialog.this);
-			}
-		});
-		setButton(BUTTON_POSITIVE, activity.getString(R.string.confirm_positive_button), new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				listener.handleDialogResponse(ConfirmDialog.YES, ConfirmDialog.this.type, ConfirmDialog.this);
+				listener.handleDialogResponse(ConfirmDialog.OK, ConfirmDialog.this.type, ConfirmDialog.this);
 			}
 		});
 	}

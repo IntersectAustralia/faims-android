@@ -33,7 +33,7 @@ public class LocateServerDialog extends ProgressDialog implements ServerDiscover
 	public void show() {
 		super.show();
 
-		ServerDiscovery.getInstance().findServer(this);
+		ServerDiscovery.getInstance().findServer(this, attempts);
 	}
 	
 	@Override
@@ -44,7 +44,7 @@ public class LocateServerDialog extends ProgressDialog implements ServerDiscover
 			attempts++;
 			Log.d("debug", "LocateServerDialog.attempt :" + String.valueOf(attempts));
 			if (attempts < SERVER_BROADCAST_ATTEMPTS) {
-				ServerDiscovery.getInstance().findServer(this);
+				ServerDiscovery.getInstance().findServer(this, attempts);
 			} else {
 				listener.handleDialogResponse(LocateServerDialog.FAILURE, LocateServerDialog.TYPE, this);
 			}

@@ -22,8 +22,9 @@
         
         <activity
             android:name="au.org.intersect.faims.android.MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
+            android:label="@string/app_name"
+			android:screenOrientation="portrait" >
+             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -31,10 +32,19 @@
         
         <activity
             android:name="au.org.intersect.faims.android.FetchProjectsActivity"
-            android:label="@string/fetch_projects_name" />
+            android:label="@string/fetch_projects_name"
+            android:screenOrientation="portrait"
+             />
 
         <activity
-            android:name="au.org.intersect.faims.android.ShowProjectActivity" />
+            android:name="au.org.intersect.faims.android.ShowProjectActivity" 
+            android:screenOrientation="portrait"
+            android:label="@string/show_projects_name" >
+             <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="au.org.intersect.faims.android.MainActivity" />
+           
+        </activity>
         
     </application>
 

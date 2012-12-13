@@ -1,6 +1,13 @@
 package au.org.intersect.faims.android.net;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -8,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import android.net.http.AndroidHttpClient;
+import android.os.Environment;
 import android.util.Log;
 import au.org.intersect.faims.android.projects.ProjectInfo;
 import au.org.intersect.faims.util.FileUtil;
@@ -87,21 +95,47 @@ public class FAIMSClient implements IFAIMSClient {
 					JsonObject data = JsonUtil.deserializeJsonObject(entity.getContent());
 			        long freeSpace = FileUtil.getExternalStorageSpace();
 			        
-			        Log.d("debug", "filesize: " + String.valueOf(freeSpace));
+			        Log.d("debug", "freespace: " + String.valueOf(freeSpace));
+			        Log.d("debug", "filesize: " + String.valueOf(data.get("size").getAsLong()));
 			        
 			        if (data.get("size").getAsLong() > freeSpace) {
 			        	
 			        	downloadArchiveListener.handleResponse(DOWNLOAD_TOO_BIG, null);
 			        } else {
 			        	
-						entity = getRequest("/android/project/" + downloadArchiveProject.id + "/download");
-						
+			        	entity = getRequest("/android/project/" + downloadArchiveProject.id + "/download");
+			        	Log.d("debug", "FAIMSClient.contentLength: " + entity.getContentLength());
+			        	
 						FileUtil.makeDirs("/faims/projects");
 						
-						FileUtil.untarFromStream("/faims/projects", entity.getContent());
+						String filename = "/faims/projects/" + data.get("file").getAsString();
 						
-						Log.d("debug", "FAIMSClient.savedProject");
-						downloadArchiveListener.handleResponse(SUCCESS, downloadArchiveProject);
+						FileUtil.saveFile(entity.getContent(), filename);
+						
+						Log.d("debug", "FAIMSClient.savedFile: " + filename);
+						
+						String md5Hash = FileUtil.generateMD5Hash(filename);
+						
+						
+						
+						Log.d("debug", "File.md5Hash: " + md5Hash);
+						Log.d("debug", "Data.md5Hash: " + data.get("md5").getAsString());
+						
+						if (!data.get("md5").getAsString().equals(md5Hash)) {
+							Log.d("debug", "FAIMSClient.deleteFile: " + filename);
+							FileUtil.deleteFile(filename);
+							
+							downloadArchiveListener.handleResponse(DOWNLOAD_CORRUPTED, null);
+						} else {
+						
+							FileUtil.untarFromStream("/faims/projects", filename);
+							
+							Log.d("debug", "FAIMSClient.deleteFile: " + filename);
+							FileUtil.deleteFile(filename);
+							
+							Log.d("debug", "FAIMSClient.savedProject");
+							downloadArchiveListener.handleResponse(SUCCESS, downloadArchiveProject);
+						}
 			        }
 					
 				} catch (IOException e) {

@@ -1,9 +1,13 @@
 package au.org.intersect.faims.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -23,16 +27,22 @@ public class FileUtil {
 			file.mkdirs();
 	}
 	
-	public static void untarFromStream(String dir, InputStream stream) throws IOException {
-		 TarArchiveInputStream ts = new TarArchiveInputStream(new GZIPInputStream(stream));
+	public static void untarFromStream(String dir, String filename) throws IOException {
+		TarArchiveInputStream ts = null;
+		try {
+		 ts = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(Environment.getExternalStorageDirectory() + filename)));
 	     TarArchiveEntry e;
 	     while((e = ts.getNextTarEntry()) != null) {
 	    	 if (e.isDirectory()) {
 	    		 makeDirs(dir + "/" + e.getName());
 	    	 } else {
-	    		 writeFile(ts, e, new File(Environment.getExternalStorageDirectory() + dir + "/" + e.getName()));
+	    		 writeTarFile(ts, e, new File(Environment.getExternalStorageDirectory() + dir + "/" + e.getName()));
 	    	 }
 	     }
+		} catch (IOException e) {
+			if (ts != null) ts.close();
+			throw e;
+		}
 	}
 	
 	public static long getExternalStorageSpace() throws Exception {
@@ -49,19 +59,66 @@ public class FileUtil {
 	    return availableSpace;
 	}
 	
-	private static void writeFile(TarArchiveInputStream input, TarArchiveEntry entry, File file) throws IOException {
-		Log.d("debug", "Writing file: " + file.getName());
-		
-		FileOutputStream fileOutput = new FileOutputStream(file);
+	public static void saveFile(InputStream input, String filename) throws IOException {
+		FileOutputStream fileOutput = null;
+		try {
+			fileOutput = new FileOutputStream(Environment.getExternalStorageDirectory() + filename);
+		        
+			byte[] buffer = new byte[1024];
+	        int bufferLength = 0; //used to store a temporary size of the buffer
 	        
-		byte[] buffer = new byte[(int)entry.getSize()];
-        int bufferLength = 0; //used to store a temporary size of the buffer
+	        while ( (bufferLength = input.read(buffer)) > 0 ) {
+	            fileOutput.write(buffer, 0, bufferLength);
+	        }
+		} catch(IOException e) {
+			if (fileOutput != null) fileOutput.close();
+			throw e;
+		}
         
-        while ( (bufferLength = input.read(buffer)) > 0 ) {
-            fileOutput.write(buffer, 0, bufferLength);
-        }
-        fileOutput.close();
-        Log.d("debug", "Finished Writing file: " + file.getName());
+        Log.d("debug", "Finished Writing file: " + filename);
+	}
+	
+	public static String generateMD5Hash(String filename) throws IOException, NoSuchAlgorithmException {
+		Log.d("debug", "Generating MD5 Hash for file: " + new File(Environment.getExternalStorageDirectory() + filename).length());
+		
+		FileInputStream input = null;
+		try {
+			input = new FileInputStream(Environment.getExternalStorageDirectory() + filename);
+			
+			MessageDigest digester = MessageDigest.getInstance("MD5");
+			byte[] bytes = new byte[8192];
+			int byteCount;
+			while ((byteCount = input.read(bytes)) > 0) {
+				digester.update(bytes, 0, byteCount);
+			}
+			
+			return new BigInteger(1, digester.digest()).toString(16);
+		} catch(IOException e) {
+			if (input != null) input.close();
+			throw e;
+		}
+	}
+	
+	public static void deleteFile(String filename) throws IOException {
+		new File(Environment.getExternalStorageDirectory() + filename).delete();
+	}
+	
+	private static void writeTarFile(TarArchiveInputStream input, TarArchiveEntry entry, File file) throws IOException {
+		FileOutputStream fileOutput = null;
+		try {
+			fileOutput = new FileOutputStream(file);
+		        
+			byte[] buffer = new byte[(int)entry.getSize()];
+	        int bufferLength = 0; //used to store a temporary size of the buffer
+	        
+	        while ( (bufferLength = input.read(buffer)) > 0 ) {
+	            fileOutput.write(buffer, 0, bufferLength);
+	        }
+		} catch(IOException e) {
+			if (fileOutput != null) fileOutput.close();
+			throw e;
+		}
+        Log.d("debug", "Finished Writing Tar file: " + file.getName());
 	}
 	
 }
