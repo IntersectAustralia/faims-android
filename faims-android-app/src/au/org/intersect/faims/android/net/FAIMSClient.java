@@ -1,152 +1,184 @@
 package au.org.intersect.faims.android.net;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import android.net.http.AndroidHttpClient;
-import android.util.Log;
-import au.org.intersect.faims.android.projects.ProjectInfo;
-import au.org.intersect.faims.util.FileUtil;
-import au.org.intersect.faims.util.JsonUtil;
+import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.ProjectArchive;
+import au.org.intersect.faims.android.util.FAIMSLog;
+import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.gson.JsonObject;
 
 public class FAIMSClient implements IFAIMSClient {
-	
-	public static final int SUCCESS = 0;
-	public static final int FAILURE = 1;
-	public static final int DOWNLOAD_TOO_BIG = 2;
-	public static final int DOWNLOAD_CORRUPTED = 3;
 
 	private AndroidHttpClient httpClient;
 	
-	private IFAIMSClient.FAIMClientListener<List<ProjectInfo>> projectListListener;
-	private IFAIMSClient.FAIMClientListener<ProjectInfo> downloadArchiveListener;
-	private ProjectInfo downloadArchiveProject;
-
-	private void createClient() {
-		httpClient = AndroidHttpClient.newInstance(
-				"Mozilla/5.0(Linux; U; Android 2.2; en-gb; LG-P500 Build/FRF91) AppleWebKit/533.0 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1");
-	
+	private void createClient() throws UnknownHostException {
+		FAIMSLog.log();
+		
+		String userAgent = InetAddress.getLocalHost().toString();
+		httpClient = AndroidHttpClient.newInstance(userAgent);
+		
+		FAIMSLog.log("userAgent is " + userAgent);
 	}
 	
 	private void destroyClient() {
+		FAIMSLog.log();
+		
 		httpClient.close();
 	}
 	
 	@Override
-	public void fetchProjectList(IFAIMSClient.FAIMClientListener<List<ProjectInfo>> listener) {
-		Log.d("debug", "FAIMSClient.fetchProjectList");
-		
-		projectListListener = listener;
-		
-		new Thread(new Runnable() {
+	public FAIMSClientResultCodes fetchProjectList(LinkedList<Project> projects) {
+		FAIMSLog.log();
+
+		InputStream stream = null;
+		try {
+			createClient();
 			
-			@Override
-			public void run() {
-				createClient();
-				try {
-					
-					HttpEntity entity = getRequest("/android/projects");
-					List<ProjectInfo> projects = JsonUtil.deserializeProjects(entity.getContent());
-					
-					Log.d("debug", "FAIMSClient.receivedProjectList");
-					projectListListener.handleResponse(SUCCESS, projects);
-			        
-				} catch(IOException e) {
-					Log.d("debug", e.toString());
-					projectListListener.handleResponse(FAILURE, null);
-				} finally {
-					destroyClient();
-				}
+			HttpEntity entity = getRequest("/android/projects");
+			
+			stream = entity.getContent();
+			
+			JsonUtil.deserializeProjects(stream);
+			
+			FAIMSLog.log("fetched projects!");
+	        
+			return FAIMSClientResultCodes.SUCCESS;
+		} catch(Exception e) {
+			FAIMSLog.log(e);
+			
+			return FAIMSClientResultCodes.SERVER_FAILURE;
+		} finally {
+			
+			try {
+				if (stream != null) stream.close();
+			} catch (IOException e) {
+				FAIMSLog.log(e);
 			}
 			
-		}).start();
-		
+			destroyClient();
+		}
 	}
 	
 	@Override
-	public void downloadProjectArchive(ProjectInfo project, IFAIMSClient.FAIMClientListener<ProjectInfo> listener) {
-		Log.d("debug", "FAIMSClient: downloadProjectArchive");
+	public FAIMSClientResultCodes downloadProjectArchive(Project project) {
+		FAIMSLog.log();
 		
-		downloadArchiveListener = listener;
-		downloadArchiveProject = project;
+		InputStream stream = null;
 		
-		new Thread(new Runnable() {
+		try {
+			createClient();
 			
-			@Override
-			public void run() {
-				createClient();
-				try {
-					
-					HttpEntity entity = getRequest("/android/project/" + downloadArchiveProject.id + "/archive");
-					JsonObject data = JsonUtil.deserializeJsonObject(entity.getContent());
-			        long freeSpace = FileUtil.getExternalStorageSpace();
-			        
-			        Log.d("debug", "freespace: " + String.valueOf(freeSpace));
-			        Log.d("debug", "filesize: " + String.valueOf(data.get("size").getAsLong()));
-			        
-			        if (data.get("size").getAsLong() > freeSpace) {
-			        	
-			        	downloadArchiveListener.handleResponse(DOWNLOAD_TOO_BIG, null);
-			        } else {
-			        	
-			        	entity = getRequest("/android/project/" + downloadArchiveProject.id + "/download");
-			        	Log.d("debug", "FAIMSClient.contentLength: " + entity.getContentLength());
-			        	
-						FileUtil.makeDirs("/faims/projects");
-						
-						String filename = "/faims/projects/" + data.get("file").getAsString();
-						
-						FileUtil.saveFile(entity.getContent(), filename);
-						
-						Log.d("debug", "FAIMSClient.savedFile: " + filename);
-						
-						String md5Hash = FileUtil.generateMD5Hash(filename);
-						
-						
-						
-						Log.d("debug", "File.md5Hash: " + md5Hash);
-						Log.d("debug", "Data.md5Hash: " + data.get("md5").getAsString());
-						
-						if (!data.get("md5").getAsString().equals(md5Hash)) {
-							Log.d("debug", "FAIMSClient.deleteFile: " + filename);
-							FileUtil.deleteFile(filename);
-							
-							downloadArchiveListener.handleResponse(DOWNLOAD_CORRUPTED, null);
-						} else {
-						
-							FileUtil.untarFromStream("/faims/projects", filename);
-							
-							Log.d("debug", "FAIMSClient.deleteFile: " + filename);
-							FileUtil.deleteFile(filename);
-							
-							Log.d("debug", "FAIMSClient.savedProject");
-							downloadArchiveListener.handleResponse(SUCCESS, downloadArchiveProject);
-						}
-			        }
-					
-				} catch (IOException e) {
-					Log.d("debug", e.toString());
-					downloadArchiveListener.handleResponse(FAILURE, null);
-				} catch (Exception e) {
-					Log.d("debug", e.toString());
-					downloadArchiveListener.handleResponse(FAILURE, null);
-				} finally {
-					destroyClient();
-				}
+			ProjectArchive archive = getProjectArchive(project);
+	        long freeSpace = FileUtil.getExternalStorageSpace();
+	        
+	        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
+	        FAIMSLog.log("filesize: " + String.valueOf(archive.size));
+	        
+	        if (archive.size > freeSpace) {
+	        	return FAIMSClientResultCodes.STORAGE_LIMIT_ERROR;
+	        } 
+        	
+	        String filename = getProjectDownload(project, archive);
+			
+			if (filename == null) {
+				return FAIMSClientResultCodes.DOWNLOAD_CORRUPTED;
 			}
-		}).start();
+
+			
+			FileUtil.untarFromStream("/faims/projects", filename);
+			
+			FileUtil.deleteFile(filename);
+			
+			FAIMSLog.log("downloaded project!");
+			
+			return FAIMSClientResultCodes.SUCCESS;
+	        
+		} catch (Exception e) {
+			FAIMSLog.log(e);
+			
+			return FAIMSClientResultCodes.SERVER_FAILURE;
+		} finally {
+			
+			try {
+				if (stream != null) stream.close();
+			} catch (IOException e) {
+				FAIMSLog.log(e);
+			}
+			
+			destroyClient();
+		}
+	}
+	
+	private ProjectArchive getProjectArchive(Project project) throws IOException {
+		FAIMSLog.log();
+		
+		InputStream stream = null;
+		
+		try {
+			HttpEntity entity = getRequest("/android/project/" + project.id + "/archive");
+			
+			stream = entity.getContent();
+			
+			JsonObject object = JsonUtil.deserializeJsonObject(stream);
+			
+			return ProjectArchive.fromJson(object);
+			
+		} finally {
+			if (stream != null) stream.close();
+		}
 		
 	}
 	
+	private String getProjectDownload(Project project, ProjectArchive archive) throws Exception {
+		FAIMSLog.log();
+		
+		InputStream stream = null;
+		
+		try {
+			HttpEntity entity = getRequest("/android/project/" + project.id + "/download");
+			
+			stream = entity.getContent();
+			
+	    	FileUtil.makeDirs("/faims/projects");
+			
+			String filename = "/faims/projects/" + archive.filename;
+			
+			FileUtil.saveFile(stream, filename);
+			
+			String md5 = FileUtil.generateMD5Hash(filename);
+			
+			FAIMSLog.log("filename.md5Hash: " + md5);
+			FAIMSLog.log("archive.md5Hash:  " + archive.md5);
+			
+			if (!archive.md5.equals(md5)) {
+				
+				FileUtil.deleteFile(filename);
+				
+				return null;
+			}
+			
+			return filename;
+		} finally {
+			if (stream != null) stream.close();
+		}
+	}
+	
 	private HttpEntity getRequest(String path) throws IOException {
+		FAIMSLog.log(path);
+		
 		ServerDiscovery ds = ServerDiscovery.getInstance();
-		Log.d("debug", ds.getServerHost() + path);
 		
 		HttpGet get = new HttpGet(ds.getServerHost() + path);
 		HttpResponse response = httpClient.execute(get);

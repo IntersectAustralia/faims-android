@@ -3,28 +3,35 @@
 
     <string name="app_name">FAIMS</string>
     <string name="welcome">This is the FAIMS Android App!</string>
-    <string name="fetch_projects_name">Projects List</string> 
-    <string name="show_projects_name">Project ?</string> 
     <string name="menu_settings">Settings</string>
-    <string name="server_port">4000</string>
-    <string name="locate_server_dialog_title">Locating Server</string>
-    <string name="locate_server_dialog_message">please wait...</string>
+    <string name="fetch_projects_name">Projects List</string> 
+    
     <string name="choice_positive_button">YES</string>
     <string name="choice_negative_button">NO</string>
     <string name="confirm_dialog_button">OK</string>
-    <string name="locate_server_failure_title">Server Discovery Failure</string>
+    
+    <string name="locate_server_title">Locating Server</string>
+    <string name="locate_server_message">broadcast attempt</string>
+    
+    <string name="locate_server_failure_title">Server Error</string>
     <string name="locate_server_failure_message">Could not locate server. Would you like to try Again?</string>
-    <string name="server_request_failure_title">Server Request Failure</string>
-    <string name="server_request_failure_message">Could not complete request. Would you like to try Again?</string>
-    <string name="fetch_projects_dialog_title">Requesting projects List</string>
-    <string name="fetch_projects_dialog_message">please wait...</string>
-    <string name="download_project_failure_title">Project Download Failure</string>
-    <string name="download_project_failure_message">Project did not download correctly. Would you like to try Again?</string>
-    <string name="download_project_title">Download Project?</string>
-    <string name="download_project_message">Would you like to download </string>
-    <string name="download_project_error_title">Project Download Error</string>
-    <string name="download_project_error_message">Project is too big for device.</string>
-    <string name="download_dialog_title">Downloading File</string>
-    <string name="download_dialog_message">please wait...</string>
+    
+    <string name="fetch_projects_title">Fetching Project List</string>
+    <string name="fetch_projects_message">please wait...</string>
+    
+    <string name="fetch_projects_failure_title">Server Error</string>
+    <string name="fetch_projects_failure_message">Could not fetch projects. Would you like to try Again?</string>
+    
+    <string name="confirm_download_project_title">Download Project</string>
+    <string name="confirm_download_project_message">Would you like to download</string>
+    
+    <string name="download_project_title">Downloading Project</string>
+    <string name="download_project_message">please wait...</string>
+    
+    <string name="download_project_failure_title">Server Error</string>
+    <string name="download_project_failure_message">Error during download. Would you like to try Again?</string>
+    
+    <string name="download_project_error_title">Server Error</string>
+    <string name="download_project_error_message">Error storage limit reached.</string>
 
 </resources>

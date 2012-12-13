@@ -38,8 +38,7 @@
 
         <activity
             android:name="au.org.intersect.faims.android.ShowProjectActivity" 
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/show_projects_name" >
+            android:configChanges="orientation|keyboardHidden|screenSize" >
              <meta-data
             android:name="android.support.PARENT_ACTIVITY"
             android:value="au.org.intersect.faims.android.MainActivity" />

@@ -1,4 +1,4 @@
-package au.org.intersect.faims.util;
+package au.org.intersect.faims.android.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import au.org.intersect.faims.android.projects.ProjectInfo;
+import au.org.intersect.faims.android.data.Project;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -29,18 +29,18 @@ public class JsonUtil {
         return parser.parse(reader).getAsJsonObject(); 
 	}
 	
-	public static List<ProjectInfo> deserializeProjects(InputStream stream) throws IOException {
-		LinkedList<ProjectInfo> projects = new LinkedList<ProjectInfo>();
+	public static List<Project> deserializeProjects(InputStream stream) throws IOException {
+		LinkedList<Project> projects = new LinkedList<Project>();
 		JsonArray objects = deserializeJsonArray(stream);
 		for (int i = 0; i < objects.size(); i++) {
-			projects.push(ProjectInfo.fromJson(objects.get(i).getAsJsonObject()));
+			projects.push(Project.fromJson(objects.get(i).getAsJsonObject()));
 		}
 		return projects;
 	}
 	
-	public static ProjectInfo deserializeProjectArchive(InputStream stream) throws IOException {
+	public static Project deserializeProjectArchive(InputStream stream) throws IOException {
 		JsonObject object = deserializeJsonObject(stream);
-		return ProjectInfo.fromJson(object);
+		return Project.fromJson(object);
 	}
 	
 	public static JsonObject deserializeJsonObject(InputStream stream) throws IOException {

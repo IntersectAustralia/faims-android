@@ -15,7 +15,8 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.util.JsonUtil;
+import au.org.intersect.faims.android.util.FAIMSLog;
+import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.gson.JsonObject;
 
@@ -76,6 +77,8 @@ public class ServerDiscovery {
 	}
 	
 	private void startHandlerThread() {
+		FAIMSLog.log();
+		
 		new Thread(new Runnable() {
 			
 			@Override
@@ -97,14 +100,14 @@ public class ServerDiscovery {
 						
 					}
 				} catch(InterruptedException e) {
-					Log.d("debug", e.toString());
+					FAIMSLog.log(e);
 				}
 			}
 		}).start();
 	}
 	
 	public void findServer(ServerDiscoveryListener handler, int attempts) {
-		Log.d("debug", "ServerDiscovery.findServer");
+		FAIMSLog.log();
 		
 		isFindingServer = true;
 		currentTimeout = (1 + attempts) * getPacketTimeout();
@@ -118,7 +121,7 @@ public class ServerDiscovery {
 	}
 	
 	private void startDiscovery() {
-		Log.d("debug", "ServerDiscovery.startDiscovery");
+		FAIMSLog.log();
 		
 		new Thread(new Runnable() {
 			
@@ -141,7 +144,7 @@ public class ServerDiscovery {
 	}
 	
 	private void sendBroadcast() throws SocketException, IOException {
-		Log.d("debug", "ServerDiscovery.sendBroadcast");
+		FAIMSLog.log();
 		
 		DatagramSocket s = new DatagramSocket();
 		try {
@@ -166,7 +169,7 @@ public class ServerDiscovery {
 	}
 	
 	private void waitForResponse() throws SocketException, IOException {
-		Log.d("debug", "ServerDiscovery.waitForResponse");
+		FAIMSLog.log();
 		
 		// receive packet
 		DatagramSocket r = new DatagramSocket(getDevicePort());
@@ -194,7 +197,7 @@ public class ServerDiscovery {
 		WifiManager wifiManager = (WifiManager) application.getSystemService(Application.WIFI_SERVICE);
     	DhcpInfo myDhcpInfo = wifiManager.getDhcpInfo();
     	if (myDhcpInfo == null) {
-    		Log.d("debug", "Could not get broadcast address");
+    		FAIMSLog.log("could not determine device ip");
     		return null;
     	}
     	int broadcast = myDhcpInfo.ipAddress;
@@ -221,8 +224,10 @@ public class ServerDiscovery {
 	}
 	
 	private String getPacketDataAsString(DatagramPacket packet) throws IOException {
-			InputStreamReader reader = null;
-		 try {
+		FAIMSLog.log();
+		
+		InputStreamReader reader = null;
+		try {
 			 reader = new InputStreamReader(new ByteArrayInputStream(packet.getData()), Charset.forName("UTF-8"));
 		     StringBuilder sb = new StringBuilder();
 		     int value;

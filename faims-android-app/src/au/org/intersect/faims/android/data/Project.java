@@ -1,14 +1,14 @@
-package au.org.intersect.faims.android.projects;
+package au.org.intersect.faims.android.data;
 
 import com.google.gson.JsonObject;
 
-public class ProjectInfo {
+public class Project {
 
 	public String name;
 	public String id;
 	
-	public static ProjectInfo fromJson(JsonObject object) {
-		ProjectInfo p = new ProjectInfo();
+	public static Project fromJson(JsonObject object) {
+		Project p = new Project();
 		p.name = object.get("name").getAsString();
 		p.id = object.get("id").getAsString();
 		return p;

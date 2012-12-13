@@ -1,4 +1,4 @@
-package au.org.intersect.faims.util;
+package au.org.intersect.faims.android.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +15,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import android.os.Environment;
 import android.os.StatFs;
-import android.util.Log;
 
 public class FileUtil {
 	
@@ -24,14 +23,18 @@ public class FileUtil {
 	}
 
 	public static void makeDirs(String dir) {
+		FAIMSLog.log();
+		
 		File file = new File(toPath(dir));
 		if (!file.exists())
 			file.mkdirs();
 		
-		Log.d("debug", "FileUtil: " + toPath(dir) + " is present " + String.valueOf(file.exists()));
+		FAIMSLog.log(toPath(dir) + " is present " + String.valueOf(file.exists()));
 	}
 	
 	public static void untarFromStream(String dir, String filename) throws IOException {
+		FAIMSLog.log();
+		
 		TarArchiveInputStream ts = null;
 		try {
 		 ts = new TarArchiveInputStream(
@@ -50,25 +53,24 @@ public class FileUtil {
 			if (ts != null) ts.close();
 		}
 		
-		Log.d("debug", "FileUtil: untared file " + filename);
+		FAIMSLog.log("untared file " + filename);
 	}
 	
 	public static long getExternalStorageSpace() throws Exception {
+		FAIMSLog.log();
+		
 	    long availableSpace = -1L;
 	    
-	    try {
-	        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-	        stat.restat(Environment.getExternalStorageDirectory().getPath());
-	        availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
-	    } catch (Exception e) {
-	       Log.d("debug", e.toString());
-	       throw e;
-	    }
+	    StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+	    stat.restat(Environment.getExternalStorageDirectory().getPath());
+	    availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
 
 	    return availableSpace;
 	}
 	
 	public static void saveFile(InputStream input, String filename) throws IOException {
+		FAIMSLog.log();
+		
 		FileOutputStream os = null;
 		try {
 			os = new FileOutputStream(toPath(filename));
@@ -83,10 +85,12 @@ public class FileUtil {
 			if (os != null) os.close();
 		}
         
-		Log.d("debug", "FileUtil: saved file " + filename);
+		FAIMSLog.log("saved file " + filename);
 	}
 	
 	public static String generateMD5Hash(String filename) throws IOException, NoSuchAlgorithmException {
+		FAIMSLog.log();
+		
 		FileInputStream fs = null;
 		try {
 			fs = new FileInputStream(toPath(filename));
@@ -98,7 +102,7 @@ public class FileUtil {
 				digester.update(bytes, 0, byteCount);
 			}
 			
-			Log.d("debug", "FileUtil: generated md5 for hash for file " + filename);
+			FAIMSLog.log("generated md5 for hash for file " + filename);
 			
 			return new BigInteger(1, digester.digest()).toString(16);
 		} finally {
@@ -107,12 +111,16 @@ public class FileUtil {
 	}
 	
 	public static void deleteFile(String filename) throws IOException {
+		FAIMSLog.log();
+		
 		new File(toPath(filename)).delete();
 		
-		Log.d("debug", "FileUtil: deleted file " + filename);
+		FAIMSLog.log("deleted file " + filename);
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
+		FAIMSLog.log();
+		
 		FileOutputStream os = null;
 		
 		try {
@@ -128,7 +136,7 @@ public class FileUtil {
 			if (os != null) os.close();
 		}
 		
-        Log.d("debug", "FileUtil: writing tar file " + file.getName());
+		FAIMSLog.log("writing tar file " + file.getName());
 	}
 	
 }
