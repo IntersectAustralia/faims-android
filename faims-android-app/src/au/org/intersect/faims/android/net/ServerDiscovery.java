@@ -14,18 +14,12 @@ import android.app.Application;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.util.JsonUtil;
 
 import com.google.gson.JsonObject;
 
 public class ServerDiscovery {
-	
-	public static final int SERVER_DISCOVERY_PORT = 4000;
-	public static final int ANDROID_BROADCAST_PORT = 5000;
-	public static final int ANDROID_RECEIVER_PORT = 6000;
-	public static final String BROADCAST_ADDR = "255.255.255.255";
-	
-	public static final int PACKET_TIMEOUT = 1000;
 	
 	public interface ServerDiscoveryListener {
 		
@@ -37,8 +31,9 @@ public class ServerDiscovery {
 	
 	private LinkedList<ServerDiscoveryListener> listenerList;
 	private Application application;
+	
 	private boolean isFindingServer;
-	private int timeout;
+	private int currentTimeout;
 	
 	private String serverIP;
 	private String serverPort;
@@ -76,6 +71,10 @@ public class ServerDiscovery {
 		serverPort = null;
 	}
 	
+	public boolean isServerHostValid() {
+		return serverIP != null && serverPort != null;
+	}
+	
 	private void startHandlerThread() {
 		new Thread(new Runnable() {
 			
@@ -108,7 +107,7 @@ public class ServerDiscovery {
 		Log.d("debug", "ServerDiscovery.findServer");
 		
 		isFindingServer = true;
-		timeout = (1 + attempts) * PACKET_TIMEOUT;
+		currentTimeout = (1 + attempts) * getPacketTimeout();
 		
 		listenerList.add(handler);
 		
@@ -118,12 +117,9 @@ public class ServerDiscovery {
 		}
 	}
 	
-	public boolean isServerHostValid() {
-		return serverIP != null && serverPort != null;
-	}
-	
 	private void startDiscovery() {
 		Log.d("debug", "ServerDiscovery.startDiscovery");
+		
 		new Thread(new Runnable() {
 			
 			@Override
@@ -146,21 +142,24 @@ public class ServerDiscovery {
 	
 	private void sendBroadcast() throws SocketException, IOException {
 		Log.d("debug", "ServerDiscovery.sendBroadcast");
+		
 		DatagramSocket s = new DatagramSocket();
 		try {
 	    	s.setBroadcast(true);
-	    	s.setSoTimeout(timeout);
+	    	s.setSoTimeout(currentTimeout);
+	    	
 	    	//s.bind(new InetSocketAddress(InetAddress.getLocalHost(), ANDROID_BROADCAST_PORT));
 	        
-	    	String packet = JsonUtil.serializeServerPacket(getIPAddress(), String.valueOf(ANDROID_RECEIVER_PORT));
+	    	String packet = JsonUtil.serializeServerPacket(getIPAddress(), String.valueOf(getDevicePort()));
 	    	int length = packet.length();
 	    	byte[] message = packet.getBytes();
 	    	
-	    	DatagramPacket p = new DatagramPacket(message, length, InetAddress.getByName(BROADCAST_ADDR), SERVER_DISCOVERY_PORT);
+	    	DatagramPacket p = new DatagramPacket(message, length, InetAddress.getByName(getBroadcastAddr()), getDiscoveryPort());
 	    	
 	    	s.send(p);
+	    	
 	    	Log.d("debug", "AndroidIP: " + getIPAddress());
-	    	Log.d("debug", "AndroidPort: " + ANDROID_RECEIVER_PORT);
+	    	Log.d("debug", "AndroidPort: " + getDevicePort());
 		} finally {
 			s.close();
 		}
@@ -168,23 +167,18 @@ public class ServerDiscovery {
 	
 	private void waitForResponse() throws SocketException, IOException {
 		Log.d("debug", "ServerDiscovery.waitForResponse");
+		
 		// receive packet
-		DatagramSocket r = new DatagramSocket(ANDROID_RECEIVER_PORT);
+		DatagramSocket r = new DatagramSocket(getDevicePort());
 		try {
-			r.setSoTimeout(timeout);
+			r.setSoTimeout(currentTimeout);
 			
 	    	byte[] buffer = new byte[1024];
 	    	DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 	    	
 	        r.receive(packet);
-	        
-	        InputStreamReader input = new InputStreamReader(new ByteArrayInputStream(packet.getData()), Charset.forName("UTF-8"));
-	        StringBuilder sb = new StringBuilder();
-	        int value;
-	        while((value = input.read()) > 0)
-	            sb.append((char) value);
-	        
-	        JsonObject data = JsonUtil.deserializeServerPacket(sb.toString());
+	       
+	        JsonObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
 	        
 	        serverIP = data.get("ip").getAsString();
 	        serverPort = data.get("port").getAsString();
@@ -195,7 +189,6 @@ public class ServerDiscovery {
 			r.close();
 		}
 	}
-	
 	
 	private String getIPAddress() throws IOException {
 		WifiManager wifiManager = (WifiManager) application.getSystemService(Application.WIFI_SERVICE);
@@ -210,6 +203,37 @@ public class ServerDiscovery {
 		quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
 		return InetAddress.getByAddress(quads).getHostAddress();
     }
+	
+	private int getPacketTimeout() {
+		return application.getResources().getInteger(R.integer.packet_timeout);
+	}
+	
+	private int getDiscoveryPort() {
+		return application.getResources().getInteger(R.integer.discovery_port);
+	}
+	
+	private int getDevicePort() {
+		return application.getResources().getInteger(R.integer.device_port);
+	}
+	
+	private String getBroadcastAddr() {
+		return application.getResources().getString(R.string.broadcast_addr);
+	}
+	
+	private String getPacketDataAsString(DatagramPacket packet) throws IOException {
+			InputStreamReader reader = null;
+		 try {
+			 reader = new InputStreamReader(new ByteArrayInputStream(packet.getData()), Charset.forName("UTF-8"));
+		     StringBuilder sb = new StringBuilder();
+		     int value;
+		     while((value = reader.read()) > 0)
+		    	 sb.append((char) value);
+		     
+		     return sb.toString();
+		 } finally {
+			 if (reader != null) reader.close();
+		 }
+	}
 	
 	public void clearListeners() {
 		listenerList.clear();

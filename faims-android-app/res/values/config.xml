@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <integer name="discovery_port">4000</integer>
+    <integer name="device_port">4000</integer>
+    <string name="broadcast_addr">255.255.255.255</string>
+    <integer name="packet_timeout">1000</integer>
+    
+</resources>
