@@ -16,7 +16,7 @@ import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.IFAIMSClient;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.projects.ProjectInfo;
-import au.org.intersect.faims.util.DialogCreatorUtil;
+import au.org.intersect.faims.util.DialogFactory;
 
 import com.google.inject.Inject;
 
@@ -56,7 +56,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
         		final String selectedItem = sel.getText().toString();
         		selectedProject = getProjectByName(selectedItem);
         		
-        		choiceDialog = DialogCreatorUtil.createChoiceDialog(FetchProjectsActivity.this, 
+        		choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this, 
         				ChoiceDialog.DOWNLOAD_PROJECT, 
         				getString(R.string.download_project_title),
         				getString(R.string.download_project_message) + " " + selectedItem);
@@ -107,7 +107,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	    		@Override
 	    		public void run() {
 	    			LocateServerDialog dialog = 
-	    					DialogCreatorUtil.createLocateServerDialog(FetchProjectsActivity.this);
+	    					DialogFactory.createLocateServerDialog(FetchProjectsActivity.this);
 	    			dialog.show();
 	    		}
 	    	});
@@ -227,7 +227,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			@Override
 			public void run() {
 				busyDialog = 
-						DialogCreatorUtil.createBusyDialog(FetchProjectsActivity.this,
+						DialogFactory.createBusyDialog(FetchProjectsActivity.this,
 								BusyDialog.TYPE,
 								getString(R.string.fetch_projects_dialog_title), 
 								getString(R.string.fetch_projects_dialog_message));
@@ -245,7 +245,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			@Override
 			public void run() {
 				downloadDialog = 
-						DialogCreatorUtil.createBusyDialog(FetchProjectsActivity.this,
+						DialogFactory.createBusyDialog(FetchProjectsActivity.this,
 								BusyDialog.TYPE,
 								getString(R.string.download_dialog_title), 
 								getString(R.string.download_dialog_message));
@@ -260,7 +260,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			
 			@Override
 			public void run() {
-				choiceDialog = DialogCreatorUtil.createChoiceDialog(FetchProjectsActivity.this,
+				choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
 						ChoiceDialog.SERVER_REQUEST_FAILURE,
 						getString(R.string.server_request_failure_title),
 						getString(R.string.server_request_failure_message));
@@ -274,7 +274,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			
 			@Override
 			public void run() {
-				choiceDialog = DialogCreatorUtil.createChoiceDialog(FetchProjectsActivity.this,
+				choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
 						ChoiceDialog.SERVER_REQUEST_FAILURE,
 						getString(R.string.locate_server_failure_title),
 						getString(R.string.locate_server_failure_message));
@@ -288,7 +288,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			
 			@Override
 			public void run() {
-				choiceDialog = DialogCreatorUtil.createChoiceDialog(FetchProjectsActivity.this,
+				choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
 						ChoiceDialog.DOWNLOAD_PROJECT_FAILURE,
 						getString(R.string.download_project_failure_title),
 						getString(R.string.download_project_failure_message));
@@ -302,7 +302,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 			
 			@Override
 			public void run() {
-				choiceDialog = DialogCreatorUtil.createConfirmDialog(FetchProjectsActivity.this,
+				choiceDialog = DialogFactory.createConfirmDialog(FetchProjectsActivity.this,
 						ConfirmDialog.DOWNLOAD_PROJECT_TO_BIG_ERROR,
 						getString(R.string.download_project_error_title),
 						getString(R.string.download_project_error_message));
@@ -324,7 +324,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	    		@Override
 	    		public void run() {
 	    			LocateServerDialog dialog = 
-	    					DialogCreatorUtil.createLocateServerDialog(FetchProjectsActivity.this);
+	    					DialogFactory.createLocateServerDialog(FetchProjectsActivity.this);
 	    			dialog.show();
 	    		}
 	    	});

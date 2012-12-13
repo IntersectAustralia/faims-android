@@ -19,33 +19,38 @@ import android.util.Log;
 
 public class FileUtil {
 	
-	private static funciton toPath(String path) {
-		
+	private static String toPath(String path) {
+		return Environment.getExternalStorageDirectory() + path;
 	}
 
-	public static void makeDirs(String path) {
-		String dir = Environment.getExternalStorageDirectory() + path;
-		File file = new File(dir);
-		Log.d("debug", dir + " exists " + String.valueOf(file.exists()));
+	public static void makeDirs(String dir) {
+		File file = new File(toPath(dir));
 		if (!file.exists())
 			file.mkdirs();
+		
+		Log.d("debug", "FileUtil: " + toPath(dir) + " is present " + String.valueOf(file.exists()));
 	}
 	
 	public static void untarFromStream(String dir, String filename) throws IOException {
 		TarArchiveInputStream ts = null;
 		try {
-		 ts = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(Environment.getExternalStorageDirectory() + filename)));
+		 ts = new TarArchiveInputStream(
+				 new GZIPInputStream(
+						 new FileInputStream(toPath(filename))));
+		 
 	     TarArchiveEntry e;
 	     while((e = ts.getNextTarEntry()) != null) {
 	    	 if (e.isDirectory()) {
 	    		 makeDirs(dir + "/" + e.getName());
 	    	 } else {
-	    		 writeTarFile(ts, e, new File(Environment.getExternalStorageDirectory() + dir + "/" + e.getName()));
+	    		 writeTarFile(ts, e, new File(toPath(dir + "/" + e.getName())));
 	    	 }
 	     }
 		} finally {
 			if (ts != null) ts.close();
 		}
+		
+		Log.d("debug", "FileUtil: untared file " + filename);
 	}
 	
 	public static long getExternalStorageSpace() throws Exception {
@@ -64,62 +69,66 @@ public class FileUtil {
 	}
 	
 	public static void saveFile(InputStream input, String filename) throws IOException {
-		FileOutputStream fileOutput = null;
+		FileOutputStream os = null;
 		try {
-			fileOutput = new FileOutputStream(Environment.getExternalStorageDirectory() + filename);
+			os = new FileOutputStream(toPath(filename));
 		        
 			byte[] buffer = new byte[1024];
 	        int bufferLength = 0; //used to store a temporary size of the buffer
 	        
 	        while ( (bufferLength = input.read(buffer)) > 0 ) {
-	            fileOutput.write(buffer, 0, bufferLength);
+	            os.write(buffer, 0, bufferLength);
 	        }
 		} finally {
-			if (fileOutput != null) fileOutput.close();
+			if (os != null) os.close();
 		}
         
-        Log.d("debug", "Finished Writing file: " + filename);
+		Log.d("debug", "FileUtil: saved file " + filename);
 	}
 	
 	public static String generateMD5Hash(String filename) throws IOException, NoSuchAlgorithmException {
-		Log.d("debug", "Generating MD5 Hash for file: " + new File(Environment.getExternalStorageDirectory() + filename).length());
-		
-		FileInputStream input = null;
+		FileInputStream fs = null;
 		try {
-			input = new FileInputStream(Environment.getExternalStorageDirectory() + filename);
+			fs = new FileInputStream(toPath(filename));
 			
 			MessageDigest digester = MessageDigest.getInstance("MD5");
 			byte[] bytes = new byte[8192];
 			int byteCount;
-			while ((byteCount = input.read(bytes)) > 0) {
+			while ((byteCount = fs.read(bytes)) > 0) {
 				digester.update(bytes, 0, byteCount);
 			}
 			
+			Log.d("debug", "FileUtil: generated md5 for hash for file " + filename);
+			
 			return new BigInteger(1, digester.digest()).toString(16);
 		} finally {
-			if (input != null) input.close();
+			if (fs != null) fs.close();
 		}
 	}
 	
 	public static void deleteFile(String filename) throws IOException {
-		new File(Environment.getExternalStorageDirectory() + filename).delete();
+		new File(toPath(filename)).delete();
+		
+		Log.d("debug", "FileUtil: deleted file " + filename);
 	}
 	
-	private static void writeTarFile(TarArchiveInputStream input, TarArchiveEntry entry, File file) throws IOException {
-		FileOutputStream fileOutput = null;
+	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
+		FileOutputStream os = null;
+		
 		try {
-			fileOutput = new FileOutputStream(file);
+			os = new FileOutputStream(file);
 		        
 			byte[] buffer = new byte[(int)entry.getSize()];
 	        int bufferLength = 0; //used to store a temporary size of the buffer
 	        
-	        while ( (bufferLength = input.read(buffer)) > 0 ) {
-	            fileOutput.write(buffer, 0, bufferLength);
+	        while ( (bufferLength = ts.read(buffer)) > 0 ) {
+	            os.write(buffer, 0, bufferLength);
 	        }
 		} finally {
-			if (fileOutput != null) fileOutput.close();
+			if (os != null) os.close();
 		}
-        Log.d("debug", "Finished Writing Tar file: " + file.getName());
+		
+        Log.d("debug", "FileUtil: writing tar file " + file.getName());
 	}
 	
 }

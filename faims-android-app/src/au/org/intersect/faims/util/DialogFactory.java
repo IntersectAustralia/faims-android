@@ -6,7 +6,7 @@ import au.org.intersect.faims.android.ChoiceDialog;
 import au.org.intersect.faims.android.ConfirmDialog;
 import au.org.intersect.faims.android.LocateServerDialog;
 
-public class DialogCreatorUtil {
+public class DialogFactory {
 	
 	public static LocateServerDialog createLocateServerDialog(Activity activity) {
 		return LocateServerDialog.create(activity);
