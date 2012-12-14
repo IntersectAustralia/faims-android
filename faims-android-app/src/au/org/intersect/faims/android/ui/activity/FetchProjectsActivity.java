@@ -5,7 +5,6 @@ import java.util.List;
 import roboguice.activity.RoboActivity;
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
