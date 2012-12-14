@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -39,26 +40,30 @@ public class FAIMSClient implements IFAIMSClient {
 	}
 	
 	@Override
-	public FAIMSClientResultCodes fetchProjectList(LinkedList<Project> projects) {
+	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
 		FAIMSLog.log();
 
 		InputStream stream = null;
-		try {
+		try {			
 			createClient();
 			
 			HttpEntity entity = getRequest("/android/projects");
 			
 			stream = entity.getContent();
 			
-			JsonUtil.deserializeProjects(stream);
+			List<Project> ps = JsonUtil.deserializeProjects(stream);
+			
+			for (Project p : ps) {
+				projects.push(p);
+			}
 			
 			FAIMSLog.log("fetched projects!");
 	        
-			return FAIMSClientResultCodes.SUCCESS;
+			return FAIMSClientResultCode.SUCCESS;
 		} catch(Exception e) {
 			FAIMSLog.log(e);
 			
-			return FAIMSClientResultCodes.SERVER_FAILURE;
+			return FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			
 			try {
@@ -72,7 +77,7 @@ public class FAIMSClient implements IFAIMSClient {
 	}
 	
 	@Override
-	public FAIMSClientResultCodes downloadProjectArchive(Project project) {
+	public FAIMSClientResultCode downloadProjectArchive(Project project) {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
@@ -87,15 +92,14 @@ public class FAIMSClient implements IFAIMSClient {
 	        FAIMSLog.log("filesize: " + String.valueOf(archive.size));
 	        
 	        if (archive.size > freeSpace) {
-	        	return FAIMSClientResultCodes.STORAGE_LIMIT_ERROR;
+	        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
 	        } 
         	
 	        String filename = getProjectDownload(project, archive);
 			
 			if (filename == null) {
-				return FAIMSClientResultCodes.DOWNLOAD_CORRUPTED;
+				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
 			}
-
 			
 			FileUtil.untarFromStream("/faims/projects", filename);
 			
@@ -103,12 +107,12 @@ public class FAIMSClient implements IFAIMSClient {
 			
 			FAIMSLog.log("downloaded project!");
 			
-			return FAIMSClientResultCodes.SUCCESS;
+			return FAIMSClientResultCode.SUCCESS;
 	        
 		} catch (Exception e) {
 			FAIMSLog.log(e);
 			
-			return FAIMSClientResultCodes.SERVER_FAILURE;
+			return FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			
 			try {

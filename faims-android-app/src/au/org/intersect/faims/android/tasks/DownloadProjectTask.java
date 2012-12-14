@@ -4,11 +4,9 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.FAIMSClientResultCodes;
+import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.IFAIMSClient;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
-import au.org.intersect.faims.android.ui.dialog.DialogResultCodes;
-import au.org.intersect.faims.android.ui.dialog.DialogTypes;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -19,7 +17,7 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 	private Activity activity;
 	private IFAIMSClient faimsClient;
 	private BusyDialog dialog;
-	private FAIMSClientResultCodes errorCode;
+	private FAIMSClientResultCode errorCode;
 	
 	public DownloadProjectTask(Activity activity, IFAIMSClient faimsClient) {
 		this.activity = activity;
@@ -31,9 +29,10 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 		FAIMSLog.log();
 		
 		dialog = DialogFactory.createBusyDialog(activity, 
-				DialogTypes.DOWNLOAD_PROJECT, 
+				ActionType.DOWNLOAD_PROJECT, 
 				activity.getString(R.string.download_project_title), 
 				activity.getString(R.string.download_project_message));
+		dialog.show();
 	}
 	
 	@Override
@@ -49,7 +48,7 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
-		dialog.dismiss();
+		// TODO: stop download or delete directory if it exists
 	}
 	
 	@Override
@@ -57,14 +56,14 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 		FAIMSLog.log();
 		
 		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
-		DialogResultCodes code = null;
-		if (errorCode == FAIMSClientResultCodes.SUCCESS)
-			code = DialogResultCodes.SUCCESS;
+		ActionResultCode code = null;
+		if (errorCode == FAIMSClientResultCode.SUCCESS)
+			code = ActionResultCode.SUCCESS;
 		else
-			code = DialogResultCodes.FAILURE;
+			code = ActionResultCode.FAILURE;
 		listener.handleDialogResponse(code, 
 				errorCode, 
-				DialogTypes.FETCH_PROJECT_LIST,
+				ActionType.DOWNLOAD_PROJECT,
 				dialog);
 	}
 	

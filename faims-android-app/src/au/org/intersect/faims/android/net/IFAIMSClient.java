@@ -6,8 +6,8 @@ import au.org.intersect.faims.android.data.Project;
 
 public interface IFAIMSClient {
 
-	public FAIMSClientResultCodes fetchProjectList(LinkedList<Project> projects);
+	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects);
 	
-	public FAIMSClientResultCodes downloadProjectArchive(Project project);
+	public FAIMSClientResultCode downloadProjectArchive(Project project);
 	
 }

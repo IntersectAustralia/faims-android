@@ -4,15 +4,17 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.tasks.ActionResultCode;
+import au.org.intersect.faims.android.tasks.ActionType;
 
 public class ConfirmDialog extends AlertDialog {
 
 	public static final int OK = 0;
 	
-	private DialogTypes type;
+	private ActionType type;
 	private IFAIMSDialogListener listener;
 	
-	public ConfirmDialog(Activity activity, DialogTypes type, String title, String message) {
+	public ConfirmDialog(Activity activity, ActionType type, String title, String message) {
 		super(activity);
 		this.type = type;
 		this.listener = (IFAIMSDialogListener) activity;
@@ -21,12 +23,12 @@ public class ConfirmDialog extends AlertDialog {
 		setButton(BUTTON_NEUTRAL, activity.getString(R.string.confirm_dialog_button), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				listener.handleDialogResponse(DialogResultCodes.SELECT_OK, null, ConfirmDialog.this.type, ConfirmDialog.this);
+				listener.handleDialogResponse(ActionResultCode.SELECT_OK, null, ConfirmDialog.this.type, ConfirmDialog.this);
 			}
 		});
 	}
 	
-	public static ConfirmDialog create(Activity activity, DialogTypes type, String title, String message) {
+	public static ConfirmDialog create(Activity activity, ActionType type, String title, String message) {
 		return new ConfirmDialog(activity, type, title, message);
 	}
 	

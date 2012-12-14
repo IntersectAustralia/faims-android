@@ -6,11 +6,9 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.FAIMSClientResultCodes;
+import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.IFAIMSClient;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
-import au.org.intersect.faims.android.ui.dialog.DialogResultCodes;
-import au.org.intersect.faims.android.ui.dialog.DialogTypes;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -22,7 +20,7 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	private IFAIMSClient faimsClient;
 	private BusyDialog dialog;
 	private LinkedList<Project> projects;
-	private FAIMSClientResultCodes errorCode;
+	private FAIMSClientResultCode errorCode;
 	
 	public FetchProjectsListTask(Activity activity, IFAIMSClient faimsClient) {
 		this.activity = activity;
@@ -34,9 +32,10 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 		FAIMSLog.log();
 		
 		dialog = DialogFactory.createBusyDialog(activity, 
-				DialogTypes.FETCH_PROJECT_LIST, 
+				ActionType.FETCH_PROJECT_LIST, 
 				activity.getString(R.string.fetch_projects_failure_title), 
 				activity.getString(R.string.fetch_projects_failure_message));
+		dialog.show();
 	}
 	
 	@Override
@@ -53,7 +52,6 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
-		dialog.dismiss();
 	}
 	
 	@Override
@@ -61,14 +59,14 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 		FAIMSLog.log();
 		
 		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
-		DialogResultCodes code = null;
-		if (errorCode == FAIMSClientResultCodes.SUCCESS)
-			code = DialogResultCodes.SUCCESS;
+		ActionResultCode code = null;
+		if (errorCode == FAIMSClientResultCode.SUCCESS)
+			code = ActionResultCode.SUCCESS;
 		else
-			code = DialogResultCodes.FAILURE;
+			code = ActionResultCode.FAILURE;
 		listener.handleDialogResponse(code, 
 				projects, 
-				DialogTypes.FETCH_PROJECT_LIST,
+				ActionType.FETCH_PROJECT_LIST,
 				dialog);
 	}
 	

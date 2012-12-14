@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import android.app.Application;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.JsonUtil;
@@ -133,9 +132,9 @@ public class ServerDiscovery {
 					waitForResponse();
 					
 				} catch(SocketException e) {
-					Log.d("debug", e.toString());
+					FAIMSLog.log(e);
 				} catch(IOException e) {
-					Log.d("debug", e.toString());
+					FAIMSLog.log(e);
 				} finally {
 			        isFindingServer = false;
 				}
@@ -161,8 +160,8 @@ public class ServerDiscovery {
 	    	
 	    	s.send(p);
 	    	
-	    	Log.d("debug", "AndroidIP: " + getIPAddress());
-	    	Log.d("debug", "AndroidPort: " + getDevicePort());
+	    	FAIMSLog.log("AndroidIP: " + getIPAddress());
+	    	FAIMSLog.log("AndroidPort: " + getDevicePort());
 		} finally {
 			s.close();
 		}
@@ -186,8 +185,8 @@ public class ServerDiscovery {
 	        serverIP = data.get("ip").getAsString();
 	        serverPort = data.get("port").getAsString();
 	        
-	        Log.d("debug", "ServerIP: " + serverIP.toString());
-	        Log.d("debug", "ServerPort: " + serverPort.toString());
+	        FAIMSLog.log("ServerIP: " + serverIP.toString());
+	        FAIMSLog.log("ServerPort: " + serverPort.toString());
 		} finally {
 			r.close();
 		}

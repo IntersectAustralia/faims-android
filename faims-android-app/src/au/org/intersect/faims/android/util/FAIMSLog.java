@@ -18,11 +18,11 @@ public class FAIMSLog {
 	
 	public static String getCaller()
 	{
-		int depth = 1;
 		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+		int depth = ste.length - 5;
 		String className = ste[ste.length - 1 - depth].getClassName(); 
 		String methodName = ste[ste.length - 1 - depth].getMethodName(); 
-		return className  + "." + methodName;
+		return className.substring(className.lastIndexOf(".") + 1)  + "." + methodName;
 	}
 	
 }

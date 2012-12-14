@@ -7,7 +7,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,15 +14,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.FAIMSClientResultCodes;
+import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.IFAIMSClient;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.tasks.ActionResultCode;
+import au.org.intersect.faims.android.tasks.ActionType;
 import au.org.intersect.faims.android.tasks.DownloadProjectTask;
 import au.org.intersect.faims.android.tasks.FetchProjectsListTask;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
-import au.org.intersect.faims.android.tasks.TaskTypes;
-import au.org.intersect.faims.android.ui.dialog.DialogResultCodes;
-import au.org.intersect.faims.android.ui.dialog.DialogTypes;
+import au.org.intersect.faims.android.tasks.TaskType;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -40,6 +39,8 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	private LocateServerTask locateTask;
 	private FetchProjectsListTask fetchTask;
 	private DownloadProjectTask downloadTask;
+	
+	private TaskType lastTask;
 	
 	private Dialog choiceDialog;
 
@@ -67,41 +68,56 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
         		selectedProject = getProjectByName(selectedItem);
         		
         		choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this, 
-        				DialogTypes.CONFIRM_DOWNLOAD_PROJECT, 
+        				ActionType.CONFIRM_DOWNLOAD_PROJECT, 
         				getString(R.string.confirm_download_project_title),
         				getString(R.string.confirm_download_project_message) + " " + selectedItem + "?");
         		choiceDialog.show();
         	}
         });
+        
+        fetchProjectsList();
     }
     
+    /*
     @Override
-    protected void onStart() {
-    	super.onStart();
-     
-    	FAIMSLog.log();
-    	
-    	if (fetchTask == null || fetchTask.getStatus() == AsyncTask.Status.FINISHED)
-    		fetchProjectsList();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_fetch_projects, menu);
+        return true;
     }
     
-    @Override
-    protected void onPause() {
-    	super.onPause();
-    	
-    	FAIMSLog.log();
-    	
-    	if (choiceDialog != null) {
-    		choiceDialog.dismiss();
-    		choiceDialog = null;
-    	}
-    	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.fetch_project:
+				fetchProjectsFromServer();
+				return (true);
+			default:
+				return (super.onOptionsItemSelected(item));
+		}
+	}
+    */
+    
+    /*
+    private boolean isLocatingServer() {
+    	return locateTask != null && locateTask.getStatus() != AsyncTask.Status.FINISHED;
     }
     
-    private void locateServer(TaskTypes taskType) {
+    private boolean isFetchingProjectList() {
+    	return fetchTask != null && fetchTask.getStatus() != AsyncTask.Status.FINISHED;
+    }
+    
+    private boolean isDownloadingProject() {
+    	return downloadTask != null && downloadTask.getStatus() != AsyncTask.Status.FINISHED;
+    }
+    */
+    
+    private void locateServer(TaskType taskType) {
     	FAIMSLog.log();
     	
     	locateTask = new LocateServerTask(FetchProjectsActivity.this, taskType);
+    	locateTask.execute();
+    	
+    	lastTask = taskType;
     }
     
     /**
@@ -112,8 +128,9 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     	
     	if (ServerDiscovery.getInstance().isServerHostValid()) {
     		fetchTask = new FetchProjectsListTask(FetchProjectsActivity.this, faimsClient);
+    		fetchTask.execute();
     	} else {
-    		locateServer(TaskTypes.FETCH_PROJECTS_LIST);
+    		locateServer(TaskType.FETCH_PROJECTS_LIST);
     	}
     }
     
@@ -123,84 +140,97 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     	
     	if (ServerDiscovery.getInstance().isServerHostValid()) {
     		downloadTask = new DownloadProjectTask(FetchProjectsActivity.this, faimsClient);
+    		downloadTask.execute(selectedProject);
     	} else {
-    		locateServer(TaskTypes.DOWNLOAD_PROJECT);
+    		locateServer(TaskType.DOWNLOAD_PROJECT);
     	}
     	
     }
     
-    @Override
-    public void handleDialogResponse(DialogResultCodes resultCode, Object data, DialogTypes type, Dialog dialog) {
-    	FAIMSLog.log("dialog is " + type);
+    @SuppressWarnings("unchecked")
+	@Override
+    public void handleDialogResponse(ActionResultCode resultCode, Object data, ActionType type, Dialog dialog) {
+    	FAIMSLog.log("dialog is " + type + " and resultCode is " + resultCode + " and data is " + data);
     	
     	dialog.dismiss();
     	
-    	if (type == DialogTypes.LOCATE_SERVER) {
+    	if (type == ActionType.LOCATE_SERVER) {
+    		// TODO clear this listener only
+    		ServerDiscovery.getInstance().clearListeners();
     		
-    		if (resultCode == DialogResultCodes.SUCCESS) {
-    			// TODO: only remove this activity as a listener
-    			ServerDiscovery.getInstance().clearListeners();
+    		if (resultCode == ActionResultCode.SUCCESS) {
     			
-    			TaskTypes taskType = (TaskTypes) data;
-    			if (taskType == TaskTypes.FETCH_PROJECTS_LIST)
+    			TaskType taskType = (TaskType) data;
+    			if (taskType == TaskType.FETCH_PROJECTS_LIST)
     				fetchProjectsList();
-    			else if (taskType == TaskTypes.DOWNLOAD_PROJECT)
+    			else if (taskType == TaskType.DOWNLOAD_PROJECT)
     				downloadProjectArchive();
+    		} else if (resultCode == ActionResultCode.CANCEL){
+    			locateTask.cancel(true);
     		} else {
     			showLocateServerFailureDialog();
     		}
     		
-    	} else if (type == DialogTypes.FETCH_PROJECT_LIST) {
+    	} else if (type == ActionType.FETCH_PROJECT_LIST) {
     		
-    		if (resultCode == DialogResultCodes.SUCCESS) {
+    		if (resultCode == ActionResultCode.SUCCESS) {
+    			
+    			if (projectListAdapter != null) projectListAdapter.clear();
+    			this.projects = (List<Project>) data;
+    			for (Project p : projects) {
+    				this.projectListAdapter.add(p.name);
+    			}
+    			
+    		} else {
     			ServerDiscovery.getInstance().invalidateServerHost();
     			
-    			fetchProjectsList();
-    		} else {
     			showFetchProjectsFailureDialog();
     		}
-    	} else if (type == DialogTypes.DOWNLOAD_PROJECT) {
+    	} else if (type == ActionType.DOWNLOAD_PROJECT) {
     		
-    		if (resultCode == DialogResultCodes.SUCCESS) {
-    			ServerDiscovery.getInstance().invalidateServerHost();
-    			
+    		if (resultCode == ActionResultCode.SUCCESS) {
     			// show project
     			Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedProject.name);
 				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
 				FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 				finish();
+    		} else if (resultCode == ActionResultCode.CANCEL) {
+    			downloadTask.cancel(true);
     		} else {
     			
-    			FAIMSClientResultCodes errorCode = (FAIMSClientResultCodes) data;
-    			if (errorCode == FAIMSClientResultCodes.STORAGE_LIMIT_ERROR)
+    			FAIMSClientResultCode errorCode = (FAIMSClientResultCode) data;
+    			if (errorCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR)
+    				
     				showDownloadProjectErrorDialog();
-    			else
+    			else {
+    				ServerDiscovery.getInstance().invalidateServerHost();
+    				
     				showDownloadProjectFailureDialog();
-    			
+    			}
     		}
-    	} else if (type == DialogTypes.LOCATE_SERVER_FAILURE) {
+    	} else if (type == ActionType.LOCATE_SERVER_FAILURE) {
     		
-    		if (resultCode == DialogResultCodes.SELECT_YES) {
+    		if (resultCode == ActionResultCode.SELECT_YES) {
     			
-    			locateServer((TaskTypes) data);
+    			locateServer(lastTask);
     		}
-    	} else if (type == DialogTypes.FETCH_PROJECT_LIST_FAILURE) {
+    	} else if (type == ActionType.FETCH_PROJECT_LIST_FAILURE) {
     		
-    		if (resultCode == DialogResultCodes.SELECT_YES) {
+    		if (resultCode == ActionResultCode.SELECT_YES) {
     			fetchProjectsList();
     		}
-    	} else if (type == DialogTypes.DOWNLOAD_PROJECT_FAILURE) {
+    	} else if (type == ActionType.DOWNLOAD_PROJECT_FAILURE) {
     		
-    		if (resultCode == DialogResultCodes.SELECT_YES) {
+    		if (resultCode == ActionResultCode.SELECT_YES) {
     			downloadProjectArchive();
     		}
-    	} else if (type == DialogTypes.DOWNLOAD_PROJECT_ERROR) {
+    	} else if (type == ActionType.DOWNLOAD_PROJECT_ERROR) {
     		
     		// does nothing
-    	} else if (type == DialogTypes.CONFIRM_DOWNLOAD_PROJECT) {
+    	} else if (type == ActionType.CONFIRM_DOWNLOAD_PROJECT) {
     		
-    		if (resultCode == DialogResultCodes.SELECT_YES) {
+    		if (resultCode == ActionResultCode.SELECT_YES) {
     			downloadProjectArchive();
     		}
     	}
@@ -208,7 +238,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     
     private void showLocateServerFailureDialog() {
     	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-				DialogTypes.LOCATE_SERVER_FAILURE,
+				ActionType.LOCATE_SERVER_FAILURE,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message));
 		choiceDialog.show();
@@ -216,7 +246,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     
     private void showFetchProjectsFailureDialog() {
     	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-    			DialogTypes.FETCH_PROJECT_LIST_FAILURE,
+    			ActionType.FETCH_PROJECT_LIST_FAILURE,
 				getString(R.string.fetch_projects_failure_title),
 				getString(R.string.fetch_projects_failure_message));
 		choiceDialog.show();
@@ -224,7 +254,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     
     private void showDownloadProjectFailureDialog() {
     	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-    			DialogTypes.DOWNLOAD_PROJECT_FAILURE,
+    			ActionType.DOWNLOAD_PROJECT_FAILURE,
 				getString(R.string.download_project_failure_title),
 				getString(R.string.download_project_failure_message));
 		choiceDialog.show();
@@ -232,7 +262,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     
     private void showDownloadProjectErrorDialog() {
     	choiceDialog = DialogFactory.createConfirmDialog(FetchProjectsActivity.this,
-    			DialogTypes.DOWNLOAD_PROJECT_ERROR,
+    			ActionType.DOWNLOAD_PROJECT_ERROR,
 				getString(R.string.download_project_error_title),
 				getString(R.string.download_project_error_message));
 		choiceDialog.show();

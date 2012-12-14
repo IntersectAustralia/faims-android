@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
-import au.org.intersect.faims.android.ui.dialog.DialogResultCodes;
-import au.org.intersect.faims.android.ui.dialog.DialogTypes;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -16,11 +14,13 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 	private Activity activity;
 	private BusyDialog dialog;
 	private int attempts;
-	private TaskTypes taskType;
+	private boolean searching;
+	private TaskType taskType;
 	
-	public LocateServerTask(Activity activity, TaskTypes taskType) {
+	public LocateServerTask(Activity activity, TaskType taskType) {
 		this.activity = activity;
 		this.attempts = 0;
+		this.taskType = taskType;
 	}
 	
 	@Override 
@@ -28,9 +28,10 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		FAIMSLog.log();
 		
 		dialog = DialogFactory.createBusyDialog(activity, 
-				DialogTypes.LOCATE_SERVER, 
-				activity.getString(R.string.locate_server_failure_title), 
-				activity.getString(R.string.locate_server_failure_message));
+				ActionType.LOCATE_SERVER, 
+				activity.getString(R.string.locate_server_title), 
+				activity.getString(R.string.locate_server_message));
+		dialog.show();
 	}
 	
 	@Override
@@ -38,10 +39,16 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		FAIMSLog.log();
 		
 		try {
+			searching = true;
+			
 			ServerDiscovery.getInstance().findServer(this, attempts);
-			attempts++;
-			publishProgress(attempts);
-			wait();
+			
+			publishProgress(attempts + 1);
+			
+			// wait for search to finish
+			while(searching && !isCancelled()) {
+				Thread.sleep(1000);
+			}
 		} catch (InterruptedException e) {
 			FAIMSLog.log(e);
 		}
@@ -53,7 +60,10 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
-		dialog.dismiss();
+		// TODO clear this listener only
+		ServerDiscovery.getInstance().clearListeners();
+		
+		searching = false;
 	}
 	
 	@Override
@@ -61,9 +71,9 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		FAIMSLog.log();
 		
 		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
-		listener.handleDialogResponse(attempts < getMaxAttempts() ? DialogResultCodes.SUCCESS : DialogResultCodes.FAILURE, 
+		listener.handleDialogResponse(attempts < getMaxAttempts() ? ActionResultCode.SUCCESS : ActionResultCode.FAILURE, 
 				taskType, 
-				DialogTypes.LOCATE_SERVER, 
+				ActionType.LOCATE_SERVER, 
 				dialog);
 	}
 	
@@ -71,7 +81,7 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 	protected void onProgressUpdate(Integer... values) {
 		FAIMSLog.log();
 		
-		dialog.setMessage(activity.getString(R.string.locate_server_failure_message) + " " + String.valueOf(values[0]) + "...");
+		dialog.setMessage(activity.getString(R.string.locate_server_message) + " " + String.valueOf(values[0]) + "...");
 	}
 
 	@Override
@@ -80,18 +90,19 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		
 		if (success) {
 			FAIMSLog.log("found server");
-			notify();
+			searching = false;
 		} else {
 			FAIMSLog.log("attempt " + String.valueOf(attempts));
 			
+			attempts++;
 			if (attempts < getMaxAttempts()) {
 				ServerDiscovery.getInstance().findServer(this, attempts);
 				
-				attempts++;
-				publishProgress(attempts);
+				publishProgress(attempts + 1);
 			} else {
 				FAIMSLog.log("server discovery exhausted");
-				notify();
+				
+				searching = false;
 			}
 		}	
 	}
