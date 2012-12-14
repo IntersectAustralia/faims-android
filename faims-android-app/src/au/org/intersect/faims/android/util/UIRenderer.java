@@ -233,6 +233,8 @@ public class UIRenderer {
                     case Constants.DATATYPE_CHOICE:
                         // check if the type if image to create image slider
                         if (questionPrompt.getQuestion()
+                                .getAdditionalAttributes().size() != 0
+                                && questionPrompt.getQuestion()
                                 .getAdditionalAttribute(null, "type")
                                 .equals("image")) {
                             renderImageSliderForSingleSelection(layout,
