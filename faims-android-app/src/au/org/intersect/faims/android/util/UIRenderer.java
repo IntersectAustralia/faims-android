@@ -188,6 +188,12 @@ public class UIRenderer {
                         view = new DatePicker(this.context);
                         layout.addView(view);
                         break;
+                    // get the text area
+                    case Constants.DATATYPE_TEXT:
+                        view = new EditText(this.context);
+                        ((TextView) view).setLines(5);
+                        layout.addView(view);
+                        break;
                     // set input type as time picker
                     case Constants.DATATYPE_TIME:
                         view = new TimePicker(this.context);
