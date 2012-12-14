@@ -2,6 +2,7 @@ package au.org.intersect.faims.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,12 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.javarosa.core.model.FormDef;
+import org.javarosa.core.model.condition.EvaluationContext;
+import org.javarosa.form.api.FormEntryController;
+import org.javarosa.form.api.FormEntryModel;
+import org.javarosa.xform.parse.XFormParseException;
+import org.javarosa.xform.util.XFormUtils;
 
 import android.os.Environment;
 import android.os.StatFs;
@@ -131,4 +138,39 @@ public class FileUtil {
         Log.d("debug", "FileUtil: writing tar file " + file.getName());
 	}
 	
+	public static FormEntryController readXmlContent(String path) {
+		FormDef fd = null;
+		FileInputStream fis = null;
+		String mErrorMsg = null;
+
+		File formXml = new File(path);
+
+		try {
+			fis = new FileInputStream(formXml);
+			fd = XFormUtils.getFormFromInputStream(fis);
+			if (fd == null) {
+				mErrorMsg = "Error reading XForm file";
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			mErrorMsg = e.getMessage();
+		} catch (XFormParseException e) {
+			mErrorMsg = e.getMessage();
+			e.printStackTrace();
+		} catch (Exception e) {
+			mErrorMsg = e.getMessage();
+			e.printStackTrace();
+		}
+
+		if (mErrorMsg != null) {
+			return null;
+		}
+
+		// new evaluation context for function handlers
+		fd.setEvaluationContext(new EvaluationContext(null));
+
+		// create FormEntryController from formdef
+		FormEntryModel fem = new FormEntryModel(fd);
+		return new FormEntryController(fem);
+	}
 }
