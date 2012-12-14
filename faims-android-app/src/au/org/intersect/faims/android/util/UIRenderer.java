@@ -59,8 +59,7 @@ public class UIRenderer {
 
     private ImageView imageView;
 
-    public UIRenderer(FormEntryController fem, TabHost tabHost,
-            Context context) {
+    public UIRenderer(FormEntryController fem, TabHost tabHost, Context context) {
         this.fem = fem;
         this.tabHost = tabHost;
         this.context = context;
@@ -137,12 +136,9 @@ public class UIRenderer {
                             true);
                     List<FormEntryPrompt> questionPrompts = new ArrayList<FormEntryPrompt>();
                     for (int j = 0; j < childGroup.getChildren().size(); j++) {
-                        IFormElement questionElement = this.fem.getModel()
-                                .getForm().getChild(idxChild);
-                        if (questionElement instanceof FormEntryPrompt) {
-                            FormEntryPrompt questionPrompt = (FormEntryPrompt) questionElement;
-                            questionPrompts.add(questionPrompt);
-                        }
+                        FormEntryPrompt questionPrompt = this.fem.getModel()
+                                .getQuestionPrompt(idxChild);
+                        questionPrompts.add(questionPrompt);
                         idxChild = this.fem.getModel().incrementIndex(idxChild,
                                 false);
                     }
@@ -252,7 +248,7 @@ public class UIRenderer {
                         break;
                 }
                 break;
-                // create control for multi select, showing it as checkbox
+            // create control for multi select, showing it as checkbox
             case Constants.CONTROL_SELECT_MULTI:
                 switch (questionPrompt.getDataType()) {
                     case Constants.DATATYPE_CHOICE_LIST:
@@ -271,7 +267,7 @@ public class UIRenderer {
                         layout.addView(selectLayout);
                 }
                 break;
-                // create control for trigger showing as a button
+            // create control for trigger showing as a button
             case Constants.CONTROL_TRIGGER:
                 Button button = new Button(this.context);
                 button.setText(questionPrompt.getQuestionText());
