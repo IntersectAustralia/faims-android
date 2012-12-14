@@ -33,8 +33,8 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 		
 		dialog = DialogFactory.createBusyDialog(activity, 
 				ActionType.FETCH_PROJECT_LIST, 
-				activity.getString(R.string.fetch_projects_failure_title), 
-				activity.getString(R.string.fetch_projects_failure_message));
+				activity.getString(R.string.fetch_projects_title), 
+				activity.getString(R.string.fetch_projects_message));
 		dialog.show();
 	}
 	
