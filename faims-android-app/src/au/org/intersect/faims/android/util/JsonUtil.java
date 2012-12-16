@@ -18,8 +18,8 @@ public class JsonUtil {
 
 	public static String serializeServerPacket(String ip, String port) {
 		JsonObject object = new JsonObject();
-    	object.addProperty("ip", ip);
-    	object.addProperty("port", port);
+    	object.addProperty("android_ip", ip);
+    	object.addProperty("android_port", port);
     	return object.toString();
 	}
 	

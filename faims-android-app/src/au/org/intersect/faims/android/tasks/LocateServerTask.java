@@ -9,17 +9,15 @@ import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
-public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements ServerDiscovery.ServerDiscoveryListener {
+public class LocateServerTask extends AsyncTask<Void, Void, Void> implements ServerDiscovery.ServerDiscoveryListener {
 	
 	private Activity activity;
 	private BusyDialog dialog;
-	private int attempts;
 	private boolean searching;
 	private TaskType taskType;
 	
 	public LocateServerTask(Activity activity, TaskType taskType) {
 		this.activity = activity;
-		this.attempts = 0;
 		this.taskType = taskType;
 	}
 	
@@ -41,9 +39,7 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		try {
 			searching = true;
 			
-			ServerDiscovery.getInstance().findServer(this, attempts);
-			
-			publishProgress(attempts + 1);
+			ServerDiscovery.getInstance().startDiscovery(this);
 			
 			// wait for search to finish
 			while(searching && !isCancelled()) {
@@ -60,8 +56,11 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
-		// TODO clear this listener only
-		ServerDiscovery.getInstance().clearListeners();
+		// cleanup to avoid memory leaks
+		dialog.cleanup();
+		activity = null;
+		
+		ServerDiscovery.getInstance().stopDiscovery();
 		
 		searching = false;
 	}
@@ -71,43 +70,19 @@ public class LocateServerTask extends AsyncTask<Void, Integer, Void> implements 
 		FAIMSLog.log();
 		
 		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
-		listener.handleDialogResponse(attempts < getMaxAttempts() ? ActionResultCode.SUCCESS : ActionResultCode.FAILURE, 
+		listener.handleDialogResponse(
+				ServerDiscovery.getInstance().isServerHostValid() ? 
+						ActionResultCode.SUCCESS : ActionResultCode.FAILURE, 
 				taskType, 
 				ActionType.LOCATE_SERVER, 
 				dialog);
 	}
 	
 	@Override
-	protected void onProgressUpdate(Integer... values) {
-		FAIMSLog.log();
-		
-		dialog.setMessage(activity.getString(R.string.locate_server_message) + " " + String.valueOf(values[0]) + "...");
-	}
-
-	@Override
 	public void handleDiscoveryResponse(boolean success) {
 		FAIMSLog.log();
 		
-		if (success) {
-			FAIMSLog.log("found server");
-			searching = false;
-		} else {
-			FAIMSLog.log("attempt " + String.valueOf(attempts));
-			
-			attempts++;
-			if (attempts < getMaxAttempts()) {
-				ServerDiscovery.getInstance().findServer(this, attempts);
-				
-				publishProgress(attempts + 1);
-			} else {
-				FAIMSLog.log("server discovery exhausted");
-				
-				searching = false;
-			}
-		}	
+		searching = false;
 	}
 	
-	private int getMaxAttempts() {
-		return activity.getResources().getInteger(R.integer.broadcast_attempts);
-	}
 }

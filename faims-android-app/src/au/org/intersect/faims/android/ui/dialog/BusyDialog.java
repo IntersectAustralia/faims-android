@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.ActionType;
 
-public class BusyDialog extends ProgressDialog {
+public class BusyDialog extends ProgressDialog implements IFAIMSDialog {
 
 	private ActionType type;
 	private IFAIMSDialogListener listener;
@@ -31,6 +31,11 @@ public class BusyDialog extends ProgressDialog {
 	
 	public static BusyDialog create(Activity activity, ActionType type, String title, String message) {
 		return new BusyDialog(activity, type, title, message);
+	}
+
+	@Override
+	public void cleanup() {
+		listener = null; // avoid memory leaks
 	}
 	
 }

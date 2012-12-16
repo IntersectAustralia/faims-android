@@ -52,6 +52,10 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
+		// cleanup to avoid memory leaks
+		dialog.cleanup();
+		activity = null;
+		
 	}
 	
 	@Override

@@ -63,6 +63,7 @@ public class FileUtil {
 		FAIMSLog.log("untared file " + filename);
 	}
 	
+	// from: http://stackoverflow.com/questions/3163045/android-how-to-check-availability-of-space-on-external-storage
 	public static long getExternalStorageSpace() throws Exception {
 		FAIMSLog.log();
 		
@@ -85,7 +86,7 @@ public class FileUtil {
 			byte[] buffer = new byte[1024];
 	        int bufferLength = 0; //used to store a temporary size of the buffer
 	        
-	        while ( (bufferLength = input.read(buffer)) > 0 ) {
+	        while ( (bufferLength = input.read(buffer)) > 0) {
 	            os.write(buffer, 0, bufferLength);
 	        }
 		} finally {

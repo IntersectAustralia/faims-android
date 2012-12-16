@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import au.org.intersect.faims.android.tasks.ActionType;
 
-public class DownloadDialog extends ProgressDialog {
+public class DownloadDialog extends ProgressDialog implements IFAIMSDialog {
 
 	//private DialogTypes type;
 	//private IFAIMSDialogListener listener;
@@ -23,5 +23,11 @@ public class DownloadDialog extends ProgressDialog {
 	public static DownloadDialog create(Activity activity, ActionType type, String title, String message) {
 		return new DownloadDialog(activity, type, title, message);
 	}
+
+	@Override
+	public void cleanup() {
+		//listener = null; // avoid memory leaks
+	}
+	
 	
 }

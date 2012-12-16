@@ -95,11 +95,23 @@ public class FAIMSClient implements IFAIMSClient {
 	        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
 	        } 
         	
+	        // quit if thread is interrupted
+	        if (Thread.interrupted()) {
+	        	return FAIMSClientResultCode.SERVER_FAILURE;
+	        }
+	        
 	        String filename = getProjectDownload(project, archive);
 			
 			if (filename == null) {
 				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
 			}
+			
+			// quit if thread is interrupted
+	        if (Thread.interrupted()) {
+	        	FileUtil.deleteFile(filename);
+	        	
+	        	return FAIMSClientResultCode.SERVER_FAILURE;
+	        }
 			
 			FileUtil.untarFromStream("/faims/projects", filename);
 			
@@ -175,6 +187,7 @@ public class FAIMSClient implements IFAIMSClient {
 			
 			return filename;
 		} finally {
+			// TODO check if file needs to be deleted
 			if (stream != null) stream.close();
 		}
 	}

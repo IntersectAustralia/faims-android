@@ -7,7 +7,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.ActionType;
 
-public class ChoiceDialog extends AlertDialog {
+public class ChoiceDialog extends AlertDialog implements IFAIMSDialog {
 	
 	private ActionType type;
 	private IFAIMSDialogListener listener;
@@ -31,10 +31,22 @@ public class ChoiceDialog extends AlertDialog {
 				listener.handleDialogResponse(ActionResultCode.SELECT_YES, null, ChoiceDialog.this.type, ChoiceDialog.this);
 			}
 		});
+		setOnCancelListener(new DialogInterface.OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				listener.handleDialogResponse(ActionResultCode.CANCEL, null, ChoiceDialog.this.type, ChoiceDialog.this);
+			}
+		});
 	}
 	
 	public static ChoiceDialog create(Activity activity, ActionType type, String title, String message) {
 		return new ChoiceDialog(activity, type, title, message);
+	}
+
+	@Override
+	public void cleanup() {
+		listener = null; // avoid memory leaks
 	}
 	
 }

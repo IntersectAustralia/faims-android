@@ -21,6 +21,30 @@ public class MainActivity extends Activity {
         // Need to set the application to get state information
         ServerDiscovery.getInstance().setApplication(getApplication());
     }
+    
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	FAIMSLog.log();
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	FAIMSLog.log();
+    }
+    
+    @Override
+    protected void onStop() {
+    	super.onStop();
+    	FAIMSLog.log();
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	FAIMSLog.log();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -31,7 +55,7 @@ public class MainActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.fetch_project:
+			case R.id.fetch_project_list:
 				fetchProjectsFromServer();
 				return (true);
 			default:

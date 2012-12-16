@@ -6,6 +6,8 @@ import roboguice.activity.RoboActivity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,6 +24,8 @@ import au.org.intersect.faims.android.tasks.DownloadProjectTask;
 import au.org.intersect.faims.android.tasks.FetchProjectsListTask;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
 import au.org.intersect.faims.android.tasks.TaskType;
+import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
+import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -41,7 +45,8 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	
 	private TaskType lastTask;
 	
-	private Dialog choiceDialog;
+	private ChoiceDialog choiceDialog;
+	private ConfirmDialog confirmDialog;
 
 	private List<Project> projects;
 	private Project selectedProject;
@@ -76,25 +81,56 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
         
         fetchProjectsList();
     }
+
+    @Override
+    protected void onStart() {
+    	super.onStart();
+    	FAIMSLog.log();
+    }
     
-    /*
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	FAIMSLog.log();
+    }
+    
+    @Override
+    protected void onStop() {
+    	super.onStop();
+    	FAIMSLog.log();
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	FAIMSLog.log();
+
+    	// cleanup tasks and dialogs to avoid memory leaks 
+    	// note: tasks and dialogs still hold references to activity
+    	if (locateTask != null) locateTask.cancel(true);
+    	if (fetchTask != null) fetchTask.cancel(true);
+    	if (downloadTask != null) downloadTask.cancel(true);
+    
+    	if (choiceDialog != null) choiceDialog.cleanup();
+    	if (confirmDialog != null) confirmDialog.cleanup();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_fetch_projects, menu);
+        getMenuInflater().inflate(R.menu.acitvity_fetch_projects, menu);
         return true;
     }
     
-	@Override
+    @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.fetch_project:
-				fetchProjectsFromServer();
+			case R.id.refresh_project_list:
+				fetchProjectsList();
 				return (true);
 			default:
 				return (super.onOptionsItemSelected(item));
 		}
 	}
-    */
     
     /*
     private boolean isLocatingServer() {
@@ -154,7 +190,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     	dialog.dismiss();
     	
     	if (type == ActionType.LOCATE_SERVER) {
-    		// TODO clear this listener only
+    		// TODO check if necessary
     		ServerDiscovery.getInstance().clearListeners();
     		
     		if (resultCode == ActionResultCode.SUCCESS) {
@@ -179,7 +215,8 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     			for (Project p : projects) {
     				this.projectListAdapter.add(p.name);
     			}
-    			
+    		} else if (resultCode == ActionResultCode.CANCEL) {
+    			fetchTask.cancel(true);
     		} else {
     			ServerDiscovery.getInstance().invalidateServerHost();
     			
@@ -260,11 +297,11 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     }
     
     private void showDownloadProjectErrorDialog() {
-    	choiceDialog = DialogFactory.createConfirmDialog(FetchProjectsActivity.this,
+    	confirmDialog = DialogFactory.createConfirmDialog(FetchProjectsActivity.this,
     			ActionType.DOWNLOAD_PROJECT_ERROR,
 				getString(R.string.download_project_error_title),
 				getString(R.string.download_project_error_message));
-		choiceDialog.show();
+    	confirmDialog.show();
     }
     
     private Project getProjectByName(String name) {

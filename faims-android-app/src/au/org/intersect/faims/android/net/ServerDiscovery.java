@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Application;
 import android.net.DhcpInfo;
@@ -33,16 +35,15 @@ public class ServerDiscovery {
 	private Application application;
 	
 	private boolean isFindingServer;
-	private int currentTimeout;
 	
 	private String serverIP;
 	private String serverPort;
+
+	private Timer timer;
 	
 	public ServerDiscovery() {
 		listenerList = new LinkedList<ServerDiscoveryListener>();
 		isFindingServer = false;
-		
-		startHandlerThread();
 	}
 	
 	public static ServerDiscovery getInstance() {
@@ -75,51 +76,68 @@ public class ServerDiscovery {
 		return serverIP != null && serverPort != null;
 	}
 	
-	private void startHandlerThread() {
+	public synchronized void stopDiscovery() {
 		FAIMSLog.log();
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				
-				try {
-					while(true) {
-						
-						if (listenerList.isEmpty()) {
-							Thread.sleep(1000);
-						} else if (isFindingServer) {
-							Thread.sleep(1000);
-						} else {
-							
-							ServerDiscoveryListener listener = listenerList.pop();
-							listener.handleDiscoveryResponse(isServerHostValid());
-						}
-						
-						
-					}
-				} catch(InterruptedException e) {
-					FAIMSLog.log(e);
-				}
-			}
-		}).start();
+		killThreads();
 	}
 	
-	public void findServer(ServerDiscoveryListener handler, int attempts) {
+	public synchronized void startDiscovery(ServerDiscoveryListener listener) {
 		FAIMSLog.log();
+		
+		if (isServerHostValid()) {
+			FAIMSLog.log("WARNING: server is already valid");
+			listener.handleDiscoveryResponse(true);
+			return ;
+		}
+		
+		listenerList.add(listener);
+		
+		if (isFindingServer) return; // already looking for server
 		
 		isFindingServer = true;
-		currentTimeout = (1 + attempts) * getPacketTimeout();
 		
-		listenerList.add(handler);
+		startReceiverThread();
+		startBroadcastThread();
 		
-		// check if server is valid or look for server
-		if (!isServerHostValid()) {
-			startDiscovery();
+		// wait for discovery time before killing search
+		if (timer != null) {
+			FAIMSLog.log("WARNING: already looking for server");
 		}
+		
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				FAIMSLog.log();
+				
+				killThreads();
+			}
+			
+		}, getDiscoveryTime());
 	}
 	
-	private void startDiscovery() {
+	private void killThreads() {
+		FAIMSLog.log();
+		
+		if (timer != null) {
+			timer.cancel();
+			timer = null;
+		}
+		
+		// TODO check if this list needs to be synchronized using Collections.synchronizedList
+		synchronized(listenerList) {
+			while(!listenerList.isEmpty()) {
+				ServerDiscoveryListener listener = listenerList.pop();
+				listener.handleDiscoveryResponse(isServerHostValid());
+			}
+		}
+		
+		isFindingServer = false;
+	}
+	
+	private void startReceiverThread() {
 		FAIMSLog.log();
 		
 		new Thread(new Runnable() {
@@ -128,15 +146,46 @@ public class ServerDiscovery {
 			public void run() {
 				try {
 					
-					sendBroadcast();
-					waitForResponse();
-					
+					while(isFindingServer) {
+						receivePacket();
+						
+						if (isServerHostValid()) {
+							killThreads();
+						}
+					}
+						
 				} catch(SocketException e) {
 					FAIMSLog.log(e);
 				} catch(IOException e) {
 					FAIMSLog.log(e);
 				} finally {
-			        isFindingServer = false;
+					
+				}
+			}
+		}).start();
+		
+	}
+	
+	private void startBroadcastThread() {
+		FAIMSLog.log();
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					
+					while(isFindingServer) {
+						sendBroadcast();
+						Thread.sleep(1000);
+					}
+						
+				} catch(SocketException e) {
+					FAIMSLog.log(e);
+				} catch(IOException e) {
+					FAIMSLog.log(e);
+				} catch(InterruptedException e) {
+					FAIMSLog.log(e);
 				}
 			}
 		}).start();
@@ -148,10 +197,7 @@ public class ServerDiscovery {
 		DatagramSocket s = new DatagramSocket();
 		try {
 	    	s.setBroadcast(true);
-	    	s.setSoTimeout(currentTimeout);
 	    	
-	    	//s.bind(new InetSocketAddress(InetAddress.getLocalHost(), ANDROID_BROADCAST_PORT));
-	        
 	    	String packet = JsonUtil.serializeServerPacket(getIPAddress(), String.valueOf(getDevicePort()));
 	    	int length = packet.length();
 	    	byte[] message = packet.getBytes();
@@ -167,13 +213,12 @@ public class ServerDiscovery {
 		}
 	}
 	
-	private void waitForResponse() throws SocketException, IOException {
+	private void receivePacket() throws SocketException, IOException {
 		FAIMSLog.log();
 		
-		// receive packet
 		DatagramSocket r = new DatagramSocket(getDevicePort());
 		try {
-			r.setSoTimeout(currentTimeout);
+			r.setSoTimeout(getPacketTimeout());
 			
 	    	byte[] buffer = new byte[1024];
 	    	DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
@@ -182,11 +227,13 @@ public class ServerDiscovery {
 	       
 	        JsonObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
 	        
-	        serverIP = data.get("ip").getAsString();
-	        serverPort = data.get("port").getAsString();
+	        if (data.has("server_ip"))
+	        	serverIP = data.get("server_ip").getAsString();
+	        if (data.has("server_port"))
+	        	serverPort = data.get("server_port").getAsString();
 	        
-	        FAIMSLog.log("ServerIP: " + serverIP.toString());
-	        FAIMSLog.log("ServerPort: " + serverPort.toString());
+	        FAIMSLog.log("ServerIP: " + serverIP);
+	        FAIMSLog.log("ServerPort: " + serverPort);
 		} finally {
 			r.close();
 		}
@@ -206,8 +253,12 @@ public class ServerDiscovery {
 		return InetAddress.getByAddress(quads).getHostAddress();
     }
 	
+	private int getDiscoveryTime() {
+		return application.getResources().getInteger(R.integer.discovery_time) * 1000;
+	}
+	
 	private int getPacketTimeout() {
-		return application.getResources().getInteger(R.integer.packet_timeout);
+		return application.getResources().getInteger(R.integer.packet_timeout) * 1000;
 	}
 	
 	private int getDiscoveryPort() {

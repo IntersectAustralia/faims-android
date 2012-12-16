@@ -48,7 +48,10 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 	protected void onCancelled() {
 		FAIMSLog.log();
 		
-		// TODO: stop download or delete directory if it exists
+		// cleanup to avoid memory leaks
+		dialog.cleanup();
+		activity = null;
+		
 	}
 	
 	@Override
