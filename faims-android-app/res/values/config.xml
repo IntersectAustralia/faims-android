@@ -4,7 +4,7 @@
     <integer name="discovery_port">4000</integer>
     <integer name="device_port">4000</integer>
     <string name="broadcast_addr">255.255.255.255</string>
-    <integer name="discovery_time">15</integer>
-    <integer name="packet_timeout">15</integer>
+    <integer name="discovery_time">20</integer>
+    <integer name="packet_timeout">20</integer>
     
 </resources>
