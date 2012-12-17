@@ -6,11 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.javarosa.core.model.FormDef;
@@ -112,7 +112,7 @@ public class FileUtil {
 			
 			FAIMSLog.log("generated md5 for hash for file " + filename);
 			
-			return new BigInteger(1, digester.digest()).toString(16);
+			return new String(Hex.encodeHex(digester.digest()));
 		} finally {
 			if (fs != null) fs.close();
 		}
