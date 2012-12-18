@@ -19,9 +19,13 @@ import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 
 public class FAIMSClient implements IFAIMSClient {
 
+	@Inject
+	IServerDiscovery serverDiscovery;
+	
 	private AndroidHttpClient httpClient;
 	
 	private void createClient() throws UnknownHostException {
@@ -195,9 +199,7 @@ public class FAIMSClient implements IFAIMSClient {
 	private HttpEntity getRequest(String path) throws IOException {
 		FAIMSLog.log(path);
 		
-		ServerDiscovery ds = ServerDiscovery.getInstance();
-		
-		HttpGet get = new HttpGet(ds.getServerHost() + path);
+		HttpGet get = new HttpGet(serverDiscovery.getServerHost() + path);
 		HttpResponse response = httpClient.execute(get);
 		HttpEntity entity = response.getEntity();
 		

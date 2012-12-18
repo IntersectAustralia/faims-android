@@ -17,7 +17,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.IFAIMSClient;
-import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.net.IServerDiscovery;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.ActionType;
 import au.org.intersect.faims.android.tasks.DownloadProjectTask;
@@ -37,6 +37,9 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	
 	@Inject
 	IFAIMSClient faimsClient;
+	@Inject
+	IServerDiscovery serverDiscovery;
+	
 	private ArrayAdapter<String> projectListAdapter;
 	
 	private LocateServerTask locateTask;
@@ -158,10 +161,10 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     /**
      * Fetch projects from the server to load into list
      */
-    private void fetchProjectsList() {
+    protected void fetchProjectsList() {
     	FAIMSLog.log();
     	
-    	if (ServerDiscovery.getInstance().isServerHostValid()) {
+    	if (serverDiscovery.isServerHostValid()) {
     		fetchTask = new FetchProjectsListTask(FetchProjectsActivity.this, faimsClient);
     		fetchTask.execute();
     	} else {
@@ -169,11 +172,10 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     	}
     }
     
-
-    private void downloadProjectArchive() {
+    protected void downloadProjectArchive() {
     	FAIMSLog.log();
     	
-    	if (ServerDiscovery.getInstance().isServerHostValid()) {
+    	if (serverDiscovery.isServerHostValid()) {
     		downloadTask = new DownloadProjectTask(FetchProjectsActivity.this, faimsClient);
     		downloadTask.execute(selectedProject);
     	} else {
@@ -190,9 +192,6 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     	dialog.dismiss();
     	
     	if (type == ActionType.LOCATE_SERVER) {
-    		// TODO check if necessary
-    		ServerDiscovery.getInstance().clearListeners();
-    		
     		if (resultCode == ActionResultCode.SUCCESS) {
     			
     			TaskType taskType = (TaskType) data;
@@ -218,7 +217,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     		} else if (resultCode == ActionResultCode.CANCEL) {
     			fetchTask.cancel(true);
     		} else {
-    			ServerDiscovery.getInstance().invalidateServerHost();
+    			serverDiscovery.invalidateServerHost();
     			
     			showFetchProjectsFailureDialog();
     		}
@@ -240,7 +239,7 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     				
     				showDownloadProjectErrorDialog();
     			else {
-    				ServerDiscovery.getInstance().invalidateServerHost();
+    				serverDiscovery.invalidateServerHost();
     				
     				showDownloadProjectFailureDialog();
     			}

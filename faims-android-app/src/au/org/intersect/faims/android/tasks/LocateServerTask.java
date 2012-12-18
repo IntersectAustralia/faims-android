@@ -1,15 +1,20 @@
 package au.org.intersect.faims.android.tasks;
 
+import roboguice.util.RoboAsyncTask;
 import android.app.Activity;
-import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.net.IServerDiscovery;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
-public class LocateServerTask extends AsyncTask<Void, Void, Void> implements ServerDiscovery.ServerDiscoveryListener {
+import com.google.inject.Inject;
+
+public class LocateServerTask extends RoboAsyncTask<Void> implements IServerDiscovery.ServerDiscoveryListener {
+	
+	@Inject
+	IServerDiscovery serverDiscovery;
 	
 	private Activity activity;
 	private BusyDialog dialog;
@@ -17,6 +22,7 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	private TaskType taskType;
 	
 	public LocateServerTask(Activity activity, TaskType taskType) {
+		super(activity);
 		this.activity = activity;
 		this.taskType = taskType;
 	}
@@ -33,16 +39,16 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	}
 	
 	@Override
-	protected Void doInBackground (Void... values) {
+	public Void call() throws Exception {
 		FAIMSLog.log();
 		
 		try {
 			searching = true;
 			
-			ServerDiscovery.getInstance().startDiscovery(this);
+			serverDiscovery.startDiscovery(this);
 			
 			// wait for search to finish
-			while(searching && !isCancelled()) {
+			while(searching) {
 				Thread.sleep(1000);
 			}
 		} catch (InterruptedException e) {
@@ -53,25 +59,25 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	}
 	
 	@Override
-	protected void onCancelled() {
+	protected void onInterrupted(Exception e) {
 		FAIMSLog.log();
 		
 		// cleanup to avoid memory leaks
 		dialog.cleanup();
 		activity = null;
 		
-		ServerDiscovery.getInstance().stopDiscovery();
+		serverDiscovery.stopDiscovery();
 		
 		searching = false;
 	}
 	
 	@Override
-	protected void onPostExecute(Void v) {
+	protected void onSuccess(Void v) {
 		FAIMSLog.log();
 		
 		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
 		listener.handleDialogResponse(
-				ServerDiscovery.getInstance().isServerHostValid() ? 
+				serverDiscovery.isServerHostValid() ? 
 						ActionResultCode.SUCCESS : ActionResultCode.FAILURE, 
 				taskType, 
 				ActionType.LOCATE_SERVER, 
