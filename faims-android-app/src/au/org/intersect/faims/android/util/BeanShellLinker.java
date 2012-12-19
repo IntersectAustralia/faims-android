@@ -22,13 +22,13 @@ public class BeanShellLinker {
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
-			source("ui_logic.bsh");
+			sourceFromAssets("ui_logic.bsh");
 		} catch (EvalError e) {
 			FAIMSLog.log(e);
 		}
 	}
 	
-	public void source(String file) {
+	public void sourceFromAssets(String file) {
 		try {
 			InputStream stream = activity.getAssets().open(file);
     		interpreter.eval(convertStreamToString(stream));

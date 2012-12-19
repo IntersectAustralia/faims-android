@@ -111,6 +111,6 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 		
 		// bind the logic to the ui
 		linker = new BeanShellLinker(this);
-		linker.source("test_script.bsh");
+		linker.sourceFromAssets("test_script.bsh");
 	}
 }

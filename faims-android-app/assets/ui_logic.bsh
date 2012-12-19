@@ -1,5 +1,7 @@
-function onEvent(String ref, String type, String callback) {
+// linker object embedded
 
-	beanshell.bindViewToEvent(ref, type, callback);
+public void onEvent(String ref, String type, String callback) {
+
+	linker.bindViewToEvent(ref, type, callback);
 
 }
