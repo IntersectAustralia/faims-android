@@ -1,6 +1,6 @@
 package au.org.intersect.faims.android.ui.activity;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,10 +8,12 @@ import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.util.FAIMSLog;
+import bsh.EvalError;
+import bsh.Interpreter;
 
 import com.google.inject.Inject;
 
-public class MainActivity extends Activity {
+public class MainActivity extends RoboActivity {
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -25,6 +27,7 @@ public class MainActivity extends Activity {
         
         // Need to set the application to get state information
         serverDiscovery.setApplication(getApplication());
+        
     }
     
     @Override
