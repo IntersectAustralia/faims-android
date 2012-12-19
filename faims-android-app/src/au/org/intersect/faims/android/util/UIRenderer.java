@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,11 +59,14 @@ public class UIRenderer {
     private Context context;
 
     private ImageView imageView;
+    
+    private HashMap<String, Integer> refToId;
 
     public UIRenderer(FormEntryController fem, TabHost tabHost, Context context) {
         this.fem = fem;
         this.tabHost = tabHost;
         this.context = context;
+        this.refToId = new HashMap<String, Integer>();
     }
 
     /**

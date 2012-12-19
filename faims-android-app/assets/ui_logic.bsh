@@ -1,0 +1,5 @@
+function onEvent(String ref, String type, String callback) {
+
+	beanshell.bindViewToEvent(ref, type, callback);
+
+}

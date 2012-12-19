@@ -15,6 +15,7 @@ import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.ActionType;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
+import au.org.intersect.faims.android.util.BeanShellLinker;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -36,6 +37,8 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 	private ChoiceDialog choiceDialog;
 
 	private String directory;
+	
+	private BeanShellLinker linker;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -105,5 +108,9 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 		// render the ui definition
 		this.renderer = new UIRenderer(this.fem, this.tabHost, this);
 		this.renderer.render();
+		
+		// bind the logic to the ui
+		linker = new BeanShellLinker(this);
+		linker.source("test_script.bsh");
 	}
 }
