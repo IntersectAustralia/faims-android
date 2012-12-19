@@ -1,9 +1,13 @@
 package au.org.intersect.faims.android.test.helper;
 
 import android.app.Application;
-import au.org.intersect.faims.android.net.IServerDiscovery;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 
-public class TestServerDiscovery implements IServerDiscovery {
+import com.google.inject.Provider;
+
+public class TestServerDiscovery extends ServerDiscovery {
+	
+	private boolean hostValid;
 
 	@Override
 	public void setApplication(Application app) {
@@ -11,12 +15,12 @@ public class TestServerDiscovery implements IServerDiscovery {
 
 	@Override
 	public boolean isServerHostValid() {
-		return true;
+		return hostValid;
 	}
 
 	@Override
 	public void invalidateServerHost() {
-		//hostValid = false;
+		hostValid = false;
 	}
 
 	@Override
@@ -31,8 +35,24 @@ public class TestServerDiscovery implements IServerDiscovery {
 
 	@Override
 	public void stopDiscovery() {
-		// TODO Auto-generated method stub
-		
+	}
+	
+	protected void setHostInvalid(boolean value) {
+		hostValid = value;
+	}
+	
+	public static Provider<TestServerDiscovery> createProvider(final boolean hostValid)
+	{
+		return new Provider<TestServerDiscovery>() {
+
+			@Override
+			public TestServerDiscovery get() {
+				TestServerDiscovery ds = new TestServerDiscovery();
+				ds.setHostInvalid(hostValid);
+				return ds;
+			}
+			
+		};
 	}
 
 }

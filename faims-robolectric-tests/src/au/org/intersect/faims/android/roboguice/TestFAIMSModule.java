@@ -4,43 +4,13 @@ import roboguice.RoboGuice;
 import roboguice.config.DefaultRoboModule;
 import roboguice.inject.RoboInjector;
 import android.app.Application;
-import au.org.intersect.faims.android.net.IFAIMSClient;
-import au.org.intersect.faims.android.net.IServerDiscovery;
-import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
-import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
 
-import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import com.xtremelabs.robolectric.Robolectric;
 
-public class TestFAIMSModule implements Module {
-
-	public interface TestFAIMSModuleConfigurable {
-
-		public void onConfigure(Binder binder);
-	}
+public abstract class TestFAIMSModule implements Module {
 	
-	private TestFAIMSModuleConfigurable configurable;
-
-	public TestFAIMSModule(TestFAIMSModuleConfigurable configurable) {
-		this.configurable = configurable;
-	}
-	
-	public TestFAIMSModule() {
-		
-	}
-
-	@Override
-	public void configure(Binder binder) {
-		
-		binder.bind(IServerDiscovery.class).to(TestServerDiscovery.class);
-		binder.bind(IFAIMSClient.class).to(TestFAIMSClient.class);
-		
-		if (configurable != null)
-			configurable.onConfigure(binder);
-	}
-
 	public static void setUp(Object testObject, TestFAIMSModule module) {
 		Module roboGuiceModule = RoboGuice
 				.newDefaultRoboModule(Robolectric.application);

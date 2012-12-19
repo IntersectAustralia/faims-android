@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.net.IServerDiscovery;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Inject;
@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 public class MainActivity extends Activity {
 
 	@Inject
-	IServerDiscovery serverDiscovery;
+	ServerDiscovery serverDiscovery;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.net.IFAIMSClient;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
@@ -15,11 +15,11 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 
 	private Activity activity;
-	private IFAIMSClient faimsClient;
+	private FAIMSClient faimsClient;
 	private BusyDialog dialog;
 	private FAIMSClientResultCode errorCode;
 	
-	public DownloadProjectTask(Activity activity, IFAIMSClient faimsClient) {
+	public DownloadProjectTask(Activity activity, FAIMSClient faimsClient) {
 		this.activity = activity;
 		this.faimsClient = faimsClient;
 	}

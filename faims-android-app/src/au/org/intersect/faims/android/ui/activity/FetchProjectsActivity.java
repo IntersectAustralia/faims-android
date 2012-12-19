@@ -15,9 +15,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.net.IFAIMSClient;
-import au.org.intersect.faims.android.net.IServerDiscovery;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.ActionType;
 import au.org.intersect.faims.android.tasks.DownloadProjectTask;
@@ -36,9 +36,9 @@ import com.google.inject.Inject;
 public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogListener {
 	
 	@Inject
-	IFAIMSClient faimsClient;
+	FAIMSClient faimsClient;
 	@Inject
-	IServerDiscovery serverDiscovery;
+	ServerDiscovery serverDiscovery;
 	
 	private ArrayAdapter<String> projectListAdapter;
 	
@@ -48,8 +48,8 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
 	
 	private TaskType lastTask;
 	
-	private ChoiceDialog choiceDialog;
-	private ConfirmDialog confirmDialog;
+	protected ChoiceDialog choiceDialog;
+	protected ConfirmDialog confirmDialog;
 
 	private List<Project> projects;
 	private Project selectedProject;
@@ -309,6 +309,10 @@ public class FetchProjectsActivity extends RoboActivity implements IFAIMSDialogL
     			return project;
     	}
     	return null;
+    }
+    
+    protected void setSelectedProject(int index) {
+    	selectedProject = projects.get(index); 
     }
     
 }

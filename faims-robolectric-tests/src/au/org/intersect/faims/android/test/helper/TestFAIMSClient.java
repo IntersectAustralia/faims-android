@@ -3,23 +3,57 @@ package au.org.intersect.faims.android.test.helper;
 import java.util.LinkedList;
 
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.net.IFAIMSClient;
 
-public class TestFAIMSClient implements IFAIMSClient {
+import com.google.inject.Provider;
+
+public class TestFAIMSClient extends FAIMSClient {
+	
+	private int projectsCount;
+	private FAIMSClientResultCode projectsCode;
+	private FAIMSClientResultCode downloadCode;
 
 	@Override
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < projectsCount; i++) {
 			projects.add(new Project("Project " + i, String.valueOf(i)));
 		}
-		return FAIMSClientResultCode.SUCCESS;
+		return projectsCode;
 	}
 
 	@Override
 	public FAIMSClientResultCode downloadProjectArchive(Project project) {
 		
-		return FAIMSClientResultCode.SUCCESS;
+		return downloadCode;
 	}
+	
+	protected void setProjectsCount(int value) {
+		projectsCount = value;
+	}
+	
+	protected void setProjectsResultCode(FAIMSClientResultCode value) {
+		projectsCode = value;
+	}
+	
+	protected void setDownloadResultCode(FAIMSClientResultCode value) {
+		downloadCode = value;
+	}
+	
+	public static Provider<TestFAIMSClient> createProvider(final int count, final FAIMSClientResultCode fetchCode, final FAIMSClientResultCode downloadCode)
+	{
+		return new Provider<TestFAIMSClient>() {
 
+			@Override
+			public TestFAIMSClient get() {
+				TestFAIMSClient client = new TestFAIMSClient();
+				client.setProjectsCount(count);
+				client.setProjectsResultCode(fetchCode);
+				client.setDownloadResultCode(downloadCode);
+				return client;
+			}
+			
+		};
+	}
+	
 }

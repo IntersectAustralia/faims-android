@@ -3,7 +3,8 @@ package au.org.intersect.faims.android.tasks;
 import roboguice.util.RoboAsyncTask;
 import android.app.Activity;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.net.IServerDiscovery;
+import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.net.ServerDiscovery.ServerDiscoveryListener;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
 import au.org.intersect.faims.android.util.DialogFactory;
@@ -11,10 +12,10 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Inject;
 
-public class LocateServerTask extends RoboAsyncTask<Void> implements IServerDiscovery.ServerDiscoveryListener {
+public class LocateServerTask extends RoboAsyncTask<Void> implements ServerDiscoveryListener {
 	
 	@Inject
-	IServerDiscovery serverDiscovery;
+	ServerDiscovery serverDiscovery;
 	
 	private Activity activity;
 	private BusyDialog dialog;

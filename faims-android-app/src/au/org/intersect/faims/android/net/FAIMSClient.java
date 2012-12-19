@@ -20,11 +20,14 @@ import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-public class FAIMSClient implements IFAIMSClient {
+// TODO create unit tests by injecting AndroidHttpClient with mock client
+@Singleton
+public class FAIMSClient {
 
 	@Inject
-	IServerDiscovery serverDiscovery;
+	ServerDiscovery serverDiscovery;
 	
 	private AndroidHttpClient httpClient;
 	
@@ -43,7 +46,6 @@ public class FAIMSClient implements IFAIMSClient {
 		httpClient.close();
 	}
 	
-	@Override
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
 		FAIMSLog.log();
 
@@ -80,7 +82,6 @@ public class FAIMSClient implements IFAIMSClient {
 		}
 	}
 	
-	@Override
 	public FAIMSClientResultCode downloadProjectArchive(Project project) {
 		FAIMSLog.log();
 		
