@@ -49,11 +49,10 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
 	private DownloadProjectTask downloadTask;
 	
 	protected ChoiceDialog choiceDialog;
-
+	protected ConfirmDialog confirmDialog;
+	
 	private List<Project> projects;
 	private Project selectedProject;
-
-	private ConfirmDialog confirmDialog;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
