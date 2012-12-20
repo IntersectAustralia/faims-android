@@ -115,6 +115,7 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
     	if (downloadTask != null) downloadTask.cancel(true);
     
     	if (choiceDialog != null) choiceDialog.cleanup();
+    	if (confirmDialog != null) confirmDialog.cleanup();
     }
 
     @Override
