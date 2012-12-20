@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -60,13 +61,13 @@ public class UIRenderer {
 
     private ImageView imageView;
     
-    private HashMap<String, Integer> refToId;
+    private HashMap<String, View> viewMap;
 
     public UIRenderer(FormEntryController fem, TabHost tabHost, Context context) {
         this.fem = fem;
         this.tabHost = tabHost;
         this.context = context;
-        this.refToId = new HashMap<String, Integer>();
+        this.viewMap = new HashMap<String, View>();
     }
 
     /**
@@ -284,6 +285,11 @@ public class UIRenderer {
                 Button button = new Button(this.context);
                 button.setText(questionPrompt.getQuestionText());
                 layout.addView(button);
+                // adding button to view map
+                viewMap.put(questionPrompt.
+                		getIndex().
+                		getReference().
+                		getNameLast().toLowerCase(Locale.ENGLISH), button);
                 break;
         }
     }
@@ -374,5 +380,9 @@ public class UIRenderer {
 
     public void clearCurrentImageView() {
         this.imageView = null;
+    }
+    
+    public View getViewByRef(String ref) {
+    	return viewMap.get(ref);
     }
 }

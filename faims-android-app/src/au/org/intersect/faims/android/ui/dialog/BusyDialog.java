@@ -1,20 +1,18 @@
 package au.org.intersect.faims.android.ui.dialog;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import au.org.intersect.faims.android.tasks.ActionResultCode;
-import au.org.intersect.faims.android.tasks.ActionType;
 
-public class BusyDialog extends ProgressDialog implements IFAIMSDialog {
+public class BusyDialog extends ProgressDialog implements IDialog {
 
-	private ActionType type;
-	private IFAIMSDialogListener listener;
+	private DialogType type;
+	private IDialogListener listener;
 	
-	public BusyDialog(Activity activity, ActionType type, String title, String message) {
-		super(activity);
+	public BusyDialog(Context context, DialogType type, String title, String message) {
+		super(context);
 		this.type = type;
-		this.listener = (IFAIMSDialogListener) activity;
+		this.listener = (IDialogListener) context;
 		setTitle(title);
 		setMessage(message);
 		setCancelable(true);
@@ -23,14 +21,14 @@ public class BusyDialog extends ProgressDialog implements IFAIMSDialog {
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				listener.handleDialogResponse(ActionResultCode.CANCEL, null, BusyDialog.this.type, BusyDialog.this);
+				listener.handleDialogResponse(DialogResultCode.CANCEL, null, BusyDialog.this.type, BusyDialog.this);
 			}
 			
 		});
 	}
 	
-	public static BusyDialog create(Activity activity, ActionType type, String title, String message) {
-		return new BusyDialog(activity, type, title, message);
+	public static BusyDialog create(Context context, DialogType type, String title, String message) {
+		return new BusyDialog(context, type, title, message);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package au.org.intersect.faims.android.ui.dialog;
 
-public interface IFAIMSDialog {
+public interface IDialog {
 
 	public void cleanup();
 }

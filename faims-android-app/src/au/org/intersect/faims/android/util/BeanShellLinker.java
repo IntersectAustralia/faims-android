@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import android.app.Activity;
+import android.content.res.AssetManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import bsh.EvalError;
@@ -15,23 +15,24 @@ public class BeanShellLinker {
 	
 	private Interpreter interpreter;
 
-	private Activity activity;
+	private UIRenderer renderer;
+
+	private AssetManager assets;
 	
-	public BeanShellLinker(Activity activity) {
-		this.activity = activity;
+	public BeanShellLinker(AssetManager assets, UIRenderer renderer) {
+		this.assets = assets;
+		this.renderer = renderer;
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
-			sourceFromAssets("ui_logic.bsh");
 		} catch (EvalError e) {
 			FAIMSLog.log(e);
 		}
 	}
 	
-	public void sourceFromAssets(String file) {
+	public void source(String filename) {
 		try {
-			InputStream stream = activity.getAssets().open(file);
-    		interpreter.eval(convertStreamToString(stream));
+    		interpreter.eval(convertStreamToString(assets.open(filename)));
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
     	} catch (IOException e) {
@@ -47,8 +48,12 @@ public class BeanShellLinker {
     	}
 	}
 	
-	public void bindViewToEvent(int id, String type, final String code) {
-		View view = activity.findViewById(id);
+	public void bindViewToEvent(String ref, String type, final String code) {
+		View view = renderer.getViewByRef(ref);
+		if (view ==  null) {
+			FAIMSLog.log("Can't find view for " + ref);
+			return;
+		}
 		if (type == "click") {
 			view.setOnClickListener(new OnClickListener() {
 
@@ -62,7 +67,7 @@ public class BeanShellLinker {
 			FAIMSLog.log("Not implemented");
 		}
 	}
-	
+
 	private String convertStreamToString(InputStream stream) {
 		BufferedReader br = null;
 		try {
@@ -88,4 +93,5 @@ public class BeanShellLinker {
 		return null;
 	}
 
+	
 }

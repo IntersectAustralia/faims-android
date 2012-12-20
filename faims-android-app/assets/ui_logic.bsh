@@ -1,6 +1,4 @@
-// linker object embedded
-
-public void onEvent(String ref, String type, String callback) {
+onEvent(String ref, String type, String callback) {
 
 	linker.bindViewToEvent(ref, type, callback);
 

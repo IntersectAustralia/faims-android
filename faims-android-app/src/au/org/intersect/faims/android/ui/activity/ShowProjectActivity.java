@@ -11,10 +11,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.widget.TabHost;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.tasks.ActionResultCode;
-import au.org.intersect.faims.android.tasks.ActionType;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
-import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
+import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
+import au.org.intersect.faims.android.ui.dialog.DialogType;
+import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.util.BeanShellLinker;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -22,7 +22,7 @@ import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.UIRenderer;
 
 @SuppressWarnings("deprecation")
-public class ShowProjectActivity extends Activity implements IFAIMSDialogListener {
+public class ShowProjectActivity extends Activity implements IDialogListener {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -51,7 +51,7 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 		directory = data.getStringExtra("directory");
 		
 		choiceDialog = DialogFactory.createChoiceDialog(ShowProjectActivity.this, 
-				ActionType.CONFIRM_RENDER_PROJECT, 
+				DialogType.CONFIRM_RENDER_PROJECT, 
 				getString(R.string.render_project_title),
 				getString(R.string.render_project_message));
 		choiceDialog.show();
@@ -90,10 +90,10 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 	}
 
 	@Override
-	public void handleDialogResponse(ActionResultCode resultCode, Object data,
-			ActionType type, Dialog dialog) {
-		if (type == ActionType.CONFIRM_RENDER_PROJECT) {
-			if (resultCode == ActionResultCode.SELECT_YES) {
+	public void handleDialogResponse(DialogResultCode resultCode, Object data,
+			DialogType type, Dialog dialog) {
+		if (type == DialogType.CONFIRM_RENDER_PROJECT) {
+			if (resultCode == DialogResultCode.SELECT_YES) {
 				renderUI();
 			}
 		}
@@ -110,7 +110,8 @@ public class ShowProjectActivity extends Activity implements IFAIMSDialogListene
 		this.renderer.render();
 		
 		// bind the logic to the ui
-		linker = new BeanShellLinker(this);
-		linker.sourceFromAssets("test_script.bsh");
+		linker = new BeanShellLinker(getAssets(), renderer);
+		linker.source("ui_logic.bsh");
+		linker.source("test_script.bsh");
 	}
 }

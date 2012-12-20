@@ -1,16 +1,15 @@
 package au.org.intersect.faims.android.ui.dialog;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import au.org.intersect.faims.android.tasks.ActionType;
+import android.content.Context;
 
-public class DownloadDialog extends ProgressDialog implements IFAIMSDialog {
+public class DownloadDialog extends ProgressDialog implements IDialog {
 
 	//private DialogTypes type;
 	//private IFAIMSDialogListener listener;
 	
-	public DownloadDialog(Activity activity, ActionType type, String title, String message) {
-		super(activity);
+	public DownloadDialog(Context context, DialogType type, String title, String message) {
+		super(context);
 		//this.type = type;
 		//this.listener = (IFAIMSDialogListener) activity;
 		setTitle(title);
@@ -20,8 +19,8 @@ public class DownloadDialog extends ProgressDialog implements IFAIMSDialog {
 		setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 	}
 	
-	public static DownloadDialog create(Activity activity, ActionType type, String title, String message) {
-		return new DownloadDialog(activity, type, title, message);
+	public static DownloadDialog create(Context context, DialogType type, String title, String message) {
+		return new DownloadDialog(context, type, title, message);
 	}
 
 	@Override

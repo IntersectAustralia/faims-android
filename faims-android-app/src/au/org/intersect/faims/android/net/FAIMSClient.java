@@ -44,6 +44,7 @@ public class FAIMSClient {
 		FAIMSLog.log();
 		
 		httpClient.close();
+		httpClient = null;
 	}
 	
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
@@ -205,6 +206,13 @@ public class FAIMSClient {
 		HttpEntity entity = response.getEntity();
 		
 		return entity;
+	}
+
+	public void cancelRequest() {
+		FAIMSLog.log();
+		if (httpClient != null) {
+			httpClient.getConnectionManager().shutdown();
+		}
 	}
 	
 }

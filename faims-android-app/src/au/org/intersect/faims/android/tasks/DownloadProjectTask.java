@@ -1,45 +1,51 @@
 package au.org.intersect.faims.android.tasks;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
-import au.org.intersect.faims.android.ui.dialog.IFAIMSDialogListener;
+import au.org.intersect.faims.android.ui.dialog.DialogType;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
 
-public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
+public class DownloadProjectTask extends AsyncTask<Void, Void, Void> {
 
-	private Activity activity;
-	private FAIMSClient faimsClient;
+	FAIMSClient faimsClient;
+	ServerDiscovery serverDiscovery;
+	
+	private Context context;
 	private BusyDialog dialog;
 	private FAIMSClientResultCode errorCode;
+	private Project project;
 	
-	public DownloadProjectTask(Activity activity, FAIMSClient faimsClient) {
-		this.activity = activity;
+	public DownloadProjectTask(Context context, Project project, FAIMSClient faimsClient, ServerDiscovery serverDiscovery) {
+		this.context = context;
+		this.project = project;
 		this.faimsClient = faimsClient;
+		this.serverDiscovery = serverDiscovery;
 	}
 	
 	@Override 
 	protected void onPreExecute() {
 		FAIMSLog.log();
 		
-		dialog = DialogFactory.createBusyDialog(activity, 
-				ActionType.DOWNLOAD_PROJECT, 
-				activity.getString(R.string.download_project_title), 
-				activity.getString(R.string.download_project_message));
+		dialog = DialogFactory.createBusyDialog(context, 
+				DialogType.BUSY_DOWNLOADING_PROJECT, 
+				context.getString(R.string.download_project_title), 
+				context.getString(R.string.download_project_message));
 		dialog.show();
 	}
 	
 	@Override
-	protected Void doInBackground (Project... values) {
+	public Void doInBackground(Void... values){
 		FAIMSLog.log();
 		
-		errorCode = faimsClient.downloadProjectArchive(values[0]);
+		errorCode = faimsClient.downloadProjectArchive(project);
 
 		return null;
 	}
@@ -50,24 +56,28 @@ public class DownloadProjectTask extends AsyncTask<Project, Void, Void> {
 		
 		// cleanup to avoid memory leaks
 		dialog.cleanup();
-		activity = null;
-		
+		context = null;
 	}
 	
 	@Override
 	protected void onPostExecute(Void v) {
 		FAIMSLog.log();
 		
-		IFAIMSDialogListener listener = (IFAIMSDialogListener) activity;
+		dialog.dismiss();
+		
+		IActionListener listener = (IActionListener) context;
 		ActionResultCode code = null;
-		if (errorCode == FAIMSClientResultCode.SUCCESS)
+		
+		if (errorCode == FAIMSClientResultCode.SUCCESS) {
 			code = ActionResultCode.SUCCESS;
-		else
+		} else {
 			code = ActionResultCode.FAILURE;
-		listener.handleDialogResponse(code, 
+			serverDiscovery.invalidateServerHost();
+		}
+		
+		listener.handleActionResponse(code, 
 				errorCode, 
-				ActionType.DOWNLOAD_PROJECT,
-				dialog);
+				ActionType.DOWNLOAD_PROJECT);
 	}
 	
 }

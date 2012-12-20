@@ -2,4 +2,4 @@ hello_world(String something) {
 	System.out.println(something);
 }
 
-onEvent("button_id", "click", "hello_world()"); 
+onEvent("basicsave", "click", "hello_world(\"Hello World\")"); 
