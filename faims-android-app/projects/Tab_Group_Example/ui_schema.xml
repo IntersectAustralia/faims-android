@@ -1,0 +1,105 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Tab Group Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="tabgroup_example">
+          <tabgroup1>
+	     	<tab1>
+	     	    <name></name>
+	     	    <description></description>
+	     	    <save></save>
+	     	</tab1>
+	     	<tab2>
+	     	    <task></task>
+	     	    <description></description>
+	     	    <save></save>
+	     	</tab2>
+	      </tabgroup1> 	
+	      <tabgroup2>
+	     	<tab1>
+	     	    <name></name>
+	     	    <description></description>
+	     	    <save></save>
+	     	</tab1>
+	     	<tab2>
+	     	    <task></task>
+	     	    <description></description>
+	     	    <save></save>
+	     	</tab2>
+	      </tabgroup2> 
+        </faims>
+      </instance>
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab2/task" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab2/description" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab1/description" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab2/task" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab2/description" type="string"/>
+    </model>
+  </h:head>
+
+  <h:body>
+    <group ref="tabgroup1">
+      <label>Tab Group 1</label>
+      <group ref="tab1">
+        <label>Tab 1</label>
+        <input ref="name">
+          <label>Name:</label>
+        </input>
+        <input ref="description">
+          <label>Description:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Tab 2</label>
+        <input ref="task">
+          <label>Task:</label>
+        </input>
+        <input ref="description">
+          <label>Description:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup2">
+      <label>Tab Group 2</label>
+      <group ref="tab1">
+        <label>Tab 1</label>
+        <input ref="name">
+          <label>Name:</label>
+        </input>
+        <input ref="description">
+          <label>Description:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Tab 2</label>
+        <input ref="task">
+          <label>Task:</label>
+        </input>
+        <input ref="description">
+          <label>Description:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+    </group>
+  </h:body>
+</h:html>

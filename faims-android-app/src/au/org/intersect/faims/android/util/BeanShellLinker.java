@@ -47,7 +47,7 @@ public class BeanShellLinker {
     		FAIMSLog.log(e); 
     	}
 	}
-	/*
+	
 	public void bindViewToEvent(String ref, String type, final String code) {
 		View view = renderer.getViewByRef(ref);
 		if (view ==  null) {
@@ -67,7 +67,7 @@ public class BeanShellLinker {
 			FAIMSLog.log("Not implemented");
 		}
 	}
-*/
+
 	private String convertStreamToString(InputStream stream) {
 		BufferedReader br = null;
 		try {

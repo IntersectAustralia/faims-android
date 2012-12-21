@@ -4,13 +4,9 @@ import org.javarosa.form.api.FormEntryController;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.LocalActivityManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
-import android.widget.TabHost;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
@@ -22,7 +18,6 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.UIRenderer;
 
-@SuppressWarnings("deprecation")
 public class ShowProjectActivity extends Activity implements IDialogListener {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
@@ -96,15 +91,16 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 	private void renderUI() {
 		// Read, validate and parse the xforms
 		this.fem = FileUtil.readXmlContent(Environment
-				.getExternalStorageDirectory() + "/faims/projects/tab_groups_schema.xml");
+				.getExternalStorageDirectory() + directory + "/ui_schema.xml");
 
 		// render the ui definition
 		this.renderer = new UIRenderer(this.fem, this);
-		this.renderer.render(this);
+		this.renderer.createUI();
+		this.renderer.showTabGroup(this, 0);
 		
 		// bind the logic to the ui
-		//linker = new BeanShellLinker(getAssets(), renderer);
-		//linker.source("ui_commands.bsh");
-		//linker.source("test_script.bsh");
+		linker = new BeanShellLinker(getAssets(), renderer);
+		linker.source("ui_commands.bsh");
+		linker.source("test_script.bsh");
 	}
 }

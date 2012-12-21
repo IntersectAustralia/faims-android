@@ -2,19 +2,13 @@ package au.org.intersect.faims.android.ui.form;
 
 import java.util.LinkedList;
 
-import android.app.ActionBar.LayoutParams;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TabHost;
-import android.widget.TabHost.TabContentFactory;
-import android.widget.TabHost.TabSpec;
-import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 
 public class TabGroup extends Fragment {
@@ -46,6 +40,7 @@ public class TabGroup extends Fragment {
 		return tabHost;
     }
 	
+	/*
 	private TabSpec createTabSpec(TabHost tabHost, final String name) {
 		TabSpec spec = tabHost.newTabSpec(name);
 		spec.setIndicator(name);
@@ -68,6 +63,7 @@ public class TabGroup extends Fragment {
         });
         return spec;
 	}
+	*/
 	
 	public TabView createTab(String name) {
 		TabView tab = new TabView(context, name);

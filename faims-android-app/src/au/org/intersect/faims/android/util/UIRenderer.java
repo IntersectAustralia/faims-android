@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.util;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.GroupDef;
@@ -10,10 +11,10 @@ import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.TabView;
@@ -30,19 +31,24 @@ public class UIRenderer {
     
     private Context context;
     
-    private HashMap<String, TabGroup> tabGroups;
+    private HashMap<String, TabGroup> tabGroupMap;
+    private LinkedList<TabGroup> tabGroupList;
+    
+    private HashMap<String, View> viewMap; 
 
     public UIRenderer(FormEntryController fem, Context context) {
         this.fem = fem;
         this.context = context;
-        this.tabGroups = new HashMap<String, TabGroup>();
+        this.tabGroupMap = new HashMap<String, TabGroup>();
+        this.tabGroupList = new LinkedList<TabGroup>(); 
+        this.viewMap = new HashMap<String, View>();
     }
 
     /**
      * Render the tabs and questions inside the tabs
      * 
      */
-    public void render(Activity activity) {
+    public void createUI() {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
@@ -66,7 +72,8 @@ public class UIRenderer {
     		if (first == null)
     			first = tabGroup;
     		
-    		tabGroups.put(tabGroupCaption.getQuestionText(), tabGroup);
+    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
+    		tabGroupList.push(tabGroup);
     		
     		GroupDef tabGroupElement = (GroupDef) element;
     		
@@ -102,15 +109,17 @@ public class UIRenderer {
             }
     	}
     	
+    }
+    
+    public void showTabGroup(Activity activity, int index) {
     	FragmentManager fm = activity.getFragmentManager();
-	    //Fragment fragment = fm.findFragmentById(R.id.fragment_content);
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
-        ft.add(R.id.fragment_content, first);
+        ft.add(R.id.fragment_content, tabGroupList.get(index));
         ft.commit();
     }
     
-    //public View getViewByRef(String ref) {
-    //	return viewMap.get(ref);
-    //}
+    public View getViewByRef(String ref) {
+    	return viewMap.get(ref);
+    }
 }
