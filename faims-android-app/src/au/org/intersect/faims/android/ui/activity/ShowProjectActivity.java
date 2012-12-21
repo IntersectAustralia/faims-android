@@ -4,6 +4,7 @@ import org.javarosa.form.api.FormEntryController;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.app.LocalActivityManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -28,10 +29,6 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 
 	private FormEntryController fem;
 
-	private LocalActivityManager manager;
-
-	private TabHost tabHost;
-
 	private UIRenderer renderer;
 
 	private ChoiceDialog choiceDialog;
@@ -55,15 +52,9 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 				getString(R.string.render_project_title),
 				getString(R.string.render_project_message));
 		choiceDialog.show();
-		
-		// initialise the tabhost for each tab
-		this.tabHost = (TabHost) findViewById(R.id.tabhost);
-		this.manager = new LocalActivityManager(this, false);
-		this.manager.dispatchCreate(savedInstanceState);
-		tabHost.setup(this.manager);
-
 	}
-
+	
+	/*
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -78,6 +69,7 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 		this.manager.dispatchPause(isFinishing());
 	}
 
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		FAIMSLog.log();
@@ -88,7 +80,8 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 			this.renderer.clearCurrentImageView();
 		}
 	}
-
+	*/
+	
 	@Override
 	public void handleDialogResponse(DialogResultCode resultCode, Object data,
 			DialogType type, Dialog dialog) {
@@ -103,15 +96,15 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 	private void renderUI() {
 		// Read, validate and parse the xforms
 		this.fem = FileUtil.readXmlContent(Environment
-				.getExternalStorageDirectory() + directory + "/ui_schema.xml");
+				.getExternalStorageDirectory() + "/faims/projects/tab_groups_schema.xml");
 
 		// render the ui definition
-		this.renderer = new UIRenderer(this.fem, this.tabHost, this);
-		this.renderer.render();
+		this.renderer = new UIRenderer(this.fem, this);
+		this.renderer.render(this);
 		
 		// bind the logic to the ui
-		linker = new BeanShellLinker(getAssets(), renderer);
-		linker.source("ui_logic.bsh");
-		linker.source("test_script.bsh");
+		//linker = new BeanShellLinker(getAssets(), renderer);
+		//linker.source("ui_commands.bsh");
+		//linker.source("test_script.bsh");
 	}
 }
