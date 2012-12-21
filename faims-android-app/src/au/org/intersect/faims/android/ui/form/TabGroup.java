@@ -67,7 +67,7 @@ public class TabGroup extends Fragment {
 	
 	public Tab createTab(String name) {
 		Tab tab = new Tab(context, name);
-		tabs.push(tab);
+		tabs.add(tab);
         return tab;
 	}
 

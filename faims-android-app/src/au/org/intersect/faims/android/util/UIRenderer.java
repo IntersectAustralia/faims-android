@@ -73,7 +73,7 @@ public class UIRenderer {
 	    		tabGroup.setContext(context);
 	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
 	    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
-	    		tabGroupList.push(tabGroup);
+	    		tabGroupList.add(tabGroup);
 	    		
 	            // descend into group
 	            FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex, true);
