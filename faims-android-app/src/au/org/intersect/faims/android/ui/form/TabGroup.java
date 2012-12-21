@@ -15,10 +15,10 @@ public class TabGroup extends Fragment {
 	
 	private Context context;
 	private TabHost tabHost;
-	private LinkedList<TabView> tabs;
+	private LinkedList<Tab> tabs;
 	
 	public TabGroup() {
-		tabs = new LinkedList<TabView>();
+		tabs = new LinkedList<Tab>();
 	}
 	
 	@Override
@@ -33,7 +33,7 @@ public class TabGroup extends Fragment {
 		tabHost.addTab(createTabSpec(tabHost, "Test 3"));
 		*/
 		
-		for (TabView tab : tabs) {
+		for (Tab tab : tabs) {
 			tabHost.addTab(tab.createTabSpec(tabHost));
 		}
 		
@@ -65,8 +65,8 @@ public class TabGroup extends Fragment {
 	}
 	*/
 	
-	public TabView createTab(String name) {
-		TabView tab = new TabView(context, name);
+	public Tab createTab(String name) {
+		Tab tab = new Tab(context, name);
 		tabs.push(tab);
         return tab;
 	}

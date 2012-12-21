@@ -25,14 +25,14 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-public class TabView {
+public class Tab {
 
 	private Context context;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private String name;
 
-	public TabView(Context context, String name) {
+	public Tab(Context context, String name) {
 		this.context = context;
 		this.name = name;
 		
@@ -46,17 +46,17 @@ public class TabView {
         
 	}
 
-	public void addInput(FormEntryPrompt input) {
+	public View addInput(FormEntryPrompt input) {
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
             TextView textView = new TextView(this.context);
             textView.setText(input.getQuestionText());
             linearLayout.addView(textView);
         }
 		
+		View view = null;
 		// check the control type to know the type of the question
         switch (input.getControlType()) {
             case Constants.CONTROL_INPUT:
-                View view;
                 // check the data type of question of type input
                 switch (input.getDataType()) {
                 // set input type as number
@@ -138,6 +138,7 @@ public class TabView {
                                     android.R.layout.simple_spinner_dropdown_item,
                                     choices);
                             spinner.setAdapter(arrayAdapter);
+                            view = spinner;
                             linearLayout.addView(spinner);
                         }
                         break;
@@ -159,6 +160,7 @@ public class TabView {
                             checkBox.setText(selectChoice.getValue());
                             selectLayout.addView(checkBox);
                         }
+                        view = selectLayout;
                         linearLayout.addView(selectLayout);
                 }
                 break;
@@ -166,15 +168,12 @@ public class TabView {
             case Constants.CONTROL_TRIGGER:
                 Button button = new Button(this.context);
                 button.setText(input.getQuestionText());
+                view = button;
                 linearLayout.addView(button);
-                
-                // adding button to view map
-                //viewMap.put(input.
-                //		getIndex().
-                //		getReference().
-                //		getNameLast().toLowerCase(Locale.ENGLISH), button);
                 break;
         }
+        
+        return view;
 	}
 
 	public TabSpec createTabSpec(TabHost tabHost) {

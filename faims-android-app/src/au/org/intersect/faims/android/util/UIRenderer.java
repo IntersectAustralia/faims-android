@@ -17,7 +17,7 @@ import android.content.Context;
 import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.form.TabGroup;
-import au.org.intersect.faims.android.ui.form.TabView;
+import au.org.intersect.faims.android.ui.form.Tab;
 
 /**
  * Class that reads the ui defintion file and render the UI
@@ -52,61 +52,64 @@ public class UIRenderer {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
+    	/*
     	if (currentIndex.isBeginningOfFormIndex()) {
             currentIndex = this.fem.getModel().incrementIndex(currentIndex, true);
         }
+    	*/
     	
     	IFormElement element = this.fem.getModel().getForm().getChild(currentIndex);
+    	FormIndex groupIndex = this.fem.getModel().incrementIndex(currentIndex, true);
     	
-    	TabGroup first = null;
-    	
-    	if (element instanceof GroupDef) {
+    	for (int i = 0; i < element.getChildren().size(); i++) {
     		
-    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(currentIndex);
+    		element = this.fem.getModel().getForm().getChild(groupIndex);
     		
-    		System.out.println(tabGroupCaption.getQuestionText());
-    		
-    		TabGroup tabGroup = new TabGroup();
-    		tabGroup.setContext(context);
-    		
-    		if (first == null)
-    			first = tabGroup;
-    		
-    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
-    		tabGroupList.push(tabGroup);
-    		
-    		GroupDef tabGroupElement = (GroupDef) element;
-    		
-            // descend into group
-            FormIndex idxChild = this.fem.getModel().incrementIndex(currentIndex, true);
-
-            for (int i = 0; i < tabGroupElement.getChildren().size(); i++) {
-                
-                element = this.fem.getModel().getForm().getChild(idxChild);
-                
-                if (element instanceof GroupDef) {
-                	
-                    FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(idxChild);
-                    
-                    System.out.println(tabCaption.getQuestionText());
-                	
-                	TabView tab = tabGroup.createTab(tabCaption.getQuestionText());
-                	
-                	GroupDef tabElement = (GroupDef) element;
-                	
-                    idxChild = this.fem.getModel().incrementIndex(idxChild, true);
-                    
-                    for (int j = 0; j < tabElement.getChildren().size(); j++) {
-                    	
-                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(idxChild);
-
-                        tab.addInput(input);
-
-                        idxChild = this.fem.getModel().incrementIndex(idxChild, false);
-                    }
-                    
-                }
-            }
+	    	if (element instanceof GroupDef) {
+	    		
+	    		GroupDef tabGroupElement = (GroupDef) element;
+	    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(groupIndex);
+	    		TabGroup tabGroup = new TabGroup();
+	    		tabGroup.setContext(context);
+	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
+	    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
+	    		tabGroupList.push(tabGroup);
+	    		
+	            // descend into group
+	            FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex, true);
+	
+	            for (int j = 0; j < tabGroupElement.getChildren().size(); j++) {  
+	            	
+	                element = this.fem.getModel().getForm().getChild(tabIndex);
+	                
+	                if (element instanceof GroupDef) {
+	                	
+	                	GroupDef tabElement = (GroupDef) element;
+	                	FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
+	                    Tab tab = tabGroup.createTab(tabCaption.getQuestionText());
+	                    
+	                    System.out.println(tabCaption.getQuestionText());
+	                	
+	                    FormIndex inputIndex = this.fem.getModel().incrementIndex(tabIndex, true);
+	                    
+	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
+	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
+	                        View view = tab.addInput(input);
+	                        
+	                        // use paths as ids
+	                        System.out.println(input.getIndex().getReference().toString().replaceAll("\\[[^\\]*].", ""));
+	                        viewMap.put(input.getIndex().getReference().toString().replaceAll("\\[[^\\]*].", ""), view);
+	
+	                        inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
+	                    }
+	                    
+	                }
+	                
+	                tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
+	            }
+	    	}
+	    	
+	    	groupIndex = this.fem.getModel().incrementIndex(groupIndex, false);
     	}
     	
     }
