@@ -138,7 +138,12 @@ public class MainActivity extends RoboActivity {
 				reader = new BufferedReader(
 						new FileReader(
 							Environment.getExternalStorageDirectory() + "/faims/projects/" + dir + "/project.settings"));
-				JsonObject object = JsonUtil.deserializeJson(reader.readLine());
+				String line = reader.readLine();
+				if (line == null) {
+					FAIMSLog.log("project " + "/faims/projects/" + dir + "/project.settings" + " settings malformed");
+					continue;
+				}
+				JsonObject object = JsonUtil.deserializeJson(line);
 				projectListAdapter.add(object.get("project").getAsString());	
 			}
 		} catch (IOException e) {
