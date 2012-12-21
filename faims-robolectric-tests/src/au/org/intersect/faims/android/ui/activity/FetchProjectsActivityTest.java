@@ -1,6 +1,6 @@
 package au.org.intersect.faims.android.ui.activity;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +16,8 @@ import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
 import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
 import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
 
+import com.xtremelabs.robolectric.Robolectric;
+import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 import com.xtremelabs.robolectric.tester.android.view.TestMenu;
 import com.xtremelabs.robolectric.tester.android.view.TestMenuItem;
 
@@ -125,13 +127,13 @@ public class FetchProjectsActivityTest {
 		ListView projectListView = (ListView) activity
 				.findViewById(R.id.project_list);
 		assertEquals("No projects exist", projectListView.getChildCount(), 0);
-
-		String dialogTitle = "Could not find Server";
-		//assertEquals("Dialog exists",
-		//		activity.choiceDialog.getActionBar().getTitle(), dialogTitle);
 		
-		assertEquals("Dialog showing",
-				activity.choiceDialog.isShowing(), true);
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.locate_server_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.locate_server_failure_message), choiceDialog.getMessage());
+		
 		
 		// TODO check how to test user interactions
 	}
@@ -153,14 +155,14 @@ public class FetchProjectsActivityTest {
 		
 		ListView projectListView = (ListView) activity
 				.findViewById(R.id.project_list);
-		assertEquals("No projects exist", projectListView.getChildCount(), 0);
-
-		String dialogTitle = "Could not fetch projects";
-		//assertEquals("Dialog exists",
-		//		activity.choiceDialog.getActionBar().getTitle(), dialogTitle);
+		assertEquals("No projects exist", projectListView.getChildCount(), 0);		
 		
-		assertEquals("Dialog showing",
-				activity.choiceDialog.isShowing(), true);
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Could not fetch projects Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.fetch_projects_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.fetch_projects_failure_message), choiceDialog.getMessage());
+		
 		
 		// TODO check how to test user interactions
 
@@ -214,13 +216,12 @@ public class FetchProjectsActivityTest {
 		activity.downloadProjectArchive();
 		
 		// TODO assert no project has been downloaded
-
-		String dialogTitle = "Could not download project";
-		//assertEquals("Dialog exists",
-		//		activity.choiceDialog.getActionBar().getTitle(), dialogTitle);
 		
-		assertEquals("Dialog showing",
-				activity.choiceDialog.isShowing(), true);
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Could not download project Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.download_project_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_project_failure_message), choiceDialog.getMessage());
 
 	}
 	
@@ -246,13 +247,12 @@ public class FetchProjectsActivityTest {
 		activity.downloadProjectArchive();
 		
 		// TODO assert no project has been downloaded
-
-		String dialogTitle = "Could not download project";
-		//assertEquals("Dialog exists",
-		//		activity.choiceDialog.getActionBar().getTitle(), dialogTitle);
 		
-		assertEquals("Dialog showing",
-				activity.choiceDialog.isShowing(), true);
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Could not download project Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.download_project_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_project_failure_message), choiceDialog.getMessage());
 	}
 	
 	@Test
@@ -277,13 +277,13 @@ public class FetchProjectsActivityTest {
 		activity.downloadProjectArchive();
 		
 		// TODO assert no project has been downloaded
-
-		String dialogTitle = "Project is too big";
-		//assertEquals("Dialog exists",
-		//		activity.confirmDialog.getActionBar().getTitle(), dialogTitle);
 		
-		assertEquals("Dialog showing",
-				activity.confirmDialog.isShowing(), true);
+		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
+		
+		assertTrue("Project is too big Dialog Showing",confirmDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.download_project_error_title), confirmDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_project_error_message), confirmDialog.getMessage());
+		
 	}
 
 }
