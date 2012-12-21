@@ -24,6 +24,7 @@
 		<file name="guice-2.0-no_aop.jar"/>
 		<file name="jsr305-1.3.9.jar"/>
 		<file name="roboguice-2.0.jar"/>
+		<file name="gson-2.2.2.jar"/>
 	</filelist>
 
 	<path id="compile_classpath">
