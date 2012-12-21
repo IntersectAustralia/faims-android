@@ -24,6 +24,10 @@ public class JsonUtil {
 	}
 	
 	public static JsonObject deserializeServerPacket(String json) throws IOException {
+		return deserializeJson(json);
+	}
+	
+	public static JsonObject deserializeJson(String json) throws IOException {
 		JsonReader reader = new JsonReader(new StringReader(json));
         JsonParser parser = new JsonParser();
         return parser.parse(reader).getAsJsonObject(); 

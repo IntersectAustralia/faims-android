@@ -4,12 +4,23 @@ import roboguice.RoboGuice;
 import roboguice.config.DefaultRoboModule;
 import roboguice.inject.RoboInjector;
 import android.app.Application;
+import au.org.intersect.faims.android.net.FAIMSClient;
+import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
+import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
 
+import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import com.xtremelabs.robolectric.Robolectric;
 
-public abstract class TestFAIMSModule implements Module {
+public class TestFAIMSModule implements Module {
+	
+	@Override
+	public void configure(Binder binder) {
+		binder.bind(ServerDiscovery.class).to(TestServerDiscovery.class);
+		binder.bind(FAIMSClient.class).to(TestFAIMSClient.class);
+	}
 	
 	public static void setUp(Object testObject, TestFAIMSModule module) {
 		Module roboGuiceModule = RoboGuice

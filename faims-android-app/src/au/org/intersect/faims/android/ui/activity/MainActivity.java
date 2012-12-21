@@ -1,7 +1,11 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Arrays;
 
 import roboguice.activity.RoboActivity;
 import android.content.Intent;
@@ -17,7 +21,9 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.util.FAIMSLog;
+import au.org.intersect.faims.android.util.JsonUtil;
 
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 
 public class MainActivity extends RoboActivity {
@@ -122,9 +128,28 @@ public class MainActivity extends RoboActivity {
 			
 		});
 		
-		projectListAdapter.clear();
-		for (String dir : directories) {
-			projectListAdapter.add(dir);
+		// sort
+		Arrays.sort(directories);
+		
+		BufferedReader reader = null;
+		try {
+			projectListAdapter.clear();
+			for (String dir : directories) {
+				reader = new BufferedReader(
+						new FileReader(
+							Environment.getExternalStorageDirectory() + "/faims/projects/" + dir + "/project.settings"));
+				JsonObject object = JsonUtil.deserializeJson(reader.readLine());
+				projectListAdapter.add(object.get("project").getAsString());	
+			}
+		} catch (IOException e) {
+			FAIMSLog.log(e);
+		} finally {
+			try {
+				if (reader != null)
+					reader.close();
+			} catch (IOException e) {
+				FAIMSLog.log(e);
+			}
 		}
 	}
 }

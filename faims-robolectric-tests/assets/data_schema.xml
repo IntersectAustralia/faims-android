@@ -1,0 +1,290 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="HorribleSample" preparer="Brian Ballsun-Stanton">
+
+
+	<RelationshipElement name="bonded to" type="bidirectional">
+		<description>
+			Indicates element is bonded to another element.
+		</description>
+		<parent>
+			Bonded To
+		</parent>
+		<child>
+			Bonded To
+		</child>
+	</RelationshipElement>
+	<RelationshipElement name="Area" type="container">
+		<description>
+			Which Trench or Area the Archaeological Entity belongs to
+		</description>
+		<property type="identifier" name="Excavator" minCardinality="1" maxCardinality="n">
+				<description>Foo</description>
+				<bundle>DOI</bundle>
+			</property>
+			<property type="identifier" name="Site" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="lookup" name="Area Colour" minCardinality="1" maxCardinality="n">
+				<lookup>	
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+			</property>
+	</RelationshipElement>
+	<RelationshipElement name="AboveBelow" type="hierarchy">
+		<description>
+			Indicates that one element is above or below another element. Used as part of the Harris Matrix
+		</description>
+		<parent>
+			Above
+		</parent>
+		<child>
+			Below
+		</child>
+	</RelationshipElement>
+
+
+
+	<ArchaeologicalElement type="ExcavationUnitStructure">
+		<description>
+			A unit is a portion of trench described by this record..
+		</description>
+			<property type="identifier" name="Excavator" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Date" name="Date" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+				<bundle>Date</bundle>
+			</property>
+			<property type="Identifier" name="Grid Square" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Identifier" name="Unit" minCardinality="1" maxCardinality="1">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Text" name="Survey Data" minCardinality="1" maxCardinality="n">
+
+			</property>
+			<property type="Lookup" name="Type of Unit" minCardinality="1" maxCardinality="n">
+				<bundle>Unit Type</bundle>
+				<lookup>
+					<term>Soil</term>
+					<term>Fill</term>
+					<term>Structure</term>
+					<term>Burial</term>
+					<term>In Situ</term>
+					<term>Dispersed</term>
+					<term annotationRequired="true" >Other</term>
+				</lookup>
+			</property>
+			<property type="Text" name="PH Level" minCardinality="1" maxCardinality="n">
+
+			</property>
+			<property type="measure" name="Length" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+<property type="measure" name="Width" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+<property type="measure" name="Depth" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+			<property type="lookup" name="Structure Major comp" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>MajorComp1</term>
+					<term>MajorComp2</term>
+					<term>MajorComp3</term>
+				</lookup>
+
+			</property>
+			<property type="lookup" name="Structure Bonding" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>BondingGreen</term>
+					<term>BondingPink</term>
+					<term>BondingBlue</term>
+				</lookup>
+
+			</property>
+			<property type="lookup" name="Structure Minor" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>MinorGreen</term>
+					<term>MinorPink</term>
+					<term>MinorBlue</term>
+				</lookup>
+
+			</property>
+			<property type="lookup" name="Structure Marks" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>MarksGreen</term>
+					<term>MarksPink</term>
+					<term>MarksBlue</term>
+				</lookup>
+
+			</property>
+			<property type="text" name="Structure Other" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Description" minCardinality="1" maxCardinality="1">
+
+			</property>
+			<property type="text" name="Record Details plan" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record Samples" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record mono photo ref" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record section num" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record mono desc" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record color ref" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record colo desc" minCardinality="0" maxCardinality="n">
+
+			</property>
+
+	</ArchaeologicalElement>
+
+
+	<ArchaeologicalElement type="ExcavationUnitSoil">
+		<description>
+			A unit is a portion of trench described by this record..
+		</description>
+			<property type="identifier" name="Excavator" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Date" name="Date" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+				<bundle>Date</bundle>
+			</property>
+			<property type="Identifier" name="Grid Square" minCardinality="1" maxCardinality="n">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Identifier" name="Unit" minCardinality="1" maxCardinality="1">
+				<bundle>DOI</bundle>
+			</property>
+			<property type="Text" name="Survey Data" minCardinality="1" maxCardinality="n">
+
+			</property>
+			<property type="Lookup" name="Type of Unit" minCardinality="1" maxCardinality="n">
+				<bundle>Unit Type</bundle>
+				<lookup>
+					<term>Soil</term>
+					<term>Fill</term>
+					<term>Structure</term>
+					<term>Burial</term>
+					<term>In Situ</term>
+					<term>Dispersed</term>
+					<term annotationRequired="true" >Other</term>
+				</lookup>
+			</property>
+			<property type="Text" name="PH Level" minCardinality="1" maxCardinality="n">
+
+			</property>
+<property type="measure" name="Length" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+<property type="measure" name="Width" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+<property type="measure" name="Depth" minCardinality="1" maxCardinality="n">
+				<lookup>
+					<term>M</term>
+					<term>M^2</term>
+					<term>Full</term>
+				</lookup>
+			</property>
+			<property type="lookup" name="Soil/Fill Colour" minCardinality="0" maxCardinality="n">
+				<lookup>
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+			</property>
+			<property type="lookup" name="Soil Texture" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+			</property>
+			<property type="lookup" name="Soil Matrix" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+
+			</property>
+			<property type="lookup" name="Soil Constituents" minCardinality="0" maxCardinality="n">
+				<lookup>	
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+
+			</property>
+			<property type="lookup" name="Soil Horizon" minCardinality="0" maxCardinality="n">
+
+				<lookup>	
+					<term>Green</term>
+					<term>Pink</term>
+					<term>Blue</term>
+				</lookup>
+			</property>
+			
+			<property type="text" name="Description" minCardinality="1" maxCardinality="1">
+
+			</property>
+			<property type="text" name="Record Details plan" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record Samples" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record mono photo ref" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record section num" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record mono desc" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record color ref" minCardinality="0" maxCardinality="n">
+
+			</property>
+			<property type="text" name="Record colo desc" minCardinality="0" maxCardinality="n">
+
+			</property>
+
+	</ArchaeologicalElement>
+</dataSchema>

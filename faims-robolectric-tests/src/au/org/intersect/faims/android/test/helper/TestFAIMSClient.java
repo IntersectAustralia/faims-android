@@ -10,7 +10,7 @@ import com.google.inject.Provider;
 
 public class TestFAIMSClient extends FAIMSClient {
 	
-	private int projectsCount;
+	private int projectsCount = 0;
 	private FAIMSClientResultCode projectsCode;
 	private FAIMSClientResultCode downloadCode;
 
@@ -28,15 +28,15 @@ public class TestFAIMSClient extends FAIMSClient {
 		return downloadCode;
 	}
 	
-	protected void setProjectsCount(int value) {
+	public void setProjectsCount(int value) {
 		projectsCount = value;
 	}
 	
-	protected void setProjectsResultCode(FAIMSClientResultCode value) {
+	public void setProjectsResultCode(FAIMSClientResultCode value) {
 		projectsCode = value;
 	}
 	
-	protected void setDownloadResultCode(FAIMSClientResultCode value) {
+	public void setDownloadResultCode(FAIMSClientResultCode value) {
 		downloadCode = value;
 	}
 	

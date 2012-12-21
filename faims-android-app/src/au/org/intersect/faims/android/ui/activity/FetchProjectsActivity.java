@@ -51,8 +51,8 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
 	protected ChoiceDialog choiceDialog;
 	protected ConfirmDialog confirmDialog;
 	
-	private List<Project> projects;
-	private Project selectedProject;
+	protected List<Project> projects;
+	protected Project selectedProject;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,10 +261,6 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
     	return null;
     }
     
-    protected void setSelectedProject(int index) {
-    	selectedProject = projects.get(index); 
-    }
-
 	@Override
 	public void handleDialogResponse(DialogResultCode resultCode, Object data,
 			DialogType type, Dialog dialog) {

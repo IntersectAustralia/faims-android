@@ -7,7 +7,7 @@ import com.google.inject.Provider;
 
 public class TestServerDiscovery extends ServerDiscovery {
 	
-	private boolean hostValid;
+	private boolean hostValid = true;
 
 	@Override
 	public void setApplication(Application app) {
@@ -37,7 +37,7 @@ public class TestServerDiscovery extends ServerDiscovery {
 	public void stopDiscovery() {
 	}
 	
-	protected void setHostInvalid(boolean value) {
+	public void setHostValid(boolean value) {
 		hostValid = value;
 	}
 	
@@ -48,7 +48,7 @@ public class TestServerDiscovery extends ServerDiscovery {
 			@Override
 			public TestServerDiscovery get() {
 				TestServerDiscovery ds = new TestServerDiscovery();
-				ds.setHostInvalid(hostValid);
+				ds.setHostValid(hostValid);
 				return ds;
 			}
 			

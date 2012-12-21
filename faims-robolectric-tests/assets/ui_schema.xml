@@ -1,0 +1,599 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+        <h:head>
+                <h:title>Kali Lilyvale Context Sheet</h:title>
+
+                <model>
+                        <instance>
+                <faims id="Kali Lily Context">
+					<tabset>
+						<BasicInfo>
+										<Excavator />
+										<Date />
+										<BasicSave />
+						</BasicInfo>
+						<Where>
+										<GridSquare />
+										<Unit />
+										<SurveyDataFile />
+										<SurveyDataComm />
+										<PhLevel />
+										<ReltoTrenchArea />
+										<ReltoTrenchType />
+										<ReltoTrenchAmount />
+										<ReltoTrenchMeasure />
+										<AddanotherMeasurement />
+										<WhereSave />
+						</Where>
+						<UnitDescription>
+										<UnitType />
+										<SoilorFillColour />
+										<SoilorFillTexture />
+										<SoilorFillMatrix />
+										<SoilorFillConstituents />
+										<SoilorFillHorizonClarity />
+										<StructureMajorComponents />
+										<StructureBonding />
+										<StructureMinorComponents />
+										<StructureDistMarks />
+										<StructureOther />
+										<Description />
+										<UnitDescSave />
+						</UnitDescription>
+					</tabset>
+				</faims>
+                        </instance>
+						<bind nodeset="/faims/tabset/BasicInfo/Date" type="date" />
+						<bind nodeset="/faims/tabset/UnitDescription/Description" type="string" />
+						<bind nodeset="/faims/tabset/UnitDescription/StructureOther" type="string" />
+						<bind nodeset="/faims/tabset/Where/SurveyDataComm" type="string" />
+                </model>
+        </h:head>
+
+        <h:body>
+			<group ref="tabset">
+			<label>Context Entry</label>
+			<group ref="BasicInfo">
+				<label>Basic Info:</label>
+				<select1 ref="Excavator">
+					<label>Excavator:</label>
+					<item>
+						<label>Alice Director</label> 
+						<value>Alice Director</value>
+					</item>
+					<item>
+						<label>Alice Director2</label> 
+						<value>Alice Director2</value>
+					</item>
+					<item>
+						<label>Bob1 TrenchSup</label> 
+						<value>Bob1 TrenchSup</value>
+					</item>
+					<item>
+						<label>Bob2 TrenchSup</label> 
+						<value>Bob2 TrenchSup</value>
+					</item>
+					<item>
+						<label>Bob3 TrenchSup</label> 
+						<value>Bob3 TrenchSup</value>
+					</item>
+					<item>
+						<label>Candy1 TrechAssist</label> 
+						<value>Candy1 TrechAssist</value>
+					</item>
+					<item>
+						<label>Candy2 TrechAssist</label> 
+						<value>Candy2 TrechAssist</value>
+					</item>
+					<item>
+						<label>Candy3 TrechAssist</label> 
+						<value>Candy3 TrechAssist</value>
+					</item>
+					<item>
+						<label>Dave Surveyor</label> 
+						<value>Dave Surveyor</value>
+					</item>
+				</select1>
+				<input ref="Date">
+					<label>Date:</label>
+				</input>
+				<trigger ref="BasicSave">
+					<label>Save</label>
+				</trigger>
+			</group>
+			<group ref="Where">
+				<label>Where</label>
+				<select1 ref="GridSquare">
+					<label>Grid Square:</label>
+					<item>
+						<label>1A</label> 
+						<value>1A</value>
+					</item>
+					<item>
+						<label>1B</label> 
+						<value>1B</value>
+					</item>
+					<item>
+						<label>1C</label> 
+						<value>1C</value>
+					</item>
+					<item>
+						<label>1D</label> 
+						<value>1D</value>
+					</item>
+					<item>
+						<label>2A</label> 
+						<value>2B</value>
+					</item>
+					<item>
+						<label>2C</label> 
+						<value>2C</value>
+					</item>
+					<item>
+						<label>2D</label> 
+						<value>2D</value>
+					</item>
+					<item>
+						<label>3A</label> 
+						<value>3A</value>
+					</item>
+					<item>
+						<label>3B</label> 
+						<value>3B</value>
+					</item>
+					<item>
+						<label>3C</label> 
+						<value>3C</value>
+					</item>
+					<item>
+						<label>3D</label> 
+						<value></value>
+					</item>
+					<item>
+						<label>3D</label> 
+						<value></value>
+					</item>
+					<item>
+						<label>4A</label> 
+						<value>4A</value>
+					</item>
+					<item>
+						<label>4B</label> 
+						<value>4B</value>
+					</item>
+					<item>
+						<label>4C</label> 
+						<value>4C</value>
+					</item>
+					<item>
+						<label>4D</label> 
+						<value>4D</value>
+					</item>
+					<item>
+						<label>5A</label> 
+						<value>5A</value>
+					</item>
+					<item>
+						<label>5B</label> 
+						<value>5B</value>
+					</item>
+					<item>
+						<label>5C</label> 
+						<value>5C</value>
+					</item>
+					<item>
+						<label>5D</label> 
+						<value>5D</value>
+					</item>
+					<item>
+						<label>6A</label> 
+						<value>6A</value>
+					</item>
+					<item>
+						<label>6B</label> 
+						<value>6B</value>
+					</item>
+					<item>
+						<label>6C</label> 
+						<value>6C</value>
+					</item>
+					<item>
+						<label>6D</label> 
+						<value>6D</value>
+					</item>
+				</select1>
+				<select1 ref="Unit">
+					<label>Unit:</label>
+					<item>
+						<label>Unit 1</label> 
+						<value>U1</value>
+					</item>
+					<item>
+						<label>Unit 2</label> 
+						<value>U2</value>
+					</item>
+					<item>
+						<label>Unit 3</label> 
+						<value>U3</value>
+					</item>
+					<item>
+						<label>Unit 4</label> 
+						<value>U4</value>
+					</item>
+					<item>
+						<label>Unit 5</label> 
+						<value>U5</value>
+					</item>
+					<item>
+						<label>Unit 6</label> 
+						<value>U6</value>
+					</item>
+					<item>
+						<label>Unit 7</label> 
+						<value>U7</value>
+					</item>
+					<item>
+						<label>Unit 8</label> 
+						<value>U8</value>
+					</item>
+					<item>
+						<label>Unit 9</label> 
+						<value>U9</value>
+					</item>
+					<item>
+						<label>Unit 10</label> 
+						<value>U10</value>
+					</item>
+					<item>
+						<label>Unit 11</label> 
+						<value>U11</value>
+					</item>
+					<item>
+						<label>Unit 12</label> 
+						<value>U12</value>
+					</item>
+					<item>
+						<label>Unit 13</label> 
+						<value>U13</value>
+					</item>
+					<item>
+						<label>Unit 14</label> 
+						<value>U14</value>
+					</item>
+					<item>
+						<label>Unit 15</label> 
+						<value>U15</value>
+					</item>
+				</select1 >
+				<trigger ref="SurveyDataFile">
+						<label>Select Survey Data File</label>
+				</trigger>
+				<input ref="SurveyDataComm">
+					<label>Survey Data Comments:</label>
+				</input>
+				<select1 ref="PhLevel">
+					<label>PH Level:</label>
+					<item>
+						<label>N/A</label> 
+						<value>N/A</value>
+					</item>
+					<item>
+						<label>0</label> 
+						<value>0</value>
+					</item>
+					<item>
+						<label>1</label> 
+						<value>1</value>
+					</item>
+					<item>
+						<label>2</label> 
+						<value>2</value>
+					</item>
+					<item>
+						<label>3</label> 
+						<value>3</value>
+					</item>
+					<item>
+						<label>4</label> 
+						<value>4</value>
+					</item>
+					<item>
+						<label>5</label> 
+						<value>5</value>
+					</item>
+					<item>
+						<label>6</label> 
+						<value>6</value>
+					</item>
+					<item>
+						<label>7</label> 
+						<value>7</value>
+					</item>
+					<item>
+						<label>8</label> 
+						<value>8</value>
+					</item>
+					<item>
+						<label>9</label> 
+						<value>9</value>
+					</item>
+					<item>
+						<label>10</label> 
+						<value>10</value>
+					</item>
+					<item>
+						<label>11</label> 
+						<value>11</value>
+					</item>
+					<item>
+						<label>12</label> 
+						<value>12</value>
+					</item>
+					<item>
+						<label>13</label> 
+						<value>13</value>
+					</item>
+					<item>
+						<label>14</label> 
+						<value>14</value>
+					</item>
+				</select1>
+				<select1 ref="ReltoTrenchArea">
+					<label>Relationship to Trench - Area Ref:</label>
+					<item>
+						<label>A</label> 
+						<value>A</value>
+					</item>
+					<item>
+						<label>B</label> 
+						<value>B</value>
+					</item>
+					<item>
+						<label>C</label> 
+						<value>C</value>
+					</item>
+					<item>
+						<label>D</label> 
+						<value>D</value>
+					</item>
+					<item>
+						<label>E</label> 
+						<value>E</value>
+					</item>
+					<item>
+						<label>F</label> 
+						<value>F</value>
+					</item>
+				</select1>
+				<select1 ref="ReltoTrenchType ">
+					<label>Relationship to Trench - Description:</label>
+					<item>
+						<label>Whole area</label> 
+						<value>Whole area</value>
+					</item>
+					<item>
+						<label>Width</label> 
+						<value>Width</value>
+					</item>
+					<item>
+						<label>Diameter</label> 
+						<value>Diameter</value>
+					</item>
+					<item>
+						<label>Height</label> 
+						<value>Height</value>
+					</item>
+					<item>
+						<label>Depth</label> 
+						<value>Depth</value>
+					</item>
+				</select1>
+				<input ref="ReltoTrenchAmount">
+					<label>Relationship to Trench - Amount</label>
+				</input>
+				<select1 ref="ReltoTrenchMeasure">
+					<label>Relationship to Trench - Measurement type</label>
+					<item>
+						<label>mm/s</label> 
+						<value>mm/s</value>
+					</item>
+					<item>
+						<label>cm/s</label> 
+						<value>cm/s</value>
+					</item>
+					<item>
+						<label>metres/s</label> 
+						<value>metre/s</value>
+					</item>
+					<item>
+						<label>km/s</label> 
+						<value>km/s</value>
+					</item>
+				</select1>
+				<trigger ref="AddanotherMeasurement">
+					<label>Add another Measurement</label>
+				</trigger>
+				<trigger ref="WhereSave">
+					<label>Save</label>
+				</trigger>
+			</group>
+			<group ref="UnitDescription">
+				<label>Soil/Fill Options:</label>
+				<select ref="UnitType">
+                    <label>Type of Unit:</label>
+					<item>
+						<label>Soil/ Fill</label> 
+						<value>Soil/Fill</value>
+					</item>
+					<item>
+						<label>Structure</label> 
+						<value>Structure</value>
+					</item>
+					<item>
+						<label>Burial</label> 
+						<value>Burial</value>
+					</item>
+					<item>
+						<label>InSitu</label> 
+						<value>InSitu</value>
+					</item>
+					<item>
+						<label>Dispersed</label> 
+						<value>Dispersed</value>
+					</item>
+					<item>
+						<label>Other Type of Unit</label> 
+						<value>Other Type of Unit</value>
+					</item>
+                </select>
+				<select ref="SoilorFillColour">
+					<label>Soil/Fill Colour:</label>
+					<item>
+						<label>Colour Vocab 1</label> 
+						<value>Col1</value>
+					</item>
+					<item>
+						<label>Colour Vocab 2</label> 
+						<value>Col2</value>
+					</item>
+					<item>
+						<label>Colour Vocab 3</label> 
+						<value>Col3</value>
+					</item>
+				</select>
+				<select ref="SoilorFillTexture">
+					<label>Soil/Fill Texture:</label>
+					<item>
+						<label>Texture Vocab 1</label> 
+						<value>Text1</value>
+					</item>
+					<item>
+						<label>Texture Vocab 2</label> 
+						<value>Text2</value>
+					</item>
+					<item>
+						<label>Texture Vocab 3</label> 
+						<value>Text3</value>
+					</item>
+				</select>
+				<select ref="SoilorFillMatrix">
+					<label>Soil/Fill Matrix:</label>
+					<item>
+						<label>Matrix Vocab 1</label> 
+						<value>Mx1</value>
+					</item>
+					<item>
+						<label>Matrix  Vocab 2</label> 
+						<value>Mx2</value>
+					</item>
+					<item>
+						<label>Matrix  Vocab 3</label> 
+						<value>Mx3</value>
+						</item>
+				</select>
+				<select ref="SoilorFillConstituents">
+					<label>Soil/Fill Constituents:</label>
+					<item>
+						<label>Constituent Vocab 1</label> 
+						<value>Con1</value>
+					</item>
+					<item>
+						<label>Constituent Vocab 2</label> 
+						<value>Con2</value>
+					</item>
+					<item>
+						<label>Constituent Vocab 3</label> 
+						<value>Con3</value>
+					</item>
+				</select>
+				<select ref="SoilorFillHorizonClarity">
+					<label>Soil/Fill Horizon Clarity:</label>
+					<item>
+						<label>Horizon Clarity Vocab 1</label> 
+						<value>HC1</value>
+					</item>
+					<item>
+						<label>Horizon Clarity Vocab 2</label> 
+						<value>HC2</value>
+					</item>
+					<item>
+						<label>Horizon Clarity Vocab 3</label> 
+						<value>HC3</value>
+					</item>
+				</select>
+				<select ref="StructureMajorComponents">
+					<label>Structure-Major Components:</label>
+					<item>
+						<label>Struct. Maj Comp Vocab 1</label> 
+						<value>SMajC1</value>
+					</item>
+					<item>
+						<label>Struct. Maj Comp Vocab 2</label> 
+						<value>SMajC2</value>
+					</item>
+					<item>
+						<label>Struct. Maj Comp Vocab 3</label> 
+						<value>SMajC3</value>
+					</item>
+				</select>
+				<select ref="StructureBonding">
+					<label>Structure-Bonding:</label>
+					<item>
+						<label>Structure-Bonding Vocab 1</label> 
+						<value>SB1</value>
+					</item>
+					<item>
+						<label>Structure-Bonding Vocab 2</label> 
+						<value>SB2</value>
+					</item>
+					<item>
+						<label>Structure-Bonding Vocab 3</label> 
+						<value>SB3</value>
+					</item>
+				</select>
+				<select ref="StructureMinorComponents">
+					<label>Structure-Minor Components:</label>
+					<item>
+						<label>Struct. Min Comp Vocab 1</label> 
+						<value>SMinC1</value>
+					</item>
+					<item>
+						<label>Struct. Min Comp Vocab 2</label> 
+						<value>SMinC2</value>
+					</item>
+					<item>
+						<label>Struct. Min Comp Vocab 3</label> 
+						<value>SMinC3</value>
+					</item>
+				</select>
+				<select ref="StructureDistMarks">
+					<label>Structure-Distinguishing Marks:</label>
+					<item>
+						<label>Struct. Dist. Marks Vocab 1</label> 
+						<value>SDM1</value>
+					</item>
+					<item>
+						<label>Struct. Dist. Marks Vocab 2</label> 
+						<value>SDM2</value>
+					</item>
+					<item>
+						<label>Struct. Dist. Marks Vocab 3</label> 
+						<value>SDM3</value>
+					</item>
+				</select>
+				<input ref="StructureOther">
+					<label>Structure-Other Details:</label>
+				</input>
+				<input ref="Description">
+					<label>Description:</label>
+				</input>
+				<trigger ref="UnitDescSave">
+					<label>Save</label>
+				</trigger>
+			</group>
+          </group>
+        </h:body>
+</h:html>

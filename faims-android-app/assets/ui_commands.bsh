@@ -1,0 +1,5 @@
+onEvent(String ref, String type, String callback) {
+
+	linker.bindViewToEvent(ref, type, callback);
+
+}
