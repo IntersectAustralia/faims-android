@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
@@ -182,4 +185,29 @@ public class FileUtil {
 		FormEntryModel fem = new FormEntryModel(fd);
 		return new FormEntryController(fem);
 	}
+	
+	public static String readFileIntoString(String path) {
+		FileInputStream stream = null;
+		try {
+			stream = new FileInputStream(new File(path));
+		    FileChannel fc = stream.getChannel();
+		    MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+		    /* Instead of using default, pass in a decoder. */
+		    return Charset.defaultCharset().decode(bb).toString();
+		}
+		catch(IOException ioe){
+			return "";
+		}
+		finally {
+			try{
+				stream.close();
+			}
+			catch(Exception e){
+				// continue
+			}
+		}
+	}
+	
 }
+
+

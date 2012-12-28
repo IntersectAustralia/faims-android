@@ -9,6 +9,7 @@ import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.graphics.Color;
 import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -40,6 +41,8 @@ public class Tab {
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
+        
+        linearLayout.setBackgroundColor(Color.WHITE);
 		
 		this.scrollView = new ScrollView(this.context);
         scrollView.addView(linearLayout);
@@ -183,7 +186,7 @@ public class Tab {
 
             @Override
             public View createTabContent(String tag) {
-                return scrollView;
+            	return scrollView;
             }
         });
         

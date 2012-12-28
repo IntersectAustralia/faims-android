@@ -1,5 +1,24 @@
+
+showTabGroup(String label){
+    linker.showTabGroup(label);
+}
+
+showToast(String message) {
+    linker.showToast(message);
+}
+
+showAlert(String title, String message, String okCallback, String cancelCallback){
+    linker.showAlert(title, message, okCallback, cancelCallback);
+}
+
+setFieldValue(String ref, String value){
+    linker.setFieldValue(ref, value);
+}
+
+String getFieldValue(String ref){
+    return linker.getFieldValue(ref);
+}
+    
 onEvent(String ref, String type, String callback) {
-
 	linker.bindViewToEvent(ref, type, callback);
-
 }

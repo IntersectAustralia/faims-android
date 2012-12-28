@@ -16,25 +16,30 @@ public class TabGroup extends Fragment {
 	private Context context;
 	private TabHost tabHost;
 	private LinkedList<Tab> tabs;
+	private String label = "";
 	
 	public TabGroup() {
 		tabs = new LinkedList<Tab>();
 	}
 	
 	@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {	
-		tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
-		tabHost.setup();
+    public View onCreateView(LayoutInflater inflater, 
+    		                  ViewGroup container,
+                              Bundle savedInstanceState) {	
 		
-		/*
-		tabHost.addTab(createTabSpec(tabHost, "Test 1"));
-		tabHost.addTab(createTabSpec(tabHost, "Test 2"));
-		tabHost.addTab(createTabSpec(tabHost, "Test 3"));
-		*/
-		
-		for (Tab tab : tabs) {
-			tabHost.addTab(tab.createTabSpec(tabHost));
+		if (tabHost == null){
+			tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
+			tabHost.setup();
+			
+			/*
+			tabHost.addTab(createTabSpec(tabHost, "Test 1"));
+			tabHost.addTab(createTabSpec(tabHost, "Test 2"));
+			tabHost.addTab(createTabSpec(tabHost, "Test 3"));
+			*/
+			
+			for (Tab tab : tabs) {
+				tabHost.addTab(tab.createTabSpec(tabHost));
+			}
 		}
 		
 		return tabHost;
@@ -75,9 +80,13 @@ public class TabGroup extends Fragment {
 		this.context = context;
 	}
 
-	public void setLabel(String tabGroupLabel) {
+	public void setLabel(String label) {
 		// TODO Auto-generated method stub
-		
+		this.label = label;
+	}
+	
+	public String getLabel(){
+		return this.label;
 	}
 	
 }

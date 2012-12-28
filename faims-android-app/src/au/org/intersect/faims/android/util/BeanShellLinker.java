@@ -5,9 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
+import android.widget.Toast;
 import bsh.EvalError;
 import bsh.Interpreter;
 
@@ -19,7 +25,10 @@ public class BeanShellLinker {
 
 	private AssetManager assets;
 	
-	public BeanShellLinker(AssetManager assets, UIRenderer renderer) {
+	private Activity activity;
+	
+	public BeanShellLinker(Activity activity, AssetManager assets, UIRenderer renderer) {
+		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
 		interpreter = new Interpreter();
@@ -30,7 +39,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void source(String filename) {
+	public void sourceFromAssets(String filename) {
 		try {
     		interpreter.eval(convertStreamToString(assets.open(filename)));
     	} catch (EvalError e) {
@@ -45,29 +54,99 @@ public class BeanShellLinker {
     		interpreter.eval(code);
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
+    		FAIMSLog.log(code);
     	}
 	}
 	
 	public void bindViewToEvent(String ref, String type, final String code) {
-		View view = renderer.getViewByRef(ref);
-		if (view ==  null) {
-			FAIMSLog.log("Can't find view for " + ref);
-			return;
+		try{
+			View view = renderer.getViewByRef(ref);
+			if (view ==  null) {
+				FAIMSLog.log("Can't find view for " + ref);
+				return;
+			}
+			if (type == "click") {
+				view.setOnClickListener(new OnClickListener() {
+	
+					@Override
+					public void onClick(View v) {
+						execute(code);
+					}
+					
+				});
+			} else {
+				FAIMSLog.log("Not implemented");
+			}
 		}
-		if (type == "click") {
-			view.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					execute(code);
-				}
-				
-			});
-		} else {
-			FAIMSLog.log("Not implemented");
+		catch(Exception e){
+			Log.e("FAIMS","Exception binding event to view",e);
 		}
 	}
 
+	public void showTabGroup(String label){
+		try{
+			renderer.showTabGroup(this.activity, label);
+		}
+		catch(Exception e){
+			Log.e("FAIMS", "Exception showing tab group",e);
+		}
+	}
+	
+	public void showToast(String message){
+		try {
+			int duration = Toast.LENGTH_SHORT;
+			Toast toast = Toast.makeText(activity.getApplicationContext(), message, duration);
+			toast.show();
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing toast message",e);
+		}
+	}
+	
+	public void showAlert(final String title, final String message, final String okCallback, final String cancelCallback){
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+		
+		builder.setTitle(title);
+		builder.setMessage(message);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User clicked OK button
+		        	   execute(okCallback);
+		           }
+		       });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User cancelled the dialog
+		        	   execute(cancelCallback);
+		           }
+		       });
+		
+		builder.create().show();
+		
+	}
+	
+	public void setFieldValue(String ref, String value) {
+		try{
+			TextView tv = (TextView) renderer.getViewByRef(ref);
+			tv.setText(value);
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting field value",e);
+		}
+	}
+	
+	public String getFieldValue(String ref){
+		try{
+			TextView tv = (TextView) renderer.getViewByRef(ref);
+			return tv.getText().toString();
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting field value",e);
+			return "";
+		}
+	}
+	
 	private String convertStreamToString(InputStream stream) {
 		BufferedReader br = null;
 		try {

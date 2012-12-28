@@ -11,6 +11,7 @@ import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -35,7 +36,7 @@ public class UIRenderer {
     private LinkedList<TabGroup> tabGroupList;
     
     private HashMap<String, View> viewMap; 
-
+    
     public UIRenderer(FormEntryController fem, Context context) {
         this.fem = fem;
         this.context = context;
@@ -72,6 +73,7 @@ public class UIRenderer {
 	    		TabGroup tabGroup = new TabGroup();
 	    		tabGroup.setContext(context);
 	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
+	    		
 	    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
 	    		tabGroupList.add(tabGroup);
 	    		
@@ -119,6 +121,18 @@ public class UIRenderer {
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
         ft.add(R.id.fragment_content, tabGroupList.get(index));
+        ft.commit();
+    }
+    
+    public void showTabGroup(Activity activity, String label) {
+    	FragmentManager fm = activity.getFragmentManager();
+    	Fragment current = fm.findFragmentById(R.id.fragment_content);
+    	
+	    FragmentTransaction ft = fm.beginTransaction();
+        //ft.add(R.id.fragment_content, tabGroupMap.get(label));
+        //ft.hide(current);
+	    ft.replace(R.id.fragment_content, tabGroupMap.get(label));
+        ft.addToBackStack(null);
         ft.commit();
     }
     

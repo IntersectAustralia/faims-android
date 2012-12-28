@@ -4,6 +4,7 @@ import org.javarosa.form.api.FormEntryController;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -99,8 +100,8 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 		this.renderer.showTabGroup(this, 0);
 		
 		// bind the logic to the ui
-		linker = new BeanShellLinker(getAssets(), renderer);
-		linker.source("ui_commands.bsh");
-		linker.source("test_script.bsh");
+		linker = new BeanShellLinker(this, getAssets(), renderer);
+		linker.sourceFromAssets("ui_commands.bsh");
+		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
 	}
 }
