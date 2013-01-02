@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
 
@@ -60,21 +61,43 @@ public class BeanShellLinker {
 	
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try{
-			View view = renderer.getViewByRef(ref);
-			if (view ==  null) {
-				FAIMSLog.log("Can't find view for " + ref);
-				return;
-			}
+			
 			if (type == "click") {
-				view.setOnClickListener(new OnClickListener() {
-	
-					@Override
-					public void onClick(View v) {
-						execute(code);
-					}
-					
-				});
-			} else {
+				View view = renderer.getViewByRef(ref);
+				if (view ==  null) {
+					Log.e("FAIMS","Can't find view for " + ref);
+					return;
+				}
+				else {
+					view.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							execute(code);
+						}
+					});
+				}
+			}
+			else if (type == "load") {
+				TabGroup tg = renderer.getTabGroupByLabel(ref);
+				if (tg == null){
+					Log.e("FAIMS","Could not find TabGroup with label: " + ref);
+					return;
+				}
+				else{
+					tg.addOnLoadCommand(code);
+				}
+			} 
+			else if (type == "show") {
+				TabGroup tg = renderer.getTabGroupByLabel(ref);
+				if (tg == null){
+					Log.e("FAIMS","Could not find TabGroup with label: " + ref);
+					return;
+				}
+				else{
+					tg.addOnShowCommand(code);
+				}
+			} 
+			else {
 				FAIMSLog.log("Not implemented");
 			}
 		}

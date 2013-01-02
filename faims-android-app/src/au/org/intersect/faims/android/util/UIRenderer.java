@@ -11,7 +11,6 @@ import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -126,11 +125,7 @@ public class UIRenderer {
     
     public void showTabGroup(Activity activity, String label) {
     	FragmentManager fm = activity.getFragmentManager();
-    	Fragment current = fm.findFragmentById(R.id.fragment_content);
-    	
-	    FragmentTransaction ft = fm.beginTransaction();
-        //ft.add(R.id.fragment_content, tabGroupMap.get(label));
-        //ft.hide(current);
+    	FragmentTransaction ft = fm.beginTransaction();
 	    ft.replace(R.id.fragment_content, tabGroupMap.get(label));
         ft.addToBackStack(null);
         ft.commit();
@@ -138,5 +133,9 @@ public class UIRenderer {
     
     public View getViewByRef(String ref) {
     	return viewMap.get(ref);
+    }
+    
+    public TabGroup getTabGroupByLabel(String label){
+    	return this.tabGroupMap.get(label);
     }
 }

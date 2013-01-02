@@ -4,10 +4,10 @@ import org.javarosa.form.api.FormEntryController;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
@@ -100,8 +100,14 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 		this.renderer.showTabGroup(this, 0);
 		
 		// bind the logic to the ui
+		Log.d("FAIMS","Binding logic to the UI");
 		linker = new BeanShellLinker(this, getAssets(), renderer);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
 	}
+	
+	public BeanShellLinker getBeanShellLinker(){
+		return this.linker;
+	}
+
 }
