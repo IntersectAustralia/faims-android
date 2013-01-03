@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import au.org.intersect.faims.android.ui.form.TabGroup;
@@ -151,8 +152,22 @@ public class BeanShellLinker {
 	
 	public void setFieldValue(String ref, String value) {
 		try{
-			TextView tv = (TextView) renderer.getViewByRef(ref);
-			tv.setText(value);
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (obj instanceof TextView){
+				TextView tv = (TextView) obj;
+				tv.setText(value);
+			}
+			else if (obj instanceof Spinner){
+				Spinner spinner = (Spinner) obj;
+				
+				for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
+					if (value.equalsIgnoreCase(spinner.getItemAtPosition(i).toString())){
+						spinner.setSelection(i);
+						break;
+					}
+				}
+			}
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception setting field value",e);
@@ -161,8 +176,17 @@ public class BeanShellLinker {
 	
 	public String getFieldValue(String ref){
 		try{
-			TextView tv = (TextView) renderer.getViewByRef(ref);
-			return tv.getText().toString();
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (obj instanceof TextView){
+				TextView tv = (TextView) obj;
+				return tv.getText().toString();
+			}
+			else if (obj instanceof Spinner){
+				Spinner spinner = (Spinner) obj;
+				return spinner.getSelectedItem().toString();
+			}
+			return "";
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception getting field value",e);
