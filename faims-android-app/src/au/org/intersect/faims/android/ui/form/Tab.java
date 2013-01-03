@@ -64,7 +64,17 @@ public class Tab {
                 switch (input.getDataType()) {
                 // set input type as number
                     case Constants.DATATYPE_INTEGER:
+                        view = new EditText(this.context);
+                        ((TextView) view)
+                                .setInputType(InputType.TYPE_CLASS_NUMBER);
+                        linearLayout.addView(view);
+                        break;
                     case Constants.DATATYPE_DECIMAL:
+                        view = new EditText(this.context);
+                        ((TextView) view)
+                                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                        linearLayout.addView(view);
+                        break;
                     case Constants.DATATYPE_LONG:
                         view = new EditText(this.context);
                         ((TextView) view)
