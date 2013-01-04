@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.javarosa.core.model.Constants;
+import org.javarosa.core.model.QuestionDef;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.form.api.FormEntryPrompt;
 
@@ -18,6 +19,8 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TabHost;
@@ -133,12 +136,32 @@ public class Tab {
                 switch (input.getDataType()) {
                     case Constants.DATATYPE_CHOICE:
                         // check if the type if image to create image slider
-                        if (input.getQuestion()
-                                .getAdditionalAttributes().size() != 0
-                                && input.getQuestion()
-                                .getAdditionalAttribute(null, "type")
-                                .equals("image")) {
+                    	QuestionDef qd = input.getQuestion();
+                        if (qd.getAdditionalAttributes().size() != 0 &&
+                            qd.getAdditionalAttribute(null, "type").equals("image")) {
                             //renderImageSliderForSingleSelection(layout, input);
+                            // check if the type if image to create image slider
+                        }
+                        // Radio Button
+                        else if ("full".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
+                            LinearLayout selectLayout = new LinearLayout(this.context);
+                            selectLayout.setLayoutParams(new LayoutParams(
+                                    LayoutParams.MATCH_PARENT,
+                                    LayoutParams.MATCH_PARENT));
+                            selectLayout.setOrientation(LinearLayout.VERTICAL);
+                            RadioGroup radioGroupLayout = new RadioGroup(this.context);
+                            radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
+                            int rbId = 0;
+                            for (final SelectChoice selectChoice : input.getSelectChoices()) {
+                                RadioButton radioButton = new RadioButton(this.context);
+                                radioButton.setId(rbId++);
+                                radioButton.setText(selectChoice.getValue());
+                                radioGroupLayout.addView(radioButton);
+                            }
+                            selectLayout.addView(radioGroupLayout);
+                            view = selectLayout;
+                            linearLayout.addView(selectLayout);
+                        // Default is single select dropdown
                         } else {
                             Spinner spinner = new Spinner(this.context);
                             List<String> choices = new ArrayList<String>();

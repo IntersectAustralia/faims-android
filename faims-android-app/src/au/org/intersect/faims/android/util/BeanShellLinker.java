@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -177,6 +179,25 @@ public class BeanShellLinker {
 						}
 					}
 				}
+				else if (obj instanceof LinearLayout){
+					LinearLayout ll = (LinearLayout) obj;
+					
+					View child0 = ll.getChildAt(0);
+					
+					if (child0 instanceof RadioGroup){
+						RadioGroup rg = (RadioGroup) child0;
+						for(int i = 0; i < rg.getChildCount(); ++i){
+							View view = rg.getChildAt(i);
+							if (view instanceof RadioButton){
+								RadioButton rb = (RadioButton) view;
+								if (rb.getText().toString().equalsIgnoreCase(value)){
+									rb.setChecked(true);
+									break;
+								}
+							}
+						}
+					}
+				}
 			}
 			
 			else if (valueObj instanceof List<?>){
@@ -225,18 +246,41 @@ public class BeanShellLinker {
 			else if (obj instanceof LinearLayout){
 				LinearLayout ll = (LinearLayout) obj;
 				
-				List<NameValuePair> valueList = new ArrayList<NameValuePair>();
+				View child0 = ll.getChildAt(0);
 				
-				for(int i = 0; i < ll.getChildCount(); ++i){
-					View view = ll.getChildAt(i);
+				if( child0 instanceof CheckBox){
+					List<NameValuePair> valueList = new ArrayList<NameValuePair>();
 					
-					if (view instanceof CheckBox){
-						CheckBox cb = (CheckBox) view;
+					for(int i = 0; i < ll.getChildCount(); ++i){
+						View view = ll.getChildAt(i);
 						
-						valueList.add(new NameValuePair(cb.getText().toString(), "" + cb.isChecked()));
+						if (view instanceof CheckBox){
+							CheckBox cb = (CheckBox) view;
+							valueList.add(new NameValuePair(cb.getText().toString(), "" + cb.isChecked()));
+						}
 					}
+					return valueList;
 				}
-				return valueList;
+				else if (child0 instanceof RadioGroup){
+					RadioGroup rg = (RadioGroup) child0;
+					String value = "";
+					for(int i = 0; i < rg.getChildCount(); ++i){
+						View view = rg.getChildAt(i);
+						
+						if (view instanceof RadioButton){
+							RadioButton rb = (RadioButton) view;
+							if (rb.isChecked()){
+								value = rb.getText().toString();
+								break;
+							}
+						}
+					}
+					return value;
+				}
+				else{
+					Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
+					return "";
+				}
 			}
 			else {
 				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
