@@ -11,11 +11,11 @@ showAlert(String title, String message, String okCallback, String cancelCallback
     linker.showAlert(title, message, okCallback, cancelCallback);
 }
 
-setFieldValue(String ref, String value){
+setFieldValue(String ref, Object value){
     linker.setFieldValue(ref, value);
 }
 
-String getFieldValue(String ref){
+Object getFieldValue(String ref){
     return linker.getFieldValue(ref);
 }
     

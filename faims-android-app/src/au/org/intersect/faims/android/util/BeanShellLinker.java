@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,9 +14,12 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -150,23 +155,54 @@ public class BeanShellLinker {
 		
 	}
 	
-	public void setFieldValue(String ref, String value) {
+	public void setFieldValue(String ref, Object valueObj) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
-			if (obj instanceof TextView){
-				TextView tv = (TextView) obj;
-				tv.setText(value);
-			}
-			else if (obj instanceof Spinner){
-				Spinner spinner = (Spinner) obj;
+			if (valueObj instanceof String){
 				
-				for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
-					if (value.equalsIgnoreCase(spinner.getItemAtPosition(i).toString())){
-						spinner.setSelection(i);
-						break;
+				String value = (String) valueObj;
+				
+				if (obj instanceof TextView){
+					TextView tv = (TextView) obj;
+					tv.setText(value);
+				}
+				else if (obj instanceof Spinner){
+					Spinner spinner = (Spinner) obj;
+					
+					for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
+						if (value.equalsIgnoreCase(spinner.getItemAtPosition(i).toString())){
+							spinner.setSelection(i);
+							break;
+						}
 					}
 				}
+			}
+			
+			else if (valueObj instanceof List<?>){
+				
+				@SuppressWarnings("unchecked")
+				List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
+				
+				if (obj instanceof LinearLayout){
+					LinearLayout ll = (LinearLayout) obj;
+					
+					for(NameValuePair pair : valueList){
+						for(int i = 0; i < ll.getChildCount(); ++i){
+							View view = ll.getChildAt(i);
+							if (view instanceof CheckBox){
+								CheckBox cb = (CheckBox) view;
+								if (cb.getText().toString().equalsIgnoreCase(pair.getName())){
+									cb.setChecked((pair.getValue().equals("true") ? true : false));
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				Log.w("FAIMS","Couldn't set value for ref= " + ref + " obj= " + obj.toString());
 			}
 		}
 		catch(Exception e){
@@ -174,7 +210,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public String getFieldValue(String ref){
+	public Object getFieldValue(String ref){
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
@@ -186,7 +222,26 @@ public class BeanShellLinker {
 				Spinner spinner = (Spinner) obj;
 				return spinner.getSelectedItem().toString();
 			}
-			return "";
+			else if (obj instanceof LinearLayout){
+				LinearLayout ll = (LinearLayout) obj;
+				
+				List<NameValuePair> valueList = new ArrayList<NameValuePair>();
+				
+				for(int i = 0; i < ll.getChildCount(); ++i){
+					View view = ll.getChildAt(i);
+					
+					if (view instanceof CheckBox){
+						CheckBox cb = (CheckBox) view;
+						
+						valueList.add(new NameValuePair(cb.getText().toString(), "" + cb.isChecked()));
+					}
+				}
+				return valueList;
+			}
+			else {
+				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
+				return "";
+			}
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception getting field value",e);
