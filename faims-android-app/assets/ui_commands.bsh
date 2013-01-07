@@ -1,0 +1,28 @@
+
+showTabGroup(String label){
+    linker.showTabGroup(label);
+}
+
+showToast(String message) {
+    linker.showToast(message);
+}
+
+showAlert(String title, String message, String okCallback, String cancelCallback){
+    linker.showAlert(title, message, okCallback, cancelCallback);
+}
+
+setFieldValue(String ref, Object value){
+    linker.setFieldValue(ref, value);
+}
+
+Object getFieldValue(String ref){
+    return linker.getFieldValue(ref);
+}
+    
+onEvent(String ref, String type, String callback) {
+	linker.bindViewToEvent(ref, type, callback);
+}
+
+onFocus(String ref, String focusCallback, String blurCallback) {
+	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
+}
