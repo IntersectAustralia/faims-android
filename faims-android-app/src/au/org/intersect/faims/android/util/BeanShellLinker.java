@@ -40,11 +40,14 @@ public class BeanShellLinker {
 	private AssetManager assets;
 	
 	private Activity activity;
+
+	private DatabaseManager databaseManager;
 	
-	public BeanShellLinker(Activity activity, AssetManager assets, UIRenderer renderer) {
+	public BeanShellLinker(Activity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
+		this.databaseManager = databaseManager;
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -326,52 +329,7 @@ public class BeanShellLinker {
 	public void saveArchEnt(String entity_id, String entity_type, String geo_data, List<?> attributes) {
 		FAIMSLog.log();
 		
-		try {
-			jsqlite.Database db = new jsqlite.Database();
-			/*
-			db.open(assets.open("test-2.3.sqlite").toString(), jsqlite.Constants.SQLITE_OPEN_READONLY);
-	
-			// Callback used to display query results in Android LogCat
-			Callback cb = new Callback() {
-				@Override
-				public void columns(String[] coldata) {
-					FAIMSLog.log("Columns: " + Arrays.toString(coldata));
-				}
-	
-				@Override
-				public void types(String[] types) {
-					FAIMSLog.log("Types: " + Arrays.toString(types));
-				}
-	
-				@Override
-				public boolean newrow(String[] rowdata) {
-					FAIMSLog.log("Row: " + Arrays.toString(rowdata));
-	
-					return false;
-				}
-			};
-	
-			// Test prepare statements
-			String query = "SELECT name, peoples, AsText(Geometry) from Towns where peoples > 350000";
-			Stmt st = db.prepare(query);
-			st.step();
-			st.close();
-	
-			// Test various queries
-			db.exec("select Distance(PointFromText('point(-77.35368 39.04106)', 4326), PointFromText('point(-77.35581 39.01725)', 4326));",
-					cb);
-			db.exec("SELECT name, peoples, AsText(Geometry), GeometryType(Geometry), NumPoints(Geometry), SRID(Geometry), IsValid(Geometry) from Towns where peoples > 350000;",
-					cb);
-			db.exec("SELECT Distance( Transform(MakePoint(4.430174797, 51.01047063, 4326), 32631), Transform(MakePoint(4.43001276, 51.01041585, 4326),32631));",
-					cb);
-	
-			// Close the database
-			db.close();
-			
-			*/
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-		}
+		databaseManager.saveArchEnt(entity_id, entity_type, geo_data, attributes);
 	}
 	
 	public void saveRel(String entity_id, String rel_type, String geo_data, List<?> attributes) {

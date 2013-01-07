@@ -14,6 +14,7 @@ import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.DialogType;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.util.BeanShellLinker;
+import au.org.intersect.faims.android.util.DatabaseManager;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -32,6 +33,8 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 	private String directory;
 	
 	private BeanShellLinker linker;
+	
+	private DatabaseManager databaseManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,8 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 				getString(R.string.render_project_title),
 				getString(R.string.render_project_message));
 		choiceDialog.show();
+		
+		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 	}
 	
 	/*
@@ -101,7 +106,7 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(this, getAssets(), renderer);
+		linker = new BeanShellLinker(this, getAssets(), renderer, databaseManager);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
 	}
