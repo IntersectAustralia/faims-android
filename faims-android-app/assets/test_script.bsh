@@ -1,8 +1,0 @@
-print_message(message) {
-	System.out.println(message);
-}
-
-onEvent("/faims/tabgroup1/tab1/save", "click", "print_message(\"tab group 1 tab 1\")");
-onEvent("/faims/tabgroup1/tab2/save", "click", "print_message(\"tab group 1 tab 2\")");
-onEvent("/faims/tabgroup2/tab1/save", "click", "print_message(\"tab group 2 tab 1\")");
-onEvent("/faims/tabgroup2/tab2/save", "click", "print_message(\"tab group 2 tab 2\")");

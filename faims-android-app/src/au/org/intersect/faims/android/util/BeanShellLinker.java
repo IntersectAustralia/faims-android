@@ -5,11 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-
-import jsqlite.Callback;
-import jsqlite.Stmt;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -334,6 +332,25 @@ public class BeanShellLinker {
 	
 	public void saveRel(String entity_id, String rel_type, String geo_data, List<?> attributes) {
 		FAIMSLog.log();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void populateDropDown(String ref, Collection valuesObj){
+		
+		Object obj = renderer.getViewByRef(ref);
+
+		if (obj instanceof Spinner && valuesObj instanceof ArrayList){
+			Spinner spinner = (Spinner) obj;
+			
+			@SuppressWarnings("unchecked")
+			ArrayList<String> values = (ArrayList<String>) valuesObj;
+			
+			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                    this.activity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    values);
+            spinner.setAdapter(arrayAdapter);
+		}
 	}
 	
 	private String convertStreamToString(InputStream stream) {

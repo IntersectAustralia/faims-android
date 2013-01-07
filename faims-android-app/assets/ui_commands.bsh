@@ -1,5 +1,6 @@
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import java.util.List;
+import java.util.Collection;
 
 showTabGroup(String label){
     linker.showTabGroup(label);
@@ -49,4 +50,7 @@ createAttribute(String name, String text, String vocab, String measure, String c
 	attribute.setMeasure(measure);
 	attribute.setCertainty(certainty);
 	return attribute;
+	
+populateDropDown(String ref, Collection values){
+    linker.populateDropDown(ref, values);
 }
