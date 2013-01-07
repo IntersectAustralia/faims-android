@@ -26,3 +26,7 @@ onEvent(String ref, String type, String callback) {
 onFocus(String ref, String focusCallback, String blurCallback) {
 	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
 }
+
+populateDropDown(String ref, java.util.Collection values){
+    linker.populateDropDown(ref, values);
+}
