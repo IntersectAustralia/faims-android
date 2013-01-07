@@ -135,10 +135,10 @@ public class Tab {
             case Constants.CONTROL_SELECT_ONE:
                 switch (input.getDataType()) {
                     case Constants.DATATYPE_CHOICE:
-                        // check if the type if image to create image slider
                     	QuestionDef qd = input.getQuestion();
-                        if (qd.getAdditionalAttributes().size() != 0 &&
-                            qd.getAdditionalAttribute(null, "type").equals("image")) {
+                        // check if the type if image to create image slider
+                        if ("image".equalsIgnoreCase(input.getQuestion()
+                                .getAdditionalAttribute(null, "type"))) {
                             //renderImageSliderForSingleSelection(layout, input);
                             // check if the type if image to create image slider
                         }
@@ -155,7 +155,7 @@ public class Tab {
                             for (final SelectChoice selectChoice : input.getSelectChoices()) {
                                 RadioButton radioButton = new RadioButton(this.context);
                                 radioButton.setId(rbId++);
-                                radioButton.setText(selectChoice.getValue());
+                                radioButton.setText(selectChoice.getLabelInnerText());
                                 radioGroupLayout.addView(radioButton);
                             }
                             selectLayout.addView(radioGroupLayout);
@@ -167,7 +167,7 @@ public class Tab {
                             List<String> choices = new ArrayList<String>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
-                                choices.add(selectChoice.getValue());
+                                choices.add(selectChoice.getLabelInnerText());
                             }
                             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                                     this.context,
@@ -193,7 +193,7 @@ public class Tab {
                         for (final SelectChoice selectChoice : input
                                 .getSelectChoices()) {
                             CheckBox checkBox = new CheckBox(this.context);
-                            checkBox.setText(selectChoice.getValue());
+                            checkBox.setText(selectChoice.getLabelInnerText());
                             selectLayout.addView(checkBox);
                         }
                         view = selectLayout;

@@ -1,0 +1,3 @@
+onEvent("/faims/tabgroup1/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
+onEvent("/faims/tabgroup2/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
+onEvent("/faims/tabgroup3/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
