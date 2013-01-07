@@ -1,6 +1,6 @@
 package au.org.intersect.faims.android.ui.form;
 
-public class NameValuePair{
+public class NameValuePair {
 	
 	private String name = "";
 	private String value = "";

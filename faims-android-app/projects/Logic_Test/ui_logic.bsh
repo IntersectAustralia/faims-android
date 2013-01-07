@@ -1,3 +1,26 @@
 onEvent("/faims/tabgroup1/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
 onEvent("/faims/tabgroup2/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
 onEvent("/faims/tabgroup3/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
+
+saveEmptyEntity() {
+	List attributes = createAttributeList();
+	saveArchEnt(null, "empty_entity", null, attributes);
+}
+
+saveSimpleEntity1() {
+
+}
+
+saveSimpleEntity2() {
+
+}
+
+saveSimpleEntity3() {
+
+}
+
+
+onEvent("/faims/tabgroup1/tab/save", "click", "saveEmptyEntity()");
+onEvent("/faims/tabgroup2/tab/save", "click", "saveSimpleEntity1()");
+onEvent("/faims/tabgroup3/tab/save", "click", "saveSimpleEntity2()");
+onEvent("/faims/tabgroup4/tab1/save", "click", "saveSimpleEntity3()");

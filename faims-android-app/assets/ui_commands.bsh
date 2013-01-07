@@ -1,3 +1,5 @@
+import au.org.intersect.faims.android.ui.form.EntityAttribute;
+import java.util.List;
 
 showTabGroup(String label){
     linker.showTabGroup(label);
@@ -25,4 +27,26 @@ onEvent(String ref, String type, String callback) {
 
 onFocus(String ref, String focusCallback, String blurCallback) {
 	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
+}
+
+saveArchEnt(String entity_id, String entity_type, String geo_data, List attributes) {
+	linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+}
+
+saveRel(String entity_id, String rel_type, String geo_data, List attributes) {
+	linker.saveRel(entity_id, rel_type, geo_data, attributes);
+}
+
+createAttributeList() {
+	return new ArrayList();
+}
+
+createAttribute(String name, String text, String vocab, String measure, String certainty) {
+	EntityAttribute attribute = new EntityAttribute();
+	attribute.setName(name);
+	attribute.setText(text);
+	attribute.setVoab(vocab);
+	attribute.setMeasure(measure);
+	attribute.setCertainty(certainty);
+	return attribute;
 }
