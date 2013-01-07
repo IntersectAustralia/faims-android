@@ -22,3 +22,7 @@ Object getFieldValue(String ref){
 onEvent(String ref, String type, String callback) {
 	linker.bindViewToEvent(ref, type, callback);
 }
+
+onFocus(String ref, String focusCallback, String blurCallback) {
+	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
+}

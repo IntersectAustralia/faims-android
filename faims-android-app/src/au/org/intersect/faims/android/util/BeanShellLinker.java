@@ -14,6 +14,7 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -104,13 +105,38 @@ public class BeanShellLinker {
 				else{
 					tg.addOnShowCommand(code);
 				}
-			} 
+			}
 			else {
 				FAIMSLog.log("Not implemented");
 			}
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception binding event to view",e);
+		}
+	}
+
+	public void bindFocusAndBlurEvent(String ref, final String focusCallback, final String blurCallBack){
+		View view = renderer.getViewByRef(ref);
+		if (view ==  null) {
+			Log.e("FAIMS","Can't find view for " + ref);
+			return;
+		}
+		else {
+			view.setOnFocusChangeListener(new OnFocusChangeListener() {
+				
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+					if(hasFocus){
+						if(focusCallback != null && !focusCallback.isEmpty()){
+							execute(focusCallback);
+						}
+					}else{
+						if(blurCallBack != null && !blurCallBack.isEmpty()){
+							execute(blurCallBack);
+						}
+					}
+				}
+			});
 		}
 	}
 
