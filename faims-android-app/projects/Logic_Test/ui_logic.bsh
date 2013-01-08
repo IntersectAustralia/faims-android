@@ -1,6 +1,6 @@
-onEvent("/faims/tabgroup1/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
-onEvent("/faims/tabgroup2/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
-onEvent("/faims/tabgroup3/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
+onEvent("empty_entity/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
+onEvent("simple_entity_1/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
+onEvent("simple_entity_2/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
 
 saveEmptyEntity() {
 	List attributes = createAttributeList();
@@ -8,19 +8,30 @@ saveEmptyEntity() {
 }
 
 saveSimpleEntity1() {
-
+	List attributes = createAttributeList();
+	attributes.add(createAttribute("name", getFieldValue("simple_entity_1/tab/name"), null, null, null));
+	attributes.add(createAttribute("count", getFieldValue("simple_entity_1/tab/count"), null, null, null));
+	attributes.add(createAttribute("date", getFieldValue("simple_entity_1/tab/date"), null, null, null));
+	attributes.add(createAttribute("time", getFieldValue("simple_entity_1/tab/time"), null, null, null));
+	attributes.add(createAttribute("location", getFieldValue("simple_entity_1/tab/location"), null, null, null));
+	List values = getFieldValue("simple_entity_1/tab/type");
+	for (Object o : values) {
+		attributes.add(createAttribute("type", o.getValue(), null, null, null));
+	}
+	saveArchEnt(null, "simple_entity_1", null, attributes);
 }
 
 saveSimpleEntity2() {
-
+	List attributes = createAttributeList();
+	saveArchEnt(null, "simple_entity_2", null, attributes);
 }
 
 saveSimpleEntity3() {
-
+	List attributes = createAttributeList();
+	saveArchEnt(null, "simple_entity_3", null, attributes);
 }
 
-
-onEvent("/faims/tabgroup1/tab/save", "click", "saveEmptyEntity()");
-onEvent("/faims/tabgroup2/tab/save", "click", "saveSimpleEntity1()");
-onEvent("/faims/tabgroup3/tab/save", "click", "saveSimpleEntity2()");
-onEvent("/faims/tabgroup4/tab1/save", "click", "saveSimpleEntity3()");
+onEvent("empty_entity/tab/save", "click", "saveEmptyEntity()");
+onEvent("simple_entity_1/tab/save", "click", "saveSimpleEntity1()");
+onEvent("simple_entity_2/tab/save", "click", "saveSimpleEntity2()");
+onEvent("simple_entity_3/tab1/save", "click", "saveSimpleEntity3()");

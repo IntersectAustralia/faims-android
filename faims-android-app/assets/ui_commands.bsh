@@ -46,10 +46,11 @@ createAttribute(String name, String text, String vocab, String measure, String c
 	EntityAttribute attribute = new EntityAttribute();
 	attribute.setName(name);
 	attribute.setText(text);
-	attribute.setVoab(vocab);
+	attribute.setVocab(vocab);
 	attribute.setMeasure(measure);
 	attribute.setCertainty(certainty);
 	return attribute;
+}
 	
 populateDropDown(String ref, Collection values){
     linker.populateDropDown(ref, values);

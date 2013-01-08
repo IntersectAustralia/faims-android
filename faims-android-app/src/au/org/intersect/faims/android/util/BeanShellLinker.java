@@ -18,12 +18,16 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
+import au.org.intersect.faims.android.ui.form.CustomCheckBox;
+import au.org.intersect.faims.android.ui.form.CustomRadioButton;
+import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
@@ -69,7 +73,8 @@ public class BeanShellLinker {
     		interpreter.eval(code);
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
-    		FAIMSLog.log(code);
+    		
+    		showWarning("Logic Error", "Error encountered in logic script", "");
     	}
 	}
 	
@@ -188,6 +193,22 @@ public class BeanShellLinker {
 		
 	}
 	
+	public void showWarning(final String title, final String message, final String okCallback){
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+		
+		builder.setTitle(title);
+		builder.setMessage(message);
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		               // User clicked OK button
+		        	   execute(okCallback);
+		           }
+		       });
+		builder.create().show();
+		
+	}
+	
 	public void setFieldValue(String ref, Object valueObj) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -204,7 +225,8 @@ public class BeanShellLinker {
 					Spinner spinner = (Spinner) obj;
 					
 					for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
-						if (value.equalsIgnoreCase(spinner.getItemAtPosition(i).toString())){
+						NameValuePair pair = (NameValuePair) spinner.getItemAtPosition(i);
+						if (value.equalsIgnoreCase(pair.getValue())){
 							spinner.setSelection(i);
 							break;
 						}
@@ -219,15 +241,23 @@ public class BeanShellLinker {
 						RadioGroup rg = (RadioGroup) child0;
 						for(int i = 0; i < rg.getChildCount(); ++i){
 							View view = rg.getChildAt(i);
-							if (view instanceof RadioButton){
-								RadioButton rb = (RadioButton) view;
-								if (rb.getText().toString().equalsIgnoreCase(value)){
+							if (view instanceof CustomRadioButton){
+								CustomRadioButton rb = (CustomRadioButton) view;
+								if (rb.getValue().toString().equalsIgnoreCase(value)){
 									rb.setChecked(true);
 									break;
 								}
 							}
 						}
 					}
+				}
+				else if (obj instanceof DatePicker) {
+					DatePicker date = (DatePicker) obj;
+					DateUtil.setDatePicker(date, value);
+				} 
+				else if (obj instanceof TimePicker) {
+					TimePicker time = (TimePicker) obj;
+					DateUtil.setTimePicker(time, value);
 				}
 			}
 			
@@ -242,10 +272,10 @@ public class BeanShellLinker {
 					for(NameValuePair pair : valueList){
 						for(int i = 0; i < ll.getChildCount(); ++i){
 							View view = ll.getChildAt(i);
-							if (view instanceof CheckBox){
-								CheckBox cb = (CheckBox) view;
-								if (cb.getText().toString().equalsIgnoreCase(pair.getName())){
-									cb.setChecked((pair.getValue().equals("true") ? true : false));
+							if (view instanceof CustomCheckBox){
+								CustomCheckBox cb = (CustomCheckBox) view;
+								if (cb.getValue().toString().equalsIgnoreCase(pair.getValue())){
+									cb.setChecked(true);
 									break;
 								}
 							}
@@ -285,9 +315,11 @@ public class BeanShellLinker {
 					for(int i = 0; i < ll.getChildCount(); ++i){
 						View view = ll.getChildAt(i);
 						
-						if (view instanceof CheckBox){
-							CheckBox cb = (CheckBox) view;
-							valueList.add(new NameValuePair(cb.getText().toString(), "" + cb.isChecked()));
+						if (view instanceof CustomCheckBox){
+							CustomCheckBox cb = (CustomCheckBox) view;
+							if (cb.isChecked()) {
+								valueList.add(new NameValuePair(cb.getText().toString(), cb.getValue()));
+							}
 						}
 					}
 					return valueList;
@@ -298,10 +330,10 @@ public class BeanShellLinker {
 					for(int i = 0; i < rg.getChildCount(); ++i){
 						View view = rg.getChildAt(i);
 						
-						if (view instanceof RadioButton){
-							RadioButton rb = (RadioButton) view;
+						if (view instanceof CustomRadioButton){
+							CustomRadioButton rb = (CustomRadioButton) view;
 							if (rb.isChecked()){
-								value = rb.getText().toString();
+								value = rb.getValue();
 								break;
 							}
 						}
@@ -312,6 +344,14 @@ public class BeanShellLinker {
 					Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
 					return "";
 				}
+			}
+			else if (obj instanceof DatePicker) {
+				DatePicker date = (DatePicker) obj;
+				return DateUtil.getDate(date);
+			} 
+			else if (obj instanceof TimePicker) {
+				TimePicker time = (TimePicker) obj;
+				return DateUtil.getTime(time);
 			}
 			else {
 				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
@@ -324,13 +364,13 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void saveArchEnt(String entity_id, String entity_type, String geo_data, List<?> attributes) {
+	public void saveArchEnt(String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 		
 		databaseManager.saveArchEnt(entity_id, entity_type, geo_data, attributes);
 	}
 	
-	public void saveRel(String entity_id, String rel_type, String geo_data, List<?> attributes) {
+	public void saveRel(String entity_id, String rel_type, String geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 	}
 	

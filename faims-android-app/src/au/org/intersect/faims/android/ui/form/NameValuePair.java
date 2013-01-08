@@ -18,6 +18,10 @@ public class NameValuePair {
 		return this.value;
 	}
 	
+	public String toString() {
+		return name;
+	}
+	
 	public String toJSON(){
 		return "{\"name\":\"" + this.name + "\",\"value\":\"" + this.value + "\"}";
 	}

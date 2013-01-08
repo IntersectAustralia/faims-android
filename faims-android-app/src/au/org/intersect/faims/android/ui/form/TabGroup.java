@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class TabGroup extends Fragment {
 	
 	private Context context;
 	private TabHost tabHost;
+	private HashMap<String, Tab> tabMap;
 	private LinkedList<Tab> tabs;
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
@@ -27,6 +29,7 @@ public class TabGroup extends Fragment {
 	
 	
 	public TabGroup() {
+		tabMap = new HashMap<String, Tab>();
 		tabs = new LinkedList<Tab>();
 		onLoadCommands = new ArrayList<String>();
 		onShowCommands = new ArrayList<String>();
@@ -89,8 +92,9 @@ public class TabGroup extends Fragment {
 	}
 	*/
 	
-	public Tab createTab(String name) {
-		Tab tab = new Tab(context, name);
+	public Tab createTab(String name, String label) {
+		Tab tab = new Tab(context, name, label);
+		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;
 	}
@@ -100,7 +104,6 @@ public class TabGroup extends Fragment {
 	}
 
 	public void setLabel(String label) {
-		// TODO Auto-generated method stub
 		this.label = label;
 	}
 	

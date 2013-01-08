@@ -1,19 +1,21 @@
 package au.org.intersect.faims.android.util;
 
+import android.util.Log;
+
 
 // custom logging class to automatically find the calling class and method
 public class FAIMSLog {
 	
 	public static void log() {
-		System.out.println(getCaller());
+		Log.d("FAIMS", getCaller());
 	}
 
 	public static void log(String message) {
-		System.out.println(getCaller() + ": " + message);
+		Log.d("FAIMS", getCaller() + ": " + message);
 	}
 	
 	public static void log(Exception e) {
-		System.out.println(getCaller() + ": " + e.toString());
+		Log.d("FAIMS", getCaller() + ": " + e.toString());
 	}
 	
 	public static String getCaller()

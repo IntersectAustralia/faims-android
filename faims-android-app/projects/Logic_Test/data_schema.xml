@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="LogicTest" preparer="Nobody">
+
+  <RelationshipElement name="AboveBelow" type="hierarchy">
+    <description>
+      Indicates that one element is above or below another element.
+    </description>
+    <parent>
+      Above
+    </parent>
+    <child>
+      Below
+    </child>
+  </RelationshipElement>
+
+  <ArchaeologicalElement type="Empty">
+    <description>
+      An empty entity
+    </description>
+  </ArchaeologicalElement>
+  
+  <ArchaeologicalElement type="Simple">
+    <description>
+      An simple entity
+    </description>
+    <property type="string" name="name" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="count" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="date" name="date" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="time" name="time" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Loc A</term>
+        <term>Loc B</term>
+        <term>Loc C</term>
+        <term>Loc D</term>
+      </lookup>
+    </property>
+    <property type="dropdown" name="type" minCardinality="1" maxCardinality="1">
+	  <bundle>DOI</bundle>
+      <lookup>
+        <term>Type A</term>
+        <term>Type B</term>
+        <term>Type C</term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+  </ArchaeologicalElement>
+  
+</dataSchema>

@@ -15,11 +15,9 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -35,10 +33,12 @@ public class Tab {
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private String name;
+	private String label;
 
-	public Tab(Context context, String name) {
+	public Tab(Context context, String name, String label) {
 		this.context = context;
 		this.name = name;
+		this.label = label;
 		
 		this.linearLayout = new LinearLayout(context);
         linearLayout.setLayoutParams(new LayoutParams(
@@ -153,9 +153,10 @@ public class Tab {
                             radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
                             int rbId = 0;
                             for (final SelectChoice selectChoice : input.getSelectChoices()) {
-                                RadioButton radioButton = new RadioButton(this.context);
+                            	CustomRadioButton radioButton = new CustomRadioButton(this.context);
                                 radioButton.setId(rbId++);
                                 radioButton.setText(selectChoice.getLabelInnerText());
+                                radioButton.setValue(selectChoice.getValue());
                                 radioGroupLayout.addView(radioButton);
                             }
                             selectLayout.addView(radioGroupLayout);
@@ -163,13 +164,14 @@ public class Tab {
                             linearLayout.addView(selectLayout);
                         // Default is single select dropdown
                         } else {
-                            Spinner spinner = new Spinner(this.context);
-                            List<String> choices = new ArrayList<String>();
+                        	Spinner spinner = new Spinner(this.context);
+                            List<NameValuePair> choices = new ArrayList<NameValuePair>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
-                                choices.add(selectChoice.getLabelInnerText());
+                            	NameValuePair pair = new NameValuePair(selectChoice.getLabelInnerText(), selectChoice.getValue());
+                                choices.add(pair);
                             }
-                            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                            ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
                                     this.context,
                                     android.R.layout.simple_spinner_dropdown_item,
                                     choices);
@@ -192,8 +194,9 @@ public class Tab {
                         selectLayout.setOrientation(LinearLayout.VERTICAL);
                         for (final SelectChoice selectChoice : input
                                 .getSelectChoices()) {
-                            CheckBox checkBox = new CheckBox(this.context);
+                        	CustomCheckBox checkBox = new CustomCheckBox(this.context);
                             checkBox.setText(selectChoice.getLabelInnerText());
+                            checkBox.setValue(selectChoice.getValue());
                             selectLayout.addView(checkBox);
                         }
                         view = selectLayout;
@@ -223,9 +226,17 @@ public class Tab {
             }
         });
         
-        tabSpec.setIndicator(name);
+        tabSpec.setIndicator(label);
         
 		return tabSpec;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 
 

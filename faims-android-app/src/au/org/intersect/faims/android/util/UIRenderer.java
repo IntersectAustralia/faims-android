@@ -34,14 +34,21 @@ public class UIRenderer {
     private HashMap<String, TabGroup> tabGroupMap;
     private LinkedList<TabGroup> tabGroupList;
     
+    private HashMap<String, Tab> tabMap;
+    private LinkedList<Tab> tabList;
+    
     private HashMap<String, View> viewMap; 
+    private LinkedList<View> viewList;
     
     public UIRenderer(FormEntryController fem, Context context) {
         this.fem = fem;
         this.context = context;
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
+        this.tabMap = new HashMap<String, Tab>();
+        this.tabList = new LinkedList<Tab>(); 
         this.viewMap = new HashMap<String, View>();
+        this.viewList = new LinkedList<View>(); 
     }
 
     /**
@@ -73,7 +80,9 @@ public class UIRenderer {
 	    		tabGroup.setContext(context);
 	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
 	    		
-	    		tabGroupMap.put(tabGroupCaption.getQuestionText(), tabGroup);
+	    		String tabGroupName = tabGroupCaption.getIndex().getReference().getNameLast();
+	    		FAIMSLog.log(tabGroupName);
+	    		tabGroupMap.put(tabGroupName, tabGroup);
 	    		tabGroupList.add(tabGroup);
 	    		
 	            // descend into group
@@ -87,20 +96,26 @@ public class UIRenderer {
 	                	
 	                	GroupDef tabElement = (GroupDef) element;
 	                	FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
-	                    Tab tab = tabGroup.createTab(tabCaption.getQuestionText());
 	                    
-	                    System.out.println(tabCaption.getQuestionText());
+	                	String tabName = tabCaption.getIndex().getReference().getNameLast();
+	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText());	                 
 	                	
+	                	FAIMSLog.log(tabGroupName + "/" + tabName);
+	                    tabMap.put(tabGroupName + "/" + tabName, tab);
+	                    tabList.add(tab);
+	                    
 	                    FormIndex inputIndex = this.fem.getModel().incrementIndex(tabIndex, true);
 	                    
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        View view = tab.addInput(input);
 	                        
-	                        // use paths as ids
-	                        System.out.println(input.getIndex().getReference().toString().replaceAll("\\[[^\\]*].", ""));
-	                        viewMap.put(input.getIndex().getReference().toString().replaceAll("\\[[^\\]*].", ""), view);
-	
+	                        String viewName = input.getIndex().getReference().getNameLast();
+	                        
+	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
+	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
+	                        viewList.add(view);
+	                        
 	                        inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
 	                    }
 	                    
@@ -123,10 +138,10 @@ public class UIRenderer {
         ft.commit();
     }
     
-    public void showTabGroup(Activity activity, String label) {
+    public void showTabGroup(Activity activity, String name) {
     	FragmentManager fm = activity.getFragmentManager();
     	FragmentTransaction ft = fm.beginTransaction();
-	    ft.replace(R.id.fragment_content, tabGroupMap.get(label));
+	    ft.replace(R.id.fragment_content, tabGroupMap.get(name));
         ft.addToBackStack(null);
         ft.commit();
     }

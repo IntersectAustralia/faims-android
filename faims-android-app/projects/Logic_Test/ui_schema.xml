@@ -10,14 +10,14 @@
       <instance>
         <faims id="tabgroup_example">
           <!-- Empty Arch Entity -->
-          <tabgroup1>
+          <empty_entity>
             <tab>
               <save></save>
               <next></next>
             </tab>
-          </tabgroup1>
+          </empty_entity>
           <!-- Simple Arch Entity with free text only -->
-          <tabgroup2>
+          <simple_entity_1>
             <tab>
               <name></name>
               <count></count>
@@ -28,9 +28,9 @@
               <save></save>
               <next></next>
             </tab>
-          </tabgroup2>
+          </simple_entity_1>
           <!-- Simple Arch Entity with vocabs, measures and certainties-->
-          <tabgroup3>
+          <simple_entity_2>
             <tab>
               <name></name>
               <count></count>
@@ -44,9 +44,9 @@
               <save></save>
               <next></next>
             </tab>
-          </tabgroup3>
-          <!-- Complex Arch Entity with vocabs, measures and certainties-->
-          <tabgroup4>
+          </simple_entity_2>
+          <!-- Simple Arch Entity with vocabs, measures and certainties in multiple tabs -->
+          <simple_entity_3>
             <tab1>
               <name></name>
               <count></count>
@@ -63,37 +63,37 @@
               <location-certainty></location-certainty>
               <type></type>
             </tab3>
-          </tabgroup4>
+          </simple_entity_3>
         </faims>
       </instance>
 
-      <bind nodeset="/faims/tabgroup2/tab/name" type="string"/>
-      <bind nodeset="/faims/tabgroup2/tab/count" type="integer"/>
-      <bind nodeset="/faims/tabgroup2/tab/date" type="date"/>
-      <bind nodeset="/faims/tabgroup2/tab/time" type="time"/>
+      <bind nodeset="/faims/simple_entity_1/tab/name" type="string"/>
+      <bind nodeset="/faims/simple_entity_1/tab/count" type="integer"/>
+      <bind nodeset="/faims/simple_entity_1/tab/date" type="date"/>
+      <bind nodeset="/faims/simple_entity_1/tab/time" type="time"/>
 
-      <bind nodeset="/faims/tabgroup3/tab/name" type="string"/>
-      <bind nodeset="/faims/tabgroup3/tab/count" type="integer"/>
-      <bind nodeset="/faims/tabgroup3/tab/count-description" type="string"/>
-      <bind nodeset="/faims/tabgroup3/tab/count-certainty" type="integer"/>
-      <bind nodeset="/faims/tabgroup3/tab/date" type="date"/>
-      <bind nodeset="/faims/tabgroup3/tab/time" type="time"/>
-      <bind nodeset="/faims/tabgroup3/tab/location-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_2/tab/name" type="string"/>
+      <bind nodeset="/faims/simple_entity_2/tab/count" type="integer"/>
+      <bind nodeset="/faims/simple_entity_2/tab/count-description" type="string"/>
+      <bind nodeset="/faims/simple_entity_2/tab/count-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_2/tab/date" type="date"/>
+      <bind nodeset="/faims/simple_entity_2/tab/time" type="time"/>
+      <bind nodeset="/faims/simple_entity_2/tab/location-certainty" type="integer"/>
 
-      <bind nodeset="/faims/tabgroup4/tab1/name" type="string"/>
-      <bind nodeset="/faims/tabgroup4/tab1/count" type="integer"/>
-      <bind nodeset="/faims/tabgroup4/tab1/count-description" type="string"/>
-      <bind nodeset="/faims/tabgroup4/tab1/count-certainty" type="integer"/>
-      <bind nodeset="/faims/tabgroup4/tab2/date" type="date"/>
-      <bind nodeset="/faims/tabgroup4/tab2/time" type="time"/>
-      <bind nodeset="/faims/tabgroup4/tab3/location-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_3/tab1/name" type="string"/>
+      <bind nodeset="/faims/simple_entity_3/tab1/count" type="integer"/>
+      <bind nodeset="/faims/simple_entity_3/tab1/count-description" type="string"/>
+      <bind nodeset="/faims/simple_entity_3/tab1/count-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_3/tab2/date" type="date"/>
+      <bind nodeset="/faims/simple_entity_3/tab2/time" type="time"/>
+      <bind nodeset="/faims/simple_entity_3/tab3/location-certainty" type="integer"/>
 
     </model>
   </h:head>
 
   <h:body>
-    <group ref="tabgroup1" faims_archent_id="empty_entity">
-      <label>empty_entity</label>
+    <group ref="empty_entity" faims_archent_id="empty_entity">
+      <label>Empty Entity Example</label>
       <group ref="tab">
         <label>Empty Entity</label>
         <trigger ref="save">
@@ -104,8 +104,8 @@
         </trigger>
       </group>
     </group>
-    <group ref="tabgroup2" faims_archent_id="simple_entity">
-      <label>simple_entity_1</label>
+    <group ref="simple_entity_1" faims_archent_id="simple_entity">
+      <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 1</label>
         <input ref="name" faims_attribute_name="name">
@@ -123,39 +123,15 @@
         <select1 ref="location" faims_attribute_name="location">
           <label>Location:</label>
           <item>
-            <label>Loc A</label>
-            <value>loca</value>
-          </item>
-          <item>
-            <label>Loc B</label>
-            <value>locb</value>
-          </item>
-          <item>
-            <label>Loc C</label>
-            <value>locc</value>
-          </item>
-          <item>
-            <label>Loc D</label>
-            <value>locd</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select1>
         <select ref="type" faims_attribute_name="type">
           <label>Type:</label>
           <item>
-            <label>Type A</label>
-            <value>typea</value>
-          </item>
-          <item>
-            <label>Type B</label>
-            <value>typeb</value>
-          </item>
-          <item>
-            <label>Type C</label>
-            <value>typec</value>
-          </item>
-          <item>
-            <label>Type D</label>
-            <value>typed</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select>
         <trigger ref="save">
@@ -166,8 +142,8 @@
         </trigger>
       </group>
     </group>
-    <group ref="tabgroup3" faims_archent_id="simple_entity">
-      <label>simple_entity_2</label>
+    <group ref="simple_entity_2" faims_archent_id="simple_entity">
+      <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 2</label>
         <input ref="name" faims_attribute_name="name">
@@ -191,20 +167,8 @@
         <select1 ref="location" faims_attribute_name="location">
           <label>Location:</label>
           <item>
-            <label>Loc A</label>
-            <value>loca</value>
-          </item>
-          <item>
-            <label>Loc B</label>
-            <value>locb</value>
-          </item>
-          <item>
-            <label>Loc C</label>
-            <value>locc</value>
-          </item>
-          <item>
-            <label>Loc D</label>
-            <value>locd</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select1>
         <input ref="location-certainty" faims_attribute_name="location_certainty">
@@ -213,20 +177,8 @@
         <select ref="type" faims_attribute_name="type">
           <label>Type:</label>
           <item>
-            <label>Type A</label>
-            <value>typea</value>
-          </item>
-          <item>
-            <label>Type B</label>
-            <value>typeb</value>
-          </item>
-          <item>
-            <label>Type C</label>
-            <value>typec</value>
-          </item>
-          <item>
-            <label>Type D</label>
-            <value>typed</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select>
         <trigger ref="save">
@@ -237,10 +189,10 @@
         </trigger>
       </group>
     </group>
-    <group ref="tabgroup4" faims_archent_id="simple_entity">
-      <label>simple_entity_3</label>
+    <group ref="simple_entity_3" faims_archent_id="simple_entity">
+      <label>Simple Entity Example</label>
       <group ref="tab1">
-        <label>Simple Entity 3 Tab 1</label>
+        <label>Simple Entity 3 T1</label>
         <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
         </input>
@@ -258,7 +210,7 @@
         </trigger>
       </group>
       <group ref="tab2">
-        <label>Simple Entity 3 Tab 2</label>
+        <label>Simple Entity 3 T2</label>
         <input ref="date" faims_attribute_name="date">
           <label>Date:</label>
         </input>
@@ -267,24 +219,12 @@
         </input>
       </group>
       <group ref="tab3">
-        <label>Simple Entity 3 Tab 3</label>
+        <label>Simple Entity 3 T3</label>
         <select1 ref="location" faims_attribute_name="location" appearance="full">
           <label>Location:</label>
           <item>
-            <label>Loc A</label>
-            <value>loca</value>
-          </item>
-          <item>
-            <label>Loc B</label>
-            <value>locb</value>
-          </item>
-          <item>
-            <label>Loc C</label>
-            <value>locc</value>
-          </item>
-          <item>
-            <label>Loc D</label>
-            <value>locd</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select1>
         <input ref="location-certainty" faims_attribute_name="location_certainty">
@@ -293,20 +233,8 @@
         <select ref="type" faims_attribute_name="type">
           <label>Type:</label>
           <item>
-            <label>Type A</label>
-            <value>typea</value>
-          </item>
-          <item>
-            <label>Type B</label>
-            <value>typeb</value>
-          </item>
-          <item>
-            <label>Type C</label>
-            <value>typec</value>
-          </item>
-          <item>
-            <label>Type D</label>
-            <value>typed</value>
+            <label>dummy</label>
+            <value>dummy</value>
           </item>
         </select>
       </group>
