@@ -24,7 +24,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 	
 	@Test
 	public void showProjectTest(){
-/**		
+
 		String projectName = getNewProjectName(projectBaseName);
 				
 		ShowProjectActivity activity = new ShowProjectActivity();
@@ -87,7 +87,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		actualValue = (String) activity.getBeanShellLinker().getFieldValue(field2Ref);
 		assertEquals("Set field Two using button", expectedValueF1, actualValue);
 
-**/
+
 	}
 
 }
