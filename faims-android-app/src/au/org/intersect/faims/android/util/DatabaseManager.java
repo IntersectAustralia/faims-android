@@ -1,12 +1,15 @@
 package au.org.intersect.faims.android.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import jsqlite.Callback;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
+import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 
 public class DatabaseManager {
 
@@ -104,4 +107,99 @@ public class DatabaseManager {
 		}
 	}
 	
+	public Object fetchArchEnt(String id){
+		
+		try {
+			jsqlite.Database db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid HAVINg max(valuetimestamp)) AS latestValue JOIN attributekey USING (attributeid)";
+			Stmt stmt = db.prepare(query);
+			stmt.bind(1, id);
+			Collection<EntityAttribute> archAttributes = new ArrayList<EntityAttribute>();
+			while(stmt.step()){
+				EntityAttribute archAttribute = new EntityAttribute();
+				archAttribute.setName(stmt.column_string(0));
+				archAttribute.setVocab(Integer.toString(stmt.column_int(1)));
+				archAttribute.setMeasure(Integer.toString(stmt.column_int(2)));
+				archAttribute.setText(stmt.column_string(3));
+				archAttribute.setCertainty(Double.toString(stmt.column_double(4)));
+				archAttributes.add(archAttribute);
+			}
+			db.close();
+
+			return archAttributes;
+		} catch (jsqlite.Exception e) {
+			FAIMSLog.log(e);
+		}
+		return null;
+	}
+	
+	public Object fetchRel(String id){
+		
+		try {
+			jsqlite.Database db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String query = "SELECT relationshipid, attributename, vocabname, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid = (select relationshipid from relnvalue limit 1) GROUP BY relationshipid, attributeid HAVINg max(relnvaluetimestamp)) AS latestValue JOIN attributekey USING (attributeid) JOIN vocabulary USING (vocabid);";
+			Stmt stmt = db.prepare(query);
+			stmt.bind(1, id);
+			Collection<RelationshipAttribute> relAttributes = new ArrayList<RelationshipAttribute>();
+			while(stmt.step()){
+				RelationshipAttribute relAttribute = new RelationshipAttribute();
+				relAttribute.setName(stmt.column_string(0));
+				relAttribute.setVocab(Integer.toString(stmt.column_int(1)));
+				relAttribute.setText(stmt.column_string(2));
+				relAttributes.add(relAttribute);
+			}
+			db.close();
+
+			return relAttributes;
+		} catch (jsqlite.Exception e) {
+			FAIMSLog.log(e);
+		}
+		return null;
+	}
+
+	public Object fetchOne(String query){
+		
+		try {
+			jsqlite.Database db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			Stmt stmt = db.prepare(query);
+			Collection<String> results = new ArrayList<String>();
+			if(stmt.step()){
+				for(int i = 0; i < stmt.column_count(); i++){
+					results.add(stmt.column_string(i));
+				}
+			}
+			db.close();
+
+			return results;
+		} catch (jsqlite.Exception e) {
+			FAIMSLog.log(e);
+		}
+		return null;
+	}
+
+	public Collection<List<String>> fetchAll(String query){
+		
+		try {
+			jsqlite.Database db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			Stmt stmt = db.prepare(query);
+			Collection<List<String>> results = new ArrayList<List<String>>();
+			while(stmt.step()){
+				List<String> result = new ArrayList<String>();
+				for(int i = 0; i < stmt.column_count(); i++){
+					result.add(stmt.column_string(i));
+				}
+				results.add(result);
+			}
+			db.close();
+
+			return results;
+		} catch (jsqlite.Exception e) {
+			FAIMSLog.log(e);
+		}
+		return null;
+	}
 }

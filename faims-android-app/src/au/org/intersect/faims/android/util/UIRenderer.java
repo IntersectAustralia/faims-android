@@ -10,10 +10,10 @@ import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.form.TabGroup;
@@ -130,16 +130,17 @@ public class UIRenderer {
     	
     }
     
-    public void showTabGroup(Activity activity, int index) {
-    	FragmentManager fm = activity.getFragmentManager();
+    public void showTabGroup(FragmentActivity activity, int index) {
+    	FragmentManager fm = activity.getSupportFragmentManager();
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
         ft.add(R.id.fragment_content, tabGroupList.get(index));
         ft.commit();
     }
     
-    public void showTabGroup(Activity activity, String name) {
-    	FragmentManager fm = activity.getFragmentManager();
+    public void showTabGroup(FragmentActivity activity, String name) {
+    	FragmentManager fm = activity.getSupportFragmentManager();
+
     	FragmentTransaction ft = fm.beginTransaction();
 	    ft.replace(R.id.fragment_content, tabGroupMap.get(name));
         ft.addToBackStack(null);

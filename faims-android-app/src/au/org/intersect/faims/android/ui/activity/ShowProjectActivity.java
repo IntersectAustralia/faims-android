@@ -2,11 +2,11 @@ package au.org.intersect.faims.android.ui.activity;
 
 import org.javarosa.form.api.FormEntryController;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
@@ -20,7 +20,7 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.UIRenderer;
 
-public class ShowProjectActivity extends Activity implements IDialogListener {
+public class ShowProjectActivity extends FragmentActivity implements IDialogListener {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -28,7 +28,7 @@ public class ShowProjectActivity extends Activity implements IDialogListener {
 
 	private UIRenderer renderer;
 
-	private ChoiceDialog choiceDialog;
+	protected ChoiceDialog choiceDialog;
 
 	private String directory;
 	

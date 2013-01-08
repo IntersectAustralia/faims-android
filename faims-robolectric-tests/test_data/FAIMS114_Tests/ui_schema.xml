@@ -1,0 +1,45 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Tab Group Example 2</h:title>
+
+    <model>
+      <instance>
+        <faims id="tabgroup_example">
+        <tabgroup1>
+	     	  <tab1>
+            <field1 />
+            <field2 />
+            <copy1 />
+	     	  </tab1>
+	      </tabgroup1> 	
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/field1" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/field2" type="string"/>
+
+    </model>
+  </h:head>
+
+  <h:body>
+    <group ref="tabgroup1">
+      <label>Tab Group 1</label>
+      <group ref="tab1">
+        <label>TG1 Tab 1</label>
+        <input ref="field1" faims_data="Foo">
+          <label>TG1 T1 Field 1:</label>
+        </input>
+        <input ref="field2" faims_data="Foo">
+          <label>TG1 T1 Field 2:</label>
+        </input>
+        <trigger ref="copy1">
+          <label>Copy One</label>
+        </trigger>
+      </group>
+    </group> 
+  </h:body>
+</h:html>
