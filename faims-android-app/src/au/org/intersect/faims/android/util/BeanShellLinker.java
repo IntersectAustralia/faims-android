@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,11 +37,11 @@ public class BeanShellLinker {
 
 	private AssetManager assets;
 	
-	private Activity activity;
-
-	private DatabaseManager databaseManager;
+	private FragmentActivity activity;
 	
-	public BeanShellLinker(Activity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
+	private DatabaseManager databaseManager;
+
+	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
@@ -378,5 +378,7 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	
+	public UIRenderer getUIRenderer(){
+		return this.renderer;
+	}
 }

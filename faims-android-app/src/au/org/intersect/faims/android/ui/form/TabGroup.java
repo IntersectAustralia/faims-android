@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import android.app.Fragment;
+
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,12 +43,6 @@ public class TabGroup extends Fragment {
 			tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
 			tabHost.setup();
 			
-			/*
-			tabHost.addTab(createTabSpec(tabHost, "Test 1"));
-			tabHost.addTab(createTabSpec(tabHost, "Test 2"));
-			tabHost.addTab(createTabSpec(tabHost, "Test 3"));
-			*/
-			
 			for (Tab tab : tabs) {
 				tabHost.addTab(tab.createTabSpec(tabHost));
 			}
@@ -59,6 +54,11 @@ public class TabGroup extends Fragment {
 		
 		if(this.onShowCommands.size() > 0){
 			executeCommands(this.onShowCommands);
+		}
+		
+		// Solves a prob the back button gives us with the TabHost already having a parent
+		if (tabHost.getParent() != null){
+			((ViewGroup) tabHost.getParent()).removeView(tabHost);
 		}
 		
 		return tabHost;

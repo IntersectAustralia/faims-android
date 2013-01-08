@@ -13,18 +13,26 @@
 	<property name="source.dir" value="./src/"/>	
 
 	<filelist id="android_jars" dir="${libs.dir}">
+		<file name="android-support-v4.jar"/>
 		<file name="android.jar"/>
 		<file name="maps.jar"/>
 	</filelist>
 
 	<filelist id="libs_jars" dir="${libs.dir}">
 		<file name="junit.jar"/>
-		<file name="hamcrest.jar"/>
-		<file name="robolectric-1.1-jar-with-dependencies.jar"/>
-		<file name="guice-2.0-no_aop.jar"/>
-		<file name="jsr305-1.3.9.jar"/>
-		<file name="roboguice-2.0.jar"/>
+		<file name="commons-codec-1.7.jar"/>
+		<file name="commons-compress-1.4.1.jar"/>
+		<file name="core.jar"/>
 		<file name="gson-2.2.2.jar"/>
+		<file name="guice-2.0-no_aop.jar"/>
+		<file name="hamcrest.jar"/>
+		<file name="javarosa-libraries.jar"/>
+		<file name="jsr305-1.3.9.jar"/>
+		<file name="kxml2-2.2.2.jar"/>
+		<file name="roboguice-2.0.jar"/>
+		<file name="robolectric-1.1-jar-with-dependencies.jar"/>
+		<file name="spatialite-android-library.jar"/>
+		<file name="bsh-2.0b4.jar"/>
 	</filelist>
 
 	<path id="compile_classpath">
