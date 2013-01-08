@@ -50,7 +50,24 @@ createAttribute(String name, String text, String vocab, String measure, String c
 	attribute.setMeasure(measure);
 	attribute.setCertainty(certainty);
 	return attribute;
-	
+}
+
 populateDropDown(String ref, Collection values){
     linker.populateDropDown(ref, values);
+}
+
+Object fetchArchEnt(String id){
+    return linker.fetchArchEnt(id);
+}
+
+Object fetchRel(String id){
+    return linker.fetchRel(id);
+}
+
+Object fetchOne(String query){
+    return linker.fetchOne(query);
+}
+
+Collection fetchAll(String query){
+    return linker.fetchAll(query);
 }

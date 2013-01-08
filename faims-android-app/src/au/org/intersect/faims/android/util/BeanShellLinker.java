@@ -353,6 +353,23 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public Object fetchArchEnt(String id){
+		return databaseManager.fetchArchEnt(id);
+	}
+
+	public Object fetchRel(String id){
+		return databaseManager.fetchRel(id);
+	}
+
+	public Object fetchOne(String query){
+		return databaseManager.fetchOne(query);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Collection fetchAll(String query){
+		return databaseManager.fetchAll(query);
+	}
+
 	private String convertStreamToString(InputStream stream) {
 		BufferedReader br = null;
 		try {
