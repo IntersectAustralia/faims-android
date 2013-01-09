@@ -118,11 +118,11 @@ public class DatabaseManager {
 			Collection<EntityAttribute> archAttributes = new ArrayList<EntityAttribute>();
 			while(stmt.step()){
 				EntityAttribute archAttribute = new EntityAttribute();
-				archAttribute.setName(stmt.column_string(0));
-				archAttribute.setVocab(Integer.toString(stmt.column_int(1)));
-				archAttribute.setMeasure(Integer.toString(stmt.column_int(2)));
-				archAttribute.setText(stmt.column_string(3));
-				archAttribute.setCertainty(Double.toString(stmt.column_double(4)));
+				archAttribute.setName(stmt.column_string(1));
+				archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
+				archAttribute.setMeasure(Integer.toString(stmt.column_int(3)));
+				archAttribute.setText(stmt.column_string(4));
+				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 				archAttributes.add(archAttribute);
 			}
 			db.close();
@@ -145,9 +145,9 @@ public class DatabaseManager {
 			Collection<RelationshipAttribute> relAttributes = new ArrayList<RelationshipAttribute>();
 			while(stmt.step()){
 				RelationshipAttribute relAttribute = new RelationshipAttribute();
-				relAttribute.setName(stmt.column_string(0));
-				relAttribute.setVocab(Integer.toString(stmt.column_int(1)));
-				relAttribute.setText(stmt.column_string(2));
+				relAttribute.setName(stmt.column_string(1));
+				relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
+				relAttribute.setText(stmt.column_string(3));
 				relAttributes.add(relAttribute);
 			}
 			db.close();
