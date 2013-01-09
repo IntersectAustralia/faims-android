@@ -29,6 +29,7 @@ import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomRadioButton;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -73,7 +74,7 @@ public class BeanShellLinker {
     		interpreter.eval(code);
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
-    		
+    		//FAIMSLog.log(code);
     		showWarning("Logic Error", "Error encountered in logic script");
     	}
 	}
@@ -284,7 +285,7 @@ public class BeanShellLinker {
 			}
 			else {
 				Log.w("FAIMS","Couldn't set value for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "Error encountered in logic script");
+				showWarning("Logic Error", "View does not exist.");
 			}
 		}
 		catch(Exception e){
@@ -303,7 +304,8 @@ public class BeanShellLinker {
 			}
 			else if (obj instanceof Spinner){
 				Spinner spinner = (Spinner) obj;
-				return spinner.getSelectedItem().toString();
+				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
+				return pair.getValue();
 			}
 			else if (obj instanceof LinearLayout){
 				LinearLayout ll = (LinearLayout) obj;
@@ -343,7 +345,7 @@ public class BeanShellLinker {
 				}
 				else{
 					Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
-					showWarning("Logic Error", "Error encountered in logic script");
+					showWarning("Logic Error", "View does not exist.");
 					return "";
 				}
 			}
@@ -357,7 +359,7 @@ public class BeanShellLinker {
 			}
 			else {
 				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "Error encountered in logic script");
+				showWarning("Logic Error", "View does not exist.");
 				return "";
 			}
 		}
@@ -378,8 +380,15 @@ public class BeanShellLinker {
 		return entity_id;
 	}
 	
-	public void saveRel(String entity_id, String rel_type, String geo_data, List<EntityAttribute> attributes) {
+	public String saveRel(String rel_id, String rel_type, String geo_data, List<RelationshipAttribute> attributes) {
 		FAIMSLog.log();
+		
+		rel_id = databaseManager.saveRel(rel_id, rel_type, geo_data, attributes);
+		if (rel_id == null) {
+			showWarning("Database Error", "Could not save relationship.");
+		}
+		
+		return rel_id;
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -390,13 +399,33 @@ public class BeanShellLinker {
 		if (obj instanceof Spinner && valuesObj instanceof ArrayList){
 			Spinner spinner = (Spinner) obj;
 			
-			@SuppressWarnings("unchecked")
-			ArrayList<String> values = (ArrayList<String>) valuesObj;
 			
-			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+			ArrayList<NameValuePair> pairs = null;
+			boolean isList = false;
+			try {
+				@SuppressWarnings("unchecked")
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (String s : values) {
+					pairs.add(new NameValuePair(s, s));
+				}
+			} catch (Exception e) {
+				isList = true;
+			}
+			
+			if (isList) {
+				@SuppressWarnings("unchecked")
+				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (List<String> list : values) {
+					pairs.add(new NameValuePair(list.get(0), list.get(1)));
+				}
+			}
+			
+			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
                     this.activity,
                     android.R.layout.simple_spinner_dropdown_item,
-                    values);
+                    pairs);
             spinner.setAdapter(arrayAdapter);
 		}
 	}

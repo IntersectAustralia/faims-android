@@ -1,4 +1,5 @@
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
+import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import java.util.List;
 import java.util.Collection;
 
@@ -31,18 +32,18 @@ onFocus(String ref, String focusCallback, String blurCallback) {
 }
 
 saveArchEnt(String entity_id, String entity_type, String geo_data, List attributes) {
-	linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+	return linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
 }
 
-saveRel(String entity_id, String rel_type, String geo_data, List attributes) {
-	linker.saveRel(entity_id, rel_type, geo_data, attributes);
+saveRel(String rel_id, String rel_type, String geo_data, List attributes) {
+	return linker.saveRel(rel_id, rel_type, geo_data, attributes);
 }
 
 createAttributeList() {
 	return new ArrayList();
 }
 
-createAttribute(String name, String text, String vocab, String measure, String certainty) {
+createEntityAttribute(String name, String text, String vocab, String measure, String certainty) {
 	EntityAttribute attribute = new EntityAttribute();
 	attribute.setName(name);
 	attribute.setText(text);
@@ -52,7 +53,19 @@ createAttribute(String name, String text, String vocab, String measure, String c
 	return attribute;
 }
 
+createRelationshipAttribute(String name, String text, String vocab) {
+	RelationshipAttribute attribute = new RelationshipAttribute();
+	attribute.setName(name);
+	attribute.setText(text);
+	attribute.setVocab(vocab);
+	return attribute;
+}
+
 populateDropDown(String ref, Collection values){
+    linker.populateDropDown(ref, values);
+}
+
+populateDropDown(String ref, Object resultSet){
     linker.populateDropDown(ref, values);
 }
 

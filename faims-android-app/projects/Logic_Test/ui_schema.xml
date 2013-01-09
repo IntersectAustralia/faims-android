@@ -57,6 +57,7 @@
               <count-certainty></count-certainty>
               <update></update>
               <save></save>
+              <next></next>
             </tab1>
             <tab2>
               <date></date>
@@ -68,6 +69,18 @@
               <type></type>
             </tab3>
           </simple_entity_3>
+          <relationship>
+            <tab1>
+              <name></name>
+              <update></update>
+              <save></save>
+            </tab1>
+            <tab2>
+              <top_entity></top_entity>
+              <bottom_entity></bottom_entity>
+              <save></save>
+            </tab2>
+          </relationship>
         </faims>
       </instance>
 
@@ -91,10 +104,13 @@
       <bind nodeset="/faims/simple_entity_3/tab2/date" type="date"/>
       <bind nodeset="/faims/simple_entity_3/tab2/time" type="time"/>
       <bind nodeset="/faims/simple_entity_3/tab3/location-certainty" type="decimal"/>
+      
+      <bind nodeset="/faims/relationship/tab1/name" type="string"/>
 
     </model>
   </h:head>
 
+  
   <h:body>
     <group ref="empty_entity" faims_archent_id="empty_entity">
       <label>Empty Entity Example</label>
@@ -202,6 +218,38 @@
         </trigger>
       </group>
     </group>
+    <group ref="relationship">
+      <label>Relationship Example</label>
+      <group ref="tab1">
+        <label>Relationship Example</label>
+        <input ref="name" faims_attribute_name="name">
+            <label>Name:</label>
+        </input>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Entity Relationship Example</label>
+        <select1 ref="top_entity">
+	      <label>Top:</label>
+	      <item>
+	        <label>dummy</label>
+	        <value>dummy</value>
+	      </item>
+	    </select1>
+        <select1 ref="bottom_entity">
+	      <label>Bottom:</label>
+	      <item>
+	        <label>dummy</label>
+	        <value>dummy</value>
+	      </item>
+	    </select1> 
+      </group>
+    </group>
     <group ref="simple_entity_3" faims_archent_id="simple_entity">
       <label>Simple Entity Example</label>
       <group ref="tab1">
@@ -223,6 +271,9 @@
         </trigger>
         <trigger ref="save">
           <label>Save</label>
+        </trigger>
+        <trigger ref="next">
+          <label>Next</label>
         </trigger>
       </group>
       <group ref="tab2">
@@ -255,5 +306,6 @@
         </select>
       </group>
     </group>
+    
   </h:body>
 </h:html>

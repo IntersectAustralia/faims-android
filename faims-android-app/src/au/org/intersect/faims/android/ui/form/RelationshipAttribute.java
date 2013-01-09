@@ -29,5 +29,9 @@ public class RelationshipAttribute {
 	public void setVocab(String value) {
 		vocab = value;
 	}
+	
+	public String toString() {
+		return "(" + name + "," + text + "," + vocab +")";
+	}
 
 }
