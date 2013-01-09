@@ -17,11 +17,19 @@ public class DateUtil {
 	}
 	
 	public static String getDate(DatePicker date) {
-		return "" + date.getDayOfMonth() + "/" + (date.getMonth() + 1) + "/" + date.getYear();
+		return "" + toFixed(date.getDayOfMonth(), 2) + "/" + toFixed((date.getMonth() + 1), 2) + "/" + date.getYear();
 	}
 	
 	public static String getTime(TimePicker time) {
-		return "" + time.getCurrentHour() + ":" + time.getCurrentMinute();
+		return "" + toFixed(time.getCurrentHour(),2) + ":" + toFixed(time.getCurrentMinute(),2);
+	}
+	
+	public static String toFixed(int i, int length) {
+		String s = String.valueOf(i);
+		while (s.length() < length) {
+			s = "0" + s;
+		}
+		return s;
 	}
 
 }

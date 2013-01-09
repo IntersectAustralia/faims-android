@@ -128,4 +128,8 @@ public class TabGroup extends Fragment {
 		}
 	}
 
+	public LinkedList<Tab> getTabs() {
+		return tabs;
+	}
+
 }

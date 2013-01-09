@@ -1,7 +1,31 @@
+Object locationObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+Object typeObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+
+System.out.println(locationObj);
+System.out.println(typeObj);
+
+populateDropDown("simple_entity_1/tab/location", locationObj);
+populateList("simple_entity_1/tab/type", typeObj);
+
+populateDropDown("simple_entity_2/tab/location", locationObj);
+populateList("simple_entity_2/tab/type", typeObj);
+
+populateList("simple_entity_3/tab3/location", locationObj);
+populateList("simple_entity_3/tab3/type", typeObj);
+
+showRelationshipTab() {
+	showTabGroup("relationship");
+	Object entityObj = fetchAll("select uuid, uuid from ArchEntity;");
+	populateDropDown("relationship/tab2/top_entity", entityObj);
+	populateDropDown("relationship/tab2/bottom_entity", entityObj);
+	Object relObj = fetchAll("select RelationshipId, RelationshipId from Relationship;");
+	populateDropDown("relationship/tab2/relationship", relObj);
+}
+
 onEvent("empty_entity/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
 onEvent("simple_entity_1/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
-onEvent("simple_entity_2/tab/next", "click", "showTabGroup(\"relationship\")");
-//onEvent("simple_entity_3/tab1/next", "click", "showTabGroup(\"relationship\")");
+onEvent("simple_entity_2/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
+onEvent("simple_entity_3/tab1/next", "click", "showRelationshipTab()");
 
 String e;
 String se1;
@@ -60,16 +84,24 @@ saveRelationship(rel_id) {
 	List attributes = createAttributeList();
 	attributes.add(createRelationshipAttribute("name", getFieldValue("relationship/tab1/name"), null));
 	r = saveRel(rel_id, "abovebelow", null, attributes);
+	Object relObj = fetchAll("select RelationshipId, RelationshipId from Relationship;");
+	populateDropDown("relationship/tab2/relationship", relObj);
+}
+
+saveEntityRelationship() {
+	addReln(getFieldValue("relationship/tab2/top_entity"), getFieldValue("relationship/tab2/relationship"), "above");
+	addReln(getFieldValue("relationship/tab2/bottom_entity"), getFieldValue("relationship/tab2/relationship"), "below");
 }
 
 onEvent("empty_entity/tab/update", "click", "saveEmptyEntity(e)");
 onEvent("simple_entity_1/tab/update", "click", "saveSimpleEntity1(se1)");
 onEvent("simple_entity_2/tab/update", "click", "saveSimpleEntity2(se2)");
-//onEvent("simple_entity_3/tab1/update", "click", "saveSimpleEntity3(se3)");
+onEvent("simple_entity_3/tab1/update", "click", "saveSimpleEntity3(se3)");
 onEvent("relationship/tab1/update", "click", "saveRelationship(r)");
 
 onEvent("empty_entity/tab/save", "click", "saveEmptyEntity(null)");
 onEvent("simple_entity_1/tab/save", "click", "saveSimpleEntity1(null)");
 onEvent("simple_entity_2/tab/save", "click", "saveSimpleEntity2(null)");
-//onEvent("simple_entity_3/tab1/save", "click", "saveSimpleEntity3(null)");
+onEvent("simple_entity_3/tab1/save", "click", "saveSimpleEntity3(null)");
 onEvent("relationship/tab1/save", "click", "saveRelationship(null)");
+onEvent("relationship/tab2/save", "click", "saveEntityRelationship()");

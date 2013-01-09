@@ -30,6 +30,7 @@ import au.org.intersect.faims.android.ui.form.CustomRadioButton;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
+import au.org.intersect.faims.android.ui.form.Tab;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -66,6 +67,7 @@ public class BeanShellLinker {
     		FAIMSLog.log(e); 
     	} catch (IOException e) {
     		FAIMSLog.log(e);
+    		showWarning("Logic Error", "Error encountered in logic script");
     	}
 	}
 
@@ -80,6 +82,7 @@ public class BeanShellLinker {
 	}
 	
 	public void bindViewToEvent(String ref, String type, final String code) {
+		FAIMSLog.log(ref);
 		try{
 			
 			if (type == "click") {
@@ -159,7 +162,43 @@ public class BeanShellLinker {
 			Log.e("FAIMS", "Exception showing tab group",e);
 		}
 	}
-	
+
+	public void showTabGroup(String id, String uuid){
+		Object archEntities = fetchArchEnt(uuid);
+		if(archEntities instanceof Collection<?>){
+			@SuppressWarnings("unchecked")
+			List<EntityAttribute> entityAttributes = (List<EntityAttribute>) archEntities;
+			try {
+				TabGroup tabGroup = renderer.showTabGroup(activity, id);
+				for (EntityAttribute entityAttribute : entityAttributes) {
+			    	for(Tab tab : tabGroup.getTabs()){
+			    		if(tab.hasView(entityAttribute.getName()) || tab.hasView(entityAttribute.getName() + "-freetext") || tab.hasView(entityAttribute.getName() + "-measure")
+			    				|| tab.hasView(entityAttribute.getName() + "-certainty") || tab.hasView(entityAttribute.getName() + "-vocab")){
+			    			if(entityAttribute.hasFreeText()){
+			    				if(tab.getPath(entityAttribute.getName() + "-freetext") != null){
+			    					setFieldValue(tab.getPath(entityAttribute.getName() + "-freetext"),entityAttribute.getText());
+			    				}else{
+			    					setFieldValue(tab.getPath(entityAttribute.getName()),entityAttribute.getText());
+			    				}
+			    			}
+			    			if(entityAttribute.hasMeasure()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-measure"),entityAttribute.getMeasure());
+			    			}
+			    			if(entityAttribute.hasFreeText()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-certainty"),entityAttribute.getCertainty());
+			    			}
+			    			if(entityAttribute.hasFreeText()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-vocab"),entityAttribute.getVocab());
+			    			}
+			    		}
+			    	}
+			    }
+			} catch (Exception e) {
+				Log.e("FAIMS", "Exception showing tab group and load value",e);
+			}
+		}
+	}
+
 	public void showToast(String message){
 		try {
 			int duration = Toast.LENGTH_SHORT;
@@ -391,6 +430,14 @@ public class BeanShellLinker {
 		return rel_id;
 	}
 	
+	public void addReln(String entity_id, String rel_id, String verb) {
+		FAIMSLog.log();
+		
+		if (!databaseManager.addReln(entity_id, rel_id, verb)) {
+			showWarning("Database Error", "Could not save entity relationship.");
+		}
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public void populateDropDown(String ref, Collection valuesObj){
 		
@@ -418,7 +465,7 @@ public class BeanShellLinker {
 				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 				pairs = new ArrayList<NameValuePair>();
 				for (List<String> list : values) {
-					pairs.add(new NameValuePair(list.get(0), list.get(1)));
+					pairs.add(new NameValuePair(list.get(1), list.get(0)));
 				}
 			}
 			
@@ -427,6 +474,64 @@ public class BeanShellLinker {
                     android.R.layout.simple_spinner_dropdown_item,
                     pairs);
             spinner.setAdapter(arrayAdapter);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void populateList(String ref, Collection valuesObj){
+		
+		Object obj = renderer.getViewByRef(ref);
+
+		if (obj instanceof LinearLayout && valuesObj instanceof ArrayList){
+			LinearLayout ll = (LinearLayout) obj;
+			
+			View child0 = ll.getChildAt(0);
+			
+			ArrayList<NameValuePair> pairs = null;
+			boolean isList = false;
+			try {
+				@SuppressWarnings("unchecked")
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (String s : values) {
+					pairs.add(new NameValuePair(s, s));
+				}
+			} catch (Exception e) {
+				isList = true;
+			}
+			
+			if (isList) {
+				@SuppressWarnings("unchecked")
+				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (List<String> list : values) {
+					pairs.add(new NameValuePair(list.get(1), list.get(0)));
+				}
+			}
+			
+			if( child0 instanceof CheckBox){
+				ll.removeAllViews();
+				
+				for (NameValuePair pair : pairs) {
+					CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
+                    checkBox.setText(pair.getName());
+                    checkBox.setValue(pair.getValue());
+                    ll.addView(checkBox);
+				}
+			}
+			else if (child0 instanceof RadioGroup){
+				RadioGroup rg = (RadioGroup) child0;
+				rg.removeAllViews();
+				
+				int rbId = 0;
+				for (NameValuePair pair : pairs) {
+					CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
+                    radioButton.setId(rbId++);
+                    radioButton.setText(pair.getName());
+                    radioButton.setValue(pair.getValue());
+                    rg.addView(radioButton);
+				}
+			}
 		}
 	}
 	
@@ -456,7 +561,7 @@ public class BeanShellLinker {
 		
 			String line;
 			while ((line = br.readLine()) != null) {
-				sb.append(line);
+				sb.append(line + "\n");
 			} 
 	
 			return sb.toString();

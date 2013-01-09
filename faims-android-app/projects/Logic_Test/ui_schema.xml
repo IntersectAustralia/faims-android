@@ -78,6 +78,7 @@
             <tab2>
               <top_entity></top_entity>
               <bottom_entity></bottom_entity>
+              <relationship></relationship>
               <save></save>
             </tab2>
           </relationship>
@@ -218,38 +219,7 @@
         </trigger>
       </group>
     </group>
-    <group ref="relationship">
-      <label>Relationship Example</label>
-      <group ref="tab1">
-        <label>Relationship Example</label>
-        <input ref="name" faims_attribute_name="name">
-            <label>Name:</label>
-        </input>
-        <trigger ref="update">
-          <label>Update</label>
-        </trigger>
-        <trigger ref="save">
-          <label>Save</label>
-        </trigger>
-      </group>
-      <group ref="tab2">
-        <label>Entity Relationship Example</label>
-        <select1 ref="top_entity">
-	      <label>Top:</label>
-	      <item>
-	        <label>dummy</label>
-	        <value>dummy</value>
-	      </item>
-	    </select1>
-        <select1 ref="bottom_entity">
-	      <label>Bottom:</label>
-	      <item>
-	        <label>dummy</label>
-	        <value>dummy</value>
-	      </item>
-	    </select1> 
-      </group>
-    </group>
+   
     <group ref="simple_entity_3" faims_archent_id="simple_entity">
       <label>Simple Entity Example</label>
       <group ref="tab1">
@@ -306,6 +276,47 @@
         </select>
       </group>
     </group>
-    
+     <group ref="relationship">
+      <label>Relationship Example</label>
+      <group ref="tab1">
+        <label>Relationship Example</label>
+        <input ref="name" faims_attribute_name="name">
+            <label>Name:</label>
+        </input>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Entity Relationship Example</label>
+        <select1 ref="top_entity">
+	      <label>Top:</label>
+	      <item>
+	        <label>dummy</label>
+	        <value>dummy</value>
+	      </item>
+	    </select1>
+        <select1 ref="bottom_entity">
+	      <label>Bottom:</label>
+	      <item>
+	        <label>dummy</label>
+	        <value>dummy</value>
+	      </item>
+	    </select1>
+	    <select1 ref="relationship">
+	      <label>Relationship:</label>
+	      <item>
+	        <label>dummy</label>
+	        <value>dummy</value>
+	      </item>
+	    </select1>
+	  	<trigger ref="save">
+          <label>Save</label>
+        </trigger> 
+      </group>
+    </group>
   </h:body>
 </h:html>

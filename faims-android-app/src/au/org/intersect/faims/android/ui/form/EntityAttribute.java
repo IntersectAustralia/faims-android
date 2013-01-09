@@ -52,4 +52,19 @@ public class EntityAttribute {
 		return "(" + name + "," + text + "," + vocab + "," + measure + "," + certainty +")";
 	}
 
+	public boolean hasFreeText(){
+		return this.text != null;
+	}
+
+	public boolean hasMeasure(){
+		return this.measure != null;
+	}
+
+	public boolean hasCertainty(){
+		return this.certainty != null;
+	}
+
+	public boolean hasVocab(){
+		return this.vocab != null;
+	}
 }

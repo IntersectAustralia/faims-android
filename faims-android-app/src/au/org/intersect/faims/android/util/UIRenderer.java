@@ -16,8 +16,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.Tab;
+import au.org.intersect.faims.android.ui.form.TabGroup;
 
 /**
  * Class that reads the ui defintion file and render the UI
@@ -68,10 +68,10 @@ public class UIRenderer {
     	IFormElement element = this.fem.getModel().getForm().getChild(currentIndex);
     	FormIndex groupIndex = this.fem.getModel().incrementIndex(currentIndex, true);
     	
-    	for (int i = 0; i < element.getChildren().size(); i++) {
+    	int groups = element.getChildren().size();
+    	for (int i = 0; i < groups; i++) {
     		
     		element = this.fem.getModel().getForm().getChild(groupIndex);
-    		
 	    	if (element instanceof GroupDef) {
 	    		
 	    		GroupDef tabGroupElement = (GroupDef) element;
@@ -88,7 +88,8 @@ public class UIRenderer {
 	            // descend into group
 	            FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex, true);
 	
-	            for (int j = 0; j < tabGroupElement.getChildren().size(); j++) {  
+	            int tabs = tabGroupElement.getChildren().size();
+	            for (int j = 0; j < tabs; j++) {  
 	            	
 	                element = this.fem.getModel().getForm().getChild(tabIndex);
 	                
@@ -108,9 +109,8 @@ public class UIRenderer {
 	                    
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
-	                        View view = tab.addInput(input);
-	                        
 	                        String viewName = input.getIndex().getReference().getNameLast();
+	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName);
 	                        
 	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
@@ -130,21 +130,25 @@ public class UIRenderer {
     	
     }
     
-    public void showTabGroup(FragmentActivity activity, int index) {
+    public TabGroup showTabGroup(FragmentActivity activity, int index) {
     	FragmentManager fm = activity.getSupportFragmentManager();
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
-        ft.add(R.id.fragment_content, tabGroupList.get(index));
+	    TabGroup tabGroup = this.tabGroupList.get(index);
+        ft.add(R.id.fragment_content, tabGroup);
         ft.commit();
+        return tabGroup;
     }
     
-    public void showTabGroup(FragmentActivity activity, String name) {
+    public TabGroup showTabGroup(FragmentActivity activity, String name) {
     	FragmentManager fm = activity.getSupportFragmentManager();
 
     	FragmentTransaction ft = fm.beginTransaction();
-	    ft.replace(R.id.fragment_content, tabGroupMap.get(name));
+    	TabGroup tabGroup = this.tabGroupMap.get(name);
+	    ft.replace(R.id.fragment_content, tabGroup);
         ft.addToBackStack(null);
         ft.commit();
+        return tabGroup;
     }
     
     public View getViewByRef(String ref) {

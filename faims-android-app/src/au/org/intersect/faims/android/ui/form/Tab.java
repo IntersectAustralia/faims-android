@@ -1,7 +1,9 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.QuestionDef;
@@ -32,6 +34,7 @@ public class Tab {
 	private Context context;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
+	private Map<String, String> viewReference;
 	private String name;
 	private String label;
 
@@ -41,6 +44,7 @@ public class Tab {
 		this.label = label;
 		
 		this.linearLayout = new LinearLayout(context);
+		this.viewReference = new HashMap<String, String>();
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -52,13 +56,14 @@ public class Tab {
         
 	}
 
-	public View addInput(FormEntryPrompt input) {
+	public View addInput(FormEntryPrompt input,String path, String viewName) {
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
             TextView textView = new TextView(this.context);
             textView.setText(input.getQuestionText());
             linearLayout.addView(textView);
         }
 		
+		viewReference.put(viewName, path);
 		View view = null;
 		// check the control type to know the type of the question
         switch (input.getControlType()) {
@@ -239,8 +244,15 @@ public class Tab {
 		return label;
 	}
 
+	public boolean hasView(String viewName){
+		return this.viewReference.containsKey(viewName);
+	}
 
-    /**
+	public String getPath(String viewName){
+		return this.viewReference.get(viewName);
+	}
+
+	/**
      * Rendering image slide for select one
      * 
      * @param layout

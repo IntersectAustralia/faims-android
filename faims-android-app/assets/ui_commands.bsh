@@ -39,6 +39,10 @@ saveRel(String rel_id, String rel_type, String geo_data, List attributes) {
 	return linker.saveRel(rel_id, rel_type, geo_data, attributes);
 }
 
+addReln(String entity_id, String rel_id, String verb) {
+	linker.addReln(entity_id, rel_id, verb);
+}
+
 createAttributeList() {
 	return new ArrayList();
 }
@@ -65,8 +69,8 @@ populateDropDown(String ref, Collection values){
     linker.populateDropDown(ref, values);
 }
 
-populateDropDown(String ref, Object resultSet){
-    linker.populateDropDown(ref, values);
+populateList(String ref, Collection values) {
+	linker.populateList(ref, values);
 }
 
 Object fetchArchEnt(String id){
