@@ -94,12 +94,8 @@ public class DatabaseManager {
 			
 			// Test various queries
 			db.exec("select count(uuid) from ArchEntity;", cb);
-			db.exec("select attributename, vocabname, measure, freetext, certainty " + 
-					"from aentvalue " +
-					"left outer join attributekey using (attributeid) " + 
-					"left outer join vocabulary using (attributeid) " +
-					"where uuid = " + uuid + " group by " + uuid + ", attributeid having max(valuetimestamp);", cb);
-			
+			db.exec("select uuid, valuetimestamp, attributeid from aentvalue where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", cb);
+			db.exec("select attributeid, valuetimestamp from aentvalue where uuid="+uuid+";", cb);
 			db.close();
 			
 		} catch (Exception e) {
@@ -112,7 +108,7 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid HAVINg max(valuetimestamp)) AS latestValue JOIN attributekey USING (attributeid)";
+			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
 			Collection<EntityAttribute> archAttributes = new ArrayList<EntityAttribute>();
@@ -139,7 +135,7 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String query = "SELECT relationshipid, attributename, vocabname, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid = (select relationshipid from relnvalue limit 1) GROUP BY relationshipid, attributeid HAVINg max(relnvaluetimestamp)) AS latestValue JOIN attributekey USING (attributeid) JOIN vocabulary USING (vocabid);";
+			String query = "SELECT relationshipid, attributename, vocabname, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN vocabulary USING (vocabid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
 			Collection<RelationshipAttribute> relAttributes = new ArrayList<RelationshipAttribute>();

@@ -25,10 +25,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomRadioButton;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.ui.form.Tab;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -158,7 +160,43 @@ public class BeanShellLinker {
 			Log.e("FAIMS", "Exception showing tab group",e);
 		}
 	}
-	
+
+	public void showTabGroup(String id, String uuid){
+		Object archEntities = fetchArchEnt(uuid);
+		if(archEntities instanceof Collection<?>){
+			@SuppressWarnings("unchecked")
+			List<EntityAttribute> entityAttributes = (List<EntityAttribute>) archEntities;
+			try {
+				TabGroup tabGroup = renderer.showTabGroup(activity, id);
+				for (EntityAttribute entityAttribute : entityAttributes) {
+			    	for(Tab tab : tabGroup.getTabs()){
+			    		if(tab.hasView(entityAttribute.getName()) || tab.hasView(entityAttribute.getName() + "-freetext") || tab.hasView(entityAttribute.getName() + "-measure")
+			    				|| tab.hasView(entityAttribute.getName() + "-certainty") || tab.hasView(entityAttribute.getName() + "-vocab")){
+			    			if(entityAttribute.hasFreeText()){
+			    				if(tab.getPath(entityAttribute.getName() + "-freetext") != null){
+			    					setFieldValue(tab.getPath(entityAttribute.getName() + "-freetext"),entityAttribute.getText());
+			    				}else{
+			    					setFieldValue(tab.getPath(entityAttribute.getName()),entityAttribute.getText());
+			    				}
+			    			}
+			    			if(entityAttribute.hasMeasure()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-measure"),entityAttribute.getMeasure());
+			    			}
+			    			if(entityAttribute.hasFreeText()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-certainty"),entityAttribute.getCertainty());
+			    			}
+			    			if(entityAttribute.hasFreeText()){
+			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-vocab"),entityAttribute.getVocab());
+			    			}
+			    		}
+			    	}
+			    }
+			} catch (Exception e) {
+				Log.e("FAIMS", "Exception showing tab group and load value",e);
+			}
+		}
+	}
+
 	public void showToast(String message){
 		try {
 			int duration = Toast.LENGTH_SHORT;
