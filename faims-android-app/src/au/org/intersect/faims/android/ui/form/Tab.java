@@ -17,17 +17,13 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 public class Tab {
 
@@ -35,6 +31,7 @@ public class Tab {
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
+	private Map<String, List<String>> viewMap;
 	private String name;
 	private String label;
 
@@ -45,6 +42,7 @@ public class Tab {
 		
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
+		this.viewMap = new HashMap<String, List<String>>();
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -65,6 +63,7 @@ public class Tab {
 		
 		viewReference.put(viewName, path);
 		View view = null;
+		CustomEditText text = null;
 		// check the control type to know the type of the question
         switch (input.getControlType()) {
             case Constants.CONTROL_INPUT:
@@ -72,42 +71,48 @@ public class Tab {
                 switch (input.getDataType()) {
                 // set input type as number
                     case Constants.DATATYPE_INTEGER:
-                        view = new EditText(this.context);
+                    	text = new CustomEditText(this.context);
+                    	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         linearLayout.addView(view);
                         break;
                     case Constants.DATATYPE_DECIMAL:
-                        view = new EditText(this.context);
+                    	text = new CustomEditText(this.context);
+                        view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                         linearLayout.addView(view);
                         break;
                     case Constants.DATATYPE_LONG:
-                        view = new EditText(this.context);
+                    	text = new CustomEditText(this.context);
+                        view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         linearLayout.addView(view);
                         break;
                     // set input type as date picker
                     case Constants.DATATYPE_DATE:
-                        view = new DatePicker(this.context);
+                    	CustomDatePicker date = new CustomDatePicker(this.context);
+                        view = date;
                         linearLayout.addView(view);
                         break;
                     // get the text area
                     case Constants.DATATYPE_TEXT:
-                        view = new EditText(this.context);
+                    	text = new CustomEditText(this.context);
+                        view = text;
                         ((TextView) view).setLines(5);
                         linearLayout.addView(view);
                         break;
                     // set input type as time picker
                     case Constants.DATATYPE_TIME:
-                        view = new TimePicker(this.context);
+                        view = new CustomTimePicker(this.context);
                         linearLayout.addView(view);
                         break;
                     // default is edit text
                     default:
-                        view = new EditText(this.context);
+                    	text = new CustomEditText(this.context);
+                        view = text;
                         linearLayout.addView(view);
                         break;
                 }
@@ -149,7 +154,7 @@ public class Tab {
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
-                            LinearLayout selectLayout = new LinearLayout(this.context);
+                        	CustomLinearLayout selectLayout = new CustomLinearLayout(this.context);
                             selectLayout.setLayoutParams(new LayoutParams(
                                     LayoutParams.MATCH_PARENT,
                                     LayoutParams.MATCH_PARENT));
@@ -169,7 +174,7 @@ public class Tab {
                             linearLayout.addView(selectLayout);
                         // Default is single select dropdown
                         } else {
-                        	Spinner spinner = new Spinner(this.context);
+                        	CustomSpinner spinner = new CustomSpinner(this.context);
                             List<NameValuePair> choices = new ArrayList<NameValuePair>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
@@ -191,7 +196,7 @@ public class Tab {
             case Constants.CONTROL_SELECT_MULTI:
                 switch (input.getDataType()) {
                     case Constants.DATATYPE_CHOICE_LIST:
-                        LinearLayout selectLayout = new LinearLayout(
+                    	CustomLinearLayout selectLayout = new CustomLinearLayout(
                                 this.context);
                         selectLayout.setLayoutParams(new LayoutParams(
                                 LayoutParams.MATCH_PARENT,

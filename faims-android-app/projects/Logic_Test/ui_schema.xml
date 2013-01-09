@@ -132,7 +132,7 @@
       <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 1</label>
-        <input ref="name" faims_attribute_name="name">
+        <input ref="name" faims_attribute_name="name" >
           <label>Name:</label>
         </input>
         <input ref="count" faims_attribute_name="count">
@@ -179,10 +179,10 @@
         <input ref="count" faims_attribute_name="count">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_attribute_name="count_description">
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="measure">
           <label>Description:</label>
         </input>
-        <input ref="count-certainty" faims_attribute_name="count_certainty">
+        <input ref="count-certainty" faims_attribute_name="count">
           <label>Certainty:</label>
         </input>
         <input ref="date" faims_attribute_name="date">

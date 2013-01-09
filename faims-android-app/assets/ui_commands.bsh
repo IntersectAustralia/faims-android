@@ -69,7 +69,11 @@ populateDropDown(String ref, Collection values){
     linker.populateDropDown(ref, values);
 }
 
-populateList(String ref, Collection values) {
+populateCheckBoxGroup(String ref, Collection values) {
+	linker.populateList(ref, values);
+}
+
+populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
 
