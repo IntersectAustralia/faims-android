@@ -1,11 +1,15 @@
 Object locationObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 Object typeObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+Object testObj = new ArrayList();
+testObj.add("Test 1");
+testObj.add("Test 2");
+
 
 System.out.println(locationObj);
 System.out.println(typeObj);
 
-populateDropDown("simple_entity_1/tab/location", locationObj);
-populateList("simple_entity_1/tab/type", typeObj);
+populateDropDown("simple_entity_1/tab/location", testObj);
+populateList("simple_entity_1/tab/type", testObj);
 
 populateDropDown("simple_entity_2/tab/location", locationObj);
 populateList("simple_entity_2/tab/type", typeObj);

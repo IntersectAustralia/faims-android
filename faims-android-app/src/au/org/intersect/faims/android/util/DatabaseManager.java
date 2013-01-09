@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import jsqlite.Callback;
 import jsqlite.Database;
@@ -46,17 +45,16 @@ public class DatabaseManager {
 				}
 				
 				// create new entity
-				UUID entity_uuid = UUID.randomUUID();
+				uuid = generateUUID();
 				
 				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
 							   "VALUES (?, 0, ?, 'POLYGON', GeomFromText('GEOMETRYCOLLECTION(POLYGON(101.23 171.82, 201.32 101.5, 215.7 201.953, 101.23 171.82))', 4326), CURRENT_TIMESTAMP);";
 				st = db.prepare(query);
-				st.bind(1, entity_uuid.getLeastSignificantBits());
+				st.bind(1, uuid);
 				st.bind(2, entity_type);
 				st.step();
 				st.close();
 				
-				uuid = String.valueOf(entity_uuid.getLeastSignificantBits());
 			} else {
 				// check if entity exists
 				if (!hasEntity(db, entity_id)) {
@@ -126,17 +124,16 @@ public class DatabaseManager {
 				}
 				
 				// create new relationship
-				UUID rel_uuid = UUID.randomUUID();
+				uuid = generateUUID();
 				
 				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
 							   "VALUES (?, 0, ?, 'POLYGON', GeomFromText('GEOMETRYCOLLECTION(POLYGON(101.23 171.82, 201.32 101.5, 215.7 201.953, 101.23 171.82))', 4326), CURRENT_TIMESTAMP);";
 				st = db.prepare(query);
-				st.bind(1, rel_uuid.getLeastSignificantBits());
+				st.bind(1, uuid);
 				st.bind(2, rel_type);
 				st.step();
 				st.close();
 				
-				uuid = String.valueOf(rel_uuid.getLeastSignificantBits());
 			} else {
 				// check if relationship exists
 				if (!hasRelationship(db, rel_id)) {
@@ -452,5 +449,9 @@ public class DatabaseManager {
 		db.exec("select UUID, RelationshipID, ParticipatesVerb " + 
 				"from AEntReln " +
 				"where uuid = " + entity_id + " and RelationshipID = " + rel_id + ";", cb);
+	}
+	
+	private String generateUUID() {
+		return "0000" + String.valueOf(System.currentTimeMillis());
 	}
 }
