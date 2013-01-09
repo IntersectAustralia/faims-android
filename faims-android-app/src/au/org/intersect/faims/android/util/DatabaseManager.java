@@ -19,28 +19,48 @@ public class DatabaseManager {
 		this.dbname = filename;
 	}
 
-	public void saveArchEnt(String entity_id, String entity_type,
+	public String saveArchEnt(String entity_id, String entity_type,
 			String geo_data, List<EntityAttribute> attributes) {
+		
+		FAIMSLog.log("entity_id:" + entity_id);
+		FAIMSLog.log("entity_type:" + entity_type);
 		
 		for (EntityAttribute attribute : attributes) {
 			FAIMSLog.log(attribute.toString());
 		}
 		
+		jsqlite.Database db = null;
 		try {
 			
-			jsqlite.Database db = new jsqlite.Database();
+			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			
+			Stmt st;
+			
+			//st = db.prepare("begin transaction;");
+			//st.step();
+			//st.close();
 			
 			String uuid;
 			
 			if (entity_id == null) {
 				// check if entity type exists
+				st = db.prepare("select count(AEntTypeID) from AEntType where AEntTypeName = ? COLLATE NOCASE;");
+				st.bind(1, entity_type);
+				st.step();
+				if (st.column_int(0) == 0) {
+					FAIMSLog.log("entity type does not exist");
+					st.close();
+					return null;
+				}
+				st.close();
 				
+				// create new entity
 				UUID entity_uuid = UUID.randomUUID();
 				
 				String query = "INSERT INTO ArchEntity (uuid, MSB_UUID, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
 							   "VALUES (?, ?, 0, ?, 'POLYGON', GeomFromText('GEOMETRYCOLLECTION(POLYGON(101.23 171.82, 201.32 101.5, 215.7 201.953, 101.23 171.82))', 4326), CURRENT_TIMESTAMP);";
-				Stmt st = db.prepare(query);
+				st = db.prepare(query);
 				st.bind(1, entity_uuid.getLeastSignificantBits());
 				st.bind(2, entity_uuid.getMostSignificantBits());
 				st.bind(3, entity_type);
@@ -49,20 +69,27 @@ public class DatabaseManager {
 				
 				uuid = String.valueOf(entity_uuid.getLeastSignificantBits());
 			} else {
-				// check if uuid exists
+				// check if entity exists
+				st = db.prepare("select count(UUID) from ArchEntity where UUID = ?;");
+				st.bind(1, entity_id);
+				st.step();
+				if (st.column_int(0) == 0) {
+					FAIMSLog.log("entity id " + entity_id + " does not exist");
+					st.close();
+					return null;
+				}
+				st.close();
 				
 				uuid = entity_id;
 			}
 			
+			// save entity attributes
 			for (EntityAttribute attribute : attributes) {
-				// check if attribute exists
-				
 				String query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
 							   "SELECT ?, ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
-							   "FROM AttributeKey LEFT OUTER JOIN Vocabulary USING (attributeID) " + 
-							   "WHERE attributeName = ? " + 
-							   "AND (vocabID = :VocabID OR vocabID is null);";
-				Stmt st = db.prepare(query);
+							   "FROM AttributeKey " + 
+							   "WHERE attributeName = ?;";
+				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, attribute.getVocab());
 				st.bind(3, attribute.getMeasure());
@@ -72,6 +99,7 @@ public class DatabaseManager {
 				st.step();
 				st.close();
 			}
+			
 			
 			Callback cb = new Callback() {
 				@Override
@@ -92,19 +120,32 @@ public class DatabaseManager {
 				}
 			};
 			
+			//st = db.prepare("commit;");
+			//st.step();
+			//st.close();
+			
 			// Test various queries
 			db.exec("select count(uuid) from ArchEntity;", cb);
-			db.exec("select attributename, vocabname, measure, freetext, certainty " + 
+			db.exec("select count(uuid) from AEntValue;", cb);
+			db.exec("select attributename, vocabname, measure, freetext, certainty, valuetimestamp " + 
 					"from aentvalue " +
 					"left outer join attributekey using (attributeid) " + 
 					"left outer join vocabulary using (attributeid) " +
-					"where uuid = " + uuid + " group by " + uuid + ", attributeid having max(valuetimestamp);", cb);
+					"where uuid = " + uuid + " group by uuid, attributeid having max(valuetimestamp);", cb);
 			
-			db.close();
+			return uuid;
 			
 		} catch (Exception e) {
 			FAIMSLog.log(e);
+		} finally {
+			try {
+				if (db != null) db.close();
+			} catch (Exception e) {
+				FAIMSLog.log(e);
+			}
 		}
+		
+		return null;
 	}
 	
 	public Object fetchArchEnt(String id){

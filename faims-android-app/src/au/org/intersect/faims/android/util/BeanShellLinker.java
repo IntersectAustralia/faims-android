@@ -74,7 +74,7 @@ public class BeanShellLinker {
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
     		
-    		showWarning("Logic Error", "Error encountered in logic script", "");
+    		showWarning("Logic Error", "Error encountered in logic script");
     	}
 	}
 	
@@ -193,7 +193,7 @@ public class BeanShellLinker {
 		
 	}
 	
-	public void showWarning(final String title, final String message, final String okCallback){
+	public void showWarning(final String title, final String message){
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
 		
@@ -202,7 +202,6 @@ public class BeanShellLinker {
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 		           public void onClick(DialogInterface dialog, int id) {
 		               // User clicked OK button
-		        	   execute(okCallback);
 		           }
 		       });
 		builder.create().show();
@@ -285,6 +284,7 @@ public class BeanShellLinker {
 			}
 			else {
 				Log.w("FAIMS","Couldn't set value for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "Error encountered in logic script");
 			}
 		}
 		catch(Exception e){
@@ -293,6 +293,7 @@ public class BeanShellLinker {
 	}
 	
 	public Object getFieldValue(String ref){
+		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
@@ -342,6 +343,7 @@ public class BeanShellLinker {
 				}
 				else{
 					Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
+					showWarning("Logic Error", "Error encountered in logic script");
 					return "";
 				}
 			}
@@ -355,6 +357,7 @@ public class BeanShellLinker {
 			}
 			else {
 				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "Error encountered in logic script");
 				return "";
 			}
 		}
@@ -364,10 +367,15 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void saveArchEnt(String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) {
+	public String saveArchEnt(String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 		
-		databaseManager.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+		entity_id = databaseManager.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+		if (entity_id == null) {
+			showWarning("Database Error", "Could not save arch entity.");
+		}
+		
+		return entity_id;
 	}
 	
 	public void saveRel(String entity_id, String rel_type, String geo_data, List<EntityAttribute> attributes) {

@@ -12,6 +12,7 @@
           <!-- Empty Arch Entity -->
           <empty_entity>
             <tab>
+              <update></update>
               <save></save>
               <next></next>
             </tab>
@@ -25,6 +26,7 @@
               <time></time>
               <location></location>
               <type></type>
+              <update></update>
               <save></save>
               <next></next>
             </tab>
@@ -41,6 +43,7 @@
               <location></location>
               <location-certainty></location-certainty>
               <type></type>
+              <update></update>
               <save></save>
               <next></next>
             </tab>
@@ -52,6 +55,7 @@
               <count></count>
               <count-description></count-description>
               <count-certainty></count-certainty>
+              <update></update>
               <save></save>
             </tab1>
             <tab2>
@@ -75,18 +79,18 @@
       <bind nodeset="/faims/simple_entity_2/tab/name" type="string"/>
       <bind nodeset="/faims/simple_entity_2/tab/count" type="integer"/>
       <bind nodeset="/faims/simple_entity_2/tab/count-description" type="string"/>
-      <bind nodeset="/faims/simple_entity_2/tab/count-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_2/tab/count-certainty" type="decimal"/>
       <bind nodeset="/faims/simple_entity_2/tab/date" type="date"/>
       <bind nodeset="/faims/simple_entity_2/tab/time" type="time"/>
-      <bind nodeset="/faims/simple_entity_2/tab/location-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_2/tab/location-certainty" type="decimal"/>
 
       <bind nodeset="/faims/simple_entity_3/tab1/name" type="string"/>
       <bind nodeset="/faims/simple_entity_3/tab1/count" type="integer"/>
       <bind nodeset="/faims/simple_entity_3/tab1/count-description" type="string"/>
-      <bind nodeset="/faims/simple_entity_3/tab1/count-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_3/tab1/count-certainty" type="decimal"/>
       <bind nodeset="/faims/simple_entity_3/tab2/date" type="date"/>
       <bind nodeset="/faims/simple_entity_3/tab2/time" type="time"/>
-      <bind nodeset="/faims/simple_entity_3/tab3/location-certainty" type="integer"/>
+      <bind nodeset="/faims/simple_entity_3/tab3/location-certainty" type="decimal"/>
 
     </model>
   </h:head>
@@ -96,6 +100,9 @@
       <label>Empty Entity Example</label>
       <group ref="tab">
         <label>Empty Entity</label>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
         <trigger ref="save">
           <label>Save</label>
         </trigger>
@@ -134,6 +141,9 @@
             <value>dummy</value>
           </item>
         </select>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
         <trigger ref="save">
           <label>Save</label>
         </trigger>
@@ -181,6 +191,9 @@
             <value>dummy</value>
           </item>
         </select>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
         <trigger ref="save">
           <label>Save</label>
         </trigger>
@@ -205,6 +218,9 @@
         <input ref="count-certainty" faims_attribute_name="count_certainty">
           <label>Certainty:</label>
         </input>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
         <trigger ref="save">
           <label>Save</label>
         </trigger>

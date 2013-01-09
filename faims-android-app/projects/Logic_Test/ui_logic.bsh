@@ -2,12 +2,17 @@ onEvent("empty_entity/tab/next", "click", "showTabGroup(\"simple_entity_1\")");
 onEvent("simple_entity_1/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
 onEvent("simple_entity_2/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
 
-saveEmptyEntity() {
+String e;
+String se1;
+String se2;
+String se3;
+
+saveEmptyEntity(entity_id) {
 	List attributes = createAttributeList();
-	saveArchEnt(null, "empty_entity", null, attributes);
+	e = saveArchEnt(entity_id, "empty", null, attributes);
 }
 
-saveSimpleEntity1() {
+saveSimpleEntity1(entity_id) {
 	List attributes = createAttributeList();
 	attributes.add(createAttribute("name", getFieldValue("simple_entity_1/tab/name"), null, null, null));
 	attributes.add(createAttribute("count", getFieldValue("simple_entity_1/tab/count"), null, null, null));
@@ -18,20 +23,43 @@ saveSimpleEntity1() {
 	for (Object o : values) {
 		attributes.add(createAttribute("type", o.getValue(), null, null, null));
 	}
-	saveArchEnt(null, "simple_entity_1", null, attributes);
+	se1 = saveArchEnt(entity_id, "Simple", null, attributes);
 }
 
-saveSimpleEntity2() {
+saveSimpleEntity2(entity_id) {
 	List attributes = createAttributeList();
-	saveArchEnt(null, "simple_entity_2", null, attributes);
+	attributes.add(createAttribute("name", getFieldValue("simple_entity_2/tab/name"), null, null, null));
+	attributes.add(createAttribute("count", getFieldValue("simple_entity_2/tab/count"), null, getFieldValue("simple_entity_2/tab/count-description"), getFieldValue("simple_entity_2/tab/count-certainty")));
+	attributes.add(createAttribute("date", getFieldValue("simple_entity_2/tab/date"), null, null, null));
+	attributes.add(createAttribute("time", getFieldValue("simple_entity_2/tab/time"), null, null, null));
+	attributes.add(createAttribute("location", getFieldValue("simple_entity_2/tab/location"), null, null, getFieldValue("simple_entity_2/tab/location-certainty")));
+	List values = getFieldValue("simple_entity_2/tab/type");
+	for (Object o : values) {
+		attributes.add(createAttribute("type", o.getValue(), null, null, null));
+	}
+	se2 = saveArchEnt(entity_id, "Simple", null, attributes);
 }
 
-saveSimpleEntity3() {
+saveSimpleEntity3(entity_id) {
 	List attributes = createAttributeList();
-	saveArchEnt(null, "simple_entity_3", null, attributes);
+	attributes.add(createAttribute("name", getFieldValue("simple_entity_3/tab1/name"), null, null, null));
+	attributes.add(createAttribute("count", getFieldValue("simple_entity_3/tab1/count"), null, getFieldValue("simple_entity_3/tab1/count-description"), getFieldValue("simple_entity_3/tab1/count-certainty")));
+	attributes.add(createAttribute("date", getFieldValue("simple_entity_3/tab2/date"), null, null, null));
+	attributes.add(createAttribute("time", getFieldValue("simple_entity_3/tab2/time"), null, null, null));
+	attributes.add(createAttribute("location", getFieldValue("simple_entity_3/tab3/location"), null, null, getFieldValue("simple_entity_3/tab3/location-certainty")));
+	List values = getFieldValue("simple_entity_3/tab3/type");
+	for (Object o : values) {
+		attributes.add(createAttribute("type", o.getValue(), null, null, null));
+	}
+	se3 = saveArchEnt(entity_id, "Simple", null, attributes);
 }
 
-onEvent("empty_entity/tab/save", "click", "saveEmptyEntity()");
-onEvent("simple_entity_1/tab/save", "click", "saveSimpleEntity1()");
-onEvent("simple_entity_2/tab/save", "click", "saveSimpleEntity2()");
-onEvent("simple_entity_3/tab1/save", "click", "saveSimpleEntity3()");
+onEvent("empty_entity/tab/update", "click", "saveEmptyEntity(e)");
+onEvent("simple_entity_1/tab/update", "click", "saveSimpleEntity1(se1)");
+onEvent("simple_entity_2/tab/update", "click", "saveSimpleEntity2(se2)");
+onEvent("simple_entity_3/tab1/update", "click", "saveSimpleEntity3(se3)");
+
+onEvent("empty_entity/tab/save", "click", "saveEmptyEntity(null)");
+onEvent("simple_entity_1/tab/save", "click", "saveSimpleEntity1(null)");
+onEvent("simple_entity_2/tab/save", "click", "saveSimpleEntity2(null)");
+onEvent("simple_entity_3/tab1/save", "click", "saveSimpleEntity3(null)");
