@@ -2,10 +2,6 @@ Object types = fetchAll("select vocabid, vocabname from vocabulary left join att
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 Object relationships = fetchAll("select relntypename, relntypename from relntype;");
 
-populateDropDown("tabgroup1/tab1/type", types);
-populateCheckBoxGroup("tabgroup1/tab1/location", locations);
-populateDropDown("tabgroup1/tab2/type", relationships);
-
 String entity_id;
 String rel_id;
 
@@ -80,7 +76,9 @@ clearEntity() {
 	setFieldValue("tabgroup1/tab1/type-description", "");
 	setFieldValue("tabgroup1/tab1/location-value", "");
 	setFieldValue("tabgroup1/tab1/location-certainty", "");
+	populateDropDown("tabgroup1/tab1/type", types);
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	
 }
 
 saveRelationship() {
@@ -90,6 +88,16 @@ saveRelationship() {
 
 loadRelationship() {
 
+	if (rel_id == null) return;
+	
+	Object relationship = fetchRel(rel_id);
+	
+	for (Object attribute : relationship) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab2/name", attribute.getText());
+		}
+	}
 }
 
 updateRelationship(rel_id) {
@@ -108,6 +116,7 @@ updateRelationship(rel_id) {
 
 clearRelationship() {
 	 setFieldValue("tabgroup1/tab2/name", "");
+	 populateDropDown("tabgroup1/tab2/type", relationships);
 }
 
 updateEntityRelationship() {
@@ -121,6 +130,8 @@ updateEntityRelationship() {
 
 saveEntityRelationship() {
 	addReln(getFieldValue("tabgroup1/tab3/entity"), getFieldValue("tabgroup1/tab3/relationship"), getFieldValue("tabgroup1/tab3/verb"));
+	
+	showToast("record saved");
 }
 
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
@@ -134,3 +145,6 @@ onEvent("tabgroup1/tab2/load", "click", "loadRelationship()");
 onEvent("tabgroup1/tab2/clear", "click", "clearRelationship()");
 
 onEvent("tabgroup1/tab3/save", "click", "saveEntityRelationship()");
+
+clearEntity();
+clearRelationship();

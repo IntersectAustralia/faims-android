@@ -65,7 +65,7 @@ public class DatabaseManager {
 				String query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
 							   "SELECT ?, ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
-							   "WHERE attributeName = ?;";
+							   "WHERE attributeName = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, attribute.getVocab());
@@ -138,9 +138,9 @@ public class DatabaseManager {
 			// save relationship attributes
 			for (RelationshipAttribute attribute : attributes) {
 				String query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-							   "SELECT ?, ?, 0, ?, CURRENT_TIMESTAMP " + 
+							   "SELECT ?, ?, attributeId, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
-							   "WHERE attributeName = ?;";
+							   "WHERE attributeName = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, attribute.getVocab());
@@ -298,7 +298,7 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String query = "SELECT relationshipid, attributename, vocabname, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN vocabulary USING (vocabid);";
+			String query = "SELECT relationshipid, attributename, vocabid, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
 			Collection<RelationshipAttribute> relAttributes = new ArrayList<RelationshipAttribute>();
