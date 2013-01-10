@@ -43,7 +43,7 @@ loadEntity() {
 			setFieldValue("tabgroup1/tab1/location-value", attribute.getMeasure());
 			setFieldValue("tabgroup1/tab1/location-certainty", attribute.getCertainty());
 		} else if ("supervisor".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/supervisor", attribute.getVocab());
+			setFieldValue("tabgroup1/tab1/supervisor", attribute.getText());
 		}
 	}
 	
@@ -63,7 +63,7 @@ updateEntity(entity_id) {
 		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab1/location-value"), getFieldValue("tabgroup1/tab1/location-certainty")));
 	}
 	
-	attributes.add(createEntityAttribute("supervisor", null, getFieldValue("tabgroup1/tab1/supervisor"), null, null));
+	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab1/supervisor"), null, null, null));
 	
 	String id = saveArchEnt(entity_id, "simple", null, attributes);
 	

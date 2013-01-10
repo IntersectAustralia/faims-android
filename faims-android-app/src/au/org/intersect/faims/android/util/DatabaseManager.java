@@ -279,7 +279,7 @@ public class DatabaseManager {
 				EntityAttribute archAttribute = new EntityAttribute();
 				archAttribute.setName(stmt.column_string(1));
 				archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
-				archAttribute.setMeasure(Integer.toString(stmt.column_int(3)));
+				archAttribute.setMeasure(Double.toString(stmt.column_int(3)));
 				archAttribute.setText(stmt.column_string(4));
 				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 				archAttributes.add(archAttribute);
