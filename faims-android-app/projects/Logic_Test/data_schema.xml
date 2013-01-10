@@ -12,6 +12,9 @@
     <child>
       Below
     </child>
+     <property type="string" name="name" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
   </RelationshipElement>
 
   <ArchaeologicalElement type="Empty">

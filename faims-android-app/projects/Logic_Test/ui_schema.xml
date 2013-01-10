@@ -179,7 +179,7 @@
         <input ref="count" faims_attribute_name="count">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="measure">
+        <input ref="count-description" faims_attribute_name="count">
           <label>Description:</label>
         </input>
         <input ref="count-certainty" faims_attribute_name="count">

@@ -35,15 +35,15 @@ public class DatabaseManager {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			
+			if (!validArchEnt(db, entity_id, entity_type, geo_data, attributes)) {
+				FAIMSLog.log("not valid arch entity");
+				return null;
+			}
+			
 			String uuid;
 			Stmt st;
 			
 			if (entity_id == null) {
-				// check if entity type exists
-				if (!hasEntityType(db, entity_type)) {
-					return null;
-				}
-				
 				// create new entity
 				uuid = generateUUID();
 				
@@ -56,10 +56,6 @@ public class DatabaseManager {
 				st.close();
 				
 			} else {
-				// check if entity exists
-				if (!hasEntity(db, entity_id)) {
-					return null;
-				}
 				
 				uuid = entity_id;
 			}
@@ -114,15 +110,15 @@ public class DatabaseManager {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			
+			if (!validRel(db, rel_id, rel_type, geo_data, attributes)) {
+				FAIMSLog.log("not valid rel");
+				return null;
+			}
+			
 			String uuid;
 			Stmt st;
 			
 			if (rel_id == null) {
-				// check if relationship type exists
-				if (!hasRelationshipType(db, rel_type)) {
-					return null;
-				}
-				
 				// create new relationship
 				uuid = generateUUID();
 				
@@ -135,10 +131,6 @@ public class DatabaseManager {
 				st.close();
 				
 			} else {
-				// check if relationship exists
-				if (!hasRelationship(db, rel_id)) {
-					return null;
-				}
 				
 				uuid = rel_id;
 			}
@@ -173,6 +165,61 @@ public class DatabaseManager {
 		}
 		
 		return null;
+	}
+	
+	private boolean validArchEnt(jsqlite.Database db, String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) throws Exception {
+		
+		if (entity_id == null && !hasEntityType(db, entity_type)) {
+			return false;
+		} else if (entity_id != null && !hasEntity(db, entity_id)) {
+			return false;
+		}
+		
+		// check if attributes exist
+		for (EntityAttribute attribute : attributes) {
+			String query = "SELECT count(AEntTypeName) " + 
+						   "FROM IdealAEnt left outer join AEntType using (AEntTypeId) left outer join AttributeKey using (AttributeId) " + 
+						   "WHERE AEntTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+			
+			Stmt st = db.prepare(query);
+			st.bind(1, entity_type);
+			st.bind(2, attribute.getName());
+			st.step();
+			if (st.column_int(0) == 0) {
+				st.close();
+				return false;
+			}
+			st.close();
+		}
+		
+		return true;
+	}
+	
+	private boolean validRel(jsqlite.Database db, String rel_id, String rel_type, String geo_data, List<RelationshipAttribute> attributes) throws Exception {
+		
+		if (rel_id == null && !hasRelationshipType(db, rel_type)) {
+			return false;
+		} else if (rel_id != null && !hasRelationship(db, rel_id)) {
+			return false;
+		}
+		
+		// check if attributes exist
+		for (RelationshipAttribute attribute : attributes) {
+			String query = "SELECT count(RelnTypeName) " + 
+					   	   "FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
+					       "WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+			Stmt st = db.prepare(query);
+			st.bind(1, rel_type);
+			st.bind(2, attribute.getName());
+			st.step();
+			if (st.column_int(0) == 0) {
+				st.close();
+				return false;
+			}
+			st.close();
+		}
+		
+		return true;
 	}
 	
 	public boolean addReln(String entity_id, String rel_id, String verb) {
@@ -342,28 +389,10 @@ public class DatabaseManager {
 	}
 	
 	private void debugSaveArchEnt(jsqlite.Database db, String uuid) throws Exception {
-		Callback cb = new Callback() {
-			@Override
-			public void columns(String[] coldata) {
-				FAIMSLog.log("Columns: " + Arrays.toString(coldata));
-			}
 
-			@Override
-			public void types(String[] types) {
-				FAIMSLog.log("Types: " + Arrays.toString(types));
-			}
-
-			@Override
-			public boolean newrow(String[] rowdata) {
-				FAIMSLog.log("Row: " + Arrays.toString(rowdata));
-
-				return false;
-			}
-		};
-		
 		// Test various queries
-		db.exec("select count(uuid) from ArchEntity;", cb);
-		db.exec("select uuid, valuetimestamp, attributename, freetext, vocabid, measure, certainty from aentvalue left outer join attributekey using (attributeid) where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", cb);
+		db.exec("select count(uuid) from ArchEntity;", createCallback());
+		db.exec("select uuid, valuetimestamp, attributename, freetext, vocabid, measure, certainty from aentvalue left outer join attributekey using (attributeid) where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", createCallback());
 		//db.exec("select attributeid, valuetimestamp from aentvalue where uuid="+uuid+";", cb);
 	}
 	
@@ -423,9 +452,9 @@ public class DatabaseManager {
 				"where RelationshipID = " + uuid + " group by RelationshipID, attributeid having max(RelnValueTimestamp);", cb);
 	}
 	
-
-	private void debugAddReln(Database db, String entity_id, String rel_id) throws Exception {
-		Callback cb = new Callback() {
+	
+	private Callback createCallback() {
+		return new Callback() {
 			@Override
 			public void columns(String[] coldata) {
 				FAIMSLog.log("Columns: " + Arrays.toString(coldata));
@@ -443,12 +472,15 @@ public class DatabaseManager {
 				return false;
 			}
 		};
+	}
+
+	private void debugAddReln(Database db, String entity_id, String rel_id) throws Exception {
 		
 		// Test various queries
-		db.exec("select count(UUID) from AEntReln;", cb);
+		db.exec("select count(UUID) from AEntReln;", createCallback());
 		db.exec("select UUID, RelationshipID, ParticipatesVerb " + 
 				"from AEntReln " +
-				"where uuid = " + entity_id + " and RelationshipID = " + rel_id + ";", cb);
+				"where uuid = " + entity_id + " and RelationshipID = " + rel_id + ";", createCallback());
 	}
 	
 	private String generateUUID() {
