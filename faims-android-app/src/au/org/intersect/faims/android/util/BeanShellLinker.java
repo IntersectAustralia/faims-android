@@ -249,6 +249,8 @@ public class BeanShellLinker {
 	}
 	
 	public void setFieldValue(String ref, Object valueObj) {
+		//FAIMSLog.log(ref);
+		//FAIMSLog.log(valueObj.toString());
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
@@ -313,8 +315,8 @@ public class BeanShellLinker {
 							View view = ll.getChildAt(i);
 							if (view instanceof CustomCheckBox){
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(pair.getValue())){
-									cb.setChecked(true);
+								if (cb.getValue().toString().equalsIgnoreCase(pair.getName())){
+									cb.setChecked("true".equals(pair.getValue()));
 									break;
 								}
 							}
@@ -360,7 +362,7 @@ public class BeanShellLinker {
 						if (view instanceof CustomCheckBox){
 							CustomCheckBox cb = (CustomCheckBox) view;
 							if (cb.isChecked()) {
-								valueList.add(new NameValuePair(cb.getText().toString(), cb.getValue()));
+								valueList.add(new NameValuePair(cb.getValue(), "true"));
 							}
 						}
 					}

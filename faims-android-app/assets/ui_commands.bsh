@@ -2,6 +2,7 @@ import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import java.util.List;
 import java.util.Collection;
+import au.org.intersect.faims.android.ui.form.NameValuePair;
 
 showTabGroup(String label){
     linker.showTabGroup(label);
