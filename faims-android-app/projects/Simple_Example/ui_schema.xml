@@ -65,7 +65,7 @@
   <h:body>
     <group ref="tabgroup1" faims_archent_id="Simple">
       <label>Simple Entity Example</label>
-      <group ref="tab1">
+      <group ref="tab1" faims_hidden="false">
         <label>Entity</label>
         <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
@@ -140,7 +140,7 @@
           <label>Clear</label>
         </trigger>
       </group>
-      <group ref="tab2">
+      <group ref="tab2" faims_hidden="false">
         <label>Relationship</label>
         <select1 ref="type" faims_attribute_name="type">
           <label>Type:</label>
@@ -165,7 +165,7 @@
           <label>Clear</label>
         </trigger>
       </group>
-      <group ref="tab3">
+      <group ref="tab3" faims_hidden="false">
         <label>Entity Relationship</label>
         <select1 ref="entity">
           <label>Entity:</label>

@@ -24,6 +24,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import au.org.intersect.faims.android.util.FAIMSLog;
 
 public class Tab {
 
@@ -34,11 +35,13 @@ public class Tab {
 	private Map<String, List<String>> viewMap;
 	private String name;
 	private String label;
+	private boolean hidden;
 
-	public Tab(Context context, String name, String label) {
+	public Tab(Context context, String name, String label, boolean hidden) {
 		this.context = context;
 		this.name = name;
 		this.label = label;
+		this.hidden = hidden;
 		
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
@@ -51,7 +54,6 @@ public class Tab {
 		
 		this.scrollView = new ScrollView(this.context);
         scrollView.addView(linearLayout);
-        
 	}
 
 	public View addInput(FormEntryPrompt input,String path, String viewName) {
@@ -247,6 +249,10 @@ public class Tab {
 
 	public String getLabel() {
 		return label;
+	}
+	
+	public boolean getHidden() {
+		return hidden;
 	}
 
 	public boolean hasView(String viewName){
