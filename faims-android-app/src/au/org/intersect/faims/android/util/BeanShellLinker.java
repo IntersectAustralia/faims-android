@@ -209,21 +209,18 @@ public class BeanShellLinker {
 	}
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
-		Object archEntities = fetchArchEnt(uuid);
-		if(archEntities instanceof Collection<?>){
-			@SuppressWarnings("unchecked")
-			List<ArchEntity> archEntityLists = (List<ArchEntity>) archEntities;
+		Object archEntityObj = fetchArchEnt(uuid);
+		if(archEntityObj instanceof ArchEntity){
+			ArchEntity archEntity = (ArchEntity) archEntityObj;
 			try {
 				for(Tab tab : tabGroup.getTabs()){
-			    	for (ArchEntity archEntity : archEntityLists) {
-			    		EntityAttribute entityAttribute = archEntity.getEntityAttribute();
+			    	for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
 			    		List<View> views = tab.getViews(entityAttribute.getName());
 			    		clearCheckboxAndRadioButtonValues(views);
 			    	}
 			    }
 				for(Tab tab : tabGroup.getTabs()){
-					for (ArchEntity archEntity : archEntityLists) {
-			    		EntityAttribute entityAttribute = archEntity.getEntityAttribute();
+					for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
 			    		if(tab.hasView(entityAttribute.getName())){
 			    			List<View> views = tab.getViews(entityAttribute.getName());
 			    			loadArchEntFieldsValue(entityAttribute, views);
@@ -237,21 +234,18 @@ public class BeanShellLinker {
 	}
 
 	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
-		Object relationships = fetchRel(uuid);
-		if(relationships instanceof Collection<?>){
-			@SuppressWarnings("unchecked")
-			List<Relationship> relationshipLists = (List<Relationship>) relationships;
+		Object relationshipObj = fetchRel(uuid);
+		if(relationshipObj instanceof Relationship){
+			Relationship relationship = (Relationship) relationshipObj;
 			try {
 				for(Tab tab : tabGroup.getTabs()){
-			    	for (Relationship relationship : relationshipLists) {
-			    		RelationshipAttribute relationshipAttribute = relationship.getRelationshipAttribute();
+			    	for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
 			    		List<View> views = tab.getViews(relationshipAttribute.getName());
 			    		clearCheckboxAndRadioButtonValues(views);
 			    	}
 			    }
 				for(Tab tab : tabGroup.getTabs()){
-					for (Relationship relationship : relationshipLists) {
-						RelationshipAttribute relationshipAttribute = relationship.getRelationshipAttribute();
+					for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
 			    		if(tab.hasView(relationshipAttribute.getName())){
 			    			List<View> views = tab.getViews(relationshipAttribute.getName());
 			    			loadRelationshipFieldsValue(relationshipAttribute, views);

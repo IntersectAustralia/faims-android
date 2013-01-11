@@ -276,20 +276,23 @@ public class DatabaseManager {
 			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
-			Collection<ArchEntity> archEntities = new ArrayList<ArchEntity>();
+			Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+			String type = null;
 			while(stmt.step()){
+				type = stmt.column_string(6);
 				EntityAttribute archAttribute = new EntityAttribute();
 				archAttribute.setName(stmt.column_string(1));
 				archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 				archAttribute.setMeasure(Double.toString(stmt.column_int(3)));
 				archAttribute.setText(stmt.column_string(4));
 				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
-				ArchEntity archEntity = new  ArchEntity(stmt.column_string(6), archAttribute);
-				archEntities.add(archEntity);
+				attributes.add(archAttribute);
 			}
+			ArchEntity archEntity = new  ArchEntity(type, attributes);
+			
 			db.close();
 
-			return archEntities;
+			return archEntity;
 		} catch (jsqlite.Exception e) {
 			FAIMSLog.log(e);
 		}
@@ -304,18 +307,21 @@ public class DatabaseManager {
 			String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
-			Collection<Relationship> relationships = new ArrayList<Relationship>();
+			Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
+			String type = null;
 			while(stmt.step()){
+				type = stmt.column_string(4);
 				RelationshipAttribute relAttribute = new RelationshipAttribute();
 				relAttribute.setName(stmt.column_string(1));
 				relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 				relAttribute.setText(stmt.column_string(3));
-				Relationship relationship = new Relationship(stmt.column_string(4), relAttribute);
-				relationships.add(relationship);
+				attributes.add(relAttribute);
 			}
+			Relationship relationship = new Relationship(type, attributes);
+			
 			db.close();
 
-			return relationships;
+			return relationship;
 		} catch (jsqlite.Exception e) {
 			FAIMSLog.log(e);
 		}

@@ -1,21 +1,23 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.util.Collection;
+
 public class Relationship {
 
 	private String type;
 	
-	private RelationshipAttribute relationshipAttribute;
+	private Collection<RelationshipAttribute> attributes;
 
-	public Relationship(String type, RelationshipAttribute relationshipAttribute){
+	public Relationship(String type, Collection<RelationshipAttribute> attributes){
 		this.type = type;
-		this.relationshipAttribute = relationshipAttribute;
+		this.attributes = attributes;
 	}
 
 	public String getType() {
 		return type;
 	}
 
-	public RelationshipAttribute getRelationshipAttribute() {
-		return relationshipAttribute;
+	public Collection<RelationshipAttribute> getAttributes() {
+		return attributes;
 	}
 }
