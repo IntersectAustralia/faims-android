@@ -51,19 +51,21 @@ public class TabGroup extends Fragment {
 			}
 			
 			TabWidget widget = tabHost.getTabWidget();
-			boolean first = true;
-			for (int i = 0; i < widget.getChildCount(); i++) {
-				Tab tab = tabs.get(i);
-				if (tab.getHidden()) {
-					widget.getChildAt(i).setVisibility(View.GONE);
-				} else if (first) {
-					tabHost.setCurrentTab(i);
-					first = false;
+			if (widget != null) {
+				boolean first = true;
+				for (int i = 0; i < widget.getChildCount(); i++) {
+					Tab tab = tabs.get(i);
+					if (tab.getHidden()) {
+						widget.getChildAt(i).setVisibility(View.GONE);
+					} else if (first) {
+						tabHost.setCurrentTab(i);
+						first = false;
+					}
 				}
-			}
-			if (first == true) {
-				// all tabs are hidden
-				// TODO: maybe hide the frame layout
+				if (first == true) {
+					// all tabs are hidden
+					// TODO: maybe hide the frame layout
+				}
 			}
 			
 			if(this.onLoadCommands.size() > 0){
