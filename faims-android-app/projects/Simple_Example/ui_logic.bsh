@@ -148,3 +148,9 @@ onEvent("tabgroup1/tab3/save", "click", "saveEntityRelationship()");
 
 clearEntity();
 clearRelationship();
+
+selectedName() {
+	System.out.println(getListItemValue());
+}
+
+onEvent("tabgroup1/tab4/names", "click", "selectedName()");

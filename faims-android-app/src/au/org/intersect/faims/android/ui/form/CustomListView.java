@@ -1,15 +1,15 @@
 package au.org.intersect.faims.android.ui.form;
 
 import android.content.Context;
-import android.widget.EditText;
+import android.widget.ListView;
 
-public class CustomEditText extends EditText {
+public class CustomListView extends ListView {
 
 	private String name;
 	private String type;
 	private String value;
 	
-	public CustomEditText(Context context) {
+	public CustomListView(Context context) {
 		super(context);
 	}
 	
@@ -36,4 +36,5 @@ public class CustomEditText extends EditText {
 	public String getValue() {
 		return value;
 	}
+
 }

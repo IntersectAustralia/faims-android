@@ -100,7 +100,8 @@ public class UIRenderer {
 	                    
 	                	String tabName = tabCaption.getIndex().getReference().getNameLast();
 	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText(), "true".equals(tabElement
-                                .getAdditionalAttribute(null, "faims_hidden")));	                 
+                                .getAdditionalAttribute(null, "faims_hidden")), !"false".equals(tabElement
+                                        .getAdditionalAttribute(null, "faims_scrollable")));	                 
 	                	
 	                	FAIMSLog.log(tabGroupName + "/" + tabName);
 	                    tabMap.put(tabGroupName + "/" + tabName, tab);

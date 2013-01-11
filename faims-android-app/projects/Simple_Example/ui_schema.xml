@@ -42,6 +42,9 @@
                   <verb></verb>
                   <save></save>
               </tab3>
+              <tab4>
+                  <names></names>
+              </tab4>
           </tabgroup1>
         </faims>
       </instance>
@@ -187,6 +190,28 @@
         <trigger ref="save">
           <label>Save</label>
         </trigger>
+      </group>
+      <group ref="tab4" faims_hidden="false" faims_scrollable="false">
+          <label>Names</label>
+          <select1 ref="names" appearance="compact">
+            <label>Name:</label>
+            <item>
+                <label>Name A</label>
+                <value>name a</value>
+            </item>
+            <item>
+                <label>Name B</label>
+                <value>name b</value>
+            </item>
+            <item>
+                <label>Name C</label>
+                <value>name c</value>
+            </item>
+            <item>
+                <label>Name D</label>
+                <value>name d</value>
+            </item>
+        </select1>
       </group>
     </group>
     

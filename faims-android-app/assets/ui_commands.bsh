@@ -93,3 +93,7 @@ Object fetchOne(String query){
 Collection fetchAll(String query){
     return linker.fetchAll(query);
 }
+
+String getListItemValue() {
+	return _list_item_value;
+}

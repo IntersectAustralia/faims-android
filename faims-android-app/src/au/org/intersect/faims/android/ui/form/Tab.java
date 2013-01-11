@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TabHost;
@@ -36,12 +37,15 @@ public class Tab {
 	private String name;
 	private String label;
 	private boolean hidden;
+	private boolean scrollable;
+	private View view;
 
-	public Tab(Context context, String name, String label, boolean hidden) {
+	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable) {
 		this.context = context;
 		this.name = name;
 		this.label = label;
 		this.hidden = hidden;
+		this.scrollable = scrollable;
 		
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
@@ -52,8 +56,13 @@ public class Tab {
         
         linearLayout.setBackgroundColor(Color.WHITE);
 		
-		this.scrollView = new ScrollView(this.context);
-        scrollView.addView(linearLayout);
+        if (scrollable) {
+        	this.scrollView = new ScrollView(this.context);
+        	scrollView.addView(linearLayout);
+        	this.view = scrollView;
+        } else {
+        	this.view = linearLayout;
+        }
 	}
 
 	public View addInput(FormEntryPrompt input,String path, String viewName) {
@@ -174,6 +183,22 @@ public class Tab {
                             selectLayout.addView(radioGroupLayout);
                             view = selectLayout;
                             linearLayout.addView(selectLayout);
+                        // List
+                        } else if ("compact".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
+                        	CustomListView list = new CustomListView(this.context);
+                            List<NameValuePair> choices = new ArrayList<NameValuePair>();
+                            for (final SelectChoice selectChoice : input
+                                    .getSelectChoices()) {
+                            	NameValuePair pair = new NameValuePair(selectChoice.getLabelInnerText(), selectChoice.getValue());
+                                choices.add(pair);
+                            }
+                            ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+                                    this.context,
+                                    android.R.layout.simple_list_item_1,
+                                    choices);
+                            list.setAdapter(arrayAdapter);
+                            view = list;
+                            linearLayout.addView(list);
                         // Default is single select dropdown
                         } else {
                         	CustomSpinner spinner = new CustomSpinner(this.context);
@@ -234,7 +259,7 @@ public class Tab {
 
             @Override
             public View createTabContent(String tag) {
-            	return scrollView;
+            	return view;
             }
         });
         
