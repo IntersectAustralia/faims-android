@@ -8,7 +8,9 @@ import java.util.List;
 import jsqlite.Callback;
 import jsqlite.Database;
 import jsqlite.Stmt;
+import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
+import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 
 public class DatabaseManager {
@@ -271,10 +273,10 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid);";
+			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
-			Collection<EntityAttribute> archAttributes = new ArrayList<EntityAttribute>();
+			Collection<ArchEntity> archEntities = new ArrayList<ArchEntity>();
 			while(stmt.step()){
 				EntityAttribute archAttribute = new EntityAttribute();
 				archAttribute.setName(stmt.column_string(1));
@@ -282,11 +284,12 @@ public class DatabaseManager {
 				archAttribute.setMeasure(Double.toString(stmt.column_int(3)));
 				archAttribute.setText(stmt.column_string(4));
 				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
-				archAttributes.add(archAttribute);
+				ArchEntity archEntity = new  ArchEntity(stmt.column_string(6), archAttribute);
+				archEntities.add(archEntity);
 			}
 			db.close();
 
-			return archAttributes;
+			return archEntities;
 		} catch (jsqlite.Exception e) {
 			FAIMSLog.log(e);
 		}
@@ -298,20 +301,21 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String query = "SELECT relationshipid, attributename, vocabid, freetext FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid);";
+			String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
-			Collection<RelationshipAttribute> relAttributes = new ArrayList<RelationshipAttribute>();
+			Collection<Relationship> relationships = new ArrayList<Relationship>();
 			while(stmt.step()){
 				RelationshipAttribute relAttribute = new RelationshipAttribute();
 				relAttribute.setName(stmt.column_string(1));
 				relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 				relAttribute.setText(stmt.column_string(3));
-				relAttributes.add(relAttribute);
+				Relationship relationship = new Relationship(stmt.column_string(4), relAttribute);
+				relationships.add(relationship);
 			}
 			db.close();
 
-			return relAttributes;
+			return relationships;
 		} catch (jsqlite.Exception e) {
 			FAIMSLog.log(e);
 		}

@@ -15,9 +15,10 @@ loadEntity() {
 	
 	if (entity_id == null) return;
 	
-	Object entity = fetchArchEnt(entity_id);
+	Object entities = fetchArchEnt(entity_id);
 	
-	for (Object attribute : entity) {
+	for (Object entity : entities) {
+		EntityAttribute attribute = entity.getEntityAttribute();
 		System.out.println(attribute.toString());
 		if ("name".equals(attribute.getName())) {
 			setFieldValue("tabgroup1/tab1/name", attribute.getText());
@@ -90,9 +91,10 @@ loadRelationship() {
 
 	if (rel_id == null) return;
 	
-	Object relationship = fetchRel(rel_id);
+	Object relationships = fetchRel(rel_id);
 	
-	for (Object attribute : relationship) {
+	for (Object relationship : relationships) {
+		RelationshipAttribute attribute = relationship.getRelationshipAttribute();
 		System.out.println(attribute.toString());
 		if ("name".equals(attribute.getName())) {
 			setFieldValue("tabgroup1/tab2/name", attribute.getText());

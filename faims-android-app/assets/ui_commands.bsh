@@ -8,6 +8,10 @@ showTabGroup(String label){
     linker.showTabGroup(label);
 }
 
+showTabGroup(String id, String uuid){
+    linker.showTabGroup(id,uuid);
+}
+
 showToast(String message) {
     linker.showToast(message);
 }

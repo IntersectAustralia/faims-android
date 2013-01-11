@@ -5,26 +5,46 @@ import android.widget.Spinner;
 
 public class CustomSpinner extends Spinner {
 
-	private String name;
-	private String type;
+	private String archEntName;
+	private String archEntType;
+	private String relName;
+	private String relType;
+	private String ref;
 	
 	public CustomSpinner(Context context) {
 		super(context);
 	}
 	
-	public String getName() {
-		return name;
+	public CustomSpinner(Context context, String archEntName, String archEntType, String relName, String relType, String ref) {
+		super(context);
+		this.archEntName = archEntName;
+		this.archEntType = archEntType;
+		this.relName = relName;
+		this.relType = relType;
+		this.ref = ref;
 	}
-	
-	public void setName(String value) {
-		name = value;
+
+	public String getArchEntName() {
+		return archEntName;
 	}
-	
-	public String getType() {
-		return type;
+
+	public String getArchEntType() {
+		return archEntType;
 	}
-	
-	public void setType(String value) {
-		type = value;
+
+	public String getRelName() {
+		return relName;
+	}
+
+	public String getRelType() {
+		return relType;
+	}
+
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
 	}
 }

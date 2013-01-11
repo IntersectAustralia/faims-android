@@ -25,10 +25,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.CustomCheckBox;
+import au.org.intersect.faims.android.ui.form.CustomDatePicker;
+import au.org.intersect.faims.android.ui.form.CustomEditText;
+import au.org.intersect.faims.android.ui.form.CustomLinearLayout;
 import au.org.intersect.faims.android.ui.form.CustomRadioButton;
+import au.org.intersect.faims.android.ui.form.CustomSpinner;
+import au.org.intersect.faims.android.ui.form.CustomTimePicker;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.ui.form.Tab;
 import au.org.intersect.faims.android.ui.form.TabGroup;
@@ -46,6 +53,11 @@ public class BeanShellLinker {
 	private FragmentActivity activity;
 	
 	private DatabaseManager databaseManager;
+
+	private static final String FREETEXT = "freetext";
+	private static final String MEASURE = "measure";
+	private static final String CERTAINTY = "certainty";
+	private static final String VOCAB = "vocab";
 
 	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
@@ -164,38 +176,165 @@ public class BeanShellLinker {
 	}
 
 	public void showTabGroup(String id, String uuid){
+		TabGroup tabGroup = renderer.showTabGroup(activity, id);
+		if(tabGroup.getArchEntId() != null && tabGroup.getArchEntId().equals(id)){
+			showArchEntityTabGroup(uuid, tabGroup);
+		}else if(tabGroup.getRelId() != null && tabGroup.getRelId().equals(id)){
+			showRelationshipTabGroup(uuid, tabGroup);
+		}else{
+			showTabGroup(id);
+		}
+	}
+
+	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntities = fetchArchEnt(uuid);
 		if(archEntities instanceof Collection<?>){
 			@SuppressWarnings("unchecked")
-			List<EntityAttribute> entityAttributes = (List<EntityAttribute>) archEntities;
+			List<ArchEntity> archEntityLists = (List<ArchEntity>) archEntities;
 			try {
-				TabGroup tabGroup = renderer.showTabGroup(activity, id);
-				for (EntityAttribute entityAttribute : entityAttributes) {
-			    	for(Tab tab : tabGroup.getTabs()){
-			    		if(tab.hasView(entityAttribute.getName()) || tab.hasView(entityAttribute.getName() + "-freetext") || tab.hasView(entityAttribute.getName() + "-measure")
-			    				|| tab.hasView(entityAttribute.getName() + "-certainty") || tab.hasView(entityAttribute.getName() + "-vocab")){
-			    			if(entityAttribute.hasFreeText()){
-			    				if(tab.getPath(entityAttribute.getName() + "-freetext") != null){
-			    					setFieldValue(tab.getPath(entityAttribute.getName() + "-freetext"),entityAttribute.getText());
-			    				}else{
-			    					setFieldValue(tab.getPath(entityAttribute.getName()),entityAttribute.getText());
-			    				}
-			    			}
-			    			if(entityAttribute.hasMeasure()){
-			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-measure"),entityAttribute.getMeasure());
-			    			}
-			    			if(entityAttribute.hasFreeText()){
-			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-certainty"),entityAttribute.getCertainty());
-			    			}
-			    			if(entityAttribute.hasFreeText()){
-			    				setFieldValue(tab.getPath(entityAttribute.getName() + "-vocab"),entityAttribute.getVocab());
-			    			}
+				for(Tab tab : tabGroup.getTabs()){
+			    	for (ArchEntity archEntity : archEntityLists) {
+			    		EntityAttribute entityAttribute = archEntity.getEntityAttribute();
+			    		List<View> views = tab.getViews(entityAttribute.getName());
+			    		clearCheckboxAndRadioButtonValues(views);
+			    	}
+			    }
+				for(Tab tab : tabGroup.getTabs()){
+					for (ArchEntity archEntity : archEntityLists) {
+			    		EntityAttribute entityAttribute = archEntity.getEntityAttribute();
+			    		if(tab.hasView(entityAttribute.getName())){
+			    			List<View> views = tab.getViews(entityAttribute.getName());
+			    			loadArchEntFieldsValue(entityAttribute, views);
 			    		}
 			    	}
 			    }
 			} catch (Exception e) {
 				Log.e("FAIMS", "Exception showing tab group and load value",e);
 			}
+		}
+	}
+
+	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
+		Object relationships = fetchRel(uuid);
+		if(relationships instanceof Collection<?>){
+			@SuppressWarnings("unchecked")
+			List<Relationship> relationshipLists = (List<Relationship>) relationships;
+			try {
+				for(Tab tab : tabGroup.getTabs()){
+			    	for (Relationship relationship : relationshipLists) {
+			    		RelationshipAttribute relationshipAttribute = relationship.getRelationshipAttribute();
+			    		List<View> views = tab.getViews(relationshipAttribute.getName());
+			    		clearCheckboxAndRadioButtonValues(views);
+			    	}
+			    }
+				for(Tab tab : tabGroup.getTabs()){
+					for (Relationship relationship : relationshipLists) {
+						RelationshipAttribute relationshipAttribute = relationship.getRelationshipAttribute();
+			    		if(tab.hasView(relationshipAttribute.getName())){
+			    			List<View> views = tab.getViews(relationshipAttribute.getName());
+			    			loadRelationshipFieldsValue(relationshipAttribute, views);
+			    		}
+			    	}
+			    }
+			} catch (Exception e) {
+				Log.e("FAIMS", "Exception showing tab group and load value",e);
+			}
+		}
+	}
+
+	private void clearCheckboxAndRadioButtonValues(List<View> views) {
+		for (View v : views) {
+			if(v instanceof CustomLinearLayout){
+				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
+				if(customLinearLayout.getChildAt(0) instanceof CustomCheckBox){
+					for(int i = 0; i < customLinearLayout.getChildCount(); ++i){
+						View view = customLinearLayout.getChildAt(i);
+						if (view instanceof CustomCheckBox){
+							CustomCheckBox cb = (CustomCheckBox) view;
+							cb.setChecked(false);
+						}
+					}
+				}else if (customLinearLayout.getChildAt(0) instanceof RadioGroup){
+					RadioGroup rg = (RadioGroup) customLinearLayout.getChildAt(0);
+					for(int i = 0; i < rg.getChildCount(); ++i){
+						View view = rg.getChildAt(i);
+						if (view instanceof CustomRadioButton){
+							CustomRadioButton rb = (CustomRadioButton) view;
+							rb.setChecked(true);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void loadArchEntFieldsValue(EntityAttribute entityAttribute, List<View> views) {
+		for (View v : views) {
+			if (v instanceof CustomEditText) {
+				CustomEditText customEditText = (CustomEditText) v;
+				setArchEntityFieldValueForType(customEditText.getArchEntType(), customEditText.getRef(), entityAttribute);
+				
+			} else if (v instanceof CustomDatePicker) {
+				CustomDatePicker customDatePicker = (CustomDatePicker) v;
+				setArchEntityFieldValueForType(customDatePicker.getArchEntType(), customDatePicker.getRef(), entityAttribute);
+				
+			} else if (v instanceof CustomTimePicker) {
+				CustomTimePicker customTimePicker = (CustomTimePicker) v;
+				setArchEntityFieldValueForType(customTimePicker.getArchEntType(), customTimePicker.getRef(), entityAttribute);
+				
+			} else if (v instanceof CustomLinearLayout) {
+				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
+				setArchEntityFieldValueForType(customLinearLayout.getArchEntType(), customLinearLayout.getRef(), entityAttribute);
+				
+			} else if (v instanceof CustomSpinner) {
+				CustomSpinner customSpinner = (CustomSpinner) v;
+				setArchEntityFieldValueForType(customSpinner.getArchEntType(), customSpinner.getRef(), entityAttribute);
+			}
+		}
+	}
+
+	private void loadRelationshipFieldsValue(RelationshipAttribute relationshipAttribute, List<View> views) {
+		for (View v : views) {
+			if (v instanceof CustomEditText) {
+				CustomEditText customEditText = (CustomEditText) v;
+				setRelationshipFieldValueForType(customEditText.getRelType(), customEditText.getRef(), relationshipAttribute);
+				
+			} else if (v instanceof CustomDatePicker) {
+				CustomDatePicker customDatePicker = (CustomDatePicker) v;
+				setRelationshipFieldValueForType(customDatePicker.getRelType(), customDatePicker.getRef(), relationshipAttribute);
+				
+			} else if (v instanceof CustomTimePicker) {
+				CustomTimePicker customTimePicker = (CustomTimePicker) v;
+				setRelationshipFieldValueForType(customTimePicker.getRelType(), customTimePicker.getRef(), relationshipAttribute);
+				
+			} else if (v instanceof CustomLinearLayout) {
+				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
+				setRelationshipFieldValueForType(customLinearLayout.getRelType(), customLinearLayout.getRef(), relationshipAttribute);
+				
+			} else if (v instanceof CustomSpinner) {
+				CustomSpinner customSpinner = (CustomSpinner) v;
+				setRelationshipFieldValueForType(customSpinner.getRelType(), customSpinner.getRef(), relationshipAttribute);
+			}
+		}
+	}
+
+	private void setArchEntityFieldValueForType(String type, String ref, EntityAttribute attribute){
+		if(FREETEXT.equals(type)){
+			setFieldValue(ref,attribute.getText());
+		}else if(MEASURE.equals(type)){
+			setFieldValue(ref,attribute.getMeasure());
+		}else if(VOCAB.equals(type)){
+			setFieldValue(ref,attribute.getVocab());
+		}else if(CERTAINTY.equals(type)){
+			setFieldValue(ref,attribute.getCertainty());
+		}
+	}
+	
+	private void setRelationshipFieldValueForType(String type, String ref, RelationshipAttribute relationshipAttribute){
+		if(FREETEXT.equals(type)){
+			setFieldValue(ref,relationshipAttribute.getText());
+		}else if(VOCAB.equals(type)){
+			setFieldValue(ref,relationshipAttribute.getVocab());
 		}
 	}
 
@@ -249,8 +388,6 @@ public class BeanShellLinker {
 	}
 	
 	public void setFieldValue(String ref, Object valueObj) {
-		//FAIMSLog.log(ref);
-		//FAIMSLog.log(valueObj.toString());
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
@@ -286,6 +423,17 @@ public class BeanShellLinker {
 								CustomRadioButton rb = (CustomRadioButton) view;
 								if (rb.getValue().toString().equalsIgnoreCase(value)){
 									rb.setChecked(true);
+									break;
+								}
+							}
+						}
+					}else if (child0 instanceof CheckBox){
+						for(int i = 0; i < ll.getChildCount(); ++i){
+							View view = ll.getChildAt(i);
+							if (view instanceof CustomCheckBox){
+								CustomCheckBox cb = (CustomCheckBox) view;
+								if (cb.getValue().toString().equalsIgnoreCase(value)){
+									cb.setChecked(true);
 									break;
 								}
 							}

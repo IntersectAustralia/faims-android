@@ -76,7 +76,9 @@ public class UIRenderer {
 	    		
 	    		GroupDef tabGroupElement = (GroupDef) element;
 	    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(groupIndex);
-	    		TabGroup tabGroup = new TabGroup();
+	    		String archEntId = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_id");
+	    		String relId = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_id");
+	    		TabGroup tabGroup = new TabGroup(archEntId,relId);
 	    		tabGroup.setContext(context);
 	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
 	    		

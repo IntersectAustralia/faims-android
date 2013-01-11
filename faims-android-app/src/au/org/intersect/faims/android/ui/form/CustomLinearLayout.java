@@ -5,26 +5,46 @@ import android.widget.LinearLayout;
 
 public class CustomLinearLayout extends LinearLayout {
 	
-	private String name;
-	private String type;
+	private String archEntName;
+	private String archEntType;
+	private String relName;
+	private String relType;
+	private String ref;
 	
 	public CustomLinearLayout(Context context) {
 		super(context);
 	}
 	
-	public String getName() {
-		return name;
+	public CustomLinearLayout(Context context, String archEntName, String archEntType, String relName, String relType, String ref) {
+		super(context);
+		this.archEntName = archEntName;
+		this.archEntType = archEntType;
+		this.relName = relName;
+		this.relType = relType;
+		this.ref = ref;
 	}
-	
-	public void setName(String value) {
-		name = value;
+
+	public String getArchEntName() {
+		return archEntName;
 	}
-	
-	public String getType() {
-		return type;
+
+	public String getArchEntType() {
+		return archEntType;
 	}
-	
-	public void setType(String value) {
-		type = value;
+
+	public String getRelName() {
+		return relName;
+	}
+
+	public String getRelType() {
+		return relType;
+	}
+
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
 	}
 }

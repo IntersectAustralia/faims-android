@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,9 @@ import android.widget.TabHost;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.BeanShellLinker;
+import au.org.intersect.faims.android.util.FAIMSLog;
 
+@SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
 	private Context context;
@@ -27,13 +30,19 @@ public class TabGroup extends Fragment {
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
 	private String label = "";
+	private String archEntId;
+	private String relId;
 	
-	
-	public TabGroup() {
+	public TabGroup(String archEntId, String relId) {
+		if(archEntId != null && relId != null){
+			FAIMSLog.log("tabgroup can only contain either archEntId or relId not both");
+		}
 		tabMap = new HashMap<String, Tab>();
 		tabs = new LinkedList<Tab>();
 		onLoadCommands = new ArrayList<String>();
 		onShowCommands = new ArrayList<String>();
+		this.archEntId = archEntId;
+		this.relId = relId;
 	}
 	
 	@Override
@@ -130,6 +139,14 @@ public class TabGroup extends Fragment {
 
 	public LinkedList<Tab> getTabs() {
 		return tabs;
+	}
+
+	public String getArchEntId() {
+		return archEntId;
+	}
+
+	public String getRelId() {
+		return relId;
 	}
 
 }

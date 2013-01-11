@@ -31,7 +31,7 @@ public class Tab {
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
-	private Map<String, List<String>> viewMap;
+	private Map<String, List<View>> viewMap;
 	private String name;
 	private String label;
 
@@ -42,7 +42,7 @@ public class Tab {
 		
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
-		this.viewMap = new HashMap<String, List<String>>();
+		this.viewMap = new HashMap<String, List<View>>();
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -64,6 +64,12 @@ public class Tab {
 		viewReference.put(viewName, path);
 		View view = null;
 		CustomEditText text = null;
+		String archEntAttributeName = input.getQuestion().getAdditionalAttribute(null, "faims_archent_attribute_name");
+		String archEntAttributeType = input.getQuestion().getAdditionalAttribute(null, "faims_archent_attribute_type");
+		archEntAttributeType = (archEntAttributeType == null) ? "freetext" : archEntAttributeType;
+		String relAttributeName = input.getQuestion().getAdditionalAttribute(null, "faims_rel_attribute_name");
+		String relAttributeType = input.getQuestion().getAdditionalAttribute(null, "faims_rel_attribute_type");
+		relAttributeType = (relAttributeType == null) ? "freetext" : relAttributeType;
 		// check the control type to know the type of the question
         switch (input.getControlType()) {
             case Constants.CONTROL_INPUT:
@@ -71,21 +77,21 @@ public class Tab {
                 switch (input.getDataType()) {
                 // set input type as number
                     case Constants.DATATYPE_INTEGER:
-                    	text = new CustomEditText(this.context);
+                    	text = new CustomEditText(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                     	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         linearLayout.addView(view);
                         break;
                     case Constants.DATATYPE_DECIMAL:
-                    	text = new CustomEditText(this.context);
+                    	text = new CustomEditText(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                         linearLayout.addView(view);
                         break;
                     case Constants.DATATYPE_LONG:
-                    	text = new CustomEditText(this.context);
+                    	text = new CustomEditText(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -93,28 +99,33 @@ public class Tab {
                         break;
                     // set input type as date picker
                     case Constants.DATATYPE_DATE:
-                    	CustomDatePicker date = new CustomDatePicker(this.context);
+                    	CustomDatePicker date = new CustomDatePicker(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         view = date;
                         linearLayout.addView(view);
                         break;
                     // get the text area
                     case Constants.DATATYPE_TEXT:
-                    	text = new CustomEditText(this.context);
+                    	text = new CustomEditText(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         view = text;
                         ((TextView) view).setLines(5);
                         linearLayout.addView(view);
                         break;
                     // set input type as time picker
                     case Constants.DATATYPE_TIME:
-                        view = new CustomTimePicker(this.context);
+                        view = new CustomTimePicker(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         linearLayout.addView(view);
                         break;
                     // default is edit text
                     default:
-                    	text = new CustomEditText(this.context);
+                    	text = new CustomEditText(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         view = text;
                         linearLayout.addView(view);
                         break;
+                }
+                if(archEntAttributeName != null){
+                	addViewMappings(archEntAttributeName, view);
+                }else if(relAttributeName != null){
+                	addViewMappings(relAttributeName, view);
                 }
                 break;
             // uploading image by using camera
@@ -154,7 +165,7 @@ public class Tab {
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
-                        	CustomLinearLayout selectLayout = new CustomLinearLayout(this.context);
+                        	CustomLinearLayout selectLayout = new CustomLinearLayout(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                             selectLayout.setLayoutParams(new LayoutParams(
                                     LayoutParams.MATCH_PARENT,
                                     LayoutParams.MATCH_PARENT));
@@ -174,7 +185,7 @@ public class Tab {
                             linearLayout.addView(selectLayout);
                         // Default is single select dropdown
                         } else {
-                        	CustomSpinner spinner = new CustomSpinner(this.context);
+                        	CustomSpinner spinner = new CustomSpinner(this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                             List<NameValuePair> choices = new ArrayList<NameValuePair>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
@@ -191,13 +202,18 @@ public class Tab {
                         }
                         break;
                 }
+                if(archEntAttributeName != null){
+                	addViewMappings(archEntAttributeName, view);
+                }else if(relAttributeName != null){
+                	addViewMappings(relAttributeName, view);
+                }
                 break;
             // create control for multi select, showing it as checkbox
             case Constants.CONTROL_SELECT_MULTI:
                 switch (input.getDataType()) {
                     case Constants.DATATYPE_CHOICE_LIST:
                     	CustomLinearLayout selectLayout = new CustomLinearLayout(
-                                this.context);
+                                this.context, archEntAttributeName, archEntAttributeType, relAttributeName, relAttributeType, path);
                         selectLayout.setLayoutParams(new LayoutParams(
                                 LayoutParams.MATCH_PARENT,
                                 LayoutParams.MATCH_PARENT));
@@ -211,6 +227,11 @@ public class Tab {
                         }
                         view = selectLayout;
                         linearLayout.addView(selectLayout);
+                }
+                if(archEntAttributeName != null){
+                	addViewMappings(archEntAttributeName, view);
+                }else if(relAttributeName != null){
+                	addViewMappings(relAttributeName, view);
                 }
                 break;
             // create control for trigger showing as a button
@@ -249,14 +270,27 @@ public class Tab {
 		return label;
 	}
 
-	public boolean hasView(String viewName){
-		return this.viewReference.containsKey(viewName);
+	public boolean hasView(String name){
+		return this.viewMap.containsKey(name);
 	}
 
 	public String getPath(String viewName){
 		return this.viewReference.get(viewName);
 	}
 
+	private void addViewMappings(String name, View view){
+		if(this.viewMap.containsKey(name)){
+			this.viewMap.get(name).add(view);
+		}else{
+			List<View> views = new ArrayList<View>();
+			views.add(view);
+			this.viewMap.put(name, views);
+		}
+	}
+	
+	public List<View> getViews(String name) {
+		return this.viewMap.get(name);
+	}
 	/**
      * Rendering image slide for select one
      * 
