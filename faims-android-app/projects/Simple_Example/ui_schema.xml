@@ -42,6 +42,9 @@
                   <verb></verb>
                   <save></save>
               </tab3>
+              <tab4>
+                  <names></names>
+              </tab4>
           </tabgroup1>
         </faims>
       </instance>
@@ -65,7 +68,7 @@
   <h:body>
     <group ref="tabgroup1" faims_archent_id="Simple">
       <label>Simple Entity Example</label>
-      <group ref="tab1">
+      <group ref="tab1" faims_hidden="false">
         <label>Entity</label>
         <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
@@ -140,7 +143,7 @@
           <label>Clear</label>
         </trigger>
       </group>
-      <group ref="tab2">
+      <group ref="tab2" faims_hidden="false">
         <label>Relationship</label>
         <select1 ref="type" faims_attribute_name="type">
           <label>Type:</label>
@@ -165,7 +168,7 @@
           <label>Clear</label>
         </trigger>
       </group>
-      <group ref="tab3">
+      <group ref="tab3" faims_hidden="false">
         <label>Entity Relationship</label>
         <select1 ref="entity">
           <label>Entity:</label>
@@ -187,6 +190,28 @@
         <trigger ref="save">
           <label>Save</label>
         </trigger>
+      </group>
+      <group ref="tab4" faims_hidden="false" faims_scrollable="false">
+          <label>Names</label>
+          <select1 ref="names" appearance="compact">
+            <label>Name:</label>
+            <item>
+                <label>Name A</label>
+                <value>name a</value>
+            </item>
+            <item>
+                <label>Name B</label>
+                <value>name b</value>
+            </item>
+            <item>
+                <label>Name C</label>
+                <value>name c</value>
+            </item>
+            <item>
+                <label>Name D</label>
+                <value>name d</value>
+            </item>
+        </select1>
       </group>
     </group>
     

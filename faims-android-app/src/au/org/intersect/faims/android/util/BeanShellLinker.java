@@ -16,10 +16,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,6 +32,7 @@ import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomDatePicker;
 import au.org.intersect.faims.android.ui.form.CustomEditText;
 import au.org.intersect.faims.android.ui.form.CustomLinearLayout;
+import au.org.intersect.faims.android.ui.form.CustomListView;
 import au.org.intersect.faims.android.ui.form.CustomRadioButton;
 import au.org.intersect.faims.android.ui.form.CustomSpinner;
 import au.org.intersect.faims.android.ui.form.CustomTimePicker;
@@ -104,12 +107,31 @@ public class BeanShellLinker {
 					return;
 				}
 				else {
-					view.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							execute(code);
-						}
-					});
+					if (view instanceof CustomListView) {
+						final CustomListView listView = (CustomListView) view;
+						listView.setOnItemClickListener(new ListView.OnItemClickListener() {
+
+							@Override
+							public void onItemClick(AdapterView<?> arg0,
+									View arg1, int index, long arg3) {
+								try {
+									NameValuePair pair = (NameValuePair) listView.getItemAtPosition(index);
+									interpreter.set("_list_item_value", pair.getValue());
+									execute(code);
+								} catch (Exception e) {
+									FAIMSLog.log(e);
+								}
+							}
+							
+						});
+					} else {
+						view.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								execute(code);
+							}
+						});
+					}
 				}
 			}
 			else if (type == "load") {

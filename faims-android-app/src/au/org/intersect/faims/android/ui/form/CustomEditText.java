@@ -10,6 +10,7 @@ public class CustomEditText extends EditText {
 	private String relName;
 	private String relType;
 	private String ref;
+	private String value;
 	
 	public CustomEditText(Context context) {
 		super(context);
@@ -46,5 +47,13 @@ public class CustomEditText extends EditText {
 
 	public void setRef(String ref) {
 		this.ref = ref;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+	
+	public String getValue() {
+		return value;
 	}
 }

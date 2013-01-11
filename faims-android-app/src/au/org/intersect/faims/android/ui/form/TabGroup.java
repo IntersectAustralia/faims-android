@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -15,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.BeanShellLinker;
@@ -59,6 +59,24 @@ public class TabGroup extends Fragment {
 				tabHost.addTab(tab.createTabSpec(tabHost));
 			}
 			
+			TabWidget widget = tabHost.getTabWidget();
+			if (widget != null) {
+				boolean first = true;
+				for (int i = 0; i < widget.getChildCount(); i++) {
+					Tab tab = tabs.get(i);
+					if (tab.getHidden()) {
+						widget.getChildAt(i).setVisibility(View.GONE);
+					} else if (first) {
+						tabHost.setCurrentTab(i);
+						first = false;
+					}
+				}
+				if (first == true) {
+					// all tabs are hidden
+					// TODO: maybe hide the frame layout
+				}
+			}
+			
 			if(this.onLoadCommands.size() > 0){
 				executeCommands(this.onLoadCommands);
 			}
@@ -101,8 +119,8 @@ public class TabGroup extends Fragment {
 	}
 	*/
 	
-	public Tab createTab(String name, String label) {
-		Tab tab = new Tab(context, name, label);
+	public Tab createTab(String name, String label, boolean hidden, boolean scrollable) {
+		Tab tab = new Tab(context, name, label, hidden, scrollable);
 		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;

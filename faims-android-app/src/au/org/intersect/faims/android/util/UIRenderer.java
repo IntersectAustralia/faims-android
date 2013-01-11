@@ -101,7 +101,9 @@ public class UIRenderer {
 	                	FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
 	                    
 	                	String tabName = tabCaption.getIndex().getReference().getNameLast();
-	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText());	                 
+	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText(), "true".equals(tabElement
+                                .getAdditionalAttribute(null, "faims_hidden")), !"false".equals(tabElement
+                                        .getAdditionalAttribute(null, "faims_scrollable")));	                 
 	                	
 	                	FAIMSLog.log(tabGroupName + "/" + tabName);
 	                    tabMap.put(tabGroupName + "/" + tabName, tab);
