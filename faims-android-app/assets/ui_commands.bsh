@@ -101,3 +101,8 @@ Collection fetchAll(String query){
 String getListItemValue() {
 	return _list_item_value;
 }
+
+goBack(){
+    linker.goBack();
+}
+

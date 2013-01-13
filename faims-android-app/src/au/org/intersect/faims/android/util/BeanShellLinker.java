@@ -208,6 +208,10 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void goBack(){
+		this.activity.onBackPressed();
+	}
+	
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if(archEntityObj instanceof ArchEntity){

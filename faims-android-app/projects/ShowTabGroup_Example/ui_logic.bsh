@@ -13,6 +13,7 @@ populateCheckBoxGroup("simple_entity_2/tab/type", typeObj);
 onEvent("relationship/tab/next", "click", "showTabGroup(\"simple_entity_2\")");
 onEvent("simple_entity_2/tab/next", "click", "showTabGroup(\"simple_entity_3\")");
 
+
 String e=null;
 String r=null;
 String se2=null;
@@ -41,6 +42,11 @@ saveSimpleEntity2(entity_id) {
 onEvent("empty_entity/tab/save", "click", "saveEmptyEntity(e)");
 onEvent("relationship/tab/save", "click", "saveRelationship(r)");
 onEvent("simple_entity_2/tab/save", "click", "saveSimpleEntity2(se2)");
+
+onEvent("relationship/tab/back", "click", "goBack()");
+onEvent("simple_entity_2/tab/back", "click", "goBack()");
+onEvent("simple_entity_3/tab1/back", "click", "goBack()");
+
 
 onEvent("relationship/tab/load", "click", "showTabGroup(\"relationship\",r)");
 onEvent("simple_entity_2/tab/load", "click", "showTabGroup(\"simple_entity_2\",se2)");
