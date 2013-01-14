@@ -155,7 +155,7 @@ loadEntityTab() {
 }
 
 showEntityTabGroup() {
-	showTabGroup("tabgroup1/tab1");
+	showTabGroup("tabgroup1");
 }
 
 loadEntityTabGroup() {
