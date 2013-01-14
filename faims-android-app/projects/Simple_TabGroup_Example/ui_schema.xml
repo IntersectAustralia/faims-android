@@ -1,0 +1,367 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <value></value>
+                  <value-description></value-description>
+                  <value-certainty></value-certainty>
+              </tab1>
+              <tab2>
+                  <date></date>
+                  <time></time>
+              </tab2>
+              <tab3>
+                  <type></type>
+                  <type-description></type-description>
+                  <location></location>
+                  <location-value></location-value>
+                  <location-certainty></location-certainty>
+                  <supervisor></supervisor>
+              </tab3>
+              <tab4>
+                  <save></save>
+                  <update></update>
+                  <clear></clear>
+                  <load></load> 
+              </tab4>
+              <tab5>
+                  <entity></entity>
+                  <hide></hide>
+                  <show></show>
+                  <load></load>
+                  <next></next>
+              </tab5>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>
+                  <type></type>
+                  <name></name>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+                  <clear></clear>
+              </tab1>
+              <tab2>
+                  <relationship></relationship>
+                  <hide></hide>
+                  <show></show>
+                  <load></load>
+                  <next></next>
+              </tab2>
+          </tabgroup2>
+          <tabgroup3>
+              <tab1>
+                  <entity></entity>
+                  <relationship></relationship>
+                  <verb></verb>
+                  <save></save>
+                  <next></next>
+              </tab1>
+          </tabgroup3>
+          <tabgroup4>
+              <tab1>
+                  <entity></entity>
+                  <show></show>
+                  <load></load>
+              </tab1>
+              <tab2>
+                  <relationship></relationship>
+                  <show></show>
+                  <load></load>
+              </tab2>
+              <tab3>
+                  <next></next>
+              </tab3>
+          </tabgroup4>
+          <tabgroup5>
+              <tab1>
+                  <names></names>
+              </tab1>
+          </tabgroup5>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value-description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value-certainty" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab2/date" type="date"/>
+      <bind nodeset="/faims/tabgroup1/tab2/time" type="time"/>
+      <bind nodeset="/faims/tabgroup1/tab3/type-description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab3/location-value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab3/location-certainty" type="decimal"/>
+      <bind nodeset="/faims/tabgroup2/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup3/tab1/verb" type="string"/>
+
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="tabgroup1" faims_archent_type="simple">
+      <label>Simple Entity Example</label>
+      <group ref="tab1" faims_hidden="true">
+        <label>Entity 1</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <label>Name:</label>
+        </input>
+        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+            <label>Value:</label>
+        </input>
+        <input ref="value-description" faims_attribute_name="value" faims_attribute_type="freetext">
+            <label>Description:</label>
+        </input>
+        <input ref="value-certainty" faims_attribute_name="value" faims_attribute_type="certainty">
+            <label>Certainty:</label>
+        </input>
+      </group>
+      <group ref="tab2" faims_hidden="true">
+        <label>Entity 2</label>
+        <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <label>Date:</label>
+        </input>
+        <input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+            <label>Time:</label>
+        </input>
+      </group>
+      <group ref="tab3" faims_hidden="true">
+        <label>Entity 3</label>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <input ref="type-description" faims_attribute_name="type" faims_attribute_type="freetext">
+            <label>Description:</label>
+        </input>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
+            <label>Value:</label>
+        </input>
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
+            <label>Certainty:</label>
+        </input>
+        <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
+            <label>Supervisor:</label>
+            <item>
+                <label>Super A</label>
+                <value>supera</value>
+            </item>
+            <item>
+                <label>Super B</label>
+                <value>superb</value>
+            </item>
+            <item>
+                <label>Super C</label>
+                <value>superc</value>
+            </item>
+            <item>
+                <label>Super D</label>
+                <value>superd</value>
+            </item>
+        </select1>
+      </group>
+      <group ref="tab4" faims_hidden="true">
+        <label>Entity 4</label>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+        <trigger ref="clear">
+          <label>Clear</label>
+        </trigger>
+	  </group>
+      <group ref="tab5">
+        <label>Load</label>
+        <select1 ref="entity">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="hide">
+          <label>Hide</label>
+        </trigger>
+        <trigger ref="show">
+          <label>Show</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+        <trigger ref="next">
+          <label>Next</label>
+        </trigger>	
+      </group>
+    </group>
+    <group ref="tabgroup2" faims_rel_type="abovebelow">
+      <label>Simple Entity Example</label>
+      <group ref="tab1" faims_hidden="true">
+        <label>Relationship</label>
+        <select1 ref="type">
+          <label>Type:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="name" faims_attribute_name="name">
+          <label>Name:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+        <trigger ref="clear">
+          <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Load</label>
+        <select1 ref="relationship">
+          <label>Relationship:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="hide">
+          <label>Hide</label>
+        </trigger>
+        <trigger ref="show">
+          <label>Show</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+        <trigger ref="next">
+          <label>Next</label>
+        </trigger>	
+      </group>
+    </group>
+    <group ref="tabgroup3">
+      <label>Simple Entity Example</label>
+      <group ref="tab1">
+        <label>Entity Relationship</label>
+        <select1 ref="entity">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 ref="relationship">
+          <label>Relationship:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="verb">
+          <label>Verb:</label>
+        </input>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="next">
+          <label>Next</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup4">
+        <label>Show Group</label>
+        <group ref="tab1">
+            <label>Show Entity</label>
+            <select1 ref="entity">
+	          <label>Entity:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+	        </select1>
+	        <trigger ref="show">
+	          <label>Show</label>
+	        </trigger>
+	        <trigger ref="load">
+	          <label>Load</label>
+	        </trigger>
+        </group>
+        <group ref="tab2">
+            <label>Show Relationship</label>
+            <select1 ref="relationship">
+	          <label>Relationship:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+	        </select1>
+	        <trigger ref="show">
+	          <label>Show</label>
+	        </trigger>
+	        <trigger ref="load">
+	          <label>Load</label>
+	        </trigger>
+        </group>
+        <group ref="tab3">
+            <label>Extra</label>
+            <trigger ref="next">
+	          <label>Next</label>
+	        </trigger>
+        </group>
+    </group>
+    <group ref="tabgroup5">
+      <label>Extra</label>
+      <group ref="tab1" faims_scrollable="false">
+          <label>List Example</label>
+          <select1 ref="names" appearance="compact">
+            <label>Name:</label>
+            <item>
+                <label>Name A</label>
+                <value>namea</value>
+            </item>
+            <item>
+                <label>Name B</label>
+                <value>nameb</value>
+            </item>
+            <item>
+                <label>Name C</label>
+                <value>namec</value>
+            </item>
+            <item>
+                <label>Name D</label>
+                <value>named</value>
+            </item>
+        </select1>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
