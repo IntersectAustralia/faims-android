@@ -154,6 +154,13 @@ loadEntityTab() {
 	showTab("tabgroup1/tab4", entity_id);
 }
 
+newEntityTab() {
+	newTab("tabgroup1/tab1");
+	newTab("tabgroup1/tab2");
+	newTab("tabgroup1/tab3");
+	newTab("tabgroup1/tab4");
+}
+
 showEntityTabGroup() {
 	showTabGroup("tabgroup1");
 }
@@ -161,6 +168,10 @@ showEntityTabGroup() {
 loadEntityTabGroup() {
 	entity_id = getFieldValue("tabgroup4/tab1/entity");
 	showTabGroup("tabgroup1", entity_id);
+}
+
+newEntityTabGroup() {
+	newTabGroup("tabgroup1");
 }
 
 hideRelationshipTab() {
@@ -176,6 +187,10 @@ loadRelationshipTab() {
 	showTab("tabgroup2/tab1", rel_id);
 }
 
+newRelationshipTab() {
+	newTab("tabgroup2/tab1");
+}
+
 showRelationshipTabGroup() {
 	showTabGroup("tabgroup2");
 }
@@ -183,6 +198,10 @@ showRelationshipTabGroup() {
 loadRelationshipTabGroup() {
 	rel_id = getFieldValue("tabgroup4/tab2/relationship");
 	showTabGroup("tabgroup2", rel_id);
+}
+
+newRelationshipTabGroup() {
+	newTabGroup("tabgroup2");
 }
 
 gotoGroup(n) {
@@ -197,6 +216,7 @@ onEvent("tabgroup1/tab4/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab5/hide", "click", "hideEntityTab()");
 onEvent("tabgroup1/tab5/show", "click", "showEntityTab()");
 onEvent("tabgroup1/tab5/load", "click", "loadEntityTab()");
+onEvent("tabgroup1/tab5/new", "click", "newEntityTab()");
 onEvent("tabgroup1/tab5/next", "click", "gotoGroup(2)");
 
 onEvent("tabgroup2/tab1/save", "click", "saveRelationship()");
@@ -207,6 +227,7 @@ onEvent("tabgroup2/tab1/clear", "click", "clearRelationship()");
 onEvent("tabgroup2/tab2/hide", "click", "hideRelationshipTab()");
 onEvent("tabgroup2/tab2/show", "click", "showRelationshipTab()");
 onEvent("tabgroup2/tab2/load", "click", "loadRelationshipTab()");
+onEvent("tabgroup2/tab2/new", "click", "newRelationshipTab()");
 onEvent("tabgroup2/tab2/next", "click", "gotoGroup(3)");
 
 onEvent("tabgroup3/tab1/save", "click", "saveEntityRelationship()");
@@ -214,8 +235,10 @@ onEvent("tabgroup3/tab1/next", "click", "gotoGroup(4)");
 
 onEvent("tabgroup4/tab1/show", "click", "showEntityTabGroup()");
 onEvent("tabgroup4/tab1/load", "click", "loadEntityTabGroup()");
+onEvent("tabgroup4/tab1/new", "click", "newEntityTabGroup()");
 onEvent("tabgroup4/tab2/show", "click", "showRelationshipTabGroup()");
 onEvent("tabgroup4/tab2/load", "click", "loadRelationshipTabGroup()");
+onEvent("tabgroup4/tab2/new", "click", "newRelationshipTabGroup()");
 onEvent("tabgroup4/tab3/next", "click", "gotoGroup(5)");
 
 clearEntity();

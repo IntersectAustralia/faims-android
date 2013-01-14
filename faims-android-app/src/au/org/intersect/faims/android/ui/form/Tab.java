@@ -14,9 +14,11 @@ import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputType;
+import android.text.format.Time;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -32,6 +34,7 @@ public class Tab {
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
 	private Map<String, List<View>> viewMap;
+	private List<View> viewList;
 	private String name;
 	private String label;
 	private boolean hidden;
@@ -48,6 +51,7 @@ public class Tab {
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
 		this.viewMap = new HashMap<String, List<View>>();
+		this.viewList = new ArrayList<View>();
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -306,6 +310,7 @@ public class Tab {
 			views.add(view);
 			this.viewMap.put(name, views);
 		}
+		viewList.add(view);
 	}
 	
 	public List<View> getViews(String name) {
@@ -400,5 +405,50 @@ public class Tab {
         this.imageView = null;
     }
     */
+
+	public void clearViews() {
+		for (View v : viewList) {
+			if (v instanceof CustomEditText) {
+				CustomEditText text = (CustomEditText) v;
+				text.setText("");
+			} else if (v instanceof CustomDatePicker) {
+				CustomDatePicker date = (CustomDatePicker) v;
+				Time now = new Time();
+				now.setToNow();
+				date.updateDate(now.year, now.month, now.monthDay);
+			} else if (v instanceof CustomTimePicker) {
+				CustomTimePicker time = (CustomTimePicker) v;
+				Time now = new Time();
+				now.setToNow();
+				time.setCurrentHour(now.hour);
+				time.setCurrentMinute(now.minute);
+			} else if (v instanceof CustomLinearLayout) {
+				CustomLinearLayout layout = (CustomLinearLayout) v;
+				View child0 = layout.getChildAt(0);
+				
+				if (child0 instanceof RadioGroup){
+					RadioGroup rg = (RadioGroup) child0;
+					for(int i = 0; i < rg.getChildCount(); ++i){
+						View view = rg.getChildAt(i);
+						if (view instanceof CustomRadioButton){
+							CustomRadioButton rb = (CustomRadioButton) view;
+							rb.setChecked(false);
+						}
+					}
+				}else if (child0 instanceof CheckBox){
+					for(int i = 0; i < layout.getChildCount(); ++i){
+						View view = layout.getChildAt(i);
+						if (view instanceof CustomCheckBox){
+							CustomCheckBox cb = (CustomCheckBox) view;
+							cb.setChecked(false);
+						}
+					}
+				}
+			} else if (v instanceof CustomSpinner) {
+				CustomSpinner spinner = (CustomSpinner) v;
+				spinner.setSelection(0);
+			}
+		}
+	}
 
 }

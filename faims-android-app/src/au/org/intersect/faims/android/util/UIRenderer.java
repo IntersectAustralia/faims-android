@@ -165,6 +165,7 @@ public class UIRenderer {
     }
 
 	public Tab showTab(String label) {
+		if (label == null) return null;
 		String[] labels = label.split("/");
 		if (labels.length < 2) return null;
 		String group = labels[0];

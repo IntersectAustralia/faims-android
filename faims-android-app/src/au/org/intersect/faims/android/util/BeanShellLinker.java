@@ -187,27 +187,59 @@ public class BeanShellLinker {
 			});
 		}
 	}
-
-	public void showTabGroup(String label){
+	
+	public void newTabGroup(String label) {
 		try{
-			if (renderer.showTabGroup(this.activity, label) == null) {
-				showWarning("Logic Error", "Could not show tab group");
-			}
+			TabGroup tabGroup = showTabGroup(label);
+			if (tabGroup == null) return;
+			
+			tabGroup.clearTabs();
 		}
 		catch(Exception e){
 			Log.e("FAIMS", "Exception showing tab group",e);
 		}
 	}
 	
-	public void showTab(String label) {
+	public void newTab(String label) {
+		try {
+			Tab tab = showTab(label);
+			if (tab == null) return;
+			
+			tab.clearViews();
+		}
+		catch(Exception e) {
+			Log.e("FAIMS", "Exception showing tab",e);
+		}
+	}
+
+	public TabGroup showTabGroup(String label){
 		try{
-			if (renderer.showTab(label) == null) {
-				showWarning("Logic Error", "Could not show tab");
+			TabGroup tabGroup = renderer.showTabGroup(this.activity, label);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Could not show tab group");
+				return null;
 			}
+			return tabGroup;
+		}
+		catch(Exception e){
+			Log.e("FAIMS", "Exception showing tab group",e);
+		}
+		return null;
+	}
+	
+	public Tab showTab(String label) {
+		try{
+			Tab tab = renderer.showTab(label);
+			if (tab == null) {
+				showWarning("Logic Error", "Could not show tab");
+				return null;
+			}
+			return tab;
 		}
 		catch(Exception e){
 			Log.e("FAIMS", "Exception showing tab",e);
 		}
+		return null;
 	}
 
 	public void showTabGroup(String id, String uuid){
@@ -226,6 +258,10 @@ public class BeanShellLinker {
 	}
 	
 	public void showTab(String id, String uuid) {
+		if (id == null) {
+			showWarning("Logic Error", "Could not show tab");
+			return ;
+		}
 		String[] ids = id.split("/");
 		if (ids.length < 2) {
 			showWarning("Logic Error", "Could not show tab");
