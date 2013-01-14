@@ -113,7 +113,7 @@
 
   
   <h:body>
-    <group ref="empty_entity" faims_archent_id="empty_entity">
+    <group ref="empty_entity" faims_archent_type="empty_entity">
       <label>Empty Entity Example</label>
       <group ref="tab">
         <label>Empty Entity</label>
@@ -128,7 +128,7 @@
         </trigger>
       </group>
     </group>
-    <group ref="simple_entity_1" faims_archent_id="simple_entity">
+    <group ref="simple_entity_1" faims_archent_type="simple_entity">
       <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 1</label>
@@ -169,7 +169,7 @@
         </trigger>
       </group>
     </group>
-    <group ref="simple_entity_2" faims_archent_id="simple_entity">
+    <group ref="simple_entity_2" faims_archent_type="simple_entity">
       <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 2</label>
@@ -220,7 +220,7 @@
       </group>
     </group>
    
-    <group ref="simple_entity_3" faims_archent_id="simple_entity">
+    <group ref="simple_entity_3" faims_archent_type="simple_entity">
       <label>Simple Entity Example</label>
       <group ref="tab1">
         <label>Simple Entity 3 T1</label>

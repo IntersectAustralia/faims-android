@@ -78,7 +78,6 @@ clearEntity() {
 	setFieldValue("tabgroup1/tab1/location-certainty", "");
 	populateDropDown("tabgroup1/tab1/type", types);
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
-	
 }
 
 saveRelationship() {
@@ -95,17 +94,16 @@ loadRelationship() {
 	for (Object attribute : relationship.getAttributes()) {
 		System.out.println(attribute.toString());
 		if ("name".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab2/name", attribute.getText());
+			setFieldValue("tabgroup2/tab1/name", attribute.getText());
 		}
 	}
 }
 
 updateRelationship(rel_id) {
-	String type = getFieldValue("tabgroup1/tab2/type");
-	System.out.println(type);
+	String type = getFieldValue("tabgroup2/tab1/type");
 
 	List attributes = createAttributeList();
-	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup1/tab2/name"), null));
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null));
 	
 	String id = saveRel(rel_id, type, null, attributes);
 	
@@ -115,23 +113,53 @@ updateRelationship(rel_id) {
 }
 
 clearRelationship() {
-	 setFieldValue("tabgroup1/tab2/name", "");
-	 populateDropDown("tabgroup1/tab2/type", relationships);
+	 setFieldValue("tabgroup2/tab1/name", "");
+	 populateDropDown("tabgroup2/tab1/type", relationships);
 }
 
 updateEntityRelationship() {
 	Object entities = fetchAll("select uuid, uuid from archentity;");
 	Object relationships = fetchAll("select relationshipid, relationshipid from relationship;");
 	
-	populateDropDown("tabgroup1/tab3/entity", entities);
-	populateDropDown("tabgroup1/tab3/relationship", relationships);
+	populateDropDown("tabgroup1/tab2/entity", entities);
+	populateDropDown("tabgroup2/tab2/relationship", relationships);
+	populateDropDown("tabgroup3/tab1/entity", entities);
+	populateDropDown("tabgroup3/tab1/relationship", relationships);
 	
 }
 
 saveEntityRelationship() {
-	addReln(getFieldValue("tabgroup1/tab3/entity"), getFieldValue("tabgroup1/tab3/relationship"), getFieldValue("tabgroup1/tab3/verb"));
+	addReln(getFieldValue("tabgroup3/tab1/entity"), getFieldValue("tabgroup3/tab1/relationship"), getFieldValue("tabgroup3/tab1/verb"));
 	
 	showToast("record saved");
+}
+
+hideEntityTab() {
+	System.out.println("hide entity tab");
+}
+
+showEntityTab() {
+	showTab("tabgroup1/tab1");
+}
+
+loadEntityTab() {
+	showTab("tabgroup1/tab1", getFieldValue("tabgroup1/tab2/entity"));
+}
+
+hideRelationshipTab() {
+	System.out.println("hide relationship tab");
+}
+
+showRelationshipTab() {
+	showTab("tabgroup2/tab1");
+}
+
+loadRelationshipTab() {
+	showTab("tabgroup2/tab1", getFieldValue("tabgroup2/tab2/relationship"));
+}
+
+gotoGroup(n) {
+	showTabGroup("tabgroup" + n);
 }
 
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
@@ -139,18 +167,30 @@ onEvent("tabgroup1/tab1/update", "click", "updateEntity(entity_id)");
 onEvent("tabgroup1/tab1/load", "click", "loadEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 
-onEvent("tabgroup1/tab2/save", "click", "saveRelationship()");
-onEvent("tabgroup1/tab2/update", "click", "updateRelationship(rel_id)");
-onEvent("tabgroup1/tab2/load", "click", "loadRelationship()");
-onEvent("tabgroup1/tab2/clear", "click", "clearRelationship()");
+onEvent("tabgroup1/tab2/hide", "click", "hideEntityTab()");
+onEvent("tabgroup1/tab2/show", "click", "showEntityTab()");
+onEvent("tabgroup1/tab2/load", "click", "loadEntityTab()");
+onEvent("tabgroup1/tab2/next", "click", "gotoGroup(2)");
 
-onEvent("tabgroup1/tab3/save", "click", "saveEntityRelationship()");
+onEvent("tabgroup2/tab1/save", "click", "saveRelationship()");
+onEvent("tabgroup2/tab1/update", "click", "updateRelationship(rel_id)");
+onEvent("tabgroup2/tab1/load", "click", "loadRelationship()");
+onEvent("tabgroup2/tab1/clear", "click", "clearRelationship()");
+
+onEvent("tabgroup2/tab2/hide", "click", "hideRelationshipTab()");
+onEvent("tabgroup2/tab2/show", "click", "showRelationshipTab()");
+onEvent("tabgroup2/tab2/load", "click", "loadRelationshipTab()");
+onEvent("tabgroup2/tab2/next", "click", "gotoGroup(3)");
+
+onEvent("tabgroup3/tab1/save", "click", "saveEntityRelationship()");
+onEvent("tabgroup3/tab1/next", "click", "gotoGroup(4)");
 
 clearEntity();
 clearRelationship();
+updateEntityRelationship();
 
 selectedName() {
 	System.out.println(getListItemValue());
 }
 
-onEvent("tabgroup1/tab4/names", "click", "selectedName()");
+onEvent("tabgroup4/tab1/names", "click", "selectedName()");

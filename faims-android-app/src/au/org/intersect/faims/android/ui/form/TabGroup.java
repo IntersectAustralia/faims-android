@@ -30,19 +30,19 @@ public class TabGroup extends Fragment {
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
 	private String label = "";
-	private String archEntId;
-	private String relId;
+	private String archEntType;
+	private String relType;
 	
-	public TabGroup(String archEntId, String relId) {
-		if(archEntId != null && relId != null){
+	public TabGroup(String archEntType, String relType) {
+		if(archEntType != null && relType != null){
 			FAIMSLog.log("tabgroup can only contain either archEntId or relId not both");
 		}
 		tabMap = new HashMap<String, Tab>();
 		tabs = new LinkedList<Tab>();
 		onLoadCommands = new ArrayList<String>();
 		onShowCommands = new ArrayList<String>();
-		this.archEntId = archEntId;
-		this.relId = relId;
+		this.archEntType = archEntType;
+		this.relType = relType;
 	}
 	
 	@Override
@@ -125,6 +125,18 @@ public class TabGroup extends Fragment {
 		tabs.add(tab);
         return tab;
 	}
+	
+	public Tab showTab(String name) {
+		for (int i = 0; i < tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			if (tab.getName().equals(name)) {
+				TabWidget widget = tabHost.getTabWidget();
+				widget.getChildAt(i).setVisibility(View.VISIBLE);
+				return tab;
+			}
+		}
+		return null;
+	}
 
 	public void setContext(Context context) {
 		this.context = context;
@@ -159,12 +171,12 @@ public class TabGroup extends Fragment {
 		return tabs;
 	}
 
-	public String getArchEntId() {
-		return archEntId;
+	public String getArchEntType() {
+		return archEntType;
 	}
 
-	public String getRelId() {
-		return relId;
+	public String getRelType() {
+		return relType;
 	}
 
 }

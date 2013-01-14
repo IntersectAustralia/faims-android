@@ -271,8 +271,13 @@ public class DatabaseManager {
 	public Object fetchArchEnt(String id){
 		
 		try {
+			
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			if (!hasEntity(db, id)) {
+				return null;
+			}
+
 			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
@@ -293,7 +298,7 @@ public class DatabaseManager {
 			db.close();
 
 			return archEntity;
-		} catch (jsqlite.Exception e) {
+		} catch (Exception e) {
 			FAIMSLog.log(e);
 		}
 		return null;
@@ -304,6 +309,11 @@ public class DatabaseManager {
 		try {
 			jsqlite.Database db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			
+			if (!hasRelationship(db, id)) {
+				return null;
+			}
+			
 			String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
 			Stmt stmt = db.prepare(query);
 			stmt.bind(1, id);
@@ -322,7 +332,7 @@ public class DatabaseManager {
 			db.close();
 
 			return relationship;
-		} catch (jsqlite.Exception e) {
+		} catch (Exception e) {
 			FAIMSLog.log(e);
 		}
 		return null;

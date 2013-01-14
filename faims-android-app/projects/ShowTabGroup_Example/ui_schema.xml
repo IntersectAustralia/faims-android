@@ -78,11 +78,11 @@
 
   
   <h:body>
-    <group ref="relationship" faims_rel_id="relationship">
+    <group ref="relationship" faims_rel_type="relationship">
       <label>relationship example</label>
       <group ref="tab">
         <label>relationship</label>
-        <input ref="name" faims_rel_attribute_name="name" >
+        <input ref="name" faims_attribute_name="name" >
           <label>Name:</label>
         </input>
         <trigger ref="save">
@@ -96,39 +96,39 @@
         </trigger>
       </group>
     </group>
-    <group ref="simple_entity_2" faims_archent_id="simple_entity_2">
+    <group ref="simple_entity_2" faims_archent_type="simple_entity_2">
       <label>Simple Entity Example</label>
       <group ref="tab">
         <label>Simple Entity 2</label>
-        <input ref="name" faims_archent_attribute_name="name">
+        <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
         </input>
-        <input ref="count" faims_archent_attribute_name="count" faims_archent_attribute_type="measure">
+        <input ref="count" faims_attribute_name="count" faims_attribute_type="measure">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_archent_attribute_name="count" faims_archent_attribute_type="freetext">
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="freetext">
           <label>Description:</label>
         </input>
-        <input ref="count-certainty" faims_archent_attribute_name="count" faims_archent_attribute_type="certainty">
+        <input ref="count-certainty" faims_attribute_name="count" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
-        <input ref="date" faims_archent_attribute_name="date">
+        <input ref="date" faims_attribute_name="date">
           <label>Date:</label>
         </input>
-        <input ref="time" faims_archent_attribute_name="time">
+        <input ref="time" faims_attribute_name="time">
           <label>Time:</label>
         </input>
-        <select1 ref="location" faims_archent_attribute_name="location" faims_archent_attribute_type="freetext">
+        <select1 ref="location" faims_attribute_name="location" faims_attribute_type="freetext">
           <label>Location:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
-        <input ref="location-certainty" faims_archent_attribute_name="location" faims_archent_attribute_type="certainty">
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
-        <select ref="type" faims_archent_attribute_name="type">
+        <select ref="type" faims_attribute_name="type">
           <label>Type:</label>
           <item>
             <label>dummy</label>
@@ -147,20 +147,20 @@
       </group>
     </group>
    
-    <group ref="simple_entity_3" faims_archent_id="simple_entity_3">
+    <group ref="simple_entity_3" faims_archent_type="simple_entity_3">
       <label>Simple Entity Example</label>
       <group ref="tab1">
         <label>Simple Entity 3 T1</label>
-        <input ref="name" faims_archent_attribute_name="name">
+        <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
         </input>
-        <input ref="count" faims_archent_attribute_name="count" faims_archent_attribute_type="measure">
+        <input ref="count" faims_attribute_name="count" faims_attribute_type="measure">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_archent_attribute_name="count" faims_archent_attribute_type="freetext">
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="freetext">
           <label>Description:</label>
         </input>
-        <input ref="count-certainty" faims_archent_attribute_name="count" faims_archent_attribute_type="certainty">
+        <input ref="count-certainty" faims_attribute_name="count" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
         <trigger ref="load">
@@ -169,26 +169,26 @@
       </group>
       <group ref="tab2">
         <label>Simple Entity 3 T2</label>
-        <input ref="date" faims_archent_attribute_name="date">
+        <input ref="date" faims_attribute_name="date">
           <label>Date:</label>
         </input>
-        <input ref="time" faims_archent_attribute_name="time">
+        <input ref="time" faims_attribute_name="time">
           <label>Time:</label>
         </input>
       </group>
       <group ref="tab3">
         <label>Simple Entity 3 T3</label>
-        <select1 ref="location" faims_archent_attribute_name="location" appearance="full">
+        <select1 ref="location" faims_attribute_name="location" appearance="full">
           <label>Location:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
-        <input ref="location-certainty" faims_archent_attribute_name="location_certainty">
+        <input ref="location-certainty" faims_attribute_name="location_certainty">
           <label>Certainty:</label>
         </input>
-        <select ref="type" faims_archent_attribute_name="type">
+        <select ref="type" faims_attribute_name="type">
           <label>Type:</label>
           <item>
             <label>dummy</label>

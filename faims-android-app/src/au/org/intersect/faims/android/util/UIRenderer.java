@@ -76,9 +76,9 @@ public class UIRenderer {
 	    		
 	    		GroupDef tabGroupElement = (GroupDef) element;
 	    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(groupIndex);
-	    		String archEntId = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_id");
-	    		String relId = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_id");
-	    		TabGroup tabGroup = new TabGroup(archEntId,relId);
+	    		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
+	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
+	    		TabGroup tabGroup = new TabGroup(archEntType,relType);
 	    		tabGroup.setContext(context);
 	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
 	    		
@@ -149,6 +149,7 @@ public class UIRenderer {
 
     	FragmentTransaction ft = fm.beginTransaction();
     	TabGroup tabGroup = this.tabGroupMap.get(name);
+    	if (tabGroup == null) return null;
 	    ft.replace(R.id.fragment_content, tabGroup);
         ft.addToBackStack(null);
         ft.commit();
@@ -162,4 +163,14 @@ public class UIRenderer {
     public TabGroup getTabGroupByLabel(String label){
     	return this.tabGroupMap.get(label);
     }
+
+	public Tab showTab(String label) {
+		String[] labels = label.split("/");
+		if (labels.length < 2) return null;
+		String group = labels[0];
+		String tab = labels[1];
+		TabGroup tabGroup = tabGroupMap.get(group);
+		if (tabGroup == null) return null;
+		return tabGroup.showTab(tab);
+	}
 }

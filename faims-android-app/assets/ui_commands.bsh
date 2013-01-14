@@ -12,6 +12,14 @@ showTabGroup(String id, String uuid){
     linker.showTabGroup(id,uuid);
 }
 
+showTab(String label) {
+	linker.showTab(label);
+}
+
+showTab(String id, String uuid) {
+	linker.showTab(id, uuid);
+}
+
 showToast(String message) {
     linker.showToast(message);
 }
