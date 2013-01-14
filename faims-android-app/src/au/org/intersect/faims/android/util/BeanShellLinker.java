@@ -264,14 +264,16 @@ public class BeanShellLinker {
 				for(Tab tab : tabGroup.getTabs()){
 			    	for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
 			    		List<View> views = tab.getViews(entityAttribute.getName());
-			    		clearCheckboxAndRadioButtonValues(views);
+			    		if (views != null)
+			    			clearCheckboxAndRadioButtonValues(views);
 			    	}
 			    }
 				for(Tab tab : tabGroup.getTabs()){
 					for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
 			    		if(tab.hasView(entityAttribute.getName())){
 			    			List<View> views = tab.getViews(entityAttribute.getName());
-			    			loadArchEntFieldsValue(entityAttribute, views);
+			    			if (views != null)
+			    				loadArchEntFieldsValue(entityAttribute, views);
 			    		}
 			    	}
 			    }
@@ -293,14 +295,16 @@ public class BeanShellLinker {
 				for(Tab tab : tabGroup.getTabs()){
 			    	for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
 			    		List<View> views = tab.getViews(relationshipAttribute.getName());
-			    		clearCheckboxAndRadioButtonValues(views);
+			    		if (views != null)
+			    			clearCheckboxAndRadioButtonValues(views);
 			    	}
 			    }
 				for(Tab tab : tabGroup.getTabs()){
 					for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
 			    		if(tab.hasView(relationshipAttribute.getName())){
 			    			List<View> views = tab.getViews(relationshipAttribute.getName());
-			    			loadRelationshipFieldsValue(relationshipAttribute, views);
+			    			if (views != null)
+			    				loadRelationshipFieldsValue(relationshipAttribute, views);
 			    		}
 			    	}
 			    }
@@ -321,13 +325,15 @@ public class BeanShellLinker {
 			try {
 				Collection<EntityAttribute> attributes = archEntity.getAttributes();
 				for (EntityAttribute entityAttribute : attributes) {
-			    	List<View> views = tab.getViews(entityAttribute.getName());
-			    	clearCheckboxAndRadioButtonValues(views);
+					List<View> views = tab.getViews(entityAttribute.getName());
+					if (views != null)
+						clearCheckboxAndRadioButtonValues(views);
 			    }
 			    for (EntityAttribute entityAttribute : attributes) {
 			    	if(tab.hasView(entityAttribute.getName())){
 			    		List<View> views = tab.getViews(entityAttribute.getName());
-			    		loadArchEntFieldsValue(entityAttribute, views);
+			    		if (views != null)
+			    			loadArchEntFieldsValue(entityAttribute, views);
 			    	}
 			    }
 			} catch (Exception e) {
@@ -348,12 +354,14 @@ public class BeanShellLinker {
 				Collection<RelationshipAttribute> attributes = relationship.getAttributes();
 				for (RelationshipAttribute relationshipAttribute : attributes) {
 			    	List<View> views = tab.getViews(relationshipAttribute.getName());
-			    	clearCheckboxAndRadioButtonValues(views);
+			    	if (views != null)
+			    		clearCheckboxAndRadioButtonValues(views);
 			    }
 			    for (RelationshipAttribute relationshipAttribute : attributes) {
 			    	if(tab.hasView(relationshipAttribute.getName())){
 			    		List<View> views = tab.getViews(relationshipAttribute.getName());
-			    		loadRelationshipFieldsValue(relationshipAttribute, views);
+			    		if (views != null)
+			    			loadRelationshipFieldsValue(relationshipAttribute, views);
 			    	}
 			    }
 			} catch (Exception e) {
