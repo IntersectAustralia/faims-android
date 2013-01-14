@@ -1,0 +1,229 @@
+Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+Object relationships = fetchAll("select relntypename, relntypename from relntype;");
+
+String entity_id;
+String rel_id;
+
+saveEntity() {
+	
+	entity_id = updateEntity(null);
+	
+}
+
+loadEntity() {
+	
+	if (entity_id == null) return;
+	
+	Object entity = fetchArchEnt(entity_id);
+	
+	for (Object attribute : entity.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab1/name", attribute.getText());
+		} else if ("value".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab1/value", attribute.getMeasure());
+			setFieldValue("tabgroup1/tab1/value-description", attribute.getText());
+			setFieldValue("tabgroup1/tab1/value-certainty", attribute.getCertainty());
+		} else if ("date".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab2/date", attribute.getText());
+		} else if ("time".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab2/time", attribute.getText());
+		} else if ("type".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab3/type", attribute.getVocab());
+			setFieldValue("tabgroup1/tab3/type-description", attribute.getText());
+		} else if ("location".equals(attribute.getName())) {
+			List locations = new ArrayList();
+			locations.add(new NameValuePair(attribute.getVocab(), "true"));
+			setFieldValue("tabgroup1/tab3/location", locations);
+			setFieldValue("tabgroup1/tab3/location-value", attribute.getMeasure());
+			setFieldValue("tabgroup1/tab3/location-certainty", attribute.getCertainty());
+		} else if ("supervisor".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab3/supervisor", attribute.getText());
+		}
+	}
+	
+}
+
+updateEntity(entity_id) {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
+	attributes.add(createEntityAttribute("value", getFieldValue("tabgroup1/tab1/value-description"), null, getFieldValue("tabgroup1/tab1/value"), getFieldValue("tabgroup1/tab1/value-certainty")));
+	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab2/date"), null, null, null));
+	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab2/time"), null, null, null));
+	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab3/type-description"), getFieldValue("tabgroup1/tab3/type"), null, null));
+	
+	Object values = getFieldValue("tabgroup1/tab3/location");
+	
+	for (Object value : values) {
+		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab3/location-value"), getFieldValue("tabgroup1/tab3/location-certainty")));
+	}
+	
+	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab3/supervisor"), null, null, null));
+	
+	String id = saveArchEnt(entity_id, "simple", null, attributes);
+	
+	updateEntityRelationship();
+	
+	return id;
+}
+
+clearEntity() {
+	setFieldValue("tabgroup1/tab1/name", "");
+	setFieldValue("tabgroup1/tab1/value", "");
+	setFieldValue("tabgroup1/tab1/value-description", "");
+	setFieldValue("tabgroup1/tab1/value-certainty", "");
+	setFieldValue("tabgroup1/tab3/type-description", "");
+	setFieldValue("tabgroup1/tab3/location-value", "");
+	setFieldValue("tabgroup1/tab3/location-certainty", "");
+	populateDropDown("tabgroup1/tab3/type", types);
+	populateCheckBoxGroup("tabgroup1/tab3/location", locations);
+}
+
+saveRelationship() {
+	
+	rel_id = updateRelationship(null);
+}
+
+loadRelationship() {
+
+	if (rel_id == null) return;
+	
+	Object relationship = fetchRel(rel_id);
+	
+	for (Object attribute : relationship.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup2/tab1/name", attribute.getText());
+		}
+	}
+}
+
+updateRelationship(rel_id) {
+	String type = getFieldValue("tabgroup2/tab1/type");
+
+	List attributes = createAttributeList();
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null));
+	
+	String id = saveRel(rel_id, type, null, attributes);
+	
+	updateEntityRelationship();
+	
+	return id;
+}
+
+clearRelationship() {
+	 setFieldValue("tabgroup2/tab1/name", "");
+	 populateDropDown("tabgroup2/tab1/type", relationships);
+}
+
+updateEntityRelationship() {
+	Object entities = fetchAll("select uuid, uuid from archentity;");
+	Object relationships = fetchAll("select relationshipid, relationshipid from relationship;");
+	
+	populateDropDown("tabgroup1/tab5/entity", entities);
+	populateDropDown("tabgroup2/tab2/relationship", relationships);
+	populateDropDown("tabgroup3/tab1/entity", entities);
+	populateDropDown("tabgroup3/tab1/relationship", relationships);
+	populateDropDown("tabgroup4/tab1/entity", entities);
+	populateDropDown("tabgroup4/tab2/relationship", relationships);
+}
+
+saveEntityRelationship() {
+	addReln(getFieldValue("tabgroup3/tab1/entity"), getFieldValue("tabgroup3/tab1/relationship"), getFieldValue("tabgroup3/tab1/verb"));
+	
+	showToast("record saved");
+}
+
+hideEntityTab() {
+	System.out.println("hide entity tab");
+}
+
+showEntityTab() {
+	showTab("tabgroup1/tab1");
+	showTab("tabgroup1/tab2");
+	showTab("tabgroup1/tab3");
+	showTab("tabgroup1/tab4");
+}
+
+loadEntityTab() {
+	entity_id = getFieldValue("tabgroup1/tab5/entity");
+	showTab("tabgroup1/tab1", entity_id);
+	showTab("tabgroup1/tab2", entity_id);
+	showTab("tabgroup1/tab3", entity_id);
+	showTab("tabgroup1/tab4", entity_id);
+}
+
+showEntityTabGroup() {
+	showTabGroup("tabgroup1/tab1");
+}
+
+loadEntityTabGroup() {
+	entity_id = getFieldValue("tabgroup4/tab1/entity");
+	showTabGroup("tabgroup1", entity_id);
+}
+
+hideRelationshipTab() {
+	System.out.println("hide relationship tab");
+}
+
+showRelationshipTab() {
+	showTab("tabgroup2/tab1");
+}
+
+loadRelationshipTab() {
+	rel_id = getFieldValue("tabgroup2/tab2/relationship");
+	showTab("tabgroup2/tab1", rel_id);
+}
+
+showRelationshipTabGroup() {
+	showTabGroup("tabgroup2");
+}
+
+loadRelationshipTabGroup() {
+	rel_id = getFieldValue("tabgroup4/tab2/relationship");
+	showTabGroup("tabgroup2", rel_id);
+}
+
+gotoGroup(n) {
+	showTabGroup("tabgroup" + n);
+}
+
+onEvent("tabgroup1/tab4/save", "click", "saveEntity()");
+onEvent("tabgroup1/tab4/update", "click", "updateEntity(entity_id)");
+onEvent("tabgroup1/tab4/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab4/clear", "click", "clearEntity()");
+
+onEvent("tabgroup1/tab5/hide", "click", "hideEntityTab()");
+onEvent("tabgroup1/tab5/show", "click", "showEntityTab()");
+onEvent("tabgroup1/tab5/load", "click", "loadEntityTab()");
+onEvent("tabgroup1/tab5/next", "click", "gotoGroup(2)");
+
+onEvent("tabgroup2/tab1/save", "click", "saveRelationship()");
+onEvent("tabgroup2/tab1/update", "click", "updateRelationship(rel_id)");
+onEvent("tabgroup2/tab1/load", "click", "loadRelationship()");
+onEvent("tabgroup2/tab1/clear", "click", "clearRelationship()");
+
+onEvent("tabgroup2/tab2/hide", "click", "hideRelationshipTab()");
+onEvent("tabgroup2/tab2/show", "click", "showRelationshipTab()");
+onEvent("tabgroup2/tab2/load", "click", "loadRelationshipTab()");
+onEvent("tabgroup2/tab2/next", "click", "gotoGroup(3)");
+
+onEvent("tabgroup3/tab1/save", "click", "saveEntityRelationship()");
+onEvent("tabgroup3/tab1/next", "click", "gotoGroup(4)");
+
+onEvent("tabgroup4/tab1/show", "click", "showEntityTabGroup()");
+onEvent("tabgroup4/tab1/load", "click", "loadEntityTabGroup()");
+onEvent("tabgroup4/tab2/show", "click", "showRelationshipTabGroup()");
+onEvent("tabgroup4/tab2/load", "click", "loadRelationshipTabGroup()");
+onEvent("tabgroup4/tab3/next", "click", "gotoGroup(5)");
+
+clearEntity();
+clearRelationship();
+updateEntityRelationship();
+
+selectedName() {
+	System.out.println(getListItemValue());
+}
+
+onEvent("tabgroup5/tab1/names", "click", "selectedName()");

@@ -12,8 +12,8 @@ public class DateUtil {
 	
 	public static void setTimePicker(TimePicker time, String value) {
 		String[] tokens = value.split(":");
-		time.setCurrentHour(Integer.valueOf(tokens[1]));
-		time.setCurrentMinute(Integer.valueOf(tokens[0]));
+		time.setCurrentHour(Integer.valueOf(tokens[0]));
+		time.setCurrentMinute(Integer.valueOf(tokens[1]));
 	}
 	
 	public static String getDate(DatePicker date) {
