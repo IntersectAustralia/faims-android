@@ -179,4 +179,10 @@ public class TabGroup extends Fragment {
 		return relType;
 	}
 
+	public void clearTabs() {
+		for (Tab tab : tabs) {
+			tab.clearViews();
+		}
+	}
+
 }

@@ -39,6 +39,7 @@
                   <hide></hide>
                   <show></show>
                   <load></load>
+                  <new></new>
                   <next></next>
               </tab5>
           </tabgroup1>
@@ -56,6 +57,7 @@
                   <hide></hide>
                   <show></show>
                   <load></load>
+                  <new></new>
                   <next></next>
               </tab2>
           </tabgroup2>
@@ -73,11 +75,13 @@
                   <entity></entity>
                   <show></show>
                   <load></load>
+                  <new></new>
               </tab1>
               <tab2>
                   <relationship></relationship>
                   <show></show>
                   <load></load>
+                  <new></new>
               </tab2>
               <tab3>
                   <next></next>
@@ -212,6 +216,9 @@
         <trigger ref="load">
           <label>Load</label>
         </trigger>
+        <trigger ref="new">
+          <label>New</label>
+        </trigger>
         <trigger ref="next">
           <label>Next</label>
         </trigger>	
@@ -261,6 +268,9 @@
         </trigger>
         <trigger ref="load">
           <label>Load</label>
+        </trigger>
+        <trigger ref="new">
+          <label>New</label>
         </trigger>
         <trigger ref="next">
           <label>Next</label>
@@ -313,6 +323,9 @@
 	        <trigger ref="load">
 	          <label>Load</label>
 	        </trigger>
+	        <trigger ref="new">
+	          <label>New</label>
+	        </trigger>
         </group>
         <group ref="tab2">
             <label>Show Relationship</label>
@@ -328,6 +341,9 @@
 	        </trigger>
 	        <trigger ref="load">
 	          <label>Load</label>
+	        </trigger>
+	        <trigger ref="new">
+	          <label>New</label>
 	        </trigger>
         </group>
         <group ref="tab3">

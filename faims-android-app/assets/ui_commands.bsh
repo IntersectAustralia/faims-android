@@ -4,6 +4,14 @@ import java.util.List;
 import java.util.Collection;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 
+newTabGroup(String label) {
+	linker.newTabGroup(label);
+}
+
+newTab(String label) {
+	linker.newTab(label);
+}
+
 showTabGroup(String label){
     linker.showTabGroup(label);
 }
