@@ -16,6 +16,7 @@
               <save></save>
               <load></load>
               <next></next>
+              <back />
             </tab>
           </relationship>
           <!-- Simple Arch Entity with vocabs, measures and certainties-->
@@ -33,6 +34,7 @@
               <save></save>
               <load></load>
               <next></next>
+              <back />
             </tab>
           </simple_entity_2>
           <!-- Simple Arch Entity with vocabs, measures and certainties in multiple tabs -->
@@ -43,6 +45,7 @@
               <count-description></count-description>
               <count-certainty></count-certainty>
               <load></load>
+              <back />
             </tab1>
             <tab2>
               <date></date>
@@ -94,6 +97,9 @@
         <trigger ref="next">
           <label>Next</label>
         </trigger>
+        <trigger ref="back">
+          <label>Back</label>
+        </trigger>
       </group>
     </group>
     <group ref="simple_entity_2" faims_archent_type="simple_entity_2">
@@ -144,6 +150,9 @@
         <trigger ref="next">
           <label>Next</label>
         </trigger>
+        <trigger ref="back">
+          <label>Back</label>
+        </trigger>
       </group>
     </group>
    
@@ -165,6 +174,9 @@
         </input>
         <trigger ref="load">
           <label>Load</label>
+        </trigger>
+        <trigger ref="back">
+          <label>Back</label>
         </trigger>
       </group>
       <group ref="tab2">
