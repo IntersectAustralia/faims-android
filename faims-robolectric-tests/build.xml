@@ -33,6 +33,10 @@
 		<file name="robolectric-1.1-jar-with-dependencies.jar"/>
 		<file name="spatialite-android-library.jar"/>
 		<file name="bsh-2.0b4.jar"/>
+		<file name="javaproj-1.0.6-noawt.jar"/>
+		<file name="protobuf-java-2.4.1-lite.jar"/>
+		<file name="nutiteq-3dsdk-1.0.84pre.jar"/>
+		<file name="mapsforge-map-0.3.0-jar-with-dependencies.jar"/>
 	</filelist>
 
 	<path id="compile_classpath">
