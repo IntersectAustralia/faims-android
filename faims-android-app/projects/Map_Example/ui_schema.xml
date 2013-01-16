@@ -1,0 +1,78 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Map Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="map_example">
+          <tabgroup1>
+              <tab1>
+                  <show></show>
+                  <new></new>
+              </tab1>
+              <tab2>
+                  <button1></button1>
+                  <button2></button2>
+                  <map></map>
+              </tab2>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>
+                  <button1></button1>
+                  <button2></button2>
+                  <map></map>
+              </tab1>
+          </tabgroup2>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+
+   <bind nodeset="/faims/simple_entity_2/tab/name" type="string"/>
+  <h:body>
+    <group ref="tabgroup1">
+      <label>Map Example</label>
+      <group ref="tab1">
+        <label>Controls</label>
+        <trigger ref="show">
+            <label>Show</label>
+        </trigger>
+        <trigger ref="new">
+            <label>New</label>
+        </trigger>
+      </group>
+      <group ref="tab2" faims_hidden="true" faims_scrollable="false">
+        <label>Map</label>
+        <trigger ref="button1">
+            <label>Button1</label>
+        </trigger>
+        <trigger ref="button2">
+            <label>Button2</label>
+        </trigger>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+      </group>
+    </group>
+    <group ref="tabgroup2">
+      <label>Map Example</label>
+      <group ref="tab1"  faims_scrollable="false">
+        <label>Map</label>
+        <trigger ref="button1">
+            <label>Button1</label>
+        </trigger>
+        <trigger ref="button2">
+            <label>Button2</label>
+        </trigger>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
