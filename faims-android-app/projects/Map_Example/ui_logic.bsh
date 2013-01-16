@@ -1,0 +1,10 @@
+showMapTab() {
+	showTab("tabgroup1/tab2");
+}
+
+showMapTabGroup() {
+	showTabGroup("tabgroup2");
+}
+
+onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
+onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
