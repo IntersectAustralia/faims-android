@@ -6,8 +6,13 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
 
 import roboguice.activity.RoboActivity;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,6 +25,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.JsonUtil;
 
@@ -31,6 +37,7 @@ public class MainActivity extends RoboActivity {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	private ArrayAdapter<String> projectListAdapter;
+	private BluetoothDevice gpsDevice;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +46,10 @@ public class MainActivity extends RoboActivity {
         
         setContentView(R.layout.activity_main);
         
-        // Need to set the application to get state information
+		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		this.gpsDevice = initialiseBluetoohConnection(adapter);
+
+		// Need to set the application to get state information
         serverDiscovery.setApplication(getApplication());
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
@@ -56,6 +66,7 @@ public class MainActivity extends RoboActivity {
         		
         		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedItem);
+				showProjectsIntent.putExtra("gpsDevice", MainActivity.this.gpsDevice);
 				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedItem.replaceAll("\\s", "_"));
 				MainActivity.this.startActivityForResult(showProjectsIntent, 1);
         	}
@@ -113,6 +124,7 @@ public class MainActivity extends RoboActivity {
 		FAIMSLog.log();
 		
 		Intent fetchProjectsIntent = new Intent(MainActivity.this, FetchProjectsActivity.class);
+		fetchProjectsIntent.putExtra("gpsDevice", this.gpsDevice);
 		MainActivity.this.startActivityForResult(fetchProjectsIntent,1);
 	}
     
@@ -157,4 +169,19 @@ public class MainActivity extends RoboActivity {
 			}
 		}
 	}
+
+	private BluetoothDevice initialiseBluetoohConnection(BluetoothAdapter adapter) {
+        if (adapter != null && adapter.isEnabled()) {
+        	BluetoothDevice device = null;
+            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice bluetoothDevice : pairedDevices) {
+                    device = bluetoothDevice;
+                    break;
+                }
+            }
+            return device;
+        }
+        return null;
+    }
 }

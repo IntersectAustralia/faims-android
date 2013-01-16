@@ -8,9 +8,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.BODSentence;
+import net.sf.marineapi.nmea.sentence.GGASentence;
+import net.sf.marineapi.nmea.util.CompassPoint;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -57,7 +64,13 @@ public class BeanShellLinker {
 	
 	private DatabaseManager databaseManager;
 
-	private static final String FREETEXT = "freetext";
+	private String GGAMessage;
+    private String BODMessage;
+
+    private float accuracy;
+    private Location location;
+
+    private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
@@ -292,6 +305,112 @@ public class BeanShellLinker {
 		this.activity.onBackPressed();
 	}
 	
+	public Object getGPSPosition(){
+		if(isUsingExternalGPS()){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			Location location = new Location(LocationManager.GPS_PROVIDER);
+			double latitude = ggaSentence.getPosition().getLatitude();
+			double longitude = ggaSentence.getPosition().getLongitude();
+			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+			location.setLatitude(latitude);
+			location.setLongitude(longitude);
+			return location;
+		}else if(isUsingInternalGPS()){
+			return this.location;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSEstimatedAccuracy(){
+		if(isUsingExternalGPS()){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+			return nmeaAccuracy;
+		}else if(isUsingInternalGPS()){
+			return this.accuracy;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSHeading(){
+		if(isUsingExternalGPS()){
+			if(this.BODMessage != null){
+				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+				return bodSentence.getTrueBearing();
+			}else{
+				return 0.0;
+			}
+		}else if(isUsingInternalGPS()){
+			return this.location.getBearing();
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSPosition(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			Location location = new Location(LocationManager.GPS_PROVIDER);
+			double latitude = ggaSentence.getPosition().getLatitude();
+			double longitude = ggaSentence.getPosition().getLongitude();
+			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+			location.setLatitude(latitude);
+			location.setLongitude(longitude);
+			return location;
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.location;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSEstimatedAccuracy(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+			return nmeaAccuracy;
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.accuracy;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSHeading(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			if(this.BODMessage != null){
+				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+				return bodSentence.getTrueBearing();
+			}else{
+				return 0.0;
+			}
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.location.getBearing();
+		}else{
+			return null;
+		}
+	}
+
+	private boolean isUsingExternalGPS(){
+		if(this.GGAMessage != null){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+			if(this.location != null && nmeaAccuracy > accuracy){
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isUsingInternalGPS(){
+		return this.location != null && this.accuracy != 0.0;
+	}
+
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
@@ -897,5 +1016,21 @@ public class BeanShellLinker {
 
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
+	}
+
+	public void setGGAMessage(String gGAMessage) {
+		this.GGAMessage = gGAMessage;
+	}
+
+	public void setBODMessage(String bODMessage) {
+		this.BODMessage = bODMessage;
+	}
+
+	public void setAccuracy(float accuracy) {
+		this.accuracy = accuracy;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
 	}
 }

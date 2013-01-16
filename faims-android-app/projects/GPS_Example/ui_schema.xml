@@ -1,0 +1,34 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <tabgroup1>
+              <tab1>
+                  <gps></gps>
+              </tab1>
+          </tabgroup1>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="tabgroup1" faims_archent_type="simple">
+      <label>GPS Example</label>
+      <group ref="tab1">
+        <label>GPS</label>
+        <trigger ref="gps">
+          <label>Load GPS</label>
+        </trigger>
+	  </group>
+    </group>
+  </h:body>
+</h:html>

@@ -3,12 +3,19 @@ package au.org.intersect.faims.android.ui.activity;
 import org.javarosa.form.api.FormEntryController;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.tasks.BluetoothActionListener;
+import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.DialogType;
@@ -20,7 +27,7 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.UIRenderer;
 
-public class ShowProjectActivity extends FragmentActivity implements IDialogListener {
+public class ShowProjectActivity extends FragmentActivity implements IDialogListener, BluetoothActionListener, LocationListener {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -35,6 +42,11 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	private BeanShellLinker linker;
 	
 	private DatabaseManager databaseManager;
+	
+	private BluetoothDevice gpsDevice;
+	private Handler handler;
+	private ExternalGPSTasks externalGPSTasks;
+	private LocationManager locationManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +56,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		setTitle(data.getStringExtra("name"));
+		this.gpsDevice = data.getParcelableExtra("gpsDevice");
 		directory = data.getStringExtra("directory");
 		
 		choiceDialog = DialogFactory.createChoiceDialog(ShowProjectActivity.this, 
@@ -55,6 +68,28 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 	}
 	
+	@Override
+	protected void onDestroy() {
+		if(this.handler != null){
+			this.handler.removeCallbacks(this.externalGPSTasks);
+		}
+		this.locationManager.removeUpdates(this);
+		super.onDestroy();
+	}
+
+	private void startGPSListener() {
+		this.locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		if(this.gpsDevice != null){
+			this.handler = new Handler();
+			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,handler, this);
+			this.handler.postDelayed(this.externalGPSTasks, 10000);
+		}
+		if(this.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
+		}
+
+	}
+
 	/*
 	@Override
 	protected void onResume() {
@@ -89,6 +124,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		if (type == DialogType.CONFIRM_RENDER_PROJECT) {
 			if (resultCode == DialogResultCode.SELECT_YES) {
 				renderUI();
+				startGPSListener();
 			}
 		}
 		
@@ -113,6 +149,33 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	
 	public BeanShellLinker getBeanShellLinker(){
 		return this.linker;
+	}
+
+	@Override
+	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
+		if(this.linker != null){
+			this.linker.setGGAMessage(GGAMessage);
+			this.linker.setBODMessage(BODMessage);
+		}
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		this.linker.setAccuracy(location.getAccuracy());
+		this.linker.setLocation(location);
+		FAIMSLog.log("Update location: " + location.getLatitude() + "," + location.getLongitude());
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
 
 }

@@ -122,3 +122,14 @@ goBack(){
     linker.goBack();
 }
 
+Object getGPSPosition(){
+	return linker.getGPSPosition();
+}
+
+Object getGPSEstimatedAccuracy(){
+	return linker.getGPSEstimatedAccuracy();
+}
+
+Object getGPSHeading(){
+	return linker.getGPSHeading();
+}

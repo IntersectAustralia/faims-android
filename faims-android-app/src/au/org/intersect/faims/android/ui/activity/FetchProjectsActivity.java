@@ -4,6 +4,7 @@ import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import android.app.Dialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -41,6 +42,7 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
 	FAIMSClient faimsClient;
 	@Inject
 	ServerDiscovery serverDiscovery;
+	private BluetoothDevice gpsDevice;
 	
 	private ArrayAdapter<String> projectListAdapter;
 	
@@ -59,6 +61,8 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
         super.onCreate(savedInstanceState);
         FAIMSLog.log();
         
+        Intent intent = getIntent();
+        this.gpsDevice = intent.getParcelableExtra("gpsDevice");
         setContentView(R.layout.activity_fetch_projects);
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
@@ -206,6 +210,7 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
     			// show project
     			Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedProject.name);
+				showProjectsIntent.putExtra("gpsDevice", this.gpsDevice);
 				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
 				FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 				finish();

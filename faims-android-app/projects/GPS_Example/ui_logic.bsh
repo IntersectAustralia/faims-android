@@ -1,0 +1,10 @@
+loadGPS(){
+	Object location = getGPSPosition();
+	longitude = location.getLongitude();
+	latitude = location.getLatitude();
+	Object accuracy = getGPSEstimatedAccuracy();
+	Object heading = getGPSHeading();
+	showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+}
+
+onEvent("tabgroup1/tab1/gps", "click", "loadGPS()");
