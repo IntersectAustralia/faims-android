@@ -1,6 +1,5 @@
 package au.org.intersect.faims.android.ui.form;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +26,6 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
-import au.org.intersect.faims.android.util.FAIMSLog;
-
-import com.nutiteq.layers.raster.GdalMapLayer;
-import com.nutiteq.projections.EPSG3857;
 
 public class Tab {
 
@@ -45,7 +40,6 @@ public class Tab {
 	private boolean hidden;
 	//private boolean scrollable;
 	private View view;
-	private int cacheId = 9991;
 
 	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable) {
 		this.context = context;
@@ -137,22 +131,7 @@ public class Tab {
                     	if ("true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"))) {
                     		CustomMapView mapView = new CustomMapView(this.context);
                     		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                    		// *** HARD CODED VALUES ***
-                    		GdalMapLayer gdalLayer;
-                            try {
-                                gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, cacheId++, "/sdcard/Map/natural-earth-2-mercator.tif", mapView, true);
-                                mapView.getLayers().setBaseLayer(gdalLayer);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            mapView.setFocusPoint(mapView.getLayers().getBaseLayer().getProjection().fromWgs84(-122.41666666667f, 37.76666666666f));
-                            // rotation - 0 = north-up
-                            mapView.setRotation(0f);
-                            // zoom - 0 = world, like on most web maps
-                            mapView.setZoom(4.0f);
-                            // tilt means perspective view. Default is 90 degrees for "normal" 2D map view, minimum allowed is 30 degrees.
-                            mapView.setTilt(90.0f);
-                            // *** END ***
+                    		
                     		mapView.startMapping();
                     		view = mapView;
                     		linearLayout.addView(view);

@@ -107,6 +107,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
 		linker = new BeanShellLinker(this, getAssets(), renderer, databaseManager);
+		linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
 	}

@@ -10,6 +10,8 @@ import com.nutiteq.components.Options;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class CustomMapView extends MapView {
+	
+	private static int cacheId = 9991;
 
 	public CustomMapView(Context context) {
 		super(context);
@@ -39,8 +41,12 @@ public class CustomMapView extends MapView {
 		this.getOptions().setClearColor(Color.WHITE);
 		
 		// configure texture caching - optional, suggested 
-        //this.getOptions().setTextureMemoryCacheSize(40 * 1024 * 1024);
-        //this.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
+        this.getOptions().setTextureMemoryCacheSize(40 * 1024 * 1024);
+        this.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
+	}
+
+	public static int nextId() {
+		return cacheId;
 	}
 	
 }
