@@ -910,6 +910,12 @@ public class BeanShellLinker {
 	}
 	
 	public void setMapFocusPoint(String ref, float latitude, float longitude) {
+		
+		if (latitude < -90.0f || latitude > 90.0f) {
+			Log.d("FAIMS", "Latitude out of range " + latitude);
+			showWarning("Logic Error", "Map data out of range.");
+		}
+		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
