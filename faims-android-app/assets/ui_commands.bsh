@@ -122,3 +122,22 @@ goBack(){
     linker.goBack();
 }
 
+showRasterMap(String ref, String filename) {
+	linker.showRasterMap(ref, filename);
+}
+
+setMapFocusPoint(String ref, float latitude, float longitude) {
+	linker.setMapFocusPoint(ref, latitude, longitude);
+}
+
+setMapRotation(String ref, float rotation) {
+	linker.setMapRotation(ref, rotation);
+}
+
+setMapZoom(String ref, float zoom) {
+	linker.setMapZoom(ref, zoom);
+}
+
+setMapTilt(String ref, float tilt) {
+	linker.setMapTilt(ref, tilt);
+}

@@ -15,15 +15,13 @@
                   <new></new>
               </tab1>
               <tab2>
-                  <button1></button1>
-                  <button2></button2>
+                  <refresh></refresh>
                   <map></map>
               </tab2>
           </tabgroup1>
           <tabgroup2>
               <tab1>
-                  <button1></button1>
-                  <button2></button2>
+                  <refresh></refresh>
                   <map></map>
               </tab1>
           </tabgroup2>
@@ -47,11 +45,8 @@
       </group>
       <group ref="tab2" faims_hidden="true" faims_scrollable="false">
         <label>Map</label>
-        <trigger ref="button1">
-            <label>Button1</label>
-        </trigger>
-        <trigger ref="button2">
-            <label>Button2</label>
+        <trigger ref="refresh">
+            <label>Refresh</label>
         </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>
@@ -62,11 +57,8 @@
       <label>Map Example</label>
       <group ref="tab1"  faims_scrollable="false">
         <label>Map</label>
-        <trigger ref="button1">
-            <label>Button1</label>
-        </trigger>
-        <trigger ref="button2">
-            <label>Button2</label>
+        <trigger ref="refresh">
+            <label>Refresh</label>
         </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>
