@@ -1,3 +1,11 @@
+setupMap(id, lat, lon) {
+	showRasterMap(id, "natural-earth-2-mercator.tif");
+	setMapFocusPoint(id, lat, lon);
+	setMapRotation(id, 360.0f);
+	setMapZoom(id, 4.0f);
+	setMapTilt(id, 90.0f);
+}
+
 showMapTab() {
 	showTab("tabgroup1/tab2");
 }
@@ -6,5 +14,18 @@ showMapTabGroup() {
 	showTabGroup("tabgroup2");
 }
 
+refreshMapTab() {
+	showRasterMap("tabgroup1/tab2/map", "natural-earth-2-mercator.tif");
+}
+
+refreshMapTabGroup() {
+	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
+}
+
 onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
+onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
+onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
+
+setupMap("tabgroup1/tab2/map", -33.8683f, 151.2086f);
+setupMap("tabgroup2/tab1/map", 37.76666666666f, -122.41666666667f);

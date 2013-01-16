@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +41,7 @@ import au.org.intersect.faims.android.ui.form.CustomDatePicker;
 import au.org.intersect.faims.android.ui.form.CustomEditText;
 import au.org.intersect.faims.android.ui.form.CustomLinearLayout;
 import au.org.intersect.faims.android.ui.form.CustomListView;
+import au.org.intersect.faims.android.ui.form.CustomMapView;
 import au.org.intersect.faims.android.ui.form.CustomRadioButton;
 import au.org.intersect.faims.android.ui.form.CustomSpinner;
 import au.org.intersect.faims.android.ui.form.CustomTimePicker;
@@ -51,6 +53,9 @@ import au.org.intersect.faims.android.ui.form.Tab;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
+
+import com.nutiteq.layers.raster.GdalMapLayer;
+import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
 	
@@ -70,7 +75,9 @@ public class BeanShellLinker {
     private float accuracy;
     private Location location;
 
-    private static final String FREETEXT = "freetext";
+	private String baseDir;
+
+	private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
@@ -139,6 +146,7 @@ public class BeanShellLinker {
 						});
 					} else {
 						view.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 								execute(code);
@@ -988,6 +996,109 @@ public class BeanShellLinker {
 	public Collection fetchAll(String query){
 		return databaseManager.fetchAll(query);
 	}
+	
+	public void showRasterMap(String ref, String filename) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				String filepath = baseDir + "/maps/" + filename;
+				if (!new File(filepath).exists()) {
+					Log.d("FAIMS","Map file " + filepath + " does not exist");
+                    showWarning("Map Error", "Could not render map.");
+					return;
+				}
+				
+        		GdalMapLayer gdalLayer;
+                try {
+                    gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
+                    mapView.getLayers().setBaseLayer(gdalLayer);
+                } catch (IOException e) {
+                	Log.e("FAIMS","Could not render raster layer",e);
+                    showWarning("Map Error", "Could not render map.");
+                }
+                
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing raster map",e);
+		}
+	}
+	
+	public void setMapFocusPoint(String ref, float latitude, float longitude) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting map focus point",e);
+			showWarning("Logic Error", "Map is malformed");
+		}
+	}
+	
+	public void setMapRotation(String ref, float rotation) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				// rotation - 0 = north-up
+                mapView.setRotation(rotation);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting map rotation",e);
+			showWarning("Logic Error", "Map is malformed");
+		}
+	}
+	
+	public void setMapZoom(String ref, float zoom) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				// zoom - 0 = world, like on most web maps
+                mapView.setZoom(zoom);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting map zoom",e);
+			showWarning("Logic Error", "Map is malformed");
+		}
+	}
+	
+	public void setMapTilt(String ref, float tilt) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				// tilt means perspective view. Default is 90 degrees for "normal" 2D map view, minimum allowed is 30 degrees.
+                mapView.setTilt(tilt);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting map tilt",e);
+			showWarning("Logic Error", "Map is malformed");
+		}
+	}
 
 	private String convertStreamToString(InputStream stream) {
 		BufferedReader br = null;
@@ -1032,5 +1143,9 @@ public class BeanShellLinker {
 
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+
+	public void setBaseDir(String dir) {
+		this.baseDir = dir;
 	}
 }
