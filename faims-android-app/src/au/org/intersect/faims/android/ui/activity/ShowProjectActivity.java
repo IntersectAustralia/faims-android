@@ -1,8 +1,11 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.util.Set;
+
 import org.javarosa.form.api.FormEntryController;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.location.Location;
@@ -53,7 +56,8 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		setTitle(data.getStringExtra("name"));
-		this.gpsDevice = data.getParcelableExtra("gpsDevice");
+		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		this.gpsDevice = initialiseBluetoohConnection(adapter);
 		directory = data.getStringExtra("directory");
 		
 		choiceDialog = DialogFactory.createChoiceDialog(ShowProjectActivity.this, 
@@ -173,4 +177,18 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
 
+	private BluetoothDevice initialiseBluetoohConnection(BluetoothAdapter adapter) {
+        if (adapter != null && adapter.isEnabled()) {
+        	BluetoothDevice device = null;
+            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice bluetoothDevice : pairedDevices) {
+                    device = bluetoothDevice;
+                    break;
+                }
+            }
+            return device;
+        }
+        return null;
+    }
 }

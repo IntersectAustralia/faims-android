@@ -37,7 +37,6 @@ public class MainActivity extends RoboActivity {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	private ArrayAdapter<String> projectListAdapter;
-	private BluetoothDevice gpsDevice;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +45,6 @@ public class MainActivity extends RoboActivity {
         
         setContentView(R.layout.activity_main);
         
-		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-		this.gpsDevice = initialiseBluetoohConnection(adapter);
-
 		// Need to set the application to get state information
         serverDiscovery.setApplication(getApplication());
         
@@ -66,7 +62,6 @@ public class MainActivity extends RoboActivity {
         		
         		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedItem);
-				showProjectsIntent.putExtra("gpsDevice", MainActivity.this.gpsDevice);
 				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedItem.replaceAll("\\s", "_"));
 				MainActivity.this.startActivityForResult(showProjectsIntent, 1);
         	}
@@ -124,7 +119,6 @@ public class MainActivity extends RoboActivity {
 		FAIMSLog.log();
 		
 		Intent fetchProjectsIntent = new Intent(MainActivity.this, FetchProjectsActivity.class);
-		fetchProjectsIntent.putExtra("gpsDevice", this.gpsDevice);
 		MainActivity.this.startActivityForResult(fetchProjectsIntent,1);
 	}
     
@@ -169,19 +163,4 @@ public class MainActivity extends RoboActivity {
 			}
 		}
 	}
-
-	private BluetoothDevice initialiseBluetoohConnection(BluetoothAdapter adapter) {
-        if (adapter != null && adapter.isEnabled()) {
-        	BluetoothDevice device = null;
-            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-            if (pairedDevices.size() > 0) {
-                for (BluetoothDevice bluetoothDevice : pairedDevices) {
-                    device = bluetoothDevice;
-                    break;
-                }
-            }
-            return device;
-        }
-        return null;
-    }
 }
