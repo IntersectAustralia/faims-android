@@ -71,7 +71,9 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	
 	@Override
 	protected void onDestroy() {
-		this.linker.destroyListener();
+		if(this.linker != null){
+			this.linker.destroyListener();
+		}
 		super.onDestroy();
 	}
 
