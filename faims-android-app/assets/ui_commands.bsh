@@ -141,3 +141,7 @@ setMapZoom(String ref, float zoom) {
 setMapTilt(String ref, float tilt) {
 	linker.setMapTilt(ref, tilt);
 }
+
+showVectorLayer(String ref, String layername) {
+	linker.showVectorLayer(ref, layername);
+}

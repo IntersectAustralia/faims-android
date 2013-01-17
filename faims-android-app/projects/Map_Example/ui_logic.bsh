@@ -4,6 +4,8 @@ setupMap(id, lat, lon) {
 	setMapRotation(id, 360.0f);
 	setMapZoom(id, 4.0f);
 	setMapTilt(id, 90.0f);
+	
+	layerId = showVectorLayer(id, "KAZ_SitePoints");
 }
 
 showMapTab() {

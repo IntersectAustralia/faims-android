@@ -12,6 +12,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.os.Environment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -48,6 +49,7 @@ import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.nutiteq.layers.raster.GdalMapLayer;
+import com.nutiteq.layers.vector.ShapeLayer;
 import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
@@ -984,6 +986,31 @@ public class BeanShellLinker {
 			Log.e("FAIMS","Exception setting map tilt",e);
 			showWarning("Logic Error", "Map is malformed");
 		}
+	}
+	
+	public int showVectorLayer(String ref, String layername) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					mapView.getLayers().addLayer(new ShapeLayer(new EPSG3857(), baseDir + "/maps/" + layername));
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not show vector layer", e);
+                    showWarning("Map Error", "Could not show vector layer");
+					return 0;
+				}
+				
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing vector layer",e);
+		}
+		return 0;
 	}
 
 	private String convertStreamToString(InputStream stream) {
