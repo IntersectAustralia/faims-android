@@ -58,7 +58,9 @@ public class ExternalGPSTasks implements Runnable {
 	            isr = new InputStreamReader(in);
 	            br = new BufferedReader(isr);
 	
-	            while (true) {
+	            long start = System.currentTimeMillis();
+	            long end = start + 2000; // check for 2 seconds to get valid GPGGA message
+	            while (System.currentTimeMillis() < end){
 	                String nmeaMessage = br.readLine();
 	                if (nmeaMessage.startsWith("$GPGGA")) {
 	                    if(hasValidGGAMessage()){
@@ -75,7 +77,7 @@ public class ExternalGPSTasks implements Runnable {
 	            isr.close();
 	            in.close();
 	        } catch (IOException e) {
-	            e.printStackTrace();
+	        	this.gpsDevice = null;
 	            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 	            if( adapter != null){
 	                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
@@ -87,15 +89,12 @@ public class ExternalGPSTasks implements Runnable {
 	                }
 	            }
 	        } catch (NoSuchMethodException e) {
-	            e.printStackTrace();
 	        } catch (IllegalArgumentException e) {
-	            e.printStackTrace();
 	        } catch (IllegalAccessException e) {
-	            e.printStackTrace();
 	        } catch (InvocationTargetException e) {
-	            e.printStackTrace();
 	        }
         }else{
+        	this.gpsDevice = null;
         	BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
             if( adapter != null){
                 Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
