@@ -12,6 +12,8 @@
           <tabgroup1>
               <tab1>
                   <gps></gps>
+                  <internalgps></internalgps>
+                  <externalgps></externalgps>
               </tab1>
           </tabgroup1>
         </faims>
@@ -27,6 +29,12 @@
         <label>GPS</label>
         <trigger ref="gps">
           <label>Load GPS</label>
+        </trigger>
+        <trigger ref="internalgps">
+          <label>Load Internal GPS</label>
+        </trigger>
+        <trigger ref="externalgps">
+          <label>Load External GPS</label>
         </trigger>
 	  </group>
     </group>

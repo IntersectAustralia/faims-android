@@ -15,10 +15,13 @@ import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.util.CompassPoint;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +38,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomDatePicker;
@@ -81,6 +86,13 @@ public class BeanShellLinker {
 	private static final String MEASURE = "measure";
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
+	
+	private int gpsUpdateInterval=10000;
+	private Context context;
+	private BluetoothDevice gpsDevice;
+	private Handler handler;
+	private ExternalGPSTasks externalGPSTasks;
+	private LocationManager locationManager;
 
 	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
@@ -312,7 +324,49 @@ public class BeanShellLinker {
 	public void goBack(){
 		this.activity.onBackPressed();
 	}
-	
+
+	public int getGpsUpdateInterval(){
+		return this.gpsUpdateInterval;
+	}
+
+	public void setGpsUpdateInterval(int gpsUpdateInterval) {
+		this.gpsUpdateInterval = gpsUpdateInterval * 1000;
+		destroyListener();
+		this.handler = new Handler();
+		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this.context, gpsUpdateInterval);
+		this.handler.postDelayed(this.externalGPSTasks, gpsUpdateInterval);
+		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateInterval, 0, (ShowProjectActivity) this.context);
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
+
+	public void setGpsDevice(BluetoothDevice gpsDevice) {
+		this.gpsDevice = gpsDevice;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	public void setExternalGPSTasks(ExternalGPSTasks externalGPSTasks) {
+		this.externalGPSTasks = externalGPSTasks;
+	}
+
+	public void setLocationManager(LocationManager locationManager) {
+		this.locationManager = locationManager;
+	}
+
+	public void destroyListener(){
+		if(this.handler != null){
+			this.handler.removeCallbacks(this.externalGPSTasks);
+		}
+		if(this.locationManager != null){
+			this.locationManager.removeUpdates((ShowProjectActivity)this.context);
+		}
+	}
+
 	public Object getGPSPosition(){
 		if(isUsingExternalGPS()){
 			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);

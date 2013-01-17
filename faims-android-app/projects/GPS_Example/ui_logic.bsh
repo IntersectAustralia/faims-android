@@ -1,10 +1,30 @@
 loadGPS(){
 	Object location = getGPSPosition();
-	longitude = location.getLongitude();
-	latitude = location.getLatitude();
 	Object accuracy = getGPSEstimatedAccuracy();
 	Object heading = getGPSHeading();
-	showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+	if(location == null && accuracy == null && heading == null){
+		showToast("No GPS is available");
+	}else{
+		longitude = location.getLongitude();
+		latitude = location.getLatitude();
+		showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+	}
 }
 
+loadGPS(String gps){
+	Object location = getGPSPosition(gps);
+	Object accuracy = getGPSEstimatedAccuracy(gps);
+	Object heading = getGPSHeading(gps);
+	if(location == null && accuracy == null && heading == null){
+		showToast("No " + gps + " GPS is available");
+	}else{
+		longitude = location.getLongitude();
+		latitude = location.getLatitude();
+		showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+	}
+}
+
+onEvent("tabgroup1", "load", "setGPSUpdateInterval(5)");
 onEvent("tabgroup1/tab1/gps", "click", "loadGPS()");
+onEvent("tabgroup1/tab1/internalgps", "click", "loadGPS(\"internal\")");
+onEvent("tabgroup1/tab1/externalgps", "click", "loadGPS(\"external\")");

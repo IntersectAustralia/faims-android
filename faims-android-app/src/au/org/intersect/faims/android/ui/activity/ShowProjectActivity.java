@@ -44,9 +44,6 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	private DatabaseManager databaseManager;
 	
 	private BluetoothDevice gpsDevice;
-	private Handler handler;
-	private ExternalGPSTasks externalGPSTasks;
-	private LocationManager locationManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,24 +67,22 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	
 	@Override
 	protected void onDestroy() {
-		if(this.handler != null){
-			this.handler.removeCallbacks(this.externalGPSTasks);
-		}
-		this.locationManager.removeUpdates(this);
+		this.linker.destroyListener();
 		super.onDestroy();
 	}
 
 	private void startGPSListener() {
-		this.locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		if(this.gpsDevice != null){
-			this.handler = new Handler();
-			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,handler, this);
-			this.handler.postDelayed(this.externalGPSTasks, 10000);
-		}
-		if(this.locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
-		}
-
+		int gpsUpdateInterval = this.linker.getGpsUpdateInterval();
+		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		Handler handler = new Handler();
+		ExternalGPSTasks externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,handler, this, gpsUpdateInterval);
+		handler.postDelayed(externalGPSTasks, gpsUpdateInterval);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateInterval, 0, this);
+		this.linker.setLocationManager(locationManager);
+		this.linker.setHandler(handler);
+		this.linker.setGpsDevice(this.gpsDevice);
+		this.linker.setExternalGPSTasks(externalGPSTasks);
+		this.linker.setContext(this);
 	}
 
 	/*
@@ -154,21 +149,20 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 
 	@Override
 	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
-		if(this.linker != null){
-			this.linker.setGGAMessage(GGAMessage);
-			this.linker.setBODMessage(BODMessage);
-		}
+		this.linker.setGGAMessage(GGAMessage);
+		this.linker.setBODMessage(BODMessage);
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
 		this.linker.setAccuracy(location.getAccuracy());
 		this.linker.setLocation(location);
-		FAIMSLog.log("Update location: " + location.getLatitude() + "," + location.getLongitude());
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
+		this.linker.setAccuracy(0.0f);
+		this.linker.setLocation(null);
 	}
 
 	@Override
