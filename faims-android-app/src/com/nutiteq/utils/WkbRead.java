@@ -38,6 +38,9 @@ public class WkbRead {
     
 public static Geometry[] readWkb(ByteArrayInputStream is, Object userData){
     int endinanByte = is.read();
+    if (endinanByte == -1) {
+    	return null;
+    }
     ByteOrder endian;
     if(endinanByte == 0){
        endian = java.nio.ByteOrder.BIG_ENDIAN;
@@ -150,10 +153,9 @@ private static Geometry[] readPolygon(ByteArrayInputStream is, int dimensions, B
     int size = readInt(is, endian);
     List<MapPos> outerRing = readCoordinateList(is, dimensions, size, endian);
     
-    List<List<MapPos>> innerRings = null;
+    List<List<MapPos>> innerRings = new LinkedList<List<MapPos>>();
     
-    if(numRings > 0){
-        innerRings = new LinkedList<List<MapPos>>();
+    if(numRings > 1){
         for (int i = 0; i < numRings; i++){
             int innerSize = is.read();
             List<MapPos> innerRing = readCoordinateList(is, dimensions, innerSize, endian);

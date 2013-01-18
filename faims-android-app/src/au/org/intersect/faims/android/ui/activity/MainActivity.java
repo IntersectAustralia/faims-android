@@ -39,7 +39,7 @@ public class MainActivity extends RoboActivity {
         
         setContentView(R.layout.activity_main);
         
-        // Need to set the application to get state information
+		// Need to set the application to get state information
         serverDiscovery.setApplication(getApplication());
         
         ListView projectList = (ListView) findViewById(R.id.project_list);

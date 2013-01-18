@@ -122,6 +122,34 @@ goBack(){
     linker.goBack();
 }
 
+setGPSUpdateInterval(int seconds){
+	linker.setGpsUpdateInterval(seconds);
+}
+
+Object getGPSPosition(){
+	return linker.getGPSPosition();
+}
+
+Object getGPSEstimatedAccuracy(){
+	return linker.getGPSEstimatedAccuracy();
+}
+
+Object getGPSHeading(){
+	return linker.getGPSHeading();
+}
+
+Object getGPSPosition(String gps){
+	return linker.getGPSPosition(gps);
+}
+
+Object getGPSEstimatedAccuracy(String gps){
+	return linker.getGPSEstimatedAccuracy(gps);
+}
+
+Object getGPSHeading(String gps){
+	return linker.getGPSHeading(gps);
+}
+
 showRasterMap(String ref, String filename) {
 	linker.showRasterMap(ref, filename);
 }
@@ -142,6 +170,6 @@ setMapTilt(String ref, float tilt) {
 	linker.setMapTilt(ref, tilt);
 }
 
-showVectorLayer(String ref, String layername) {
-	linker.showVectorLayer(ref, layername);
+showVectorLayer(String ref, String filename) {
+	linker.showVectorLayer(ref, filename);
 }

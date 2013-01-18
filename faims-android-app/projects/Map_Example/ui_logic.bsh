@@ -5,7 +5,7 @@ setupMap(id, lat, lon) {
 	setMapZoom(id, 4.0f);
 	setMapTilt(id, 90.0f);
 	
-	layerId = showVectorLayer(id, "KAZ_SitePoints");
+	
 }
 
 showMapTab() {
@@ -31,3 +31,6 @@ onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
 
 setupMap("tabgroup1/tab2/map", -33.8683f, 151.2086f);
 setupMap("tabgroup2/tab1/map", 37.76666666666f, -122.41666666667f);
+
+layerId = showVectorLayer("tabgroup1/tab2/map", "test.wkb");
+layerId = showVectorLayer("tabgroup1/tab2/map", "test2.wkb");

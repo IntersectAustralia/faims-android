@@ -1,14 +1,24 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.util.Set;
+
 import org.javarosa.form.api.FormEntryController;
 
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.tasks.BluetoothActionListener;
+import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.DialogType;
@@ -20,7 +30,7 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.UIRenderer;
 
-public class ShowProjectActivity extends FragmentActivity implements IDialogListener {
+public class ShowProjectActivity extends FragmentActivity implements IDialogListener, BluetoothActionListener, LocationListener {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 
@@ -35,6 +45,8 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	private BeanShellLinker linker;
 	
 	private DatabaseManager databaseManager;
+	
+	private BluetoothDevice gpsDevice;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +56,8 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		setTitle(data.getStringExtra("name"));
+		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+		this.gpsDevice = initialiseBluetoohConnection(adapter);
 		directory = data.getStringExtra("directory");
 		
 		choiceDialog = DialogFactory.createChoiceDialog(ShowProjectActivity.this, 
@@ -55,6 +69,28 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 	}
 	
+	@Override
+	protected void onDestroy() {
+		if(this.linker != null){
+			this.linker.destroyListener();
+		}
+		super.onDestroy();
+	}
+
+	private void startGPSListener() {
+		int gpsUpdateInterval = this.linker.getGpsUpdateInterval();
+		LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		Handler handler = new Handler();
+		ExternalGPSTasks externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,handler, this, gpsUpdateInterval);
+		handler.postDelayed(externalGPSTasks, gpsUpdateInterval);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateInterval, 0, this);
+		this.linker.setLocationManager(locationManager);
+		this.linker.setHandler(handler);
+		this.linker.setGpsDevice(this.gpsDevice);
+		this.linker.setExternalGPSTasks(externalGPSTasks);
+		this.linker.setContext(this);
+	}
+
 	/*
 	@Override
 	protected void onResume() {
@@ -89,6 +125,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		if (type == DialogType.CONFIRM_RENDER_PROJECT) {
 			if (resultCode == DialogResultCode.SELECT_YES) {
 				renderUI();
+				startGPSListener();
 			}
 		}
 		
@@ -116,4 +153,44 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		return this.linker;
 	}
 
+	@Override
+	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
+		this.linker.setGGAMessage(GGAMessage);
+		this.linker.setBODMessage(BODMessage);
+	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		this.linker.setAccuracy(location.getAccuracy());
+		this.linker.setLocation(location);
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {
+		this.linker.setAccuracy(0.0f);
+		this.linker.setLocation(null);
+	}
+
+	@Override
+	public void onProviderEnabled(String provider) {
+	}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+	}
+
+	private BluetoothDevice initialiseBluetoohConnection(BluetoothAdapter adapter) {
+        if (adapter != null && adapter.isEnabled()) {
+        	BluetoothDevice device = null;
+            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                for (BluetoothDevice bluetoothDevice : pairedDevices) {
+                    device = bluetoothDevice;
+                    break;
+                }
+            }
+            return device;
+        }
+        return null;
+    }
 }

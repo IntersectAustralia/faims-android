@@ -9,10 +9,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.sentence.BODSentence;
+import net.sf.marineapi.nmea.sentence.GGASentence;
+import net.sf.marineapi.nmea.util.CompassPoint;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
-import android.os.Environment;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +40,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomDatePicker;
@@ -49,8 +63,13 @@ import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.nutiteq.layers.raster.GdalMapLayer;
-import com.nutiteq.layers.vector.ShapeLayer;
+import com.nutiteq.layers.vector.WKBLayer;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.LineStyle;
+import com.nutiteq.style.PointStyle;
+import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.style.StyleSet;
+import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class BeanShellLinker {
 	
@@ -64,12 +83,25 @@ public class BeanShellLinker {
 	
 	private DatabaseManager databaseManager;
 
+	private String GGAMessage;
+    private String BODMessage;
+
+    private float accuracy;
+    private Location location;
+
 	private String baseDir;
 
 	private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
+	
+	private int gpsUpdateInterval=10000;
+	private Context context;
+	private BluetoothDevice gpsDevice;
+	private Handler handler;
+	private ExternalGPSTasks externalGPSTasks;
+	private LocationManager locationManager;
 
 	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
@@ -135,6 +167,7 @@ public class BeanShellLinker {
 						});
 					} else {
 						view.setOnClickListener(new OnClickListener() {
+							
 							@Override
 							public void onClick(View v) {
 								execute(code);
@@ -300,7 +333,159 @@ public class BeanShellLinker {
 	public void goBack(){
 		this.activity.onBackPressed();
 	}
-	
+
+	public int getGpsUpdateInterval(){
+		return this.gpsUpdateInterval;
+	}
+
+	public void setGpsUpdateInterval(int gpsUpdateInterval) {
+		this.gpsUpdateInterval = gpsUpdateInterval * 1000;
+		destroyListener();
+		this.handler = new Handler();
+		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this.context, gpsUpdateInterval);
+		this.handler.postDelayed(this.externalGPSTasks, gpsUpdateInterval);
+		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateInterval, 0, (ShowProjectActivity) this.context);
+	}
+
+	public void setContext(Context context) {
+		this.context = context;
+	}
+
+	public void setGpsDevice(BluetoothDevice gpsDevice) {
+		this.gpsDevice = gpsDevice;
+	}
+
+	public void setHandler(Handler handler) {
+		this.handler = handler;
+	}
+
+	public void setExternalGPSTasks(ExternalGPSTasks externalGPSTasks) {
+		this.externalGPSTasks = externalGPSTasks;
+	}
+
+	public void setLocationManager(LocationManager locationManager) {
+		this.locationManager = locationManager;
+	}
+
+	public void destroyListener(){
+		if(this.handler != null){
+			this.handler.removeCallbacks(this.externalGPSTasks);
+		}
+		if(this.locationManager != null){
+			this.locationManager.removeUpdates((ShowProjectActivity)this.context);
+		}
+	}
+
+	public Object getGPSPosition(){
+		if(isUsingExternalGPS()){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			Location location = new Location(LocationManager.GPS_PROVIDER);
+			double latitude = ggaSentence.getPosition().getLatitude();
+			double longitude = ggaSentence.getPosition().getLongitude();
+			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+			location.setLatitude(latitude);
+			location.setLongitude(longitude);
+			return location;
+		}else if(isUsingInternalGPS()){
+			return this.location;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSEstimatedAccuracy(){
+		if(isUsingExternalGPS()){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+			return nmeaAccuracy;
+		}else if(isUsingInternalGPS()){
+			return this.accuracy;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSHeading(){
+		if(isUsingExternalGPS()){
+			if(this.BODMessage != null){
+				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+				return bodSentence.getTrueBearing();
+			}else{
+				return 0.0;
+			}
+		}else if(isUsingInternalGPS()){
+			return this.location.getBearing();
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSPosition(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			Location location = new Location(LocationManager.GPS_PROVIDER);
+			double latitude = ggaSentence.getPosition().getLatitude();
+			double longitude = ggaSentence.getPosition().getLongitude();
+			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+			location.setLatitude(latitude);
+			location.setLongitude(longitude);
+			return location;
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.location;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSEstimatedAccuracy(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+			return nmeaAccuracy;
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.accuracy;
+		}else{
+			return null;
+		}
+	}
+
+	public Object getGPSHeading(String gps){
+		if("external".equals(gps) && this.GGAMessage != null){
+			if(this.BODMessage != null){
+				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+				return bodSentence.getTrueBearing();
+			}else{
+				return 0.0;
+			}
+		}else if("internal".equals(gps) && isUsingInternalGPS()){
+			return this.location.getBearing();
+		}else{
+			return null;
+		}
+	}
+
+	private boolean isUsingExternalGPS(){
+		if(this.GGAMessage != null){
+			try{
+				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+				double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+				if(this.location != null && nmeaAccuracy > accuracy){
+					return false;
+				}
+				return true;
+	        } catch (DataNotAvailableException e){
+	        	return false;
+	        }
+		}
+		return false;
+	}
+
+	private boolean isUsingInternalGPS(){
+		return this.location != null && this.accuracy != 0.0;
+	}
+
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
@@ -988,14 +1173,29 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public int showVectorLayer(String ref, String layername) {
+	public int showVectorLayer(String ref, String filename) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
+				int minZoom = 0;
+				
+				StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
+		        Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
+		        PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.05f).setColor(Color.BLACK).build();
+				pointStyleSet.setZoomStyle(minZoom, pointStyle);
+
+				StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
+		        lineStyleSet.setZoomStyle(minZoom, LineStyle.builder().setWidth(0.1f).setColor(Color.GREEN).build());
+		        
+		        PolygonStyle polygonStyle = PolygonStyle.builder().setColor(Color.BLUE).build();
+		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
+				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
+				
 				try {
-					mapView.getLayers().addLayer(new ShapeLayer(new EPSG3857(), baseDir + "/maps/" + layername));
+					mapView.getLayers().addLayer(new WKBLayer(new EPSG3857(), baseDir + "/maps/" + filename,
+							pointStyleSet, lineStyleSet, polygonStyleSet));
 				} catch (Exception e) {
 					Log.e("FAIMS","Could not show vector layer", e);
                     showWarning("Map Error", "Could not show vector layer");
@@ -1040,6 +1240,22 @@ public class BeanShellLinker {
 
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
+	}
+
+	public void setGGAMessage(String gGAMessage) {
+		this.GGAMessage = gGAMessage;
+	}
+
+	public void setBODMessage(String bODMessage) {
+		this.BODMessage = bODMessage;
+	}
+
+	public void setAccuracy(float accuracy) {
+		this.accuracy = accuracy;
+	}
+
+	public void setLocation(Location location) {
+		this.location = location;
 	}
 
 	public void setBaseDir(String dir) {
