@@ -7,10 +7,12 @@ setupMap(id, lat, lon) {
 }
 
 showMapTab() {
+	setupMap("tabgroup1/tab2/map", -33.8683f, 151.2086f);
 	showTab("tabgroup1/tab2");
 }
 
 showMapTabGroup() {
+	setupMap("tabgroup2/tab1/map", 37.76666666666f, -122.41666666667f);
 	showTabGroup("tabgroup2");
 }
 
@@ -22,10 +24,8 @@ refreshMapTabGroup() {
 	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
 }
 
+onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
 onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
 onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
 onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
-
-setupMap("tabgroup1/tab2/map", -33.8683f, 151.2086f);
-setupMap("tabgroup2/tab1/map", 37.76666666666f, -122.41666666667f);

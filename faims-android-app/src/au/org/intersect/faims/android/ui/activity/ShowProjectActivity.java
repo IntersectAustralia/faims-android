@@ -157,18 +157,21 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
 		this.linker.setGGAMessage(GGAMessage);
 		this.linker.setBODMessage(BODMessage);
+		this.linker.setExternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
 		this.linker.setAccuracy(location.getAccuracy());
 		this.linker.setLocation(location);
+		this.linker.setInternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
 		this.linker.setAccuracy(0.0f);
 		this.linker.setLocation(null);
+		this.linker.setInternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override

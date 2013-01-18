@@ -59,7 +59,7 @@ public class ExternalGPSTasks implements Runnable {
 	            br = new BufferedReader(isr);
 	
 	            long start = System.currentTimeMillis();
-	            long end = start + 2000; // check for 2 seconds to get valid GPGGA message
+	            long end = start + 500; // check for 0.5 seconds to get valid GPGGA message
 	            while (System.currentTimeMillis() < end){
 	                String nmeaMessage = br.readLine();
 	                if (nmeaMessage.startsWith("$GPGGA")) {
@@ -72,10 +72,10 @@ public class ExternalGPSTasks implements Runnable {
 	                    this.BODMessage = nmeaMessage;
 	                }
 	            }
-	            bluetoothSocket.close();
 	            br.close();
 	            isr.close();
 	            in.close();
+	            bluetoothSocket.close();
 	        } catch (IOException e) {
 	        	this.gpsDevice = null;
 	            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
