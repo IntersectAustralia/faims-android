@@ -130,7 +130,7 @@ public class Tab {
                     	// check if map type
                     	if ("true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"))) {
                     		CustomMapView mapView = new CustomMapView(this.context);
-                    		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+                    		mapView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
                     		
                     		mapView.startMapping();
                     		view = mapView;

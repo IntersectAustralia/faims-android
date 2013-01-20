@@ -43,6 +43,10 @@ public class CustomMapView extends MapView {
 		// configure texture caching - optional, suggested 
         this.getOptions().setTextureMemoryCacheSize(40 * 1024 * 1024);
         this.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
+        
+        //this.getOptions().setPersistentCachePath(activity.getDatabasePath("mapcache").getPath());
+        // set persistent raster cache limit to 100MB
+        //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
 	}
 
 	public static int nextId() {

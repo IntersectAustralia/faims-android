@@ -2,7 +2,7 @@ setupMap(id, lat, lon) {
 	showRasterMap(id, "natural-earth-2-mercator.tif");
 	setMapFocusPoint(id, lat, lon);
 	setMapRotation(id, 360.0f);
-	setMapZoom(id, 4.0f);
+	setMapZoom(id, 8.0f);
 	setMapTilt(id, 90.0f);
 }
 

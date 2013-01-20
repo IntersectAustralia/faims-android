@@ -15,8 +15,8 @@
                   <new></new>
               </tab1>
               <tab2>
-                  <refresh></refresh>
                   <map></map>
+                  <refresh></refresh>
               </tab2>
           </tabgroup1>
           <tabgroup2>
@@ -45,12 +45,12 @@
       </group>
       <group ref="tab2" faims_hidden="true" faims_scrollable="false">
         <label>Map</label>
-        <trigger ref="refresh">
-            <label>Refresh</label>
-        </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>
         </input>
+        <trigger ref="refresh">
+            <label>Refresh</label>
+        </trigger>
       </group>
     </group>
     <group ref="tabgroup2">

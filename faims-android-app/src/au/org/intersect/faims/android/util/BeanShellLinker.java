@@ -993,6 +993,7 @@ public class BeanShellLinker {
         		final GdalMapLayer gdalLayer;
                 try {
                     gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
+                    gdalLayer.setShowAlways(true);
                     mapView.getLayers().setBaseLayer(gdalLayer);
                     if(this.currentLocationHandler == null){
                     	this.currentLocationHandler = new Handler();
