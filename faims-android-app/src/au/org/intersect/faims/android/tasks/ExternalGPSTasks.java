@@ -15,7 +15,6 @@ import net.sf.marineapi.nmea.sentence.GGASentence;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Handler;
 
 public class ExternalGPSTasks implements Runnable {
@@ -27,15 +26,16 @@ public class ExternalGPSTasks implements Runnable {
     private String BODMessage;
     private int gpsUpdateInterval;
 
-    public ExternalGPSTasks(BluetoothDevice gpsDevice, Handler handler, Context context, int gpsUpdateInterval){
+    public ExternalGPSTasks(BluetoothDevice gpsDevice, Handler handler, BluetoothActionListener actionListener, int gpsUpdateInterval){
     	this.gpsDevice = gpsDevice;
     	this.handler = handler;
-    	this.actionListener = (BluetoothActionListener) context;
+    	this.actionListener = actionListener;
     	this.gpsUpdateInterval = gpsUpdateInterval;
     }
 
 	@Override
 	public void run() {
+		System.out.println("Running the external GPS task");
 		readSentences();
 		this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
 		handler.postDelayed(this, this.gpsUpdateInterval);
@@ -108,7 +108,7 @@ public class ExternalGPSTasks implements Runnable {
         }
     }
 
-    private boolean hasValidGGAMessage() {
+	private boolean hasValidGGAMessage() {
         GGASentence sentence = null;
         if (this.GGAMessage != null) {
             sentence = (GGASentence) SentenceFactory.getInstance()

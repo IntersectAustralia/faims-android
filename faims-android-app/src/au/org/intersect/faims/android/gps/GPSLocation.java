@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.util;
+package au.org.intersect.faims.android.gps;
 
 public class GPSLocation {
 

@@ -10,13 +10,11 @@ import java.util.Collection;
 import java.util.List;
 
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -35,8 +33,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.gps.GPSDataManager;
+import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.CustomCheckBox;
 import au.org.intersect.faims.android.ui.form.CustomDatePicker;
@@ -76,7 +74,7 @@ public class BeanShellLinker {
 	
 	private DatabaseManager databaseManager;
 
-	private GPSData gpsData;
+	private GPSDataManager gpsDataManager;
 
 	private String baseDir;
 
@@ -85,24 +83,19 @@ public class BeanShellLinker {
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
 	
-	private int gpsUpdateInterval=10000;
-	private Context context;
-	private BluetoothDevice gpsDevice;
-	private Handler handler;
 	private Handler currentLocationHandler;
 	private Runnable currentLocationTask;
-	private ExternalGPSTasks externalGPSTasks;
-	private LocationManager locationManager;
+	private Context context;
 
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
 
-	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
+	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
 		this.databaseManager = databaseManager;
-		this.gpsData = new GPSData();
+		this.gpsDataManager = gpsDataManager;
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -330,46 +323,19 @@ public class BeanShellLinker {
 	}
 
 	public int getGpsUpdateInterval(){
-		return this.gpsUpdateInterval;
+		return this.gpsDataManager.getGpsUpdateInterval();
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		this.gpsUpdateInterval = gpsUpdateInterval * 1000;
 		destroyListener();
-		this.handler = new Handler();
-		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this.context, this.gpsUpdateInterval);
-		this.handler.postDelayed(this.externalGPSTasks, this.gpsUpdateInterval);
-		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.gpsUpdateInterval, 0, (ShowProjectActivity) this.context);
+		this.gpsDataManager.setGpsUpdateInterval(gpsUpdateInterval);
 	}
 
 	public void setContext(Context context) {
 		this.context = context;
 	}
 
-	public void setGpsDevice(BluetoothDevice gpsDevice) {
-		this.gpsDevice = gpsDevice;
-	}
-
-	public void setHandler(Handler handler) {
-		this.handler = handler;
-	}
-
-	public void setExternalGPSTasks(ExternalGPSTasks externalGPSTasks) {
-		this.externalGPSTasks = externalGPSTasks;
-	}
-
-	public void setLocationManager(LocationManager locationManager) {
-		this.locationManager = locationManager;
-	}
-
 	public void destroyListener(){
-		System.out.println("Destroyed called");
-		if(this.handler != null){
-			this.handler.removeCallbacks(this.externalGPSTasks);
-		}
-		if(this.locationManager != null){
-			this.locationManager.removeUpdates((ShowProjectActivity)this.context);
-		}
 		if(this.currentLocationHandler != null){
 			this.currentLocationHandler.removeCallbacks(this.currentLocationTask);
 		}
@@ -954,27 +920,27 @@ public class BeanShellLinker {
 	}
 	
 	public Object getGPSPosition(){
-		return this.gpsData.getGPSPosition();
+		return this.gpsDataManager.getGPSPosition();
 	}
 
 	public Object getGPSEstimatedAccuracy(){
-		return this.gpsData.getGPSEstimatedAccuracy();
+		return this.gpsDataManager.getGPSEstimatedAccuracy();
 	}
 
 	public Object getGPSHeading(){
-		return this.gpsData.getGPSHeading();
+		return this.gpsDataManager.getGPSHeading();
 	}
 
 	public Object getGPSPosition(String gps){
-		return this.gpsData.getGPSPosition(gps);
+		return this.gpsDataManager.getGPSPosition(gps);
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps){
-		return this.gpsData.getGPSEstimatedAccuracy(gps);
+		return this.gpsDataManager.getGPSEstimatedAccuracy(gps);
 	}
 
 	public Object getGPSHeading(String gps){
-		return this.gpsData.getGPSHeading(gps);
+		return this.gpsDataManager.getGPSHeading(gps);
 	}
 
 	public void showRasterMap(final String ref, String filename) {
@@ -1038,11 +1004,11 @@ public class BeanShellLinker {
 										}
 									}
 								}
-								currentLocationHandler.postDelayed(this, gpsUpdateInterval);
+								currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
 							}
 						};
                     }
-                    this.currentLocationHandler.postDelayed(currentLocationTask, this.gpsUpdateInterval);
+                    this.currentLocationHandler.postDelayed(currentLocationTask, getGpsUpdateInterval());
                 } catch (IOException e) {
                 	Log.e("FAIMS","Could not render raster layer",e);
                     showWarning("Map Error", "Could not render map.");
@@ -1165,27 +1131,27 @@ public class BeanShellLinker {
 	}
 
 	public void setGGAMessage(String gGAMessage) {
-		this.gpsData.setGGAMessage(gGAMessage);
+		this.gpsDataManager.setGGAMessage(gGAMessage);
 	}
 
 	public void setBODMessage(String bODMessage) {
-		this.gpsData.setBODMessage(bODMessage);
+		this.gpsDataManager.setBODMessage(bODMessage);
 	}
 
 	public void setExternalGPSTimestamp(long timestamp){
-		this.gpsData.setExternalGPSTimestamp(timestamp);
+		this.gpsDataManager.setExternalGPSTimestamp(timestamp);
 	}
 
 	public void setAccuracy(float accuracy) {
-		this.gpsData.setAccuracy(accuracy);
+		this.gpsDataManager.setAccuracy(accuracy);
 	}
 
 	public void setLocation(Location location) {
-		this.gpsData.setLocation(location);
+		this.gpsDataManager.setLocation(location);
 	}
 
 	public void setInternalGPSTimestamp(long timestamp){
-		this.gpsData.setInternalGPSTimestamp(timestamp);
+		this.gpsDataManager.setInternalGPSTimestamp(timestamp);
 	}
 
 	public void setBaseDir(String dir) {

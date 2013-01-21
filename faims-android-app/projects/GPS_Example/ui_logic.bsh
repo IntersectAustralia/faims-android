@@ -7,7 +7,10 @@ loadGPS(){
 	}else{
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
-		showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+		setFieldValue("tabgroup1/tab1/longitude",longitude);
+		setFieldValue("tabgroup1/tab1/latitude",latitude);
+		setFieldValue("tabgroup1/tab1/accuracy",accuracy);
+		setFieldValue("tabgroup1/tab1/heading",heading);
 	}
 }
 
@@ -20,7 +23,10 @@ loadGPS(String gps){
 	}else{
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
-		showToast("Longitude: " + longitude + " Latitude:" + latitude + " Accuracy: " + accuracy + " Heading: " + heading);
+		setFieldValue("tabgroup1/tab1/longitude",longitude);
+		setFieldValue("tabgroup1/tab1/latitude",latitude);
+		setFieldValue("tabgroup1/tab1/accuracy",accuracy);
+		setFieldValue("tabgroup1/tab1/heading",heading);
 	}
 }
 
