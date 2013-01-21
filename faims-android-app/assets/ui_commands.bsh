@@ -173,3 +173,7 @@ setMapTilt(String ref, float tilt) {
 showVectorLayer(String ref, String filename) {
 	linker.showVectorLayer(ref, filename);
 }
+
+clearVectorLayer(String ref, int id) {
+	linker.clearVectorLayer(ref, id);
+}

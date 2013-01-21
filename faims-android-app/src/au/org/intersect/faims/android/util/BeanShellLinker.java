@@ -9,11 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.sf.marineapi.nmea.parser.DataNotAvailableException;
-import net.sf.marineapi.nmea.parser.SentenceFactory;
-import net.sf.marineapi.nmea.sentence.BODSentence;
-import net.sf.marineapi.nmea.sentence.GGASentence;
-import net.sf.marineapi.nmea.util.CompassPoint;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -62,14 +57,18 @@ import au.org.intersect.faims.android.ui.form.TabGroup;
 import bsh.EvalError;
 import bsh.Interpreter;
 
+import com.nutiteq.components.MapPos;
+import com.nutiteq.geometry.Marker;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.layers.vector.WKBLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
+import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.UnscaledBitmapLoader;
+import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class BeanShellLinker {
 	
@@ -83,11 +82,7 @@ public class BeanShellLinker {
 	
 	private DatabaseManager databaseManager;
 
-	private String GGAMessage;
-    private String BODMessage;
-
-    private float accuracy;
-    private Location location;
+	private GPSData gpsData;
 
 	private String baseDir;
 
@@ -100,14 +95,20 @@ public class BeanShellLinker {
 	private Context context;
 	private BluetoothDevice gpsDevice;
 	private Handler handler;
+	private Handler currentLocationHandler;
+	private Runnable currentLocationTask;
 	private ExternalGPSTasks externalGPSTasks;
 	private LocationManager locationManager;
+
+	private MarkerLayer currentPositionLayer;
+	private GPSLocation previousLocation;
 
 	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
 		this.databaseManager = databaseManager;
+		this.gpsData = new GPSData();
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -342,9 +343,9 @@ public class BeanShellLinker {
 		this.gpsUpdateInterval = gpsUpdateInterval * 1000;
 		destroyListener();
 		this.handler = new Handler();
-		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this.context, gpsUpdateInterval);
-		this.handler.postDelayed(this.externalGPSTasks, gpsUpdateInterval);
-		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, gpsUpdateInterval, 0, (ShowProjectActivity) this.context);
+		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this.context, this.gpsUpdateInterval);
+		this.handler.postDelayed(this.externalGPSTasks, this.gpsUpdateInterval);
+		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, this.gpsUpdateInterval, 0, (ShowProjectActivity) this.context);
 	}
 
 	public void setContext(Context context) {
@@ -368,122 +369,16 @@ public class BeanShellLinker {
 	}
 
 	public void destroyListener(){
+		System.out.println("Destroyed called");
 		if(this.handler != null){
 			this.handler.removeCallbacks(this.externalGPSTasks);
 		}
 		if(this.locationManager != null){
 			this.locationManager.removeUpdates((ShowProjectActivity)this.context);
 		}
-	}
-
-	public Object getGPSPosition(){
-		if(isUsingExternalGPS()){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			Location location = new Location(LocationManager.GPS_PROVIDER);
-			double latitude = ggaSentence.getPosition().getLatitude();
-			double longitude = ggaSentence.getPosition().getLongitude();
-			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
-			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
-			location.setLatitude(latitude);
-			location.setLongitude(longitude);
-			return location;
-		}else if(isUsingInternalGPS()){
-			return this.location;
-		}else{
-			return null;
+		if(this.currentLocationHandler != null){
+			this.currentLocationHandler.removeCallbacks(this.currentLocationTask);
 		}
-	}
-
-	public Object getGPSEstimatedAccuracy(){
-		if(isUsingExternalGPS()){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return nmeaAccuracy;
-		}else if(isUsingInternalGPS()){
-			return this.accuracy;
-		}else{
-			return null;
-		}
-	}
-
-	public Object getGPSHeading(){
-		if(isUsingExternalGPS()){
-			if(this.BODMessage != null){
-				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
-				return bodSentence.getTrueBearing();
-			}else{
-				return 0.0;
-			}
-		}else if(isUsingInternalGPS()){
-			return this.location.getBearing();
-		}else{
-			return null;
-		}
-	}
-
-	public Object getGPSPosition(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			Location location = new Location(LocationManager.GPS_PROVIDER);
-			double latitude = ggaSentence.getPosition().getLatitude();
-			double longitude = ggaSentence.getPosition().getLongitude();
-			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
-			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
-			location.setLatitude(latitude);
-			location.setLongitude(longitude);
-			return location;
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
-			return this.location;
-		}else{
-			return null;
-		}
-	}
-
-	public Object getGPSEstimatedAccuracy(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return nmeaAccuracy;
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
-			return this.accuracy;
-		}else{
-			return null;
-		}
-	}
-
-	public Object getGPSHeading(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
-			if(this.BODMessage != null){
-				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
-				return bodSentence.getTrueBearing();
-			}else{
-				return 0.0;
-			}
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
-			return this.location.getBearing();
-		}else{
-			return null;
-		}
-	}
-
-	private boolean isUsingExternalGPS(){
-		if(this.GGAMessage != null){
-			try{
-				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-				double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-				if(this.location != null && nmeaAccuracy > accuracy){
-					return false;
-				}
-				return true;
-	        } catch (DataNotAvailableException e){
-	        	return false;
-	        }
-		}
-		return false;
-	}
-
-	private boolean isUsingInternalGPS(){
-		return this.location != null && this.accuracy != 0.0;
 	}
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
@@ -1064,11 +959,35 @@ public class BeanShellLinker {
 		return databaseManager.fetchAll(query);
 	}
 	
-	public void showRasterMap(String ref, String filename) {
+	public Object getGPSPosition(){
+		return this.gpsData.getGPSPosition();
+	}
+
+	public Object getGPSEstimatedAccuracy(){
+		return this.gpsData.getGPSEstimatedAccuracy();
+	}
+
+	public Object getGPSHeading(){
+		return this.gpsData.getGPSHeading();
+	}
+
+	public Object getGPSPosition(String gps){
+		return this.gpsData.getGPSPosition(gps);
+	}
+
+	public Object getGPSEstimatedAccuracy(String gps){
+		return this.gpsData.getGPSEstimatedAccuracy(gps);
+	}
+
+	public Object getGPSHeading(String gps){
+		return this.gpsData.getGPSHeading(gps);
+	}
+
+	public void showRasterMap(final String ref, String filename) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
-				CustomMapView mapView = (CustomMapView) obj;
+				final CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/maps/" + filename;
 				if (!new File(filepath).exists()) {
@@ -1077,10 +996,60 @@ public class BeanShellLinker {
 					return;
 				}
 				
-        		GdalMapLayer gdalLayer;
+        		final GdalMapLayer gdalLayer;
                 try {
                     gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
+                    gdalLayer.setShowAlways(true);
                     mapView.getLayers().setBaseLayer(gdalLayer);
+                    if(this.currentLocationHandler == null){
+                    	this.currentLocationHandler = new Handler();
+                    }
+                    if(this.currentLocationTask == null){
+	                    this.currentLocationTask = new Runnable() {
+							
+							@Override
+							public void run() {
+								Object currentLocation = getGPSPosition();
+								if(currentLocation != null){
+									GPSLocation location = (GPSLocation) currentLocation;
+									previousLocation = location;
+									Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+				                            context.getResources(), R.drawable.blue_dot);
+				                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+				                            .setSize(0.5f).build();
+				                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+				                            location.getLongitude(), location.getLatitude());
+				                    if(currentPositionLayer != null){
+				                    	mapView.getLayers().removeLayer(currentPositionLayer);
+				                    }
+				                    currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+				                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+				                    mapView.getLayers().addLayer(currentPositionLayer);
+								}else{
+									if(previousLocation != null){
+										// when there is no gps signal for two minutes, change the color of the marker to be grey
+										if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 5 * 1000){
+											Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+						                            context.getResources(), R.drawable.grey_dot);
+						                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+						                            .setSize(0.5f).build();
+						                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+						                    		previousLocation.getLongitude(), previousLocation.getLatitude());
+					                    	if(currentPositionLayer != null){
+						                    	mapView.getLayers().removeLayer(currentPositionLayer);
+						                    }
+					                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+						                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+						                    mapView.getLayers().addLayer(currentPositionLayer);
+											previousLocation = null;
+										}
+									}
+								}
+								currentLocationHandler.postDelayed(this, gpsUpdateInterval);
+							}
+						};
+                    }
+                    this.currentLocationHandler.postDelayed(currentLocationTask, this.gpsUpdateInterval);
                 } catch (IOException e) {
                 	Log.e("FAIMS","Could not render raster layer",e);
                     showWarning("Map Error", "Could not render map.");
@@ -1179,7 +1148,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				int minZoom = 0;
+				int minZoom = 4;
 				
 				StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
 		        Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
@@ -1193,13 +1162,40 @@ public class BeanShellLinker {
 		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
 				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
 				
+				int id = 0;
 				try {
-					mapView.getLayers().addLayer(new WKBLayer(new EPSG3857(), baseDir + "/maps/" + filename,
-							pointStyleSet, lineStyleSet, polygonStyleSet));
+					WKBLayer layer = new WKBLayer(new EPSG3857(), baseDir + "/maps/" + filename,
+							pointStyleSet, lineStyleSet, polygonStyleSet);
+					id = mapView.addVectorLayer(layer);
 				} catch (Exception e) {
 					Log.e("FAIMS","Could not show vector layer", e);
                     showWarning("Map Error", "Could not show vector layer");
 					return 0;
+				}
+				
+				return id;
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing vector layer",e);
+		}
+		return 0;
+	}
+	
+	public void clearVectorLayer(String ref, int id) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					mapView.removeVectorLayer(id);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not clear vector layer ", e);
+                    showWarning("Map Error", "Could not clear vector layer");
 				}
 				
 			} else {
@@ -1210,7 +1206,6 @@ public class BeanShellLinker {
 		catch(Exception e){
 			Log.e("FAIMS","Exception showing vector layer",e);
 		}
-		return 0;
 	}
 
 	private String convertStreamToString(InputStream stream) {
@@ -1243,19 +1238,27 @@ public class BeanShellLinker {
 	}
 
 	public void setGGAMessage(String gGAMessage) {
-		this.GGAMessage = gGAMessage;
+		this.gpsData.setGGAMessage(gGAMessage);
 	}
 
 	public void setBODMessage(String bODMessage) {
-		this.BODMessage = bODMessage;
+		this.gpsData.setBODMessage(bODMessage);
+	}
+
+	public void setExternalGPSTimestamp(long timestamp){
+		this.gpsData.setExternalGPSTimestamp(timestamp);
 	}
 
 	public void setAccuracy(float accuracy) {
-		this.accuracy = accuracy;
+		this.gpsData.setAccuracy(accuracy);
 	}
 
 	public void setLocation(Location location) {
-		this.location = location;
+		this.gpsData.setLocation(location);
+	}
+
+	public void setInternalGPSTimestamp(long timestamp){
+		this.gpsData.setInternalGPSTimestamp(timestamp);
 	}
 
 	public void setBaseDir(String dir) {
