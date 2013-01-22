@@ -57,9 +57,15 @@ public class ExternalGPSTasks implements Runnable {
 	public void closeBluetoothConnection(){
 		if(this.bluetoothSocket != null){
     		try {
-    			br.close();
-	            isr.close();
-	            in.close();
+    			if(this.br != null){
+    				br.close();
+    			}
+    			if(this.isr != null){
+    				isr.close();
+    			}
+    			if(this.in != null){
+    				in.close();
+    			}
 				this.bluetoothSocket.close();
 			} catch (IOException exception) {
 			}
