@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.FragmentActivity;
@@ -57,8 +58,13 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Marker;
 import com.nutiteq.layers.raster.GdalMapLayer;
+import com.nutiteq.layers.vector.WKBLayer;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
+import com.nutiteq.style.PointStyle;
+import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
@@ -86,7 +92,6 @@ public class BeanShellLinker {
 	private HandlerThread handlerThread;
 	private Handler currentLocationHandler;
 	private Runnable currentLocationTask;
-	private Context context;
 
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
@@ -330,10 +335,6 @@ public class BeanShellLinker {
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
 		destroyListener();
 		this.gpsDataManager.setGpsUpdateInterval(gpsUpdateInterval);
-	}
-
-	public void setContext(Context context) {
-		this.context = context;
 	}
 
 	public void destroyListener(){
@@ -983,7 +984,7 @@ public class BeanShellLinker {
 									GPSLocation location = (GPSLocation) currentLocation;
 									previousLocation = location;
 									Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-				                            context.getResources(), R.drawable.blue_dot);
+											activity.getResources(), R.drawable.blue_dot);
 				                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
 				                            .setSize(0.5f).build();
 				                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
@@ -997,9 +998,9 @@ public class BeanShellLinker {
 								}else{
 									if(previousLocation != null){
 										// when there is no gps signal for two minutes, change the color of the marker to be grey
-										if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 5 * 1000){
+										if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
 											Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-						                            context.getResources(), R.drawable.grey_dot);
+						                            activity.getResources(), R.drawable.grey_dot);
 						                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
 						                            .setSize(0.5f).build();
 						                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
@@ -1108,6 +1109,72 @@ public class BeanShellLinker {
 		catch(Exception e){
 			Log.e("FAIMS","Exception setting map tilt",e);
 			showWarning("Logic Error", "Map is malformed");
+		}
+	}
+	
+	public int showVectorLayer(String ref, String filename) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				int minZoom = 4;
+				
+				StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
+		        Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
+		        PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.05f).setColor(Color.BLACK).build();
+				pointStyleSet.setZoomStyle(minZoom, pointStyle);
+
+				StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
+		        lineStyleSet.setZoomStyle(minZoom, LineStyle.builder().setWidth(0.1f).setColor(Color.GREEN).build());
+		        
+		        PolygonStyle polygonStyle = PolygonStyle.builder().setColor(Color.BLUE).build();
+		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
+				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
+				
+				int id = 0;
+				try {
+					WKBLayer layer = new WKBLayer(new EPSG3857(), baseDir + "/maps/" + filename,
+							pointStyleSet, lineStyleSet, polygonStyleSet);
+					id = mapView.addVectorLayer(layer);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not show vector layer", e);
+                    showWarning("Map Error", "Could not show vector layer");
+					return 0;
+				}
+				
+				return id;
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing vector layer",e);
+		}
+		return 0;
+	}
+	
+	public void clearVectorLayer(String ref, int id) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					mapView.removeVectorLayer(id);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not clear vector layer ", e);
+                    showWarning("Map Error", "Could not clear vector layer");
+				}
+				
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing vector layer",e);
 		}
 	}
 

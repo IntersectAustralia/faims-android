@@ -113,21 +113,27 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	
 	private void renderUI() {
 		// Read, validate and parse the xforms
-		this.fem = FileUtil.readXmlContent(Environment
-				.getExternalStorageDirectory() + directory + "/ui_schema.xml");
+		this.runOnUiThread(new Thread(new Runnable() {
 
-		// render the ui definition
-		this.renderer = new UIRenderer(this.fem, this);
-		this.renderer.createUI();
-		this.renderer.showTabGroup(this, 0);
-		
-		// bind the logic to the ui
-		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(this, getAssets(), renderer, databaseManager, gpsDataManager);
-		linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
-		linker.sourceFromAssets("ui_commands.bsh");
-		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
-		linker.setContext(this);
+			@Override
+			public void run() {
+				ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
+						.getExternalStorageDirectory() + directory + "/ui_schema.xml");
+
+				// render the ui definition
+				ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this);
+				ShowProjectActivity.this.renderer.createUI();
+				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+				
+				// bind the logic to the ui
+				Log.d("FAIMS","Binding logic to the UI");
+				linker = new BeanShellLinker(ShowProjectActivity.this, getAssets(), renderer, databaseManager, gpsDataManager);
+				linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
+				linker.sourceFromAssets("ui_commands.bsh");
+				linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
+			}
+			
+		}));
 	}
 	
 	public BeanShellLinker getBeanShellLinker(){

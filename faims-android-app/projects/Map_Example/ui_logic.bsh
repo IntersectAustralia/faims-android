@@ -7,8 +7,9 @@ setupMap(id, lat, lon) {
 }
 
 showMapTab() {
-	setupMap("tabgroup1/tab2/map", -33.8683f, 151.2086f);
+	setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f);
 	showTab("tabgroup1/tab2");
+	addVectorLayers();
 }
 
 showMapTabGroup() {
@@ -18,6 +19,20 @@ showMapTabGroup() {
 
 refreshMapTab() {
 	showRasterMap("tabgroup1/tab2/map", "natural-earth-2-mercator.tif");
+	addVectorLayers();
+}
+
+List layers = new ArrayList();
+
+clearMapTab() {
+	for (Integer layerId : layers) {
+		clearVectorLayer("tabgroup1/tab2/map", layerId);
+	}
+	
+	//clearVectorLayer("tabgroup1/tab2/map", layers.get(0));
+	//clearVectorLayer("tabgroup1/tab2/map", layers.get(2));
+	
+	layers = new ArrayList();
 }
 
 refreshMapTabGroup() {
@@ -29,3 +44,18 @@ onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
 onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
 onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
+onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
+
+addVectorLayers() {
+	// layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams.wkb")); // performance issue
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "KAZ_Contours.wkb")));
+	layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints.wkb")));
+	layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters.wkb")));
+	layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints.wkb")));
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "Kaz11_AllPoints.wkb")));
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "Kaz11_AllTeams.wkb"))); // performance issue but testable
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "Kaz11_Mound.wkb")));
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "Kaz11_SitePoints.wkb")));
+	//layers.add(new Integer(showVectorLayer("tabgroup1/tab2/map", "Roads.wkb"))); // out of memory issue
+
+}

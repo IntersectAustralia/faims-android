@@ -6,13 +6,8 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Set;
 
 import roboguice.activity.RoboActivity;
-import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,7 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.ServerDiscovery;
-import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.JsonUtil;
 
