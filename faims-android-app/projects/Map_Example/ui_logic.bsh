@@ -39,11 +39,21 @@ refreshMapTabGroup() {
 	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
 }
 
+showCurrentPositionTab(){
+	centerOnCurrentPosition("tabgroup1/tab2/map");
+}
+
+showCurrentPositionTabGroup(){
+	centerOnCurrentPosition("tabgroup2/tab1/map");
+}
+
 onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
 onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
+onEvent("tabgroup1/tab2/show", "click", "showCurrentPositionTab()");
 onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
 onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
+onEvent("tabgroup2/tab1/show", "click", "showCurrentPositionTabGroup()");
 onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
 
 addVectorLayers() {

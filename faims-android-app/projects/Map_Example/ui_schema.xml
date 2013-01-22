@@ -17,6 +17,7 @@
               <tab2>
                   <map></map>
                   <refresh></refresh>
+                  <show></show>
                   <clear></clear>
               </tab2>
           </tabgroup1>
@@ -24,6 +25,7 @@
               <tab1>                  
                   <map></map>
                   <refresh></refresh>
+                  <show></show>
                   <clear></clear>
               </tab1>
           </tabgroup2>
@@ -53,6 +55,9 @@
         <trigger ref="refresh">
             <label>Refresh</label>
         </trigger>
+        <trigger ref="show">
+            <label>Show current position</label>
+        </trigger>
         <trigger ref="clear">
             <label>Clear</label>
         </trigger>
@@ -67,6 +72,9 @@
         </input>
         <trigger ref="refresh">
             <label>Refresh</label>
+        </trigger>
+        <trigger ref="show">
+            <label>Show current position</label>
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>

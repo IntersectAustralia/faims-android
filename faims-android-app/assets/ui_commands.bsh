@@ -177,3 +177,7 @@ showVectorLayer(String ref, String filename) {
 clearVectorLayer(String ref, int id) {
 	linker.clearVectorLayer(ref, id);
 }
+
+centerOnCurrentPosition(String ref){
+	linker.centerOnCurrentPosition(ref);
+}
