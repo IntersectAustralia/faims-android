@@ -4,9 +4,8 @@ import java.util.Map;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
-import com.nutiteq.components.TileQuadTreeNode;
+import com.nutiteq.components.MapTile;
 import com.nutiteq.log.Log;
-import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.projections.EPSG4326;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.rasterlayers.RasterLayer;
@@ -20,9 +19,6 @@ public class WmsLayer extends RasterLayer {
     private String format;
     private String style;
     private Projection dataProjection;
-    private int offsetX = 0;
-    private int offsetY = 0;
-    private int offsetZoom = 0;
     private Map<String, String> httpHeaders;
 
 
@@ -63,18 +59,6 @@ public class WmsLayer extends RasterLayer {
 
     }
     
-    /**
-     * Change highest level ("World") tile to something else than global 0,0,0
-     * Useful for regional maps, with #com.nutiteq.projections.SingleTileEPSG3857 
-     * @param offsetX
-     * @param offsetY
-     * @param offsetZoom
-     */
-    public void setWorldTile(int offsetX, int offsetY, int offsetZoom){
-      this.offsetX = offsetX;
-      this.offsetY = offsetY;
-      this.offsetZoom = offsetZoom;
-    }
     
     /**
      * Add HTTP headers. Useful for referer, basic-auth etc.
@@ -85,36 +69,33 @@ public class WmsLayer extends RasterLayer {
     }
 
     @Override
-    public void fetchTile(TileQuadTreeNode tile) {
+    public void fetchTile(MapTile tile) {
 
         Log.debug("WmsMap for tile " + tile);
 
-        // adjust to WorldTile (if default 0,0,0 then no change)
-        int zoomPow2 = 2 << (tile.zoom-1); // same as Math.pow(2,tile.zoom)
-        int tileX = offsetX * zoomPow2 + tile.x;
-        int tileY = offsetY * zoomPow2 + tile.y;
-        int tileZoom = tile.zoom + offsetZoom;
+        int tileX = tile.x;
+        int tileY = tile.y;
+        int tileZoom = tile.zoom ;
         
         if (tileZoom < minZoom || tileZoom > maxZoom) {
             return;
         }
 
-        Envelope envelope = TileUtils.TileBounds(tileX, tileY, tileZoom,projection);
+        Envelope envelope = TileUtils.TileBounds(tileX, tileY, tileZoom, projection);
         
-        EPSG3857 epsg3857 = new EPSG3857();
         String bbox = "" + envelope.getMinX() + "," + envelope.getMinY() + ","
                 + envelope.getMaxX() + "," + envelope.getMaxY();
         Log.debug("wmsmap original envelope bbox " + bbox);
-        if (!dataProjection.name().equals(epsg3857.name())) {
+        if (!dataProjection.name().equals(projection.name())) {
             // recalculate to WMS dataProjection via WGS84
-            MapPos bottomLeft = epsg3857.toWgs84((float) envelope.getMinX(),
+            MapPos bottomLeft = projection.toWgs84((float) envelope.getMinX(),
                     (float) envelope.getMinY());
-            MapPos topRight = epsg3857.toWgs84((float) envelope.getMaxX(),
+            MapPos topRight = projection.toWgs84((float) envelope.getMaxX(),
                     (float) envelope.getMaxY());
             Log.debug("WmsMap bottomLeft " + bottomLeft + " topRight "
                     + topRight);
             if(dataProjection.name().equals(new EPSG4326().name())){
-                // no reprojection needed, already Wgs84
+                // no reprojection needed, already WGS84
                bbox = "" + bottomLeft.x + "," + bottomLeft.y
                         + "," + topRight.x +","+ topRight.y;
             }else{
@@ -147,7 +128,7 @@ public class WmsLayer extends RasterLayer {
         
         // finally you need to add a task with download URL to the raster tile download pool
         components.rasterTaskPool.execute(new NetFetchTileTask(tile,
-                components, tileIdOffset, urlString));
+                components, tileIdOffset, urlString, httpHeaders));
     }
 
     @Override

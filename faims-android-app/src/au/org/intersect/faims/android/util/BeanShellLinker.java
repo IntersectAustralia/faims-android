@@ -60,7 +60,7 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Marker;
 import com.nutiteq.layers.raster.GdalMapLayer;
-import com.nutiteq.layers.vector.WKBLayer;
+import com.nutiteq.layers.vector.OgrLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
@@ -1148,11 +1148,11 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				int minZoom = 4;
+				int minZoom = 10;
 				
 				StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
 		        Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
-		        PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.05f).setColor(Color.BLACK).build();
+		        PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.05f).setColor(Color.RED).build();
 				pointStyleSet.setZoomStyle(minZoom, pointStyle);
 
 				StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
@@ -1164,9 +1164,11 @@ public class BeanShellLinker {
 				
 				int id = 0;
 				try {
-					WKBLayer layer = new WKBLayer(new EPSG3857(), baseDir + "/maps/" + filename,
-							pointStyleSet, lineStyleSet, polygonStyleSet);
-					id = mapView.addVectorLayer(layer);
+					OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null,
+	                        500, pointStyleSet, lineStyleSet, polygonStyleSet);
+	                // ogrLayer.printSupportedDrivers();
+	                // ogrLayer.printLayerDetails(table);
+					id = mapView.addVectorLayer(ogrLayer);
 				} catch (Exception e) {
 					Log.e("FAIMS","Could not show vector layer", e);
                     showWarning("Map Error", "Could not show vector layer");
