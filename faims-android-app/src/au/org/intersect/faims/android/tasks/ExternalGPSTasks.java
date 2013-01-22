@@ -158,13 +158,13 @@ public class ExternalGPSTasks implements Runnable {
 
 	private boolean hasValidGGAMessage() {
         GGASentence sentence = null;
-        if (this.GGAMessage != null) {
-            sentence = (GGASentence) SentenceFactory.getInstance()
-                    .createParser(this.GGAMessage);
-        }
         try{
+	        if (this.GGAMessage != null) {
+	            sentence = (GGASentence) SentenceFactory.getInstance()
+	                    .createParser(this.GGAMessage);
+	        }
         	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
-        } catch (DataNotAvailableException e){
+        } catch (Exception e){
         	return false;
         }
     }
