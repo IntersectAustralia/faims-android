@@ -15,7 +15,6 @@ import net.sf.marineapi.nmea.sentence.GGASentence;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.os.Handler;
 
 public class ExternalGPSTasks implements Runnable {
@@ -26,40 +25,65 @@ public class ExternalGPSTasks implements Runnable {
     private String GGAMessage;
     private String BODMessage;
     private int gpsUpdateInterval;
+    private BluetoothSocket bluetoothSocket;
+    private InputStream in;
+    private InputStreamReader isr;
+    private BufferedReader br;
 
-    public ExternalGPSTasks(BluetoothDevice gpsDevice, Handler handler, Context context, int gpsUpdateInterval){
+    public ExternalGPSTasks(BluetoothDevice gpsDevice, Handler handler, BluetoothActionListener actionListener, int gpsUpdateInterval){
     	this.gpsDevice = gpsDevice;
     	this.handler = handler;
-    	this.actionListener = (BluetoothActionListener) context;
+    	this.actionListener = actionListener;
     	this.gpsUpdateInterval = gpsUpdateInterval;
+		try {
+			if(this.gpsDevice != null){
+				initialiseBluetoothSocket();
+			}
+		} catch (NoSuchMethodException e) {
+		} catch (IllegalArgumentException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
+		} catch (IOException e) {
+			System.out.println("failed");
+			this.bluetoothSocket = null;
+		}
     }
 
 	@Override
 	public void run() {
-		readSentences();
-		this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
 		handler.postDelayed(this, this.gpsUpdateInterval);
+		System.out.println("run run run");
+		readSentences();
+		System.out.println("done sentences");
+		this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
 	}
 
+	public void closeBluetoothConnection(){
+		if(this.bluetoothSocket != null){
+    		try {
+    			br.close();
+	            isr.close();
+	            in.close();
+				this.bluetoothSocket.close();
+			} catch (IOException exception) {
+			}
+    	}
+	}
+	
 	private void readSentences() {
-        InputStream in = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
         this.GGAMessage = null;
         this.BODMessage = null;
+        if(this.gpsDevice!= null) System.out.println(this.gpsDevice.getName());
         if(this.gpsDevice != null){
 	        try {
-	            Method m = this.gpsDevice.getClass().getMethod("createRfcommSocket",
-	                    new Class[] { int.class });
-	            BluetoothSocket bluetoothSocket = (BluetoothSocket) m.invoke(
-	            		this.gpsDevice, 1);
-	            bluetoothSocket.connect();
-	            in = bluetoothSocket.getInputStream();
-	            isr = new InputStreamReader(in);
-	            br = new BufferedReader(isr);
+	            if(this.bluetoothSocket == null){
+	            	System.out.println("null here");
+	            	initialiseBluetoothSocket();
+	            }
+	            System.out.println("start stream");
 	
 	            long start = System.currentTimeMillis();
-	            long end = start + 500; // check for 0.5 seconds to get valid GPGGA message
+	            long end = start + 1000; // check for 0.5 seconds to get valid GPGGA message
 	            while (System.currentTimeMillis() < end){
 	                String nmeaMessage = br.readLine();
 	                if (nmeaMessage.startsWith("$GPGGA")) {
@@ -67,17 +91,27 @@ public class ExternalGPSTasks implements Runnable {
 	                        break;
 	                    }else{
 	                        this.GGAMessage = nmeaMessage;
+	                        if(!hasValidGGAMessage()){
+	                        	this.GGAMessage = null;
+	                        }
 	                    }
-	                } else if (nmeaMessage.startsWith("$GPBOD")) {
+		            } else if (nmeaMessage.startsWith("$GPBOD")) {
 	                    this.BODMessage = nmeaMessage;
 	                }
 	            }
-	            br.close();
-	            isr.close();
-	            in.close();
-	            bluetoothSocket.close();
+	            System.out.println("done looping");
 	        } catch (IOException e) {
 	        	this.gpsDevice = null;
+	        	if(this.bluetoothSocket != null){
+	        		try {
+	        			br.close();
+	    	            isr.close();
+	    	            in.close();
+						this.bluetoothSocket.close();
+						this.bluetoothSocket = null;
+					} catch (IOException exception) {
+					}
+	        	}
 	            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 	            if( adapter != null){
 	                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
@@ -88,11 +122,12 @@ public class ExternalGPSTasks implements Runnable {
 	                    }
 	                }
 	            }
-	        } catch (NoSuchMethodException e) {
+	            System.out.println("can not connect");
 	        } catch (IllegalArgumentException e) {
-	        } catch (IllegalAccessException e) {
-	        } catch (InvocationTargetException e) {
-	        }
+	        } catch (NoSuchMethodException e) {
+			} catch (IllegalAccessException e) {
+			} catch (InvocationTargetException e) {
+			}
         }else{
         	this.gpsDevice = null;
         	BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -105,10 +140,23 @@ public class ExternalGPSTasks implements Runnable {
                     }
                 }
             }
+            System.out.println("no connection");
         }
     }
 
-    private boolean hasValidGGAMessage() {
+	private void initialiseBluetoothSocket() throws NoSuchMethodException,
+			IllegalAccessException, InvocationTargetException, IOException {
+		Method m = this.gpsDevice.getClass().getMethod("createRfcommSocket",
+		        new Class[] { int.class });
+		this.bluetoothSocket = (BluetoothSocket) m.invoke(
+				this.gpsDevice, 1);
+		this.bluetoothSocket.connect();
+		in = bluetoothSocket.getInputStream();
+		isr = new InputStreamReader(in);
+		br = new BufferedReader(isr);
+	}
+
+	private boolean hasValidGGAMessage() {
         GGASentence sentence = null;
         if (this.GGAMessage != null) {
             sentence = (GGASentence) SentenceFactory.getInstance()
