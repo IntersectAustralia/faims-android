@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 
@@ -44,7 +43,6 @@ public class ExternalGPSTasks implements Runnable {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
 		} catch (IOException e) {
-			System.out.println("failed");
 			this.bluetoothSocket = null;
 		}
     }
@@ -52,9 +50,7 @@ public class ExternalGPSTasks implements Runnable {
 	@Override
 	public void run() {
 		handler.postDelayed(this, this.gpsUpdateInterval);
-		System.out.println("run run run");
 		readSentences();
-		System.out.println("done sentences");
 		this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
 	}
 
@@ -73,14 +69,11 @@ public class ExternalGPSTasks implements Runnable {
 	private void readSentences() {
         this.GGAMessage = null;
         this.BODMessage = null;
-        if(this.gpsDevice!= null) System.out.println(this.gpsDevice.getName());
         if(this.gpsDevice != null){
 	        try {
 	            if(this.bluetoothSocket == null){
-	            	System.out.println("null here");
 	            	initialiseBluetoothSocket();
 	            }
-	            System.out.println("start stream");
 	
 	            long start = System.currentTimeMillis();
 	            long end = start + 1000; // check for 0.5 seconds to get valid GPGGA message
@@ -99,14 +92,19 @@ public class ExternalGPSTasks implements Runnable {
 	                    this.BODMessage = nmeaMessage;
 	                }
 	            }
-	            System.out.println("done looping");
 	        } catch (IOException e) {
 	        	this.gpsDevice = null;
 	        	if(this.bluetoothSocket != null){
 	        		try {
-	        			br.close();
-	    	            isr.close();
-	    	            in.close();
+	        			if(this.br != null){
+	        				br.close();
+	        			}
+	        			if(this.isr != null){
+	        				isr.close();
+	        			}
+	        			if(this.in != null){
+	        				in.close();
+	        			}
 						this.bluetoothSocket.close();
 						this.bluetoothSocket = null;
 					} catch (IOException exception) {
@@ -122,7 +120,6 @@ public class ExternalGPSTasks implements Runnable {
 	                    }
 	                }
 	            }
-	            System.out.println("can not connect");
 	        } catch (IllegalArgumentException e) {
 	        } catch (NoSuchMethodException e) {
 			} catch (IllegalAccessException e) {
@@ -140,7 +137,6 @@ public class ExternalGPSTasks implements Runnable {
                     }
                 }
             }
-            System.out.println("no connection");
         }
     }
 
@@ -158,13 +154,13 @@ public class ExternalGPSTasks implements Runnable {
 
 	private boolean hasValidGGAMessage() {
         GGASentence sentence = null;
-        if (this.GGAMessage != null) {
-            sentence = (GGASentence) SentenceFactory.getInstance()
-                    .createParser(this.GGAMessage);
-        }
         try{
+	        if (this.GGAMessage != null) {
+	            sentence = (GGASentence) SentenceFactory.getInstance()
+	                    .createParser(this.GGAMessage);
+	        }
         	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
-        } catch (DataNotAvailableException e){
+        } catch (Exception e){
         	return false;
         }
     }

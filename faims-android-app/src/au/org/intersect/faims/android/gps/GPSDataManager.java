@@ -199,11 +199,6 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 
 	public void setGGAMessage(String gGAMessage) {
 		this.GGAMessage = gGAMessage;
-		if(gGAMessage != null){
-			System.out.println(gGAMessage);
-		}else{
-			System.out.println("null");
-		}
 	}
 
 	public void setBODMessage(String bODMessage) {

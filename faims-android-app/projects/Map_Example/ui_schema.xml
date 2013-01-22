@@ -17,6 +17,7 @@
               <tab2>
                   <map></map>
                   <refresh></refresh>
+                  <show></show>
                   <clear></clear>
               </tab2>
           </tabgroup1>
@@ -25,7 +26,7 @@
                   <drawActions></drawActions> 
                   <drawActionBtn></drawActionBtn>               
                   <map></map>
-                  <layers></<layers>
+                  <layers></layers>
                   <layerActions></layerActions>
                   <layerActionBtn></layerActionBtn>
               </tab1>
@@ -35,7 +36,6 @@
     </model>
   </h:head>
 
-   <bind nodeset="/faims/simple_entity_2/tab/name" type="string"/>
   <h:body>
     <group ref="tabgroup1">
       <label>Map Example</label>
@@ -55,6 +55,9 @@
         </input>
         <trigger ref="refresh">
             <label>Refresh</label>
+        </trigger>
+        <trigger ref="show">
+            <label>Show current position</label>
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>

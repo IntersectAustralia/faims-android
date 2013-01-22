@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.List;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -966,59 +965,60 @@ public class BeanShellLinker {
                     gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
                     gdalLayer.setShowAlways(true);
                     mapView.getLayers().setBaseLayer(gdalLayer);
-                    if(this.handlerThread == null){
-                    	this.handlerThread = new HandlerThread("MapHandler");
-                		this.handlerThread.start();
+                    if(this.handlerThread != null){
+                    	this.handlerThread.quit();
                     }
-                    if(this.currentLocationHandler == null){
-                    	this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
+                    if(this.currentLocationHandler != null){
+                    	if(this.currentLocationTask != null){
+                    		this.currentLocationHandler.removeCallbacks(currentLocationTask);
+                    	}
                     }
-                    if(this.currentLocationTask == null){
-	                    this.currentLocationTask = new Runnable() {
+                    this.handlerThread = new HandlerThread("MapHandler");
+            		this.handlerThread.start();
+            		this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
+                    this.currentLocationTask = new Runnable() {
 							
-							@Override
-							public void run() {
-								Object currentLocation = getGPSPosition();
-								if(currentLocation != null){
-									System.out.println("get location");
-									GPSLocation location = (GPSLocation) currentLocation;
-									previousLocation = location;
-									Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-											activity.getResources(), R.drawable.blue_dot);
-				                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-				                            .setSize(0.5f).build();
-				                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-				                            location.getLongitude(), location.getLatitude());
-				                    if(currentPositionLayer != null){
-				                    	mapView.getLayers().removeLayer(currentPositionLayer);
-				                    }
-				                    currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-				                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-				                    mapView.getLayers().addLayer(currentPositionLayer);
-								}else{
-									if(previousLocation != null){
-										// when there is no gps signal for two minutes, change the color of the marker to be grey
-										if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
-											Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-						                            activity.getResources(), R.drawable.grey_dot);
-						                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-						                            .setSize(0.5f).build();
-						                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-						                    		previousLocation.getLongitude(), previousLocation.getLatitude());
-					                    	if(currentPositionLayer != null){
-						                    	mapView.getLayers().removeLayer(currentPositionLayer);
-						                    }
-					                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-						                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-						                    mapView.getLayers().addLayer(currentPositionLayer);
-											previousLocation = null;
-										}
+						@Override
+						public void run() {
+							Object currentLocation = getGPSPosition();
+							if(currentLocation != null){
+								GPSLocation location = (GPSLocation) currentLocation;
+								previousLocation = location;
+								Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+										activity.getResources(), R.drawable.blue_dot);
+			                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+			                            .setSize(0.5f).build();
+			                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+			                            location.getLongitude(), location.getLatitude());
+			                    if(currentPositionLayer != null){
+			                    	mapView.getLayers().removeLayer(currentPositionLayer);
+			                    }
+			                    currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+			                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+			                    mapView.getLayers().addLayer(currentPositionLayer);
+							}else{
+								if(previousLocation != null){
+									// when there is no gps signal for two minutes, change the color of the marker to be grey
+									if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
+										Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+					                            activity.getResources(), R.drawable.grey_dot);
+					                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+					                            .setSize(0.5f).build();
+					                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+					                    		previousLocation.getLongitude(), previousLocation.getLatitude());
+				                    	if(currentPositionLayer != null){
+					                    	mapView.getLayers().removeLayer(currentPositionLayer);
+					                    }
+				                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+					                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+					                    mapView.getLayers().addLayer(currentPositionLayer);
+										previousLocation = null;
 									}
 								}
-								currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
 							}
-						};
-                    }
+							currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
+						}
+					};
                     this.currentLocationHandler.postDelayed(currentLocationTask, getGpsUpdateInterval());
                 } catch (IOException e) {
                 	Log.e("FAIMS","Could not render raster layer",e);
@@ -1112,6 +1112,14 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public void centerOnCurrentPosition(String ref){
+		Object currentLocation = getGPSPosition();
+		if(currentLocation != null){
+			GPSLocation location = (GPSLocation) currentLocation;
+			setMapFocusPoint(ref, (float) location.getLatitude(), (float) location.getLongitude());
+		}
+	}
+
 	public int showVectorLayer(String ref, String filename) {
 		try{
 			Object obj = renderer.getViewByRef(ref);

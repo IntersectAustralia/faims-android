@@ -13,7 +13,7 @@ showMapTab() {
 }
 
 showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", 151.23f, 33.58f);
+	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f);
 	showTabGroup("tabgroup2");
 }
 
@@ -35,16 +35,20 @@ refreshMapTabGroup() {
 	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
 }
 
+showCurrentPositionTab(){
+	centerOnCurrentPosition("tabgroup1/tab2/map");
+}
+
 onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
 onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
+onEvent("tabgroup1/tab2/show", "click", "showCurrentPositionTab()");
 onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
-onEvent("tabgroup2/tab1/refresh", "click", "refreshMapTabGroup()");
 onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
 
 addVectorLayers() {
 	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp")); 
-	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
-	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
 	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
 }
