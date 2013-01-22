@@ -14,6 +14,10 @@
                   <gps></gps>
                   <internalgps></internalgps>
                   <externalgps></externalgps>
+                  <longitude></longitude>
+                  <latitude></latitude>
+                  <accuracy></accuracy>
+                  <heading></heading>
               </tab1>
           </tabgroup1>
         </faims>
@@ -36,6 +40,18 @@
         <trigger ref="externalgps">
           <label>Load External GPS</label>
         </trigger>
+        <input ref="longitude">
+          <label>Longitude</label>
+        </input>
+        <input ref="latitude">
+          <label>Latitude</label>
+        </input>
+        <input ref="accuracy">
+          <label>Accuracy</label>
+        </input>
+        <input ref="heading">
+          <label>Heading</label>
+        </input>
 	  </group>
     </group>
   </h:body>

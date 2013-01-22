@@ -7,10 +7,10 @@ loadGPS(){
 	}else{
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
-		setFieldValue("tabgroup1/tab1/longitude",longitude);
-		setFieldValue("tabgroup1/tab1/latitude",latitude);
-		setFieldValue("tabgroup1/tab1/accuracy",accuracy);
-		setFieldValue("tabgroup1/tab1/heading",heading);
+		setFieldValue("tabgroup1/tab1/longitude",longitude.toString());
+		setFieldValue("tabgroup1/tab1/latitude",latitude.toString());
+		setFieldValue("tabgroup1/tab1/accuracy",accuracy.toString());
+		setFieldValue("tabgroup1/tab1/heading",heading.toString());
 	}
 }
 
@@ -23,14 +23,14 @@ loadGPS(String gps){
 	}else{
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
-		setFieldValue("tabgroup1/tab1/longitude",longitude);
-		setFieldValue("tabgroup1/tab1/latitude",latitude);
-		setFieldValue("tabgroup1/tab1/accuracy",accuracy);
-		setFieldValue("tabgroup1/tab1/heading",heading);
+		setFieldValue("tabgroup1/tab1/longitude",longitude.toString());
+		setFieldValue("tabgroup1/tab1/latitude",latitude.toString());
+		setFieldValue("tabgroup1/tab1/accuracy",accuracy.toString());
+		setFieldValue("tabgroup1/tab1/heading",heading.toString());
 	}
 }
 
-onEvent("tabgroup1", "load", "setGPSUpdateInterval(5)");
+onEvent("tabgroup1", "load", "setGPSUpdateInterval(3)");
 onEvent("tabgroup1/tab1/gps", "click", "loadGPS()");
 onEvent("tabgroup1/tab1/internalgps", "click", "loadGPS(\"internal\")");
 onEvent("tabgroup1/tab1/externalgps", "click", "loadGPS(\"external\")");

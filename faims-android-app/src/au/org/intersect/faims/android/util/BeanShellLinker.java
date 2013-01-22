@@ -14,8 +14,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -83,6 +83,7 @@ public class BeanShellLinker {
 	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
 	
+	private HandlerThread handlerThread;
 	private Handler currentLocationHandler;
 	private Runnable currentLocationTask;
 	private Context context;
@@ -338,6 +339,9 @@ public class BeanShellLinker {
 	public void destroyListener(){
 		if(this.currentLocationHandler != null){
 			this.currentLocationHandler.removeCallbacks(this.currentLocationTask);
+		}
+		if(this.handlerThread != null){
+			handlerThread.quit();
 		}
 	}
 
@@ -961,8 +965,12 @@ public class BeanShellLinker {
                     gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
                     gdalLayer.setShowAlways(true);
                     mapView.getLayers().setBaseLayer(gdalLayer);
+                    if(this.handlerThread == null){
+                    	this.handlerThread = new HandlerThread("MapHandler");
+                		this.handlerThread.start();
+                    }
                     if(this.currentLocationHandler == null){
-                    	this.currentLocationHandler = new Handler();
+                    	this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
                     }
                     if(this.currentLocationTask == null){
 	                    this.currentLocationTask = new Runnable() {
@@ -971,6 +979,7 @@ public class BeanShellLinker {
 							public void run() {
 								Object currentLocation = getGPSPosition();
 								if(currentLocation != null){
+									System.out.println("get location");
 									GPSLocation location = (GPSLocation) currentLocation;
 									previousLocation = location;
 									Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
@@ -1129,30 +1138,6 @@ public class BeanShellLinker {
 
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
-	}
-
-	public void setGGAMessage(String gGAMessage) {
-		this.gpsDataManager.setGGAMessage(gGAMessage);
-	}
-
-	public void setBODMessage(String bODMessage) {
-		this.gpsDataManager.setBODMessage(bODMessage);
-	}
-
-	public void setExternalGPSTimestamp(long timestamp){
-		this.gpsDataManager.setExternalGPSTimestamp(timestamp);
-	}
-
-	public void setAccuracy(float accuracy) {
-		this.gpsDataManager.setAccuracy(accuracy);
-	}
-
-	public void setLocation(Location location) {
-		this.gpsDataManager.setLocation(location);
-	}
-
-	public void setInternalGPSTimestamp(long timestamp){
-		this.gpsDataManager.setInternalGPSTimestamp(timestamp);
 	}
 
 	public void setBaseDir(String dir) {

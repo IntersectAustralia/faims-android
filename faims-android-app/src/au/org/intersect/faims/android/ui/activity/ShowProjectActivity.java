@@ -127,6 +127,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 		linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
+		linker.setContext(this);
 	}
 	
 	public BeanShellLinker getBeanShellLinker(){

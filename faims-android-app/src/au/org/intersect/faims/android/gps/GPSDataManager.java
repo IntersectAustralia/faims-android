@@ -44,23 +44,23 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
     @Override
 	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
-		this.setGGAMessage(GGAMessage);
-		this.setBODMessage(BODMessage);
-		this.setExternalGPSTimestamp(System.currentTimeMillis());
+		setGGAMessage(GGAMessage);
+		setBODMessage(BODMessage);
+		setExternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override
 	public void onLocationChanged(Location location) {
-		this.setAccuracy(location.getAccuracy());
-		this.setLocation(location);
-		this.setInternalGPSTimestamp(System.currentTimeMillis());
+		setAccuracy(location.getAccuracy());
+		setLocation(location);
+		setInternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		this.setAccuracy(0.0f);
-		this.setLocation(null);
-		this.setInternalGPSTimestamp(System.currentTimeMillis());
+		setAccuracy(0.0f);
+		setLocation(null);
+		setInternalGPSTimestamp(System.currentTimeMillis());
 	}
 
 	@Override
@@ -75,13 +75,14 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		this.handlerThread = new HandlerThread("GPSHandler");
 		this.handlerThread.start();
 		this.handler = new Handler(this.handlerThread.getLooper());
-		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, 0);
+		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval());
 		this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
 		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval(), 0, this);
 	}
 
 	public void destroyListener(){
 		if(this.handler != null){
+			this.externalGPSTasks.closeBluetoothConnection();
 			this.handler.removeCallbacks(this.externalGPSTasks);
 		}
 		if(this.handlerThread != null){
@@ -198,6 +199,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 
 	public void setGGAMessage(String gGAMessage) {
 		this.GGAMessage = gGAMessage;
+		if(gGAMessage != null){
+			System.out.println(gGAMessage);
+		}else{
+			System.out.println("null");
+		}
 	}
 
 	public void setBODMessage(String bODMessage) {
