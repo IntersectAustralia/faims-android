@@ -13,7 +13,7 @@ showMapTab() {
 }
 
 showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", 37.76666666666f, -122.41666666667f);
+	setupMap("tabgroup2/tab1/map", 151.23f, 33.58f);
 	showTabGroup("tabgroup2");
 }
 

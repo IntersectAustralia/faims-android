@@ -21,10 +21,13 @@
               </tab2>
           </tabgroup1>
           <tabgroup2>
-              <tab1>                  
+              <tab1>  
+                  <drawActions></drawActions> 
+                  <drawActionBtn></drawActionBtn>               
                   <map></map>
-                  <refresh></refresh>
-                  <clear></clear>
+                  <layers></<layers>
+                  <layerActions></layerActions>
+                  <layerActionBtn></layerActionBtn>
               </tab1>
           </tabgroup2>
         </faims>
@@ -62,14 +65,35 @@
       <label>Map Example</label>
       <group ref="tab1"  faims_scrollable="false">
         <label>Map</label>
+        <select1 ref="drawActions">
+            <label>Draw Actions:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <trigger ref="drawActionBtn">
+            <label>Ok</label>
+        </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>
         </input>
-        <trigger ref="refresh">
-            <label>Refresh</label>
-        </trigger>
-        <trigger ref="clear">
-            <label>Clear</label>
+        <select1 ref="layers">
+            <label>Layers:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="layerActions">
+            <label>Layers Actions:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1> 
+        <trigger ref="layerActionBtn">
+            <label>Ok</label>
         </trigger>
       </group>
     </group>
