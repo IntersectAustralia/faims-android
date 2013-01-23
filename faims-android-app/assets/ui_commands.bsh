@@ -226,5 +226,5 @@ clearGeometryList(String ref, int layerId, List geomList) {
 }
 
 createPoint(float lat, float lon) {
-	return new EPSG3857().fromWgs84(lon, lat);
+	return new MapPos(lon, lat);
 }
