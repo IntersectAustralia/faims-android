@@ -477,13 +477,7 @@ public class Tab {
 				
 				if (child0 instanceof RadioGroup){
 					RadioGroup rg = (RadioGroup) child0;
-					for(int i = 0; i < rg.getChildCount(); ++i){
-						View view = rg.getChildAt(i);
-						if (view instanceof CustomRadioButton){
-							CustomRadioButton rb = (CustomRadioButton) view;
-							rb.setChecked(false);
-						}
-					}
+					rg.clearCheck();
 					valueReference.put(layout.getRef(), "");
 				}else if (child0 instanceof CheckBox){
 					for(int i = 0; i < layout.getChildCount(); ++i){
