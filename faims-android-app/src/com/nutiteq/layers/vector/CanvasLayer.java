@@ -2,6 +2,7 @@ package com.nutiteq.layers.vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -31,17 +32,21 @@ public class CanvasLayer extends GeometryLayer {
 	private Activity activity;
 	private SparseArray<Geometry> objectMap;
 	private int geomId = 1;
+	private Stack<Geometry> geomBuffer;
 	
 	public CanvasLayer(Activity activity, Projection projection) {
 		super(projection);
 		this.activity = activity;
 		objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
 		objectMap = new SparseArray<Geometry>();
+		geomBuffer = new Stack<Geometry>();
 	}
 	
 	@Override
 	public void calculateVisibleElements(Envelope envelope, int zoom) {
 		if (objects != null) {
+			clearGeometryBuffer();
+			
 			List<Geometry> objList = objects.query(envelope);
 			for (Geometry geom : objList) {
 				geom.setActiveStyle(zoom);
@@ -75,9 +80,18 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.remove(geomId);
 		
-		this.remove(geom);
+		geomBuffer.add(geom); // Issue with removing objects when object is still in visible list so buffering objects to be removed later
 		
 		Log.d("FAIMS", "Removed: " + geom.toString());
+	}
+	
+	private void clearGeometryBuffer() {
+		while(geomBuffer.size() > 0) {
+			Geometry geom = geomBuffer.pop();
+			this.remove(geom);
+			
+			Log.d("FAIMS", "Cleared: " + geom.toString());
+		}
 	}
 	
 	public void updateRenderer() {
