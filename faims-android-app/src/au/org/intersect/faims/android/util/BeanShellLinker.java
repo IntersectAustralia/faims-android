@@ -323,6 +323,51 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void cancelTabGroup(String id, boolean warn){
+		if (id == null) {
+			showWarning("Logic Error", "Could not cancel tab group");
+			return ;
+		}
+		final TabGroup tabGroup = renderer.getTabGroupByLabel(id);
+		if (tabGroup == null) {
+			showWarning("Logic Error", "Could not show tab group");
+			return ;
+		}
+		if(warn){
+			boolean hasChanges = false;
+			if(tabGroup.getArchEntType() != null || tabGroup.getRelType() != null){
+				for(Tab tab : tabGroup.getTabs()){
+					if(hasChanges(tab)){
+						hasChanges = true;
+					}
+				}
+			}
+			if(hasChanges){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+				
+				builder.setTitle("Warning");
+				builder.setMessage("Are you sure you want to cancel the tab group? You have unsaved changes there.");
+				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				               // User clicked OK button
+				        	   goBack();
+				           }
+				       });
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				               // User cancelled the dialog
+				           }
+				       });
+				
+				builder.create().show();
+			}else{
+				goBack();
+			}
+		}else{
+     		goBack();
+		}
+	}
+
 	public void cancelTab(String id, boolean warn){
 		if (id == null) {
 			showWarning("Logic Error", "Could not cancel tab");
