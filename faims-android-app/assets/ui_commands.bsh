@@ -28,6 +28,10 @@ showTab(String id, String uuid) {
 	linker.showTab(id, uuid);
 }
 
+cancelTab(String id, boolean warn){
+	linker.cancelTab(id,warn);
+}
+
 showToast(String message) {
     linker.showToast(message);
 }

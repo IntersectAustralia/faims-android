@@ -323,6 +323,101 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void cancelTab(String id, boolean warn){
+		if (id == null) {
+			showWarning("Logic Error", "Could not cancel tab");
+			return ;
+		}
+		String[] ids = id.split("/");
+		if (ids.length < 2) {
+			showWarning("Logic Error", "Could not cancel tab");
+			return ;
+		}
+		String groupId = ids[0];
+		final String tabId = ids[1];
+		final TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
+		if (tabGroup == null) {
+			showWarning("Logic Error", "Could not show tab");
+			return ;
+		}
+		Tab tab = tabGroup.getTab(tabId);
+		if(warn){
+			if(hasChanges(tab) && (tabGroup.getArchEntType() != null || tabGroup.getRelType() != null)){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+				
+				builder.setTitle("Warning");
+				builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
+				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				               // User clicked OK button
+				        	   if(tabGroup.getTabs().size() == 1){
+				        		   goBack();
+				        	   }else{
+				        		   tabGroup.hideTab(tabId);
+				        	   }
+				           }
+				       });
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				               // User cancelled the dialog
+				        	   tabGroup.showTab(tabId);
+				           }
+				       });
+				
+				builder.create().show();
+			}else{
+				if(tabGroup.getTabs().size() == 1){
+	        	   goBack();
+	        	}else{
+	        	   tabGroup.hideTab(tabId);
+	           }
+			}
+		}else{
+			if(tabGroup.getTabs().size() == 1){
+     		   goBack();
+     	   }else{
+     		   tabGroup.hideTab(tabId);
+     	   }
+		}
+	}
+	
+	private boolean hasChanges(Tab tab) {
+		List<View> views = tab.getAllViews();
+		for (View v : views) {
+			if (v instanceof CustomEditText) {
+				CustomEditText customEditText = (CustomEditText) v;
+				if(!getFieldValue(customEditText.getRef()).equals(tab.getStoredValue(customEditText.getRef()))){
+					return true;
+				}
+				
+			} else if (v instanceof CustomDatePicker) {
+				CustomDatePicker customDatePicker = (CustomDatePicker) v;
+				if(!getFieldValue(customDatePicker.getRef()).equals(tab.getStoredValue(customDatePicker.getRef()))){
+					return true;
+				}
+				
+			} else if (v instanceof CustomTimePicker) {
+				CustomTimePicker customTimePicker = (CustomTimePicker) v;
+				if(!getFieldValue(customTimePicker.getRef()).equals(tab.getStoredValue(customTimePicker.getRef()))){
+					return true;
+				}
+				
+			} else if (v instanceof CustomLinearLayout) {
+				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
+				if(!getFieldValue(customLinearLayout.getRef()).equals(tab.getStoredValue(customLinearLayout.getRef()))){
+					return true;
+				}
+				
+			} else if (v instanceof CustomSpinner) {
+				CustomSpinner customSpinner = (CustomSpinner) v;
+				if(!getFieldValue(customSpinner.getRef()).equals(tab.getStoredValue(customSpinner.getRef()))){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public void goBack(){
 		this.activity.onBackPressed();
 	}
@@ -366,7 +461,7 @@ public class BeanShellLinker {
 			    		if(tab.hasView(entityAttribute.getName())){
 			    			List<View> views = tab.getViews(entityAttribute.getName());
 			    			if (views != null)
-			    				loadArchEntFieldsValue(entityAttribute, views);
+			    				loadArchEntFieldsValue(tab, entityAttribute, views);
 			    		}
 			    	}
 			    }
@@ -397,7 +492,7 @@ public class BeanShellLinker {
 			    		if(tab.hasView(relationshipAttribute.getName())){
 			    			List<View> views = tab.getViews(relationshipAttribute.getName());
 			    			if (views != null)
-			    				loadRelationshipFieldsValue(relationshipAttribute, views);
+			    				loadRelationshipFieldsValue(tab,relationshipAttribute, views);
 			    		}
 			    	}
 			    }
@@ -426,7 +521,7 @@ public class BeanShellLinker {
 			    	if(tab.hasView(entityAttribute.getName())){
 			    		List<View> views = tab.getViews(entityAttribute.getName());
 			    		if (views != null)
-			    			loadArchEntFieldsValue(entityAttribute, views);
+			    			loadArchEntFieldsValue(tab, entityAttribute, views);
 			    	}
 			    }
 			} catch (Exception e) {
@@ -454,7 +549,7 @@ public class BeanShellLinker {
 			    	if(tab.hasView(relationshipAttribute.getName())){
 			    		List<View> views = tab.getViews(relationshipAttribute.getName());
 			    		if (views != null)
-			    			loadRelationshipFieldsValue(relationshipAttribute, views);
+			    			loadRelationshipFieldsValue(tab, relationshipAttribute, views);
 			    	}
 			    }
 			} catch (Exception e) {
@@ -489,57 +584,57 @@ public class BeanShellLinker {
 		}
 	}
 
-	private void loadArchEntFieldsValue(EntityAttribute entityAttribute, List<View> views) {
+	private void loadArchEntFieldsValue(Tab tab, EntityAttribute entityAttribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof CustomEditText) {
 				CustomEditText customEditText = (CustomEditText) v;
-				setArchEntityFieldValueForType(customEditText.getAttributeType(), customEditText.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab, customEditText.getAttributeType(), customEditText.getRef(), entityAttribute);
 				
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
-				setArchEntityFieldValueForType(customDatePicker.getAttributeType(), customDatePicker.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab, customDatePicker.getAttributeType(), customDatePicker.getRef(), entityAttribute);
 				
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker customTimePicker = (CustomTimePicker) v;
-				setArchEntityFieldValueForType(customTimePicker.getAttributeType(), customTimePicker.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab, customTimePicker.getAttributeType(), customTimePicker.getRef(), entityAttribute);
 				
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
-				setArchEntityFieldValueForType(customLinearLayout.getAttributeType(), customLinearLayout.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab, customLinearLayout.getAttributeType(), customLinearLayout.getRef(), entityAttribute);
 				
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
-				setArchEntityFieldValueForType(customSpinner.getAttributeType(), customSpinner.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), entityAttribute);
 			}
 		}
 	}
 
-	private void loadRelationshipFieldsValue(RelationshipAttribute relationshipAttribute, List<View> views) {
+	private void loadRelationshipFieldsValue(Tab tab, RelationshipAttribute relationshipAttribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof CustomEditText) {
 				CustomEditText customEditText = (CustomEditText) v;
-				setRelationshipFieldValueForType(customEditText.getAttributeType(), customEditText.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab, customEditText.getAttributeType(), customEditText.getRef(), relationshipAttribute);
 				
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
-				setRelationshipFieldValueForType(customDatePicker.getAttributeType(), customDatePicker.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab, customDatePicker.getAttributeType(), customDatePicker.getRef(), relationshipAttribute);
 				
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker customTimePicker = (CustomTimePicker) v;
-				setRelationshipFieldValueForType(customTimePicker.getAttributeType(), customTimePicker.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab, customTimePicker.getAttributeType(), customTimePicker.getRef(), relationshipAttribute);
 				
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
-				setRelationshipFieldValueForType(customLinearLayout.getAttributeType(), customLinearLayout.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab, customLinearLayout.getAttributeType(), customLinearLayout.getRef(), relationshipAttribute);
 				
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
-				setRelationshipFieldValueForType(customSpinner.getAttributeType(), customSpinner.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), relationshipAttribute);
 			}
 		}
 	}
 
-	private void setArchEntityFieldValueForType(String type, String ref, EntityAttribute attribute){
+	private void setArchEntityFieldValueForType(Tab tab, String type, String ref, EntityAttribute attribute){
 		if(FREETEXT.equals(type)){
 			setFieldValue(ref,attribute.getText());
 		}else if(MEASURE.equals(type)){
@@ -549,14 +644,16 @@ public class BeanShellLinker {
 		}else if(CERTAINTY.equals(type)){
 			setFieldValue(ref,attribute.getCertainty());
 		}
+		tab.setValueReference(ref, getFieldValue(ref));
 	}
 	
-	private void setRelationshipFieldValueForType(String type, String ref, RelationshipAttribute relationshipAttribute){
+	private void setRelationshipFieldValueForType(Tab tab, String type, String ref, RelationshipAttribute relationshipAttribute){
 		if(FREETEXT.equals(type)){
 			setFieldValue(ref,relationshipAttribute.getText());
 		}else if(VOCAB.equals(type)){
 			setFieldValue(ref,relationshipAttribute.getVocab());
 		}
+		tab.setValueReference(ref, getFieldValue(ref));
 	}
 
 	public void showToast(String message){
