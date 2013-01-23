@@ -3,6 +3,9 @@ import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import java.util.List;
 import java.util.Collection;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
+import android.graphics.Color;
+import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.components.MapPos;
 
 newTabGroup(String label) {
 	linker.newTabGroup(label);
@@ -34,6 +37,10 @@ showToast(String message) {
 
 showAlert(String title, String message, String okCallback, String cancelCallback){
     linker.showAlert(title, message, okCallback, cancelCallback);
+}
+
+showWarning(String title, String message) {
+	linker.showWarning(title, message);
 }
 
 setFieldValue(String ref, Object value){
@@ -174,10 +181,46 @@ showVectorLayer(String ref, String filename) {
 	linker.showVectorLayer(ref, filename);
 }
 
-clearVectorLayer(String ref, int id) {
-	linker.clearVectorLayer(ref, id);
+clearVectorLayer(String ref, int layerId) {
+	linker.clearVectorLayer(ref, layerId);
 }
 
 centerOnCurrentPosition(String ref){
 	linker.centerOnCurrentPosition(ref);
+}
+
+createVectorLayer(String ref) {
+	return linker.createVectorLayer(ref);
+}
+
+setVectorLayerVisible(String ref, int layerId, boolean visible) {
+	linker.setVectorLayerVisible(ref, layerId, visible);
+}
+
+getMapPointClicked() {
+	return _map_point_clicked;
+}
+
+drawPoint(String ref, int layerId, MapPos point, int color) {
+	linker.drawPoint(ref, layerId, point, color);
+}
+
+drawLine(String ref, int layerId, List points, int color) {
+	linker.drawLine(ref, layerId, points, color);
+}
+
+drawPolygon(String ref, int layerId, List points, int color) {
+	linker.drawPolygon(ref, layerId, points, color);
+}
+
+clearGeometry(String ref, int layerId, int geomId) {
+	linker.clearGeometry(ref, layerId, geomId);
+}
+
+clearGeometryList(String ref, int layerId, List geomList) {
+	linker.clearGeometryList(ref, layerId, geomList);
+}
+
+createPoint(float lat, float lon) {
+	return new EPSG3857().fromWgs84(lon, lat);
 }

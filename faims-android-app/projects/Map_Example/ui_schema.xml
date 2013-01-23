@@ -24,7 +24,7 @@
           <tabgroup2>
               <tab1>  
                   <drawActions></drawActions> 
-                  <drawActionBtn></drawActionBtn>               
+                  <create></create>           
                   <map></map>
                   <layers></layers>
                   <layerActions></layerActions>
@@ -33,6 +33,7 @@
           </tabgroup2>
         </faims>
       </instance>
+      <bind nodeset="/faims/tabgroup2/tab1/action" type="string"/>
     </model>
   </h:head>
 
@@ -71,12 +72,20 @@
         <select1 ref="drawActions">
             <label>Draw Actions:</label>
             <item>
-                <label>dummy</label>
-                <value>dummy</value>
+                <label>Draw Point</label>
+                <value>draw_point</value>
+            </item>
+            <item>
+                <label>Draw Line</label>
+                <value>draw_line</value>
+            </item>
+            <item>
+                <label>Draw Polygon</label>
+                <value>draw_polygon</value>
             </item>
         </select1>
-        <trigger ref="drawActionBtn">
-            <label>Ok</label>
+        <trigger ref="create">
+            <label>Create</label>
         </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>
@@ -91,8 +100,20 @@
         <select1 ref="layerActions">
             <label>Layers Actions:</label>
             <item>
-                <label>dummy</label>
-                <value>dummy</value>
+                <label>Create Layer</label>
+                <value>create_layer</value>
+            </item>
+            <item>
+                <label>Clear Layer</label>
+                <value>clear_layer</value>
+            </item>
+            <item>
+                <label>Hide Layer</label>
+                <value>hide_layer</value>
+            </item>
+            <item>
+                <label>Show Layer</label>
+                <value>show_layer</value>
             </item>
         </select1> 
         <trigger ref="layerActionBtn">

@@ -15,6 +15,8 @@ showMapTab() {
 showMapTabGroup() {
 	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f);
 	showTabGroup("tabgroup2");
+	
+	refreshLayers();
 }
 
 refreshMapTab() {
@@ -52,3 +54,145 @@ addVectorLayers() {
 	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
 	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
 }
+
+onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
+onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
+onEvent("tabgroup2/tab1/create", "click", "onDrawAction()");
+onEvent("tabgroup2/tab1/layerActionBtn", "click", "onLayerAction()");
+onEvent("tabgroup2/tab1/map", "click", "onMapClick()");
+
+POINT = 1;
+LINE = 2;
+POLYGON = 3;
+
+List canvasLayers = new ArrayList();
+List points = new ArrayList();
+List pointIds = new ArrayList();
+int tool = POINT;
+int currentLayerId = 0;
+
+onMapClick() {
+	if (currentLayerId == 0) {
+		showWarning("Logic Error", "No layer selected");
+		return;
+	}
+	
+	switch(tool) {
+		case POINT:
+			point = getMapPointClicked();
+			drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.RED);
+		break;
+		case LINE:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.GREEN)));
+		break;
+		case POLYGON:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.BLUE)));
+		break;
+	}
+}
+
+refreshLayers() {
+	
+	populateDropDown("tabgroup2/tab1/layers", canvasLayers);
+	
+	// check if current layer exists and set to that layer
+	if (canvasLayers.indexOf(String.valueOf(currentLayerId)) >= 0) {
+		setFieldValue("tabgroup2/tab1/layers", String.valueOf(currentLayerId));
+	} else {
+		currentLayerId = 0;
+		onChangeLayers();
+	}
+}
+
+createShape() {
+	
+	if (currentLayerId == 0) {
+		showWarning("Logic Error", "No layer selected");
+		return;
+	}
+	
+	layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
+	switch(tool) {
+		case POINT:
+		break;
+		case LINE:
+			drawLine("tabgroup2/tab1/map", currentLayerId, points, Color.GREEN);
+			clearPoints();
+		break;
+		case POLYGON:
+			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, Color.BLUE);
+			clearPoints();
+		break;
+	}
+	
+}
+
+clearShape() {
+
+}
+
+clearPoints() {
+	if (currentLayerId == 0) return;
+	
+	clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
+	points = new ArrayList();
+	pointIds = new ArrayList();
+}
+
+onChangeLayers() {
+	if (getFieldValue("tabgroup2/tab1/layers") == "") {
+		layerId = 0;
+	} else {
+		layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
+	}
+	if (layerId != currentLayerId) {
+		clearPoints();
+		currentLayerId = layerId;
+	}
+}
+
+onChangeAction() {
+	action = getFieldValue("tabgroup2/tab1/drawActions");
+	if ("draw_point".equals(action)) {
+		if (tool != POINT) clearPoints();
+		tool = POINT;
+	} else if ("draw_line".equals(action)) {
+		if (tool != LINE) clearPoints();
+		tool = LINE;
+	} else if ("draw_polygon".equals(action)) {
+		if (tool != POLYGON) clearPoints();
+		tool = POLYGON;
+	}
+}
+
+onDrawAction() {
+	createShape();
+}
+
+onLayerAction() {
+	action = getFieldValue("tabgroup2/tab1/layerActions");
+	
+	if ("create_layer".equals(action)) {
+		canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+		refreshLayers();
+	} else if ("clear_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		clearVectorLayer("tabgroup2/tab1/map", currentLayerId);
+		canvasLayers.remove(String.valueOf(currentLayerId));
+		refreshLayers();
+	} else if ("hide_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		setVectorLayerVisible("tabgroup2/tab1/map", currentLayerId, false);
+	} else if ("show_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		setVectorLayerVisible("tabgroup2/tab1/map", currentLayerId, true);
+	}
+	
+}
+
+canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+refreshLayers();
