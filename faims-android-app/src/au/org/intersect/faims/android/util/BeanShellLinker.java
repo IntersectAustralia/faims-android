@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
@@ -56,7 +58,9 @@ import bsh.Interpreter;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Marker;
+import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.raster.GdalMapLayer;
+import com.nutiteq.layers.vector.CanvasLayer;
 import com.nutiteq.layers.vector.OgrLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
@@ -64,11 +68,14 @@ import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
+import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class BeanShellLinker {
 	
+	private static final int MAX_OBJECTS = 500;
+
 	private Interpreter interpreter;
 
 	private UIRenderer renderer;
@@ -114,6 +121,7 @@ public class BeanShellLinker {
     		interpreter.eval(convertStreamToString(assets.open(filename)));
     	} catch (EvalError e) {
     		FAIMSLog.log(e); 
+    		showWarning("Logic Error", "Error encountered in logic script");
     	} catch (IOException e) {
     		FAIMSLog.log(e);
     		showWarning("Logic Error", "Error encountered in logic script");
@@ -124,8 +132,7 @@ public class BeanShellLinker {
 		try {
     		interpreter.eval(code);
     	} catch (EvalError e) {
-    		FAIMSLog.log(e); 
-    		//FAIMSLog.log(code);
+    		FAIMSLog.log(e);
     		showWarning("Logic Error", "Error encountered in logic script");
     	}
 	}
@@ -158,14 +165,90 @@ public class BeanShellLinker {
 							}
 							
 						});
-					} else {
-						view.setOnClickListener(new OnClickListener() {
-							
+					} else if (view instanceof CustomMapView) {
+						final CustomMapView mapView = (CustomMapView) view;
+						
+						mapView.getOptions().setMapListener(new MapListener() {
+
 							@Override
-							public void onClick(View v) {
-								execute(code);
+							public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
+								// TODO Auto-generated method stub
+								
 							}
+
+							@Override
+							public void onDrawFrameBefore3D(GL10 arg0,
+									float arg1) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void onLabelClicked(VectorElement arg0,
+									boolean arg1) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void onMapClicked(double x, double y,
+									boolean arg2) {
+								try {
+									interpreter.set("_map_point_clicked", (new EPSG3857()).toWgs84(x, y));
+									execute(code);
+								} catch (Exception e) {
+									FAIMSLog.log(e);
+								}
+							}
+
+							@Override
+							public void onMapMoved() {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void onSurfaceChanged(GL10 arg0, int arg1,
+									int arg2) {
+								// TODO Auto-generated method stub
+								
+							}
+
+							@Override
+							public void onVectorElementClicked(
+									VectorElement arg0, double arg1,
+									double arg2, boolean arg3) {
+								Log.d("FAIMS", arg0.toString());
+							}
+							
 						});
+					} else {
+						if (view instanceof Spinner) {
+							((Spinner) view).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+								@Override
+								public void onItemSelected(AdapterView<?> arg0,
+										View arg1, int arg2, long arg3) {
+									execute(code);
+								}
+
+								@Override
+								public void onNothingSelected(
+										AdapterView<?> arg0) {
+									execute(code);
+								}
+
+								
+							});
+						} else {
+							view.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View v) {
+									execute(code);
+								}
+							});
+						}
 					}
 				}
 			}
@@ -851,6 +934,7 @@ public class BeanShellLinker {
 			else if (obj instanceof Spinner){
 				Spinner spinner = (Spinner) obj;
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
+				if (pair == null) return "";
 				return pair.getValue();
 			}
 			else if (obj instanceof LinearLayout){
@@ -1173,15 +1257,16 @@ public class BeanShellLinker {
 	
 	public void setMapFocusPoint(String ref, float latitude, float longitude) {
 		
-		if (latitude < -90.0f || latitude > 90.0f) {
-			Log.d("FAIMS", "Latitude out of range " + latitude);
-			showWarning("Logic Error", "Map data out of range.");
-		}
-		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
+				
+				if (latitude < -90.0f || latitude > 90.0f) {
+					Log.d("FAIMS", "Latitude out of range " + latitude);
+					showWarning("Logic Error", "Map data out of range.");
+				}
+				
 				mapView.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
 			} else {
 				Log.d("FAIMS","Could not find map view");
@@ -1276,20 +1361,16 @@ public class BeanShellLinker {
 		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
 				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
 				
-				int id = 0;
 				try {
 					OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null,
-	                        500, pointStyleSet, lineStyleSet, polygonStyleSet);
+	                        MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
 	                // ogrLayer.printSupportedDrivers();
 	                // ogrLayer.printLayerDetails(table);
-					id = mapView.addVectorLayer(ogrLayer);
+					return mapView.addVectorLayer(ogrLayer);
 				} catch (Exception e) {
 					Log.e("FAIMS","Could not show vector layer", e);
                     showWarning("Map Error", "Could not show vector layer");
-					return 0;
 				}
-				
-				return id;
 			} else {
 				Log.d("FAIMS","Could not find map view");
 				showWarning("Logic Error", "Map does not exist.");
@@ -1301,17 +1382,17 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public void clearVectorLayer(String ref, int id) {
+	public void clearVectorLayer(String ref, int layerId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				try {
-					mapView.removeVectorLayer(id);
+					mapView.removeVectorLayer(layerId);
 				} catch (Exception e) {
-					Log.e("FAIMS","Could not clear vector layer ", e);
-                    showWarning("Map Error", "Could not clear vector layer");
+					Log.e("FAIMS", "Could not clear layer", e);
+					showWarning("Logic Error", "Could not clear layer");
 				}
 				
 			} else {
@@ -1320,8 +1401,191 @@ public class BeanShellLinker {
 			}
 		}
 		catch(Exception e){
+			Log.e("FAIMS","Exception clearing vector layer",e);
+		}
+	}
+	
+	public int createVectorLayer(String ref) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer layer = new CanvasLayer(activity, new EPSG3857());
+					return mapView.addVectorLayer(layer);
+				} catch (Exception e) {
+					Log.e("FAIMS", "Could not create layer", e);
+					showWarning("Logic Error", "Could not create layer");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception creating vector layer",e);
+		}
+		return 0;
+	}
+	
+	public void setVectorLayerVisible(String ref, int layerId, boolean visible) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					mapView.setLayerVisible(layerId, visible);
+				} catch (Exception e) {
+					Log.e("FAIMS", "Could not set layer visibility", e);
+					showWarning("Logic Error", "Could not set layer visibility");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
 			Log.e("FAIMS","Exception showing vector layer",e);
 		}
+	}
+	
+	public int drawPoint(String ref, int layerId, MapPos point, int color) {
+		
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					int id = canvas.addPoint(point, color);
+					canvas.updateRenderer();
+					return id;
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not draw point",e);
+					showWarning("Logic Error", "Could not draw point");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception drawing point on vector layer",e);
+		}
+		return 0;
+	}
+	
+	public int drawLine(String ref, int layerId, List<MapPos> points, int color) {
+		
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					int id = canvas.addLine(points, color);
+					canvas.updateRenderer();
+					return id;
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not draw line",e);
+					showWarning("Logic Error", "Could not draw line");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception drawing line on vector layer",e);
+		}
+		return 0;
+	}
+	
+	public int drawPolygon(String ref, int layerId, List<MapPos> points, int color) {
+		
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					int id = canvas.addPolygon(points, color);
+					canvas.updateRenderer();
+					return id;
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not draw polygon",e);
+					showWarning("Logic Error", "Could not draw polygon");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception drawing polygon on vector layer",e);
+		}
+		return 0;
+	}
+	
+	public void clearGeometry(String ref, int layerId, int geomId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					canvas.removeGeometry(geomId);
+					canvas.updateRenderer();
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not clear geometry",e);
+					showWarning("Logic Error", "Could not clear geometry");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception clearing geometry",e);
+		}
+	}
+	
+	public int clearGeometryList(String ref, int layerId, List<Integer> geomList) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					for (Integer geomId : geomList) {
+						canvas.removeGeometry(geomId);
+					}
+					canvas.updateRenderer();
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not clear geometry list",e);
+					showWarning("Logic Error", "Could not clear geometry list");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception clearing geometry",e);
+		}
+		return 0;
 	}
 
 	private String convertStreamToString(InputStream stream) {

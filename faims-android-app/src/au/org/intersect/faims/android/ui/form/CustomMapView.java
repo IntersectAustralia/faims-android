@@ -8,14 +8,14 @@ import au.org.intersect.faims.android.R;
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
 import com.nutiteq.components.Options;
-import com.nutiteq.layers.vector.OgrLayer;
 import com.nutiteq.utils.UnscaledBitmapLoader;
+import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CustomMapView extends MapView {
 	
 	private static int cacheId = 9991;
 	
-	private SparseArray<OgrLayer> vectorMap;
+	private SparseArray<GeometryLayer> vectorMap;
 	
 	private int vectorId = 1;
 
@@ -54,14 +54,14 @@ public class CustomMapView extends MapView {
         // set persistent raster cache limit to 100MB
         //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
         
-        vectorMap = new SparseArray<OgrLayer>();
+        vectorMap = new SparseArray<GeometryLayer>();
 	}
 
 	public static int nextId() {
 		return cacheId;
 	}
 	
-	public int addVectorLayer(OgrLayer layer) {
+	public int addVectorLayer(GeometryLayer layer) {
 		this.getLayers().addLayer(layer);
 		vectorMap.put(vectorId, layer);
 		return vectorId++;
@@ -70,6 +70,15 @@ public class CustomMapView extends MapView {
 	public void removeVectorLayer(int id) {
 		this.getLayers().removeLayer(vectorMap.get(id));
 		vectorMap.remove(id);
+	}
+
+	public GeometryLayer getVectorLayer(int layerId) {
+		return vectorMap.get(layerId);
+	}
+
+	public void setLayerVisible(int layerId, boolean visible) {
+		GeometryLayer layer = vectorMap.get(layerId);
+		layer.setVisible(visible);
 	}
 	
 }
