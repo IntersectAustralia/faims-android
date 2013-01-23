@@ -1,0 +1,32 @@
+Object locationObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+Object typeObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+
+populateRadioGroup("tabgroup2/tab3/location", locationObj);
+populateCheckBoxGroup("tabgroup2/tab3/type", typeObj);
+
+String e=null;
+
+saveEntity(entity_id) {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, null, null));
+	attributes.add(createEntityAttribute("count", getFieldValue("tabgroup2/tab1/count-description"), null, getFieldValue("tabgroup2/tab1/count"), getFieldValue("tabgroup2/tab1/count-certainty")));
+	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup2/tab2/date"), null, null, null));
+	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup2/tab2/time"), null, null, null));
+	attributes.add(createEntityAttribute("location", getFieldValue("tabgroup2/tab3/location"), null, null, getFieldValue("tabgroup2/tab3/location-certainty")));
+	List values = getFieldValue("tabgroup2/tab3/type");
+	for (Object o : values) {
+		attributes.add(createEntityAttribute("type", o.getName(), null, null, null));
+	}
+	e = saveArchEnt(entity_id, "Simple", null, attributes);
+	showTab("tabgroup2/tab3",e);
+	showTab("tabgroup2/tab2",e);
+	showTab("tabgroup2/tab1",e);
+}
+
+onEvent("tabgroup2/tab1/update", "click", "saveEntity(e)");
+
+onEvent("tabgroup2/tab1/save", "click", "saveEntity(null)");
+
+onEvent("tabgroup1/tab1/showtabgroup2", "click", "showTabGroup(\"tabgroup2\")");
+onEvent("tabgroup1/tab1/newtabgroup2", "click", "newTabGroup(\"tabgroup2\")");
+onEvent("tabgroup2/tab1/cancel", "click", "cancelTabGroup(\"tabgroup2\",true)");

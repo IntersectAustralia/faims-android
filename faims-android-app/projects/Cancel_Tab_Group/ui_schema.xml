@@ -1,0 +1,125 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Tab Group Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="tabgroup_example">
+          <!-- Simple Arch tabgroup2 with vocabs, measures and certainties in multiple tabs -->
+          <tabgroup1>
+            <tab1>
+              <showtabgroup2></showtabgroup2>
+              <newtabgroup2></newtabgroup2>
+            </tab1>
+          </tabgroup1>
+          <tabgroup2>
+            <tab1>
+              <name></name>
+              <count></count>
+              <count-description></count-description>
+              <count-certainty></count-certainty>
+              <update></update>
+              <save></save>
+              <cancel></cancel>
+            </tab1>
+            <tab2>
+              <date></date>
+              <time></time>
+            </tab2>
+            <tab3>
+              <location></location>
+              <location-certainty></location-certainty>
+              <type></type>
+            </tab3>
+          </tabgroup2>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup2/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab1/count" type="integer"/>
+      <bind nodeset="/faims/tabgroup2/tab1/count-description" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab1/count-certainty" type="decimal"/>
+      <bind nodeset="/faims/tabgroup2/tab2/date" type="date"/>
+      <bind nodeset="/faims/tabgroup2/tab2/time" type="time"/>
+      <bind nodeset="/faims/tabgroup2/tab3/location-certainty" type="decimal"/>
+      
+      <bind nodeset="/faims/relationship/tab1/name" type="string"/>
+
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="tabgroup1">
+      <label>Tabgroup 1</label>
+      <group ref="tab1">
+        <trigger ref="showtabgroup2">
+          <label>Show Tab Group 2</label>
+        </trigger>
+        <trigger ref="newtabgroup2">
+          <label>New Tab Group 2</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup2" faims_archent_type="simple_entity">
+      <label>Tabgroup 2</label>
+      <group ref="tab1">
+        <label>First Tab</label>
+        <input ref="name" faims_attribute_name="name">
+          <label>Name:</label>
+        </input>
+        <input ref="count" faims_attribute_name="count" faims_attribute_type="measure">
+          <label>Count:</label>
+        </input>
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="freetext">
+          <label>Description:</label>
+        </input>
+        <input ref="count-certainty" faims_attribute_name="count" faims_attribute_type="certainty">
+          <label>Certainty:</label>
+        </input>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="cancel">
+          <label>Cancel</label>
+        </trigger>
+        </group>
+      <group ref="tab2">
+        <label>Second Tab</label>
+        <input ref="date" faims_attribute_name="date">
+          <label>Date:</label>
+        </input>
+        <input ref="time" faims_attribute_name="time">
+          <label>Time:</label>
+        </input>
+      </group>
+      <group ref="tab3">
+        <label>Third Tab</label>
+        <select1 ref="location" faims_attribute_name="location" appearance="full" faims_attribute_type="freetext">
+          <label>Location:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
+          <label>Certainty:</label>
+        </input>
+        <select ref="type" faims_attribute_name="type">
+          <label>Type:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select>
+      </group>
+    </group>
+  </h:body>
+</h:html>

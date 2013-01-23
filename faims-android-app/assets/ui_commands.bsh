@@ -31,6 +31,10 @@ showTab(String id, String uuid) {
 	linker.showTab(id, uuid);
 }
 
+cancelTabGroup(String id, boolean warn){
+	linker.cancelTabGroup(id,warn);
+}
+
 cancelTab(String id, boolean warn){
 	linker.cancelTab(id,warn);
 }
