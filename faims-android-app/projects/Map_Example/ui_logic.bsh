@@ -64,6 +64,7 @@ onEvent("tabgroup2/tab1/map", "click", "onMapClick()");
 POINT = 1;
 LINE = 2;
 POLYGON = 3;
+SELECT_SHAPE = 4;
 
 List canvasLayers = new ArrayList();
 List points = new ArrayList();
@@ -110,20 +111,22 @@ refreshLayers() {
 
 createShape() {
 	
-	if (currentLayerId == 0) {
-		showWarning("Logic Error", "No layer selected");
-		return;
-	}
-	
-	layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
 	switch(tool) {
-		case POINT:
-		break;
 		case LINE:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
 			drawLine("tabgroup2/tab1/map", currentLayerId, points, Color.GREEN);
 			clearPoints();
 		break;
 		case POLYGON:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
 			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, Color.BLUE);
 			clearPoints();
 		break;
@@ -137,7 +140,8 @@ clearShape() {
 
 clearPoints() {
 	if (currentLayerId == 0) return;
-	
+	System.out.println("layer: " + String.valueOf(currentLayerId));
+	System.out.println(pointIds.toString());
 	clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
 	points = new ArrayList();
 	pointIds = new ArrayList();
@@ -166,6 +170,9 @@ onChangeAction() {
 	} else if ("draw_polygon".equals(action)) {
 		if (tool != POLYGON) clearPoints();
 		tool = POLYGON;
+	} else if ("select_shape".equals(action)) {
+		if (tool != SELECT_SHAPE) clearPoints();
+		tool = SELECT_SHAPE;
 	}
 }
 
@@ -196,3 +203,4 @@ onLayerAction() {
 
 canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
 refreshLayers();
+

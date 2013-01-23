@@ -71,14 +71,13 @@ public class CanvasLayer extends GeometryLayer {
 	public void removeGeometry(int geomId) {
 		Geometry geom = objectMap.get(geomId);
 		
-		Log.d("FAIMS", geom.toString());
-		
 		objects.remove(geom.getInternalState().envelope, geom);
 		
 		objectMap.remove(geomId);
 		
 		this.remove(geom);
 		
+		Log.d("FAIMS", "Removed: " + geom.toString());
 	}
 	
 	public void updateRenderer() {

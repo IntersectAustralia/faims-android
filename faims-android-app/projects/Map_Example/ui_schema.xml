@@ -83,6 +83,10 @@
                 <label>Draw Polygon</label>
                 <value>draw_polygon</value>
             </item>
+            <item>
+                <label>Select Shape</label>
+                <value>select_shape</value>
+            </item>
         </select1>
         <trigger ref="create">
             <label>Create</label>

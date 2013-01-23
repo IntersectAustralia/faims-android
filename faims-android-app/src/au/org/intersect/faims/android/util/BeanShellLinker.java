@@ -218,8 +218,7 @@ public class BeanShellLinker {
 							public void onVectorElementClicked(
 									VectorElement arg0, double arg1,
 									double arg2, boolean arg3) {
-								// TODO Auto-generated method stub
-								
+								Log.d("FAIMS", arg0.toString());
 							}
 							
 						});
