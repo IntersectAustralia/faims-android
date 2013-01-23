@@ -1569,10 +1569,12 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					for (Integer geomId : geomList) {
-						canvas.removeGeometry(geomId);
+					if (geomList.size() > 0) {
+						for (Integer geomId : geomList) {
+							canvas.removeGeometry(geomId);
+						}
+						canvas.updateRenderer();
 					}
-					canvas.updateRenderer();
 				} catch (Exception e) {
 					Log.e("FAIMS","Could not clear geometry list",e);
 					showWarning("Logic Error", "Could not clear geometry list");
