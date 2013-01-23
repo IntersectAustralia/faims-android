@@ -26,6 +26,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import au.org.intersect.faims.android.util.DateUtil;
 
 public class Tab {
 
@@ -34,6 +35,7 @@ public class Tab {
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
 	private Map<String, List<View>> viewMap;
+	private Map<String, Object> valueReference;
 	private List<View> viewList;
 	private String name;
 	private String label;
@@ -50,6 +52,7 @@ public class Tab {
 		
 		this.linearLayout = new LinearLayout(context);
 		this.viewReference = new HashMap<String, String>();
+		this.valueReference = new HashMap<String, Object>();
 		this.viewMap = new HashMap<String, List<View>>();
 		this.viewList = new ArrayList<View>();
         linearLayout.setLayoutParams(new LayoutParams(
@@ -92,6 +95,7 @@ public class Tab {
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         linearLayout.addView(view);
+                        valueReference.put(path, "");
                         break;
                     case Constants.DATATYPE_DECIMAL:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
@@ -99,6 +103,7 @@ public class Tab {
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                         linearLayout.addView(view);
+                        valueReference.put(path, "");
                         break;
                     case Constants.DATATYPE_LONG:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
@@ -106,12 +111,17 @@ public class Tab {
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         linearLayout.addView(view);
+                        valueReference.put(path, "");
                         break;
                     // set input type as date picker
                     case Constants.DATATYPE_DATE:
                     	CustomDatePicker date = new CustomDatePicker(this.context, attributeName, attributeType, path);
-                        view = date;
+                    	Time now = new Time();
+        				now.setToNow();
+        				date.updateDate(now.year, now.month, now.monthDay);
+                    	view = date;
                         linearLayout.addView(view);
+                        valueReference.put(path, DateUtil.getDate(date));
                         break;
                     // get the text area
                     case Constants.DATATYPE_TEXT:
@@ -119,11 +129,18 @@ public class Tab {
                         view = text;
                         ((TextView) view).setLines(5);
                         linearLayout.addView(view);
+                        valueReference.put(path, "");
                         break;
                     // set input type as time picker
                     case Constants.DATATYPE_TIME:
-                        view = new CustomTimePicker(this.context, attributeName, attributeType, path);
+                    	CustomTimePicker time = new CustomTimePicker(this.context, attributeName, attributeType, path);
+                    	Time timeNow = new Time();
+                        timeNow.setToNow();
+        				time.setCurrentHour(timeNow.hour);
+        				time.setCurrentMinute(timeNow.minute);
+        				view = time;
                         linearLayout.addView(view);
+        				valueReference.put(path, DateUtil.getTime(time));
                         break;
                     // default is edit text
                     default:
@@ -138,6 +155,7 @@ public class Tab {
                     	} else {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;
+                            valueReference.put(path, "");
                             linearLayout.addView(view);
                     	}
                         break;
@@ -201,6 +219,7 @@ public class Tab {
                             selectLayout.addView(radioGroupLayout);
                             view = selectLayout;
                             linearLayout.addView(selectLayout);
+                            valueReference.put(path, "");
                         // List
                         } else if ("compact".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
                         	CustomListView list = new CustomListView(this.context);
@@ -231,8 +250,11 @@ public class Tab {
                                     android.R.layout.simple_spinner_dropdown_item,
                                     choices);
                             spinner.setAdapter(arrayAdapter);
+                            spinner.setSelection(0);
                             view = spinner;
                             linearLayout.addView(spinner);
+                            NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
+            				valueReference.put(path, pair.getValue());
                         }
                         break;
                 }
@@ -259,6 +281,7 @@ public class Tab {
                         }
                         view = selectLayout;
                         linearLayout.addView(selectLayout);
+                        valueReference.put(path, new ArrayList<NameValuePair>());
                 }
                 if(attributeName != null){
                 	addViewMappings(attributeName, view);
@@ -323,9 +346,22 @@ public class Tab {
 		viewList.add(view);
 	}
 	
+	public List<View> getAllViews(){
+		return this.viewList;
+	}
+
 	public List<View> getViews(String name) {
 		return this.viewMap.get(name);
 	}
+	
+	public Object getStoredValue(String ref){
+		return this.valueReference.get(ref);
+	}
+
+	public void setValueReference(String ref, Object value){
+		this.valueReference.put(ref, value);
+	}
+
 	/**
      * Rendering image slide for select one
      * 
@@ -421,17 +457,20 @@ public class Tab {
 			if (v instanceof CustomEditText) {
 				CustomEditText text = (CustomEditText) v;
 				text.setText("");
+				valueReference.put(text.getRef(), "");
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker date = (CustomDatePicker) v;
 				Time now = new Time();
 				now.setToNow();
 				date.updateDate(now.year, now.month, now.monthDay);
+				valueReference.put(date.getRef(), DateUtil.getDate(date));
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker time = (CustomTimePicker) v;
 				Time now = new Time();
 				now.setToNow();
 				time.setCurrentHour(now.hour);
 				time.setCurrentMinute(now.minute);
+				valueReference.put(time.getRef(), DateUtil.getTime(time));
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) v;
 				View child0 = layout.getChildAt(0);
@@ -445,6 +484,7 @@ public class Tab {
 							rb.setChecked(false);
 						}
 					}
+					valueReference.put(layout.getRef(), "");
 				}else if (child0 instanceof CheckBox){
 					for(int i = 0; i < layout.getChildCount(); ++i){
 						View view = layout.getChildAt(i);
@@ -453,10 +493,13 @@ public class Tab {
 							cb.setChecked(false);
 						}
 					}
+					valueReference.put(layout.getRef(), new ArrayList<NameValuePair>());
 				}
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
 				spinner.setSelection(0);
+				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
+				valueReference.put(spinner.getRef(), pair.getValue());
 			}
 		}
 	}

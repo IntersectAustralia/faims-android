@@ -132,6 +132,27 @@ public class TabGroup extends Fragment {
 			if (tab.getName().equals(name)) {
 				TabWidget widget = tabHost.getTabWidget();
 				widget.getChildAt(i).setVisibility(View.VISIBLE);
+				tabHost.setCurrentTab(i);
+				return tab;
+			}
+		}
+		return null;
+	}
+
+	public void hideTab(String name){
+		for (int i = 0; i < tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			if (tab.getName().equals(name)) {
+				TabWidget widget = tabHost.getTabWidget();
+				widget.getChildAt(i).setVisibility(View.GONE);
+			}
+		}
+	}
+
+	public Tab getTab(String name){
+		for (int i = 0; i < tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			if (tab.getName().equals(name)) {
 				return tab;
 			}
 		}

@@ -1,0 +1,60 @@
+Object locationObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+Object typeObj = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+
+populateRadioGroup("entity/tab3/location", locationObj);
+populateCheckBoxGroup("entity/tab3/type", typeObj);
+
+showRelationshipTab() {
+	showTabGroup("relationship");
+}
+
+onEvent("entity/tab1/next", "click", "showRelationshipTab()");
+
+String e;
+String r;
+
+saveEntity(entity_id) {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("entity/tab2/name"), null, null, null));
+	attributes.add(createEntityAttribute("count", getFieldValue("entity/tab2/count-description"), null, getFieldValue("entity/tab2/count"), getFieldValue("entity/tab2/count-certainty")));
+	attributes.add(createEntityAttribute("date", getFieldValue("entity/tab2/date"), null, null, null));
+	attributes.add(createEntityAttribute("time", getFieldValue("entity/tab2/time"), null, null, null));
+	attributes.add(createEntityAttribute("location", getFieldValue("entity/tab3/location"), null, null, getFieldValue("entity/tab3/location-certainty")));
+	List values = getFieldValue("entity/tab3/type");
+	for (Object o : values) {
+		attributes.add(createEntityAttribute("type", o.getName(), null, null, null));
+	}
+	e = saveArchEnt(entity_id, "Simple", null, attributes);
+	showTab("entity/tab3",e);
+	cancelTab("entity/tab3",false);
+	showTab("entity/tab2",e);
+	cancelTab("entity/tab2",false);
+	showTab("entity/tab1",e);
+}
+
+saveRelationship(rel_id) {
+	List attributes = createAttributeList();
+	attributes.add(createRelationshipAttribute("name", getFieldValue("relationship/tab1/name"), null));
+	r = saveRel(rel_id, "abovebelow", null, attributes);
+	showTab("relationship/tab1",r);
+}
+
+cancelTabAndShowTab(String tabToCancel, String tabToShow, boolean warn){
+	cancelTab(tabToCancel,warn);
+	showTab(tabToShow);
+}
+
+onEvent("entity/tab1/update", "click", "saveEntity(e)");
+onEvent("relationship/tab1/update", "click", "saveRelationship(r)");
+
+onEvent("entity/tab1/save", "click", "saveEntity(null)");
+onEvent("relationship/tab1/save", "click", "saveRelationship(null)");
+
+onEvent("entity/tab1/showtab2", "click", "showTab(\"entity/tab2\")");
+onEvent("entity/tab1/showtab3", "click", "showTab(\"entity/tab3\")");
+onEvent("entity/tab1/newtab2", "click", "newTab(\"entity/tab2\")");
+onEvent("entity/tab1/newtab3", "click", "newTab(\"entity/tab3\")");
+onEvent("entity/tab2/cancel", "click", "cancelTabAndShowTab(\"entity/tab2\",\"entity/tab1\",true)");
+onEvent("entity/tab3/cancel", "click", "cancelTabAndShowTab(\"entity/tab3\",\"entity/tab1\",true)");
+
+onEvent("relationship/tab1/cancel", "click", "cancelTab(\"relationship/tab1\",true)");
