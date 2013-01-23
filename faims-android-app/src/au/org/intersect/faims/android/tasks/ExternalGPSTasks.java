@@ -85,6 +85,9 @@ public class ExternalGPSTasks implements Runnable {
 	            long end = start + 1000; // check for 0.5 seconds to get valid GPGGA message
 	            while (System.currentTimeMillis() < end){
 	                String nmeaMessage = br.readLine();
+	                if(nmeaMessage == null){
+	                	break;
+	                }
 	                if (nmeaMessage.startsWith("$GPGGA")) {
 	                    if(hasValidGGAMessage()){
 	                        break;
