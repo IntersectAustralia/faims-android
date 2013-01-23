@@ -572,13 +572,7 @@ public class BeanShellLinker {
 					}
 				}else if (customLinearLayout.getChildAt(0) instanceof RadioGroup){
 					RadioGroup rg = (RadioGroup) customLinearLayout.getChildAt(0);
-					for(int i = 0; i < rg.getChildCount(); ++i){
-						View view = rg.getChildAt(i);
-						if (view instanceof CustomRadioButton){
-							CustomRadioButton rb = (CustomRadioButton) view;
-							rb.setChecked(false);
-						}
-					}
+					rg.clearCheck();
 				}
 			}
 		}
