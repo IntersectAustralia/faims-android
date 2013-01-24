@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.util;
+package au.org.intersect.faims.android.managers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,7 @@ import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
+import au.org.intersect.faims.android.util.FAIMSLog;
 
 public class DatabaseManager {
 

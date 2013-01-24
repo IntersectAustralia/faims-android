@@ -17,7 +17,6 @@ import android.widget.TabHost;
 import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
-import au.org.intersect.faims.android.util.BeanShellLinker;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
 @SuppressLint("ValidFragment")

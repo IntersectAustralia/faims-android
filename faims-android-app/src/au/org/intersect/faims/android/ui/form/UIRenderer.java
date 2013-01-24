@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.util;
+package au.org.intersect.faims.android.ui.form;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,8 +16,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.ui.form.Tab;
-import au.org.intersect.faims.android.ui.form.TabGroup;
+import au.org.intersect.faims.android.util.FAIMSLog;
 
 /**
  * Class that reads the ui defintion file and render the UI

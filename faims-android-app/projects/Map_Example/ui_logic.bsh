@@ -7,14 +7,14 @@ setupMap(id, lat, lon) {
 }
 
 showMapTab() {
-	//setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f);
-	setupMap("tabgroup1/tab2/map", -33.58f, 151.23f);
+	setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
+	//setupMap("tabgroup1/tab2/map", -33.58f, 151.23f); // sydney
 	showTab("tabgroup1/tab2");
 	addVectorLayers();
 }
 
 showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f);
+	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f); // sydney
 	showTabGroup("tabgroup2");
 	
 	refreshLayers();

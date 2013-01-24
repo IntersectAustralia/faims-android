@@ -1,4 +1,4 @@
-package com.nutiteq.layers.vector;
+package au.org.intersect.faims.android.nutiteq;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

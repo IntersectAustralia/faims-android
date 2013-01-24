@@ -1,4 +1,4 @@
-package com.nutiteq.layers.vector;
+package au.org.intersect.faims.android.nutiteq;
 
 import java.util.ArrayList;
 import java.util.List;

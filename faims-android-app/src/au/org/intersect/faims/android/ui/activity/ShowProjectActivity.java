@@ -11,16 +11,16 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.gps.GPSDataManager;
+import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.DialogType;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
-import au.org.intersect.faims.android.util.BeanShellLinker;
-import au.org.intersect.faims.android.util.DatabaseManager;
+import au.org.intersect.faims.android.ui.form.BeanShellLinker;
+import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
-import au.org.intersect.faims.android.util.UIRenderer;
 
 public class ShowProjectActivity extends FragmentActivity implements IDialogListener {
 
