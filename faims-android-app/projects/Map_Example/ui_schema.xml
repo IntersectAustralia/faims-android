@@ -30,10 +30,21 @@
                   <layerActions></layerActions>
                   <layerActionBtn></layerActionBtn>
               </tab1>
+              <tab2>
+                  <entity></entity>
+                  <name></name>
+                  <value></value>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab2>
           </tabgroup2>
         </faims>
       </instance>
       <bind nodeset="/faims/tabgroup2/tab1/action" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab2/name" type="string"/>
+      <bind nodeset="/faims/tabgroup2/tab2/value" type="decimal"/>
     </model>
   </h:head>
 
@@ -123,6 +134,34 @@
         <trigger ref="layerActionBtn">
             <label>Ok</label>
         </trigger>
+      </group>
+      <group ref="tab2">
+          <label>Entity</label>
+          <select1 ref="entity">
+              <label>Entity</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name">
+              <label>Name:</label>
+          </input>
+          <input ref="value">
+              <label>Value:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
       </group>
     </group>
     
