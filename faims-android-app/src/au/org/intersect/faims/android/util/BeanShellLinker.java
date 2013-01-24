@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import org.javarosa.core.model.SelectChoice;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
@@ -821,15 +819,26 @@ public class BeanShellLinker {
 						}
 						rg.removeAllViews();
 						for (CustomRadioButton rb : buttons) {
-								CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
-	                            radioButton.setText(rb.getText());
-	                            radioButton.setValue(rb.getValue());
-	                            if (rb.getValue().toString().equalsIgnoreCase(value)){
-	                            	radioButton.setChecked(true);
-								}
-	                            rg.addView(radioButton);
+							CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
+                            radioButton.setText(rb.getText());
+                            radioButton.setValue(rb.getValue());
+                            if (rb.getValue().toString().equalsIgnoreCase(value)){
+                            	radioButton.setChecked(true);
+							}
+                            rg.addView(radioButton);
                         	
                         }
+						
+//						for(int i = 0; i < rg.getChildCount(); ++i){
+//							View view = rg.getChildAt(i);
+//							if (view instanceof CustomRadioButton){
+//								CustomRadioButton rb = (CustomRadioButton) view;
+//								if (rb.getValue().toString().equalsIgnoreCase(value)){
+//	                            	rb.setChecked(true);
+//	                            	break;
+//								}
+//							}
+//						}
 					}else if (child0 instanceof CheckBox){
 						for(int i = 0; i < ll.getChildCount(); ++i){
 							View view = ll.getChildAt(i);
@@ -1036,11 +1045,7 @@ public class BeanShellLinker {
 		
 		Object obj = renderer.getViewByRef(ref);
 
-		if (obj instanceof LinearLayout && valuesObj instanceof ArrayList){
-			LinearLayout ll = (LinearLayout) obj;
-			
-			View child0 = ll.getChildAt(0);
-			
+		if (valuesObj instanceof ArrayList){
 			ArrayList<NameValuePair> pairs = null;
 			boolean isList = false;
 			try {
@@ -1062,29 +1067,42 @@ public class BeanShellLinker {
 					pairs.add(new NameValuePair(list.get(1), list.get(0)));
 				}
 			}
-			
-			if( child0 instanceof CheckBox){
-				ll.removeAllViews();
+			if(obj instanceof LinearLayout){
+				LinearLayout ll = (LinearLayout) obj;
 				
-				for (NameValuePair pair : pairs) {
-					CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
-                    checkBox.setText(pair.getName());
-                    checkBox.setValue(pair.getValue());
-                    ll.addView(checkBox);
-				}
-			}
-			else if (child0 instanceof RadioGroup){
-				RadioGroup rg = (RadioGroup) child0;
-				rg.removeAllViews();
+				View child0 = ll.getChildAt(0);
 				
-				int rbId = 0;
-				for (NameValuePair pair : pairs) {
-					CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
-                    radioButton.setId(rbId++);
-                    radioButton.setText(pair.getName());
-                    radioButton.setValue(pair.getValue());
-                    rg.addView(radioButton);
+				
+				if( child0 instanceof CheckBox){
+					ll.removeAllViews();
+					
+					for (NameValuePair pair : pairs) {
+						CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
+	                    checkBox.setText(pair.getName());
+	                    checkBox.setValue(pair.getValue());
+	                    ll.addView(checkBox);
+					}
 				}
+				else if (child0 instanceof RadioGroup){
+					RadioGroup rg = (RadioGroup) child0;
+					rg.removeAllViews();
+					
+					int rbId = 0;
+					for (NameValuePair pair : pairs) {
+						CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
+	                    radioButton.setId(rbId++);
+	                    radioButton.setText(pair.getName());
+	                    radioButton.setValue(pair.getValue());
+	                    rg.addView(radioButton);
+					}
+				}
+			}else if(obj instanceof CustomListView){
+				CustomListView list = (CustomListView) obj;
+                ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+                        list.getContext(),
+                        android.R.layout.simple_list_item_1,
+                        pairs);
+                list.setAdapter(arrayAdapter);
 			}
 		}
 	}
