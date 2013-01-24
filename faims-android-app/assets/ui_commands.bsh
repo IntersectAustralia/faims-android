@@ -109,6 +109,10 @@ populateCheckBoxGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
 
+populateList(String ref, Collection values){
+	linker.populateList(ref, values);
+}
+
 populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
