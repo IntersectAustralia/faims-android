@@ -829,16 +829,6 @@ public class BeanShellLinker {
                         	
                         }
 						
-//						for(int i = 0; i < rg.getChildCount(); ++i){
-//							View view = rg.getChildAt(i);
-//							if (view instanceof CustomRadioButton){
-//								CustomRadioButton rb = (CustomRadioButton) view;
-//								if (rb.getValue().toString().equalsIgnoreCase(value)){
-//	                            	rb.setChecked(true);
-//	                            	break;
-//								}
-//							}
-//						}
 					}else if (child0 instanceof CheckBox){
 						for(int i = 0; i < ll.getChildCount(); ++i){
 							View view = ll.getChildAt(i);
@@ -1087,10 +1077,8 @@ public class BeanShellLinker {
 					RadioGroup rg = (RadioGroup) child0;
 					rg.removeAllViews();
 					
-					int rbId = 0;
 					for (NameValuePair pair : pairs) {
 						CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
-	                    radioButton.setId(rbId++);
 	                    radioButton.setText(pair.getName());
 	                    radioButton.setValue(pair.getValue());
 	                    rg.addView(radioButton);
