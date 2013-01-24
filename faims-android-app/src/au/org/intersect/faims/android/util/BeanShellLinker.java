@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.javarosa.core.model.SelectChoice;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
@@ -578,16 +580,7 @@ public class BeanShellLinker {
 			ArchEntity archEntity = (ArchEntity) archEntityObj;
 			try {
 				for(Tab tab : tabGroup.getTabs()){
-					tab.clearViews();
-			    }
-				for(Tab tab : tabGroup.getTabs()){
-					for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
-			    		if(tab.hasView(entityAttribute.getName())){
-			    			List<View> views = tab.getViews(entityAttribute.getName());
-			    			if (views != null)
-			    				loadArchEntFieldsValue(tab, entityAttribute, views);
-			    		}
-			    	}
+					reinitiateArchEntFieldsValue(tab, archEntity);
 			    }
 			} catch (Exception e) {
 				Log.e("FAIMS", "Exception showing tab group and load value",e);
@@ -605,16 +598,7 @@ public class BeanShellLinker {
 			Relationship relationship = (Relationship) relationshipObj;
 			try {
 				for(Tab tab : tabGroup.getTabs()){
-					tab.clearViews();
-			    }
-				for(Tab tab : tabGroup.getTabs()){
-					for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
-			    		if(tab.hasView(relationshipAttribute.getName())){
-			    			List<View> views = tab.getViews(relationshipAttribute.getName());
-			    			if (views != null)
-			    				loadRelationshipFieldsValue(tab,relationshipAttribute, views);
-			    		}
-			    	}
+					reinitiateRelationshipFieldsValue(tab, relationship);
 			    }
 			} catch (Exception e) {
 				Log.e("FAIMS", "Exception showing tab group and load value",e);
@@ -631,17 +615,20 @@ public class BeanShellLinker {
 		if(archEntityObj instanceof ArchEntity){
 			ArchEntity archEntity = (ArchEntity) archEntityObj;
 			try {
-				Collection<EntityAttribute> attributes = archEntity.getAttributes();
-				tab.clearViews();
-			    for (EntityAttribute entityAttribute : attributes) {
-			    	if(tab.hasView(entityAttribute.getName())){
-			    		List<View> views = tab.getViews(entityAttribute.getName());
-			    		if (views != null)
-			    			loadArchEntFieldsValue(tab, entityAttribute, views);
-			    	}
-			    }
+				reinitiateArchEntFieldsValue(tab, archEntity);
 			} catch (Exception e) {
 				Log.e("FAIMS", "Exception showing tab and load value",e);
+			}
+		}
+	}
+
+	private void reinitiateArchEntFieldsValue(Tab tab, ArchEntity archEntity) {
+		tab.clearViews();
+		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
+			if(tab.hasView(entityAttribute.getName())){
+				List<View> views = tab.getViews(entityAttribute.getName());
+				if (views != null)
+					loadArchEntFieldsValue(tab, entityAttribute, views);
 			}
 		}
 	}
@@ -655,17 +642,21 @@ public class BeanShellLinker {
 		if(relationshipObj instanceof Relationship){
 			Relationship relationship = (Relationship) relationshipObj;
 			try {
-				Collection<RelationshipAttribute> attributes = relationship.getAttributes();
-				tab.clearViews();
-			    for (RelationshipAttribute relationshipAttribute : attributes) {
-			    	if(tab.hasView(relationshipAttribute.getName())){
-			    		List<View> views = tab.getViews(relationshipAttribute.getName());
-			    		if (views != null)
-			    			loadRelationshipFieldsValue(tab, relationshipAttribute, views);
-			    	}
-			    }
+				reinitiateRelationshipFieldsValue(tab, relationship);
 			} catch (Exception e) {
 				Log.e("FAIMS", "Exception showing tab and load value",e);
+			}
+		}
+	}
+
+	private void reinitiateRelationshipFieldsValue(Tab tab,
+			Relationship relationship) {
+		tab.clearViews();
+		for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
+			if(tab.hasView(relationshipAttribute.getName())){
+				List<View> views = tab.getViews(relationshipAttribute.getName());
+				if (views != null)
+					loadRelationshipFieldsValue(tab, relationshipAttribute, views);
 			}
 		}
 	}
@@ -821,16 +812,24 @@ public class BeanShellLinker {
 					
 					if (child0 instanceof RadioGroup){
 						RadioGroup rg = (RadioGroup) child0;
+						List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
 						for(int i = 0; i < rg.getChildCount(); ++i){
 							View view = rg.getChildAt(i);
 							if (view instanceof CustomRadioButton){
-								CustomRadioButton rb = (CustomRadioButton) view;
-								if (rb.getValue().toString().equalsIgnoreCase(value)){
-									rb.setChecked(true);
-									break;
-								}
+								buttons.add((CustomRadioButton) view);
 							}
 						}
+						rg.removeAllViews();
+						for (CustomRadioButton rb : buttons) {
+								CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
+	                            radioButton.setText(rb.getText());
+	                            radioButton.setValue(rb.getValue());
+	                            if (rb.getValue().toString().equalsIgnoreCase(value)){
+	                            	radioButton.setChecked(true);
+								}
+	                            rg.addView(radioButton);
+                        	
+                        }
 					}else if (child0 instanceof CheckBox){
 						for(int i = 0; i < ll.getChildCount(); ++i){
 							View view = ll.getChildAt(i);

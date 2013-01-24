@@ -208,10 +208,8 @@ public class Tab {
                             selectLayout.setOrientation(LinearLayout.VERTICAL);
                             RadioGroup radioGroupLayout = new RadioGroup(this.context);
                             radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
-                            int rbId = 0;
                             for (final SelectChoice selectChoice : input.getSelectChoices()) {
                             	CustomRadioButton radioButton = new CustomRadioButton(this.context);
-                                radioButton.setId(rbId++);
                                 radioButton.setText(selectChoice.getLabelInnerText());
                                 radioButton.setValue(selectChoice.getValue());
                                 radioGroupLayout.addView(radioButton);
@@ -477,7 +475,13 @@ public class Tab {
 				
 				if (child0 instanceof RadioGroup){
 					RadioGroup rg = (RadioGroup) child0;
-					rg.clearCheck();
+					for(int i = 0; i < rg.getChildCount(); ++i){
+						View view = rg.getChildAt(i);
+						if (view instanceof CustomRadioButton){
+							CustomRadioButton rb = (CustomRadioButton) view;
+							rb.setChecked(false);
+						}
+					}
 					valueReference.put(layout.getRef(), "");
 				}else if (child0 instanceof CheckBox){
 					for(int i = 0; i < layout.getChildCount(); ++i){
