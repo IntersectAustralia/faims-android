@@ -140,10 +140,11 @@ clearShape() {
 }
 
 clearPoints() {
-	if (currentLayerId == 0) return;
 	System.out.println("layer: " + String.valueOf(currentLayerId));
 	System.out.println(pointIds.toString());
-	clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
+	
+	if (currentLayerId != 0) clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
+	
 	points = new ArrayList();
 	pointIds = new ArrayList();
 }
@@ -154,7 +155,7 @@ onChangeLayers() {
 	} else {
 		layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
 	}
-	if (layerId != currentLayerId) {
+	if (layerId == 0 || layerId != currentLayerId) {
 		clearPoints();
 		currentLayerId = layerId;
 	}
