@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.managers;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,11 +9,16 @@ import java.util.List;
 import jsqlite.Callback;
 import jsqlite.Database;
 import jsqlite.Stmt;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.util.FAIMSLog;
+
+import com.nutiteq.geometry.Geometry;
+import com.nutiteq.utils.Utils;
+import com.nutiteq.utils.WkbRead;
 
 public class DatabaseManager {
 
@@ -47,25 +53,29 @@ public class DatabaseManager {
 			Stmt st;
 			
 			if (entity_id == null) {
+				
 				// create new entity
 				uuid = generateUUID();
 				
-				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
-							   "VALUES (?, 0, ?, 'POLYGON', GeomFromText('GEOMETRYCOLLECTION(POLYGON(101.23 171.82, 201.32 101.5, 215.7 201.953, 101.23 171.82))', 4326), CURRENT_TIMESTAMP);";
-				st = db.prepare(query);
-				st.bind(1, uuid);
-				st.bind(2, entity_type);
-				st.step();
-				st.close();
-				
 			} else {
 				
+				// update entity
 				uuid = entity_id;
+				
 			}
+			
+			String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
+					   "VALUES (?, 0, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+			st = db.prepare(query);
+			st.bind(1, uuid);
+			st.bind(2, entity_type);
+			st.bind(3, geo_data);
+			st.step();
+			st.close();
 			
 			// save entity attributes
 			for (EntityAttribute attribute : attributes) {
-				String query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
+				query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
 							   "SELECT ?, ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
 							   "WHERE attributeName = ? COLLATE NOCASE;";
@@ -125,22 +135,23 @@ public class DatabaseManager {
 				// create new relationship
 				uuid = generateUUID();
 				
-				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
-							   "VALUES (?, 0, ?, 'POLYGON', GeomFromText('GEOMETRYCOLLECTION(POLYGON(101.23 171.82, 201.32 101.5, 215.7 201.953, 101.23 171.82))', 4326), CURRENT_TIMESTAMP);";
-				st = db.prepare(query);
-				st.bind(1, uuid);
-				st.bind(2, rel_type);
-				st.step();
-				st.close();
-				
 			} else {
 				
 				uuid = rel_id;
 			}
 			
+			String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
+					   "VALUES (?, 0, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+			st = db.prepare(query);
+			st.bind(1, uuid);
+			st.bind(2, rel_type);
+			st.bind(3, geo_data);
+			st.step();
+			st.close();
+			
 			// save relationship attributes
 			for (RelationshipAttribute attribute : attributes) {
-				String query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
+				query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
 							   "SELECT ?, ?, attributeId, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
 							   "WHERE attributeName = ? COLLATE NOCASE;";
@@ -294,7 +305,23 @@ public class DatabaseManager {
 				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 				attributes.add(archAttribute);
 			}
-			ArchEntity archEntity = new  ArchEntity(type, attributes);
+			
+			// get vector geometry
+			stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
+			stmt.bind(1, id);
+			List<Geometry> geomList = new ArrayList<Geometry>();
+			if(stmt.step()){
+				Geometry[] g1 = WkbRead.readWkb(
+	                    new ByteArrayInputStream(Utils
+	                            .hexStringToByteArray(stmt.column_string(1))), null);
+				if (g1 != null) {
+		            for (int i = 0; i < g1.length; i++) {
+		                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+		            }
+				}
+			}
+
+			ArchEntity archEntity = new ArchEntity(type, attributes, geomList);
 			
 			db.close();
 
@@ -328,7 +355,23 @@ public class DatabaseManager {
 				relAttribute.setText(stmt.column_string(3));
 				attributes.add(relAttribute);
 			}
-			Relationship relationship = new Relationship(type, attributes);
+			
+			// get vector geometry
+			stmt = db.prepare("SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN ( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);");
+			stmt.bind(1, id);
+			List<Geometry> geomList = new ArrayList<Geometry>();
+			if(stmt.step()){
+				Geometry[] g1 = WkbRead.readWkb(
+	                    new ByteArrayInputStream(Utils
+	                            .hexStringToByteArray(stmt.column_string(1))), null);
+				if (g1 != null) {
+		            for (int i = 0; i < g1.length; i++) {
+		                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+		            }
+				}
+			}
+			
+			Relationship relationship = new Relationship(type, attributes, geomList);
 			
 			db.close();
 
@@ -412,7 +455,7 @@ public class DatabaseManager {
 	private void debugSaveArchEnt(jsqlite.Database db, String uuid) throws Exception {
 
 		// Test various queries
-		db.exec("select count(uuid) from ArchEntity;", createCallback());
+		db.exec("select uuid, AsText(GeoSpatialColumn) from ArchEntity;", createCallback());
 		db.exec("select uuid, valuetimestamp, attributename, freetext, vocabid, measure, certainty from aentvalue left outer join attributekey using (attributeid) where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", createCallback());
 		//db.exec("select attributeid, valuetimestamp from aentvalue where uuid="+uuid+";", cb);
 	}
@@ -464,8 +507,7 @@ public class DatabaseManager {
 		};
 		
 		// Test various queries
-		db.exec("select count(RelationshipID) from Relationship;", cb);
-		db.exec("select count(RelationshipID) from RelnValue;", cb);
+		db.exec("select RelationshipID, AsText(GeoSpatialColumn) from Relationship;", cb);
 		db.exec("select attributename, vocabname, freetext, RelnValueTimestamp " + 
 				"from RelnValue " +
 				"left outer join attributekey using (attributeid) " + 

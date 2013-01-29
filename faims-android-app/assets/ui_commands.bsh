@@ -6,6 +6,10 @@ import au.org.intersect.faims.android.ui.form.NameValuePair;
 import android.graphics.Color;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.components.MapPos;
+import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Polygon;
 
 newTabGroup(String label) {
 	linker.newTabGroup(label);
@@ -67,11 +71,11 @@ onFocus(String ref, String focusCallback, String blurCallback) {
 	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
 }
 
-saveArchEnt(String entity_id, String entity_type, String geo_data, List attributes) {
+saveArchEnt(String entity_id, String entity_type, List geo_data, List attributes) {
 	return linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
 }
 
-saveRel(String rel_id, String rel_type, String geo_data, List attributes) {
+saveRel(String rel_id, String rel_type, List geo_data, List attributes) {
 	return linker.saveRel(rel_id, rel_type, geo_data, attributes);
 }
 
@@ -235,4 +239,18 @@ clearGeometryList(String ref, int layerId, List geomList) {
 
 createPoint(float lat, float lon) {
 	return new MapPos(lon, lat);
+}
+
+getGeometryList(String ref, int layerId) {
+	return linker.getGeometryList(ref, layerId);
+}
+
+drawGeometry(String ref, int layerId, Geometry geom, int color) {
+	if (geom instanceof Point) {
+		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), color);
+	} else if (geom instanceof Line) {
+		return drawLine(ref, layerId, ((Line) geom).getVertexList(), color);
+	} else if (geom instanceof Polygon) {
+		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), color);
+	}
 }

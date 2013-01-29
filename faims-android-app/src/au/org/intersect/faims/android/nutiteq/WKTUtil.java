@@ -52,14 +52,14 @@ public class WKTUtil {
 	*/
 	
 	public static String collectionToWKT(List<Geometry> geometryList) {
-		if (geometryList.size() == 0) return "";
+		if (geometryList == null || geometryList.size() == 0) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("GEOMETRYCOLLECTION (");
 		boolean first = true;
 		for (Geometry geometry : geometryList) {
 			if (first) {
-				first = true;
+				first = false;
 			} else {
 				sb.append(", ");
 			}

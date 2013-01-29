@@ -127,6 +127,8 @@ updateEntityRelationship() {
 	populateDropDown("tabgroupc/tab1/relationship", relationships);
 	populateDropDown("tabgroupd/tab1/entity", entities);
 	populateDropDown("tabgroupd/tab2/relationship", relationships);
+	
+	populateList("tabgroupd/tab1/locations",entities);
 }
 
 saveEntityRelationship() {
@@ -209,7 +211,7 @@ gotoGroup(String n) {
 
 gotoList(){
  gotoGroup("d");
- populateList("tabgroupd/tab1/locations",locations);
+ 
 }
 
 onEvent("tabgroupa/tab4/save", "click", "saveEntity()");

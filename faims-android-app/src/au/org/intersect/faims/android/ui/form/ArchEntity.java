@@ -1,6 +1,9 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.util.Collection;
+import java.util.List;
+
+import com.nutiteq.geometry.Geometry;
 
 public class ArchEntity {
 
@@ -8,9 +11,12 @@ public class ArchEntity {
 	
 	private Collection<EntityAttribute> attributes;
 
-	public ArchEntity(String type, Collection<EntityAttribute> attributes){
+	private List<Geometry> geometryList;
+
+	public ArchEntity(String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList){
 		this.type = type;
 		this.attributes = attributes;
+		this.geometryList = geometryList;
 	}
 
 	public String getType() {
@@ -19,5 +25,9 @@ public class ArchEntity {
 
 	public Collection<EntityAttribute> getAttributes() {
 		return attributes;
+	}
+	
+	public List<Geometry> getGeometryList() {
+		return geometryList;
 	}
 }

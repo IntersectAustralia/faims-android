@@ -211,8 +211,13 @@ onEvent("tabgroup2/tab2/save", "click", "saveEntity()");
 onEvent("tabgroup2/tab2/update", "click", "updateEntity(getFieldValue(\"tabgroup2/tab2/entity\"))");
 onEvent("tabgroup2/tab2/load", "click", "loadEntity()");
 
+onEvent("tabgroup2/tab3/clear", "click", "clearRelationship()");
+onEvent("tabgroup2/tab3/save", "click", "saveRelationship()");
+onEvent("tabgroup2/tab3/update", "click", "updateRelationship(getFieldValue(\"tabgroup2/tab3/relationship\"))");
+onEvent("tabgroup2/tab3/load", "click", "loadRelationship()");
+
 refreshEntities() {
-	Object entities = fetchAll("select uuid, uuid from archentity;");
+	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
 	
 	populateDropDown("tabgroup2/tab2/entity", entities);
 }
@@ -227,12 +232,21 @@ saveEntity() {
 }
 
 updateEntity(String entityId) {
+	
 
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, null));
 	attributes.add(createEntityAttribute("value", null, null, getFieldValue("tabgroup2/tab2/value"), null));
 	
-	String id = saveArchEnt(entityId, "simple", null, attributes);
+	List collection = null;
+	if (currentLayerId != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", currentLayerId); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	String id = saveArchEnt(entityId, "simple", collection, attributes);
 	
 	refreshEntities();
 	
@@ -254,6 +268,70 @@ loadEntity() {
 		}
 	}
 	
+	System.out.println(entity.getGeometryList());
+	
+	for (Geometry geom : entity.getGeometryList()) {
+		drawGeometry("tabgroup2/tab1/map", currentLayerId, geom, Color.MAGENTA);
+	}
+	
 }
 
 refreshEntities();
+
+refreshRelationships() {
+	Object relationships = fetchAll("select relationshipid, relationshipid from relationship group by relationshipid;");
+	
+	populateDropDown("tabgroup2/tab3/relationship", relationships);
+}
+
+clearRelationship() {
+	setFieldValue("tabgroup2/tab3/name", "");
+}
+
+saveRelationship() {
+	updateRelationship(null);
+}
+
+updateRelationship(String relId) {
+	
+
+	List attributes = createAttributeList();
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null));
+	
+	List collection = null;
+	if (currentLayerId != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", currentLayerId); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	String id = saveRel(relId, "abovebelow", collection, attributes);
+	
+	refreshRelationships();
+	
+	return id;
+}
+
+loadRelationship() {
+	
+	relId = getFieldValue("tabgroup2/tab3/relationship");
+	
+	Object relationship = fetchRel(relId);
+	
+	for (Object attribute : relationship.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup2/tab3/name", attribute.getText());
+		}
+	}
+	
+	System.out.println(relationship.getGeometryList());
+	
+	for (Geometry geom : relationship.getGeometryList()) {
+		drawGeometry("tabgroup2/tab1/map", currentLayerId, geom, Color.MAGENTA);
+	}
+	
+}
+
+refreshRelationships();

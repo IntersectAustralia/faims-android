@@ -39,12 +39,21 @@
                   <update></update>
                   <load></load>
               </tab2>
+              <tab3>
+                  <relationship></relationship>
+                  <name></name>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab3>
           </tabgroup2>
         </faims>
       </instance>
       <bind nodeset="/faims/tabgroup2/tab1/action" type="string"/>
       <bind nodeset="/faims/tabgroup2/tab2/name" type="string"/>
       <bind nodeset="/faims/tabgroup2/tab2/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup2/tab3/value" type="string"/>
     </model>
   </h:head>
 
@@ -149,6 +158,31 @@
           </input>
           <input ref="value">
               <label>Value:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+      <group ref="tab3">
+          <label>Relationship</label>
+          <select1 ref="relationship">
+              <label>Relationship</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name">
+              <label>Name:</label>
           </input>
           <trigger ref="clear">
               <label>Clear</label>

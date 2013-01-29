@@ -142,4 +142,45 @@ public class CanvasLayer extends GeometryLayer {
 		return geomId++;
 	}
 
+	public List<Geometry> getGeometryList() {
+		return transformGeometryList(objects.getAll());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Geometry transformGeometry(Geometry geom) {
+		if (geom instanceof Point) {
+			Point p = (Point) geom;
+			return new Point(transformVertex(p.getMapPos()), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
+		} else if (geom instanceof Line) {
+			Line l = (Line) geom;
+			return new Line(transformVertices(l.getVertexList()), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
+		} else if (geom instanceof Polygon) {
+			Polygon p = (Polygon) geom;
+			return new Polygon(transformVertices(p.getVertexList()), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
+		}
+		return null;
+	}
+	
+	private List<Geometry> transformGeometryList(List<Geometry> geomList) {
+		if (geomList.size() == 0) return null;
+		
+		List<Geometry> newGeomList = new ArrayList<Geometry>();
+		for (Geometry geom : geomList) {
+			newGeomList.add(transformGeometry(geom));
+		}
+		return newGeomList;
+	}
+	
+	private MapPos transformVertex(MapPos v) {
+		return projection.toWgs84(v.x, v.y);
+	}
+	
+	private List<MapPos> transformVertices(List<MapPos> vertices) {
+		List<MapPos> newVertices = new ArrayList<MapPos>();
+		for (MapPos v : vertices) {
+			newVertices.add(projection.toWgs84(v.x, v.y));
+		}
+		return newVertices;
+	}
+
 }

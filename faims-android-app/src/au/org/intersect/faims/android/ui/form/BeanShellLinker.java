@@ -39,12 +39,14 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
+import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.nutiteq.components.MapPos;
+import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Marker;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.raster.GdalMapLayer;
@@ -948,10 +950,10 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public String saveArchEnt(String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) {
+	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 		
-		entity_id = databaseManager.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+		entity_id = databaseManager.saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
 		if (entity_id == null) {
 			showWarning("Database Error", "Could not save arch entity.");
 		}
@@ -959,10 +961,10 @@ public class BeanShellLinker {
 		return entity_id;
 	}
 	
-	public String saveRel(String rel_id, String rel_type, String geo_data, List<RelationshipAttribute> attributes) {
+	public String saveRel(String rel_id, String rel_type, List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
 		FAIMSLog.log();
 		
-		rel_id = databaseManager.saveRel(rel_id, rel_type, geo_data, attributes);
+		rel_id = databaseManager.saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
 		if (rel_id == null) {
 			showWarning("Database Error", "Could not save relationship.");
 		}
@@ -1544,6 +1546,31 @@ public class BeanShellLinker {
 			Log.e("FAIMS","Exception clearing geometry",e);
 		}
 		return 0;
+	}
+	
+	public List<Geometry> getGeometryList(String ref, int layerId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					return canvas.getGeometryList();
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not clear geometry list",e);
+					showWarning("Logic Error", "Could not clear geometry list");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting geometry list",e);
+		}
+		return null;
 	}
 
 	private String convertStreamToString(InputStream stream) {
