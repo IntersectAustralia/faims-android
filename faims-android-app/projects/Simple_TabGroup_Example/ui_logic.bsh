@@ -1,3 +1,26 @@
+onLoadPage() {
+	showToast("This is the entity page");
+}
+
+onShowPage() {
+	showToast("This is the relationship page");
+}
+
+onFocusEntity() {
+	showToast("Focus on Value");
+}
+
+onBlurEntity() {
+	if (!getFieldValue("tabgroup1/tab1/value").equals("")) {
+		showAlert("Message", "Do you want to keep value", "", "setFieldValue(\"tabgroup1/tab1/value\", \"\")");
+	}
+	
+}
+
+onEvent("tabgroup1", "load", "onLoadPage()");
+onEvent("tabgroup2", "show", "onShowPage()");
+onFocus("tabgroup1/tab1/value", "onFocusEntity()", "onBlurEntity()");
+
 Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 Object relationships = fetchAll("select relntypename, relntypename from relntype;");
@@ -127,6 +150,8 @@ updateEntityRelationship() {
 	populateDropDown("tabgroup3/tab1/relationship", relationships);
 	populateDropDown("tabgroup4/tab1/entity", entities);
 	populateDropDown("tabgroup4/tab2/relationship", relationships);
+	
+	populateList("tabgroup5/tab1/entity", entities);
 }
 
 saveEntityRelationship() {
@@ -245,8 +270,19 @@ clearEntity();
 clearRelationship();
 updateEntityRelationship();
 
-selectedName() {
-	System.out.println(getListItemValue());
+selectedEntity() {
+	showToast(getListItemValue());
 }
 
-onEvent("tabgroup5/tab1/names", "click", "selectedName()");
+onEvent("tabgroup5/tab1/entity", "click", "selectedEntity()");
+
+cancelEntity() {
+	cancelTab("tabgroup1/tab1", true);
+}
+
+cancelEntityGroup() {
+	cancelTabGroup("tabgroup1", true);
+}
+
+onEvent("tabgroup1/tab5/cancel", "click", "cancelEntity()");
+onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");

@@ -32,7 +32,7 @@
                   <save></save>
                   <update></update>
                   <clear></clear>
-                  <load></load> 
+                  <load></load>
               </tab4>
               <tab5>
                   <entity></entity>
@@ -40,6 +40,8 @@
                   <show></show>
                   <load></load>
                   <new></new>
+                  <cancel></cancel>
+                  <close></close>
                   <next></next>
               </tab5>
           </tabgroup1>
@@ -89,7 +91,7 @@
           </tabgroup4>
           <tabgroup5>
               <tab1>
-                  <names></names>
+                  <entity></entity>
               </tab1>
           </tabgroup5>
         </faims>
@@ -218,6 +220,12 @@
         </trigger>
         <trigger ref="new">
           <label>New</label>
+        </trigger>
+        <trigger ref="cancel">
+          <label>Cancel</label>
+        </trigger>
+        <trigger ref="close">
+          <label>Close</label>
         </trigger>
         <trigger ref="next">
           <label>Next</label>
@@ -356,24 +364,12 @@
     <group ref="tabgroup5">
       <label>Extra</label>
       <group ref="tab1" faims_scrollable="false">
-          <label>List Example</label>
-          <select1 ref="names" appearance="compact">
-            <label>Name:</label>
+          <label>Entity List Example</label>
+          <select1 ref="entity" appearance="compact">
+            <label>Entity List:</label>
             <item>
-                <label>Name A</label>
-                <value>namea</value>
-            </item>
-            <item>
-                <label>Name B</label>
-                <value>nameb</value>
-            </item>
-            <item>
-                <label>Name C</label>
-                <value>namec</value>
-            </item>
-            <item>
-                <label>Name D</label>
-                <value>named</value>
+                <label>dummy</label>
+                <value>dummy</value>
             </item>
         </select1>
       </group>
