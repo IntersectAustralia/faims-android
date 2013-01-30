@@ -1574,7 +1574,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void lockGeometry(String ref, int geomId, boolean lock) {
+	public void drawGeometryOverlay(String ref, int geomId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -1585,18 +1585,52 @@ public class BeanShellLinker {
 					showWarning("Logic Error", "Could not find geometry.");
 					return ;
 				}
-				if (lock) {
-					mapView.drawOverlayFromGeometry(geom);
-				} else {
-					mapView.replaceGeometryWithOverlay(geomId);
-				}
+				mapView.drawGeometrOverlay(geom);
 			} else {
 				Log.d("FAIMS","Could not find map view");
 				showWarning("Logic Error", "Map does not exist.");
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception locking map view",e);
+			Log.e("FAIMS","Exception drawing geometry overlay",e);
+		}
+	}
+	
+	public void clearGeometryOverlay(String ref) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.drawGeometrOverlay(null);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception clearing geometry overlay",e);
+		}
+	}
+	
+	public void replaceGeometryOverlay(String ref, int geomId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				Geometry geom = mapView.getGeometry(geomId);
+				if (geom == null) {
+					Log.d("FAIMS","Could not find geometry.");
+					showWarning("Logic Error", "Could not find geometry.");
+					return ;
+				}
+				mapView.replaceGeometryOverlay(geomId);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception replacing geometry overlay",e);
 		}
 	}
 

@@ -179,12 +179,17 @@ public class CustomMapView extends MapView {
 		return null;
 	}
 
-	public void drawOverlayFromGeometry(Geometry geom) {
-		this.overlayGeometry = GeometryUtil.worldToScreen(geom, this);
-		drawView.drawGeometry(overlayGeometry);
+	public void drawGeometrOverlay(Geometry geom) {
+		if (geom == null) {
+			this.overlayGeometry = null;
+			drawView.drawGeometry(null);
+		} else {
+			this.overlayGeometry = GeometryUtil.worldToScreen(geom, this);
+			drawView.drawGeometry(overlayGeometry);
+		}
 	}
 	
-	public void replaceGeometryWithOverlay(int geomId) {
+	public void replaceGeometryOverlay(int geomId) {
 		for(int i = 0; i < vectorMap.size(); i++) {
 			int key = vectorMap.keyAt(i);
 			GeometryLayer layer = vectorMap.get(key);
@@ -197,7 +202,6 @@ public class CustomMapView extends MapView {
 				}
 			}
 		}
-		drawView.drawGeometry(null);
 	}
 	
 }

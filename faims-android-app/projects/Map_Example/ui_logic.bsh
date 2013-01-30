@@ -72,26 +72,29 @@ List points = new ArrayList();
 List pointIds = new ArrayList();
 int tool = POINT;
 int currentLayerId = 0;
-int currentGeometry = 0;
+int currentGeometryId = 0;
 
 onMapSelect() {
 	System.out.println("select");
 	
+	if (tool != SELECT_SHAPE) return;
+	
 	geomId = getMapGeometrySelected();
 	System.out.println(geomId);
 	
-	if (currentGeometry == geomId) return;
-	currentGeometry = geomId;
+	if (currentGeometryId == geomId) return;
+	currentGeometryId = geomId;
 	
-	lockGeometry("tabgroup2/tab1/map", currentGeometry, true);
+	drawGeometryOverlay("tabgroup2/tab1/map", currentGeometryId);
 }
 
 onMapClick() {
 	System.out.println("click");
 
-	if (currentGeometry != 0){
-		lockGeometry("tabgroup2/tab1/map", currentGeometry, false);
-		currentGeometry = 0;
+	if (currentGeometryId != 0){
+		replaceGeometryOverlay("tabgroup2/tab1/map", currentGeometryId);
+		clearGeometryOverlay("tabgroup2/tab1/map");
+		currentGeometryId = 0;
 	}
 
 	if (currentLayerId == 0) {
@@ -160,8 +163,8 @@ clearShape() {
 }
 
 clearPoints() {
-	System.out.println("layer: " + String.valueOf(currentLayerId));
-	System.out.println(pointIds.toString());
+	//System.out.println("layer: " + String.valueOf(currentLayerId));
+	//System.out.println(pointIds.toString());
 	
 	if (currentLayerId != 0) clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
 	
