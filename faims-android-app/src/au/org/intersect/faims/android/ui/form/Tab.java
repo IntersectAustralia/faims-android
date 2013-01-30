@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
@@ -146,12 +147,21 @@ public class Tab {
                     default:
                     	// check if map type
                     	if ("true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"))) {
-                    		CustomMapView mapView = new CustomMapView(this.context);
-                    		mapView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
+                    		RelativeLayout mapLayout = new RelativeLayout(this.context);
+                    		mapLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
                     		
+                    		DrawView drawView = new DrawView(this.context);
+                    		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+                    		
+                    		CustomMapView mapView = new CustomMapView(this.context, drawView);
+                    		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
                     		mapView.startMapping();
+                    		
+                    		mapLayout.addView(mapView);
+                    		mapLayout.addView(drawView);
+                    		
                     		view = mapView;
-                    		linearLayout.addView(view);
+                    		linearLayout.addView(mapLayout);
                     	} else {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;

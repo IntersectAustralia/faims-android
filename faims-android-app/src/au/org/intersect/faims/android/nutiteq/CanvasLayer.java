@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.nutiteq;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -31,7 +32,7 @@ public class CanvasLayer extends GeometryLayer {
 	private Quadtree<Geometry> objects;
 	private Activity activity;
 	private SparseArray<Geometry> objectMap;
-	private int geomId = 1;
+	private static int geomId = 1;
 	private Stack<Geometry> geomBuffer;
 	
 	public CanvasLayer(Activity activity, Projection projection) {
@@ -58,7 +59,7 @@ public class CanvasLayer extends GeometryLayer {
 	public int addPoint(MapPos point, int color) {
 		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
 		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
-		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).build();
+		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).setPickingSize(0.25f).build();
 		pointStyleSet.setZoomStyle(0, pointStyle);
 		
 		Point p = new Point(projection.fromWgs84(point.x, point.y), null, pointStyleSet, null);
@@ -103,7 +104,7 @@ public class CanvasLayer extends GeometryLayer {
 
 	public int addLine(List<MapPos> points, int color) {
 		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-        lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).build());
+        lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).setPickingWidth(0.25f).build());
         
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
@@ -181,6 +182,31 @@ public class CanvasLayer extends GeometryLayer {
 			newVertices.add(projection.toWgs84(v.x, v.y));
 		}
 		return newVertices;
+	}
+
+	public int getGeometryId(Geometry geometry) {
+		for(int i = 0; i < objectMap.size(); i++) {
+		   int key = objectMap.keyAt(i);
+		   Geometry object = objectMap.get(key);
+		   if (object == geometry)
+			   return key;
+		}
+		return 0;
+	}
+	
+	public Geometry getGeometry(int geomId) {
+		return objectMap.get(geomId);
+	}
+
+	public int addGeometry(Geometry geom, int color) {
+		if (geom instanceof Point) {
+			return addPoint(((Point) geom).getMapPos(), color);
+		} else if  (geom instanceof Line) {
+			return addLine(((Line) geom).getVertexList(), color);
+		} else if (geom instanceof Polygon) {
+			return addPolygon(((Polygon) geom).getVertexList(), color);
+		}
+		return 0;
 	}
 
 }

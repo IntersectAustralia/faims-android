@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.microedition.khronos.opengles.GL10;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
@@ -57,7 +55,6 @@ import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
-import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
@@ -154,63 +151,6 @@ public class BeanShellLinker {
 							}
 							
 						});
-					} else if (view instanceof CustomMapView) {
-						final CustomMapView mapView = (CustomMapView) view;
-						
-						mapView.getOptions().setMapListener(new MapListener() {
-
-							@Override
-							public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
-								// TODO Auto-generated method stub
-								
-							}
-
-							@Override
-							public void onDrawFrameBefore3D(GL10 arg0,
-									float arg1) {
-								// TODO Auto-generated method stub
-								
-							}
-
-							@Override
-							public void onLabelClicked(VectorElement arg0,
-									boolean arg1) {
-								// TODO Auto-generated method stub
-								
-							}
-
-							@Override
-							public void onMapClicked(double x, double y,
-									boolean arg2) {
-								try {
-									interpreter.set("_map_point_clicked", (new EPSG3857()).toWgs84(x, y));
-									execute(code);
-								} catch (Exception e) {
-									FAIMSLog.log(e);
-								}
-							}
-
-							@Override
-							public void onMapMoved() {
-								// TODO Auto-generated method stub
-								
-							}
-
-							@Override
-							public void onSurfaceChanged(GL10 arg0, int arg1,
-									int arg2) {
-								// TODO Auto-generated method stub
-								
-							}
-
-							@Override
-							public void onVectorElementClicked(
-									VectorElement arg0, double arg1,
-									double arg2, boolean arg3) {
-								Log.d("FAIMS", arg0.toString());
-							}
-							
-						});
 					} else {
 						if (view instanceof Spinner) {
 							((Spinner) view).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -292,6 +232,47 @@ public class BeanShellLinker {
 					}
 				}
 			});
+		}
+	}
+	
+	public void bindMapEvent(String ref, final String clickCallback, final String selectCallback) {
+		try{
+			View view = renderer.getViewByRef(ref);
+			if (view instanceof CustomMapView) {
+				final CustomMapView mapView = (CustomMapView) view;
+				mapView.getOptions().setMapListener(new CustomMapView.CustomMapListener() {
+
+					@Override
+					public void onMapClicked(double x, double y,
+							boolean arg2) {
+						try {
+							interpreter.set("_map_point_clicked", (new EPSG3857()).toWgs84(x, y));
+							execute(clickCallback);
+						} catch (Exception e) {
+							FAIMSLog.log(e);
+						}
+					}
+
+					@Override
+					public void onVectorElementClicked(
+							VectorElement element, double arg1,
+							double arg2, boolean arg3) {
+						try {
+							int geomId = mapView.getGeometryId((Geometry) element);
+							interpreter.set("_map_geometry_selected", geomId);
+							execute(selectCallback);
+						} catch (Exception e) {
+							FAIMSLog.log(e);
+						}
+					}
+					
+				});
+			}
+			else {
+				Log.e("FAIMS","Can't find view for " + ref);
+			}
+		}catch(Exception e){
+			Log.e("FAIMS","Exception binding map event to view",e);
 		}
 	}
 	
@@ -1569,6 +1550,40 @@ public class BeanShellLinker {
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception getting geometry list",e);
+		}
+		return null;
+	}
+	
+	public List<Geometry> lockMapView(String ref, boolean lock) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.setViewLocked(lock);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception locking map view",e);
+		}
+		return null;
+	}
+	
+	public List<Geometry> lockGeometry(String ref, int geomId, boolean lock) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.setGeometryLocked(lock ? geomId : 0);
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception locking map view",e);
 		}
 		return null;
 	}

@@ -60,7 +60,7 @@ onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
 onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
 onEvent("tabgroup2/tab1/create", "click", "onDrawAction()");
 onEvent("tabgroup2/tab1/layerActionBtn", "click", "onLayerAction()");
-onEvent("tabgroup2/tab1/map", "click", "onMapClick()");
+onMapEvent("tabgroup2/tab1/map", "onMapClick()", "onMapSelect()");
 
 POINT = 1;
 LINE = 2;
@@ -72,8 +72,27 @@ List points = new ArrayList();
 List pointIds = new ArrayList();
 int tool = POINT;
 int currentLayerId = 0;
+int currentGeometry = 0;
+
+onMapSelect() {
+	System.out.println("select");
+	
+	geomId = getMapGeometrySelected();
+	if (currentGeometry == geomId) return;
+	currentGeometry = geomId;
+	
+	System.out.println(currentGeometry);
+	lockGeometry("tabgroup2/tab1/map", currentGeometry, true);
+}
 
 onMapClick() {
+	System.out.println("click");
+
+	if (currentGeometry != 0){
+		lockGeometry("tabgroup2/tab1/map", currentGeometry, false);
+		currentGeometry = 0;
+	}
+
 	if (currentLayerId == 0) {
 		showWarning("Logic Error", "No layer selected");
 		return;
@@ -164,15 +183,19 @@ onChangeLayers() {
 onChangeAction() {
 	action = getFieldValue("tabgroup2/tab1/drawActions");
 	if ("draw_point".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
 		if (tool != POINT) clearPoints();
 		tool = POINT;
 	} else if ("draw_line".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
 		if (tool != LINE) clearPoints();
 		tool = LINE;
 	} else if ("draw_polygon".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
 		if (tool != POLYGON) clearPoints();
 		tool = POLYGON;
 	} else if ("select_shape".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", true);
 		if (tool != SELECT_SHAPE) clearPoints();
 		tool = SELECT_SHAPE;
 	}

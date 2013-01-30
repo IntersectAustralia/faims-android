@@ -1,17 +1,73 @@
 package au.org.intersect.faims.android.ui.form;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.nutiteq.CanvasLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
+import com.nutiteq.components.Constraints;
 import com.nutiteq.components.Options;
+import com.nutiteq.components.Range;
+import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CustomMapView extends MapView {
+	
+	public static class CustomMapListener extends MapListener {
+
+		@Override
+		public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onDrawFrameBefore3D(GL10 arg0, float arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onLabelClicked(VectorElement arg0, boolean arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onMapClicked(double arg0, double arg1, boolean arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onMapMoved() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onSurfaceChanged(GL10 arg0, int arg1, int arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onVectorElementClicked(VectorElement arg0, double arg1,
+				double arg2, boolean arg3) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 	
 	private static int cacheId = 9991;
 	
@@ -19,6 +75,13 @@ public class CustomMapView extends MapView {
 	
 	private int vectorId = 1;
 
+	private DrawView drawView;
+	
+	public CustomMapView(Context context, DrawView drawView) {
+		this(context);
+		this.drawView = drawView;
+	}
+	
 	public CustomMapView(Context context) {
 		super(context);
 		
@@ -79,6 +142,42 @@ public class CustomMapView extends MapView {
 	public void setLayerVisible(int layerId, boolean visible) {
 		GeometryLayer layer = vectorMap.get(layerId);
 		layer.setVisible(visible);
+	}
+
+	public void setViewLocked(boolean lock) {
+		if (lock) {
+			this.getConstraints().setTiltRange(new Range(90.0f, 90.0f));
+			this.setTilt(90.0f);
+		} else {
+			this.getConstraints().setTiltRange(Constraints.DEFAULT_TILT_RANGE);
+		}
+	}
+
+	public int getGeometryId(Geometry geometry) {
+		for(int i = 0; i < vectorMap.size(); i++) {
+			int key = vectorMap.keyAt(i);
+			GeometryLayer layer = vectorMap.get(key);
+			if (layer instanceof CanvasLayer) {
+				int geomId = ((CanvasLayer) layer).getGeometryId(geometry);
+				if (geomId > 0) return geomId;
+			}
+		}
+		return 0;
+	}
+
+	public void setGeometryLocked(int geomId) {
+		for(int i = 0; i < vectorMap.size(); i++) {
+			int key = vectorMap.keyAt(i);
+			GeometryLayer layer = vectorMap.get(key);
+			if (layer instanceof CanvasLayer) {
+				Geometry geom = ((CanvasLayer) layer).getGeometry(geomId);
+				if (geom != null) {
+					drawView.setGeometry(GeometryUtil.translateGeometry(geom, -this.getFocusPoint().x, -this.getFocusPoint().y));
+					return;
+				}
+			}
+		}
+		drawView.setGeometry(null);
 	}
 	
 }

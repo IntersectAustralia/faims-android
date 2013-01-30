@@ -62,6 +62,10 @@ setFieldValue(String ref, Object value){
 Object getFieldValue(String ref){
     return linker.getFieldValue(ref);
 }
+
+onMapEvent(String ref, String clickCallback, selectCallback) {
+	linker.bindMapEvent(ref, clickCallback, selectCallback);
+}
     
 onEvent(String ref, String type, String callback) {
 	linker.bindViewToEvent(ref, type, callback);
@@ -253,4 +257,16 @@ drawGeometry(String ref, int layerId, Geometry geom, int color) {
 	} else if (geom instanceof Polygon) {
 		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), color);
 	}
+}
+
+lockMapView(String ref, boolean lock) {
+	linker.lockMapView(ref, lock);
+}
+
+lockGeometry(String ref, int geomId, boolean lock) {
+	linker.lockGeometry(ref, geomId, lock);
+}
+
+getMapGeometrySelected() {
+	return _map_geometry_selected;
 }

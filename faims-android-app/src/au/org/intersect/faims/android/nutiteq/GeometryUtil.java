@@ -29,5 +29,32 @@ public class GeometryUtil {
 		}
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	public static Geometry translateGeometry(Geometry geom, double x, double y) {
+		if (geom instanceof Point) {
+			Point p = (Point) geom;
+			return new Point(translateVertex(p.getMapPos(), x, y), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
+		} else if (geom instanceof Line) {
+			Line l = (Line) geom;
+			return new Line(translateVertices(l.getVertexList(), x, y), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
+		} else if (geom instanceof Polygon) {
+			Polygon p = (Polygon) geom;
+			return new Polygon(translateVertices(p.getVertexList(), x, y), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
+		}
+		return null;
+	}
+	
+	public static MapPos translateVertex(MapPos vertex, double x, double y) {
+		return new MapPos(vertex.x - x, vertex.y - y);
+	}
+	
+	public static List<MapPos> translateVertices(List<MapPos> vertices, double x, double y) {
+		List<MapPos> newVertices = new ArrayList<MapPos>();
+		for (MapPos vertex : vertices) {
+			newVertices.add(translateVertex(vertex, x, y));
+		}
+		return newVertices;
+	}
 	
 }
