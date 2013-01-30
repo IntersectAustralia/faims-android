@@ -1554,7 +1554,7 @@ public class BeanShellLinker {
 		return null;
 	}
 	
-	public List<Geometry> lockMapView(String ref, boolean lock) {
+	public void lockMapView(String ref, boolean lock) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -1568,15 +1568,24 @@ public class BeanShellLinker {
 		catch(Exception e){
 			Log.e("FAIMS","Exception locking map view",e);
 		}
-		return null;
 	}
 	
-	public List<Geometry> lockGeometry(String ref, int geomId, boolean lock) {
+	public void lockGeometry(String ref, int geomId, boolean lock) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.setGeometryLocked(lock ? geomId : 0);
+				Geometry geom = mapView.getGeometry(geomId);
+				if (geom == null) {
+					Log.d("FAIMS","Could not find geometry.");
+					showWarning("Logic Error", "Could not find geometry.");
+					return ;
+				}
+				if (lock) {
+					mapView.drawOverlayFromGeometry(geom);
+				} else {
+					mapView.replaceGeometryWithOverlay(geomId);
+				}
 			} else {
 				Log.d("FAIMS","Could not find map view");
 				showWarning("Logic Error", "Map does not exist.");
@@ -1585,7 +1594,6 @@ public class BeanShellLinker {
 		catch(Exception e){
 			Log.e("FAIMS","Exception locking map view",e);
 		}
-		return null;
 	}
 
 	private String convertStreamToString(InputStream stream) {

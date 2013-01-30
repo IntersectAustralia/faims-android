@@ -21,6 +21,7 @@ public class DrawView extends View {
 		super(context);
 		
 		paint.setColor(Color.CYAN);
+		paint.setStrokeWidth(5.0f);
 		paint.setAntiAlias(true);
 	}
 	
@@ -29,7 +30,7 @@ public class DrawView extends View {
 		if (geometry != null) {
 			if (geometry instanceof Point) {
 				Point p = (Point) geometry;
-				canvas.drawCircle((float) p.getMapPos().x, (float) p.getMapPos().y, 5, paint);
+				canvas.drawCircle((float) p.getMapPos().x, (float) p.getMapPos().y, 5.0f, paint);
 			} else if (geometry instanceof Line) {
 				Line l = (Line) geometry;
 				MapPos lp = null;
@@ -54,8 +55,9 @@ public class DrawView extends View {
 		}
 	}
 	
-	public void setGeometry(Geometry geometry) {
+	public void drawGeometry(Geometry geometry) {
 		this.geometry = geometry;
+		this.invalidate();
 	}
 
 }

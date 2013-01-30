@@ -78,10 +78,11 @@ onMapSelect() {
 	System.out.println("select");
 	
 	geomId = getMapGeometrySelected();
+	System.out.println(geomId);
+	
 	if (currentGeometry == geomId) return;
 	currentGeometry = geomId;
 	
-	System.out.println(currentGeometry);
 	lockGeometry("tabgroup2/tab1/map", currentGeometry, true);
 }
 

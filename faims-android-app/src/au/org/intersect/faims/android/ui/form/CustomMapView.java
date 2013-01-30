@@ -76,6 +76,8 @@ public class CustomMapView extends MapView {
 	private int vectorId = 1;
 
 	private DrawView drawView;
+
+	private Geometry overlayGeometry;
 	
 	public CustomMapView(Context context, DrawView drawView) {
 		this(context);
@@ -165,19 +167,37 @@ public class CustomMapView extends MapView {
 		return 0;
 	}
 
-	public void setGeometryLocked(int geomId) {
+	public Geometry getGeometry(int geomId) {
 		for(int i = 0; i < vectorMap.size(); i++) {
 			int key = vectorMap.keyAt(i);
 			GeometryLayer layer = vectorMap.get(key);
 			if (layer instanceof CanvasLayer) {
 				Geometry geom = ((CanvasLayer) layer).getGeometry(geomId);
+				if (geom != null) return geom;
+			}
+		}
+		return null;
+	}
+
+	public void drawOverlayFromGeometry(Geometry geom) {
+		this.overlayGeometry = GeometryUtil.worldToScreen(geom, this);
+		drawView.drawGeometry(overlayGeometry);
+	}
+	
+	public void replaceGeometryWithOverlay(int geomId) {
+		for(int i = 0; i < vectorMap.size(); i++) {
+			int key = vectorMap.keyAt(i);
+			GeometryLayer layer = vectorMap.get(key);
+			if (layer instanceof CanvasLayer) {
+				CanvasLayer canvas = (CanvasLayer) layer;
+				Geometry geom = canvas.getGeometry(geomId);
 				if (geom != null) {
-					drawView.setGeometry(GeometryUtil.translateGeometry(geom, -this.getFocusPoint().x, -this.getFocusPoint().y));
-					return;
+					canvas.replaceGeometry(geomId, GeometryUtil.screenToWorld(overlayGeometry, this));
+					canvas.updateRenderer();
 				}
 			}
 		}
-		drawView.setGeometry(null);
+		drawView.drawGeometry(null);
 	}
 	
 }

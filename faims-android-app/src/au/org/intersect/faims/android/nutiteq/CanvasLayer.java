@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -55,8 +54,12 @@ public class CanvasLayer extends GeometryLayer {
 			setVisibleElementsList(objList);
 		}
 	}
-
+	
 	public int addPoint(MapPos point, int color) {
+		return addPoint(point, color, geomId++);
+	}
+
+	public int addPoint(MapPos point, int color, int id) {
 		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
 		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
 		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).setPickingSize(0.25f).build();
@@ -67,11 +70,11 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objects.insert(p.getInternalState().envelope, p);
 		
-		objectMap.put(geomId, p);
+		objectMap.put(id, p);
 		
 		Log.d("FAIMS", p.toString());
 		
-		return geomId++;
+		return id;
 	}
 	
 	public void removeGeometry(int geomId) {
@@ -101,8 +104,12 @@ public class CanvasLayer extends GeometryLayer {
 			components.mapRenderers.getMapRenderer().frustumChanged();
 		}
 	}
-
+	
 	public int addLine(List<MapPos> points, int color) {
+		return addLine(points, color, geomId++);
+	}
+	
+	public int addLine(List<MapPos> points, int color, int id) {
 		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
         lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).setPickingWidth(0.25f).build());
         
@@ -115,14 +122,18 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objects.insert(l.getInternalState().envelope, l);
 		
-		objectMap.put(geomId, l);
+		objectMap.put(id, l);
 		
 		Log.d("FAIMS", l.toString());
 		
-		return geomId++;
+		return id;
 	}
 
 	public int addPolygon(List<MapPos> points, int color) {
+		return addPolygon(points, color, geomId++);
+	}
+	
+	public int addPolygon(List<MapPos> points, int color, int id) {
 		PolygonStyle polygonStyle = PolygonStyle.builder().setColor(color).build();
         StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
 		polygonStyleSet.setZoomStyle(0, polygonStyle);
@@ -136,11 +147,11 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objects.insert(p.getInternalState().envelope, p);
 		
-		objectMap.put(geomId, p);
+		objectMap.put(id, p);
 		
 		Log.d("FAIMS", p.toString());
 		
-		return geomId++;
+		return id;
 	}
 
 	public List<Geometry> getGeometryList() {
@@ -197,16 +208,33 @@ public class CanvasLayer extends GeometryLayer {
 	public Geometry getGeometry(int geomId) {
 		return objectMap.get(geomId);
 	}
-
+	
 	public int addGeometry(Geometry geom, int color) {
+		return addGeometry(geom, color, geomId++);
+	}
+
+	public int addGeometry(Geometry geom, int color, int id) {
 		if (geom instanceof Point) {
-			return addPoint(((Point) geom).getMapPos(), color);
+			return addPoint(((Point) geom).getMapPos(), color, id);
 		} else if  (geom instanceof Line) {
-			return addLine(((Line) geom).getVertexList(), color);
+			return addLine(((Line) geom).getVertexList(), color, id);
 		} else if (geom instanceof Polygon) {
-			return addPolygon(((Polygon) geom).getVertexList(), color);
+			return addPolygon(((Polygon) geom).getVertexList(), color, id);
 		}
 		return 0;
+	}
+
+	public void replaceGeometry(int geomId, Geometry geom) {
+		removeGeometry(geomId);
+		
+		geom.attachToLayer(this);
+		
+		objects.insert(geom.getInternalState().envelope, geom);
+		
+		objectMap.put(geomId, geom);
+		
+		Log.d("FAIMS", geom.toString());
+		
 	}
 
 }
