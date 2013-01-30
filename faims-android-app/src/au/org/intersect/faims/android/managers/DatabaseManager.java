@@ -159,7 +159,7 @@ public class DatabaseManager {
 			// save relationship attributes
 			for (RelationshipAttribute attribute : attributes) {
 				query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-							   "SELECT (cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
+							   "SELECT cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
 							   "WHERE attributeName = ? COLLATE NOCASE;";
 				st = db.prepare(query);
