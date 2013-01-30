@@ -13,9 +13,6 @@
               <tab1>
                   <userlist></userlist>
               </tab1>
-              <tab2>
-                  <userlist></userlist>
-              </tab2>
           </user>
           <tabgroup1>
               <tab1>
@@ -125,16 +122,6 @@
     <group ref="user">
       <label>User List</label>
       <group ref="tab1" faims_scrollable="false">
-        <label>User List</label>
-        <select1 ref="userlist" appearance="compact">
-          <label>Users:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-      </group>
-      <group ref="tab2" faims_scrollable="false">
         <label>User List</label>
         <select1 ref="userlist" appearance="compact">
           <label>Users:</label>
