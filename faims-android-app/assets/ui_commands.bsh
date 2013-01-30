@@ -1,3 +1,4 @@
+import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import java.util.List;
@@ -77,6 +78,10 @@ onFocus(String ref, String focusCallback, String blurCallback) {
 
 saveArchEnt(String entity_id, String entity_type, List geo_data, List attributes) {
 	return linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+}
+
+setUser(User user){
+	linker.setUser(user);
 }
 
 saveRel(String rel_id, String rel_type, List geo_data, List attributes) {

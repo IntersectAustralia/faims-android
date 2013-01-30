@@ -233,6 +233,23 @@ gotoGroup(n) {
 	showTabGroup("tabgroup" + n);
 }
 
+populateListForUsers(){
+	Object users = fetchAll("select userid,(fname || ' ' || lname) as name from user;");
+	populateList("user/tab1/userlist",users);
+	populateList("user/tab2/userlist",users);
+}
+
+login(){
+	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	setUser(user);
+	gotoGroup(1);
+}
+
+onEvent("user", "show", "populateListForUsers()");
+onEvent("user/tab1/userlist", "click", "login()");
+onEvent("user/tab2/userlist", "click", "login()");
+
 onEvent("tabgroup1/tab4/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab4/update", "click", "updateEntity(entity_id)");
 onEvent("tabgroup1/tab4/load", "click", "loadEntity()");

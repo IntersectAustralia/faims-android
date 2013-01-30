@@ -23,9 +23,14 @@ import com.nutiteq.utils.WkbRead;
 public class DatabaseManager {
 
 	private String dbname;
+	private String userId;
 
 	public DatabaseManager(String filename) {
 		this.dbname = filename;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type,
@@ -65,18 +70,19 @@ public class DatabaseManager {
 			}
 			
 			String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
-					   "VALUES (?, 0, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+					   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
 			st = db.prepare(query);
 			st.bind(1, uuid);
-			st.bind(2, entity_type);
-			st.bind(3, geo_data);
+			st.bind(2, userId);
+			st.bind(3, entity_type);
+			st.bind(4, geo_data);
 			st.step();
 			st.close();
 			
 			// save entity attributes
 			for (EntityAttribute attribute : attributes) {
 				query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-							   "SELECT ?, ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
+							   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
 							   "WHERE attributeName = ? COLLATE NOCASE;";
 				st = db.prepare(query);
@@ -141,18 +147,19 @@ public class DatabaseManager {
 			}
 			
 			String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
-					   "VALUES (?, 0, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+					   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
 			st = db.prepare(query);
 			st.bind(1, uuid);
-			st.bind(2, rel_type);
-			st.bind(3, geo_data);
+			st.bind(2, userId);
+			st.bind(3, rel_type);
+			st.bind(4, geo_data);
 			st.step();
 			st.close();
 			
 			// save relationship attributes
 			for (RelationshipAttribute attribute : attributes) {
 				query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-							   "SELECT ?, ?, attributeId, ?, CURRENT_TIMESTAMP " + 
+							   "SELECT (cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
 							   "FROM AttributeKey " + 
 							   "WHERE attributeName = ? COLLATE NOCASE;";
 				st = db.prepare(query);
@@ -547,6 +554,10 @@ public class DatabaseManager {
 	}
 	
 	private String generateUUID() {
-		return "0000" + String.valueOf(System.currentTimeMillis());
+		String s = userId;
+		while (s.length() < 5) {
+			s = "0" + s;
+		}
+		return "1"+ s + String.valueOf(System.currentTimeMillis());
 	}
 }
