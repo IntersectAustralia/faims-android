@@ -62,7 +62,7 @@ public class CanvasLayer extends GeometryLayer {
 	public int addPoint(MapPos point, int color, int id) {
 		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
 		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
-		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).setPickingSize(0.25f).build();
+		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).setPickingSize(0.3f).build();
 		pointStyleSet.setZoomStyle(0, pointStyle);
 		
 		Point p = new Point(projection.fromWgs84(point.x, point.y), null, pointStyleSet, null);
@@ -111,7 +111,7 @@ public class CanvasLayer extends GeometryLayer {
 	
 	public int addLine(List<MapPos> points, int color, int id) {
 		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-        lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).setPickingWidth(0.25f).build());
+        lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).setPickingWidth(0.3f).build());
         
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {

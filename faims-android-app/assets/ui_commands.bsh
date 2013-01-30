@@ -263,8 +263,16 @@ lockMapView(String ref, boolean lock) {
 	linker.lockMapView(ref, lock);
 }
 
-lockGeometry(String ref, int geomId, boolean lock) {
-	linker.lockGeometry(ref, geomId, lock);
+drawGeometryOverlay(String ref, int geomId) {
+	linker.drawGeometryOverlay(ref, geomId);
+}
+
+replaceGeometryOverlay(String ref, int geomId) {
+	linker.replaceGeometryOverlay(ref, geomId);
+}
+
+clearGeometryOverlay(String ref) {
+	linker.clearGeometryOverlay(ref);
 }
 
 getMapGeometrySelected() {
