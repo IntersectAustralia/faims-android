@@ -248,7 +248,6 @@ login(){
 
 onEvent("user", "show", "populateListForUsers()");
 onEvent("user/tab1/userlist", "click", "login()");
-onEvent("user/tab2/userlist", "click", "login()");
 
 onEvent("tabgroup1/tab4/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab4/update", "click", "updateEntity(entity_id)");
