@@ -25,6 +25,7 @@
               <tab1>  
                   <drawActions></drawActions> 
                   <create></create>           
+                  <generate></generate>           
                   <map></map>
                   <layers></layers>
                   <layerActions></layerActions>
@@ -104,12 +105,19 @@
                 <value>draw_polygon</value>
             </item>
             <item>
+                <label>Draw Grid</label>
+                <value>draw_grid</value>
+            </item>
+            <item>
                 <label>Select Shape</label>
                 <value>select_shape</value>
             </item>
         </select1>
         <trigger ref="create">
             <label>Create</label>
+        </trigger>
+        <trigger ref="generate">
+            <label>Generate grid</label>
         </trigger>
         <input ref="map" faims_map="true">
             <label>Map:</label>

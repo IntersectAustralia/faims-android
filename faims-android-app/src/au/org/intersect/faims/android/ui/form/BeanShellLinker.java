@@ -1542,10 +1542,35 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					return canvas.getGeometryList();
+					return canvas.getTransformedGeometryList();
 				} catch (Exception e) {
-					Log.e("FAIMS","Could not clear geometry list",e);
-					showWarning("Logic Error", "Could not clear geometry list");
+					Log.e("FAIMS","Could not get geometry list",e);
+					showWarning("Logic Error", "Could not get geometry list");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting geometry list",e);
+		}
+		return null;
+	}
+	
+	public Geometry getGeometry(String ref, int layerId, int geomId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					return canvas.getTransformedGeometry(geomId);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not get geometry",e);
+					showWarning("Logic Error", "Could not get geometry");
 				}
 			} else {
 				Log.d("FAIMS","Could not find map view");

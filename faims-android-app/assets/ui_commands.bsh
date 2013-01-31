@@ -250,8 +250,16 @@ createPoint(float lat, float lon) {
 	return new MapPos(lon, lat);
 }
 
+createPoint(double lat, double lon) {
+	return new MapPos((float) lat, (float) lon);
+}
+
 getGeometryList(String ref, int layerId) {
 	return linker.getGeometryList(ref, layerId);
+}
+
+getGeometry(String ref, int layerId, int geomId) {
+	return linker.getGeometry(ref, layerId, geomId);
 }
 
 drawGeometry(String ref, int layerId, Geometry geom, int color) {

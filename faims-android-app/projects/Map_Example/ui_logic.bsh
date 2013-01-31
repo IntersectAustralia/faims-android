@@ -59,20 +59,27 @@ addVectorLayers() {
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
 onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
 onEvent("tabgroup2/tab1/create", "click", "onDrawAction()");
+onEvent("tabgroup2/tab1/generate", "click", "onGenerateGrid()");
 onEvent("tabgroup2/tab1/layerActionBtn", "click", "onLayerAction()");
 onMapEvent("tabgroup2/tab1/map", "onMapClick()", "onMapSelect()");
 
 POINT = 1;
 LINE = 2;
 POLYGON = 3;
-SELECT_SHAPE = 4;
+GRID = 4;
+SELECT_SHAPE = 5;
 
 List canvasLayers = new ArrayList();
 List points = new ArrayList();
 List pointIds = new ArrayList();
+int gridId = 0;
 int tool = POINT;
 int currentLayerId = 0;
 int currentGeometryId = 0;
+
+onGenerateGrid() {
+	drawGrid("tabgroup2/tab1/map", currentLayerId, Color.YELLOW, 3, 5);
+}
 
 onMapSelect() {
 	System.out.println("select");
@@ -117,6 +124,11 @@ onMapClick() {
 			points.add(point);
 			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.BLUE)));
 		break;
+		case GRID:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.YELLOW)));
+		break;
 	}
 }
 
@@ -131,6 +143,54 @@ refreshLayers() {
 		currentLayerId = 0;
 		onChangeLayers();
 	}
+}
+
+drawBox(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(createPoint(p1.x, p1.y));
+	pts.add(createPoint(p2.x, p1.y));
+	pts.add(createPoint(p2.x, p2.y));
+	pts.add(createPoint(p1.x, p2.y));
+	pts.add(createPoint(p1.x, p1.y));
+	drawLine(map, layer, pts, color);
+}
+
+drawLine(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(p1);
+	pts.add(p2);
+	drawLine(map, layer, pts, color);
+}
+
+drawGrid(map, layer, color, cols, rows) {
+
+	if (gridId == 0) {
+		showWarning("Logic Error", "Cannot create grid.");
+		return;
+	}
+	
+	polygon = getGeometry(map, layer, gridId);
+	pts = polygon.getVertexList();
+	
+	p1 = pts.get(0);
+	p2 = pts.get(2);
+	
+	// draw a box
+	drawBox(map, layer, p1, p2, color);
+	
+	// draw grid
+	for (i = 1; i < cols; i++) {
+		t = p1.x + (p2.x - p1.x) * ((float) i / cols);
+		drawLine(map, layer, createPoint(t, p1.y), createPoint(t, p2.y), color);
+	}
+	
+	for (i = 1; i < rows; i++) {
+		t = p1.y + (p2.y - p1.y) * ((float) i / rows);
+		drawLine(map, layer, createPoint(p1.x, t), createPoint(p2.x, t), color);
+	}
+
+	clearGeometry(map, layer, gridId);
+	gridId = 0;
 }
 
 createShape() {
@@ -152,6 +212,29 @@ createShape() {
 			}
 			
 			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, Color.BLUE);
+			clearPoints();
+		break;
+		case GRID:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			if (points.size() != 2) {
+				showWarning("Logic Error", "Cannot create grid.");
+				return;
+			}
+			
+			p1 = points.get(0);
+			p2 = points.get(1);
+			
+			List pts = new ArrayList();
+			pts.add(createPoint(p1.x, p1.y));
+			pts.add(createPoint(p2.x, p1.y));
+			pts.add(createPoint(p2.x, p2.y));
+			pts.add(createPoint(p1.x, p2.y));
+			
+			gridId = drawPolygon("tabgroup2/tab1/map", currentLayerId, pts, Color.YELLOW);
 			clearPoints();
 		break;
 	}
@@ -202,6 +285,10 @@ onChangeAction() {
 		lockMapView("tabgroup2/tab1/map", true);
 		if (tool != SELECT_SHAPE) clearPoints();
 		tool = SELECT_SHAPE;
+	} else if ("draw_grid".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
+		if (tool != GRID) clearPoints();
+		tool = GRID;
 	}
 }
 
@@ -362,3 +449,6 @@ loadRelationship() {
 }
 
 refreshRelationships();
+
+User user = new User("0","Default","User");
+setUser(user);
