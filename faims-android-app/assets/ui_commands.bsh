@@ -278,3 +278,11 @@ clearGeometryOverlay(String ref) {
 getMapGeometrySelected() {
 	return _map_geometry_selected;
 }
+
+pushDatabaseToServer() {
+	linker.pushDatabaseToServer();
+}
+
+pullDatabaseFromServer() {
+
+}
