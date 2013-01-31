@@ -9,6 +9,11 @@
     <model>
       <instance>
         <faims id="simple_example">
+          <user>
+              <tab1>
+                  <userlist></userlist>
+              </tab1>
+          </user>
           <tabgroup1>
               <tab1>
                   <name></name>
@@ -114,6 +119,19 @@
 
   
   <h:body>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="userlist" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
     <group ref="tabgroup1" faims_archent_type="simple">
       <label>Simple Entity Example</label>
       <group ref="tab1" faims_hidden="true">

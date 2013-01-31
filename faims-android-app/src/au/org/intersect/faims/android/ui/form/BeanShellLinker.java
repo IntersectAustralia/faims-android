@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.managers.DatabaseManager;
@@ -87,6 +88,9 @@ public class BeanShellLinker {
 
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
+
+	@SuppressWarnings("unused")
+	private User user;
 
 	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
 		this.activity = activity;
@@ -1538,10 +1542,35 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					return canvas.getGeometryList();
+					return canvas.getTransformedGeometryList();
 				} catch (Exception e) {
-					Log.e("FAIMS","Could not clear geometry list",e);
-					showWarning("Logic Error", "Could not clear geometry list");
+					Log.e("FAIMS","Could not get geometry list",e);
+					showWarning("Logic Error", "Could not get geometry list");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting geometry list",e);
+		}
+		return null;
+	}
+	
+	public Geometry getGeometry(String ref, int layerId, int geomId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+					
+					return canvas.getTransformedGeometry(geomId);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not get geometry",e);
+					showWarning("Logic Error", "Could not get geometry");
 				}
 			} else {
 				Log.d("FAIMS","Could not find map view");
@@ -1661,5 +1690,10 @@ public class BeanShellLinker {
 
 	public void setBaseDir(String dir) {
 		this.baseDir = dir;
+	}
+	
+	public void setUser(User user) {
+		this.user = user;
+		this.databaseManager.setUserId(user.getUserId());
 	}
 }

@@ -153,8 +153,12 @@ public class CanvasLayer extends GeometryLayer {
 		
 		return id;
 	}
+	
+	public Geometry getTransformedGeometry(int geomId) {
+		return transformGeometry(objectMap.get(geomId));
+	}
 
-	public List<Geometry> getGeometryList() {
+	public List<Geometry> getTransformedGeometryList() {
 		return transformGeometryList(objects.getAll());
 	}
 	
