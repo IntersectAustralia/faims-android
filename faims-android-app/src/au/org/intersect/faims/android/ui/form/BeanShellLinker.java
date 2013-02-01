@@ -37,6 +37,7 @@ import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -92,8 +93,11 @@ public class BeanShellLinker {
 	@SuppressWarnings("unused")
 	private User user;
 
-	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
+	private FAIMSClient faimsClient;
+
+	public BeanShellLinker(FragmentActivity activity, FAIMSClient faimsClient, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
 		this.activity = activity;
+		this.faimsClient = faimsClient;
 		this.assets = assets;
 		this.renderer = renderer;
 		this.databaseManager = databaseManager;
@@ -1657,6 +1661,16 @@ public class BeanShellLinker {
 		catch(Exception e){
 			Log.e("FAIMS","Exception replacing geometry overlay",e);
 		}
+	}
+	
+	public void pushDatabaseToServer() {
+		
+		
+		File file = new File(baseDir + "/db.sqlite3");
+		if (!file.exists()) {
+			Log.d("FAIMS", "database does not exist");
+		}
+		
 	}
 
 	private String convertStreamToString(InputStream stream) {

@@ -36,5 +36,8 @@
     
     <string name="render_project_title">Show Project</string>
     <string name="render_project_message">Do you want to render project?</string>
+    
+    <string name="upload_database_title">Uploading Database</string>
+    <string name="upload_database_message">please wait..</string>
 
 </resources>

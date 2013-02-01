@@ -236,7 +236,6 @@ gotoGroup(n) {
 populateListForUsers(){
 	Object users = fetchAll("select userid,(fname || ' ' || lname) as name from user;");
 	populateList("user/tab1/userlist",users);
-	populateList("user/tab2/userlist",users);
 }
 
 login(){
@@ -302,3 +301,17 @@ cancelEntityGroup() {
 
 onEvent("tabgroup1/tab5/cancel", "click", "cancelEntity()");
 onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");
+
+onEvent("tabgroup5/tab2/push", "click", "pushDatabaseToServer()");
+onEvent("tabgroup5/tab2/pull", "click", "pullDatabaseFromServer()");
+
+skip() {
+
+	User user = new User("0","Default","User");
+	setUser(user);
+	
+	showTabGroup("tabgroup1");
+}
+
+onEvent("user/tab1/skip", "click", "skip()");
+	

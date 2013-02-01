@@ -1,8 +1,10 @@
 package au.org.intersect.faims.android.net;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,8 +12,11 @@ import java.util.List;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
 
 import android.net.http.AndroidHttpClient;
+import android.util.Log;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.ProjectArchive;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -29,9 +34,9 @@ public class FAIMSClient {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
-	private AndroidHttpClient httpClient;
+	AndroidHttpClient httpClient;
 	
-	private void createClient() throws UnknownHostException {
+	private void initClient() throws UnknownHostException {
 		FAIMSLog.log();
 		
 		String userAgent = InetAddress.getLocalHost().toString();
@@ -40,11 +45,41 @@ public class FAIMSClient {
 		FAIMSLog.log("userAgent is " + userAgent);
 	}
 	
-	private void destroyClient() {
+	private void cleanupClient() {
 		FAIMSLog.log();
 		
 		httpClient.close();
 		httpClient = null;
+	}
+	
+	public FAIMSClientResultCode uploadDatabase(File file) {
+		return uploadFile(file, "/android/upload_db");
+	}
+	
+	public FAIMSClientResultCode uploadFile(File file, String uri) {
+		try {
+			initClient();
+			
+			FileEntity entity = new FileEntity(file, "binary/octet-stream");
+			entity.setChunked(true);
+			
+			HttpPost post = new HttpPost(new URI(uri));
+			post.setEntity(entity);
+			
+			HttpResponse response = httpClient.execute(post);
+			if (response.getEntity() == null) {
+				return FAIMSClientResultCode.SERVER_FAILURE;
+			}
+			
+			return FAIMSClientResultCode.SUCCESS;
+			
+		} catch (Exception e) {
+			Log.e("FAIMS", "cannot upload file", e);
+		} finally {
+			cleanupClient();
+		}
+		
+		return FAIMSClientResultCode.SERVER_FAILURE;
 	}
 	
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
@@ -52,7 +87,7 @@ public class FAIMSClient {
 
 		InputStream stream = null;
 		try {			
-			createClient();
+			initClient();
 			
 			HttpEntity entity = getRequest("/android/projects");
 			
@@ -79,19 +114,19 @@ public class FAIMSClient {
 				FAIMSLog.log(e);
 			}
 			
-			destroyClient();
+			cleanupClient();
 		}
 	}
 	
-	public FAIMSClientResultCode downloadProjectArchive(Project project) {
+	public FAIMSClientResultCode downloadProjectArchive(String projectId) {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
 		
 		try {
-			createClient();
+			initClient();
 			
-			ProjectArchive archive = getProjectArchive(project);
+			ProjectArchive archive = getProjectArchive(projectId);
 	        long freeSpace = FileUtil.getExternalStorageSpace();
 	        
 	        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
@@ -106,7 +141,7 @@ public class FAIMSClient {
 	        	return FAIMSClientResultCode.SERVER_FAILURE;
 	        }
 	        
-	        String filename = getProjectDownload(project, archive);
+	        String filename = getProjectDownload(projectId, archive);
 			
 			if (filename == null) {
 				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
@@ -139,17 +174,17 @@ public class FAIMSClient {
 				FAIMSLog.log(e);
 			}
 			
-			destroyClient();
+			cleanupClient();
 		}
 	}
 	
-	private ProjectArchive getProjectArchive(Project project) throws IOException {
+	private ProjectArchive getProjectArchive(String projectId) throws IOException {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
 		
 		try {
-			HttpEntity entity = getRequest("/android/project/" + project.id + "/archive");
+			HttpEntity entity = getRequest("/android/project/" + projectId + "/archive");
 			
 			stream = entity.getContent();
 			
@@ -163,13 +198,13 @@ public class FAIMSClient {
 		
 	}
 	
-	private String getProjectDownload(Project project, ProjectArchive archive) throws Exception {
+	private String getProjectDownload(String projectId, ProjectArchive archive) throws Exception {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
 		
 		try {
-			HttpEntity entity = getRequest("/android/project/" + project.id + "/download");
+			HttpEntity entity = getRequest("/android/project/" + projectId + "/download");
 			
 			stream = entity.getContent();
 			
@@ -198,10 +233,14 @@ public class FAIMSClient {
 		}
 	}
 	
+	private String getURI(String path) {
+		return serverDiscovery.getServerHost() + path;
+	}
+	
 	private HttpEntity getRequest(String path) throws IOException {
 		FAIMSLog.log(path);
 		
-		HttpGet get = new HttpGet(serverDiscovery.getServerHost() + path);
+		HttpGet get = new HttpGet(getURI(path));
 		HttpResponse response = httpClient.execute(get);
 		HttpEntity entity = response.getEntity();
 		
@@ -213,6 +252,10 @@ public class FAIMSClient {
 		if (httpClient != null) {
 			httpClient.getConnectionManager().shutdown();
 		}
+	}
+	
+	public void invalidate() {
+		serverDiscovery.invalidateServerHost();
 	}
 	
 }

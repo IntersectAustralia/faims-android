@@ -4,15 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-public class BusyDialog extends ProgressDialog implements IDialog {
+public class BusyDialog extends ProgressDialog {
 
-	private DialogType type;
-	private IDialogListener listener;
-	
-	public BusyDialog(Context context, DialogType type, String title, String message) {
+	public BusyDialog(Context context, String title, String message, final IDialogListener listener) {
 		super(context);
-		this.type = type;
-		this.listener = (IDialogListener) context;
 		setTitle(title);
 		setMessage(message);
 		setCancelable(true);
@@ -21,19 +16,10 @@ public class BusyDialog extends ProgressDialog implements IDialog {
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				listener.handleDialogResponse(DialogResultCode.CANCEL, null, BusyDialog.this.type, BusyDialog.this);
+				listener.handleDialogResponse(DialogResultCode.CANCEL);
 			}
 			
 		});
-	}
-	
-	public static BusyDialog create(Context context, DialogType type, String title, String message) {
-		return new BusyDialog(context, type, title, message);
-	}
-
-	@Override
-	public void cleanup() {
-		listener = null; // avoid memory leaks
 	}
 	
 }

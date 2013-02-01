@@ -3,9 +3,13 @@ package au.org.intersect.faims.android.ui.activity;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
-import android.app.Dialog;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,24 +22,21 @@ import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.services.DownloadProjectService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
-import au.org.intersect.faims.android.tasks.ActionType;
-import au.org.intersect.faims.android.tasks.DownloadProjectTask;
 import au.org.intersect.faims.android.tasks.FetchProjectsListTask;
 import au.org.intersect.faims.android.tasks.IActionListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
-import au.org.intersect.faims.android.tasks.TaskType;
+import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
-import au.org.intersect.faims.android.ui.dialog.DialogType;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
-import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Inject;
 
-public class FetchProjectsActivity extends RoboActivity implements IActionListener, IDialogListener {
+public class FetchProjectsActivity extends RoboActivity {
 	
 	@Inject
 	FAIMSClient faimsClient;
@@ -44,16 +45,13 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
 	
 	private ArrayAdapter<String> projectListAdapter;
 	
-	private LocateServerTask locateTask;
-	private FetchProjectsListTask fetchTask;
-	private DownloadProjectTask downloadTask;
-	
-	protected ChoiceDialog choiceDialog;
-	protected ConfirmDialog confirmDialog;
-	
 	protected List<Project> projects;
 	protected Project selectedProject;
 	
+	private BusyDialog busyDialog;
+	private AsyncTask<Void, Void, Void> locateTask;
+	private AsyncTask<Void, Void, Void> fetchTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,11 +72,20 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
         		final String selectedItem = sel.getText().toString();
         		selectedProject = getProjectByName(selectedItem);
         		
-        		choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this, 
-        				DialogType.CONFIRM_DOWNLOAD_PROJECT, 
+        		new ChoiceDialog(FetchProjectsActivity.this, 
         				getString(R.string.confirm_download_project_title),
-        				getString(R.string.confirm_download_project_message) + " " + selectedItem + "?");
-        		choiceDialog.show();
+        				getString(R.string.confirm_download_project_message) + " " + selectedItem + "?",
+        				new IDialogListener() {
+
+							@Override
+							public void handleDialogResponse(
+									DialogResultCode resultCode) {
+								if (resultCode == DialogResultCode.SELECT_YES) {
+									downloadProjectArchive();
+								}
+							}
+        			
+        		}).show();
         	}
         });
         
@@ -107,15 +114,6 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
     protected void onDestroy() {
     	super.onDestroy();
     	FAIMSLog.log();
-
-    	// cleanup tasks and dialogs to avoid memory leaks 
-    	// note: tasks and dialogs still hold references to activity
-    	if (locateTask != null) locateTask.cancel(true);
-    	if (fetchTask != null) fetchTask.cancel(true);
-    	if (downloadTask != null) downloadTask.cancel(true);
-    
-    	if (choiceDialog != null) choiceDialog.cleanup();
-    	if (confirmDialog != null) confirmDialog.cleanup();
     }
 
     @Override
@@ -135,122 +133,224 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
 		}
 	}
     
-    /*
-    private boolean isLocatingServer() {
-    	return locateTask != null && locateTask.getStatus() != AsyncTask.Status.FINISHED;
-    }
-    
-    private boolean isFetchingProjectList() {
-    	return fetchTask != null && fetchTask.getStatus() != AsyncTask.Status.FINISHED;
-    }
-    
-    private boolean isDownloadingProject() {
-    	return downloadTask != null && downloadTask.getStatus() != AsyncTask.Status.FINISHED;
-    }
-    */
-    
     /**
      * Fetch projects from the server to load into list
      */
     protected void fetchProjectsList() {
     	FAIMSLog.log();
     	
-    	locateTask = new LocateServerTask(FetchProjectsActivity.this, TaskType.FETCH_PROJECTS_LIST, serverDiscovery);
-    	locateTask.execute();
+    	if (serverDiscovery.isServerHostValid()) {
+    		fetchTask = new FetchProjectsListTask(faimsClient, new IActionListener() {
+
+				@SuppressWarnings("unchecked")
+				@Override
+				public void handleActionResponse(ActionResultCode resultCode,
+						Object data) {
+					if (resultCode == ActionResultCode.SUCCESS) {
+						FetchProjectsActivity.this.busyDialog.dismiss();
+						if (projectListAdapter != null) projectListAdapter.clear();
+		    			FetchProjectsActivity.this.projects = (List<Project>) data;
+		    			for (Project p : projects) {
+		    				FetchProjectsActivity.this.projectListAdapter.add(p.name);
+		    			}
+					} else {
+						showFetchProjectsFailureDialog();
+					}
+				}
+    			
+    		}).execute();
+    		
+    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+    				getString(R.string.fetch_projects_title),
+    				getString(R.string.fetch_projects_message),
+    				new IDialogListener() {
+
+						@Override
+						public void handleDialogResponse(
+								DialogResultCode resultCode) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								FetchProjectsActivity.this.fetchTask.cancel(true);
+							}
+						}
+    			
+    		});
+    		busyDialog.show();
+    	} else {
+    		
+    		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+
+    			@Override
+    			public void handleActionResponse(ActionResultCode resultCode,
+    					Object data) {
+    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				if (resultCode == ActionResultCode.FAILURE) {
+    					showLocateServerFailureDialog();
+    				} else {
+    					fetchProjectsList();
+    				}
+    			}
+        		
+        	}).execute();
+    		
+    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+    				getString(R.string.locate_server_title),
+    				getString(R.string.locate_server_message),
+    				new IDialogListener() {
+
+						@Override
+						public void handleDialogResponse(
+								DialogResultCode resultCode) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								FetchProjectsActivity.this.locateTask.cancel(true);
+							}
+						}
+    			
+    		});
+    		busyDialog.show();
+    	}
+    	
     }
     
-    protected void downloadProjectArchive() {
+    @SuppressLint("HandlerLeak")
+	protected void downloadProjectArchive() {
     	FAIMSLog.log();
     	
-    	locateTask = new LocateServerTask(FetchProjectsActivity.this, TaskType.DOWNLOAD_PROJECT, serverDiscovery);
-    	locateTask.execute();
-    }
-    
-    @SuppressWarnings("unchecked")
-	@Override
-    public void handleActionResponse(ActionResultCode resultCode, Object data, ActionType type) {
-    	FAIMSLog.log("action is " + type + " and resultCode is " + resultCode + " and data is " + data);
-    	
-    	if (type == ActionType.LOCATE_SERVER) {
-    		
-    		if (resultCode == ActionResultCode.SUCCESS) {
+    	if (serverDiscovery.isServerHostValid()) {
+    		// start service
+    		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+		    // Create a new Messenger for the communication back
+		    Messenger messenger = new Messenger(new Handler() {
+				
+				public void handleMessage(Message message) {
+					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+					if (resultCode == FAIMSClientResultCode.SUCCESS) {
+						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
+						showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
+						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
+					} else {
+						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
+							showDownloadProjectErrorDialog();
+						} else {
+							showDownloadProjectFailureDialog();
+						}
+					}
+				}
+				
+			});
+		    intent.putExtra("MESSENGER", messenger);
+		    intent.putExtra("project", selectedProject.id);
+		    startService(intent);
+		    
+		    busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+    				getString(R.string.locate_server_title),
+    				getString(R.string.locate_server_message),
+    				new IDialogListener() {
+
+						@Override
+						public void handleDialogResponse(
+								DialogResultCode resultCode) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								// TODO cancel service
+							}
+						}
     			
-    			TaskType taskType = (TaskType) data;
-    			if (taskType == TaskType.FETCH_PROJECTS_LIST) {
-    				fetchTask = new FetchProjectsListTask(FetchProjectsActivity.this, faimsClient, serverDiscovery);
-    				fetchTask.execute();
-    			} else if (taskType == TaskType.DOWNLOAD_PROJECT) {
-    				downloadTask = new DownloadProjectTask(FetchProjectsActivity.this, selectedProject, faimsClient, serverDiscovery);
-    				downloadTask.execute();
+    		});
+		    busyDialog.show();
+    	} else {
+    		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+
+    			@Override
+    			public void handleActionResponse(ActionResultCode resultCode,
+    					Object data) {
+    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				if (resultCode == ActionResultCode.FAILURE) {
+    					showLocateServerFailureDialog();
+    				} else {
+    					downloadProjectArchive();
+    				}
     			}
-    		} else if (resultCode == ActionResultCode.FAILURE) {
-    			showLocateServerFailureDialog();
-    		}
+        		
+        	}).execute();
     		
-    	} else if (type == ActionType.FETCH_PROJECT_LIST) {
-    		
-    		if (resultCode == ActionResultCode.SUCCESS) {
+    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+    				getString(R.string.locate_server_title),
+    				getString(R.string.locate_server_message),
+    				new IDialogListener() {
+
+						@Override
+						public void handleDialogResponse(
+								DialogResultCode resultCode) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								FetchProjectsActivity.this.locateTask.cancel(true);
+							}
+						}
     			
-    			if (projectListAdapter != null) projectListAdapter.clear();
-    			this.projects = (List<Project>) data;
-    			for (Project p : projects) {
-    				this.projectListAdapter.add(p.name);
-    			}
-    			
-    		} else if (resultCode == ActionResultCode.FAILURE) {
-    			showFetchProjectsFailureDialog();
-    		}
-    	} else if (type == ActionType.DOWNLOAD_PROJECT) {
-    		
-    		if (resultCode == ActionResultCode.SUCCESS) {
-    			// show project
-    			Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("name", selectedProject.name);
-				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
-				FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
-				finish();
-    		} else if (resultCode == ActionResultCode.FAILURE) {
-    			
-    			FAIMSClientResultCode errorCode = (FAIMSClientResultCode) data;
-    			if (errorCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR)
-    				showDownloadProjectErrorDialog();
-    			else {
-    				showDownloadProjectFailureDialog();
-    			}
-    		}
+    		});
+    		busyDialog.show();
     	}
+    	
     }
     
     private void showLocateServerFailureDialog() {
-    	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-				DialogType.LOCATE_SERVER_FAILURE,
+    	new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.locate_server_failure_title),
-				getString(R.string.locate_server_failure_message));
-		choiceDialog.show();
+				getString(R.string.locate_server_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							fetchProjectsList();
+						}
+					}
+    		
+    	}).show();
     }
     
     private void showFetchProjectsFailureDialog() {
-    	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-    			DialogType.FETCH_PROJECT_LIST_FAILURE,
+    	new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.fetch_projects_failure_title),
-				getString(R.string.fetch_projects_failure_message));
-		choiceDialog.show();
+				getString(R.string.fetch_projects_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							fetchProjectsList();
+						}
+					}
+    		
+    	}).show();
     }
     
     private void showDownloadProjectFailureDialog() {
-    	choiceDialog = DialogFactory.createChoiceDialog(FetchProjectsActivity.this,
-    			DialogType.DOWNLOAD_PROJECT_FAILURE,
+    	new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.download_project_failure_title),
-				getString(R.string.download_project_failure_message));
-		choiceDialog.show();
+				getString(R.string.download_project_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							downloadProjectArchive();
+						}
+					}
+    		
+    	}).show();
     }
     
     private void showDownloadProjectErrorDialog() {
-    	confirmDialog = DialogFactory.createConfirmDialog(FetchProjectsActivity.this,
-    			DialogType.DOWNLOAD_PROJECT_ERROR,
+    	new ConfirmDialog(FetchProjectsActivity.this,
 				getString(R.string.download_project_error_title),
-				getString(R.string.download_project_error_message));
-    	confirmDialog.show();
+				getString(R.string.download_project_error_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						// do nothing
+					}
+    		
+    	}).show();
     }
     
     private Project getProjectByName(String name) {
@@ -260,40 +360,5 @@ public class FetchProjectsActivity extends RoboActivity implements IActionListen
     	}
     	return null;
     }
-    
-	@Override
-	public void handleDialogResponse(DialogResultCode resultCode, Object data,
-			DialogType type, Dialog dialog) {
-		FAIMSLog.log("dialog is " + type + " and resultCode is " + resultCode + " and data is " + data);
-		
-		if (type == DialogType.CONFIRM_DOWNLOAD_PROJECT) {
-			if (resultCode == DialogResultCode.SELECT_YES) {
-				downloadProjectArchive();
-			}
-		} else if (type == DialogType.BUSY_LOCATING_SERVER) {
-			if (resultCode == DialogResultCode.CANCEL) {
-				locateTask.cancel(true);
-			}
-		} else if (type == DialogType.BUSY_FETCHING_PROJECT_LIST) {
-			if (resultCode == DialogResultCode.CANCEL) {
-				fetchTask.cancel(true);
-			}
-		} else if (type == DialogType.BUSY_DOWNLOADING_PROJECT) {
-			if (resultCode == DialogResultCode.CANCEL) {
-				downloadTask.cancel(true);
-			}
-		} else if (type == DialogType.LOCATE_SERVER_FAILURE) {
-			if (resultCode == DialogResultCode.SELECT_YES) {
-				fetchProjectsList();
-			}
-		} else if (type == DialogType.DOWNLOAD_PROJECT_FAILURE) {
-			if (resultCode == DialogResultCode.SELECT_YES) {
-				downloadProjectArchive();
-			}
-		} else if (type == DialogType.DOWNLOAD_PROJECT_ERROR) {
-			
-		}
-		
-	}
     
 }

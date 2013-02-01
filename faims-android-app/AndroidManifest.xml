@@ -48,6 +48,10 @@
            
         </activity>
         
+        <service
+            android:name="DownloadProjectService"
+            ></service>
+        
     </application>
 
 </manifest>

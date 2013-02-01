@@ -1,3 +1,4 @@
+
 setupMap(id, lat, lon) {
 	showRasterMap(id, "natural-earth-2-mercator.tif");
 	setMapFocusPoint(id, lat, lon);

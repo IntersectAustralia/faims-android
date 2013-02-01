@@ -2,7 +2,6 @@ package au.org.intersect.faims.android.ui.activity;
 
 import org.javarosa.form.api.FormEntryController;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -12,25 +11,27 @@ import android.util.Log;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
-import au.org.intersect.faims.android.ui.dialog.DialogType;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
-import au.org.intersect.faims.android.util.DialogFactory;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 
-public class ShowProjectActivity extends FragmentActivity implements IDialogListener {
+import com.google.inject.Inject;
+
+public class ShowProjectActivity extends FragmentActivity {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
+	
+	@Inject
+	FAIMSClient faimsClient;
 
 	private FormEntryController fem;
 
 	private UIRenderer renderer;
-
-	protected ChoiceDialog choiceDialog;
 
 	private String directory;
 	
@@ -44,20 +45,28 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		FAIMSLog.log();
-		
+
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		setTitle(data.getStringExtra("name"));
 		directory = data.getStringExtra("directory");
 		
-		choiceDialog = DialogFactory.createChoiceDialog(ShowProjectActivity.this, 
-				DialogType.CONFIRM_RENDER_PROJECT, 
-				getString(R.string.render_project_title),
-				getString(R.string.render_project_message));
-		choiceDialog.show();
-		
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
+		
+		new ChoiceDialog(ShowProjectActivity.this,
+				getString(R.string.render_project_title),
+				getString(R.string.render_project_message), new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							renderUI();
+							gpsDataManager.startGPSListener();
+						}
+					}
+			
+		}).show();
 	}
 	
 	@Override
@@ -99,18 +108,6 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 	}
 	*/
 	
-	@Override
-	public void handleDialogResponse(DialogResultCode resultCode, Object data,
-			DialogType type, Dialog dialog) {
-		if (type == DialogType.CONFIRM_RENDER_PROJECT) {
-			if (resultCode == DialogResultCode.SELECT_YES) {
-				renderUI();
-				gpsDataManager.startGPSListener();
-			}
-		}
-		
-	}
-	
 	private void renderUI() {
 		// Read, validate and parse the xforms
 		this.runOnUiThread(new Thread(new Runnable() {
@@ -127,7 +124,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 				
 				// bind the logic to the ui
 				Log.d("FAIMS","Binding logic to the UI");
-				linker = new BeanShellLinker(ShowProjectActivity.this, getAssets(), renderer, databaseManager, gpsDataManager);
+				linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.faimsClient, getAssets(), renderer, databaseManager, gpsDataManager);
 				linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
 				linker.sourceFromAssets("ui_commands.bsh");
 				linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));

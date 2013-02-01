@@ -12,6 +12,7 @@
           <user>
               <tab1>
                   <userlist></userlist>
+                  <skip></skip>
               </tab1>
           </user>
           <tabgroup1>
@@ -98,6 +99,10 @@
               <tab1>
                   <entity></entity>
               </tab1>
+              <tab2>
+                  <push></push>
+                  <pull></pull>
+              </tab2>
           </tabgroup5>
         </faims>
       </instance>
@@ -130,6 +135,9 @@
             <value>dummy</value>
           </item>
         </select1>
+        <trigger ref="skip">
+            <label>Skip</label>
+        </trigger>
       </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="simple">
@@ -390,6 +398,15 @@
                 <value>dummy</value>
             </item>
         </select1>
+      </group>
+      <group ref="tab2">
+          <label>Push/Pull Database</label>
+          <trigger ref="push">
+              <label>Push to Server</label>
+          </trigger>
+          <trigger ref="pull">
+              <label>Pull from Server</label>
+          </trigger>
       </group>
     </group>
     

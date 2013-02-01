@@ -30,6 +30,7 @@ public class MainActivity extends RoboActivity {
 
 	@Inject
 	ServerDiscovery serverDiscovery;
+	
 	private ArrayAdapter<String> projectListAdapter;
 	
     @Override
