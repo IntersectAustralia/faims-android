@@ -146,8 +146,9 @@ public class FetchProjectsActivity extends RoboActivity {
 				@Override
 				public void handleActionResponse(ActionResultCode resultCode,
 						Object data) {
+					FetchProjectsActivity.this.busyDialog.dismiss();
+					
 					if (resultCode == ActionResultCode.SUCCESS) {
-						FetchProjectsActivity.this.busyDialog.dismiss();
 						if (projectListAdapter != null) projectListAdapter.clear();
 		    			FetchProjectsActivity.this.projects = (List<Project>) data;
 		    			for (Project p : projects) {
@@ -183,6 +184,7 @@ public class FetchProjectsActivity extends RoboActivity {
     			public void handleActionResponse(ActionResultCode resultCode,
     					Object data) {
     				FetchProjectsActivity.this.busyDialog.dismiss();
+    				
     				if (resultCode == ActionResultCode.FAILURE) {
     					showLocateServerFailureDialog();
     				} else {
@@ -222,6 +224,8 @@ public class FetchProjectsActivity extends RoboActivity {
 		    Messenger messenger = new Messenger(new Handler() {
 				
 				public void handleMessage(Message message) {
+					FetchProjectsActivity.this.busyDialog.dismiss();
+					
 					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
@@ -242,8 +246,8 @@ public class FetchProjectsActivity extends RoboActivity {
 		    startService(intent);
 		    
 		    busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-    				getString(R.string.locate_server_title),
-    				getString(R.string.locate_server_message),
+    				getString(R.string.download_project_title),
+    				getString(R.string.download_project_message),
     				new IDialogListener() {
 
 						@Override
@@ -263,6 +267,7 @@ public class FetchProjectsActivity extends RoboActivity {
     			public void handleActionResponse(ActionResultCode resultCode,
     					Object data) {
     				FetchProjectsActivity.this.busyDialog.dismiss();
+    				
     				if (resultCode == ActionResultCode.FAILURE) {
     					showLocateServerFailureDialog();
     				} else {
