@@ -118,8 +118,8 @@ public class TabGroup extends Fragment {
 	}
 	*/
 	
-	public Tab createTab(String name, String label, boolean hidden, boolean scrollable) {
-		Tab tab = new Tab(context, name, label, hidden, scrollable);
+	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n) {
+		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n);
 		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;

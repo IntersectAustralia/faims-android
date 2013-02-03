@@ -43,10 +43,13 @@ public class Tab {
 	private boolean hidden;
 	//private boolean scrollable;
 	private View view;
+	private Arch16n arch16n;
 
-	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable) {
+	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n) {
 		this.context = context;
 		this.name = name;
+		this.arch16n = arch16n;
+		label = this.arch16n.substituteValue(label);
 		this.label = label;
 		this.hidden = hidden;
 		//this.scrollable = scrollable;
@@ -74,7 +77,9 @@ public class Tab {
 	public View addInput(FormEntryPrompt input,String path, String viewName) {
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
             TextView textView = new TextView(this.context);
-            textView.setText(input.getQuestionText());
+            String inputText = input.getQuestionText();
+            inputText = arch16n.substituteValue(inputText);
+            textView.setText(inputText);
             linearLayout.addView(textView);
         }
 		
@@ -220,7 +225,9 @@ public class Tab {
                             radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
                             for (final SelectChoice selectChoice : input.getSelectChoices()) {
                             	CustomRadioButton radioButton = new CustomRadioButton(this.context);
-                                radioButton.setText(selectChoice.getLabelInnerText());
+                            	String innerText = selectChoice.getLabelInnerText();
+                            	innerText = arch16n.substituteValue(innerText);
+                                radioButton.setText(innerText);
                                 radioButton.setValue(selectChoice.getValue());
                                 radioGroupLayout.addView(radioButton);
                             }
@@ -234,7 +241,9 @@ public class Tab {
                             List<NameValuePair> choices = new ArrayList<NameValuePair>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
-                            	NameValuePair pair = new NameValuePair(selectChoice.getLabelInnerText(), selectChoice.getValue());
+                            	String innerText = selectChoice.getLabelInnerText();
+                            	innerText = arch16n.substituteValue(innerText);
+                            	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
                                 choices.add(pair);
                             }
                             ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -250,7 +259,9 @@ public class Tab {
                             List<NameValuePair> choices = new ArrayList<NameValuePair>();
                             for (final SelectChoice selectChoice : input
                                     .getSelectChoices()) {
-                            	NameValuePair pair = new NameValuePair(selectChoice.getLabelInnerText(), selectChoice.getValue());
+                            	String innerText = selectChoice.getLabelInnerText();
+                            	innerText = arch16n.substituteValue(innerText);
+                            	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
                                 choices.add(pair);
                             }
                             ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -283,7 +294,9 @@ public class Tab {
                         for (final SelectChoice selectChoice : input
                                 .getSelectChoices()) {
                         	CustomCheckBox checkBox = new CustomCheckBox(this.context);
-                            checkBox.setText(selectChoice.getLabelInnerText());
+                        	String innerText = selectChoice.getLabelInnerText();
+                        	innerText = arch16n.substituteValue(innerText);
+                            checkBox.setText(innerText);
                             checkBox.setValue(selectChoice.getValue());
                             selectLayout.addView(checkBox);
                         }

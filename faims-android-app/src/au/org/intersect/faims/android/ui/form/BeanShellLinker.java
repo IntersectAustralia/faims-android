@@ -89,15 +89,18 @@ public class BeanShellLinker {
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
 
+	private Arch16n arch16n;
+
 	@SuppressWarnings("unused")
 	private User user;
 
-	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
+	public BeanShellLinker(FragmentActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
 		this.databaseManager = databaseManager;
 		this.gpsDataManager = gpsDataManager;
+		this.arch16n = arch16n;
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -761,6 +764,7 @@ public class BeanShellLinker {
 			if (valueObj instanceof String){
 				
 				String value = (String) valueObj;
+				value = arch16n.substituteValue(value);
 				
 				if (obj instanceof TextView){
 					TextView tv = (TextView) obj;
@@ -839,7 +843,7 @@ public class BeanShellLinker {
 							View view = ll.getChildAt(i);
 							if (view instanceof CustomCheckBox){
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(pair.getName())){
+								if (cb.getValue().toString().equalsIgnoreCase(arch16n.substituteValue(pair.getName()))){
 									cb.setChecked("true".equals(pair.getValue()));
 									break;
 								}
@@ -992,7 +996,7 @@ public class BeanShellLinker {
 				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 				pairs = new ArrayList<NameValuePair>();
 				for (List<String> list : values) {
-					pairs.add(new NameValuePair(list.get(1), list.get(0)));
+					pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
 				}
 			}
 			
@@ -1028,7 +1032,7 @@ public class BeanShellLinker {
 				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 				pairs = new ArrayList<NameValuePair>();
 				for (List<String> list : values) {
-					pairs.add(new NameValuePair(list.get(1), list.get(0)));
+					pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
 				}
 			}
 			if(obj instanceof LinearLayout){
