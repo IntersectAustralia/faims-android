@@ -5,9 +5,13 @@ import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.net.ServerDiscovery.ServerDiscoveryListener;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
+import com.google.inject.Inject;
+
 public class LocateServerTask extends AsyncTask<Void, Void, Void> implements ServerDiscoveryListener {
 
-	private ServerDiscovery serverDiscovery;
+	@Inject
+	ServerDiscovery serverDiscovery;
+	
 	private IActionListener listener;
 	
 	private boolean searching;

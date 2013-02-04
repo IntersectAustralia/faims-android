@@ -114,6 +114,9 @@ public class FetchProjectsActivity extends RoboActivity {
     protected void onDestroy() {
     	super.onDestroy();
     	FAIMSLog.log();
+    	
+    	if (busyDialog.isShowing())
+    		busyDialog.dismiss();
     }
 
     @Override
@@ -140,6 +143,8 @@ public class FetchProjectsActivity extends RoboActivity {
     	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
+    		showBusyFetchingProjectsDialog();
+    		
     		fetchTask = new FetchProjectsListTask(faimsClient, new IActionListener() {
 
 				@SuppressWarnings("unchecked")
@@ -160,23 +165,8 @@ public class FetchProjectsActivity extends RoboActivity {
 				}
     			
     		}).execute();
-    		
-    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-    				getString(R.string.fetch_projects_title),
-    				getString(R.string.fetch_projects_message),
-    				new IDialogListener() {
-
-						@Override
-						public void handleDialogResponse(
-								DialogResultCode resultCode) {
-							if (resultCode == DialogResultCode.CANCEL) {
-								FetchProjectsActivity.this.fetchTask.cancel(true);
-							}
-						}
-    			
-    		});
-    		busyDialog.show();
     	} else {
+    		showBusyLocatingServerDialog();
     		
     		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
 
@@ -193,22 +183,6 @@ public class FetchProjectsActivity extends RoboActivity {
     			}
         		
         	}).execute();
-    		
-    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-    				getString(R.string.locate_server_title),
-    				getString(R.string.locate_server_message),
-    				new IDialogListener() {
-
-						@Override
-						public void handleDialogResponse(
-								DialogResultCode resultCode) {
-							if (resultCode == DialogResultCode.CANCEL) {
-								FetchProjectsActivity.this.locateTask.cancel(true);
-							}
-						}
-    			
-    		});
-    		busyDialog.show();
     	}
     	
     }
@@ -218,6 +192,8 @@ public class FetchProjectsActivity extends RoboActivity {
     	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
+    		showBusyDownloadingProjectsDialog();
+    		
     		// start service
     		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
 		    // Create a new Messenger for the communication back
@@ -228,13 +204,15 @@ public class FetchProjectsActivity extends RoboActivity {
 					
 					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
+						// start show project activity
+						
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
 						showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
 						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
 							showDownloadProjectErrorDialog();
-						} else {
+						} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
 							showDownloadProjectFailureDialog();
 						}
 					}
@@ -244,23 +222,9 @@ public class FetchProjectsActivity extends RoboActivity {
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("project", selectedProject.id);
 		    startService(intent);
-		    
-		    busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-    				getString(R.string.download_project_title),
-    				getString(R.string.download_project_message),
-    				new IDialogListener() {
-
-						@Override
-						public void handleDialogResponse(
-								DialogResultCode resultCode) {
-							if (resultCode == DialogResultCode.CANCEL) {
-								// TODO cancel service
-							}
-						}
-    			
-    		});
-		    busyDialog.show();
     	} else {
+    		showBusyLocatingServerDialog();
+    		
     		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
 
     			@Override
@@ -276,22 +240,6 @@ public class FetchProjectsActivity extends RoboActivity {
     			}
         		
         	}).execute();
-    		
-    		busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-    				getString(R.string.locate_server_title),
-    				getString(R.string.locate_server_message),
-    				new IDialogListener() {
-
-						@Override
-						public void handleDialogResponse(
-								DialogResultCode resultCode) {
-							if (resultCode == DialogResultCode.CANCEL) {
-								FetchProjectsActivity.this.locateTask.cancel(true);
-							}
-						}
-    			
-    		});
-    		busyDialog.show();
     	}
     	
     }
@@ -356,6 +304,63 @@ public class FetchProjectsActivity extends RoboActivity {
 					}
     		
     	}).show();
+    }
+    
+    private void showBusyLocatingServerDialog() {
+    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+				getString(R.string.locate_server_title),
+				getString(R.string.locate_server_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(
+							DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.CANCEL) {
+							FetchProjectsActivity.this.locateTask.cancel(true);
+						}
+					}
+			
+		});
+		busyDialog.show();
+    }
+    
+    private void showBusyFetchingProjectsDialog() {
+    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+				getString(R.string.fetch_projects_title),
+				getString(R.string.fetch_projects_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(
+							DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.CANCEL) {
+							FetchProjectsActivity.this.fetchTask.cancel(true);
+						}
+					}
+			
+		});
+		busyDialog.show();
+    }
+    
+    private void showBusyDownloadingProjectsDialog() {
+    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+				getString(R.string.download_project_title),
+				getString(R.string.download_project_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(
+							DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.CANCEL) {
+							// stop service
+				    		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+				    		
+				    		stopService(intent);
+						}
+					}
+			
+		});
+	    busyDialog.show();
     }
     
     private Project getProjectByName(String name) {

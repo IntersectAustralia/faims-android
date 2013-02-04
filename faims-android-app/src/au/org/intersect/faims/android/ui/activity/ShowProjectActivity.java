@@ -110,27 +110,20 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	private void renderUI() {
 		// Read, validate and parse the xforms
-		this.runOnUiThread(new Thread(new Runnable() {
+		ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
+				.getExternalStorageDirectory() + directory + "/ui_schema.xml");
 
-			@Override
-			public void run() {
-				ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
-						.getExternalStorageDirectory() + directory + "/ui_schema.xml");
-
-				// render the ui definition
-				ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this);
-				ShowProjectActivity.this.renderer.createUI();
-				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
-				
-				// bind the logic to the ui
-				Log.d("FAIMS","Binding logic to the UI");
-				linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.faimsClient, getAssets(), renderer, databaseManager, gpsDataManager);
-				linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
-				linker.sourceFromAssets("ui_commands.bsh");
-				linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
-			}
-			
-		}));
+		// render the ui definition
+		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this);
+		ShowProjectActivity.this.renderer.createUI();
+		ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+		
+		// bind the logic to the ui
+		Log.d("FAIMS","Binding logic to the UI");
+		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.faimsClient, getAssets(), renderer, databaseManager, gpsDataManager);
+		linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
+		linker.sourceFromAssets("ui_commands.bsh");
+		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));
 	}
 	
 	public BeanShellLinker getBeanShellLinker(){

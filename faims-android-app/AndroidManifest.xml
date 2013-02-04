@@ -49,7 +49,7 @@
         </activity>
         
         <service
-            android:name="DownloadProjectService"
+            android:name="au.org.intersect.faims.android.services.DownloadProjectService"
             ></service>
         
     </application>

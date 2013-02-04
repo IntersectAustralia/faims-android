@@ -68,6 +68,8 @@ public class FAIMSClient {
 			
 			HttpResponse response = httpClient.execute(post);
 			if (response.getEntity() == null) {
+				Log.d("FAIMS", "upload failed");
+				
 				return FAIMSClientResultCode.SERVER_FAILURE;
 			}
 			
@@ -75,11 +77,16 @@ public class FAIMSClient {
 			
 		} catch (Exception e) {
 			Log.e("FAIMS", "cannot upload file", e);
+			
+			if (e instanceof InterruptedException) {
+				return FAIMSClientResultCode.CANCELLED;
+			} else {
+				return FAIMSClientResultCode.SERVER_FAILURE;
+			}
+			
 		} finally {
 			cleanupClient();
 		}
-		
-		return FAIMSClientResultCode.SERVER_FAILURE;
 	}
 	
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
@@ -105,7 +112,12 @@ public class FAIMSClient {
 		} catch(Exception e) {
 			FAIMSLog.log(e);
 			
-			return FAIMSClientResultCode.SERVER_FAILURE;
+			if (e instanceof InterruptedException) {
+				return FAIMSClientResultCode.CANCELLED;
+			} else {
+				return FAIMSClientResultCode.SERVER_FAILURE;
+			}
+			
 		} finally {
 			
 			try {
@@ -122,7 +134,7 @@ public class FAIMSClient {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
-		
+		String filename = null;
 		try {
 			initClient();
 			
@@ -135,24 +147,12 @@ public class FAIMSClient {
 	        if (archive.size > freeSpace) {
 	        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
 	        } 
-        	
-	        // quit if thread is interrupted
-	        if (Thread.interrupted()) {
-	        	return FAIMSClientResultCode.SERVER_FAILURE;
-	        }
 	        
-	        String filename = getProjectDownload(projectId, archive);
+	        filename = getProjectDownload(projectId, archive);
 			
 			if (filename == null) {
 				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
 			}
-			
-			// quit if thread is interrupted
-	        if (Thread.interrupted()) {
-	        	FileUtil.deleteFile(filename);
-	        	
-	        	return FAIMSClientResultCode.SERVER_FAILURE;
-	        }
 			
 			FileUtil.untarFromStream("/faims/projects", filename);
 			
@@ -165,7 +165,23 @@ public class FAIMSClient {
 		} catch (Exception e) {
 			FAIMSLog.log(e);
 			
-			return FAIMSClientResultCode.SERVER_FAILURE;
+			// remove file if downloaded
+			if (filename != null) {
+				try {
+				
+					FileUtil.deleteFile(filename);
+					
+				} catch (IOException ioe) {
+					FAIMSLog.log(ioe);
+				}
+			}
+			
+			if (e instanceof InterruptedException) {
+				return FAIMSClientResultCode.CANCELLED;
+			} else {
+				return FAIMSClientResultCode.SERVER_FAILURE;
+			}
+			
 		} finally {
 			
 			try {
