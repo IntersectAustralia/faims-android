@@ -7,17 +7,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.content.Intent;
+import android.os.Message;
 import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
+import au.org.intersect.faims.android.services.DownloadProjectService;
 import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
 import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
 
 import com.xtremelabs.robolectric.Robolectric;
+import com.xtremelabs.robolectric.shadows.ShadowActivity;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
+import com.xtremelabs.robolectric.shadows.ShadowIntent;
 import com.xtremelabs.robolectric.tester.android.view.TestMenu;
 import com.xtremelabs.robolectric.tester.android.view.TestMenuItem;
 
@@ -215,7 +220,17 @@ public class FetchProjectsActivityTest {
 		
 		activity.downloadProjectArchive();
 		
+		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+		Intent startedIntent = shadowActivity.getNextStartedService();
+		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+		
+		assertEquals("Download service started", DownloadProjectService.class.getName().toString(), shadowIntent.getComponent().getClassName());
+		
 		// TODO assert no project has been downloaded
+		
+		Message msg = new Message();
+		msg.obj = FAIMSClientResultCode.SERVER_FAILURE;
+		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -246,7 +261,17 @@ public class FetchProjectsActivityTest {
 		
 		activity.downloadProjectArchive();
 		
+		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+		Intent startedIntent = shadowActivity.getNextStartedService();
+		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+		
+		assertEquals("Download service started", DownloadProjectService.class.getName().toString(), shadowIntent.getComponent().getClassName());
+		
 		// TODO assert no project has been downloaded
+		
+		Message msg = new Message();
+		msg.obj = FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
+		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -276,7 +301,17 @@ public class FetchProjectsActivityTest {
 		
 		activity.downloadProjectArchive();
 		
+		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+		Intent startedIntent = shadowActivity.getNextStartedService();
+		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+		
+		assertEquals("Download service started", DownloadProjectService.class.getName().toString(), shadowIntent.getComponent().getClassName());
+		
 		// TODO assert no project has been downloaded
+		
+		Message msg = new Message();
+		msg.obj = FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
+		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
 		

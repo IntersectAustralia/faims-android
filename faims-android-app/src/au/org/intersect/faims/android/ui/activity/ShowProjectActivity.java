@@ -41,6 +41,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	private GPSDataManager gpsDataManager;
 	
+	protected ChoiceDialog choiceDialog;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,7 +56,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		
-		new ChoiceDialog(ShowProjectActivity.this,
+		choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.render_project_title),
 				getString(R.string.render_project_message), new IDialogListener() {
 
@@ -66,7 +68,8 @@ public class ShowProjectActivity extends FragmentActivity {
 						}
 					}
 			
-		}).show();
+		});
+		choiceDialog.show();
 	}
 	
 	@Override
@@ -108,7 +111,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	*/
 	
-	private void renderUI() {
+	protected void renderUI() {
 		// Read, validate and parse the xforms
 		ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
 				.getExternalStorageDirectory() + directory + "/ui_schema.xml");

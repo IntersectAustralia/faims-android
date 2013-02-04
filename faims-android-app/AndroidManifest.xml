@@ -52,6 +52,10 @@
             android:name="au.org.intersect.faims.android.services.DownloadProjectService"
             ></service>
         
+        <service
+            android:name="au.org.intersect.faims.android.services.UploadDatabaseService"
+            ></service>
+        
     </application>
 
 </manifest>

@@ -6,15 +6,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.xtremelabs.robolectric.Robolectric;
-import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
-
 import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
-import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
-import au.org.intersect.faims.android.ui.dialog.DialogType;
+
+import com.xtremelabs.robolectric.Robolectric;
+import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
 @RunWith(FAIMSRobolectricTestRunner.class)
 public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
@@ -54,7 +52,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		// We now tell the activity to render the project UI
 		
-		activity.handleDialogResponse(DialogResultCode.SELECT_YES, null, DialogType.CONFIRM_RENDER_PROJECT, null);
+		activity.renderUI();
 		
 		// We should have Field1, Field2 and a copy button
 		

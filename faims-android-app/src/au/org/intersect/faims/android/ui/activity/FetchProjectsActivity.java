@@ -48,9 +48,12 @@ public class FetchProjectsActivity extends RoboActivity {
 	protected List<Project> projects;
 	protected Project selectedProject;
 	
-	private BusyDialog busyDialog;
+	protected BusyDialog busyDialog;
+	protected ChoiceDialog choiceDialog;
+	protected ConfirmDialog confirmDialog;
 	private AsyncTask<Void, Void, Void> locateTask;
 	private AsyncTask<Void, Void, Void> fetchTask;
+	protected Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +75,7 @@ public class FetchProjectsActivity extends RoboActivity {
         		final String selectedItem = sel.getText().toString();
         		selectedProject = getProjectByName(selectedItem);
         		
-        		new ChoiceDialog(FetchProjectsActivity.this, 
+        		choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
         				getString(R.string.confirm_download_project_title),
         				getString(R.string.confirm_download_project_message) + " " + selectedItem + "?",
         				new IDialogListener() {
@@ -85,7 +88,8 @@ public class FetchProjectsActivity extends RoboActivity {
 								}
 							}
         			
-        		}).show();
+        		});
+        		choiceDialog.show();
         	}
         });
         
@@ -187,7 +191,7 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
     
-    @SuppressLint("HandlerLeak")
+	@SuppressLint("HandlerLeak")
 	protected void downloadProjectArchive() {
     	FAIMSLog.log();
     	
@@ -197,7 +201,7 @@ public class FetchProjectsActivity extends RoboActivity {
     		// start service
     		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
 		    // Create a new Messenger for the communication back
-		    Messenger messenger = new Messenger(new Handler() {
+    		handler = new Handler() {
 				
 				public void handleMessage(Message message) {
 					FetchProjectsActivity.this.busyDialog.dismiss();
@@ -212,13 +216,14 @@ public class FetchProjectsActivity extends RoboActivity {
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
 							showDownloadProjectErrorDialog();
-						} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
+						} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE || resultCode == FAIMSClientResultCode.DOWNLOAD_CORRUPTED){
 							showDownloadProjectFailureDialog();
 						}
 					}
 				}
 				
-			});
+			};
+		    Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("project", selectedProject.id);
 		    startService(intent);
@@ -245,7 +250,7 @@ public class FetchProjectsActivity extends RoboActivity {
     }
     
     private void showLocateServerFailureDialog() {
-    	new ChoiceDialog(FetchProjectsActivity.this,
+    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
@@ -257,11 +262,12 @@ public class FetchProjectsActivity extends RoboActivity {
 						}
 					}
     		
-    	}).show();
+    	});
+    	choiceDialog.show();
     }
     
     private void showFetchProjectsFailureDialog() {
-    	new ChoiceDialog(FetchProjectsActivity.this,
+    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.fetch_projects_failure_title),
 				getString(R.string.fetch_projects_failure_message),
 				new IDialogListener() {
@@ -273,11 +279,12 @@ public class FetchProjectsActivity extends RoboActivity {
 						}
 					}
     		
-    	}).show();
+    	});
+    	choiceDialog.show();
     }
     
     private void showDownloadProjectFailureDialog() {
-    	new ChoiceDialog(FetchProjectsActivity.this,
+    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.download_project_failure_title),
 				getString(R.string.download_project_failure_message),
 				new IDialogListener() {
@@ -289,11 +296,12 @@ public class FetchProjectsActivity extends RoboActivity {
 						}
 					}
     		
-    	}).show();
+    	});
+    	choiceDialog.show();
     }
     
     private void showDownloadProjectErrorDialog() {
-    	new ConfirmDialog(FetchProjectsActivity.this,
+    	confirmDialog = new ConfirmDialog(FetchProjectsActivity.this,
 				getString(R.string.download_project_error_title),
 				getString(R.string.download_project_error_message),
 				new IDialogListener() {
@@ -303,7 +311,8 @@ public class FetchProjectsActivity extends RoboActivity {
 						// do nothing
 					}
     		
-    	}).show();
+    	});
+    	confirmDialog.show();
     }
     
     private void showBusyLocatingServerDialog() {

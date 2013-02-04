@@ -1665,11 +1665,12 @@ public class BeanShellLinker {
 	
 	public void pushDatabaseToServer() {
 		
-		
 		File file = new File(baseDir + "/db.sqlite3");
 		if (!file.exists()) {
 			Log.d("FAIMS", "database does not exist");
 		}
+		
+		
 		
 	}
 
