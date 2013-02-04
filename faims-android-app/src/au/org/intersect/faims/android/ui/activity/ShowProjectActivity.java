@@ -42,6 +42,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	private GPSDataManager gpsDataManager;
 	
 	protected ChoiceDialog choiceDialog;
+
+	private String projectId;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		Intent data = getIntent();
 		setTitle(data.getStringExtra("name"));
 		directory = data.getStringExtra("directory");
+		projectId = data.getStringExtra("projectId");
 		
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + directory + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
@@ -123,7 +126,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.faimsClient, getAssets(), renderer, databaseManager, gpsDataManager);
+		linker = new BeanShellLinker(ShowProjectActivity.this, getAssets(), renderer, databaseManager, gpsDataManager, projectId);
 		linker.setBaseDir(Environment.getExternalStorageDirectory() + directory);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + directory + "/ui_logic.bsh"));

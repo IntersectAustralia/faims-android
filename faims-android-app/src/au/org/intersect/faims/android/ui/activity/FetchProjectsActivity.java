@@ -212,6 +212,7 @@ public class FetchProjectsActivity extends RoboActivity {
 						
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
 						showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
+						showProjectsIntent.putExtra("projectId", selectedProject.id);
 						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {

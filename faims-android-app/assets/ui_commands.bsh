@@ -292,8 +292,8 @@ getMapGeometrySelected() {
 	return _map_geometry_selected;
 }
 
-pushDatabaseToServer() {
-	linker.pushDatabaseToServer();
+pushDatabaseToServer(String successCallback, String failureCallback) {
+	linker.pushDatabaseToServer(successCallback, failureCallback);
 }
 
 pullDatabaseFromServer() {

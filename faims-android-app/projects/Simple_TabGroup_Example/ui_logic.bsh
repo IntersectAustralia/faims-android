@@ -302,7 +302,7 @@ cancelEntityGroup() {
 onEvent("tabgroup1/tab5/cancel", "click", "cancelEntity()");
 onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");
 
-onEvent("tabgroup5/tab2/push", "click", "pushDatabaseToServer()");
+onEvent("tabgroup5/tab2/push", "click", "uploadDatabase()");
 onEvent("tabgroup5/tab2/pull", "click", "pullDatabaseFromServer()");
 
 skip() {
@@ -315,3 +315,14 @@ skip() {
 
 onEvent("user/tab1/skip", "click", "skip()");
 	
+onUploadSuccess() {
+	showToast("database uploaded successfully");
+}
+
+onUploadFailure() {
+	showToast("failed to upload database");
+}
+	
+uploadDatabase() {
+	pushDatabaseToServer("onUploadSuccess()", "onUploadFailure()");
+}

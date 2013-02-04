@@ -9,13 +9,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -37,9 +41,10 @@ import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.managers.DatabaseManager;
-import au.org.intersect.faims.android.net.FAIMSClient;
+import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
+import au.org.intersect.faims.android.services.UploadDatabaseService;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import bsh.EvalError;
@@ -93,15 +98,15 @@ public class BeanShellLinker {
 	@SuppressWarnings("unused")
 	private User user;
 
-	private FAIMSClient faimsClient;
+	private String projectId;
 
-	public BeanShellLinker(FragmentActivity activity, FAIMSClient faimsClient, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
+	public BeanShellLinker(FragmentActivity activity, AssetManager assets, UIRenderer renderer, DatabaseManager databaseManager, GPSDataManager gpsDataManager, String projectId) {
 		this.activity = activity;
-		this.faimsClient = faimsClient;
 		this.assets = assets;
 		this.renderer = renderer;
 		this.databaseManager = databaseManager;
 		this.gpsDataManager = gpsDataManager;
+		this.projectId = projectId;
 		interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -1663,15 +1668,35 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void pushDatabaseToServer() {
+	@SuppressLint("HandlerLeak")
+	public void pushDatabaseToServer(final String successCallback, final String failureCallback) {
 		
 		File file = new File(baseDir + "/db.sqlite3");
 		if (!file.exists()) {
 			Log.d("FAIMS", "database does not exist");
 		}
 		
-		
-		
+		Intent intent = new Intent(this.activity, UploadDatabaseService.class);
+	    // Create a new Messenger for the communication back
+	    Messenger messenger = new Messenger(new Handler() {
+			
+			public void handleMessage(Message message) {
+				FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+				if (resultCode == FAIMSClientResultCode.SUCCESS) {
+					execute(successCallback);
+				} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
+					execute(failureCallback);
+				} else {
+					// TODO cancelled?
+				}
+				
+			}
+			
+		});
+	    intent.putExtra("MESSENGER", messenger);
+	    intent.putExtra("database", file);
+	    intent.putExtra("projectId", projectId);
+	    activity.startService(intent);
 	}
 
 	private String convertStreamToString(InputStream stream) {

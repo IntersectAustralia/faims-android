@@ -11,9 +11,11 @@ import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
 
 import android.net.http.AndroidHttpClient;
 import android.util.Log;
@@ -52,22 +54,23 @@ public class FAIMSClient {
 		httpClient = null;
 	}
 	
-	public FAIMSClientResultCode uploadDatabase(File file) {
-		return uploadFile(file, "/android/upload_db");
+	public FAIMSClientResultCode uploadDatabase(String projectId, File file) {
+		return uploadFile(file, "/android/project/" + projectId + "/upload_db");
 	}
 	
 	public FAIMSClientResultCode uploadFile(File file, String uri) {
 		try {
 			initClient();
 			
-			FileEntity entity = new FileEntity(file, "binary/octet-stream");
-			entity.setChunked(true);
+			MultipartEntity entity = new MultipartEntity();
+			entity.addPart("file", new FileBody(file, "binary/octet-stream"));
 			
-			HttpPost post = new HttpPost(new URI(uri));
+			HttpPost post = new HttpPost(new URI(getURI(uri)));
 			post.setEntity(entity);
 			
 			HttpResponse response = httpClient.execute(post);
-			if (response.getEntity() == null) {
+			
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 				Log.d("FAIMS", "upload failed");
 				
 				return FAIMSClientResultCode.SERVER_FAILURE;
@@ -250,6 +253,8 @@ public class FAIMSClient {
 	}
 	
 	private String getURI(String path) {
+		FAIMSLog.log(serverDiscovery.getServerHost() + path);
+		
 		return serverDiscovery.getServerHost() + path;
 	}
 	
