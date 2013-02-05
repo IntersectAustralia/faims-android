@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.Timer;
@@ -146,8 +148,12 @@ public class ServerDiscovery {
 			@Override
 			public void run() {
 				DatagramSocket socket = null;
+				DatagramChannel channel = null;
 				try {
-					socket = new DatagramSocket(getDevicePort());
+					channel = DatagramChannel.open();
+					socket = channel.socket();
+					socket.setReuseAddress(true);
+					socket.bind(new InetSocketAddress(getDevicePort()));
 					
 					while(isFindingServer) {
 						receivePacket(socket);
@@ -163,6 +169,11 @@ public class ServerDiscovery {
 					FAIMSLog.log(e);
 				} finally {
 					if (socket != null) socket.close();
+					try {
+						if (channel != null) channel.close();
+					} catch (IOException e) {
+						FAIMSLog.log(e);
+					}
 				}
 			}
 		}).start();
