@@ -2,7 +2,7 @@
 <resources>
     
     <integer name="discovery_port">3001</integer>
-    <integer name="device_port">3001</integer>
+    <integer name="device_port">3002</integer>
     <string name="broadcast_addr">255.255.255.255</string>
     <integer name="discovery_time">20</integer>
     <integer name="packet_timeout">20</integer>
