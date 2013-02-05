@@ -38,6 +38,10 @@
 		<file name="nutiteq-3dsdk-1.0.84pre.jar"/>
 		<file name="mapsforge-map-0.3.0-jar-with-dependencies.jar"/>
 		<file name="marineapi.jar"/>
+		<file name="httpclient-4.2.3.jar "/>
+		<file name="httpcore-4.2.2.jar"/>
+		<file name="httpmime-4.2.3.jar"/>
+		<file name="apache-mime4j-core-0.7.2.jar "/>
 	</filelist>
 
 	<path id="compile_classpath">
