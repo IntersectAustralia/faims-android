@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +14,13 @@ import org.javarosa.form.api.FormEntryPrompt;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
 import android.text.InputType;
 import android.text.format.Time;
+import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -74,7 +79,7 @@ public class Tab {
         }
 	}
 
-	public View addInput(FormEntryPrompt input,String path, String viewName) {
+	public View addInput(FormEntryPrompt input,String path, String viewName, String directory) {
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
             TextView textView = new TextView(this.context);
             String inputText = input.getQuestionText();
@@ -211,8 +216,9 @@ public class Tab {
                         // check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(input.getQuestion()
                                 .getAdditionalAttribute(null, "type"))) {
-                            //renderImageSliderForSingleSelection(layout, input);
-                            // check if the type if image to create image slider
+                            view = renderImageSliderForSingleSelection(input, directory, attributeName, attributeType, path);
+                            linearLayout.addView(view);
+                            valueReference.put(path, "");
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
@@ -388,82 +394,62 @@ public class Tab {
      * 
      * @param layout
      * @param questionPrompt
+	 * @param path2 
+	 * @param attributeType 
+	 * @param attributeName 
      */
-	/*
-    private void renderImageSliderForSingleSelection(LinearLayout layout,
-            final FormEntryPrompt questionPrompt) {
-        HorizontalScrollView horizontalScrollView = new HorizontalScrollView(
-                this.context);
-        RadioGroup radioGroupLayout = new RadioGroup(this.context);
-        radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
-        final List<ImageView> images = new ArrayList<ImageView>();
+    private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormEntryPrompt questionPrompt, String directory, String attributeName, String attributeType, String path) {
+    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.context, attributeName, attributeType, path);
+        LinearLayout galleriesLayout = new LinearLayout(this.context);
+        galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
+        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
         for (final SelectChoice selectChoice : questionPrompt
                 .getSelectChoices()) {
-            final ImageView gallery = new ImageView(this.context);
-            String uri = selectChoice.getValue();
-            gallery.setImageURI(Uri.parse(uri));
-            gallery.setMinimumHeight(400);
-            gallery.setMinimumWidth(400);
-            gallery.setBackgroundColor(Color.GREEN);
-            gallery.setPadding(10, 10, 10, 10);
-            images.add(gallery);
-            RadioButton button = new RadioButton(this.context);
-            button.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    for (ImageView view : images) {
-                        if (view.equals(gallery)) {
-                            view.setBackgroundColor(Color.RED);
-                        } else {
-                            view.setBackgroundColor(Color.GREEN);
-                        }
-                    }
-
-                }
-            });
-            radioGroupLayout.addView(gallery);
-            radioGroupLayout.addView(button);
+        	final String picturePath = Environment.getExternalStorageDirectory() + directory + "/" + selectChoice.getValue();
+        	File pictureFolder = new File(picturePath);
+        	if(pictureFolder.exists()){
+	        	for(final String name : pictureFolder.list()){
+	        		LinearLayout galleryLayout = new LinearLayout(this.context);
+	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+	        		CustomImageView gallery = new CustomImageView(this.context);
+	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+	                gallery.setImageURI(Uri.parse(path+"/"+name));
+	                gallery.setBackgroundColor(Color.RED);
+	                gallery.setPadding(10, 10, 10, 10);
+	                gallery.setLayoutParams(layoutParams);
+	                gallery.setPicture(null);
+	                gallery.setOnClickListener(new OnClickListener() {
+	
+	                    @Override
+	                    public void onClick(View v) {
+	                    	CustomImageView selectedImageView = (CustomImageView) v;
+	                        horizontalScrollView.setSelectedImageView(selectedImageView);
+	                        for (CustomImageView view : galleryImages) {
+	                            if (view.equals(selectedImageView)) {
+	                                view.setBackgroundColor(Color.GREEN);
+	                            } else {
+	                                view.setBackgroundColor(Color.RED);
+	                            }
+	                        }
+	                    }
+	                });
+	                TextView textView = new TextView(this.context);
+	                textView.setText(name);
+	                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+	                textView.setTextSize(20);
+	                galleryLayout.addView(textView);
+	                galleryImages.add(gallery);
+	                galleryLayout.addView(gallery);
+	                galleriesLayout.addView(galleryLayout);
+	        	}
+	        	horizontalScrollView.setImageViews(galleryImages);
+	        }
         }
-        horizontalScrollView.addView(radioGroupLayout);
-        layout.addView(horizontalScrollView);
-
-        HorizontalScrollView horizontalScrollView2 = new HorizontalScrollView(
-                this.context);
-        LinearLayout galleryLayout = new RadioGroup(this.context);
-        galleryLayout.setOrientation(LinearLayout.HORIZONTAL);
-        final List<ImageView> galleryImages = new ArrayList<ImageView>();
-        for (final SelectChoice selectChoice : questionPrompt
-                .getSelectChoices()) {
-            final ImageView gallery = new ImageView(this.context);
-            String uri = selectChoice.getValue();
-            gallery.setImageURI(Uri.parse(uri));
-            gallery.setBackgroundColor(Color.GREEN);
-            gallery.setMinimumHeight(400);
-            gallery.setMinimumWidth(400);
-            gallery.setPadding(10, 10, 10, 10);
-            gallery.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    ImageView selectedImageView = (ImageView) v;
-                    for (ImageView view : galleryImages) {
-                        if (view.equals(selectedImageView)) {
-                            view.setBackgroundColor(Color.RED);
-                        } else {
-                            view.setBackgroundColor(Color.GREEN);
-                        }
-                    }
-
-                }
-            });
-            galleryImages.add(gallery);
-            galleryLayout.addView(gallery);
-        }
-        horizontalScrollView2.addView(galleryLayout);
-        layout.addView(horizontalScrollView2);
+        horizontalScrollView.addView(galleriesLayout);
+        return horizontalScrollView;
     }
 
+	/*
     public ImageView getCurrentImageView() {
         return this.imageView;
     }
@@ -515,6 +501,12 @@ public class Tab {
 				spinner.setSelection(0);
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
 				valueReference.put(spinner.getRef(), pair.getValue());
+			} else if(v instanceof CustomHorizontalScrollView){
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				for(CustomImageView customImageView : horizontalScrollView.getImageViews()){
+					customImageView.setBackgroundColor(Color.RED);
+				}
+				horizontalScrollView.setSelectedImageView(null);
 			}
 		}
 	}

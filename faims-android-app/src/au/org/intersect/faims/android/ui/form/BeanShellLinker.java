@@ -14,10 +14,12 @@ import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -26,6 +28,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -518,6 +522,11 @@ public class BeanShellLinker {
 				if(!getFieldValue(customSpinner.getRef()).equals(tab.getStoredValue(customSpinner.getRef()))){
 					return true;
 				}
+			} else if (v instanceof CustomHorizontalScrollView) {
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				if(!getFieldValue(horizontalScrollView.getRef()).equals(tab.getStoredValue(horizontalScrollView.getRef()))){
+					return true;
+				}
 			}
 		}
 		return false;
@@ -657,6 +666,9 @@ public class BeanShellLinker {
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
 				setArchEntityFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), entityAttribute);
+			} else if (v instanceof CustomHorizontalScrollView) {
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				setArchEntityFieldValueForType(tab, horizontalScrollView.getAttributeType(), horizontalScrollView.getRef(), entityAttribute);
 			}
 		}
 	}
@@ -682,6 +694,9 @@ public class BeanShellLinker {
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
 				setRelationshipFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), relationshipAttribute);
+			} else if (v instanceof CustomHorizontalScrollView) {
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				setRelationshipFieldValueForType(tab, horizontalScrollView.getAttributeType(), horizontalScrollView.getRef(), relationshipAttribute);
 			}
 		}
 	}
@@ -827,6 +842,15 @@ public class BeanShellLinker {
 				else if (obj instanceof TimePicker) {
 					TimePicker time = (TimePicker) obj;
 					DateUtil.setTimePicker(time, value);
+				}else if (obj instanceof CustomHorizontalScrollView){
+					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
+						if(customImageView.getPicture().getId().equals(value)){
+							customImageView.setBackgroundColor(Color.GREEN);
+							horizontalScrollView.setSelectedImageView(customImageView);
+							break;
+						}
+					};
 				}
 			}
 			
@@ -926,6 +950,14 @@ public class BeanShellLinker {
 			else if (obj instanceof TimePicker) {
 				TimePicker time = (TimePicker) obj;
 				return DateUtil.getTime(time);
+			}
+			else if (obj instanceof CustomHorizontalScrollView){
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				if(horizontalScrollView.getSelectedImageView() != null){
+					return horizontalScrollView.getSelectedImageView().getPicture().getId();
+				}else{
+					return "";
+				}
 			}
 			else {
 				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
@@ -1073,6 +1105,66 @@ public class BeanShellLinker {
 		}
 	}
 	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populatePictureGallery(String ref, Collection valuesObj){
+		Object obj = renderer.getViewByRef(ref);
+		
+		List<Picture> pictures = new ArrayList<Picture>();
+		if(valuesObj instanceof ArrayList<?>){
+			ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
+			for(List<String> pictureList : arrayList){
+				Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+				pictures.add(picture);
+			}
+		}
+		
+		if(obj instanceof HorizontalScrollView){
+			final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+	        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+	        galleriesLayout.removeAllViews();
+	        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+	        for (Picture picture : pictures) {
+	        	File pictureFile = new File(baseDir + "/" + picture.getUrl());
+	        	if(pictureFile.exists()){
+	        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+	        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+	                gallery.setImageURI(Uri.parse(baseDir + "/" + picture.getUrl()));
+	                gallery.setBackgroundColor(Color.RED);
+	                gallery.setPadding(10, 10, 10, 10);
+	                gallery.setLayoutParams(layoutParams);
+	                gallery.setPicture(picture);
+	                gallery.setOnClickListener(new OnClickListener() {
+	
+	                    @Override
+	                    public void onClick(View v) {
+	                    	CustomImageView selectedImageView = (CustomImageView) v;
+	                        horizontalScrollView.setSelectedImageView(selectedImageView);
+	                        for (ImageView view : galleryImages) {
+	                            if (view.equals(selectedImageView)) {
+	                                view.setBackgroundColor(Color.GREEN);
+	                            } else {
+	                                view.setBackgroundColor(Color.RED);
+	                            }
+	                        }
+	                    }
+	                });
+	                TextView textView = new TextView(galleriesLayout.getContext());
+	                textView.setText(picture.getName());
+	                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+	                textView.setTextSize(20);
+	                galleryLayout.addView(textView);
+	                galleryImages.add(gallery);
+	                galleryLayout.addView(gallery);
+	                galleriesLayout.addView(galleryLayout);
+	        	}
+	        }
+	        horizontalScrollView.setImageViews(galleryImages);
+		}
+	}
+
 	public Object fetchArchEnt(String id){
 		return databaseManager.fetchArchEnt(id);
 	}

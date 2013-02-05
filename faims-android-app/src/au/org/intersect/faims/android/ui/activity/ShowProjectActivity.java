@@ -128,7 +128,7 @@ public class ShowProjectActivity extends FragmentActivity implements IDialogList
 
 				// render the ui definition
 				renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-				renderer.createUI();
+				renderer.createUI(directory);
 				renderer.showTabGroup(ShowProjectActivity.this, 0);
 				
 				// bind the logic to the ui

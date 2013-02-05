@@ -126,6 +126,10 @@ populateList(String ref, Collection values){
 	linker.populateList(ref, values);
 }
 
+populatePictureGallery(String ref, Collection values){
+	linker.populatePictureGallery(ref, values);
+}
+
 populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }

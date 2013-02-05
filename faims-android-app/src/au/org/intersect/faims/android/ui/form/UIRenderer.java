@@ -57,7 +57,7 @@ public class UIRenderer {
      * Render the tabs and questions inside the tabs
      * 
      */
-    public void createUI() {
+    public void createUI(String directory) {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
@@ -118,7 +118,7 @@ public class UIRenderer {
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName);
+	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory);
 	                        
 	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);

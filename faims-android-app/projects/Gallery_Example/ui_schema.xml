@@ -1,0 +1,141 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <date></date>
+                  <time></time>
+                  <type></type>
+                  <type-description></type-description>
+                  <picture></picture>
+                  <cancel></cancel>
+              </tab1>
+              <tab2>
+                  <location></location>
+                  <location-value></location-value>
+                  <location-certainty></location-certainty>
+                  <supervisor></supervisor>
+              </tab2>
+              <tab3>
+                  <entity></entity>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab3>
+          </tabgroup1>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/date" type="date"/>
+      <bind nodeset="/faims/tabgroup1/tab1/time" type="time"/>
+      <bind nodeset="/faims/tabgroup1/tab1/type-description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/location-value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/location-certainty" type="decimal"/>
+
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="tabgroup1" faims_archent_type="simple">
+      <label>Simple Entity Example</label>
+      <group ref="tab1">
+        <label>Entity</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <label>Name:</label>
+        </input>
+        <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <label>Date:</label>
+        </input>
+        <input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+            <label>Time:</label>
+        </input>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <input ref="type-description" faims_attribute_name="type" faims_attribute_type="freetext">
+            <label>Description:</label>
+        </input>
+        <select1 ref="picture" type="image" faims_attribute_name="picture" faims_attribute_type="freetext">
+            <label>Picture:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <trigger ref="cancel">
+          <label>Cancel This Tab</label>
+        </trigger>
+	  </group>
+      <group ref="tab2">
+        <label>Entity 2</label>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
+            <label>Value:</label>
+        </input>
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
+            <label>Certainty:</label>
+        </input>
+        <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
+            <label>Supervisor:</label>
+            <item>
+                <label>Super A</label>
+                <value>supera</value>
+            </item>
+            <item>
+                <label>Super B</label>
+                <value>superb</value>
+            </item>
+            <item>
+                <label>Super C</label>
+                <value>superc</value>
+            </item>
+            <item>
+                <label>Super D</label>
+                <value>superd</value>
+            </item>
+        </select1>
+      </group>
+      <group ref="tab3">
+        <label>Load</label>
+        <select1 ref="entity">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
