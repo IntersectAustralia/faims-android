@@ -184,7 +184,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
 						linker.execute(callback);
-					} else {
+					} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
 						showUploadDatabaseFailureDialog(file, callback);
 					}
 				}
