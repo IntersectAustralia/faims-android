@@ -23,11 +23,37 @@ public class ProjectUtil {
 			
 			copyFile(new File("assets/data_schema.xml"), new File(dir + "/data_schema.xml"));
 			copyFile(new File("assets/ui_schema.xml"), new File(dir + "/ui_schema.xml"));
-			copyFile(new File("assets/ui_logic.bsh"), new File(dir + "/ui_logic.xml"));
+			copyFile(new File("assets/ui_logic.bsh"), new File(dir + "/ui_logic.bsh"));
 			copyFile(new File("assets/db.sqlite3"), new File(dir + "/db.sqlite3"));
 			
 			JsonObject object = new JsonObject();
-	    	object.addProperty("project", name);
+	    	object.addProperty("name", name);
+	    	
+	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
+	    	writer.write(object.toString());
+	    	writer.flush();
+	    	writer.close();
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+	}
+	
+	public static void createProjectFrom(String name, String dirname) {
+		try {
+			String dir = Environment.getExternalStorageDirectory() + "/faims/projects/" + name.replaceAll("\\s+", "_");
+			File file = new File(dir);
+			if (!file.isDirectory())
+				file.mkdirs();
+			
+			String dirpath = "test_data/" + dirname;
+			
+			copyFile(new File(dirpath + "/data_schema.xml"), new File(dir + "/data_schema.xml"));
+			copyFile(new File(dirpath + "/ui_schema.xml"), new File(dir + "/ui_schema.xml"));
+			copyFile(new File(dirpath + "/ui_logic.bsh"), new File(dir + "/ui_logic.bsh"));
+			copyFile(new File(dirpath + "/db.sqlite3"), new File(dir + "/db.sqlite3"));
+			
+			JsonObject object = new JsonObject();
+	    	object.addProperty("name", name);
 	    	
 	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
 	    	writer.write(object.toString());

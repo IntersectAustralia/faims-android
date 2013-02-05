@@ -30,10 +30,10 @@
       <label>Tab Group 1</label>
       <group ref="tab1">
         <label>TG1 Tab 1</label>
-        <input ref="field1" faims_data="Foo">
+        <input ref="field1">
           <label>TG1 T1 Field 1:</label>
         </input>
-        <input ref="field2" faims_data="Foo">
+        <input ref="field2">
           <label>TG1 T1 Field 2:</label>
         </input>
         <trigger ref="copy1">

@@ -32,7 +32,7 @@ public class Project {
 		Project p = new Project();
 		if (object.has("name"))	p.name = object.get("name").getAsString();
 		if (object.has("id")) p.id = object.get("id").getAsString();
-		if (p.name != null) p.dir = p.name.replace("\\s", "_");
+		if (p.name != null) p.dir = p.name.replace("\\s+", "_");
 		return p;
 	}
 	

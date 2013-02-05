@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
+import au.org.intersect.faims.android.test.helper.ProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
@@ -31,12 +32,11 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		Intent intent = new Intent();
 		intent.putExtra("name", projectName);
-		intent.putExtra("directory", "/faims/projects/" + projectName);
 		activity.setIntent(intent);
 		
 		// We need the UI xml and logic bsh files
 		
-		createTestData(projectName, this.directoryName);
+		ProjectUtil.createProjectFrom(projectName, this.directoryName);
 		
 		// Create the activity
 		
@@ -53,7 +53,6 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		// We now tell the activity to render the project UI
 		
 		activity.renderUI();
-		
 		// We should have Field1, Field2 and a copy button
 		
 		String field1Ref = "tabgroup1/tab1/field1";

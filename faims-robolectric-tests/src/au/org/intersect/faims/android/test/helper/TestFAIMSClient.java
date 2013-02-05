@@ -17,7 +17,7 @@ public class TestFAIMSClient extends FAIMSClient {
 	@Override
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
 		for (int i = 0; i < projectsCount; i++) {
-			projects.add(new Project("Project " + i, String.valueOf(i)));
+			projects.add(new Project(String.valueOf(i).replace("\\s+", "_"), "Project " + i, String.valueOf(i)));
 		}
 		return projectsCode;
 	}

@@ -119,6 +119,7 @@ public class BeanShellLinker {
 
 	public void execute(String code) {
 		try {
+			
     		interpreter.eval(code);
     	} catch (EvalError e) {
     		FAIMSLog.log(e);
