@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.managers;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -559,5 +560,36 @@ public class DatabaseManager {
 			s = "0" + s;
 		}
 		return "1"+ s + String.valueOf(System.currentTimeMillis());
+	}
+
+	public void dumpDatabaseTo(File file) {
+		jsqlite.Database db = null;
+		try {
+			
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+
+			String query = 
+						"attach database ? as export;" +
+						"create table export.archentity as select * from archentity;" +
+						"create table export.aentvalue as select * from aentvalue;" +
+						"create table export.aentreln as select * from aentreln;" + 
+						"create table export.relationship as select * from relationship;" +
+						"create table export.relnvalue as select * from relnvalue;" +
+						"detach database export;";
+			Stmt st = db.prepare(query);
+			st.bind(1, file.getAbsolutePath());
+			st.step();
+			st.close();
+			
+		} catch (Exception e) {
+			FAIMSLog.log(e);
+		} finally {
+			try {
+				if (db != null) db.close();
+			} catch (Exception e) {
+				FAIMSLog.log(e);
+			}
+		}
 	}
 }

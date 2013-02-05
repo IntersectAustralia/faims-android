@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
@@ -1659,17 +1658,8 @@ public class BeanShellLinker {
 		}
 	}
 	
-	@SuppressLint("HandlerLeak")
 	public void pushDatabaseToServer(final String callback) {
-		
-		File file = new File(baseDir + "/db.sqlite3");
-		if (!file.exists()) {
-			Log.d("FAIMS", "Database does not exist");
-			showWarning("Logic Error", "Database does not exist");
-			return;
-		}
-		
-		this.activity.uploadDatabaseToServer(file, callback);
+		this.activity.uploadDatabaseToServer(callback);
 	}
 
 	public UIRenderer getUIRenderer(){

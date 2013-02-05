@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.activity;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.javarosa.form.api.FormEntryController;
 
@@ -167,7 +168,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	@SuppressLint("HandlerLeak")
-	public void uploadDatabaseToServer(final File file, final String callback) {
+	public void uploadDatabaseToServer(final String callback) {
     	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
@@ -185,16 +186,28 @@ public class ShowProjectActivity extends FragmentActivity {
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
 						linker.execute(callback);
 					} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
-						showUploadDatabaseFailureDialog(file, callback);
+						showUploadDatabaseFailureDialog(callback);
 					}
 				}
 				
 			};
-		    Messenger messenger = new Messenger(handler);
-		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("database", file);
-		    intent.putExtra("projectId", project.id);
-		    startService(intent);
+		    
+		    try {
+		    	// create temp database to upload
+		    	File tempFile = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir));
+		    	databaseManager.dumpDatabaseTo(tempFile);
+		    	
+		    	// start upload service
+		    	// note: the temp file is automatically deleted by the service after it has finished
+		    	Messenger messenger = new Messenger(handler);
+			    intent.putExtra("MESSENGER", messenger);
+			    intent.putExtra("database", tempFile);
+			    intent.putExtra("projectId", project.id);
+			    startService(intent);
+		    } catch(IOException e) {
+		    	Log.e("FAIMS", "Exception creating temp database", e);
+		    }
+		    
     	} else {
     		showBusyLocatingServerDialog();
     		
@@ -206,9 +219,9 @@ public class ShowProjectActivity extends FragmentActivity {
     				ShowProjectActivity.this.busyDialog.dismiss();
     				
     				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerUploadDatabaseFailureDialog(file, callback);
+    					showLocateServerUploadDatabaseFailureDialog(callback);
     				} else {
-    					uploadDatabaseToServer(file, callback);
+    					uploadDatabaseToServer(callback);
     				}
     			}
         		
@@ -217,7 +230,7 @@ public class ShowProjectActivity extends FragmentActivity {
     	
     }
 	
-	private void showLocateServerUploadDatabaseFailureDialog(final File file, final String callback) {
+	private void showLocateServerUploadDatabaseFailureDialog(final String callback) {
     	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
@@ -226,7 +239,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							uploadDatabaseToServer(file, callback);
+							uploadDatabaseToServer(callback);
 						}
 					}
     		
@@ -273,7 +286,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	    busyDialog.show();
     }
 	
-	private void showUploadDatabaseFailureDialog(final File file, final String callback) {
+	private void showUploadDatabaseFailureDialog(final String callback) {
     	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.upload_database_failure_title),
 				getString(R.string.upload_database_failure_message),
@@ -282,7 +295,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							uploadDatabaseToServer(file, callback);
+							uploadDatabaseToServer(callback);
 						}
 					}
     		

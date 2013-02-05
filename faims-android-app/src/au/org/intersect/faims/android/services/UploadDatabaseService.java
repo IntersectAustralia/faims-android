@@ -3,9 +3,6 @@ package au.org.intersect.faims.android.services;
 import java.io.File;
 
 import roboguice.RoboGuice;
-
-import com.google.inject.Inject;
-
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +13,8 @@ import android.util.Log;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 
+import com.google.inject.Inject;
+
 public class UploadDatabaseService extends IntentService {
 
 	@Inject
@@ -24,6 +23,8 @@ public class UploadDatabaseService extends IntentService {
 	private Thread uploadThread;
 	
 	private FAIMSClientResultCode resultCode;
+
+	private File file;
 
 	public UploadDatabaseService() {
 		super("UploadDatabaseService");
@@ -40,6 +41,7 @@ public class UploadDatabaseService extends IntentService {
 		super.onDestroy();
 		Log.d("FAIMS", "stopping upload service");
 		uploadThread.interrupt();
+		file.delete(); // remove temp file
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class UploadDatabaseService extends IntentService {
 			return;
 		}
 		
-		final File file = (File) extras.get("database");
+		file = (File) extras.get("database");
 		final String projectId = intent.getStringExtra("projectId");
 		uploadThread = new Thread(new Runnable() {
 
