@@ -10,6 +10,7 @@ import java.util.List;
 import jsqlite.Callback;
 import jsqlite.Database;
 import jsqlite.Stmt;
+import android.util.Log;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
@@ -563,6 +564,7 @@ public class DatabaseManager {
 	}
 
 	public void dumpDatabaseTo(File file) {
+		Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
 		jsqlite.Database db = null;
 		try {
 			
@@ -570,17 +572,14 @@ public class DatabaseManager {
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 
 			String query = 
-						"attach database ? as export;" +
+						"attach database '" + file.getAbsolutePath() + "' as export;" +
 						"create table export.archentity as select * from archentity;" +
 						"create table export.aentvalue as select * from aentvalue;" +
 						"create table export.aentreln as select * from aentreln;" + 
 						"create table export.relationship as select * from relationship;" +
 						"create table export.relnvalue as select * from relnvalue;" +
 						"detach database export;";
-			Stmt st = db.prepare(query);
-			st.bind(1, file.getAbsolutePath());
-			st.step();
-			st.close();
+			db.exec(query, createCallback());
 			
 		} catch (Exception e) {
 			FAIMSLog.log(e);
@@ -592,4 +591,42 @@ public class DatabaseManager {
 			}
 		}
 	}
+
+	public static void debugDump(File file) {
+		jsqlite.Database db = null;
+		try {
+			
+			db = new jsqlite.Database();
+			db.open(file.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			
+			db.exec("select * from archentity;", new Callback() {
+				@Override
+				public void columns(String[] coldata) {
+					FAIMSLog.log("Columns: " + Arrays.toString(coldata));
+				}
+
+				@Override
+				public void types(String[] types) {
+					FAIMSLog.log("Types: " + Arrays.toString(types));
+				}
+
+				@Override
+				public boolean newrow(String[] rowdata) {
+					FAIMSLog.log("Row: " + Arrays.toString(rowdata));
+
+					return false;
+				}
+			});
+			
+		} catch (Exception e) {
+			FAIMSLog.log(e);
+		} finally {
+			try {
+				if (db != null) db.close();
+			} catch (Exception e) {
+				FAIMSLog.log(e);
+			}
+		}
+	}
+	
 }
