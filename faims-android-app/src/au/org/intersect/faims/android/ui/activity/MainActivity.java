@@ -1,16 +1,10 @@
 package au.org.intersect.faims.android.ui.activity;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,11 +13,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.util.FAIMSLog;
-import au.org.intersect.faims.android.util.JsonUtil;
+import au.org.intersect.faims.android.util.ProjectUtil;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 
 public class MainActivity extends RoboActivity {
@@ -57,7 +51,6 @@ public class MainActivity extends RoboActivity {
         		
         		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedItem);
-				showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedItem.replaceAll("\\s", "_"));
 				MainActivity.this.startActivityForResult(showProjectsIntent, 1);
         	}
         });
@@ -118,43 +111,11 @@ public class MainActivity extends RoboActivity {
 	}
     
 	private void readStoredProjects() {
-		File file = new File(Environment.getExternalStorageDirectory() + "/faims/projects");
-		if (!file.isDirectory()) return;
-		String[] directories = file.list(new FilenameFilter() {
-
-			@Override
-			public boolean accept(File file, String arg1) {
-				return file.isDirectory();
-			}
-			
-		});
-		
-		// sort
-		Arrays.sort(directories);
-		
-		BufferedReader reader = null;
-		try {
-			projectListAdapter.clear();
-			for (String dir : directories) {
-				reader = new BufferedReader(
-						new FileReader(
-							Environment.getExternalStorageDirectory() + "/faims/projects/" + dir + "/project.settings"));
-				String line = reader.readLine();
-				if (line == null) {
-					FAIMSLog.log("project " + "/faims/projects/" + dir + "/project.settings" + " settings malformed");
-					continue;
-				}
-				JsonObject object = JsonUtil.deserializeJson(line);
-				projectListAdapter.add(object.get("project").getAsString());	
-			}
-		} catch (IOException e) {
-			FAIMSLog.log(e);
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-				FAIMSLog.log(e);
+		projectListAdapter.clear();
+		List<Project> projects = ProjectUtil.getProjects();
+		if (projects != null) {
+			for (Project p : projects) {
+				projectListAdapter.add(p.name);
 			}
 		}
 	}

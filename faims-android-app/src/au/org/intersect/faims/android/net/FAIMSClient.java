@@ -16,11 +16,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 
 import android.net.http.AndroidHttpClient;
 import android.util.Log;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.data.ProjectArchive;
+import au.org.intersect.faims.android.data.ProjectArchiveInfo;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
@@ -64,6 +65,7 @@ public class FAIMSClient {
 			
 			MultipartEntity entity = new MultipartEntity();
 			entity.addPart("file", new FileBody(file, "binary/octet-stream"));
+			entity.addPart("md5", new StringBody(FileUtil.generateMD5Hash(file.getPath())));
 			
 			HttpPost post = new HttpPost(new URI(getURI(uri)));
 			post.setEntity(entity);
@@ -141,7 +143,7 @@ public class FAIMSClient {
 		try {
 			initClient();
 			
-			ProjectArchive archive = getProjectArchive(projectId);
+			ProjectArchiveInfo archive = getProjectArchive(projectId);
 	        long freeSpace = FileUtil.getExternalStorageSpace();
 	        
 	        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
@@ -197,7 +199,7 @@ public class FAIMSClient {
 		}
 	}
 	
-	private ProjectArchive getProjectArchive(String projectId) throws IOException {
+	private ProjectArchiveInfo getProjectArchive(String projectId) throws IOException {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
@@ -209,7 +211,7 @@ public class FAIMSClient {
 			
 			JsonObject object = JsonUtil.deserializeJsonObject(stream);
 			
-			return ProjectArchive.fromJson(object);
+			return ProjectArchiveInfo.fromJson(object);
 			
 		} finally {
 			if (stream != null) stream.close();
@@ -217,7 +219,7 @@ public class FAIMSClient {
 		
 	}
 	
-	private String getProjectDownload(String projectId, ProjectArchive archive) throws Exception {
+	private String getProjectDownload(String projectId, ProjectArchiveInfo archive) throws Exception {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
@@ -233,7 +235,7 @@ public class FAIMSClient {
 			
 			FileUtil.saveFile(stream, filename);
 			
-			String md5 = FileUtil.generateMD5Hash(filename);
+			String md5 = FileUtil.generateMD5Hash(FileUtil.toPath(filename));
 			
 			FAIMSLog.log("filename.md5Hash: " + md5);
 			FAIMSLog.log("archive.md5Hash:  " + archive.md5);

@@ -315,14 +315,10 @@ skip() {
 
 onEvent("user/tab1/skip", "click", "skip()");
 	
-onUploadSuccess() {
+onUpload() {
 	showToast("database uploaded successfully");
-}
-
-onUploadFailure() {
-	showToast("failed to upload database");
 }
 	
 uploadDatabase() {
-	pushDatabaseToServer("onUploadSuccess()", "onUploadFailure()");
+	pushDatabaseToServer("onUpload()");
 }

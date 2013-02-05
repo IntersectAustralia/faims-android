@@ -180,7 +180,7 @@ public class FetchProjectsActivity extends RoboActivity {
     				FetchProjectsActivity.this.busyDialog.dismiss();
     				
     				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerFailureDialog();
+    					showLocateServerFetchProjectsFailureDialog();
     				} else {
     					fetchProjectsList();
     				}
@@ -211,8 +211,7 @@ public class FetchProjectsActivity extends RoboActivity {
 						// start show project activity
 						
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
-						showProjectsIntent.putExtra("directory", "/faims/projects/" + selectedProject.name.replaceAll("\\s", "_"));
-						showProjectsIntent.putExtra("projectId", selectedProject.id);
+						showProjectsIntent.putExtra("name", selectedProject.name);
 						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
@@ -239,7 +238,7 @@ public class FetchProjectsActivity extends RoboActivity {
     				FetchProjectsActivity.this.busyDialog.dismiss();
     				
     				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerFailureDialog();
+    					showLocateServerDownloadArchiveFailureDialog();
     				} else {
     					downloadProjectArchive();
     				}
@@ -250,7 +249,7 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
     
-    private void showLocateServerFailureDialog() {
+    private void showLocateServerFetchProjectsFailureDialog() {
     	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
@@ -260,6 +259,23 @@ public class FetchProjectsActivity extends RoboActivity {
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
 							fetchProjectsList();
+						}
+					}
+    		
+    	});
+    	choiceDialog.show();
+    }
+    
+    private void showLocateServerDownloadArchiveFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
+				getString(R.string.locate_server_failure_title),
+				getString(R.string.locate_server_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							downloadProjectArchive();
 						}
 					}
     		

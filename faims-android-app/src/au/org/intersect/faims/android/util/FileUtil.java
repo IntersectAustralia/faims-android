@@ -1,11 +1,13 @@
 package au.org.intersect.faims.android.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -28,7 +30,7 @@ import android.os.StatFs;
 
 public class FileUtil {
 	
-	private static String toPath(String path) {
+	public static String toPath(String path) {
 		return Environment.getExternalStorageDirectory() + path;
 	}
 
@@ -104,7 +106,7 @@ public class FileUtil {
 		
 		FileInputStream fs = null;
 		try {
-			fs = new FileInputStream(toPath(filename));
+			fs = new FileInputStream(filename);
 			
 			MessageDigest digester = MessageDigest.getInstance("MD5");
 			byte[] bytes = new byte[8192];
@@ -207,6 +209,32 @@ public class FileUtil {
 			}
 		}
 	}
+	
+	public static String convertStreamToString(InputStream stream) {
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new InputStreamReader(stream));
+		
+			StringBuilder sb = new StringBuilder();
+		
+			String line;
+			while ((line = br.readLine()) != null) {
+				sb.append(line + "\n");
+			} 
+	
+			return sb.toString();
+		} catch (IOException e) {
+			FAIMSLog.log(e);
+		} finally {
+			try {
+				if (br != null) br.close();
+			} catch (IOException e) {
+				FAIMSLog.log(e);
+			}
+		}
+		return null;
+	}
+
 	
 }
 

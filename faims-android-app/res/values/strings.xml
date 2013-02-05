@@ -14,13 +14,13 @@
     <string name="locate_server_message">looking for server on network..</string>
     
     <string name="locate_server_failure_title">Could not find Server</string>
-    <string name="locate_server_failure_message">Would you like to try Again?</string>
+    <string name="locate_server_failure_message">Would you like to try again?</string>
     
     <string name="fetch_projects_title">Fetching Project List</string>
     <string name="fetch_projects_message">please wait..</string>
     
     <string name="fetch_projects_failure_title">Could not fetch projects</string>
-    <string name="fetch_projects_failure_message">Would you like to try Again?</string>
+    <string name="fetch_projects_failure_message">Would you like to try again?</string>
     
     <string name="confirm_download_project_title">Download Project</string>
     <string name="confirm_download_project_message">Would you like to download</string>
@@ -29,7 +29,7 @@
     <string name="download_project_message">please wait..</string>
     
     <string name="download_project_failure_title">Could not download project</string>
-    <string name="download_project_failure_message">Would you like to try Again?</string>
+    <string name="download_project_failure_message">Would you like to try again?</string>
     
     <string name="download_project_error_title">Project is too big</string>
     <string name="download_project_error_message">Error storage limit reached.</string>
@@ -39,5 +39,8 @@
     
     <string name="upload_database_title">Uploading Database</string>
     <string name="upload_database_message">please wait..</string>
+    
+    <string name="upload_database_failure_title">Could not upload database</string>
+    <string name="upload_database_failure_message">Would you like to try again?</string>
 
 </resources>
