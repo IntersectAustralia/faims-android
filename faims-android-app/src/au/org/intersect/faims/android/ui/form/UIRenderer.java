@@ -39,8 +39,11 @@ public class UIRenderer {
     private HashMap<String, View> viewMap; 
     private LinkedList<View> viewList;
     
-    public UIRenderer(FormEntryController fem, Context context) {
+    private Arch16n arch16n;
+
+    public UIRenderer(FormEntryController fem, Arch16n arch16n, Context context) {
         this.fem = fem;
+        this.arch16n = arch16n;
         this.context = context;
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
@@ -54,7 +57,7 @@ public class UIRenderer {
      * Render the tabs and questions inside the tabs
      * 
      */
-    public void createUI() {
+    public void createUI(String directory) {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
@@ -79,7 +82,9 @@ public class UIRenderer {
 	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
 	    		TabGroup tabGroup = new TabGroup(archEntType,relType);
 	    		tabGroup.setContext(context);
-	    		tabGroup.setLabel(tabGroupCaption.getQuestionText());
+	    		String tabGroupText = tabGroupCaption.getQuestionText();
+	    		tabGroupText = arch16n.substituteValue(tabGroupText);
+	    		tabGroup.setLabel(tabGroupText);
 	    		
 	    		String tabGroupName = tabGroupCaption.getIndex().getReference().getNameLast();
 	    		FAIMSLog.log(tabGroupName);
@@ -102,7 +107,7 @@ public class UIRenderer {
 	                	String tabName = tabCaption.getIndex().getReference().getNameLast();
 	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText(), "true".equals(tabElement
                                 .getAdditionalAttribute(null, "faims_hidden")), !"false".equals(tabElement
-                                        .getAdditionalAttribute(null, "faims_scrollable")));	                 
+                                        .getAdditionalAttribute(null, "faims_scrollable")), arch16n);	                 
 	                	
 	                	FAIMSLog.log(tabGroupName + "/" + tabName);
 	                    tabMap.put(tabGroupName + "/" + tabName, tab);
@@ -113,7 +118,7 @@ public class UIRenderer {
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName);
+	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory);
 	                        
 	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);

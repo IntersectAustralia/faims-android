@@ -32,6 +32,7 @@ import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
+import au.org.intersect.faims.android.ui.form.Arch16n;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -59,7 +60,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	private DatabaseManager databaseManager;
 	
 	private GPSDataManager gpsDataManager;
-	
+
 	protected BusyDialog busyDialog;
 	protected ChoiceDialog choiceDialog;
 	private AsyncTask<Void, Void, Void> locateTask;
@@ -67,7 +68,9 @@ public class ShowProjectActivity extends FragmentActivity {
 	private Handler handler;
 
 	private Project project;
-	
+
+	private Arch16n arch16n;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,6 +84,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
+		arch16n = new Arch16n(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir, project.name);
 		
 		choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.render_project_title),
@@ -151,13 +155,13 @@ public class ShowProjectActivity extends FragmentActivity {
 				.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_schema.xml");
 
 		// render the ui definition
-		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this);
-		ShowProjectActivity.this.renderer.createUI();
+		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
+		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + project.dir);
 		ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(ShowProjectActivity.this, getAssets(), renderer, databaseManager, gpsDataManager);
+		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager);
 		linker.setBaseDir(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_logic.bsh"));

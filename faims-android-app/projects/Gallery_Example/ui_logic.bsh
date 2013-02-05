@@ -1,0 +1,57 @@
+Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';");
+
+String entity_id;
+
+initialise() {
+	setUser();
+	updateEntities();
+	populateDropDown("tabgroup1/tab1/type", types);
+	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
+	populatePictureGallery("tabgroup1/tab1/picture", pictures);
+}
+
+saveEntity() {
+	
+	entity_id = updateEntity(null);
+	
+}
+
+setUser(){
+	User user = new User("0","Default","User");
+	setUser(user);
+}
+
+updateEntity(entity_id) {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
+	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab1/date"), null, null, null));
+	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab1/time"), null, null, null));
+	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab1/type-description"), getFieldValue("tabgroup1/tab1/type"), null, null));
+	attributes.add(createEntityAttribute("picture", getFieldValue("tabgroup1/tab1/picture"), null, null, null));
+	
+	Object values = getFieldValue("tabgroup1/tab2/location");
+	
+	for (Object value : values) {
+		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab2/location-value"), getFieldValue("tabgroup1/tab2/location-certainty")));
+	}
+	
+	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, null));
+	
+	String id = saveArchEnt(entity_id, "simple", null, attributes);
+	updateEntities();
+	return id;
+}
+
+updateEntities() {
+	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
+
+	populateDropDown("tabgroup1/tab3/entity", entities);
+}
+
+onEvent("tabgroup1", "load", "initialise()");
+onEvent("tabgroup1/tab1/cancel", "click", "cancelTab(\"tabgroup1/tab1\",true)");
+onEvent("tabgroup1/tab3/save", "click", "saveEntity()");
+onEvent("tabgroup1/tab3/update", "click", "updateEntity(entity_id)");
+onEvent("tabgroup1/tab3/load", "click", "showTabGroup(\"tabgroup1\",getFieldValue(\"tabgroup1/tab3/entity\"))");

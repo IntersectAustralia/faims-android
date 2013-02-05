@@ -1,0 +1,123 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <value></value>
+                  <value-description></value-description>
+                  <value-certainty></value-certainty>
+                  <date></date>
+                  <time></time>
+                  <type></type>
+                  <type-description></type-description>
+                  <settype></settype>
+              </tab1>
+              <tab2>
+                  <location></location>
+                  <location-value></location-value>
+                  <location-certainty></location-certainty>
+                  <supervisor></supervisor>
+              </tab2>
+          </tabgroup1>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value-description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value-certainty" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/date" type="date"/>
+      <bind nodeset="/faims/tabgroup1/tab1/time" type="time"/>
+      <bind nodeset="/faims/tabgroup1/tab1/type-description" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/location-value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/location-certainty" type="decimal"/>
+
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="tabgroup1" faims_archent_type="simple">
+      <label>Simple Entity Example</label>
+      <group ref="tab1">
+        <label>{entity}</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <label>{name}:</label>
+        </input>
+        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+            <label>{value}:</label>
+        </input>
+        <input ref="value-description" faims_attribute_name="value" faims_attribute_type="freetext">
+            <label>Description:</label>
+        </input>
+        <input ref="value-certainty" faims_attribute_name="value" faims_attribute_type="certainty">
+            <label>Certainty:</label>
+        </input>
+        <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <label>Date:</label>
+        </input>
+        <input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+            <label>Time:</label>
+        </input>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <input ref="type-description" faims_attribute_name="type" faims_attribute_type="freetext">
+            <label>Description:</label>
+        </input>
+        <trigger ref="settype">
+            <label>Set type</label>
+        </trigger>
+	  </group>
+      <group ref="tab2">
+        <label>Load</label>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
+            <label>Value:</label>
+        </input>
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
+            <label>Certainty:</label>
+        </input>
+        <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
+            <label>Supervisor:</label>
+            <item>
+                <label>{superA}</label>
+                <value>supera</value>
+            </item>
+            <item>
+                <label>Super B</label>
+                <value>superb</value>
+            </item>
+            <item>
+                <label>Super C</label>
+                <value>superc</value>
+            </item>
+            <item>
+                <label>Super D</label>
+                <value>superd</value>
+            </item>
+        </select1>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
