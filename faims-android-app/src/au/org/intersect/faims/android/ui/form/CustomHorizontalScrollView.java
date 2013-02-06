@@ -12,6 +12,8 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	private String ref;
 	private CustomImageView selectedImageView;
 	private List<CustomImageView> imageViews;
+	private float certainty = 1;
+	private float currentCertainty = 1;
 
 	public CustomHorizontalScrollView(Context context) {
 		super(context);
@@ -66,5 +68,21 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	
 	public void addImageView(CustomImageView imageView){
 		this.imageViews.add(imageView);
+	}
+
+	public float getCertainty() {
+		return certainty;
+	}
+
+	public void setCertainty(float certainty) {
+		this.certainty = certainty;
+	}
+
+	public float getCurrentCertainty() {
+		return currentCertainty;
+	}
+
+	public void setCurrentCertainty(float currentCertainty) {
+		this.currentCertainty = currentCertainty;
 	}
 }

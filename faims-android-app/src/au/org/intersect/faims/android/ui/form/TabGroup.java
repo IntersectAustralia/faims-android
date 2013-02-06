@@ -199,6 +199,10 @@ public class TabGroup extends Fragment {
 		return relType;
 	}
 
+	public boolean isArchEnt(){
+		return this.archEntType != null && this.relType == null;
+	}
+
 	public void clearTabs() {
 		for (Tab tab : tabs) {
 			tab.clearViews();

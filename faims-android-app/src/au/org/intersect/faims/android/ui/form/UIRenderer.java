@@ -36,7 +36,8 @@ public class UIRenderer {
     private HashMap<String, Tab> tabMap;
     private LinkedList<Tab> tabList;
     
-    private HashMap<String, View> viewMap; 
+    private HashMap<String, View> viewMap;
+    private HashMap<String, Tab> viewTabMap; 
     private LinkedList<View> viewList;
     
     private Arch16n arch16n;
@@ -47,6 +48,7 @@ public class UIRenderer {
         this.context = context;
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
+        this.viewTabMap = new HashMap<String, Tab>();
         this.tabMap = new HashMap<String, Tab>();
         this.tabList = new LinkedList<Tab>(); 
         this.viewMap = new HashMap<String, View>();
@@ -118,10 +120,11 @@ public class UIRenderer {
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory);
+	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory,tabGroup.isArchEnt());
 	                        
 	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
+	                        viewTabMap.put(tabGroupName + "/" + tabName + "/" + viewName, tab);
 	                        viewList.add(view);
 	                        
 	                        inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
@@ -162,6 +165,10 @@ public class UIRenderer {
     
     public View getViewByRef(String ref) {
     	return viewMap.get(ref);
+    }
+    
+    public Tab getTabForView(String ref){
+    	return viewTabMap.get(ref);
     }
     
     public TabGroup getTabGroupByLabel(String label){

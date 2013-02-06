@@ -54,10 +54,10 @@
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
           <label>Name:</label>
         </input>
-        <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+        <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext" faims_certainty="false">
             <label>Date:</label>
         </input>
-        <input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+        <input ref="time" faims_attribute_name="time" faims_attribute_type="freetext" faims_certainty="false">
             <label>Time:</label>
         </input>
         <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
@@ -92,9 +92,6 @@
         </select>
         <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
             <label>Value:</label>
-        </input>
-        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
-            <label>Certainty:</label>
         </input>
         <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
             <label>Supervisor:</label>

@@ -8,6 +8,8 @@ public class CustomDatePicker extends DatePicker {
 	private String attributeName;
 	private String attributeType;
 	private String ref;
+	private float certainty = 1;
+	private float currentCertainty = 1;
 	
 	public CustomDatePicker(Context context) {
 		super(context);
@@ -34,5 +36,21 @@ public class CustomDatePicker extends DatePicker {
 
 	public void setRef(String ref) {
 		this.ref = ref;
+	}
+
+	public float getCertainty() {
+		return certainty;
+	}
+
+	public void setCertainty(float certainty) {
+		this.certainty = certainty;
+	}
+
+	public float getCurrentCertainty() {
+		return currentCertainty;
+	}
+
+	public void setCurrentCertainty(float currentCertainty) {
+		this.currentCertainty = currentCertainty;
 	}
 }

@@ -8,7 +8,8 @@ public class CustomEditText extends EditText {
 	private String attributeName;
 	private String attributeType;
 	private String ref;
-	private String value;
+	private float certainty = 1;
+	private float currentCertainty = 1;
 	
 	public CustomEditText(Context context) {
 		super(context);
@@ -37,11 +38,19 @@ public class CustomEditText extends EditText {
 		this.ref = ref;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public float getCertainty() {
+		return certainty;
 	}
-	
-	public String getValue() {
-		return value;
+
+	public void setCertainty(float certainty) {
+		this.certainty = certainty;
+	}
+
+	public float getCurrentCertainty() {
+		return currentCertainty;
+	}
+
+	public void setCurrentCertainty(float currentCertainty) {
+		this.currentCertainty = currentCertainty;
 	}
 }

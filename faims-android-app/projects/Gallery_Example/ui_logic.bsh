@@ -25,19 +25,19 @@ setUser(){
 
 updateEntity(entity_id) {
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
-	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab1/date"), null, null, null));
-	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab1/time"), null, null, null));
-	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab1/type-description"), getFieldValue("tabgroup1/tab1/type"), null, null));
-	attributes.add(createEntityAttribute("picture", getFieldValue("tabgroup1/tab1/picture"), null, null, null));
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
+	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab1/date"), null, null, getFieldCertainty("tabgroup1/tab1/date")));
+	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab1/time"), null, null, getFieldCertainty("tabgroup1/tab1/time")));
+	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab1/type-description"), getFieldValue("tabgroup1/tab1/type"), null, getFieldCertainty("tabgroup1/tab1/type")));
+	attributes.add(createEntityAttribute("picture", getFieldValue("tabgroup1/tab1/picture"), null, null, getFieldCertainty("tabgroup1/tab1/picture")));
 	
 	Object values = getFieldValue("tabgroup1/tab2/location");
 	
 	for (Object value : values) {
-		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab2/location-value"), getFieldValue("tabgroup1/tab2/location-certainty")));
+		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab2/location-value"), getFieldCertainty("tabgroup1/tab2/location")));
 	}
 	
-	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, null));
+	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, getFieldCertainty("tabgroup1/tab2/supervisor")));
 	
 	String id = saveArchEnt(entity_id, "simple", null, attributes);
 	updateEntities();

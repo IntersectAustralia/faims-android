@@ -11,8 +11,10 @@ import org.javarosa.core.model.QuestionDef;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.form.api.FormEntryPrompt;
 
+import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
@@ -24,14 +26,18 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.DateUtil;
 
 public class Tab {
@@ -79,13 +85,16 @@ public class Tab {
         }
 	}
 
-	public View addInput(FormEntryPrompt input,String path, String viewName, String directory) {
+	public View addInput(FormEntryPrompt input,String path, String viewName, String directory, boolean isArchEnt) {
+		LinearLayout fieldLinearLayout = new LinearLayout(this.context);
+    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
             TextView textView = new TextView(this.context);
             String inputText = input.getQuestionText();
             inputText = arch16n.substituteValue(inputText);
             textView.setText(inputText);
-            linearLayout.addView(textView);
+            fieldLinearLayout.addView(textView);
+            linearLayout.addView(fieldLinearLayout);
         }
 		
 		viewReference.put(viewName, path);
@@ -93,7 +102,24 @@ public class Tab {
 		CustomEditText text = null;
 		String attributeName = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		String attributeType = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
+		String certainty = input.getQuestion().getAdditionalAttribute(null, "faims_certainty");
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
+		Button imageButton = new Button(this.context);
+		imageButton.setBackgroundResource(R.drawable.square_button);
+		LayoutParams layoutParams = new LayoutParams(30, 30);
+		layoutParams.topMargin = 10;
+		imageButton.setLayoutParams(layoutParams);
+		imageButton.setText("C");
+		imageButton.setTextSize(10);
+		if(isArchEnt){
+			if(certainty != null){
+				if(!certainty.equals("false")){
+					fieldLinearLayout.addView(imageButton);
+				}
+			}else{
+				fieldLinearLayout.addView(imageButton);
+			}
+		}
 		// check the control type to know the type of the question
         switch (input.getControlType()) {
             case Constants.CONTROL_INPUT:
@@ -105,6 +131,7 @@ public class Tab {
                     	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
+                        onImageButtonClicked(imageButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -113,6 +140,7 @@ public class Tab {
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                        onImageButtonClicked(imageButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -121,8 +149,8 @@ public class Tab {
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
+                        onImageButtonClicked(imageButton, text);
                         linearLayout.addView(view);
-                        valueReference.put(path, "");
                         break;
                     // set input type as date picker
                     case Constants.DATATYPE_DATE:
@@ -131,7 +159,8 @@ public class Tab {
         				now.setToNow();
         				date.updateDate(now.year, now.month, now.monthDay);
                     	view = date;
-                        linearLayout.addView(view);
+                    	onImageButtonClicked(imageButton, date);
+                    	linearLayout.addView(view);
                         valueReference.put(path, DateUtil.getDate(date));
                         break;
                     // get the text area
@@ -139,6 +168,7 @@ public class Tab {
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
                         ((TextView) view).setLines(5);
+                        onImageButtonClicked(imageButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -150,7 +180,8 @@ public class Tab {
         				time.setCurrentHour(timeNow.hour);
         				time.setCurrentMinute(timeNow.minute);
         				view = time;
-                        linearLayout.addView(view);
+        				onImageButtonClicked(imageButton, time);
+        				linearLayout.addView(view);
         				valueReference.put(path, DateUtil.getTime(time));
                         break;
                     // default is edit text
@@ -176,6 +207,7 @@ public class Tab {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;
                             valueReference.put(path, "");
+                            onImageButtonClicked(imageButton, text);
                             linearLayout.addView(view);
                     	}
                         break;
@@ -218,6 +250,7 @@ public class Tab {
                                 .getAdditionalAttribute(null, "type"))) {
                             view = renderImageSliderForSingleSelection(input, directory, attributeName, attributeType, path);
                             linearLayout.addView(view);
+                            onImageButtonClicked(imageButton, view);
                             valueReference.put(path, "");
                         }
                         // Radio Button
@@ -239,6 +272,7 @@ public class Tab {
                             }
                             selectLayout.addView(radioGroupLayout);
                             view = selectLayout;
+                            onImageButtonClicked(imageButton, selectLayout);
                             linearLayout.addView(selectLayout);
                             valueReference.put(path, "");
                         // List
@@ -277,6 +311,7 @@ public class Tab {
                             spinner.setAdapter(arrayAdapter);
                             spinner.setSelection(0);
                             view = spinner;
+                            onImageButtonClicked(imageButton, view);
                             linearLayout.addView(spinner);
                             NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
             				valueReference.put(path, pair.getValue());
@@ -308,6 +343,7 @@ public class Tab {
                         }
                         view = selectLayout;
                         linearLayout.addView(selectLayout);
+                        onImageButtonClicked(imageButton, selectLayout);
                         valueReference.put(path, new ArrayList<NameValuePair>());
                 }
                 if(attributeName != null){
@@ -324,6 +360,102 @@ public class Tab {
         }
         
         return view;
+	}
+
+	private void onImageButtonClicked(Button imageButton,final View view) {
+		imageButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				LinearLayout layout = new LinearLayout(v.getContext());
+				layout.setOrientation(LinearLayout.VERTICAL);
+				final SeekBar seekBar = new SeekBar(v.getContext());
+				float certainty = 0;
+				seekBar.setMax(100);
+				seekBar.setMinimumWidth(400);
+				if (view instanceof CustomEditText){
+	        		CustomEditText customEditText = (CustomEditText) view;
+	        		certainty = customEditText.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}else if (view instanceof CustomDatePicker){
+	        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
+	        		certainty = customDatePicker.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}else if (view instanceof CustomTimePicker){
+	        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
+	        		certainty = customTimePicker.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}else if (view instanceof CustomLinearLayout){
+	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
+	        		certainty = customLinearLayout.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}else if (view instanceof CustomHorizontalScrollView){
+	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
+	        		certainty = customHorizontalScrollView.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}else if (view instanceof CustomSpinner){
+	        		CustomSpinner customSpinner = (CustomSpinner) view;
+	        		certainty = customSpinner.getCurrentCertainty();
+	        		seekBar.setProgress((int) (certainty * 100));
+	        	}
+				
+				final TextView text = new TextView(v.getContext());
+				text.setText("    Certainty: " + certainty);
+				seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+					
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+					
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+					
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress,
+							boolean fromUser) {
+						text.setText("    Certainty: " + ((float) progress)/100);
+					}
+				});
+				layout.addView(text);
+				layout.addView(seekBar);
+				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+				
+				builder.setTitle("Certainty");
+				builder.setMessage("Set the certainty value for the question");
+				builder.setView(layout);
+				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int id) {
+				        	if (view instanceof CustomEditText){
+				        		CustomEditText customEditText = (CustomEditText) view;
+				        		customEditText.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}else if (view instanceof CustomDatePicker){
+				        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
+				        		customDatePicker.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}else if (view instanceof CustomTimePicker){
+				        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
+				        		customTimePicker.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}else if (view instanceof CustomLinearLayout){
+				        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
+				        		customLinearLayout.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}else if (view instanceof CustomHorizontalScrollView){
+				        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
+				        		customHorizontalScrollView.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}else if (view instanceof CustomSpinner){
+				        		CustomSpinner customSpinner = (CustomSpinner) view;
+				        		customSpinner.setCurrentCertainty(((float)seekBar.getProgress())/100);
+				        	}
+				        }
+				    });
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int id) {
+				            // User cancelled the dialog
+				        }
+				    });
+				
+				builder.create().show();
+				
+			}
+		});
 	}
 
 	public TabSpec createTabSpec(TabHost tabHost) {

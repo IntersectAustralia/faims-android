@@ -60,8 +60,16 @@ setFieldValue(String ref, Object value){
     linker.setFieldValue(ref, value);
 }
 
+setFieldCertainty(String ref, Object value){
+    linker.setFieldCertainty(ref, value);
+}
+
 Object getFieldValue(String ref){
     return linker.getFieldValue(ref);
+}
+
+Object getFieldCertainty(String ref){
+    return linker.getFieldCertainty(ref);
 }
 
 onMapEvent(String ref, String clickCallback, selectCallback) {

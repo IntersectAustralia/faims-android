@@ -81,7 +81,6 @@ public class BeanShellLinker {
 
 	private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
-	private static final String CERTAINTY = "certainty";
 	private static final String VOCAB = "vocab";
 	
 	private HandlerThread handlerThread;
@@ -498,10 +497,16 @@ public class BeanShellLinker {
 				if(!getFieldValue(customEditText.getRef()).equals(tab.getStoredValue(customEditText.getRef()))){
 					return true;
 				}
+				if(customEditText.getCertainty() != customEditText.getCurrentCertainty()){
+					return true;
+				}
 				
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
 				if(!getFieldValue(customDatePicker.getRef()).equals(tab.getStoredValue(customDatePicker.getRef()))){
+					return true;
+				}
+				if(customDatePicker.getCertainty() != customDatePicker.getCurrentCertainty()){
 					return true;
 				}
 				
@@ -510,10 +515,16 @@ public class BeanShellLinker {
 				if(!getFieldValue(customTimePicker.getRef()).equals(tab.getStoredValue(customTimePicker.getRef()))){
 					return true;
 				}
+				if(customTimePicker.getCertainty() != customTimePicker.getCurrentCertainty()){
+					return true;
+				}
 				
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
 				if(!getFieldValue(customLinearLayout.getRef()).equals(tab.getStoredValue(customLinearLayout.getRef()))){
+					return true;
+				}
+				if(customLinearLayout.getCertainty() != customLinearLayout.getCurrentCertainty()){
 					return true;
 				}
 				
@@ -522,9 +533,16 @@ public class BeanShellLinker {
 				if(!getFieldValue(customSpinner.getRef()).equals(tab.getStoredValue(customSpinner.getRef()))){
 					return true;
 				}
+				if(customSpinner.getCertainty() != customSpinner.getCurrentCertainty()){
+					return true;
+				}
+				
 			} else if (v instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
 				if(!getFieldValue(horizontalScrollView.getRef()).equals(tab.getStoredValue(horizontalScrollView.getRef()))){
+					return true;
+				}
+				if(horizontalScrollView.getCertainty() != horizontalScrollView.getCurrentCertainty()){
 					return true;
 				}
 			}
@@ -708,9 +726,8 @@ public class BeanShellLinker {
 			setFieldValue(ref,attribute.getMeasure());
 		}else if(VOCAB.equals(type)){
 			setFieldValue(ref,attribute.getVocab());
-		}else if(CERTAINTY.equals(type)){
-			setFieldValue(ref,attribute.getCertainty());
 		}
+		setFieldCertainty(ref,attribute.getCertainty());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
 	
@@ -885,7 +902,56 @@ public class BeanShellLinker {
 			Log.e("FAIMS","Exception setting field value",e);
 		}
 	}
-	
+
+	public void setFieldCertainty(String ref, Object valueObj) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (valueObj instanceof String){
+				
+				float value = Float.valueOf((String) valueObj);
+				
+				if (obj instanceof CustomEditText){
+					CustomEditText tv = (CustomEditText) obj;
+					tv.setCertainty(value);
+					tv.setCurrentCertainty(value);
+				}
+				else if (obj instanceof CustomSpinner){
+					CustomSpinner spinner = (CustomSpinner) obj;
+					spinner.setCertainty(value);
+					spinner.setCurrentCertainty(value);
+				}
+				else if (obj instanceof CustomLinearLayout){
+					CustomLinearLayout layout = (CustomLinearLayout) obj;
+					layout.setCertainty(value);
+					layout.setCurrentCertainty(value);
+				}
+				else if (obj instanceof CustomDatePicker) {
+					CustomDatePicker date = (CustomDatePicker) obj;
+					date.setCertainty(value);
+					date.setCurrentCertainty(value);
+				} 
+				else if (obj instanceof CustomTimePicker) {
+					CustomTimePicker time = (CustomTimePicker) obj;
+					time.setCertainty(value);
+					time.setCurrentCertainty(value);
+				}else if (obj instanceof CustomHorizontalScrollView){
+					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					horizontalScrollView.setCertainty(value);
+					horizontalScrollView.setCurrentCertainty(value);
+				}
+			}
+			
+			else {
+				Log.w("FAIMS","Couldn't set certainty for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "View does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting field certainty",e);
+		}
+	}
+
 	public Object getFieldValue(String ref){
 		
 		try{
@@ -970,7 +1036,48 @@ public class BeanShellLinker {
 			return "";
 		}
 	}
-	
+
+	public Object getFieldCertainty(String ref){
+		
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (obj instanceof CustomEditText){
+				CustomEditText tv = (CustomEditText) obj;
+				return String.valueOf(tv.getCurrentCertainty());
+			}
+			else if (obj instanceof CustomSpinner){
+				CustomSpinner spinner = (CustomSpinner) obj;
+				return String.valueOf(spinner.getCurrentCertainty());
+			}
+			else if (obj instanceof CustomLinearLayout){
+				CustomLinearLayout layout = (CustomLinearLayout) obj;
+				return String.valueOf(layout.getCurrentCertainty());
+			}
+			else if (obj instanceof CustomDatePicker) {
+				CustomDatePicker date = (CustomDatePicker) obj;
+				return String.valueOf(date.getCurrentCertainty());
+			} 
+			else if (obj instanceof CustomTimePicker) {
+				CustomTimePicker time = (CustomTimePicker) obj;
+				return String.valueOf(time.getCurrentCertainty());
+			}
+			else if (obj instanceof CustomHorizontalScrollView){
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				return String.valueOf(horizontalScrollView.getCurrentCertainty());
+			}
+			else {
+				Log.w("FAIMS","Couldn't get certainty for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "View does not exist.");
+				return "";
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting field certainty",e);
+			return "";
+		}
+	}
+
 	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 		
@@ -1037,6 +1144,7 @@ public class BeanShellLinker {
                     android.R.layout.simple_spinner_dropdown_item,
                     pairs);
             spinner.setAdapter(arrayAdapter);
+            renderer.getTabForView(ref).setValueReference(ref, getFieldValue(ref));
 		}
 	}
 	
