@@ -153,6 +153,8 @@ public class ShowProjectActivity extends FragmentActivity {
 		// Read, validate and parse the xforms
 		ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
 				.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_schema.xml");
+		
+		arch16n.generatePropertiesMap();
 
 		// render the ui definition
 		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
