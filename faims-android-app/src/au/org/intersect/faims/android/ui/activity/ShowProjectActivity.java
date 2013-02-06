@@ -1,8 +1,5 @@
 package au.org.intersect.faims.android.ui.activity;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.javarosa.form.api.FormEntryController;
 
 import roboguice.RoboGuice;
@@ -21,7 +18,6 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
-import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
@@ -46,9 +42,6 @@ public class ShowProjectActivity extends FragmentActivity {
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
 	@Inject
-	FAIMSClient faimsClient;
-	
-	@Inject
 	ServerDiscovery serverDiscovery;
 
 	private FormEntryController fem;
@@ -64,8 +57,6 @@ public class ShowProjectActivity extends FragmentActivity {
 	protected BusyDialog busyDialog;
 	protected ChoiceDialog choiceDialog;
 	private AsyncTask<Void, Void, Void> locateTask;
-
-	private Handler handler;
 
 	private Project project;
 
@@ -179,11 +170,9 @@ public class ShowProjectActivity extends FragmentActivity {
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyUploadDatabaseDialog();
-    		
-    		// start service
-    		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
-		    // Create a new Messenger for the communication back
-    		handler = new Handler() {
+		    
+    		// Create a new Messenger for the communication back
+    		final Handler handler = new Handler() {
 				
 				public void handleMessage(Message message) {
 					ShowProjectActivity.this.busyDialog.dismiss();
@@ -197,23 +186,19 @@ public class ShowProjectActivity extends FragmentActivity {
 				}
 				
 			};
-		    
-		    try {
-		    	// create temp database to upload
-		    	File tempFile = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir));
-		    	databaseManager.dumpDatabaseTo(tempFile);
-		    	
-		    	// start upload service
-		    	// note: the temp file is automatically deleted by the service after it has finished
-		    	Messenger messenger = new Messenger(handler);
-			    intent.putExtra("MESSENGER", messenger);
-			    intent.putExtra("database", tempFile);
-			    intent.putExtra("projectId", project.id);
-			    startService(intent);
-		    } catch(IOException e) {
-		    	Log.e("FAIMS", "Exception creating temp database", e);
-		    }
-		    
+			
+			// start service
+    		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+			
+	    	// start upload service
+	    	// note: the temp file is automatically deleted by the service after it has finished
+	    	Messenger messenger = new Messenger(handler);
+		    intent.putExtra("MESSENGER", messenger);
+		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+		    intent.putExtra("projectId", project.id);
+		    intent.putExtra("projectDir", project.dir);
+		    ShowProjectActivity.this.startService(intent);
+		   
     	} else {
     		showBusyLocatingServerDialog();
     		

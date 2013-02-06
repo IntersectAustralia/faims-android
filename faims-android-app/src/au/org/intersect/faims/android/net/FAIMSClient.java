@@ -17,6 +17,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import android.net.http.AndroidHttpClient;
 import android.util.Log;
@@ -33,6 +36,10 @@ import com.google.inject.Singleton;
 // TODO create unit tests by injecting AndroidHttpClient with mock client
 @Singleton
 public class FAIMSClient {
+
+	private static final int CONNECTION_TIMEOUT = 60 * 1000;
+	
+	private static final int DATA_TIMEOUT = 60 * 1000;
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -83,11 +90,7 @@ public class FAIMSClient {
 		} catch (Exception e) {
 			Log.e("FAIMS", "cannot upload file", e);
 			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			cleanupClient();
@@ -117,11 +120,7 @@ public class FAIMSClient {
 		} catch(Exception e) {
 			FAIMSLog.log(e);
 			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			
@@ -180,12 +179,8 @@ public class FAIMSClient {
 					FAIMSLog.log(ioe);
 				}
 			}
-			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+				
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			
@@ -225,7 +220,11 @@ public class FAIMSClient {
 		InputStream stream = null;
 		
 		try {
-			HttpEntity entity = getRequest("/android/project/" + projectId + "/download");
+			HttpParams params = new BasicHttpParams();
+			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+			HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
+			
+			HttpEntity entity = getRequest("/android/project/" + projectId + "/download", params);
 			
 			stream = entity.getContent();
 			
@@ -261,24 +260,32 @@ public class FAIMSClient {
 	}
 	
 	private HttpEntity getRequest(String path) throws IOException {
+		return getRequest(path, null);
+	}
+	
+	private HttpEntity getRequest(String path, HttpParams params) throws IOException {
 		FAIMSLog.log(path);
 		
 		HttpGet get = new HttpGet(getURI(path));
+		
+		if (params != null) {
+			get.setParams(params);
+		}
+
 		HttpResponse response = httpClient.execute(get);
 		HttpEntity entity = response.getEntity();
 		
 		return entity;
 	}
-
-	public void cancelRequest() {
-		FAIMSLog.log();
-		if (httpClient != null) {
-			httpClient.getConnectionManager().shutdown();
-		}
-	}
 	
 	public void invalidate() {
 		serverDiscovery.invalidateServerHost();
+	}
+
+	public void interrupt() {
+		if (httpClient != null) {
+			httpClient.getConnectionManager().shutdown();
+		}
 	}
 	
 }
