@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.os.Environment;
@@ -26,7 +27,7 @@ public class ProjectUtil {
 			}
 			
 		});
-		
+		Arrays.sort(directories);
 		ArrayList<Project> list = new ArrayList<Project>();
 		FileInputStream is = null;
 		try {
