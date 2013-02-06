@@ -216,7 +216,7 @@ public class FetchProjectsActivity extends RoboActivity {
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
 							showDownloadProjectErrorDialog();
-						} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE || resultCode == FAIMSClientResultCode.DOWNLOAD_CORRUPTED){
+						} else {
 							showDownloadProjectFailureDialog();
 						}
 					}

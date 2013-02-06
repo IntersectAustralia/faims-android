@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
@@ -46,22 +45,21 @@ public class DownloadProjectService extends IntentService {
 			String projectId = intent.getStringExtra("project");
 		
 			FAIMSClientResultCode resultCode = faimsClient.downloadProjectArchive(projectId);
+			
+			if (downloadStopped) {
+				Log.d("FAIMS", "cancelled download");
+				return;
+			}
 		
-			if (!downloadStopped && resultCode != FAIMSClientResultCode.SUCCESS) {
+			if (resultCode != FAIMSClientResultCode.SUCCESS) {
 				faimsClient.invalidate();
 			}
 			
 			Bundle extras = intent.getExtras();
-			if (extras != null) {
-				Messenger messenger = (Messenger) extras.get("MESSENGER");
-				Message msg = Message.obtain();
-				msg.obj = downloadStopped ? FAIMSClientResultCode.CANCELLED : resultCode;
-				try {
-					messenger.send(msg);
-				} catch (RemoteException e) {
-					Log.e("FAIMS", "Cannot send download project message", e);
-				}
-			}
+			Messenger messenger = (Messenger) extras.get("MESSENGER");
+			Message msg = Message.obtain();
+			msg.obj = resultCode;
+			messenger.send(msg);
 		} catch (Exception e) {
 			Log.e("FAIMS", "download service failed", e);
 		}

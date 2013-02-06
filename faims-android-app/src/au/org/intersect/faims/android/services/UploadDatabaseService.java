@@ -6,10 +6,11 @@ import roboguice.RoboGuice;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
+import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 
@@ -20,9 +21,7 @@ public class UploadDatabaseService extends IntentService {
 	@Inject
 	FAIMSClient faimsClient;
 	
-	private Thread uploadThread;
-	
-	private FAIMSClientResultCode resultCode;
+	private boolean uploadStopped;
 
 	private File file;
 
@@ -40,54 +39,46 @@ public class UploadDatabaseService extends IntentService {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d("FAIMS", "stopping upload service");
-		uploadThread.interrupt();
-		file.delete(); // remove temp file
+		faimsClient.interrupt();
+		uploadStopped = true;
+		if (file != null) {
+			file.delete();
+		}
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Log.d("FAIMS", "starting upload service");
 		
-		Bundle extras = intent.getExtras();
-		if (extras == null) {
-			Log.d("FAIMS", "cannot find upload file");
-			return;
-		}
-		
-		file = (File) extras.get("database");
-		final String projectId = intent.getStringExtra("projectId");
-		uploadThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					resultCode = faimsClient.uploadDatabase(projectId, file);
-				} catch (Exception e) {
-					Log.e("FAIMS", "upload service failed", e);
-				}
-			}
-			
-		});
-		uploadThread.start();
-		
 		try {
-			// wait for database to upload
-			while(resultCode == null) {
-				Thread.sleep(1000);
-			}
+			// create temp database to upload
+			DatabaseManager dbmgr = new DatabaseManager(intent.getStringExtra("database"));
+			
+	    	file = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + intent.getStringExtra("projectDir")));
+	    	dbmgr.dumpDatabaseTo(file);
+	    	
+	    	if (uploadStopped) {
+	    		Log.d("FAIMS", "cancelled upload");
+	    		return;
+	    	}
+	    	
+	    	String projectId = intent.getStringExtra("projectId");
+			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(projectId, file);
+			
+			if (uploadStopped) {
+	    		Log.d("FAIMS", "cancelled upload");
+	    		return;
+	    	}
 			
 			if (resultCode != FAIMSClientResultCode.SUCCESS) {
 				faimsClient.invalidate();
 			}
 			
+			Bundle extras = intent.getExtras();
 			Messenger messenger = (Messenger) extras.get("MESSENGER");
 			Message msg = Message.obtain();
 			msg.obj = resultCode;
-			try {
-				messenger.send(msg);
-			} catch (RemoteException e) {
-				Log.e("FAIMS", "Cannot send upload service message", e);
-			}
+			messenger.send(msg);
 			
 		} catch (Exception e) {
 			Log.e("FAIMS", "upload service failed", e);

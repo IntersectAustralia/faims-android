@@ -277,13 +277,6 @@ public class FAIMSClient {
 		
 		return entity;
 	}
-
-	public void cancelRequest() {
-		FAIMSLog.log();
-		if (httpClient != null) {
-			httpClient.getConnectionManager().shutdown();
-		}
-	}
 	
 	public void invalidate() {
 		serverDiscovery.invalidateServerHost();
