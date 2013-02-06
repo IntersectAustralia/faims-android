@@ -69,10 +69,17 @@
         <term>Loc D</term>
       </lookup>
     </property>
-    <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">
-      <bundle>DOI</bundle>
-    </property>
     <property type="dropdown" name="picture" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="pictures/cugl26140.jpg">Picture A</term>
+        <term pictureURL="pictures/cugl26185a.jpg">Picture B</term>
+        <term pictureURL="pictures/cugl26193.jpg">Picture C</term>
+        <term pictureURL="pictures/cugl26197a.jpg">Picture D</term>
+        <term pictureURL="pictures/cugl26206.jpg">Picture E</term>
+      </lookup>
+    </property>
+    <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
   </ArchaeologicalElement>
