@@ -90,11 +90,7 @@ public class FAIMSClient {
 		} catch (Exception e) {
 			Log.e("FAIMS", "cannot upload file", e);
 			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			cleanupClient();
@@ -124,11 +120,7 @@ public class FAIMSClient {
 		} catch(Exception e) {
 			FAIMSLog.log(e);
 			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			
@@ -187,12 +179,8 @@ public class FAIMSClient {
 					FAIMSLog.log(ioe);
 				}
 			}
-			
-			if (e instanceof InterruptedException) {
-				return FAIMSClientResultCode.CANCELLED;
-			} else {
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			}
+				
+			return FAIMSClientResultCode.SERVER_FAILURE;
 			
 		} finally {
 			
@@ -299,6 +287,12 @@ public class FAIMSClient {
 	
 	public void invalidate() {
 		serverDiscovery.invalidateServerHost();
+	}
+
+	public void interrupt() {
+		if (httpClient != null) {
+			httpClient.getConnectionManager().shutdown();
+		}
 	}
 	
 }
