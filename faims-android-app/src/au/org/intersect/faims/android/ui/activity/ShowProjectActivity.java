@@ -181,7 +181,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
 						linker.execute(callback);
-					} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
+					} else {
 						showDownloadDatabaseFailureDialog(callback);
 					}
 				}
@@ -232,7 +232,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 					if (resultCode == FAIMSClientResultCode.SUCCESS) {
 						linker.execute(callback);
-					} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
+					} else {
 						showUploadDatabaseFailureDialog(callback);
 					}
 				}
@@ -392,7 +392,7 @@ public class ShowProjectActivity extends FragmentActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							uploadDatabaseToServer(callback);
+							downloadDatabaseFromServer(callback);
 						}
 					}
     		
