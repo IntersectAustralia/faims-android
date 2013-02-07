@@ -308,6 +308,6 @@ pushDatabaseToServer(String callback) {
 	linker.pushDatabaseToServer(callback);
 }
 
-pullDatabaseFromServer() {
-
+pullDatabaseFromServer(String callback) {
+	linker.pullDatabaseFromServer(callback);
 }

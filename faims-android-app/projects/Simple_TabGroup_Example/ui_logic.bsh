@@ -303,7 +303,7 @@ onEvent("tabgroup1/tab5/cancel", "click", "cancelEntity()");
 onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");
 
 onEvent("tabgroup5/tab2/push", "click", "uploadDatabase()");
-onEvent("tabgroup5/tab2/pull", "click", "pullDatabaseFromServer()");
+onEvent("tabgroup5/tab2/pull", "click", "downloadDatabase()");
 
 skip() {
 
@@ -321,4 +321,16 @@ onUpload() {
 	
 uploadDatabase() {
 	pushDatabaseToServer("onUpload()");
+}
+
+
+onDownload() {
+	
+	showToast("database downloaded successfully");
+	
+	updateEntityRelationship();
+}
+
+downloadDatabase() {
+	pullDatabaseFromServer("onDownload()");
 }

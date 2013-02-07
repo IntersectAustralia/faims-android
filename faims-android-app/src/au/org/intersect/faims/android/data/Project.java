@@ -1,9 +1,13 @@
 package au.org.intersect.faims.android.data;
 
+import java.io.Serializable;
+
 import com.google.gson.JsonObject;
 
-public class Project {
+public class Project implements Serializable {
 
+	private static final long serialVersionUID = -6351485413843633422L;
+	
 	public String name;
 	public String id;
 	public String dir;

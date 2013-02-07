@@ -1866,6 +1866,10 @@ public class BeanShellLinker {
 	public void pushDatabaseToServer(final String callback) {
 		this.activity.uploadDatabaseToServer(callback);
 	}
+	
+	public void pullDatabaseFromServer(final String callback) {
+		this.activity.downloadDatabaseFromServer(callback);
+	}
 
 	public UIRenderer getUIRenderer(){
 		return this.renderer;

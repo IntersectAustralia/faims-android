@@ -27,6 +27,7 @@ public class ProjectUtil {
 			}
 			
 		});
+		
 		Arrays.sort(directories);
 		ArrayList<Project> list = new ArrayList<Project>();
 		FileInputStream is = null;

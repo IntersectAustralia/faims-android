@@ -29,19 +29,15 @@ import android.os.Environment;
 import android.os.StatFs;
 
 public class FileUtil {
-	
-	public static String toPath(String path) {
-		return Environment.getExternalStorageDirectory() + path;
-	}
 
 	public static void makeDirs(String dir) {
 		FAIMSLog.log();
 		
-		File file = new File(toPath(dir));
+		File file = new File(dir);
 		if (!file.exists())
 			file.mkdirs();
 		
-		FAIMSLog.log(toPath(dir) + " is present " + String.valueOf(file.exists()));
+		FAIMSLog.log(dir + " is present " + String.valueOf(file.exists()));
 	}
 	
 	public static void untarFromStream(String dir, String filename) throws IOException {
@@ -51,14 +47,14 @@ public class FileUtil {
 		try {
 		 ts = new TarArchiveInputStream(
 				 new GZIPInputStream(
-						 new FileInputStream(toPath(filename))));
+						 new FileInputStream(filename)));
 		 
 	     TarArchiveEntry e;
 	     while((e = ts.getNextTarEntry()) != null) {
 	    	 if (e.isDirectory()) {
 	    		 makeDirs(dir + "/" + e.getName());
 	    	 } else {
-	    		 writeTarFile(ts, e, new File(toPath(dir + "/" + e.getName())));
+	    		 writeTarFile(ts, e, new File(dir + "/" + e.getName()));
 	    	 }
 	     }
 		} finally {
@@ -86,7 +82,7 @@ public class FileUtil {
 		
 		FileOutputStream os = null;
 		try {
-			os = new FileOutputStream(toPath(filename));
+			os = new FileOutputStream(filename);
 		        
 			byte[] buffer = new byte[1024];
 	        int bufferLength = 0; //used to store a temporary size of the buffer
@@ -121,14 +117,6 @@ public class FileUtil {
 		} finally {
 			if (fs != null) fs.close();
 		}
-	}
-	
-	public static void deleteFile(String filename) throws IOException {
-		FAIMSLog.log();
-		
-		new File(toPath(filename)).delete();
-		
-		FAIMSLog.log("deleted file " + filename);
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {

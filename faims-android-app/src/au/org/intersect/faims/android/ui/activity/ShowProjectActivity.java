@@ -20,6 +20,7 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.services.DownloadDatabaseService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.IActionListener;
@@ -165,6 +166,57 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	@SuppressLint("HandlerLeak")
+	public void downloadDatabaseFromServer(final String callback) {
+		FAIMSLog.log();
+		
+		if (serverDiscovery.isServerHostValid()) {
+			showBusyDownloadDatabaseDialog();
+		    
+    		// Create a new Messenger for the communication back
+    		final Handler handler = new Handler() {
+				
+				public void handleMessage(Message message) {
+					ShowProjectActivity.this.busyDialog.dismiss();
+					
+					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+					if (resultCode == FAIMSClientResultCode.SUCCESS) {
+						linker.execute(callback);
+					} else if (resultCode == FAIMSClientResultCode.SERVER_FAILURE){
+						showDownloadDatabaseFailureDialog(callback);
+					}
+				}
+				
+			};
+			
+			// start service
+    		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
+			
+	    	Messenger messenger = new Messenger(handler);
+		    intent.putExtra("MESSENGER", messenger);
+		    intent.putExtra("project", project);
+		    ShowProjectActivity.this.startService(intent);
+		} else {
+			showBusyLocatingServerDialog();
+			
+			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+
+    			@Override
+    			public void handleActionResponse(ActionResultCode resultCode,
+    					Object data) {
+    				ShowProjectActivity.this.busyDialog.dismiss();
+    				
+    				if (resultCode == ActionResultCode.FAILURE) {
+    					showLocateServerDownloadDatabaseFailureDialog(callback);
+    				} else {
+    					downloadDatabaseFromServer(callback);
+    				}
+    			}
+        		
+        	}).execute();
+		}
+	}
+	
+	@SuppressLint("HandlerLeak")
 	public void uploadDatabaseToServer(final String callback) {
     	FAIMSLog.log();
     	
@@ -195,8 +247,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
-		    intent.putExtra("projectId", project.id);
-		    intent.putExtra("projectDir", project.dir);
+		    intent.putExtra("project", project);
 		    ShowProjectActivity.this.startService(intent);
 		   
     	} else {
@@ -231,6 +282,23 @@ public class ShowProjectActivity extends FragmentActivity {
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
 							uploadDatabaseToServer(callback);
+						}
+					}
+    		
+    	});
+    	choiceDialog.show();
+    }
+	
+	private void showLocateServerDownloadDatabaseFailureDialog(final String callback) {
+    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+				getString(R.string.locate_server_failure_title),
+				getString(R.string.locate_server_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							downloadDatabaseFromServer(callback);
 						}
 					}
     		
@@ -277,10 +345,48 @@ public class ShowProjectActivity extends FragmentActivity {
 	    busyDialog.show();
     }
 	
+	private void showBusyDownloadDatabaseDialog() {
+    	busyDialog = new BusyDialog(ShowProjectActivity.this, 
+				getString(R.string.download_database_title),
+				getString(R.string.download_database_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(
+							DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.CANCEL) {
+							// stop service
+				    		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
+				    		
+				    		stopService(intent);
+						}
+					}
+			
+		});
+	    busyDialog.show();
+    }
+	
 	private void showUploadDatabaseFailureDialog(final String callback) {
     	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.upload_database_failure_title),
 				getString(R.string.upload_database_failure_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							uploadDatabaseToServer(callback);
+						}
+					}
+    		
+    	});
+    	choiceDialog.show();
+    }
+	
+	private void showDownloadDatabaseFailureDialog(final String callback) {
+    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+				getString(R.string.download_database_failure_title),
+				getString(R.string.download_database_failure_message),
 				new IDialogListener() {
 
 					@Override

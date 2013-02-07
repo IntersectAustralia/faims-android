@@ -225,7 +225,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			};
 		    Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", selectedProject.id);
+		    intent.putExtra("project", selectedProject);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();

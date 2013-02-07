@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
@@ -51,10 +52,13 @@ public class UploadDatabaseService extends IntentService {
 		Log.d("FAIMS", "starting upload service");
 		
 		try {
+			Bundle extras = intent.getExtras();
+			Project project = (Project) extras.get("project");
+			
 			// create temp database to upload
 			DatabaseManager dbmgr = new DatabaseManager(intent.getStringExtra("database"));
 			
-	    	file = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + intent.getStringExtra("projectDir")));
+	    	file = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir));
 	    	dbmgr.dumpDatabaseTo(file);
 	    	
 	    	if (uploadStopped) {
@@ -62,8 +66,7 @@ public class UploadDatabaseService extends IntentService {
 	    		return;
 	    	}
 	    	
-	    	String projectId = intent.getStringExtra("projectId");
-			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(projectId, file);
+			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(project, file);
 			
 			if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
@@ -74,7 +77,6 @@ public class UploadDatabaseService extends IntentService {
 				faimsClient.invalidate();
 			}
 			
-			Bundle extras = intent.getExtras();
 			Messenger messenger = (Messenger) extras.get("MESSENGER");
 			Message msg = Message.obtain();
 			msg.obj = resultCode;

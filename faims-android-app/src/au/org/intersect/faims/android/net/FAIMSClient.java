@@ -22,9 +22,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
 import android.net.http.AndroidHttpClient;
+import android.os.Environment;
 import android.util.Log;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.data.ProjectArchiveInfo;
+import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
@@ -40,6 +41,8 @@ public class FAIMSClient {
 	private static final int CONNECTION_TIMEOUT = 60 * 1000;
 	
 	private static final int DATA_TIMEOUT = 60 * 1000;
+
+	private static final String BASE_DIR = "/faims/projects/";
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -62,11 +65,11 @@ public class FAIMSClient {
 		httpClient = null;
 	}
 	
-	public FAIMSClientResultCode uploadDatabase(String projectId, File file) {
-		return uploadFile(file, "/android/project/" + projectId + "/upload_db");
+	public FAIMSClientResultCode uploadDatabase(Project project, File file) {
+		return uploadFile(file, "/android/project/" + project.id + "/upload_db");
 	}
 	
-	public FAIMSClientResultCode uploadFile(File file, String uri) {
+	public FAIMSClientResultCode uploadFile(File file, String path) {
 		try {
 			initClient();
 			
@@ -74,7 +77,7 @@ public class FAIMSClient {
 			entity.addPart("file", new FileBody(file, "binary/octet-stream"));
 			entity.addPart("md5", new StringBody(FileUtil.generateMD5Hash(file.getPath())));
 			
-			HttpPost post = new HttpPost(new URI(getURI(uri)));
+			HttpPost post = new HttpPost(new URI(getUri(path)));
 			post.setEntity(entity);
 			
 			HttpResponse response = httpClient.execute(post);
@@ -84,6 +87,8 @@ public class FAIMSClient {
 				
 				return FAIMSClientResultCode.SERVER_FAILURE;
 			}
+			
+			Log.d("FAIMS", "uploaded file!");
 			
 			return FAIMSClientResultCode.SUCCESS;
 			
@@ -104,7 +109,7 @@ public class FAIMSClient {
 		try {			
 			initClient();
 			
-			HttpEntity entity = getRequest("/android/projects");
+			HttpEntity entity = getRequest(getUri("/android/projects"));
 			
 			stream = entity.getContent();
 			
@@ -134,50 +139,54 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FAIMSClientResultCode downloadProjectArchive(String projectId) {
+	public FAIMSClientResultCode downloadProject(Project project) {
+		return downloadFile("/android/project/" + project.id + "/archive", "/android/project/" + project.id + "/download", BASE_DIR);
+	}
+	
+	public FAIMSClientResultCode downloadDatabase(Project project) {
+		return downloadFile("/android/project/" + project.id + "/archive_db", "/android/project/" + project.id + "/download_db", BASE_DIR + project.dir);
+	}
+	
+	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
-		String filename = null;
+		File file = null;
+		
 		try {
 			initClient();
 			
-			ProjectArchiveInfo archive = getProjectArchive(projectId);
+			FileInfo info = getFileInfo(infoPath);
+			
 	        long freeSpace = FileUtil.getExternalStorageSpace();
 	        
 	        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
-	        FAIMSLog.log("filesize: " + String.valueOf(archive.size));
+	        FAIMSLog.log("filesize: " + String.valueOf(info.size));
 	        
-	        if (archive.size > freeSpace) {
+	        if (info.size > freeSpace) {
 	        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
 	        } 
 	        
-	        filename = getProjectDownload(projectId, archive);
+	        file = downloadArchive(downloadPath, info);
 			
-			if (filename == null) {
+			if (file == null) {
 				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
 			}
 			
-			FileUtil.untarFromStream("/faims/projects", filename);
+			FileUtil.untarFromStream(Environment.getExternalStorageDirectory() + dir, file.getAbsolutePath());
 			
-			FileUtil.deleteFile(filename);
+			file.delete();
 			
-			FAIMSLog.log("downloaded project!");
+			FAIMSLog.log("downloaded file!");
 			
 			return FAIMSClientResultCode.SUCCESS;
 	        
 		} catch (Exception e) {
 			FAIMSLog.log(e);
 			
-			// remove file if downloaded
-			if (filename != null) {
-				try {
-				
-					FileUtil.deleteFile(filename);
-					
-				} catch (IOException ioe) {
-					FAIMSLog.log(ioe);
-				}
+			// remove downloaded file
+			if (file != null) {
+				file.delete();
 			}
 				
 			return FAIMSClientResultCode.SERVER_FAILURE;
@@ -194,19 +203,19 @@ public class FAIMSClient {
 		}
 	}
 	
-	private ProjectArchiveInfo getProjectArchive(String projectId) throws IOException {
+	private FileInfo getFileInfo(String path) throws IOException {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
 		
 		try {
-			HttpEntity entity = getRequest("/android/project/" + projectId + "/archive");
+			HttpEntity entity = getRequest(getUri(path));
 			
 			stream = entity.getContent();
 			
 			JsonObject object = JsonUtil.deserializeJsonObject(stream);
 			
-			return ProjectArchiveInfo.fromJson(object);
+			return FileInfo.fromJson(object);
 			
 		} finally {
 			if (stream != null) stream.close();
@@ -214,7 +223,7 @@ public class FAIMSClient {
 		
 	}
 	
-	private String getProjectDownload(String projectId, ProjectArchiveInfo archive) throws Exception {
+	private File downloadArchive(String path, FileInfo archive) throws Exception {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
@@ -224,55 +233,60 @@ public class FAIMSClient {
 			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
 			HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
 			
-			HttpEntity entity = getRequest("/android/project/" + projectId + "/download", params);
+			HttpEntity entity = getRequest(getUri(path), params);
 			
 			stream = entity.getContent();
 			
-	    	FileUtil.makeDirs("/faims/projects");
+	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + BASE_DIR); // make sure directory exists
 			
-			String filename = "/faims/projects/" + archive.filename;
+	    	File tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + BASE_DIR));
+	    	
+			FileUtil.saveFile(stream, tempFile.getAbsolutePath());
 			
-			FileUtil.saveFile(stream, filename);
-			
-			String md5 = FileUtil.generateMD5Hash(FileUtil.toPath(filename));
+			String md5 = FileUtil.generateMD5Hash(tempFile.getAbsolutePath());
 			
 			FAIMSLog.log("filename.md5Hash: " + md5);
 			FAIMSLog.log("archive.md5Hash:  " + archive.md5);
 			
 			if (!archive.md5.equals(md5)) {
 				
-				FileUtil.deleteFile(filename);
+				tempFile.delete();
 				
 				return null;
 			}
 			
-			return filename;
+			return tempFile;
 		} finally {
 			// TODO check if file needs to be deleted
 			if (stream != null) stream.close();
 		}
 	}
 	
-	private String getURI(String path) {
+	private String getUri(String path) {
 		FAIMSLog.log(serverDiscovery.getServerHost() + path);
 		
 		return serverDiscovery.getServerHost() + path;
 	}
 	
-	private HttpEntity getRequest(String path) throws IOException {
-		return getRequest(path, null);
+	private HttpEntity getRequest(String uri) throws IOException {
+		return getRequest(uri, null);
 	}
 	
-	private HttpEntity getRequest(String path, HttpParams params) throws IOException {
-		FAIMSLog.log(path);
+	private HttpEntity getRequest(String uri, HttpParams params) throws IOException {
+		FAIMSLog.log(uri);
 		
-		HttpGet get = new HttpGet(getURI(path));
+		HttpGet get = new HttpGet(uri);
 		
 		if (params != null) {
 			get.setParams(params);
 		}
 
 		HttpResponse response = httpClient.execute(get);
+		if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+			Log.d("FAIMS", "failed request: " + uri);
+			return null;
+		}
+		
 		HttpEntity entity = response.getEntity();
 		
 		return entity;
