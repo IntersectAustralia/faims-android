@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.ServerDiscovery;
@@ -46,8 +45,7 @@ public class MainActivity extends RoboActivity {
         	
         	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-        		TextView sel = (TextView) arg1;
-        		final String selectedItem = sel.getText().toString();
+        		final String selectedItem = projectListAdapter.getItem(arg2).toString();
         		
         		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("name", selectedItem);

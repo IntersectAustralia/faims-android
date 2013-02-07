@@ -64,4 +64,30 @@ public class MainActivityTest {
 		assertEquals("New Activity launched ok", FetchProjectsActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
 	}
 	
+	@Test
+	public void loadStoredProjectTest() {
+		String projectName = "Test Project";
+		
+		ProjectUtil.createProject(projectName);
+		
+		MainActivity activity = new MainActivity();
+		activity.onCreate(null);
+		activity.onStart();
+		
+		ListView projectListView = (ListView) activity
+				.findViewById(R.id.project_list);
+		
+		assertEquals("Project List Item ", projectName, projectListView.getItemAtPosition(0));
+		
+		projectListView.performItemClick(null, 0, 0);
+		
+		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+		Intent startedIntent = shadowActivity.getNextStartedActivity();
+		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+
+		assertEquals("New Activity launched ok", ShowProjectActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
+		
+		assertEquals("Show project name", projectName, startedIntent.getStringExtra("name"));
+	}
+	
 }
