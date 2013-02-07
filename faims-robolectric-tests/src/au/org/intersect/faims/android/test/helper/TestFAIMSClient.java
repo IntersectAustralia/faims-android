@@ -23,7 +23,7 @@ public class TestFAIMSClient extends FAIMSClient {
 	}
 
 	@Override
-	public FAIMSClientResultCode downloadProject(String projectId) {
+	public FAIMSClientResultCode downloadProject(Project project) {
 		
 		return downloadCode;
 	}
