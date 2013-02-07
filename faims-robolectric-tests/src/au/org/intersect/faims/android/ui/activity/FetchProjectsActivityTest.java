@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.activity;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -121,26 +122,70 @@ public class FetchProjectsActivityTest {
 		
 		activity.onCreate(null);
 		
+		// set invalid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(false);
 		
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		int count = 10;
+		client.setProjectsCount(count);
 		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
 		
+		// fetch projects list
 		activity.fetchProjectsList();
 		
 		ListView projectListView = (ListView) activity
 				.findViewById(R.id.project_list);
 		assertEquals("No projects exist", projectListView.getChildCount(), 0);
 		
+		// show failure dialog
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.locate_server_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.locate_server_failure_message), choiceDialog.getMessage());
+	}
+	
+	@Test
+	public void testServerDiscoveryRetry() throws Exception {
+		FetchProjectsActivity activity = new FetchProjectsActivity();
+		
+		activity.onCreate(null);
+		
+		// set invalid host
+		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.setHostValid(false);
+		
+		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		int count = 10;
+		client.setProjectsCount(count);
+		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
+		
+		// fetch projects list
+		activity.fetchProjectsList();
+		
+		ListView projectListView = (ListView) activity
+				.findViewById(R.id.project_list);
+		assertEquals("No projects exist", projectListView.getChildCount(), 0);
+		
+		// show failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
 		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.locate_server_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.locate_server_failure_message), choiceDialog.getMessage());
 		
+		// set valid host
+		discovery.setHostValid(true);
 		
-		// TODO check how to test user interactions
+		// TODO how to click yes on the dialog?
+		activity.fetchProjectsList();
+		
+		// show projects list
+		for (int i = 0; i < count; i++) {
+			assertEquals("Project " + i + " exists", "Project " + i,
+					projectListView.getItemAtPosition(i));
+		}
 	}
 	
 	@Test
@@ -150,52 +195,158 @@ public class FetchProjectsActivityTest {
 		
 		activity.onCreate(null);
 		
+		// set valid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
 
+		// set fetch failure
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		int count = 10;
+		client.setProjectsCount(count);
 		client.setProjectsResultCode(FAIMSClientResultCode.SERVER_FAILURE);
 		
+		// fetch projects list
 		activity.fetchProjectsList();
 		
 		ListView projectListView = (ListView) activity
 				.findViewById(R.id.project_list);
 		assertEquals("No projects exist", projectListView.getChildCount(), 0);		
 		
+		// show fetch failure dialog
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Could not fetch projects Dialog Showing",choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.fetch_projects_failure_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.fetch_projects_failure_message), choiceDialog.getMessage());
+	}
+	
+	@Test
+	public void testFetchProjectsListRetry() throws Exception {
+
+		FetchProjectsActivity activity = new FetchProjectsActivity();
+		
+		activity.onCreate(null);
+		
+		// set valid host
+		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.setHostValid(true);
+
+		// set fetch failure
+		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		int count = 10;
+		client.setProjectsCount(count);
+		client.setProjectsResultCode(FAIMSClientResultCode.SERVER_FAILURE);
+		
+		// fetch projects list
+		activity.fetchProjectsList();
+		
+		ListView projectListView = (ListView) activity
+				.findViewById(R.id.project_list);
+		assertEquals("No projects exist", projectListView.getChildCount(), 0);		
+		
+		// show fetch failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
 		assertTrue("Could not fetch projects Dialog Showing",choiceDialog.isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.fetch_projects_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.fetch_projects_failure_message), choiceDialog.getMessage());
 		
+		// set fetch success
+		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
 		
-		// TODO check how to test user interactions
+		// TODO how to click yes on the dialog?
+		activity.fetchProjectsList();
+		
+		// show projects list
+		for (int i = 0; i < count; i++) {
+			assertEquals("Project " + i + " exists", "Project " + i,
+					projectListView.getItemAtPosition(i));
+		}
+	}
 
+	@Test
+	public void showDownloadProjectDialog() {
+		FetchProjectsActivity activity = new FetchProjectsActivity();
+		
+		activity.onCreate(null); // this automatically fetches projects
+		
+		// reset the server discovery
+		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.setHostValid(true);
+		
+		// update test client
+		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		client.setProjectsCount(1);
+		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
+		
+		// fetch project list
+		activity.fetchProjectsList();
+		
+		ListView projectListView = (ListView) activity
+				.findViewById(R.id.project_list);
+
+		assertEquals("Project exists", "Project 0",
+				projectListView.getItemAtPosition(0));
+		
+		// select project
+		projectListView.performItemClick(null, 0, 0);
+		
+		// show download project dialog
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Download project dialog", choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.confirm_download_project_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.confirm_download_project_message) + " Project 0?", choiceDialog.getMessage());
 	}
 	
 	@Test
 	public void testDownloadProjectSuccess() throws Exception {
-		
 		FetchProjectsActivity activity = new FetchProjectsActivity();
 		
-		activity.onCreate(null);
+		activity.onCreate(null); // this automatically fetches projects
 		
+		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
-
-		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
-		client.setProjectsCount(10);
-		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
-		client.setDownloadResultCode(FAIMSClientResultCode.SERVER_FAILURE);
 		
+		// update test client
+		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
+		client.setProjectsCount(1);
+		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
+		client.setDownloadResultCode(FAIMSClientResultCode.SUCCESS);
+		
+		// fetch project list
 		activity.fetchProjectsList();
 		
-		// TODO pick project form dialog
-		activity.selectedProject = activity.projects.get(0);
-		
-		activity.downloadProjectArchive();
+		ListView projectListView = (ListView) activity
+				.findViewById(R.id.project_list);
 
-		// TODO assert file has been downloaded
+		assertEquals("Project exists", "Project 0",
+				projectListView.getItemAtPosition(0));
+		
+		// select project
+		projectListView.performItemClick(null, 0, 0);
+		
+		// show download project dialog
+		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
+		
+		assertTrue("Download project dialog", choiceDialog.isShowing());
+		assertEquals("Dialog title", activity.getString(R.string.confirm_download_project_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.confirm_download_project_message) + " Project 0?", choiceDialog.getMessage());
+		
+		// download project
+		activity.downloadProjectArchive();
+		
+		// download service start
+		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
+		Intent startedIntent = shadowActivity.getNextStartedService();
+		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+		
+		assertEquals("Download service launched ok", DownloadProjectService.class.getName().toString(),shadowIntent.getComponent().getClassName());
+		
+		// assert file has been downloaded
+		//List<Project> projects = ProjectUtil.getProjects();
+		//assertEquals("Project downloaded", "Project 0", projects.get(0).name);
 	}
 	
 	@Test

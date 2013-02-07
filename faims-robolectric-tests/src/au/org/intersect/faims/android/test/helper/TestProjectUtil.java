@@ -12,7 +12,7 @@ import android.os.Environment;
 
 import com.google.gson.JsonObject;
 
-public class ProjectUtil {
+public class TestProjectUtil {
 
 	public static void createProject(String name) {
 		try {

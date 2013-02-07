@@ -10,7 +10,7 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
-import au.org.intersect.faims.android.test.helper.ProjectUtil;
+import au.org.intersect.faims.android.test.helper.TestProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
@@ -26,7 +26,7 @@ public class MainActivityTest {
 		
 		int count = 10;
 		for (int i = 0; i < count; i++) {
-			ProjectUtil.createProject("Project " + i);
+			TestProjectUtil.createProject("Project " + i);
 		}
 		
 		MainActivity activity = new MainActivity();
@@ -68,7 +68,7 @@ public class MainActivityTest {
 	public void loadStoredProjectTest() {
 		String projectName = "Test Project";
 		
-		ProjectUtil.createProject(projectName);
+		TestProjectUtil.createProject(projectName);
 		
 		MainActivity activity = new MainActivity();
 		activity.onCreate(null);

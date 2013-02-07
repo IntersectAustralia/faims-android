@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
-import au.org.intersect.faims.android.test.helper.ProjectUtil;
+import au.org.intersect.faims.android.test.helper.TestProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
@@ -36,7 +36,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		// We need the UI xml and logic bsh files
 		
-		ProjectUtil.createProjectFrom(projectName, this.directoryName);
+		TestProjectUtil.createProjectFrom(projectName, this.directoryName);
 		
 		// Create the activity
 		
