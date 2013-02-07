@@ -15,14 +15,11 @@
                   <date></date>
                   <time></time>
                   <type></type>
-                  <type-description></type-description>
                   <picture></picture>
                   <cancel></cancel>
               </tab1>
               <tab2>
                   <location></location>
-                  <location-value></location-value>
-                  <location-certainty></location-certainty>
                   <supervisor></supervisor>
               </tab2>
               <tab3>
@@ -38,10 +35,6 @@
       <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
       <bind nodeset="/faims/tabgroup1/tab1/date" type="date"/>
       <bind nodeset="/faims/tabgroup1/tab1/time" type="time"/>
-      <bind nodeset="/faims/tabgroup1/tab1/type-description" type="string"/>
-      <bind nodeset="/faims/tabgroup1/tab1/location-value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup1/tab1/location-certainty" type="decimal"/>
-
     </model>
   </h:head>
 
@@ -67,10 +60,7 @@
                 <value>dummy</value>
             </item>
         </select1>
-        <input ref="type-description" faims_attribute_name="type" faims_attribute_type="freetext">
-            <label>Description:</label>
-        </input>
-        <select1 ref="picture" type="image" faims_attribute_name="picture" faims_attribute_type="freetext">
+        <select1 ref="picture" type="image" faims_attribute_name="picture" faims_attribute_type="vocab" faims_annotation="false">
             <label>Picture:</label>
             <item>
                 <label>dummy</label>
@@ -90,9 +80,6 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
-            <label>Value:</label>
-        </input>
         <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
             <label>Supervisor:</label>
             <item>

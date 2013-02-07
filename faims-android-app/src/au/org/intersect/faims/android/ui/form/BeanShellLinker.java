@@ -500,6 +500,9 @@ public class BeanShellLinker {
 				if(customEditText.getCertainty() != customEditText.getCurrentCertainty()){
 					return true;
 				}
+				if(!customEditText.getAnnotation().equals(customEditText.getCurrentAnnotation())){
+					return true;
+				}
 				
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
@@ -527,6 +530,9 @@ public class BeanShellLinker {
 				if(customLinearLayout.getCertainty() != customLinearLayout.getCurrentCertainty()){
 					return true;
 				}
+				if(!customLinearLayout.getAnnotation().equals(customLinearLayout.getCurrentAnnotation())){
+					return true;
+				}
 				
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
@@ -536,6 +542,9 @@ public class BeanShellLinker {
 				if(customSpinner.getCertainty() != customSpinner.getCurrentCertainty()){
 					return true;
 				}
+				if(!customSpinner.getAnnotation().equals(customSpinner.getCurrentAnnotation())){
+					return true;
+				}
 				
 			} else if (v instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
@@ -543,6 +552,9 @@ public class BeanShellLinker {
 					return true;
 				}
 				if(horizontalScrollView.getCertainty() != horizontalScrollView.getCurrentCertainty()){
+					return true;
+				}
+				if(!horizontalScrollView.getAnnotation().equals(horizontalScrollView.getCurrentAnnotation())){
 					return true;
 				}
 			}
@@ -724,8 +736,10 @@ public class BeanShellLinker {
 			setFieldValue(ref,attribute.getText());
 		}else if(MEASURE.equals(type)){
 			setFieldValue(ref,attribute.getMeasure());
+			setFieldAnnotation(ref, attribute.getText());
 		}else if(VOCAB.equals(type)){
 			setFieldValue(ref,attribute.getVocab());
+			setFieldAnnotation(ref, attribute.getText());
 		}
 		setFieldCertainty(ref,attribute.getCertainty());
 		tab.setValueReference(ref, getFieldValue(ref));
@@ -736,6 +750,7 @@ public class BeanShellLinker {
 			setFieldValue(ref,relationshipAttribute.getText());
 		}else if(VOCAB.equals(type)){
 			setFieldValue(ref,relationshipAttribute.getVocab());
+			setFieldAnnotation(ref, relationshipAttribute.getText());
 		}
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
@@ -952,6 +967,45 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void setFieldAnnotation(String ref, Object valueObj) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (valueObj instanceof String){
+				
+				String value = (String) valueObj;
+				
+				if (obj instanceof CustomEditText){
+					CustomEditText tv = (CustomEditText) obj;
+					tv.setAnnotation(value);
+					tv.setCurrentAnnotation(value);
+				}
+				else if (obj instanceof CustomSpinner){
+					CustomSpinner spinner = (CustomSpinner) obj;
+					spinner.setAnnotation(value);
+					spinner.setCurrentAnnotation(value);
+				}
+				else if (obj instanceof CustomLinearLayout){
+					CustomLinearLayout layout = (CustomLinearLayout) obj;
+					layout.setAnnotation(value);
+					layout.setCurrentAnnotation(value);
+				}else if (obj instanceof CustomHorizontalScrollView){
+					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					horizontalScrollView.setAnnotation(value);
+					horizontalScrollView.setCurrentAnnotation(value);
+				}
+			}
+			
+			else {
+				Log.w("FAIMS","Couldn't set annotation for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "View does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception setting field annotation",e);
+		}
+	}
+
 	public Object getFieldValue(String ref){
 		
 		try{
@@ -1074,6 +1128,39 @@ public class BeanShellLinker {
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception getting field certainty",e);
+			return "";
+		}
+	}
+
+	public Object getFieldAnnotation(String ref){
+		
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			
+			if (obj instanceof CustomEditText){
+				CustomEditText tv = (CustomEditText) obj;
+				return tv.getCurrentAnnotation();
+			}
+			else if (obj instanceof CustomSpinner){
+				CustomSpinner spinner = (CustomSpinner) obj;
+				return spinner.getCurrentAnnotation();
+			}
+			else if (obj instanceof CustomLinearLayout){
+				CustomLinearLayout layout = (CustomLinearLayout) obj;
+				return layout.getCurrentAnnotation();
+			}
+			else if (obj instanceof CustomHorizontalScrollView){
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				return horizontalScrollView.getCurrentAnnotation();
+			}
+			else {
+				Log.w("FAIMS","Couldn't get annotation for ref= " + ref + " obj= " + obj.toString());
+				showWarning("Logic Error", "View does not exist.");
+				return "";
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception getting field annotation",e);
 			return "";
 		}
 	}
@@ -1870,7 +1957,7 @@ public class BeanShellLinker {
 	public void pullDatabaseFromServer(final String callback) {
 		this.activity.downloadDatabaseFromServer(callback);
 	}
-
+	
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
 	}

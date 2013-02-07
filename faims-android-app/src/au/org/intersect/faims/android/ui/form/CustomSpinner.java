@@ -10,6 +10,8 @@ public class CustomSpinner extends Spinner {
 	private String ref;
 	private float certainty = 1;
 	private float currentCertainty = 1;
+	private String annotation = "";
+	private String currentAnnotation = "";
 	
 	public CustomSpinner(Context context) {
 		super(context);
@@ -52,5 +54,21 @@ public class CustomSpinner extends Spinner {
 
 	public void setCurrentCertainty(float currentCertainty) {
 		this.currentCertainty = currentCertainty;
+	}
+
+	public String getAnnotation() {
+		return annotation;
+	}
+
+	public void setAnnotation(String annotation) {
+		this.annotation = annotation;
+	}
+
+	public String getCurrentAnnotation() {
+		return currentAnnotation;
+	}
+
+	public void setCurrentAnnotation(String currentAnnotation) {
+		this.currentAnnotation = currentAnnotation;
 	}
 }

@@ -26,6 +26,7 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -54,6 +55,7 @@ public class Tab {
 	//private boolean scrollable;
 	private View view;
 	private Arch16n arch16n;
+	private static final String FREETEXT = "freetext";
 
 	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n) {
 		this.context = context;
@@ -102,21 +104,36 @@ public class Tab {
 		String attributeName = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		String attributeType = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
 		String certainty = input.getQuestion().getAdditionalAttribute(null, "faims_certainty");
+		String annotation = input.getQuestion().getAdditionalAttribute(null, "faims_annotation");
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
-		Button imageButton = new Button(this.context);
-		imageButton.setBackgroundResource(R.drawable.square_button);
+		Button certaintyButton = new Button(this.context);
+		certaintyButton.setBackgroundResource(R.drawable.square_button);
 		LayoutParams layoutParams = new LayoutParams(30, 30);
 		layoutParams.topMargin = 10;
-		imageButton.setLayoutParams(layoutParams);
-		imageButton.setText("C");
-		imageButton.setTextSize(10);
+		certaintyButton.setLayoutParams(layoutParams);
+		certaintyButton.setText("C");
+		certaintyButton.setTextSize(10);
 		if(isArchEnt){
 			if(certainty != null){
 				if(!certainty.equals("false")){
-					fieldLinearLayout.addView(imageButton);
+					fieldLinearLayout.addView(certaintyButton);
 				}
 			}else{
-				fieldLinearLayout.addView(imageButton);
+				fieldLinearLayout.addView(certaintyButton);
+			}
+		}
+		Button annotationButton = new Button(this.context);
+		annotationButton.setBackgroundResource(R.drawable.square_button);
+		annotationButton.setLayoutParams(layoutParams);
+		annotationButton.setText("A");
+		annotationButton.setTextSize(10);
+		if(!FREETEXT.equals(attributeType)){
+			if(annotation != null){
+				if(!annotation.equals("false")){
+					fieldLinearLayout.addView(annotationButton);
+				}
+			}else{
+				fieldLinearLayout.addView(annotationButton);
 			}
 		}
 		// check the control type to know the type of the question
@@ -130,7 +147,8 @@ public class Tab {
                     	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
-                        onImageButtonClicked(imageButton, text);
+                        onCertaintyButtonClicked(certaintyButton, text);
+                        onAnnotationButtonClicked(annotationButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -139,7 +157,8 @@ public class Tab {
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                        onImageButtonClicked(imageButton, text);
+                        onCertaintyButtonClicked(certaintyButton, text);
+                        onAnnotationButtonClicked(annotationButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -148,7 +167,8 @@ public class Tab {
                         view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
-                        onImageButtonClicked(imageButton, text);
+                        onCertaintyButtonClicked(certaintyButton, text);
+                        onAnnotationButtonClicked(annotationButton, text);
                         linearLayout.addView(view);
                         break;
                     // set input type as date picker
@@ -158,7 +178,8 @@ public class Tab {
         				now.setToNow();
         				date.updateDate(now.year, now.month, now.monthDay);
                     	view = date;
-                    	onImageButtonClicked(imageButton, date);
+                    	onCertaintyButtonClicked(certaintyButton, date);
+                    	onAnnotationButtonClicked(annotationButton, date);
                     	linearLayout.addView(view);
                         valueReference.put(path, DateUtil.getDate(date));
                         break;
@@ -167,7 +188,8 @@ public class Tab {
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
                         ((TextView) view).setLines(5);
-                        onImageButtonClicked(imageButton, text);
+                        onCertaintyButtonClicked(certaintyButton, text);
+                        onAnnotationButtonClicked(annotationButton, text);
                         linearLayout.addView(view);
                         valueReference.put(path, "");
                         break;
@@ -179,7 +201,8 @@ public class Tab {
         				time.setCurrentHour(timeNow.hour);
         				time.setCurrentMinute(timeNow.minute);
         				view = time;
-        				onImageButtonClicked(imageButton, time);
+        				onCertaintyButtonClicked(certaintyButton, time);
+        				onAnnotationButtonClicked(annotationButton, time);
         				linearLayout.addView(view);
         				valueReference.put(path, DateUtil.getTime(time));
                         break;
@@ -206,7 +229,7 @@ public class Tab {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;
                             valueReference.put(path, "");
-                            onImageButtonClicked(imageButton, text);
+                            onCertaintyButtonClicked(certaintyButton, text);
                             linearLayout.addView(view);
                     	}
                         break;
@@ -249,7 +272,8 @@ public class Tab {
                                 .getAdditionalAttribute(null, "type"))) {
                             view = renderImageSliderForSingleSelection(input, directory, attributeName, attributeType, path);
                             linearLayout.addView(view);
-                            onImageButtonClicked(imageButton, view);
+                            onCertaintyButtonClicked(certaintyButton, view);
+                            onAnnotationButtonClicked(annotationButton, view);
                             valueReference.put(path, "");
                         }
                         // Radio Button
@@ -271,7 +295,8 @@ public class Tab {
                             }
                             selectLayout.addView(radioGroupLayout);
                             view = selectLayout;
-                            onImageButtonClicked(imageButton, selectLayout);
+                            onCertaintyButtonClicked(certaintyButton, selectLayout);
+                            onAnnotationButtonClicked(annotationButton, selectLayout);
                             linearLayout.addView(selectLayout);
                             valueReference.put(path, "");
                         // List
@@ -310,7 +335,8 @@ public class Tab {
                             spinner.setAdapter(arrayAdapter);
                             spinner.setSelection(0);
                             view = spinner;
-                            onImageButtonClicked(imageButton, view);
+                            onCertaintyButtonClicked(certaintyButton, view);
+                            onAnnotationButtonClicked(annotationButton, view);
                             linearLayout.addView(spinner);
                             NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
             				valueReference.put(path, pair.getValue());
@@ -342,7 +368,8 @@ public class Tab {
                         }
                         view = selectLayout;
                         linearLayout.addView(selectLayout);
-                        onImageButtonClicked(imageButton, selectLayout);
+                        onCertaintyButtonClicked(certaintyButton, selectLayout);
+                        onAnnotationButtonClicked(annotationButton, selectLayout);
                         valueReference.put(path, new ArrayList<NameValuePair>());
                 }
                 if(attributeName != null){
@@ -361,8 +388,60 @@ public class Tab {
         return view;
 	}
 
-	private void onImageButtonClicked(Button imageButton,final View view) {
-		imageButton.setOnClickListener(new OnClickListener() {
+	private void onAnnotationButtonClicked(Button annotationButton, final View view) {
+		annotationButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				final EditText editText = new EditText(v.getContext());
+				if (view instanceof CustomEditText){
+	        		CustomEditText customEditText = (CustomEditText) view;
+	        		editText.setText(customEditText.getCurrentAnnotation());
+	        	}else if (view instanceof CustomLinearLayout){
+	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
+	        		editText.setText(customLinearLayout.getCurrentAnnotation());
+	        	}else if (view instanceof CustomHorizontalScrollView){
+	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
+	        		editText.setText(customHorizontalScrollView.getCurrentAnnotation());
+	        	}else if (view instanceof CustomSpinner){
+	        		CustomSpinner customSpinner = (CustomSpinner) view;
+	        		editText.setText(customSpinner.getCurrentAnnotation());
+	        	}
+				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+				
+				builder.setTitle("Annotation");
+				builder.setMessage("Set the annotation text for the field");
+				builder.setView(editText);
+				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int id) {
+				        	if (view instanceof CustomEditText){
+				        		CustomEditText customEditText = (CustomEditText) view;
+				        		customEditText.setCurrentAnnotation(editText.getText().toString());
+				        	}else if (view instanceof CustomLinearLayout){
+				        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
+				        		customLinearLayout.setCurrentAnnotation(editText.getText().toString());
+				        	}else if (view instanceof CustomHorizontalScrollView){
+				        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
+				        		customHorizontalScrollView.setCurrentAnnotation(editText.getText().toString());
+				        	}else if (view instanceof CustomSpinner){
+				        		CustomSpinner customSpinner = (CustomSpinner) view;
+				        		customSpinner.setCurrentAnnotation(editText.getText().toString());
+				        	}
+				        }
+				    });
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int id) {
+				            // User cancelled the dialog
+				        }
+				    });
+				
+				builder.create().show();
+			}
+		});
+	}
+
+	private void onCertaintyButtonClicked(Button certaintyButton,final View view) {
+		certaintyButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				LinearLayout layout = new LinearLayout(v.getContext());

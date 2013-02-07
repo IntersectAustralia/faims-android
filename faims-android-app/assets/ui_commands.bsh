@@ -64,12 +64,20 @@ setFieldCertainty(String ref, Object value){
     linker.setFieldCertainty(ref, value);
 }
 
+setFieldAnnotation(String ref, Object value){
+    linker.setFieldAnnotation(ref, value);
+}
+
 Object getFieldValue(String ref){
     return linker.getFieldValue(ref);
 }
 
 Object getFieldCertainty(String ref){
     return linker.getFieldCertainty(ref);
+}
+
+Object getFieldAnnotation(String ref){
+    return linker.getFieldAnnotation(ref);
 }
 
 onMapEvent(String ref, String clickCallback, selectCallback) {
