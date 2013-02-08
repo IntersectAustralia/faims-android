@@ -16,14 +16,14 @@ import com.google.gson.JsonObject;
 public class ProjectUtil {
 
 	public static List<Project> getProjects() {
-		File file = new File(Environment.getExternalStorageDirectory() + "/faims/projects");
-		if (!file.isDirectory()) return null;
+		final File dir = new File(Environment.getExternalStorageDirectory() + "/faims/projects");
+		if (!dir.isDirectory()) return null;
 		
-		String[] directories = file.list(new FilenameFilter() {
+		String[] directories = dir.list(new FilenameFilter() {
 
 			@Override
 			public boolean accept(File file, String arg1) {
-				return file.isDirectory();
+				return dir.equals(file) && file.isDirectory();
 			}
 			
 		});
@@ -32,16 +32,16 @@ public class ProjectUtil {
 		ArrayList<Project> list = new ArrayList<Project>();
 		FileInputStream is = null;
 		try {
-			for (String dir : directories) {
+			for (String dirname : directories) {
 				is = new FileInputStream(
-							Environment.getExternalStorageDirectory() + "/faims/projects/" + dir + "/project.settings");
+							Environment.getExternalStorageDirectory() + "/faims/projects/" + dirname + "/project.settings");
 				String config = FileUtil.convertStreamToString(is);
 				if (config == null) {
-					FAIMSLog.log("project " + "/faims/projects/" + dir + "/project.settings" + " settings malformed");
+					FAIMSLog.log("project " + "/faims/projects/" + dirname + "/project.settings" + " settings malformed");
 					continue;
 				}
 				JsonObject object = JsonUtil.deserializeJson(config);
-				Project project = Project.fromJson(dir, object);	
+				Project project = Project.fromJson(dirname, object);	
 				list.add(project);
 			}
 		} catch (IOException e) {
