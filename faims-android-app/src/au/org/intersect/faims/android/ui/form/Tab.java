@@ -109,7 +109,7 @@ public class Tab {
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
 		Button certaintyButton = new Button(this.context);
 		certaintyButton.setBackgroundResource(R.drawable.square_button);
-		int size = (30 * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+		int size = getDpi(30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		certaintyButton.setLayoutParams(layoutParams);
@@ -624,7 +624,8 @@ public class Tab {
 	        		LinearLayout galleryLayout = new LinearLayout(this.context);
 	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 	        		CustomImageView gallery = new CustomImageView(this.context);
-	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+	        		int size = getDpi(400);
+	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(path+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);
 	                gallery.setPadding(10, 10, 10, 10);
@@ -721,6 +722,10 @@ public class Tab {
 				horizontalScrollView.setSelectedImageView(null);
 			}
 		}
+	}
+	
+	private int getDpi(int size) {
+		return (size * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
 	}
 
 }
