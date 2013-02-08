@@ -98,7 +98,7 @@ public class DatabaseManager {
 				st.close();
 			}
 			
-			debugSaveArchEnt(db, uuid);
+			//debugSaveArchEnt(db, uuid);
 			
 			return uuid;
 			
@@ -173,7 +173,7 @@ public class DatabaseManager {
 				st.close();
 			}
 
-			debugSaveRel(db, uuid);
+			//debugSaveRel(db, uuid);
 			
 			return uuid;
 			
@@ -461,6 +461,7 @@ public class DatabaseManager {
 		return true;
 	}
 	
+	/*
 	private void debugSaveArchEnt(jsqlite.Database db, String uuid) throws Exception {
 
 		// Test various queries
@@ -468,6 +469,7 @@ public class DatabaseManager {
 		db.exec("select uuid, valuetimestamp, attributename, freetext, vocabid, measure, certainty from aentvalue left outer join attributekey using (attributeid) where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", createCallback());
 		//db.exec("select attributeid, valuetimestamp from aentvalue where uuid="+uuid+";", cb);
 	}
+	*/
 	
 	private boolean hasRelationshipType(jsqlite.Database db, String rel_type) throws Exception {
 		Stmt st = db.prepare("select count(RelnTypeID) from RelnType where RelnTypeName = ? COLLATE NOCASE;");
@@ -495,6 +497,7 @@ public class DatabaseManager {
 		return true;
 	}
 	
+	/*
 	private void debugSaveRel(jsqlite.Database db, String uuid) throws Exception {
 		Callback cb = new Callback() {
 			@Override
@@ -523,7 +526,7 @@ public class DatabaseManager {
 				"left outer join vocabulary using (attributeid) " +
 				"where RelationshipID = " + uuid + " group by RelationshipID, attributeid having max(RelnValueTimestamp);", cb);
 	}
-	
+	*/
 	
 	private Callback createCallback() {
 		return new Callback() {
