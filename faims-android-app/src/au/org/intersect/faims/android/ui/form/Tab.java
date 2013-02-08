@@ -11,8 +11,8 @@ import org.javarosa.core.model.QuestionDef;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import android.app.AlertDialog;
 import android.app.ActionBar.LayoutParams;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.text.InputType;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -108,7 +109,8 @@ public class Tab {
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
 		Button certaintyButton = new Button(this.context);
 		certaintyButton.setBackgroundResource(R.drawable.square_button);
-		LayoutParams layoutParams = new LayoutParams(30, 30);
+		int size = (30 * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		certaintyButton.setLayoutParams(layoutParams);
 		certaintyButton.setText("C");
