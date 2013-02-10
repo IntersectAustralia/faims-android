@@ -16,8 +16,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.condition.EvaluationContext;
 import org.javarosa.form.api.FormEntryController;
@@ -27,6 +25,9 @@ import org.javarosa.xform.util.XFormUtils;
 
 import android.os.Environment;
 import android.os.StatFs;
+
+import com.ice.tar.TarEntry;
+import com.ice.tar.TarInputStream;
 
 public class FileUtil {
 
@@ -43,14 +44,14 @@ public class FileUtil {
 	public static void untarFromStream(String dir, String filename) throws IOException {
 		FAIMSLog.log();
 		
-		TarArchiveInputStream ts = null;
+		TarInputStream ts = null;
 		try {
-		 ts = new TarArchiveInputStream(
+		 ts = new TarInputStream(
 				 new GZIPInputStream(
 						 new FileInputStream(filename)));
 		 
-	     TarArchiveEntry e;
-	     while((e = ts.getNextTarEntry()) != null) {
+	     TarEntry e;
+	     while((e = ts.getNextEntry()) != null) {
 	    	 if (e.isDirectory()) {
 	    		 makeDirs(dir + "/" + e.getName());
 	    	 } else {
@@ -119,7 +120,7 @@ public class FileUtil {
 		}
 	}
 	
-	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
+	private static void writeTarFile(TarInputStream ts, TarEntry entry, File file) throws IOException {
 		FAIMSLog.log();
 		
 		FileOutputStream os = null;
