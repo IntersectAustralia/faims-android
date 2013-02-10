@@ -14,6 +14,7 @@ import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
 
@@ -51,6 +52,7 @@ public class UploadDatabaseService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.d("FAIMS", "starting upload service");
 		
+		File tempFile = null;
 		try {
 			Bundle extras = intent.getExtras();
 			Project project = (Project) extras.get("project");
@@ -58,14 +60,26 @@ public class UploadDatabaseService extends IntentService {
 			// create temp database to upload
 			DatabaseManager dbmgr = new DatabaseManager(intent.getStringExtra("database"));
 			
-	    	file = File.createTempFile("tempdb_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir));
-	    	dbmgr.dumpDatabaseTo(file);
+			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
+			
+	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
+	    	dbmgr.dumpDatabaseTo(tempFile);
 	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
 	    		return;
 	    	}
 	    	
+	    	// tar file
+	    	file = File.createTempFile("temp_", ".tar.gz", outputDir);
+	    	FileUtil.tarFile(tempFile.getAbsolutePath(), file.getAbsolutePath());
+	    	
+	    	if (uploadStopped) {
+	    		Log.d("FAIMS", "cancelled upload");
+	    		return;
+	    	}
+	    	
+	    	// upload database
 			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(project, file);
 			
 			if (uploadStopped) {
@@ -84,6 +98,8 @@ public class UploadDatabaseService extends IntentService {
 			
 		} catch (Exception e) {
 			Log.e("FAIMS", "upload service failed", e);
+		} finally {
+			if (tempFile != null) tempFile.delete();
 		}
 	}
 

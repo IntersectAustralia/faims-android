@@ -173,7 +173,7 @@ public class FAIMSClient {
 				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
 			}
 			
-			FileUtil.untarFromStream(Environment.getExternalStorageDirectory() + dir, file.getAbsolutePath());
+			FileUtil.untarFile(Environment.getExternalStorageDirectory() + dir, file.getAbsolutePath());
 			
 			file.delete();
 			

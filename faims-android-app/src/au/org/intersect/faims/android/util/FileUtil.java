@@ -14,8 +14,13 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.condition.EvaluationContext;
 import org.javarosa.form.api.FormEntryController;
@@ -25,9 +30,7 @@ import org.javarosa.xform.util.XFormUtils;
 
 import android.os.Environment;
 import android.os.StatFs;
-
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
+import android.util.Log;
 
 public class FileUtil {
 
@@ -41,17 +44,69 @@ public class FileUtil {
 		FAIMSLog.log(dir + " is present " + String.valueOf(file.exists()));
 	}
 	
-	public static void untarFromStream(String dir, String filename) throws IOException {
+	public static void tarFile(String dir, String filename) throws IOException, FileNotFoundException {
+		Log.d("FAIMS", "tar file " + dir + " to " + filename);
+		TarArchiveOutputStream ts = null;
+		try {
+		 ts = new TarArchiveOutputStream(
+				 new GZIPOutputStream(
+						 new FileOutputStream(filename)));
+		 
+		 tarDirToStream(dir, new File(dir).getName(), ts);
+		}
+		finally {
+			if (ts != null) ts.close();
+		}
+	}
+	
+	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts) throws IOException, FileNotFoundException {
+		Log.d("FAIMS", "add dir " + dir + "  to tarname " + tarname);
+		File d = new File(dir);
+		if (d.isDirectory()) {
+			String[] fileList = d.list();
+			
+			for (int i = 0; i < fileList.length; i++) {
+				File f = new File(d, fileList[i]);
+				if (f.isDirectory()) {
+					tarDirToStream(f.getPath(), tarname + "/" + f.getName(), ts);
+				} else {
+					tarFileToStream(f.getPath(), tarname + "/" + f.getName(), ts);
+				}
+			}
+		} else {
+			tarFileToStream(d.getPath(), tarname, ts);
+		}
+	}
+	
+	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
+		Log.d("FAIMS", "add file " + filename + "  to tarname " + tarname);
+		FileInputStream fs = null;
+		try {
+			File f = new File(filename);
+			fs = new FileInputStream(f);
+			TarArchiveEntry te = new TarArchiveEntry(f);
+			te.setName(tarname);
+			te.setSize(f.length());
+			ts.putArchiveEntry(te);
+			IOUtils.copy(fs, ts);
+			ts.closeArchiveEntry();
+		}
+		finally {
+			if (fs != null) fs.close();
+		}
+	}
+	
+	public static void untarFile(String dir, String filename) throws IOException {
 		FAIMSLog.log();
 		
-		TarInputStream ts = null;
+		TarArchiveInputStream ts = null;
 		try {
-		 ts = new TarInputStream(
+		 ts = new TarArchiveInputStream(
 				 new GZIPInputStream(
 						 new FileInputStream(filename)));
 		 
-	     TarEntry e;
-	     while((e = ts.getNextEntry()) != null) {
+	     TarArchiveEntry e;
+	     while((e = ts.getNextTarEntry()) != null) {
 	    	 if (e.isDirectory()) {
 	    		 makeDirs(dir + "/" + e.getName());
 	    	 } else {
@@ -84,13 +139,7 @@ public class FileUtil {
 		FileOutputStream os = null;
 		try {
 			os = new FileOutputStream(filename);
-		        
-			byte[] buffer = new byte[1024];
-	        int bufferLength = 0; //used to store a temporary size of the buffer
-	        
-	        while ( (bufferLength = input.read(buffer)) > 0) {
-	            os.write(buffer, 0, bufferLength);
-	        }
+			IOUtils.copy(input, os);
 		} finally {
 			if (os != null) os.close();
 		}
@@ -120,7 +169,7 @@ public class FileUtil {
 		}
 	}
 	
-	private static void writeTarFile(TarInputStream ts, TarEntry entry, File file) throws IOException {
+	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
 		FAIMSLog.log();
 		
 		FileOutputStream os = null;
