@@ -3,6 +3,8 @@ package au.org.intersect.faims.android.ui.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,12 +15,15 @@ import android.os.Message;
 import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.TestFAIMSClient;
+import au.org.intersect.faims.android.net.TestServerDiscovery;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
 import au.org.intersect.faims.android.services.DownloadProjectService;
-import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
-import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
+import au.org.intersect.faims.android.services.TestDownloadProjectService;
+import au.org.intersect.faims.android.util.ProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
@@ -337,16 +342,23 @@ public class FetchProjectsActivityTest {
 		// download project
 		activity.downloadProjectArchive();
 		
-		// download service start
+		// download service
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedService();
 		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
 		
 		assertEquals("Download service launched ok", DownloadProjectService.class.getName().toString(),shadowIntent.getComponent().getClassName());
 		
+		// start service
+		TestDownloadProjectService downloadService = new TestDownloadProjectService();
+		downloadService.onCreate();
+		downloadService.setFaimsClient(activity.faimsClient);	// manual roboguice injection
+
+		downloadService.onHandleIntent(startedIntent);
+		
 		// assert file has been downloaded
-		//List<Project> projects = ProjectUtil.getProjects();
-		//assertEquals("Project downloaded", "Project 0", projects.get(0).name);
+		List<Project> projects = ProjectUtil.getProjects();
+		assertEquals("Project downloaded", "Project 0", projects.get(0).name);
 	}
 	
 	@Test
@@ -366,7 +378,6 @@ public class FetchProjectsActivityTest {
 		
 		activity.fetchProjectsList();
 		
-		// TODO pick project form dialog
 		activity.selectedProject = activity.projects.get(0);
 		
 		activity.downloadProjectArchive();

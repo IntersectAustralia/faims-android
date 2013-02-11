@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.test.helper;
+package au.org.intersect.faims.android.net;
 
 import android.app.Application;
 import au.org.intersect.faims.android.net.ServerDiscovery;

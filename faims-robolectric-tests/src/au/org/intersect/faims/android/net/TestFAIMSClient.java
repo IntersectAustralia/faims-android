@@ -1,10 +1,11 @@
-package au.org.intersect.faims.android.test.helper;
+package au.org.intersect.faims.android.net;
 
 import java.util.LinkedList;
 
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.TestProjectUtil;
 
 import com.google.inject.Provider;
 
@@ -24,7 +25,7 @@ public class TestFAIMSClient extends FAIMSClient {
 
 	@Override
 	public FAIMSClientResultCode downloadProject(Project project) {
-		
+		TestProjectUtil.createProjectFrom(project.name, "Common");
 		return downloadCode;
 	}
 	

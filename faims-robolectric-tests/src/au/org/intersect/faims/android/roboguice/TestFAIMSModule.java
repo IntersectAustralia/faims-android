@@ -6,8 +6,8 @@ import roboguice.inject.RoboInjector;
 import android.app.Application;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.ServerDiscovery;
-import au.org.intersect.faims.android.test.helper.TestFAIMSClient;
-import au.org.intersect.faims.android.test.helper.TestServerDiscovery;
+import au.org.intersect.faims.android.net.TestFAIMSClient;
+import au.org.intersect.faims.android.net.TestServerDiscovery;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;

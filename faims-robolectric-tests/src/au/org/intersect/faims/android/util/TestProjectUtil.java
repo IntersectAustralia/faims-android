@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.test.helper;
+package au.org.intersect.faims.android.util;
 
 import java.io.BufferedWriter;
 import java.io.File;

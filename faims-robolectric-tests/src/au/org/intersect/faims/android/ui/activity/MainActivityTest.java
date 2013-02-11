@@ -10,7 +10,7 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
-import au.org.intersect.faims.android.test.helper.TestProjectUtil;
+import au.org.intersect.faims.android.util.TestProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;

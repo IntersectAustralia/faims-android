@@ -1,0 +1,12 @@
+
+tab1_field1 = "tabgroup1/tab1/field1";
+tab1_field2 = "tabgroup1/tab1/field2";
+
+tab1_copy1     = "tabgroup1/tab1/copy1";
+
+
+// Tab Group 1
+
+// Tab 1 events
+onEvent( tab1_copy1,      "click", "setFieldValue(tab1_field2,getFieldValue(tab1_field1))" );
+
