@@ -76,7 +76,7 @@
         <term pictureURL="pictures/cugl26185a.jpg">Picture B</term>
         <term pictureURL="pictures/cugl26193.jpg">Picture C</term>
         <term pictureURL="pictures/cugl26197a.jpg">Picture D</term>
-        <term pictureURL="pictures/cugl26206.jpg">Picture E</term>
+        <term pictureURL="pictures/cugl26206a.jpg">Picture E</term>
       </lookup>
     </property>
     <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">
