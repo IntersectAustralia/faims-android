@@ -66,7 +66,7 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode uploadDatabase(Project project, File file) {
-		return uploadFile(file, "/android/project/" + project.id + "/upload_db");
+		return uploadFile(file, "/android/project/" + project.key + "/upload_db");
 	}
 	
 	public FAIMSClientResultCode uploadFile(File file, String path) {
@@ -140,11 +140,11 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode downloadProject(Project project) {
-		return downloadFile("/android/project/" + project.id + "/archive", "/android/project/" + project.id + "/download", BASE_DIR);
+		return downloadFile("/android/project/" + project.key + "/archive", "/android/project/" + project.key + "/download", BASE_DIR);
 	}
 	
 	public FAIMSClientResultCode downloadDatabase(Project project) {
-		return downloadFile("/android/project/" + project.id + "/archive_db", "/android/project/" + project.id + "/download_db", BASE_DIR + project.dir);
+		return downloadFile("/android/project/" + project.key + "/archive_db", "/android/project/" + project.key + "/download_db", BASE_DIR + project.dir);
 	}
 	
 	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
