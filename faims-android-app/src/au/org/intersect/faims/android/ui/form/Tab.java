@@ -677,12 +677,18 @@ public class Tab {
 			if (v instanceof CustomEditText) {
 				CustomEditText text = (CustomEditText) v;
 				text.setText("");
+				text.setCertainty(1);
+				text.setAnnotation("");
+				text.setCurrentCertainty(1);
+				text.setCurrentAnnotation("");
 				valueReference.put(text.getRef(), "");
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker date = (CustomDatePicker) v;
 				Time now = new Time();
 				now.setToNow();
 				date.updateDate(now.year, now.month, now.monthDay);
+				date.setCertainty(1);
+				date.setCurrentCertainty(1);
 				valueReference.put(date.getRef(), DateUtil.getDate(date));
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker time = (CustomTimePicker) v;
@@ -690,9 +696,15 @@ public class Tab {
 				now.setToNow();
 				time.setCurrentHour(now.hour);
 				time.setCurrentMinute(now.minute);
+				time.setCertainty(1);
+				time.setCurrentCertainty(1);
 				valueReference.put(time.getRef(), DateUtil.getTime(time));
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) v;
+				layout.setCertainty(1);
+				layout.setAnnotation("");
+				layout.setCurrentCertainty(1);
+				layout.setCurrentAnnotation("");
 				View child0 = layout.getChildAt(0);
 				
 				if (child0 instanceof RadioGroup){
@@ -712,10 +724,18 @@ public class Tab {
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
 				spinner.setSelection(0);
+				spinner.setCertainty(1);
+				spinner.setAnnotation("");
+				spinner.setCurrentCertainty(1);
+				spinner.setCurrentAnnotation("");
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
 				valueReference.put(spinner.getRef(), pair.getValue());
 			} else if(v instanceof CustomHorizontalScrollView){
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				horizontalScrollView.setCertainty(1);
+				horizontalScrollView.setAnnotation("");
+				horizontalScrollView.setCurrentCertainty(1);
+				horizontalScrollView.setCurrentAnnotation("");
 				for(CustomImageView customImageView : horizontalScrollView.getImageViews()){
 					customImageView.setBackgroundColor(Color.RED);
 				}
