@@ -106,6 +106,8 @@ public class Tab {
 		String attributeType = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
 		String certainty = input.getQuestion().getAdditionalAttribute(null, "faims_certainty");
 		String annotation = input.getQuestion().getAdditionalAttribute(null, "faims_annotation");
+		String readOnly = input.getQuestion().getAdditionalAttribute(null, "faims_read_only");
+		boolean isReadOnly = (readOnly != null && readOnly.equals("true"));
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
 		Button certaintyButton = new Button(this.context);
 		certaintyButton.setBackgroundResource(R.drawable.square_button);
@@ -146,6 +148,9 @@ public class Tab {
                 // set input type as number
                     case Constants.DATATYPE_INTEGER:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
+                    	if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                     	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -157,6 +162,9 @@ public class Tab {
                     case Constants.DATATYPE_DECIMAL:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
+                        if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                         onCertaintyButtonClicked(certaintyButton, text);
@@ -167,6 +175,9 @@ public class Tab {
                     case Constants.DATATYPE_LONG:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
+                        if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         onCertaintyButtonClicked(certaintyButton, text);
@@ -179,6 +190,9 @@ public class Tab {
                     	Time now = new Time();
         				now.setToNow();
         				date.updateDate(now.year, now.month, now.monthDay);
+        				if (isReadOnly) {
+                    		date.setEnabled(false);
+                    	}
                     	view = date;
                     	onCertaintyButtonClicked(certaintyButton, date);
                     	onAnnotationButtonClicked(annotationButton, date);
@@ -188,7 +202,10 @@ public class Tab {
                     // get the text area
                     case Constants.DATATYPE_TEXT:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                        view = text;
+                    	if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
+                    	view = text;
                         ((TextView) view).setLines(5);
                         onCertaintyButtonClicked(certaintyButton, text);
                         onAnnotationButtonClicked(annotationButton, text);
@@ -203,6 +220,9 @@ public class Tab {
         				time.setCurrentHour(timeNow.hour);
         				time.setCurrentMinute(timeNow.minute);
         				view = time;
+        				if (isReadOnly) {
+                    		time.setEnabled(false);
+                    	}
         				onCertaintyButtonClicked(certaintyButton, time);
         				onAnnotationButtonClicked(annotationButton, time);
         				linearLayout.addView(view);
@@ -230,6 +250,9 @@ public class Tab {
                     	} else {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;
+                            if (isReadOnly) {
+                        		text.setEnabled(false);
+                        	}
                             valueReference.put(path, "");
                             onCertaintyButtonClicked(certaintyButton, text);
                             linearLayout.addView(view);

@@ -45,10 +45,7 @@
     <property type="integer" name="value" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="date" name="date" minCardinality="1" maxCardinality="1">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="time" name="time" minCardinality="1" maxCardinality="1">
+    <property type="timestamp" name="timestamp" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
     <property type="checklist" name="type" minCardinality="1" maxCardinality="1">

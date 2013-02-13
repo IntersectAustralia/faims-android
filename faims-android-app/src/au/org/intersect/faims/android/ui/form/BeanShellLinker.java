@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -1163,6 +1164,12 @@ public class BeanShellLinker {
 			Log.e("FAIMS","Exception getting field annotation",e);
 			return "";
 		}
+	}
+
+	public String getCurrentTime(){
+		Time timeNow = new Time();
+        timeNow.setToNow();
+        return timeNow.format("%Y-%m-%d %H:%M:%S");
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {

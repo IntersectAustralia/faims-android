@@ -80,6 +80,10 @@ Object getFieldAnnotation(String ref){
     return linker.getFieldAnnotation(ref);
 }
 
+String getCurrentTime(){
+    return linker.getCurrentTime();
+}
+
 onMapEvent(String ref, String clickCallback, selectCallback) {
 	linker.bindMapEvent(ref, clickCallback, selectCallback);
 }
