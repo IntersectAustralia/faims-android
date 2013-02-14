@@ -28,7 +28,7 @@ public class Project implements Serializable {
 	public static Project fromJson(String dir, JsonObject object) {
 		Project p = new Project(dir);
 		if (object.has("name"))	p.name = object.get("name").getAsString();
-		if (object.has("id")) p.key = object.get("id").getAsString();
+		if (object.has("key")) p.key = object.get("key").getAsString();
 		return p;
 	}
 	

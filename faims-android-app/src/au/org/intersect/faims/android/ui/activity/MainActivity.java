@@ -14,6 +14,7 @@ import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
@@ -24,7 +25,7 @@ public class MainActivity extends RoboActivity {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
-	private ArrayAdapter<String> projectListAdapter;
+	private ArrayAdapter<NameValuePair> projectListAdapter;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +39,17 @@ public class MainActivity extends RoboActivity {
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
         
-        projectListAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
+        projectListAdapter = new ArrayAdapter<NameValuePair>(this,android.R.layout.simple_list_item_1);
         projectList.setAdapter(projectListAdapter);
         
         projectList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         	
         	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-        		final String selectedItem = projectListAdapter.getItem(arg2).toString();
+        		final String selectedItem = projectListAdapter.getItem(arg2).getValue();
         		
         		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("name", selectedItem);
+				showProjectsIntent.putExtra("key", selectedItem);
 				MainActivity.this.startActivityForResult(showProjectsIntent, 1);
         	}
         });
@@ -113,7 +114,7 @@ public class MainActivity extends RoboActivity {
 		List<Project> projects = ProjectUtil.getProjects();
 		if (projects != null) {
 			for (Project p : projects) {
-				projectListAdapter.add(p.name);
+				projectListAdapter.add(new NameValuePair(p.name,p.key));
 			}
 		}
 	}

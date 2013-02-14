@@ -71,7 +71,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		
-		project = ProjectUtil.getProject(data.getStringExtra("name"));
+		project = ProjectUtil.getProject(data.getStringExtra("key"));
 		setTitle(project.name);
 		
 		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");

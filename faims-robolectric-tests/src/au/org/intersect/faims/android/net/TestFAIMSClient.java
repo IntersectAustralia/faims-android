@@ -25,7 +25,7 @@ public class TestFAIMSClient extends FAIMSClient {
 
 	@Override
 	public FAIMSClientResultCode downloadProject(Project project) {
-		TestProjectUtil.createProjectFrom(project.name, "Common");
+		TestProjectUtil.createProjectFrom(project.name, "Common", project.key);
 		return downloadCode;
 	}
 	

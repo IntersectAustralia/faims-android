@@ -14,7 +14,7 @@ import com.google.gson.JsonObject;
 
 public class TestProjectUtil {
 
-	public static void createProject(String name) {
+	public static void createProject(String name, String key) {
 		try {
 			String dir = Environment.getExternalStorageDirectory() + "/faims/projects/" + name.replaceAll("\\s+", "_");
 			File file = new File(dir);
@@ -28,6 +28,7 @@ public class TestProjectUtil {
 			
 			JsonObject object = new JsonObject();
 	    	object.addProperty("name", name);
+	    	object.addProperty("key", key);
 	    	
 	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
 	    	writer.write(object.toString());
@@ -38,7 +39,7 @@ public class TestProjectUtil {
 		}
 	}
 	
-	public static void createProjectFrom(String name, String dirname) {
+	public static void createProjectFrom(String name, String dirname, String key) {
 		try {
 			String dir = Environment.getExternalStorageDirectory() + "/faims/projects/" + name.replaceAll("\\s+", "_");
 			File file = new File(dir);
@@ -54,6 +55,7 @@ public class TestProjectUtil {
 			
 			JsonObject object = new JsonObject();
 	    	object.addProperty("name", name);
+	    	object.addProperty("key", key);
 	    	
 	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
 	    	writer.write(object.toString());

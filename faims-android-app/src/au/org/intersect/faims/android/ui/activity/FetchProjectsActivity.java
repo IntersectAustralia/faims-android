@@ -209,7 +209,7 @@ public class FetchProjectsActivity extends RoboActivity {
 						// start show project activity
 						
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
-						showProjectsIntent.putExtra("name", selectedProject.name);
+						showProjectsIntent.putExtra("key", selectedProject.key);
 						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {

@@ -15,4 +15,10 @@ public class FAIMSLogicTestBase {
 		
 	}
 	
+	protected String getNewProjectKey(String key){
+		
+		return key + "-" + System.currentTimeMillis();
+		
+	}
+	
 }

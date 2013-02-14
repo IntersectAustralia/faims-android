@@ -19,24 +19,26 @@ import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 
 	private String projectBaseName = "FAIMS114";
+	private String projectBaseKey = "FAIMS114_Key";
 	private String directoryName = "FAIMS114_Tests";
 	
 	@Test
 	public void showProjectTest(){
 
 		String projectName = getNewProjectName(projectBaseName);
+		String projectKey = getNewProjectKey(projectBaseKey);
 				
 		ShowProjectActivity activity = new ShowProjectActivity();
 		
 		// We need name + directory in an Intent
 		
 		Intent intent = new Intent();
-		intent.putExtra("name", projectName);
+		intent.putExtra("key", projectKey);
 		activity.setIntent(intent);
 		
 		// We need the UI xml and logic bsh files
 		
-		TestProjectUtil.createProjectFrom(projectName, this.directoryName);
+		TestProjectUtil.createProjectFrom(projectName, this.directoryName, projectKey);
 		
 		// Create the activity
 		

@@ -58,11 +58,11 @@ public class ProjectUtil {
 	}
 
 	public static Project getProject(
-			String projectName) {
+			String key) {
 		List<Project> projects = getProjects();
 		if (projects != null) {
 			for (Project p : projects) {
-				if (p.name.equals(projectName)) return p;
+				if (p.key.equals(key)) return p;
 			}
 		}
 		return null;
