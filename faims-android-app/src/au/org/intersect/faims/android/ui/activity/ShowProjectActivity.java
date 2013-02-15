@@ -155,7 +155,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager);
+		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
 		linker.setBaseDir(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
 		linker.sourceFromAssets("ui_commands.bsh");
 		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_logic.bsh"));

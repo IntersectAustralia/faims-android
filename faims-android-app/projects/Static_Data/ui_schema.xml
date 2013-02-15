@@ -1,0 +1,85 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <user>
+              <tab1>
+                  <userlist></userlist>
+                  <skip></skip>
+              </tab1>
+          </user>
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <id></id>
+                  <season></season>
+                  <description></description>
+                  <permit_no></permit_no>
+                  <permit_holder></permit_holder>
+                  <contact_address></contact_address>
+                  <participants></participants>
+              </tab1>
+          </tabgroup1>
+        </faims>
+      </instance>
+
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="userlist" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="skip">
+            <label>Skip</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup1">
+      <label>Static Data Example</label>
+      <group ref="tab1">
+        <label>Static Data</label>
+        <input ref="name" faims_read_only="true">
+          <label>Project Name:</label>
+        </input>
+        <input ref="id" faims_read_only="true">
+          <label>Project Id:</label>
+        </input>
+        <input ref="season" faims_read_only="true">
+          <label>Project Season:</label>
+        </input>
+        <input ref="description" faims_read_only="true">
+          <label>Project Description:</label>
+        </input>
+        <input ref="permit_no" faims_read_only="true">
+          <label>Permit No:</label>
+        </input>
+        <input ref="permit_holder" faims_read_only="true">
+          <label>Permit Holder:</label>
+        </input>
+        <input ref="contact_address" faims_read_only="true">
+          <label>Contact and Address:</label>
+        </input>
+        <input ref="participants" faims_read_only="true">
+          <label>Participants:</label>
+        </input>
+      </group>
+    </group>
+  </h:body>
+</h:html>
