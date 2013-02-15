@@ -18,16 +18,18 @@ import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
+import com.google.inject.Singleton;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.utils.Utils;
 import com.nutiteq.utils.WkbRead;
 
+@Singleton
 public class DatabaseManager {
 
 	private String dbname;
 	private String userId;
 
-	public DatabaseManager(String filename) {
+	public void init(String filename) {
 		this.dbname = filename;
 	}
 
@@ -41,157 +43,159 @@ public class DatabaseManager {
 
 	public String saveArchEnt(String entity_id, String entity_type,
 			String geo_data, List<EntityAttribute> attributes) {
-		
-		FAIMSLog.log("entity_id:" + entity_id);
-		FAIMSLog.log("entity_type:" + entity_type);
-		
-		for (EntityAttribute attribute : attributes) {
-			FAIMSLog.log(attribute.toString());
-		}
-		
-		jsqlite.Database db = null;
-		try {
+		synchronized(DatabaseManager.class) {
+			FAIMSLog.log("entity_id:" + entity_id);
+			FAIMSLog.log("entity_type:" + entity_type);
 			
-			db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			
-			if (!validArchEnt(db, entity_id, entity_type, geo_data, attributes)) {
-				FAIMSLog.log("not valid arch entity");
-				return null;
-			}
-			
-			String uuid;
-			Stmt st;
-			
-			if (entity_id == null) {
-				
-				// create new entity
-				uuid = generateUUID();
-				
-			} else {
-				
-				// update entity
-				uuid = entity_id;
-				
-			}
-			
-			String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
-					   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, entity_type);
-			st.bind(4, geo_data);
-			st.step();
-			st.close();
-			
-			// save entity attributes
 			for (EntityAttribute attribute : attributes) {
-				query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-							   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
-							   "FROM AttributeKey " + 
-							   "WHERE attributeName = ? COLLATE NOCASE;";
+				FAIMSLog.log(attribute.toString());
+			}
+			
+			jsqlite.Database db = null;
+			try {
+				
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				if (!validArchEnt(db, entity_id, entity_type, geo_data, attributes)) {
+					FAIMSLog.log("not valid arch entity");
+					return null;
+				}
+				
+				String uuid;
+				Stmt st;
+				
+				if (entity_id == null) {
+					
+					// create new entity
+					uuid = generateUUID();
+					
+				} else {
+					
+					// update entity
+					uuid = entity_id;
+					
+				}
+				
+				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
+						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
 				st = db.prepare(query);
 				st.bind(1, uuid);
-				st.bind(2, attribute.getVocab());
-				st.bind(3, attribute.getMeasure());
-				st.bind(4, attribute.getText());
-				st.bind(5, attribute.getCertainty());
-				st.bind(6, attribute.getName());
+				st.bind(2, userId);
+				st.bind(3, entity_type);
+				st.bind(4, geo_data);
 				st.step();
 				st.close();
-			}
-			
-			//debugSaveArchEnt(db, uuid);
-			
-			return uuid;
-			
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-		} finally {
-			try {
-				if (db != null) db.close();
+				
+				// save entity attributes
+				for (EntityAttribute attribute : attributes) {
+					query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
+								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
+								   "FROM AttributeKey " + 
+								   "WHERE attributeName = ? COLLATE NOCASE;";
+					st = db.prepare(query);
+					st.bind(1, uuid);
+					st.bind(2, attribute.getVocab());
+					st.bind(3, attribute.getMeasure());
+					st.bind(4, attribute.getText());
+					st.bind(5, attribute.getCertainty());
+					st.bind(6, attribute.getName());
+					st.step();
+					st.close();
+				}
+				
+				//debugSaveArchEnt(db, uuid);
+				
+				return uuid;
+				
 			} catch (Exception e) {
 				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
 			}
+			
+			return null;
 		}
-		
-		return null;
 	}
 	
 	public String saveRel(String rel_id, String rel_type,
 			String geo_data, List<RelationshipAttribute> attributes) {
-		
-		FAIMSLog.log("rel_id:" + rel_id);
-		FAIMSLog.log("rel_type:" + rel_type);
-		
-		for (RelationshipAttribute attribute : attributes) {
-			FAIMSLog.log(attribute.toString());
-		}
-		
-		jsqlite.Database db = null;
-		try {
+		synchronized(DatabaseManager.class) {
+			FAIMSLog.log("rel_id:" + rel_id);
+			FAIMSLog.log("rel_type:" + rel_type);
 			
-			db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			
-			if (!validRel(db, rel_id, rel_type, geo_data, attributes)) {
-				FAIMSLog.log("not valid rel");
-				return null;
-			}
-			
-			String uuid;
-			Stmt st;
-			
-			if (rel_id == null) {
-				// create new relationship
-				uuid = generateUUID();
-				
-			} else {
-				
-				uuid = rel_id;
-			}
-			
-			String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
-					   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, rel_type);
-			st.bind(4, geo_data);
-			st.step();
-			st.close();
-			
-			// save relationship attributes
 			for (RelationshipAttribute attribute : attributes) {
-				query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-							   "SELECT cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
-							   "FROM AttributeKey " + 
-							   "WHERE attributeName = ? COLLATE NOCASE;";
+				FAIMSLog.log(attribute.toString());
+			}
+			
+			jsqlite.Database db = null;
+			try {
+				
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				if (!validRel(db, rel_id, rel_type, geo_data, attributes)) {
+					FAIMSLog.log("not valid rel");
+					return null;
+				}
+				
+				String uuid;
+				Stmt st;
+				
+				if (rel_id == null) {
+					// create new relationship
+					uuid = generateUUID();
+					
+				} else {
+					
+					uuid = rel_id;
+				}
+				
+				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
+						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
 				st = db.prepare(query);
 				st.bind(1, uuid);
-				st.bind(2, attribute.getVocab());
-				st.bind(3, attribute.getText());
-				st.bind(4, attribute.getName());
+				st.bind(2, userId);
+				st.bind(3, rel_type);
+				st.bind(4, geo_data);
 				st.step();
 				st.close();
-			}
-
-			//debugSaveRel(db, uuid);
-			
-			return uuid;
-			
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-		} finally {
-			try {
-				if (db != null) db.close();
+				
+				// save relationship attributes
+				for (RelationshipAttribute attribute : attributes) {
+					query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
+								   "SELECT cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
+								   "FROM AttributeKey " + 
+								   "WHERE attributeName = ? COLLATE NOCASE;";
+					st = db.prepare(query);
+					st.bind(1, uuid);
+					st.bind(2, attribute.getVocab());
+					st.bind(3, attribute.getText());
+					st.bind(4, attribute.getName());
+					st.step();
+					st.close();
+				}
+	
+				//debugSaveRel(db, uuid);
+				
+				return uuid;
+				
 			} catch (Exception e) {
 				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
 			}
+			
+			return null;
 		}
-		
-		return null;
 	}
 	
 	private boolean validArchEnt(jsqlite.Database db, String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) throws Exception {
@@ -250,193 +254,199 @@ public class DatabaseManager {
 	}
 	
 	public boolean addReln(String entity_id, String rel_id, String verb) {
-		FAIMSLog.log("entity_id:" + entity_id);
-		FAIMSLog.log("rel_id:" + rel_id);
-		FAIMSLog.log("verb:" + verb);
-		
-		jsqlite.Database db = null;
-		try {
+		synchronized(DatabaseManager.class) {
+			FAIMSLog.log("entity_id:" + entity_id);
+			FAIMSLog.log("rel_id:" + rel_id);
+			FAIMSLog.log("verb:" + verb);
 			
-			db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			
-			if (!hasEntity(db, entity_id) || !hasRelationship(db, rel_id)) {
-				return false;
-			}
-			
-			// create new entity relationship
-			String query = "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
-						   "VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
-			Stmt st = db.prepare(query);
-			st.bind(1, entity_id);
-			st.bind(2, rel_id);
-			st.bind(3, verb);
-			st.step();
-			st.close();
-			
-			FAIMSLog.log("test");
-			
-			debugAddReln(db, entity_id, rel_id);
-			
-			return true;
-			
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-		} finally {
+			jsqlite.Database db = null;
 			try {
-				if (db != null) db.close();
+				
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				if (!hasEntity(db, entity_id) || !hasRelationship(db, rel_id)) {
+					return false;
+				}
+				
+				// create new entity relationship
+				String query = "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
+							   "VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
+				Stmt st = db.prepare(query);
+				st.bind(1, entity_id);
+				st.bind(2, rel_id);
+				st.bind(3, verb);
+				st.step();
+				st.close();
+				
+				FAIMSLog.log("test");
+				
+				debugAddReln(db, entity_id, rel_id);
+				
+				return true;
+				
 			} catch (Exception e) {
 				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
 			}
+			
+			return false;
 		}
-		
-		return false;
 	}
 
 	public Object fetchArchEnt(String id){
-		
-		try {
-			
-			jsqlite.Database db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			if (!hasEntity(db, id)) {
-				return null;
-			}
-
-			String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
-			Stmt stmt = db.prepare(query);
-			stmt.bind(1, id);
-			Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-			String type = null;
-			while(stmt.step()){
-				type = stmt.column_string(6);
-				EntityAttribute archAttribute = new EntityAttribute();
-				archAttribute.setName(stmt.column_string(1));
-				archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
-				archAttribute.setMeasure(Double.toString(stmt.column_double(3)));
-				archAttribute.setText(stmt.column_string(4));
-				archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
-				attributes.add(archAttribute);
-			}
-			
-			// get vector geometry
-			stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
-			stmt.bind(1, id);
-			List<Geometry> geomList = new ArrayList<Geometry>();
-			if(stmt.step()){
-				Geometry[] g1 = WkbRead.readWkb(
-	                    new ByteArrayInputStream(Utils
-	                            .hexStringToByteArray(stmt.column_string(1))), null);
-				if (g1 != null) {
-		            for (int i = 0; i < g1.length; i++) {
-		                geomList.add(GeometryUtil.fromGeometry(g1[i]));
-		            }
+		synchronized(DatabaseManager.class) {
+			try {
+				
+				jsqlite.Database db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				if (!hasEntity(db, id)) {
+					return null;
 				}
+	
+				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
+				Stmt stmt = db.prepare(query);
+				stmt.bind(1, id);
+				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+				String type = null;
+				while(stmt.step()){
+					type = stmt.column_string(6);
+					EntityAttribute archAttribute = new EntityAttribute();
+					archAttribute.setName(stmt.column_string(1));
+					archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
+					archAttribute.setMeasure(Double.toString(stmt.column_double(3)));
+					archAttribute.setText(stmt.column_string(4));
+					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
+					attributes.add(archAttribute);
+				}
+				
+				// get vector geometry
+				stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
+				stmt.bind(1, id);
+				List<Geometry> geomList = new ArrayList<Geometry>();
+				if(stmt.step()){
+					Geometry[] g1 = WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(1))), null);
+					if (g1 != null) {
+			            for (int i = 0; i < g1.length; i++) {
+			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+			            }
+					}
+				}
+	
+				ArchEntity archEntity = new ArchEntity(type, attributes, geomList);
+				
+				db.close();
+	
+				return archEntity;
+			} catch (Exception e) {
+				FAIMSLog.log(e);
 			}
-
-			ArchEntity archEntity = new ArchEntity(type, attributes, geomList);
-			
-			db.close();
-
-			return archEntity;
-		} catch (Exception e) {
-			FAIMSLog.log(e);
+			return null;
 		}
-		return null;
 	}
 	
 	public Object fetchRel(String id){
-		
-		try {
-			jsqlite.Database db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			
-			if (!hasRelationship(db, id)) {
-				return null;
-			}
-			
-			String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
-			Stmt stmt = db.prepare(query);
-			stmt.bind(1, id);
-			Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-			String type = null;
-			while(stmt.step()){
-				type = stmt.column_string(4);
-				RelationshipAttribute relAttribute = new RelationshipAttribute();
-				relAttribute.setName(stmt.column_string(1));
-				relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
-				relAttribute.setText(stmt.column_string(3));
-				attributes.add(relAttribute);
-			}
-			
-			// get vector geometry
-			stmt = db.prepare("SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN ( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);");
-			stmt.bind(1, id);
-			List<Geometry> geomList = new ArrayList<Geometry>();
-			if(stmt.step()){
-				Geometry[] g1 = WkbRead.readWkb(
-	                    new ByteArrayInputStream(Utils
-	                            .hexStringToByteArray(stmt.column_string(1))), null);
-				if (g1 != null) {
-		            for (int i = 0; i < g1.length; i++) {
-		                geomList.add(GeometryUtil.fromGeometry(g1[i]));
-		            }
+		synchronized(DatabaseManager.class) {
+			try {
+				jsqlite.Database db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				if (!hasRelationship(db, id)) {
+					return null;
 				}
+				
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
+				Stmt stmt = db.prepare(query);
+				stmt.bind(1, id);
+				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
+				String type = null;
+				while(stmt.step()){
+					type = stmt.column_string(4);
+					RelationshipAttribute relAttribute = new RelationshipAttribute();
+					relAttribute.setName(stmt.column_string(1));
+					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
+					relAttribute.setText(stmt.column_string(3));
+					attributes.add(relAttribute);
+				}
+				
+				// get vector geometry
+				stmt = db.prepare("SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN ( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);");
+				stmt.bind(1, id);
+				List<Geometry> geomList = new ArrayList<Geometry>();
+				if(stmt.step()){
+					Geometry[] g1 = WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(1))), null);
+					if (g1 != null) {
+			            for (int i = 0; i < g1.length; i++) {
+			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+			            }
+					}
+				}
+				
+				Relationship relationship = new Relationship(type, attributes, geomList);
+				
+				db.close();
+	
+				return relationship;
+			} catch (Exception e) {
+				FAIMSLog.log(e);
 			}
-			
-			Relationship relationship = new Relationship(type, attributes, geomList);
-			
-			db.close();
-
-			return relationship;
-		} catch (Exception e) {
-			FAIMSLog.log(e);
+			return null;
 		}
-		return null;
 	}
 
 	public Object fetchOne(String query){
-		
-		try {
-			jsqlite.Database db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			Stmt stmt = db.prepare(query);
-			Collection<String> results = new ArrayList<String>();
-			if(stmt.step()){
-				for(int i = 0; i < stmt.column_count(); i++){
-					results.add(stmt.column_string(i));
+		synchronized(DatabaseManager.class) {
+			try {
+				jsqlite.Database db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				Stmt stmt = db.prepare(query);
+				Collection<String> results = new ArrayList<String>();
+				if(stmt.step()){
+					for(int i = 0; i < stmt.column_count(); i++){
+						results.add(stmt.column_string(i));
+					}
 				}
+				db.close();
+	
+				return results;
+			} catch (jsqlite.Exception e) {
+				FAIMSLog.log(e);
 			}
-			db.close();
-
-			return results;
-		} catch (jsqlite.Exception e) {
-			FAIMSLog.log(e);
+			return null;
 		}
-		return null;
 	}
 
 	public Collection<List<String>> fetchAll(String query){
-		
-		try {
-			jsqlite.Database db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			Stmt stmt = db.prepare(query);
-			Collection<List<String>> results = new ArrayList<List<String>>();
-			while(stmt.step()){
-				List<String> result = new ArrayList<String>();
-				for(int i = 0; i < stmt.column_count(); i++){
-					result.add(stmt.column_string(i));
+		synchronized(DatabaseManager.class) {
+			try {
+				jsqlite.Database db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				Stmt stmt = db.prepare(query);
+				Collection<List<String>> results = new ArrayList<List<String>>();
+				while(stmt.step()){
+					List<String> result = new ArrayList<String>();
+					for(int i = 0; i < stmt.column_count(); i++){
+						result.add(stmt.column_string(i));
+					}
+					results.add(result);
 				}
-				results.add(result);
+				db.close();
+	
+				return results;
+			} catch (jsqlite.Exception e) {
+				FAIMSLog.log(e);
 			}
-			db.close();
-
-			return results;
-		} catch (jsqlite.Exception e) {
-			FAIMSLog.log(e);
+			return null;
 		}
-		return null;
 	}
 	
 	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {
@@ -571,30 +581,32 @@ public class DatabaseManager {
 	}
 
 	public void dumpDatabaseTo(File file) {
-		Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
-		jsqlite.Database db = null;
-		try {
-			
-			db = new jsqlite.Database();
-			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-
-			String query = 
-						"attach database '" + file.getAbsolutePath() + "' as export;" +
-						"create table export.archentity as select * from archentity;" +
-						"create table export.aentvalue as select * from aentvalue;" +
-						"create table export.aentreln as select * from aentreln;" + 
-						"create table export.relationship as select * from relationship;" +
-						"create table export.relnvalue as select * from relnvalue;" +
-						"detach database export;";
-			db.exec(query, createCallback());
-			
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-		} finally {
+		synchronized(DatabaseManager.class) {
+			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
+			jsqlite.Database db = null;
 			try {
-				if (db != null) db.close();
+				
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+	
+				String query = 
+							"attach database '" + file.getAbsolutePath() + "' as export;" +
+							"create table export.archentity as select * from archentity;" +
+							"create table export.aentvalue as select * from aentvalue;" +
+							"create table export.aentreln as select * from aentreln;" + 
+							"create table export.relationship as select * from relationship;" +
+							"create table export.relnvalue as select * from relnvalue;" +
+							"detach database export;";
+				db.exec(query, createCallback());
+				
 			} catch (Exception e) {
 				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
 			}
 		}
 	}

@@ -121,7 +121,7 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
-		synchronized(FAIMSClient.this) {
+		synchronized(FAIMSClient.class) {
 			FAIMSLog.log();
 	
 			InputStream stream = null;
@@ -168,7 +168,7 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
-		synchronized(FAIMSClient.this) {
+		synchronized(FAIMSClient.class) {
 			FAIMSLog.log();
 			
 			InputStream stream = null;
@@ -319,7 +319,7 @@ public class FAIMSClient {
 	}
 
 	public void interrupt() {
-		synchronized(FAIMSClient.this) {
+		synchronized(FAIMSClient.class) {
 			if (httpClient != null) {
 				httpClient.getConnectionManager().shutdown();
 			}

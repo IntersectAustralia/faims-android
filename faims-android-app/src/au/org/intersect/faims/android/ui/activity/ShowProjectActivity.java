@@ -44,14 +44,15 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	@Inject
 	ServerDiscovery serverDiscovery;
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	private FormEntryController fem;
 
 	private UIRenderer renderer;
 
 	private BeanShellLinker linker;
-	
-	private DatabaseManager databaseManager;
 	
 	private GPSDataManager gpsDataManager;
 
@@ -74,7 +75,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		project = ProjectUtil.getProject(data.getStringExtra("name"));
 		setTitle(project.name);
 		
-		databaseManager = new DatabaseManager(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+		databaseManager.init(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir, project.name);
 		

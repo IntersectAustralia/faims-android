@@ -23,6 +23,9 @@ public class UploadDatabaseService extends IntentService {
 	@Inject
 	FAIMSClient faimsClient;
 	
+	@Inject
+	DatabaseManager databaseManager;
+	
 	private boolean uploadStopped;
 
 	private File file;
@@ -60,12 +63,12 @@ public class UploadDatabaseService extends IntentService {
 			Project project = (Project) extras.get("project");
 			
 			// create temp database to upload
-			DatabaseManager dbmgr = new DatabaseManager(database);
+			databaseManager.init(database);
 			
 			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
 			
 	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
-	    	dbmgr.dumpDatabaseTo(tempFile);
+	    	databaseManager.dumpDatabaseTo(tempFile);
 	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
