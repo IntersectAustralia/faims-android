@@ -248,6 +248,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
 		    intent.putExtra("project", project);
+		    intent.putExtra("userId", databaseManager.getUserId());
 		    ShowProjectActivity.this.startService(intent);
 		   
     	} else {

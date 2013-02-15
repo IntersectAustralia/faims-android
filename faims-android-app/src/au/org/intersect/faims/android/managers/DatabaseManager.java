@@ -34,6 +34,10 @@ public class DatabaseManager {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+	
+	public String getUserId() {
+		return this.userId;
+	}
 
 	public String saveArchEnt(String entity_id, String entity_type,
 			String geo_data, List<EntityAttribute> attributes) {

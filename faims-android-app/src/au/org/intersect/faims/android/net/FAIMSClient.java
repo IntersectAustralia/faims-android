@@ -6,8 +6,10 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,6 +17,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.params.BasicHttpParams;
@@ -24,8 +27,8 @@ import org.apache.http.params.HttpParams;
 import android.net.http.AndroidHttpClient;
 import android.os.Environment;
 import android.util.Log;
-import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.FileInfo;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
@@ -65,17 +68,30 @@ public class FAIMSClient {
 		httpClient = null;
 	}
 	
-	public FAIMSClientResultCode uploadDatabase(Project project, File file) {
-		return uploadFile(file, "/android/project/" + project.key + "/upload_db");
+	public FAIMSClientResultCode uploadDatabase(Project project, File file, String userId) {
+		try {
+			HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
+			extraParts.put("user", new StringBody(userId));
+			return uploadFile(file, "/android/project/" + project.key + "/upload_db", extraParts);
+		} catch (Exception e) {
+			Log.d("FAIMS", "Error during uploading database");
+		} 
+		return FAIMSClientResultCode.SERVER_FAILURE;
 	}
 	
-	public FAIMSClientResultCode uploadFile(File file, String path) {
+	public FAIMSClientResultCode uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
 		try {
 			initClient();
 			
 			MultipartEntity entity = new MultipartEntity();
 			entity.addPart("file", new FileBody(file, "binary/octet-stream"));
 			entity.addPart("md5", new StringBody(FileUtil.generateMD5Hash(file.getPath())));
+			
+			if (extraParts != null) {
+				for (Entry<String, ContentBody> entry : extraParts.entrySet()) {
+					entity.addPart(entry.getKey(), entry.getValue());
+				}
+			}
 			
 			HttpPost post = new HttpPost(new URI(getUri(path)));
 			post.setEntity(entity);

@@ -54,11 +54,13 @@ public class UploadDatabaseService extends IntentService {
 		
 		File tempFile = null;
 		try {
+			String database = intent.getStringExtra("database");
+			String userId = intent.getStringExtra("userId");
 			Bundle extras = intent.getExtras();
 			Project project = (Project) extras.get("project");
 			
 			// create temp database to upload
-			DatabaseManager dbmgr = new DatabaseManager(intent.getStringExtra("database"));
+			DatabaseManager dbmgr = new DatabaseManager(database);
 			
 			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
 			
@@ -80,7 +82,7 @@ public class UploadDatabaseService extends IntentService {
 	    	}
 	    	
 	    	// upload database
-			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(project, file);
+			FAIMSClientResultCode resultCode = faimsClient.uploadDatabase(project, file, userId);
 			
 			if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
