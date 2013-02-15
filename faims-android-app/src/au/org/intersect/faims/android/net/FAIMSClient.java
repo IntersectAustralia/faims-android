@@ -80,78 +80,82 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
-		try {
-			initClient();
-			
-			MultipartEntity entity = new MultipartEntity();
-			entity.addPart("file", new FileBody(file, "binary/octet-stream"));
-			entity.addPart("md5", new StringBody(FileUtil.generateMD5Hash(file.getPath())));
-			
-			if (extraParts != null) {
-				for (Entry<String, ContentBody> entry : extraParts.entrySet()) {
-					entity.addPart(entry.getKey(), entry.getValue());
+		synchronized(FAIMSClient.class) {
+			try {
+				initClient();
+				
+				MultipartEntity entity = new MultipartEntity();
+				entity.addPart("file", new FileBody(file, "binary/octet-stream"));
+				entity.addPart("md5", new StringBody(FileUtil.generateMD5Hash(file.getPath())));
+				
+				if (extraParts != null) {
+					for (Entry<String, ContentBody> entry : extraParts.entrySet()) {
+						entity.addPart(entry.getKey(), entry.getValue());
+					}
 				}
-			}
-			
-			HttpPost post = new HttpPost(new URI(getUri(path)));
-			post.setEntity(entity);
-			
-			HttpResponse response = httpClient.execute(post);
-			
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				Log.d("FAIMS", "upload failed");
+				
+				HttpPost post = new HttpPost(new URI(getUri(path)));
+				post.setEntity(entity);
+				
+				HttpResponse response = httpClient.execute(post);
+				
+				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					Log.d("FAIMS", "upload failed");
+					
+					return FAIMSClientResultCode.SERVER_FAILURE;
+				}
+				
+				Log.d("FAIMS", "uploaded file!");
+				
+				return FAIMSClientResultCode.SUCCESS;
+				
+			} catch (Exception e) {
+				Log.e("FAIMS", "cannot upload file", e);
 				
 				return FAIMSClientResultCode.SERVER_FAILURE;
+				
+			} finally {
+				cleanupClient();
 			}
-			
-			Log.d("FAIMS", "uploaded file!");
-			
-			return FAIMSClientResultCode.SUCCESS;
-			
-		} catch (Exception e) {
-			Log.e("FAIMS", "cannot upload file", e);
-			
-			return FAIMSClientResultCode.SERVER_FAILURE;
-			
-		} finally {
-			cleanupClient();
 		}
 	}
 	
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
-		FAIMSLog.log();
-
-		InputStream stream = null;
-		try {			
-			initClient();
-			
-			HttpEntity entity = getRequest(getUri("/android/projects"));
-			
-			stream = entity.getContent();
-			
-			List<Project> ps = JsonUtil.deserializeProjects(stream);
-			
-			for (Project p : ps) {
-				projects.push(p);
-			}
-			
-			FAIMSLog.log("fetched projects!");
-	        
-			return FAIMSClientResultCode.SUCCESS;
-		} catch(Exception e) {
-			FAIMSLog.log(e);
-			
-			return FAIMSClientResultCode.SERVER_FAILURE;
-			
-		} finally {
-			
-			try {
-				if (stream != null) stream.close();
-			} catch (IOException e) {
+		synchronized(FAIMSClient.this) {
+			FAIMSLog.log();
+	
+			InputStream stream = null;
+			try {			
+				initClient();
+				
+				HttpEntity entity = getRequest(getUri("/android/projects"));
+				
+				stream = entity.getContent();
+				
+				List<Project> ps = JsonUtil.deserializeProjects(stream);
+				
+				for (Project p : ps) {
+					projects.push(p);
+				}
+				
+				FAIMSLog.log("fetched projects!");
+		        
+				return FAIMSClientResultCode.SUCCESS;
+			} catch(Exception e) {
 				FAIMSLog.log(e);
+				
+				return FAIMSClientResultCode.SERVER_FAILURE;
+				
+			} finally {
+				
+				try {
+					if (stream != null) stream.close();
+				} catch (IOException e) {
+					FAIMSLog.log(e);
+				}
+				
+				cleanupClient();
 			}
-			
-			cleanupClient();
 		}
 	}
 	
@@ -164,58 +168,60 @@ public class FAIMSClient {
 	}
 	
 	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
-		FAIMSLog.log();
-		
-		InputStream stream = null;
-		File file = null;
-		
-		try {
-			initClient();
+		synchronized(FAIMSClient.this) {
+			FAIMSLog.log();
 			
-			FileInfo info = getFileInfo(infoPath);
-			
-	        long freeSpace = FileUtil.getExternalStorageSpace();
-	        
-	        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
-	        FAIMSLog.log("filesize: " + String.valueOf(info.size));
-	        
-	        if (info.size > freeSpace) {
-	        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
-	        } 
-	        
-	        file = downloadArchive(downloadPath, info);
-			
-			if (file == null) {
-				return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
-			}
-			
-			FileUtil.untarFile(Environment.getExternalStorageDirectory() + dir, file.getAbsolutePath());
-			
-			file.delete();
-			
-			FAIMSLog.log("downloaded file!");
-			
-			return FAIMSClientResultCode.SUCCESS;
-	        
-		} catch (Exception e) {
-			FAIMSLog.log(e);
-			
-			// remove downloaded file
-			if (file != null) {
-				file.delete();
-			}
-				
-			return FAIMSClientResultCode.SERVER_FAILURE;
-			
-		} finally {
+			InputStream stream = null;
+			File file = null;
 			
 			try {
-				if (stream != null) stream.close();
-			} catch (IOException e) {
+				initClient();
+				
+				FileInfo info = getFileInfo(infoPath);
+				
+		        long freeSpace = FileUtil.getExternalStorageSpace();
+		        
+		        FAIMSLog.log("freespace: " + String.valueOf(freeSpace));
+		        FAIMSLog.log("filesize: " + String.valueOf(info.size));
+		        
+		        if (info.size > freeSpace) {
+		        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
+		        } 
+		        
+		        file = downloadArchive(downloadPath, info);
+				
+				if (file == null) {
+					return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
+				}
+				
+				FileUtil.untarFile(Environment.getExternalStorageDirectory() + dir, file.getAbsolutePath());
+				
+				file.delete();
+				
+				FAIMSLog.log("downloaded file!");
+				
+				return FAIMSClientResultCode.SUCCESS;
+		        
+			} catch (Exception e) {
 				FAIMSLog.log(e);
+				
+				// remove downloaded file
+				if (file != null) {
+					file.delete();
+				}
+					
+				return FAIMSClientResultCode.SERVER_FAILURE;
+				
+			} finally {
+				
+				try {
+					if (stream != null) stream.close();
+				} catch (IOException e) {
+					FAIMSLog.log(e);
+				}
+				
+				cleanupClient();
 			}
-			
-			cleanupClient();
 		}
 	}
 	
@@ -313,8 +319,10 @@ public class FAIMSClient {
 	}
 
 	public void interrupt() {
-		if (httpClient != null) {
-			httpClient.getConnectionManager().shutdown();
+		synchronized(FAIMSClient.this) {
+			if (httpClient != null) {
+				httpClient.getConnectionManager().shutdown();
+			}
 		}
 	}
 	
