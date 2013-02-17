@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.net;
 
 import android.app.Application;
-import au.org.intersect.faims.android.net.ServerDiscovery;
 
 import com.google.inject.Provider;
 

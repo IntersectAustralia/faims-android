@@ -71,7 +71,7 @@ public class FetchProjectsActivity extends RoboActivity {
         	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
         		final String selectedItem = projectListAdapter.getItem(arg2).toString();
-        		selectedProject = getProjectByName(selectedItem);
+        		selectedProject = projects.get(arg2);
         		
         		choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
         				getString(R.string.confirm_download_project_title),
@@ -209,7 +209,7 @@ public class FetchProjectsActivity extends RoboActivity {
 						// start show project activity
 						
 						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
-						showProjectsIntent.putExtra("name", selectedProject.name);
+						showProjectsIntent.putExtra("key", selectedProject.key);
 						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
 					} else {
 						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
@@ -385,14 +385,6 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 		});
 	    busyDialog.show();
-    }
-    
-    private Project getProjectByName(String name) {
-    	for (Project project : projects) {
-    		if (project.name == name) 
-    			return project;
-    	}
-    	return null;
     }
     
 }

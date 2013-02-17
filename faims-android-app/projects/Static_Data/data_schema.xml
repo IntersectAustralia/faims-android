@@ -45,7 +45,10 @@
     <property type="integer" name="value" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="timestamp" name="timestamp" minCardinality="1" maxCardinality="1">
+    <property type="date" name="date" minCardinality="1" maxCardinality="1">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="time" name="time" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
     <property type="checklist" name="type" minCardinality="1" maxCardinality="1">
@@ -64,16 +67,6 @@
         <term>Loc B</term>
         <term>Loc C</term>
         <term>Loc D</term>
-      </lookup>
-    </property>
-    <property type="dropdown" name="picture" minCardinality="1" maxCardinality="1">
-      <bundle>DOI</bundle>
-      <lookup>
-        <term pictureURL="pictures/cugl26140.jpg">Picture A</term>
-        <term pictureURL="pictures/cugl26185a.jpg">Picture B</term>
-        <term pictureURL="pictures/cugl26193.jpg">Picture C</term>
-        <term pictureURL="pictures/cugl26197a.jpg">Picture D</term>
-        <term pictureURL="pictures/cugl26206a.jpg">Picture E</term>
       </lookup>
     </property>
     <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">

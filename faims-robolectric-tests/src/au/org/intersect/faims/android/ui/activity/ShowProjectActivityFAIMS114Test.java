@@ -3,6 +3,8 @@ package au.org.intersect.faims.android.ui.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -25,18 +27,19 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 	public void showProjectTest(){
 
 		String projectName = getNewProjectName(projectBaseName);
+		String projectKey = UUID.randomUUID().toString();
 				
 		ShowProjectActivity activity = new ShowProjectActivity();
 		
 		// We need name + directory in an Intent
 		
 		Intent intent = new Intent();
-		intent.putExtra("name", projectName);
+		intent.putExtra("key", projectKey);
 		activity.setIntent(intent);
 		
 		// We need the UI xml and logic bsh files
 		
-		TestProjectUtil.createProjectFrom(projectName, this.directoryName);
+		TestProjectUtil.createProjectFrom(projectName, projectKey, this.directoryName);
 		
 		// Create the activity
 		

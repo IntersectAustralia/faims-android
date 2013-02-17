@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
+import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.TestProjectUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
@@ -26,7 +27,7 @@ public class MainActivityTest {
 		
 		int count = 10;
 		for (int i = 0; i < count; i++) {
-			TestProjectUtil.createProject("Project " + i);
+			TestProjectUtil.createProject("Project " + i, "key" + i);
 		}
 		
 		MainActivity activity = new MainActivity();
@@ -37,7 +38,7 @@ public class MainActivityTest {
 				.findViewById(R.id.project_list);
 		
 		for (int i = 0; i < count; i++) {
-			assertEquals("Project List Item " + i, "Project " + i, projectListView.getItemAtPosition(i));
+			assertEquals("Project List Item " + i, "Project " + i, ((NameValuePair)projectListView.getItemAtPosition(i)).getName());
 		}
 	}
 	
@@ -67,8 +68,9 @@ public class MainActivityTest {
 	@Test
 	public void loadStoredProjectTest() {
 		String projectName = "Test Project";
+		String projectKey = "123456789";
 		
-		TestProjectUtil.createProject(projectName);
+		TestProjectUtil.createProject(projectName, projectKey);
 		
 		MainActivity activity = new MainActivity();
 		activity.onCreate(null);
@@ -77,7 +79,7 @@ public class MainActivityTest {
 		ListView projectListView = (ListView) activity
 				.findViewById(R.id.project_list);
 		
-		assertEquals("Project List Item ", projectName, projectListView.getItemAtPosition(0));
+		assertEquals("Project List Item ", projectName, ((NameValuePair)projectListView.getItemAtPosition(0)).getName());
 		
 		projectListView.performItemClick(null, 0, 0);
 		
@@ -87,7 +89,7 @@ public class MainActivityTest {
 
 		assertEquals("New Activity launched ok", ShowProjectActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
 		
-		assertEquals("Show project name", projectName, startedIntent.getStringExtra("name"));
+		assertEquals("Show project key", projectKey, startedIntent.getStringExtra("key"));
 	}
 	
 }

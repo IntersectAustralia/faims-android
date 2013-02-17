@@ -106,6 +106,8 @@ public class Tab {
 		String attributeType = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
 		String certainty = input.getQuestion().getAdditionalAttribute(null, "faims_certainty");
 		String annotation = input.getQuestion().getAdditionalAttribute(null, "faims_annotation");
+		String readOnly = input.getQuestion().getAdditionalAttribute(null, "faims_read_only");
+		boolean isReadOnly = (readOnly != null && readOnly.equals("true"));
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
 		Button certaintyButton = new Button(this.context);
 		certaintyButton.setBackgroundResource(R.drawable.square_button);
@@ -146,6 +148,9 @@ public class Tab {
                 // set input type as number
                     case Constants.DATATYPE_INTEGER:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
+                    	if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                     	view = text;
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -157,6 +162,9 @@ public class Tab {
                     case Constants.DATATYPE_DECIMAL:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
+                        if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
                         onCertaintyButtonClicked(certaintyButton, text);
@@ -167,6 +175,9 @@ public class Tab {
                     case Constants.DATATYPE_LONG:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
                         view = text;
+                        if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
                         ((TextView) view)
                                 .setInputType(InputType.TYPE_CLASS_NUMBER);
                         onCertaintyButtonClicked(certaintyButton, text);
@@ -179,6 +190,9 @@ public class Tab {
                     	Time now = new Time();
         				now.setToNow();
         				date.updateDate(now.year, now.month, now.monthDay);
+        				if (isReadOnly) {
+                    		date.setEnabled(false);
+                    	}
                     	view = date;
                     	onCertaintyButtonClicked(certaintyButton, date);
                     	onAnnotationButtonClicked(annotationButton, date);
@@ -188,7 +202,10 @@ public class Tab {
                     // get the text area
                     case Constants.DATATYPE_TEXT:
                     	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                        view = text;
+                    	if (isReadOnly) {
+                    		text.setEnabled(false);
+                    	}
+                    	view = text;
                         ((TextView) view).setLines(5);
                         onCertaintyButtonClicked(certaintyButton, text);
                         onAnnotationButtonClicked(annotationButton, text);
@@ -203,6 +220,9 @@ public class Tab {
         				time.setCurrentHour(timeNow.hour);
         				time.setCurrentMinute(timeNow.minute);
         				view = time;
+        				if (isReadOnly) {
+                    		time.setEnabled(false);
+                    	}
         				onCertaintyButtonClicked(certaintyButton, time);
         				onAnnotationButtonClicked(annotationButton, time);
         				linearLayout.addView(view);
@@ -230,6 +250,9 @@ public class Tab {
                     	} else {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
                             view = text;
+                            if (isReadOnly) {
+                        		text.setEnabled(false);
+                        	}
                             valueReference.put(path, "");
                             onCertaintyButtonClicked(certaintyButton, text);
                             linearLayout.addView(view);
@@ -677,12 +700,18 @@ public class Tab {
 			if (v instanceof CustomEditText) {
 				CustomEditText text = (CustomEditText) v;
 				text.setText("");
+				text.setCertainty(1);
+				text.setAnnotation("");
+				text.setCurrentCertainty(1);
+				text.setCurrentAnnotation("");
 				valueReference.put(text.getRef(), "");
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker date = (CustomDatePicker) v;
 				Time now = new Time();
 				now.setToNow();
 				date.updateDate(now.year, now.month, now.monthDay);
+				date.setCertainty(1);
+				date.setCurrentCertainty(1);
 				valueReference.put(date.getRef(), DateUtil.getDate(date));
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker time = (CustomTimePicker) v;
@@ -690,9 +719,15 @@ public class Tab {
 				now.setToNow();
 				time.setCurrentHour(now.hour);
 				time.setCurrentMinute(now.minute);
+				time.setCertainty(1);
+				time.setCurrentCertainty(1);
 				valueReference.put(time.getRef(), DateUtil.getTime(time));
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) v;
+				layout.setCertainty(1);
+				layout.setAnnotation("");
+				layout.setCurrentCertainty(1);
+				layout.setCurrentAnnotation("");
 				View child0 = layout.getChildAt(0);
 				
 				if (child0 instanceof RadioGroup){
@@ -712,10 +747,18 @@ public class Tab {
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
 				spinner.setSelection(0);
+				spinner.setCertainty(1);
+				spinner.setAnnotation("");
+				spinner.setCurrentCertainty(1);
+				spinner.setCurrentAnnotation("");
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
 				valueReference.put(spinner.getRef(), pair.getValue());
 			} else if(v instanceof CustomHorizontalScrollView){
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
+				horizontalScrollView.setCertainty(1);
+				horizontalScrollView.setAnnotation("");
+				horizontalScrollView.setCurrentCertainty(1);
+				horizontalScrollView.setCurrentAnnotation("");
 				for(CustomImageView customImageView : horizontalScrollView.getImageViews()){
 					customImageView.setBackgroundColor(Color.RED);
 				}

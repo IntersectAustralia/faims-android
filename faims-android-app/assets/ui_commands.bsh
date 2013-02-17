@@ -80,6 +80,10 @@ Object getFieldAnnotation(String ref){
     return linker.getFieldAnnotation(ref);
 }
 
+String getCurrentTime(){
+    return linker.getCurrentTime();
+}
+
 onMapEvent(String ref, String clickCallback, selectCallback) {
 	linker.bindMapEvent(ref, clickCallback, selectCallback);
 }
@@ -322,4 +326,36 @@ pullDatabaseFromServer(String callback) {
 
 setSyncEnabled(boolean value) {
 	linker.setSyncEnabled(value);
+}
+
+String getProjectName(){
+	return linker.getProjectName();
+}
+
+String getProjectId(){
+	return linker.getProjectId();
+}
+
+String getProjectSeason(){
+	return linker.getProjectSeason();
+}
+
+String getProjectDescription(){
+	return linker.getProjectDescription();
+}
+
+String getPermitNo(){
+	return linker.getPermitNo();
+}
+
+String getPermitHolder(){
+	return linker.getPermitHolder();
+}
+
+String getContactAndAddress(){
+	return linker.getContactAndAddress();
+}
+
+String getParticipants(){
+	return linker.getParticipants();
 }

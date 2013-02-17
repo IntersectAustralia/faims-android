@@ -7,6 +7,7 @@ String entity_id;
 initialise() {
 	setUser();
 	updateEntities();
+	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
 	populateDropDown("tabgroup1/tab1/type", types);
 	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
 	populatePictureGallery("tabgroup1/tab1/picture", pictures);
@@ -26,8 +27,7 @@ setUser(){
 updateEntity(entity_id) {
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
-	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab1/date"), null, null, getFieldCertainty("tabgroup1/tab1/date")));
-	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab1/time"), null, null, getFieldCertainty("tabgroup1/tab1/time")));
+	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/time"), null, null, getFieldCertainty("tabgroup1/tab1/time")));
 	attributes.add(createEntityAttribute("type", getFieldAnnotation("tabgroup1/tab1/type"), getFieldValue("tabgroup1/tab1/type"), null, getFieldCertainty("tabgroup1/tab1/type")));
 	attributes.add(createEntityAttribute("picture", getFieldAnnotation("tabgroup1/tab1/picture"), getFieldValue("tabgroup1/tab1/picture"), null, getFieldCertainty("tabgroup1/tab1/picture")));
 	

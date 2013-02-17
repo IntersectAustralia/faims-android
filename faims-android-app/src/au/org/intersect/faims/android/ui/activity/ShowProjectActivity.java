@@ -75,12 +75,14 @@ public class ShowProjectActivity extends FragmentActivity {
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		
-		project = ProjectUtil.getProject(data.getStringExtra("name"));
+		project = ProjectUtil.getProject(data.getStringExtra("key"));
 		setTitle(project.name);
 		
-		databaseManager.init(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+		
+		databaseManager.init(projectDir + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
-		arch16n = new Arch16n(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir, project.name);
+		arch16n = new Arch16n(projectDir, project.name);
 		
 		choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.render_project_title),
@@ -138,26 +140,26 @@ public class ShowProjectActivity extends FragmentActivity {
 	*/
 	
 	protected void renderUI() {
-		Log.d("FAIMS", "loading schema: " + Environment
-				.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_schema.xml");
+		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+		
+		Log.d("FAIMS", "loading schema: " + projectDir + "/ui_schema.xml");
 		
 		// Read, validate and parse the xforms
-		ShowProjectActivity.this.fem = FileUtil.readXmlContent(Environment
-				.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_schema.xml");
+		ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
 		
 		arch16n.generatePropertiesMap();
 
 		// render the ui definition
 		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + project.dir);
+		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + project.key);
 		ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager);
-		linker.setBaseDir(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
+		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
+		linker.setBaseDir(projectDir);
 		linker.sourceFromAssets("ui_commands.bsh");
-		linker.execute(FileUtil.readFileIntoString(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/ui_logic.bsh"));
+		linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
 	}
 	
 	public BeanShellLinker getBeanShellLinker(){
@@ -245,7 +247,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	    	// note: the temp file is automatically deleted by the service after it has finished
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3");
 		    intent.putExtra("project", project);
 		    intent.putExtra("userId", databaseManager.getUserId());
 		    ShowProjectActivity.this.startService(intent);
@@ -420,7 +422,7 @@ public class ShowProjectActivity extends FragmentActivity {
     	// note: the temp file is automatically deleted by the service after it has finished
     	Messenger messenger = new Messenger(handler);
 	    intent.putExtra("MESSENGER", messenger);
-	    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+	    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3");
 	    intent.putExtra("project", project);
 	    intent.putExtra("userId", databaseManager.getUserId());
 	    ShowProjectActivity.this.startService(intent);

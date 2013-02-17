@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.net;
 
 import java.util.LinkedList;
+import java.util.UUID;
 
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
@@ -17,14 +18,14 @@ public class TestFAIMSClient extends FAIMSClient {
 	@Override
 	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
 		for (int i = 0; i < projectsCount; i++) {
-			projects.add(new Project(String.valueOf(i).replace("\\s+", "_"), "Project " + i, String.valueOf(i)));
+			projects.add(new Project("Project " + i, UUID.randomUUID().toString()));
 		}
 		return projectsCode;
 	}
 
 	@Override
 	public DownloadResult downloadProject(Project project) {
-		TestProjectUtil.createProjectFrom(project.name, "Common");
+		TestProjectUtil.createProjectFrom(project.name, project.key, "Common");
 		DownloadResult result = new DownloadResult();
 		result.code = downloadCode;
 		return result;

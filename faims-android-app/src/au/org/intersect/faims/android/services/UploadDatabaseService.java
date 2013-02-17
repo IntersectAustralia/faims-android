@@ -29,7 +29,7 @@ public class UploadDatabaseService extends UploadService {
 			// create temp database to upload
 			databaseManager.init(database);
 			
-			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
+			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key);
 			
 	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
 	    	databaseManager.dumpDatabaseTo(tempFile);

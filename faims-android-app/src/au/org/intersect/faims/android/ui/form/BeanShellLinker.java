@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -33,6 +34,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
@@ -91,12 +93,13 @@ public class BeanShellLinker {
 	private GPSLocation previousLocation;
 
 	private Arch16n arch16n;
+	private Project project;
 
 	@SuppressWarnings("unused")
 	private User user;
 
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
-			DatabaseManager databaseManager, GPSDataManager gpsDataManager) {
+			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
 		this.activity = activity;
 		this.assets = assets;
 		this.renderer = renderer;
@@ -104,6 +107,7 @@ public class BeanShellLinker {
 		this.gpsDataManager = gpsDataManager;
 		this.interpreter = new Interpreter();
 		this.arch16n = arch16n;
+		this.project = project;
 		try {
 			interpreter.set("linker", this);
 		} catch (EvalError e) {
@@ -1165,6 +1169,12 @@ public class BeanShellLinker {
 		}
 	}
 
+	public String getCurrentTime(){
+		Time timeNow = new Time();
+        timeNow.setToNow();
+        return timeNow.format("%Y-%m-%d %H:%M:%S");
+	}
+
 	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		FAIMSLog.log();
 		
@@ -1957,7 +1967,7 @@ public class BeanShellLinker {
 	public void pullDatabaseFromServer(final String callback) {
 		this.activity.downloadDatabaseFromServer(callback);
 	}
-	
+
 	public void setSyncEnabled(boolean value) {
 		if (value) {
 			this.activity.enableSync();
@@ -1966,6 +1976,38 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public String getProjectName(){
+		return this.project.getName();
+	}
+	
+	public String getProjectId(){
+		return this.project.getKey();
+	}
+	
+	public String getProjectSeason(){
+		return this.project.getSeason();
+	}
+	
+	public String getProjectDescription(){
+		return this.project.getDescription();
+	}
+	
+	public String getPermitNo(){
+		return this.project.getPermitNo();
+	}
+	
+	public String getPermitHolder(){
+		return this.project.getPermitHolder();
+	}
+	
+	public String getContactAndAddress(){
+		return this.project.getContactAndAddress();
+	}
+	
+	public String getParticipants(){
+		return this.project.getParticipants();
+	}
+
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
 	}

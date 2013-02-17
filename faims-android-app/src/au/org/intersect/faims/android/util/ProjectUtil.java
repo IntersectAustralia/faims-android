@@ -44,7 +44,7 @@ public class ProjectUtil {
 					continue;
 				}
 				JsonObject object = JsonUtil.deserializeJson(config);
-				Project project = Project.fromJson(dirname, object);	
+				Project project = Project.fromJson(object);	
 				list.add(project);
 			}
 		} catch (IOException e) {
@@ -57,15 +57,16 @@ public class ProjectUtil {
 				FAIMSLog.log(e);
 			}
 		}
+		System.out.println(list.toString());
 		return list;
 	}
 
 	public static Project getProject(
-			String projectName) {
+			String key) {
 		List<Project> projects = getProjects();
 		if (projects != null) {
 			for (Project p : projects) {
-				if (p.name.equals(projectName)) return p;
+				if (p.key.equals(key)) return p;
 			}
 		}
 		return null;
@@ -73,12 +74,12 @@ public class ProjectUtil {
 
 	public static void saveProject(Project project) {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/project.settings"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/project.settings"));
 	    	writer.write(project.toJson().toString());
 	    	writer.flush();
 	    	writer.close();
 		} catch (IOException e) {
-			Log.d("FAIMS", "Error saving project");
+			Log.e("FAIMS", "Error saving project", e);
 		}
 	}
 	
