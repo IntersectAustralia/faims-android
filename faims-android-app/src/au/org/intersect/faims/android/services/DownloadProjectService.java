@@ -2,8 +2,10 @@ package au.org.intersect.faims.android.services;
 
 import android.content.Intent;
 import android.util.Log;
+import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.ProjectUtil;
 
 public class DownloadProjectService extends DownloadService {
 
@@ -16,7 +18,13 @@ public class DownloadProjectService extends DownloadService {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			Log.d("FAIMS", "downloading project " + project.name);
-			return faimsClient.downloadProject(project);
+			DownloadResult result = faimsClient.downloadProject(project);
+			
+			// if result is success then update the project settings with version and timestamp
+			project.version = result.info.version;
+			ProjectUtil.saveProject(project);
+			
+			return result.code;
 		} catch (Exception e) {
 			Log.d("FAIMS", "could not download project");
 		}

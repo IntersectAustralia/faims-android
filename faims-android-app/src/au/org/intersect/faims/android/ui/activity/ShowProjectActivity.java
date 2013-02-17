@@ -68,6 +68,9 @@ public class ShowProjectActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		FAIMSLog.log();
+		
+		// inject faimsClient and serverDiscovery
+		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
@@ -93,13 +96,8 @@ public class ShowProjectActivity extends FragmentActivity {
 			
 		});
 		choiceDialog.show();
-		
-		// inject faimsClient and serverDiscovery
-		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 	}
 	
-	
-
 	@Override
 	protected void onDestroy() {
 		if(this.linker != null){
@@ -401,5 +399,36 @@ public class ShowProjectActivity extends FragmentActivity {
     	});
     	choiceDialog.show();
     }
+	
+	@SuppressLint("HandlerLeak")
+	public void enableSync() {
+		// start sync upload service
+		
+		// Create a new Messenger for the communication back
+		final Handler handler = new Handler() {
+			
+			public void handleMessage(Message message) {
+				
+			}
+			
+		};
+		
+		// start service
+		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+		
+    	// start upload service
+    	// note: the temp file is automatically deleted by the service after it has finished
+    	Messenger messenger = new Messenger(handler);
+	    intent.putExtra("MESSENGER", messenger);
+	    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/db.sqlite3");
+	    intent.putExtra("project", project);
+	    intent.putExtra("userId", databaseManager.getUserId());
+	    ShowProjectActivity.this.startService(intent);
+		
+	}
+
+	public void disableSync() {
+		// stop sync upload service
+	}
 
 }

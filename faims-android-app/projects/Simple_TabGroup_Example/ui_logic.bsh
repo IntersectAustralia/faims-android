@@ -1,3 +1,5 @@
+setSyncEnabled(true);
+
 onLoadPage() {
 	showToast("This is the entity page");
 }

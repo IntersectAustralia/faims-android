@@ -610,6 +610,37 @@ public class DatabaseManager {
 			}
 		}
 	}
+	
+	public void dumpDatabaseTo(File file, String fromTimestamp) {
+		synchronized(DatabaseManager.class) {
+			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
+			jsqlite.Database db = null;
+			try {
+				
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+	
+				String query = 
+							"attach database '" + file.getAbsolutePath() + "' as export" +
+							"create table export.archentity as select * from archentity where aenttimestamp > '" + fromTimestamp + "';" +
+							"create table export.aentvalue as select * from aentvalue where valuetimestamp > '" + fromTimestamp + "';" +
+							"create table export.aentreln as select * from aentreln where aentrelntimestamp > '" + fromTimestamp + "';" +
+							"create table export.relationship as select * from relationship where relntimestamp > '" + fromTimestamp + "';" +
+							"create table export.relnvalue as select * from relnvalue where relnvaluetimestamp > '" + fromTimestamp + "';" +
+							"detach database export;";
+				db.exec(query, createCallback());
+				
+			} catch (Exception e) {
+				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
+			}
+		}
+	}
 
 	public static void debugDump(File file) {
 		jsqlite.Database db = null;

@@ -1,7 +1,9 @@
 package au.org.intersect.faims.android.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.os.Environment;
+import android.util.Log;
 import au.org.intersect.faims.android.data.Project;
 
 import com.google.gson.JsonObject;
@@ -66,6 +69,17 @@ public class ProjectUtil {
 			}
 		}
 		return null;
+	}
+
+	public static void saveProject(Project project) {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir + "/project.settings"));
+	    	writer.write(project.toJson().toString());
+	    	writer.flush();
+	    	writer.close();
+		} catch (IOException e) {
+			Log.d("FAIMS", "Error saving project");
+		}
 	}
 	
 }

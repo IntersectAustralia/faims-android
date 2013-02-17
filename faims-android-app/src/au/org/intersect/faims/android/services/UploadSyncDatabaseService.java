@@ -10,10 +10,10 @@ import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.FileUtil;
 
-public class UploadDatabaseService extends UploadService {
-
-	public UploadDatabaseService() {
-		super("UploadDatabaseService");
+public class UploadSyncDatabaseService extends UploadService {
+	
+	public UploadSyncDatabaseService() {
+		super("UploadSyncDatabaseService");
 	}
 	
 	@Override
@@ -32,7 +32,12 @@ public class UploadDatabaseService extends UploadService {
 			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.dir);
 			
 	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
-	    	databaseManager.dumpDatabaseTo(tempFile);
+	    	
+	    	if (project.timestamp != null) {
+	    		databaseManager.dumpDatabaseTo(tempFile, project.timestamp);
+	    	} else {
+	    		databaseManager.dumpDatabaseTo(tempFile);
+	    	}
 	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");

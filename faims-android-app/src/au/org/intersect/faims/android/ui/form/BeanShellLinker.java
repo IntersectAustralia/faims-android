@@ -1958,6 +1958,14 @@ public class BeanShellLinker {
 		this.activity.downloadDatabaseFromServer(callback);
 	}
 	
+	public void setSyncEnabled(boolean value) {
+		if (value) {
+			this.activity.enableSync();
+		} else {
+			this.activity.disableSync();
+		}
+	}
+	
 	public UIRenderer getUIRenderer(){
 		return this.renderer;
 	}

@@ -27,6 +27,7 @@ import org.apache.http.params.HttpParams;
 import android.net.http.AndroidHttpClient;
 import android.os.Environment;
 import android.util.Log;
+import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -159,15 +160,25 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FAIMSClientResultCode downloadProject(Project project) {
-		return downloadFile("/android/project/" + project.key + "/archive", "/android/project/" + project.key + "/download", BASE_DIR);
+	public DownloadResult downloadProject(Project project) {
+		FileInfo info = new FileInfo();
+		FAIMSClientResultCode code = downloadFile("/android/project/" + project.key + "/archive", "/android/project/" + project.key + "/download", BASE_DIR, info);
+		DownloadResult result = new DownloadResult();
+		result.code = code;
+		result.info = info;
+		return result;
 	}
 	
-	public FAIMSClientResultCode downloadDatabase(Project project) {
-		return downloadFile("/android/project/" + project.key + "/archive_db", "/android/project/" + project.key + "/download_db", BASE_DIR + project.dir);
+	public DownloadResult downloadDatabase(Project project) {
+		FileInfo info = new FileInfo();
+		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db", "/android/project/" + project.key + "/download_db", BASE_DIR + project.dir, info);
+		DownloadResult result = new DownloadResult();
+		result.code = code;
+		result.info = info;
+		return result;
 	}
 	
-	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
+	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir, FileInfo info) {
 		synchronized(FAIMSClient.class) {
 			FAIMSLog.log();
 			
@@ -177,7 +188,7 @@ public class FAIMSClient {
 			try {
 				initClient();
 				
-				FileInfo info = getFileInfo(infoPath);
+				getFileInfo(infoPath, info);
 				
 		        long freeSpace = FileUtil.getExternalStorageSpace();
 		        
@@ -225,7 +236,7 @@ public class FAIMSClient {
 		}
 	}
 	
-	private FileInfo getFileInfo(String path) throws IOException {
+	private void getFileInfo(String path, FileInfo info) throws IOException {
 		FAIMSLog.log();
 		
 		InputStream stream = null;
@@ -237,7 +248,7 @@ public class FAIMSClient {
 			
 			JsonObject object = JsonUtil.deserializeJsonObject(stream);
 			
-			return FileInfo.fromJson(object);
+			info.parseJson(object);
 			
 		} finally {
 			if (stream != null) stream.close();

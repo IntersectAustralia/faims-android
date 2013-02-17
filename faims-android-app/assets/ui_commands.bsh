@@ -319,3 +319,7 @@ pushDatabaseToServer(String callback) {
 pullDatabaseFromServer(String callback) {
 	linker.pullDatabaseFromServer(callback);
 }
+
+setSyncEnabled(boolean value) {
+	linker.setSyncEnabled(value);
+}
