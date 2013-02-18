@@ -580,7 +580,7 @@ public class DatabaseManager {
 		return "1"+ s + String.valueOf(System.currentTimeMillis());
 	}
 
-	public void dumpDatabaseTo(File file) {
+	public void dumpDatabaseTo(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
@@ -599,8 +599,6 @@ public class DatabaseManager {
 							"detach database export;";
 				db.exec(query, createCallback());
 				
-			} catch (Exception e) {
-				FAIMSLog.log(e);
 			} finally {
 				try {
 					if (db != null) db.close();
@@ -611,7 +609,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public void dumpDatabaseTo(File file, String fromTimestamp) {
+	public void dumpDatabaseTo(File file, String fromTimestamp) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
@@ -630,8 +628,6 @@ public class DatabaseManager {
 							"detach database export;";
 				db.exec(query, createCallback());
 				
-			} catch (Exception e) {
-				FAIMSLog.log(e);
 			} finally {
 				try {
 					if (db != null) db.close();

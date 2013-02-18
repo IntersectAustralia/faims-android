@@ -75,7 +75,7 @@ public class FAIMSClient {
 			extraParts.put("user", new StringBody(userId));
 			return uploadFile(file, "/android/project/" + project.key + "/upload_db", extraParts);
 		} catch (Exception e) {
-			Log.d("FAIMS", "Error during uploading database");
+			Log.e("FAIMS", "Error during uploading database", e);
 		} 
 		return FAIMSClientResultCode.SERVER_FAILURE;
 	}

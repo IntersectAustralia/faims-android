@@ -6,5 +6,8 @@
     <string name="broadcast_addr">255.255.255.255</string>
     <integer name="discovery_time">20</integer>
     <integer name="packet_timeout">20</integer>
+    <integer name="sync_min_internal">5</integer>
+    <integer name="sync_max_interval">30</integer>
+    <integer name="sync_failure_delay">5</integer>
     
 </resources>

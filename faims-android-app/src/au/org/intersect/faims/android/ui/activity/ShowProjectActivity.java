@@ -21,6 +21,8 @@ import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
+import au.org.intersect.faims.android.services.SyncService;
+import au.org.intersect.faims.android.services.SyncUploadDatabaseService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.IActionListener;
@@ -63,6 +65,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	private Project project;
 
 	private Arch16n arch16n;
+
+	private boolean syncEnabled;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +113,22 @@ public class ShowProjectActivity extends FragmentActivity {
 			this.gpsDataManager.destroyListener();
 		}
 		super.onDestroy();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (syncEnabled) {
+			startSync();
+		}
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		stopSync();
 	}
 
 	/*
@@ -402,35 +422,83 @@ public class ShowProjectActivity extends FragmentActivity {
     	choiceDialog.show();
     }
 	
-	@SuppressLint("HandlerLeak")
 	public void enableSync() {
-		// start sync upload service
+		syncEnabled = true;
 		
-		// Create a new Messenger for the communication back
-		final Handler handler = new Handler() {
-			
-			public void handleMessage(Message message) {
-				
-			}
-			
-		};
-		
-		// start service
-		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
-		
-    	// start upload service
-    	// note: the temp file is automatically deleted by the service after it has finished
-    	Messenger messenger = new Messenger(handler);
-	    intent.putExtra("MESSENGER", messenger);
-	    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3");
-	    intent.putExtra("project", project);
-	    intent.putExtra("userId", databaseManager.getUserId());
-	    ShowProjectActivity.this.startService(intent);
-		
+		startSync();
 	}
 
 	public void disableSync() {
+		syncEnabled = true;
+		
+		stopSync();
+	}
+	
+	public void stopSync() {
+		Log.d("FAIMS", "stopping sync");
+		
 		// stop sync upload service
+		Intent intent = new Intent(ShowProjectActivity.this, SyncService.class);
+		ShowProjectActivity.this.stopService(intent);
+	}
+
+	@SuppressLint("HandlerLeak")
+	public void startSync() {
+		if (serverDiscovery.isServerHostValid()) {
+			Log.d("FAIMS", "starting sync");
+			
+			// start sync upload service
+			
+			// Create a new Messenger for the communication back
+			final Handler handler = new Handler() {
+				
+				public void handleMessage(Message message) {
+					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+					if (resultCode == FAIMSClientResultCode.SUCCESS) {
+						// dispatch event
+						
+						
+					}
+					
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							try {
+								Thread.sleep(1000);
+								ShowProjectActivity.this.startSync();
+							} catch (Exception e) {
+								Log.e("FAIMS", "Error during sync upload", e);
+							}
+						}
+						
+					});
+				}
+				
+			};
+			
+			// start service
+			Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
+			
+	    	Messenger messenger = new Messenger(handler);
+		    intent.putExtra("MESSENGER", messenger);
+		    intent.putExtra("project", project);
+		    intent.putExtra("userId", "0");
+		    ShowProjectActivity.this.startService(intent);
+		    
+		} else {
+			Log.d("FAIMS", "sync locating server");
+			
+			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+
+    			@Override
+    			public void handleActionResponse(ActionResultCode resultCode,
+    					Object data) {
+    				startSync();
+    			}
+        		
+        	}).execute();
+		}
 	}
 
 }

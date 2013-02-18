@@ -16,6 +16,10 @@ public class UploadDatabaseService extends UploadService {
 		super("UploadDatabaseService");
 	}
 	
+	public UploadDatabaseService(String name) {
+		super(name);
+	}
+	
 	@Override
 	protected FAIMSClientResultCode doUpload(Intent intent) throws Exception {
 		File tempFile = null;
@@ -32,7 +36,8 @@ public class UploadDatabaseService extends UploadService {
 			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key);
 			
 	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
-	    	databaseManager.dumpDatabaseTo(tempFile);
+	    	
+	    	dumpDatabase(tempFile, project);
 	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
@@ -54,6 +59,10 @@ public class UploadDatabaseService extends UploadService {
 		} finally {
 			if (tempFile != null) tempFile.delete();
 		}
+	}
+
+	protected void dumpDatabase(File tempFile, Project project) throws Exception {
+    	databaseManager.dumpDatabaseTo(tempFile);
 	}
 
 }
