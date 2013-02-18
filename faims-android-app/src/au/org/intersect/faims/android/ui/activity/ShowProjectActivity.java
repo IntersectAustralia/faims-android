@@ -21,7 +21,6 @@ import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
-import au.org.intersect.faims.android.services.SyncService;
 import au.org.intersect.faims.android.services.SyncUploadDatabaseService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
@@ -267,7 +266,6 @@ public class ShowProjectActivity extends FragmentActivity {
 	    	// note: the temp file is automatically deleted by the service after it has finished
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("database", Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3");
 		    intent.putExtra("project", project);
 		    intent.putExtra("userId", databaseManager.getUserId());
 		    ShowProjectActivity.this.startService(intent);
@@ -438,14 +436,14 @@ public class ShowProjectActivity extends FragmentActivity {
 		Log.d("FAIMS", "stopping sync");
 		
 		// stop sync upload service
-		Intent intent = new Intent(ShowProjectActivity.this, SyncService.class);
+		Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
 		ShowProjectActivity.this.stopService(intent);
 	}
 
 	@SuppressLint("HandlerLeak")
 	public void startSync() {
 		if (serverDiscovery.isServerHostValid()) {
-			Log.d("FAIMS", "starting sync");
+			Log.d("FAIMS", "starting sync upload");
 			
 			// start sync upload service
 			
@@ -453,13 +451,6 @@ public class ShowProjectActivity extends FragmentActivity {
 			final Handler handler = new Handler() {
 				
 				public void handleMessage(Message message) {
-					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-					if (resultCode == FAIMSClientResultCode.SUCCESS) {
-						// dispatch event
-						
-						
-					}
-					
 					new Thread(new Runnable() {
 
 						@Override

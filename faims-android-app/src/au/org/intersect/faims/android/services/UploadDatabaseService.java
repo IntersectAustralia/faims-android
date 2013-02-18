@@ -25,10 +25,10 @@ public class UploadDatabaseService extends UploadService {
 		File tempFile = null;
 		
 		try {
-			String database = intent.getStringExtra("database");
 			String userId = intent.getStringExtra("userId");
 			Bundle extras = intent.getExtras();
 			Project project = (Project) extras.get("project");
+			String database = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3";
 			
 			// create temp database to upload
 			databaseManager.init(database);
