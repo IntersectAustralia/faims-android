@@ -328,6 +328,10 @@ setSyncEnabled(boolean value) {
 	linker.setSyncEnabled(value);
 }
 
+onSyncEvent(String startCallback, String successCallback, String failureCallback) {
+	linker.addSyncListener(startCallback, successCallback, failureCallback);
+}
+
 String getProjectName(){
 	return linker.getProjectName();
 }

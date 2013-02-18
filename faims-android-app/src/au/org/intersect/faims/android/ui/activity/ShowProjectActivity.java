@@ -1,11 +1,18 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.javarosa.form.api.FormEntryController;
 
 import roboguice.RoboGuice;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,6 +47,35 @@ import au.org.intersect.faims.android.util.ProjectUtil;
 import com.google.inject.Inject;
 
 public class ShowProjectActivity extends FragmentActivity {
+	
+	public interface SyncListener {
+		
+		public void handleStart();
+		public void handleSuccess();
+		public void handleFailure();
+		
+	}
+	
+	public class WifiBroadcastReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+		    final String action = intent.getAction();
+		    Log.d("FAIMS", "WifiBroadcastReceiver action " + action);
+		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
+		            if (!ShowProjectActivity.this.isSyncing && ShowProjectActivity.this.syncEnabled) {
+		            	startSync();
+		            }
+		        } else {
+		        	if (ShowProjectActivity.this.isSyncing) {
+		            	stopSync();
+		            }
+		        }
+		    }
+		}
+	}
+	
+	public WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver();
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
@@ -61,11 +97,17 @@ public class ShowProjectActivity extends FragmentActivity {
 	protected ChoiceDialog choiceDialog;
 	private AsyncTask<Void, Void, Void> locateTask;
 
-	private Project project;
+	private String projectKey;
 
 	private Arch16n arch16n;
 
 	private boolean syncEnabled;
+	private boolean isSyncing;
+	private int uploadSyncInterval;
+	
+	private List<SyncListener> listeners;
+
+	private boolean isUploadSyncRunning;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +120,10 @@ public class ShowProjectActivity extends FragmentActivity {
 		setContentView(R.layout.activity_show_project);
 		Intent data = getIntent();
 		
-		project = ProjectUtil.getProject(data.getStringExtra("key"));
+		Project project = ProjectUtil.getProject(data.getStringExtra("key"));
 		setTitle(project.name);
+		
+		this.projectKey = project.key;
 		
 		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
 		
@@ -101,6 +145,12 @@ public class ShowProjectActivity extends FragmentActivity {
 			
 		});
 		choiceDialog.show();
+		
+		listeners = new ArrayList<SyncListener>();
+		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+		registerReceiver(broadcastReceiver, intentFilter);
 	}
 	
 	@Override
@@ -121,6 +171,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		if (syncEnabled) {
 			startSync();
 		}
+		
 	}
 	
 	@Override
@@ -159,7 +210,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	*/
 	
 	protected void renderUI() {
-		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
 		
 		Log.d("FAIMS", "loading schema: " + projectDir + "/ui_schema.xml");
 		
@@ -170,8 +221,10 @@ public class ShowProjectActivity extends FragmentActivity {
 
 		// render the ui definition
 		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + project.key);
+		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + projectKey);
 		ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+		
+		Project project = ProjectUtil.getProject(projectKey);
 		
 		// bind the logic to the ui
 		Log.d("FAIMS","Binding logic to the UI");
@@ -211,6 +264,8 @@ public class ShowProjectActivity extends FragmentActivity {
 			// start service
     		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
 			
+    		Project project = ProjectUtil.getProject(projectKey);
+    		
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("project", project);
@@ -262,6 +317,8 @@ public class ShowProjectActivity extends FragmentActivity {
 			// start service
     		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
 			
+    		Project project = ProjectUtil.getProject(projectKey);
+    		
 	    	// start upload service
 	    	// note: the temp file is automatically deleted by the service after it has finished
 	    	Messenger messenger = new Messenger(handler);
@@ -421,75 +478,225 @@ public class ShowProjectActivity extends FragmentActivity {
     }
 	
 	public void enableSync() {
+		if (syncEnabled) return;
 		syncEnabled = true;
-		
 		startSync();
 	}
 
 	public void disableSync() {
-		syncEnabled = true;
-		
+		if (!syncEnabled) return;
+		syncEnabled = false;
 		stopSync();
 	}
 	
 	public void stopSync() {
 		Log.d("FAIMS", "stopping sync");
+		isSyncing = false;
+		stopUploadSync();
+	}
+	
+	public void startSync() {
+		if (!syncEnabled) return;
 		
-		// stop sync upload service
+		// wait for service to stop before starting
+		if (isUploadSyncRunning) {
+			delayStartSync();
+		} else {
+			
+			Log.d("FAIMS", "starting sync");
+			isSyncing = true;
+			resetUploadSyncInterval();
+			startUploadSync();
+		}
+	}
+	
+	public void delayStartSync() {	
+		Log.d("FAIMS", "delaying starting sync");
+		if (!syncEnabled) return;
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					while(isUploadSyncRunning) {
+						Thread.sleep(1000);
+					}
+					Thread.sleep(1000);
+					ShowProjectActivity.this.startSync();
+				} catch (Exception e) {
+					Log.e("FAIMS", "Error trying to start sync", e);
+				}
+			}
+			
+		}).start();
+	}
+	
+	private void stopUploadSync() {
+		Log.d("FAIMS", "stopping upload sync");
+		
 		Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
 		ShowProjectActivity.this.stopService(intent);
 	}
+	
+	private void startUploadSync() {
+		if (!syncEnabled) return;
+		
+		Log.d("FAIMS", "starting upload sync");
+		
+		// handler needs to be created on ui thread
+		runOnUiThread(new Runnable() {
 
+			@Override
+			public void run() {
+				
+				startUploadSyncService();
+				
+			}
+			
+		});
+		
+	}
+	
+	private void delayStartUploadSync() {
+		if (!syncEnabled) return;
+		
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					long time = uploadSyncInterval * 1000;
+					Log.d("FAIMS", "Waiting for next upload sync in " + time);
+					Thread.sleep(time);
+					ShowProjectActivity.this.startUploadSync();
+				} catch (Exception e) {
+					Log.e("FAIMS", "Error waiting for next sync upload", e);
+				}
+			}
+			
+		}).start();
+	}
+	
 	@SuppressLint("HandlerLeak")
-	public void startSync() {
+	private void startUploadSyncService() {
+		
 		if (serverDiscovery.isServerHostValid()) {
-			Log.d("FAIMS", "starting sync upload");
 			
 			// start sync upload service
-			
+					
 			// Create a new Messenger for the communication back
 			final Handler handler = new Handler() {
-				
-				public void handleMessage(Message message) {
-					new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							try {
-								Thread.sleep(1000);
-								ShowProjectActivity.this.startSync();
-							} catch (Exception e) {
-								Log.e("FAIMS", "Error during sync upload", e);
-							}
-						}
 						
-					});
+				public void handleMessage(Message message) {
+					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+					
+					if (resultCode != null) {
+						if (resultCode == FAIMSClientResultCode.SUCCESS) {
+							resetUploadSyncInterval();
+							
+							callSyncSuccess();
+						} else {
+							delayUploadSyncInterval();
+							
+							callSyncFailure();
+						}
+					}
+					
+					if (isSyncing) {
+						delayStartUploadSync();	
+					}
+					
+					isUploadSyncRunning = false;
 				}
-				
+						
 			};
-			
+					
 			// start service
 			Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
+					
+			Project project = ProjectUtil.getProject(projectKey);
 			
-	    	Messenger messenger = new Messenger(handler);
-		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", project);
-		    intent.putExtra("userId", "0");
-		    ShowProjectActivity.this.startService(intent);
-		    
+			Messenger messenger = new Messenger(handler);
+			intent.putExtra("MESSENGER", messenger);
+			intent.putExtra("project", project);
+			intent.putExtra("userId", "0");
+			ShowProjectActivity.this.startService(intent);
+			
+			callSyncStart();
+			
+			isUploadSyncRunning = true;
 		} else {
-			Log.d("FAIMS", "sync locating server");
-			
+			Log.d("FAIMS", "upload sync locating server");
+					
 			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
 
-    			@Override
-    			public void handleActionResponse(ActionResultCode resultCode,
-    					Object data) {
-    				startSync();
-    			}
-        		
-        	}).execute();
+		    	@Override
+		    	public void handleActionResponse(ActionResultCode resultCode,
+		    			Object data) {
+		    		if (resultCode == ActionResultCode.SUCCESS) {
+		    			startUploadSync();
+		    		} else {
+		    			delayUploadSyncInterval();
+		    			delayStartUploadSync();
+		    			
+		    			callSyncFailure();
+		    		}
+		    	}
+		      		
+			}).execute();
+		}
+	}
+	
+	private void resetUploadSyncInterval() {
+		uploadSyncInterval = getResources().getInteger(R.integer.sync_min_interval);
+	}
+	
+	private void delayUploadSyncInterval() {
+		uploadSyncInterval += getResources().getInteger(R.integer.sync_failure_delay);
+		int maxInterval = getResources().getInteger(R.integer.sync_max_interval);
+		if (uploadSyncInterval > maxInterval) 
+			uploadSyncInterval = maxInterval;
+	}
+	
+	public void addSyncListener(SyncListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void callSyncStart() {
+		for (SyncListener listener : listeners) {
+			listener.handleStart();
+		}
+	}
+	
+	public void callSyncSuccess() {
+		for (SyncListener listener : listeners) {
+			listener.handleSuccess();
+		}
+	}
+	
+	public void callSyncFailure() {
+		for (SyncListener listener : listeners) {
+			listener.handleFailure();
 		}
 	}
 
+	public void restartSync() {
+		stopSync();
+		startSync();
+	}
+	
+	/*
+	@SuppressWarnings("rawtypes")
+	private boolean isServiceRunning(Class c) {
+	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	    	Log.d("FAIMS", service.service.getClassName());
+	        if (c.getName().equals(service.service.getClass().getName())) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	*/
 }

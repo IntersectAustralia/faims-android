@@ -1976,6 +1976,26 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public void addSyncListener(final String startCallback, final String successCallback, final String failureCallback) {
+		this.activity.addSyncListener(new ShowProjectActivity.SyncListener() {
+			
+			@Override
+			public void handleStart() {
+				execute(startCallback);
+			}
+			
+			@Override
+			public void handleSuccess() {
+				execute(successCallback);
+			}
+			
+			@Override
+			public void handleFailure() {
+				execute(failureCallback);
+			}
+		});
+	}
+	
 	public String getProjectName(){
 		return this.project.getName();
 	}
@@ -2019,5 +2039,7 @@ public class BeanShellLinker {
 	public void setUser(User user) {
 		this.user = user;
 		this.databaseManager.setUserId(user.getUserId());
+		
+		this.activity.restartSync();
 	}
 }

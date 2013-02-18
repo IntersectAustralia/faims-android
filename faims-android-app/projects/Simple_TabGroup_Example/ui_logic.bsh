@@ -1,4 +1,33 @@
-setSyncEnabled(true);
+startSync() {
+	setSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+restartSync() {
+	User user = new User("1","Test","User");
+	setUser(user);
+}
+
+onEvent("tabgroup5/tab3/start", "click", "startSync()");
+onEvent("tabgroup5/tab3/stop", "click", "stopSync()");
+onEvent("tabgroup5/tab3/restart", "click", "restartSync()");
+
+syncStarted() {
+	showToast("starting sync");
+}
+
+syncCompleted() {
+	showToast("sync completed");
+}
+
+syncFailed() {
+	showToast("sync failed");
+}
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 
 onLoadPage() {
 	showToast("This is the entity page");

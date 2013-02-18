@@ -103,6 +103,11 @@
                   <push></push>
                   <pull></pull>
               </tab2>
+              <tab3>
+                  <start></start>
+                  <stop></stop>
+                  <restart></restart>
+              </tab3>
           </tabgroup5>
         </faims>
       </instance>
@@ -406,6 +411,18 @@
           </trigger>
           <trigger ref="pull">
               <label>Pull from Server</label>
+          </trigger>
+      </group>
+      <group ref="tab3">
+          <label>Start/Stop Sync</label>
+          <trigger ref="start">
+              <label>Start Sync</label>
+          </trigger>
+          <trigger ref="stop">
+              <label>Stop Sync</label>
+          </trigger>
+          <trigger ref="restart">
+              <label>Set Test User</label>
           </trigger>
       </group>
     </group>

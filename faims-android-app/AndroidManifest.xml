@@ -63,10 +63,6 @@
         <service
             android:name="au.org.intersect.faims.android.services.SyncUploadDatabaseService"
             ></service>
-        
-        <service
-            android:name="au.org.intersect.faims.android.services.SyncService"
-            ></service>
     </application>
 
 </manifest>

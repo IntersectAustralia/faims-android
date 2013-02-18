@@ -25,6 +25,7 @@ public abstract class DownloadService extends IntentService {
 	
 	@Override
 	public void onCreate() {
+		Log.d("FAIMS", "DownloadService.onCreate");
 		super.onCreate();
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 	}
@@ -41,11 +42,13 @@ public abstract class DownloadService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.d("FAIMS", "starting download service");
 		
+		FAIMSClientResultCode resultCode = null;
 		try {
-			FAIMSClientResultCode resultCode = doDownload(intent);
+			resultCode = doDownload(intent);
 			
 			if (downloadStopped) {
 				Log.d("FAIMS", "cancelled download");
+				resultCode = null;
 				return;
 			}
 		
@@ -53,13 +56,18 @@ public abstract class DownloadService extends IntentService {
 				faimsClient.invalidate();
 			}
 			
-			Bundle extras = intent.getExtras();
-			Messenger messenger = (Messenger) extras.get("MESSENGER");
-			Message msg = Message.obtain();
-			msg.obj = resultCode;
-			messenger.send(msg);
 		} catch (Exception e) {
 			Log.e("FAIMS", "download service failed", e);
+		} finally {
+			try {
+				Bundle extras = intent.getExtras();
+				Messenger messenger = (Messenger) extras.get("MESSENGER");
+				Message msg = Message.obtain();
+				msg.obj = resultCode;
+				messenger.send(msg);
+			} catch (Exception me) {
+				Log.e("FAIMS", "download service messenger failed", me);
+			}
 		}
 	}
 	

@@ -57,7 +57,6 @@ public class ProjectUtil {
 				FAIMSLog.log(e);
 			}
 		}
-		System.out.println(list.toString());
 		return list;
 	}
 

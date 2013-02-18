@@ -52,12 +52,13 @@ public abstract class UploadService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		Log.d("FAIMS", "starting upload service");
 		
-		File tempFile = null;
+		FAIMSClientResultCode resultCode = null;
 		try {
-			FAIMSClientResultCode resultCode = doUpload(intent);
+			resultCode = doUpload(intent);
 			
 			if (uploadStopped) {
 				Log.d("FAIMS", "cancelled upload");
+				resultCode = null;
 				return;
 			}
 			
@@ -65,16 +66,18 @@ public abstract class UploadService extends IntentService {
 				faimsClient.invalidate();
 			}
 			
-			Bundle extras = intent.getExtras();
-			Messenger messenger = (Messenger) extras.get("MESSENGER");
-			Message msg = Message.obtain();
-			msg.obj = resultCode;
-			messenger.send(msg);
-			
 		} catch (Exception e) {
 			Log.e("FAIMS", "upload service failed", e);
 		} finally {
-			if (tempFile != null) tempFile.delete();
+			try {
+				Bundle extras = intent.getExtras();
+				Messenger messenger = (Messenger) extras.get("MESSENGER");
+				Message msg = Message.obtain();
+				msg.obj = resultCode;
+				messenger.send(msg);
+			} catch (Exception me) {
+				Log.e("FAIMS", "upload service messenger failed", me);
+			}
 		}
 	}
 	

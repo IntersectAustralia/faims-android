@@ -580,7 +580,7 @@ public class DatabaseManager {
 		return "1"+ s + String.valueOf(System.currentTimeMillis());
 	}
 
-	public void dumpDatabaseTo(File file) throws Exception {
+	public void dumpDatabaseTo(File file) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {
 			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
@@ -609,7 +609,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public void dumpDatabaseTo(File file, String fromTimestamp) throws Exception {
+	public void dumpDatabaseTo(File file, String fromTimestamp) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {
 			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
@@ -619,7 +619,7 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 	
 				String query = 
-							"attach database '" + file.getAbsolutePath() + "' as export" +
+							"attach database '" + file.getAbsolutePath() + "' as export;" +
 							"create table export.archentity as select * from archentity where aenttimestamp > '" + fromTimestamp + "';" +
 							"create table export.aentvalue as select * from aentvalue where valuetimestamp > '" + fromTimestamp + "';" +
 							"create table export.aentreln as select * from aentreln where aentrelntimestamp > '" + fromTimestamp + "';" +

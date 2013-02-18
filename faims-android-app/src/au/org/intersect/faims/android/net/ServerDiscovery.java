@@ -39,8 +39,8 @@ public class ServerDiscovery {
 	
 	private boolean isFindingServer;
 	
-	private String serverIP = "172.16.30.212";
-	private String serverPort = "3000";
+	private String serverIP;
+	private String serverPort;
 
 	private Timer timer;
 	
@@ -71,8 +71,8 @@ public class ServerDiscovery {
 	}
 	
 	public void invalidateServerHost() {
-		//serverIP = null;
-		//serverPort = null;
+		serverIP = null;
+		serverPort = null;
 	}
 	
 	public boolean isServerHostValid() {
