@@ -1,3 +1,7 @@
+//setSyncMinInterval(10.0f);
+//setSyncMaxInterval(15.0f);
+//setSyncDelay(2.0f);
+
 startSync() {
 	setSyncEnabled(true);
 }

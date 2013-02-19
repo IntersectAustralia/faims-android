@@ -219,11 +219,12 @@ public class ShowProjectActivity extends FragmentActivity {
 
 	private boolean syncEnabled;
 	private boolean isSyncing;
-	private int uploadSyncInterval;
-	
-	private List<SyncListener> listeners;
-
 	private boolean isUploadSyncRunning;
+	private float syncInterval;
+	private float syncMinInterval;
+	private float syncMaxInterval;
+	private float syncDelay;
+	private List<SyncListener> listeners;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -267,6 +268,10 @@ public class ShowProjectActivity extends FragmentActivity {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
 		registerReceiver(broadcastReceiver, intentFilter);
+		
+		syncMinInterval = getResources().getInteger(R.integer.sync_min_interval);
+		syncMaxInterval = getResources().getInteger(R.integer.sync_max_interval);
+		syncDelay = getResources().getInteger(R.integer.sync_failure_delay);
 	}
 	
 	@Override
@@ -696,7 +701,7 @@ public class ShowProjectActivity extends FragmentActivity {
 			@Override
 			public void run() {
 				try {
-					long time = uploadSyncInterval * 1000;
+					long time = (long) syncInterval * 1000;
 					Log.d("FAIMS", "Waiting for next upload sync in " + time);
 					Thread.sleep(time);
 				} catch (Exception e) {
@@ -710,14 +715,13 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void resetUploadSyncInterval() {
-		uploadSyncInterval = getResources().getInteger(R.integer.sync_min_interval);
+		syncInterval = syncMinInterval;
 	}
 	
 	private void delayUploadSyncInterval() {
-		uploadSyncInterval += getResources().getInteger(R.integer.sync_failure_delay);
-		int maxInterval = getResources().getInteger(R.integer.sync_max_interval);
-		if (uploadSyncInterval > maxInterval) 
-			uploadSyncInterval = maxInterval;
+		syncInterval += syncDelay;
+		if (syncInterval > syncMaxInterval) 
+			syncInterval = syncMaxInterval;
 	}
 	
 	public void addSyncListener(SyncListener listener) {
@@ -745,6 +749,18 @@ public class ShowProjectActivity extends FragmentActivity {
 	public void restartSync() {
 		stopSync();
 		startSync();
+	}
+
+	public void setSyncMinInterval(float value) {
+		this.syncMinInterval = value;
+	}
+	
+	public void setSyncMaxInterval(float value) {
+		this.syncMaxInterval = value;
+	}
+	
+	public void setSyncDelay(float value) {
+		this.syncDelay = value;
 	}
 	
 	/*
