@@ -7,7 +7,6 @@ import java.util.List;
 import org.javarosa.form.api.FormEntryController;
 
 import roboguice.RoboGuice;
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +56,108 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 	}
 	
+	public static abstract class ShowProjectActivityHandler extends Handler {
+		
+		private WeakReference<ShowProjectActivity> activityRef;
+
+		public ShowProjectActivityHandler(ShowProjectActivity activity) {
+			this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		}
+		
+		public void handleMessage(Message message) {
+			ShowProjectActivity activity = activityRef.get();
+			if (activity == null) {
+				Log.d("FAIMS", "ShowProjectActivityHandler cannot get activity");
+				return;
+			}
+			
+			handleMessageSafe(activity, message);
+		}
+		
+		public abstract void handleMessageSafe(ShowProjectActivity activity, Message message);
+		
+	};
+	
+	public static class DownloadDatabaseHandler extends ShowProjectActivityHandler {
+
+		private String callback;
+
+		public DownloadDatabaseHandler(ShowProjectActivity activity, String callback) {
+			super(activity);
+			this.callback = callback;
+		}
+
+		@Override
+		public void handleMessageSafe(ShowProjectActivity activity,
+				Message message) {
+			activity.busyDialog.dismiss();
+			
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+				activity.linker.execute(callback);
+			} else {
+				activity.showDownloadDatabaseFailureDialog(callback);
+			}
+		}
+		
+	}
+	
+	public static class UploadDatabaseHandler extends ShowProjectActivityHandler {
+
+		private String callback;
+
+		public UploadDatabaseHandler(ShowProjectActivity activity, String callback) {
+			super(activity);
+			this.callback = callback;
+		}
+
+		@Override
+		public void handleMessageSafe(ShowProjectActivity activity,
+				Message message) {
+			activity.busyDialog.dismiss();
+			
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+				activity.linker.execute(callback);
+			} else {
+				activity.showUploadDatabaseFailureDialog(callback);
+			}
+		}
+		
+	}
+	
+	public static class SyncUploadDatabaseHandler extends ShowProjectActivityHandler {
+
+		public SyncUploadDatabaseHandler(ShowProjectActivity activity) {
+			super(activity);
+		}
+
+		@Override
+		public void handleMessageSafe(ShowProjectActivity activity,
+				Message message) {
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			
+			if (resultCode != null) {
+				if (resultCode == FAIMSClientResultCode.SUCCESS) {
+					activity.resetUploadSyncInterval();
+					
+					activity.callSyncSuccess();
+				} else {
+					activity.delayUploadSyncInterval();
+					
+					activity.callSyncFailure();
+				}
+			}
+			
+			if (activity.isSyncing) {
+				activity.delayStartUploadSync();	
+			}
+			
+			activity.isUploadSyncRunning = false;
+		}
+		
+	}
+	
 	public static class WifiBroadcastReceiver extends BroadcastReceiver {
 		
 		private WeakReference<ShowProjectActivity> activityRef;
@@ -90,7 +191,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 	}
 	
-	public WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
+	public final WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
@@ -253,33 +354,19 @@ public class ShowProjectActivity extends FragmentActivity {
 		return this.linker;
 	}
 	
-	@SuppressLint("HandlerLeak")
+	
 	public void downloadDatabaseFromServer(final String callback) {
 		FAIMSLog.log();
 		
 		if (serverDiscovery.isServerHostValid()) {
 			showBusyDownloadDatabaseDialog();
-		    
-    		// Create a new Messenger for the communication back
-    		final Handler handler = new Handler() {
-				
-				public void handleMessage(Message message) {
-					ShowProjectActivity.this.busyDialog.dismiss();
-					
-					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-					if (resultCode == FAIMSClientResultCode.SUCCESS) {
-						linker.execute(callback);
-					} else {
-						showDownloadDatabaseFailureDialog(callback);
-					}
-				}
-				
-			};
 			
 			// start service
     		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
 			
     		Project project = ProjectUtil.getProject(projectKey);
+    		
+    		DownloadDatabaseHandler handler = new DownloadDatabaseHandler(ShowProjectActivity.this, callback);
     		
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
@@ -306,33 +393,18 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 	}
 	
-	@SuppressLint("HandlerLeak")
 	public void uploadDatabaseToServer(final String callback) {
     	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyUploadDatabaseDialog();
 		    
-    		// Create a new Messenger for the communication back
-    		final Handler handler = new Handler() {
-				
-				public void handleMessage(Message message) {
-					ShowProjectActivity.this.busyDialog.dismiss();
-					
-					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-					if (resultCode == FAIMSClientResultCode.SUCCESS) {
-						linker.execute(callback);
-					} else {
-						showUploadDatabaseFailureDialog(callback);
-					}
-				}
-				
-			};
-			
 			// start service
     		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
 			
     		Project project = ProjectUtil.getProject(projectKey);
+    		
+    		UploadDatabaseHandler handler = new UploadDatabaseHandler(ShowProjectActivity.this, callback);
     		
 	    	// start upload service
 	    	// note: the temp file is automatically deleted by the service after it has finished
@@ -593,44 +665,16 @@ public class ShowProjectActivity extends FragmentActivity {
 		}).start();
 	}
 	
-	@SuppressLint("HandlerLeak")
 	private void startUploadSyncService() {
 		
 		if (serverDiscovery.isServerHostValid()) {
 			
 			// start sync upload service
-					
-			// Create a new Messenger for the communication back
-			final Handler handler = new Handler() {
-						
-				public void handleMessage(Message message) {
-					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-					
-					if (resultCode != null) {
-						if (resultCode == FAIMSClientResultCode.SUCCESS) {
-							resetUploadSyncInterval();
-							
-							callSyncSuccess();
-						} else {
-							delayUploadSyncInterval();
-							
-							callSyncFailure();
-						}
-					}
-					
-					if (isSyncing) {
-						delayStartUploadSync();	
-					}
-					
-					isUploadSyncRunning = false;
-				}
-						
-			};
-					
-			// start service
 			Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
 					
 			Project project = ProjectUtil.getProject(projectKey);
+			
+			SyncUploadDatabaseHandler handler = new SyncUploadDatabaseHandler(ShowProjectActivity.this);
 			
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);

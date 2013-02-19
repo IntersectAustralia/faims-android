@@ -1,15 +1,16 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +38,41 @@ import com.google.inject.Inject;
 
 public class FetchProjectsActivity extends RoboActivity {
 	
+	public static class FetchProjectsHandler extends Handler {
+		
+		private WeakReference<FetchProjectsActivity> activityRef;
+
+		public FetchProjectsHandler(FetchProjectsActivity activity) {
+			this.activityRef = new WeakReference<FetchProjectsActivity>(activity);
+		}
+		
+		public void handleMessage(Message message) {
+			FetchProjectsActivity activity = activityRef.get();
+			if (activity == null) {
+				Log.d("FAIMS", "FetchProjectsHandler cannot get activity");
+				return;
+			}
+			
+			activity.busyDialog.dismiss();
+			
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+				// start show project activity
+				
+				Intent showProjectsIntent = new Intent(activity, ShowProjectActivity.class);
+				showProjectsIntent.putExtra("key", activity.selectedProject.key);
+				activity.startActivityForResult(showProjectsIntent, 1);
+			} else {
+				if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
+					activity.showDownloadProjectErrorDialog();
+				} else {
+					activity.showDownloadProjectFailureDialog();
+				}
+			}
+		}
+		
+	};
+	
 	@Inject
 	FAIMSClient faimsClient;
 	@Inject
@@ -50,9 +86,11 @@ public class FetchProjectsActivity extends RoboActivity {
 	protected BusyDialog busyDialog;
 	protected ChoiceDialog choiceDialog;
 	protected ConfirmDialog confirmDialog;
+	
 	private AsyncTask<Void, Void, Void> locateTask;
 	private AsyncTask<Void, Void, Void> fetchTask;
-	protected Handler handler;
+	
+	protected final FetchProjectsHandler handler = new FetchProjectsHandler(FetchProjectsActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,7 +227,6 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
     
-	@SuppressLint("HandlerLeak")
 	protected void downloadProjectArchive() {
     	FAIMSLog.log();
     	
@@ -198,29 +235,7 @@ public class FetchProjectsActivity extends RoboActivity {
     		
     		// start service
     		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
-		    // Create a new Messenger for the communication back
-    		handler = new Handler() {
-				
-				public void handleMessage(Message message) {
-					FetchProjectsActivity.this.busyDialog.dismiss();
-					
-					FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-					if (resultCode == FAIMSClientResultCode.SUCCESS) {
-						// start show project activity
-						
-						Intent showProjectsIntent = new Intent(FetchProjectsActivity.this, ShowProjectActivity.class);
-						showProjectsIntent.putExtra("key", selectedProject.key);
-						FetchProjectsActivity.this.startActivityForResult(showProjectsIntent, 1);
-					} else {
-						if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
-							showDownloadProjectErrorDialog();
-						} else {
-							showDownloadProjectFailureDialog();
-						}
-					}
-				}
-				
-			};
+    		
 		    Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("project", selectedProject);
