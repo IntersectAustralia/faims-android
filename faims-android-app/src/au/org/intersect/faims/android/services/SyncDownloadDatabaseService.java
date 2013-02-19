@@ -1,6 +1,10 @@
 package au.org.intersect.faims.android.services;
 
+import java.io.File;
+import java.util.UUID;
+
 import android.content.Intent;
+import android.os.Environment;
 import android.util.Log;
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
@@ -16,10 +20,14 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 	
 	@Override
 	protected FAIMSClientResultCode doDownload(Intent intent) {
+		File tempDir = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			Log.d("FAIMS", "downloading database for " + project.name);
-			DownloadResult result = faimsClient.downloadDatabase(project);
+			
+			tempDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/" + UUID.randomUUID());
+			
+			DownloadResult result = faimsClient.downloadDatabase(project, project.version, tempDir.getAbsolutePath());
 			
 			// if result is success then update the project settings with version and timestamp
 			if (result.code == FAIMSClientResultCode.SUCCESS) {
@@ -32,6 +40,8 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 			return result.code;
 		} catch (Exception e) {
 			Log.d("FAIMS", "could not download database");
+		} finally {
+			if (tempDir != null) tempDir.delete();
 		}
 		return null;
 	}

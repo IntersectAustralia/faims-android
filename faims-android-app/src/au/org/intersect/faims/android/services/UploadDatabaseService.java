@@ -47,7 +47,7 @@ public class UploadDatabaseService extends UploadService {
 	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
-	    		return null; // note: this doesn't matter as upload is cancelled
+	    		return null; 
 	    	}
 	    	
 	    	// tar file

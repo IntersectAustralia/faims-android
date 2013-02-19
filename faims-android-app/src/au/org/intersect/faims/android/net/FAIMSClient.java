@@ -111,7 +111,7 @@ public class FAIMSClient {
 				return FAIMSClientResultCode.SUCCESS;
 				
 			} catch (Exception e) {
-				Log.e("FAIMS", "cannot upload file", e);
+				Log.e("FAIMS", "Error during uploading file", e);
 				
 				return FAIMSClientResultCode.SERVER_FAILURE;
 				
@@ -172,6 +172,16 @@ public class FAIMSClient {
 	public DownloadResult downloadDatabase(Project project) {
 		FileInfo info = new FileInfo();
 		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db", "/android/project/" + project.key + "/download_db", BASE_DIR + project.key, info);
+		DownloadResult result = new DownloadResult();
+		result.code = code;
+		result.info = info;
+		return result;
+	}
+	
+	public DownloadResult downloadDatabase(Project project, String version, String dir) {
+		FileInfo info = new FileInfo();
+		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db", 
+				"/android/project/" + project.key + "/download_db?version=" + version, dir, info);
 		DownloadResult result = new DownloadResult();
 		result.code = code;
 		result.info = info;
