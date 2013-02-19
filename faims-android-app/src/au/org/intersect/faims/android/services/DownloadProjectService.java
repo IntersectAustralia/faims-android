@@ -24,7 +24,6 @@ public class DownloadProjectService extends DownloadService {
 			if (result.code == FAIMSClientResultCode.SUCCESS) {
 				project = ProjectUtil.getProject(project.key); // get the latest settings
 				project.version = result.info.version;
-				project.timestamp = result.info.timestamp;
 				ProjectUtil.saveProject(project);
 			}
 			

@@ -39,6 +39,12 @@ public class UploadDatabaseService extends UploadService {
 	    	
 	    	dumpDatabase(tempFile, project);
 	    	
+	    	// check if database is empty
+	    	if (databaseManager.isEmpty(tempFile)) {
+	    		Log.d("FAIMS", "database is empty");
+	    		return FAIMSClientResultCode.SUCCESS;
+	    	}
+	    	
 	    	if (uploadStopped) {
 	    		Log.d("FAIMS", "cancelled upload");
 	    		return null; // note: this doesn't matter as upload is cancelled

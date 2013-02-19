@@ -674,5 +674,46 @@ public class DatabaseManager {
 			}
 		}
 	}
+
+	public boolean isEmpty(File file) throws jsqlite.Exception {
+		synchronized(DatabaseManager.class) {
+			Log.d("FAIMS", "checking if database " + file.getAbsolutePath() + " is empty");
+			jsqlite.Database db = null;
+			try {
+				
+				db = new jsqlite.Database();
+				db.open(file.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				if (!isTableEmpty(db, "archentity")) return false;
+				if (!isTableEmpty(db, "aentvalue")) return false;
+				if (!isTableEmpty(db, "relationship")) return false;
+				if (!isTableEmpty(db, "relnvalue")) return false;
+				if (!isTableEmpty(db, "aentreln")) return false;
+				
+				return true;
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
+			}
+		}
+	}
+	
+	private boolean isTableEmpty(jsqlite.Database db, String table) throws jsqlite.Exception {
+		Stmt st = null;
+		try {
+			st = db.prepare("select count(*) from " + table + ";");
+			st.step();
+			int count = st.column_int(0);
+			if (count == 0) {
+				return true;
+			}
+			return false;
+		} finally {
+			if (st != null) st.close();
+		}
+		
+	}
 	
 }

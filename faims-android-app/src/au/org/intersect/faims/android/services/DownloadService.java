@@ -58,6 +58,7 @@ public abstract class DownloadService extends IntentService {
 			
 		} catch (Exception e) {
 			Log.e("FAIMS", "download service failed", e);
+			resultCode = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			try {
 				Bundle extras = intent.getExtras();

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
@@ -66,8 +67,14 @@ public abstract class UploadService extends IntentService {
 				faimsClient.invalidate();
 			}
 			
+			Bundle extras = intent.getExtras();
+			Project project = (Project) extras.get("project");
+			
+			doComplete(resultCode, project);
+			
 		} catch (Exception e) {
 			Log.e("FAIMS", "upload service failed", e);
+			resultCode = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			try {
 				Bundle extras = intent.getExtras();
@@ -82,5 +89,9 @@ public abstract class UploadService extends IntentService {
 	}
 	
 	protected abstract FAIMSClientResultCode doUpload(Intent intent) throws Exception;
+	
+	protected void doComplete(FAIMSClientResultCode resultCode, Project project) throws Exception {
+		
+	}
 
 }

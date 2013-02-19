@@ -1,5 +1,10 @@
 package au.org.intersect.faims.android.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
@@ -30,6 +35,12 @@ public class DateUtil {
 			s = "0" + s;
 		}
 		return s;
+	}
+	
+	public static String getCurrentTimestampGMT(String format) {
+		SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.ENGLISH);
+		formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+		return formatter.format(new Date());
 	}
 
 }
