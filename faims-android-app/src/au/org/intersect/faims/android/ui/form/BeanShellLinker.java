@@ -2039,7 +2039,5 @@ public class BeanShellLinker {
 	public void setUser(User user) {
 		this.user = user;
 		this.databaseManager.setUserId(user.getUserId());
-		
-		this.activity.restartSync();
 	}
 }
