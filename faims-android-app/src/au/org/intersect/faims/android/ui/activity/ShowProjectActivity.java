@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,26 +57,40 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 	}
 	
-	public class WifiBroadcastReceiver extends BroadcastReceiver {
+	public static class WifiBroadcastReceiver extends BroadcastReceiver {
+		
+		private WeakReference<ShowProjectActivity> activityRef;
+
+		public WifiBroadcastReceiver(ShowProjectActivity activity) {
+			this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		}
+		
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			ShowProjectActivity activity = this.activityRef.get();
+			if (activity == null) {
+				Log.d("FAIMS", "WifiBroadcastReciever cannot get activity");
+				return;
+			}
+			
 		    final String action = intent.getAction();
 		    Log.d("FAIMS", "WifiBroadcastReceiver action " + action);
+		    
 		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
 		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
-		            if (!ShowProjectActivity.this.isSyncing && ShowProjectActivity.this.syncEnabled) {
-		            	startSync();
+		            if (!activity.isSyncing && activity.syncEnabled) {
+		            	activity.startSync();
 		            }
 		        } else {
-		        	if (ShowProjectActivity.this.isSyncing) {
-		            	stopSync();
+		        	if (activity.isSyncing) {
+		        		activity.stopSync();
 		            }
 		        }
 		    }
 		}
 	}
 	
-	public WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver();
+	public WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
