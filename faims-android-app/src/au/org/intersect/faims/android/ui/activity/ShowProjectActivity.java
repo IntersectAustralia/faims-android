@@ -138,11 +138,7 @@ public class ShowProjectActivity extends FragmentActivity {
 				Message message) {
 			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				//activity.startDownloadSync();
-				activity.resetSyncInterval();
-				activity.waitForNextSync();
-				
-				activity.callSyncSuccess();
+				activity.startDownloadSync();
 			} else if (resultCode != null) {
 				activity.delaySyncInterval();
 				activity.waitForNextSync();
@@ -256,6 +252,9 @@ public class ShowProjectActivity extends FragmentActivity {
 							if (!isSyncUploading && !isSyncDownloading) {
 								ShowProjectActivity.this.startSync();
 							}
+							break;
+						default:
+							// do nothing
 							break;
 						}
 						
@@ -689,6 +688,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	public void enableSync() {
 		if (syncEnabled) return;
 		syncEnabled = true;
+		resetSyncInterval();
 		startSync();
 	}
 

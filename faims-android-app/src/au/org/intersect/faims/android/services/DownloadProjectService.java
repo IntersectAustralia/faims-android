@@ -31,7 +31,7 @@ public class DownloadProjectService extends DownloadService {
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.d("FAIMS", "could not download project");
+			Log.e("FAIMS", "could not download project", e);
 		}
 		return null;
 	}

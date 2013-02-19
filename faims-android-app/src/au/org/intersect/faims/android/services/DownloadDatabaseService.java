@@ -35,7 +35,7 @@ public class DownloadDatabaseService extends DownloadService {
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.d("FAIMS", "could not download database");
+			Log.e("FAIMS", "could not download database", e);
 		}
 		return null;
 	}
