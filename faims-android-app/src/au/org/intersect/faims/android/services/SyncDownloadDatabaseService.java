@@ -8,14 +8,10 @@ import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
-public class DownloadDatabaseService extends DownloadService {
+public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 
-	public DownloadDatabaseService() {
-		super("DownloadDatabaseService");
-	}
-	
-	public DownloadDatabaseService(String name) {
-		super(name);
+	public SyncDownloadDatabaseService() {
+		super("SyncDownloadDatabaseService");
 	}
 	
 	@Override
@@ -39,5 +35,4 @@ public class DownloadDatabaseService extends DownloadService {
 		}
 		return null;
 	}
-
 }
