@@ -42,5 +42,9 @@ public class DateUtil {
 		formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return formatter.format(new Date());
 	}
+	
+	public static String getCurrentTimestampGMT() {
+		return getCurrentTimestampGMT("yyyy-MM-dd HH:mm:ss");
+	}
 
 }

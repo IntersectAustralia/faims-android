@@ -609,10 +609,15 @@ public class ShowProjectActivity extends FragmentActivity {
 					while(isUploadSyncRunning) {
 						Thread.sleep(1000);
 					}
-					Thread.sleep(1000);
-					ShowProjectActivity.this.startSync();
+					
+					// TODO isUploadSyncRunning is set to false after upload is complete but service is still running
+					// need to delay starting sync until service finishes. is there a better way?
+					int time = getResources().getInteger(R.integer.sync_restart_time) * 1000;
+					Thread.sleep(time);
 				} catch (Exception e) {
 					Log.e("FAIMS", "Error trying to start sync", e);
+				} finally {
+					ShowProjectActivity.this.startSync();
 				}
 			}
 			
@@ -631,16 +636,54 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		Log.d("FAIMS", "starting upload sync");
 		
-		// handler needs to be created on ui thread
+		// handler must be created on ui thread
 		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				startUploadSyncService();
-				
-			}
 			
+			@Override 
+			public void run() {
+				if (serverDiscovery.isServerHostValid()) {
+					
+					// start sync upload service
+					Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
+							
+					Project project = ProjectUtil.getProject(projectKey);
+					
+					SyncUploadDatabaseHandler handler = new SyncUploadDatabaseHandler(ShowProjectActivity.this);
+					
+					Messenger messenger = new Messenger(handler);
+					intent.putExtra("MESSENGER", messenger);
+					intent.putExtra("project", project);
+					String userId = databaseManager.getUserId();
+					if (userId == null) {
+						userId = "0"; // TODO: what should happen if user sets no user?
+					}
+					intent.putExtra("userId", userId);
+					ShowProjectActivity.this.startService(intent);
+					
+					callSyncStart();
+					
+					isUploadSyncRunning = true;
+				} else {
+					Log.d("FAIMS", "upload sync locating server");
+							
+					locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+		
+				    	@Override
+				    	public void handleActionResponse(ActionResultCode resultCode,
+				    			Object data) {
+				    		if (resultCode == ActionResultCode.SUCCESS) {
+				    			startUploadSync();
+				    		} else {
+				    			delayUploadSyncInterval();
+				    			delayStartUploadSync();
+				    			
+				    			callSyncFailure();
+				    		}
+				    	}
+				      		
+					}).execute();
+				}
+			}
 		});
 		
 	}
@@ -656,55 +699,14 @@ public class ShowProjectActivity extends FragmentActivity {
 					long time = uploadSyncInterval * 1000;
 					Log.d("FAIMS", "Waiting for next upload sync in " + time);
 					Thread.sleep(time);
-					ShowProjectActivity.this.startUploadSync();
 				} catch (Exception e) {
 					Log.e("FAIMS", "Error waiting for next sync upload", e);
+				} finally {
+					ShowProjectActivity.this.startUploadSync();
 				}
 			}
 			
 		}).start();
-	}
-	
-	private void startUploadSyncService() {
-		
-		if (serverDiscovery.isServerHostValid()) {
-			
-			// start sync upload service
-			Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
-					
-			Project project = ProjectUtil.getProject(projectKey);
-			
-			SyncUploadDatabaseHandler handler = new SyncUploadDatabaseHandler(ShowProjectActivity.this);
-			
-			Messenger messenger = new Messenger(handler);
-			intent.putExtra("MESSENGER", messenger);
-			intent.putExtra("project", project);
-			intent.putExtra("userId", "0");
-			ShowProjectActivity.this.startService(intent);
-			
-			callSyncStart();
-			
-			isUploadSyncRunning = true;
-		} else {
-			Log.d("FAIMS", "upload sync locating server");
-					
-			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
-
-		    	@Override
-		    	public void handleActionResponse(ActionResultCode resultCode,
-		    			Object data) {
-		    		if (resultCode == ActionResultCode.SUCCESS) {
-		    			startUploadSync();
-		    		} else {
-		    			delayUploadSyncInterval();
-		    			delayStartUploadSync();
-		    			
-		    			callSyncFailure();
-		    		}
-		    	}
-		      		
-			}).execute();
-		}
 	}
 	
 	private void resetUploadSyncInterval() {
@@ -746,6 +748,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	/*
+	
 	@SuppressWarnings("rawtypes")
 	private boolean isServiceRunning(Class c) {
 	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -757,5 +760,6 @@ public class ShowProjectActivity extends FragmentActivity {
 	    }
 	    return false;
 	}
+	
 	*/
 }

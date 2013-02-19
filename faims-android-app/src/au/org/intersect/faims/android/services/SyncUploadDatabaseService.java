@@ -27,7 +27,7 @@ public class SyncUploadDatabaseService extends UploadDatabaseService {
 	protected void doComplete(FAIMSClientResultCode resultCode, Project project) {
 		if (resultCode == FAIMSClientResultCode.SUCCESS) {
 			project = ProjectUtil.getProject(project.key); // get the latest settings
-			project.timestamp = DateUtil.getCurrentTimestampGMT("yyyy-MM-dd HH:mm:ss");
+			project.timestamp = DateUtil.getCurrentTimestampGMT();
 			ProjectUtil.saveProject(project);
 		}
 	}

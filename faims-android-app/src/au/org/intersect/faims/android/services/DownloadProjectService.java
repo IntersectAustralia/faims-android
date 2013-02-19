@@ -5,6 +5,7 @@ import android.util.Log;
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
 public class DownloadProjectService extends DownloadService {
@@ -24,6 +25,7 @@ public class DownloadProjectService extends DownloadService {
 			if (result.code == FAIMSClientResultCode.SUCCESS) {
 				project = ProjectUtil.getProject(project.key); // get the latest settings
 				project.version = result.info.version;
+				project.timestamp = DateUtil.getCurrentTimestampGMT();
 				ProjectUtil.saveProject(project);
 			}
 			
