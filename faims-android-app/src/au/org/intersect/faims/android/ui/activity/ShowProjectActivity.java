@@ -827,8 +827,6 @@ public class ShowProjectActivity extends FragmentActivity {
 				ShowProjectActivity.this.startService(intent);
 				
 				isSyncDownloading = true;
-				
-				callSyncStart();
 			}
 		});
 	}
