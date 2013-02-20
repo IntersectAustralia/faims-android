@@ -1,5 +1,5 @@
-setSyncMinInterval(30.0f);
-setSyncMaxInterval(30.0f);
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(10.0f);
 setSyncDelay(5.0f);
 
 startSync() {
