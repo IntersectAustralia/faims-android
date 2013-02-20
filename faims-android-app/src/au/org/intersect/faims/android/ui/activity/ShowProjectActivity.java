@@ -228,8 +228,8 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		@Override 
 		public void start() {
-			super.start();
 			wakeup();
+			super.start();
 		}
 		
 		@Override
