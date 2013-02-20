@@ -229,7 +229,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		@Override 
 		public void start() {
 			super.start();
-			state = SyncState.IDLE;
+			wakeup();
 		}
 		
 		@Override
@@ -288,6 +288,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		public void wakeup() {
 			this.isSleeping = false;
+			this.state = SyncState.IDLE;
 		}
 		
 		public void kill() {
@@ -716,6 +717,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		// stop download sync
 		Intent downloadIntent = new Intent(ShowProjectActivity.this, SyncDownloadDatabaseService.class);
 		ShowProjectActivity.this.stopService(downloadIntent);
+		
 	}
 	
 	public void startSync() {
