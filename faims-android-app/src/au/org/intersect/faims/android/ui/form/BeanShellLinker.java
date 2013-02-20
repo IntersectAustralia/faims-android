@@ -2037,14 +2037,28 @@ public class BeanShellLinker {
 	}
 	
 	public void setSyncMinInterval(float value) {
+		if (value < 0) {
+			showWarning("Logic Error", "Invalid sync min interval");
+			return;
+		}
+		
 		this.activity.setSyncMinInterval(value);
 	}
 	
 	public void setSyncMaxInterval(float value) {
+		if (value < 0 || value < this.activity.getSyncMinInterval()) {
+			showWarning("Logic Error", "Invalid sync max interval");
+			return;
+		}
+		
 		this.activity.setSyncMaxInterval(value);
 	}
 	
 	public void setSyncDelay(float value) {
+		if (value < 0) {
+			showWarning("Logic Error", "Invalid sync delay");
+			return;
+		}
 		this.activity.setSyncDelay(value);
 	}
 	

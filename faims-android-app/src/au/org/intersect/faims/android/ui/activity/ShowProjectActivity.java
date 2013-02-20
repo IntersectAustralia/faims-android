@@ -881,6 +881,18 @@ public class ShowProjectActivity extends FragmentActivity {
 	public void setSyncDelay(float value) {
 		this.syncDelay = value;
 	}
+
+	public float getSyncMinInterval() {
+		return this.syncMinInterval;
+	}
+	
+	public float getSyncMaxInterval(float value) {
+		return this.syncMaxInterval;
+	}
+	
+	public float gettSyncDelay(float value) {
+		return this.syncDelay;
+	}
 	
 	/*
 	
