@@ -57,6 +57,10 @@
             ></service>
         
         <service
+            android:name="au.org.intersect.faims.android.services.SyncDownloadDatabaseService"
+            ></service>
+        
+        <service
             android:name="au.org.intersect.faims.android.services.UploadDatabaseService"
             ></service>
         

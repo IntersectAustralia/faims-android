@@ -716,4 +716,31 @@ public class DatabaseManager {
 		
 	}
 	
+	public void mergeDatabaseFrom(File file) throws jsqlite.Exception {
+		synchronized(DatabaseManager.class) {
+			Log.d("FAIMS", "merging database");
+			jsqlite.Database db = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				String query = 
+						"attach database '" + file.getAbsolutePath() + "' as import;" +
+						"insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);" +
+						"insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);" +
+						"insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);" +
+						"insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);" + 
+						"insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);" +
+						"detach database import;";
+				db.exec(query, createCallback());
+			} finally {
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FAIMSLog.log(e);
+				}
+			}
+		}
+	}
+	
 }

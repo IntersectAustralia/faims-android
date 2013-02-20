@@ -332,6 +332,18 @@ onSyncEvent(String startCallback, String successCallback, String failureCallback
 	linker.addSyncListener(startCallback, successCallback, failureCallback);
 }
 
+public setSyncMinInterval(float value) {
+	linker.setSyncMinInterval(value);
+}
+
+public setSyncMaxInterval(float value) {
+	linker.setSyncMaxInterval(value);
+}
+
+public setSyncDelay(float value) {
+	linker.setSyncDelay(value);
+}
+
 String getProjectName(){
 	return linker.getProjectName();
 }

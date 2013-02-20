@@ -14,6 +14,10 @@ public class DownloadDatabaseService extends DownloadService {
 		super("DownloadDatabaseService");
 	}
 	
+	public DownloadDatabaseService(String name) {
+		super(name);
+	}
+	
 	@Override
 	protected FAIMSClientResultCode doDownload(Intent intent) {
 		try {
@@ -25,13 +29,13 @@ public class DownloadDatabaseService extends DownloadService {
 			if (result.code == FAIMSClientResultCode.SUCCESS) {
 				project = ProjectUtil.getProject(project.key); // get the latest settings
 				project.version = result.info.version;
-				project.timestamp = DateUtil.getCurrentTimestampGMT();
+				project.timestamp = DateUtil.getCurrentTimestampGMT(); // note: updating timestamp as database is overwritten
 				ProjectUtil.saveProject(project);
 			}
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.d("FAIMS", "could not download database");
+			Log.e("FAIMS", "could not download database", e);
 		}
 		return null;
 	}

@@ -28,6 +28,7 @@ import android.net.http.AndroidHttpClient;
 import android.os.Environment;
 import android.util.Log;
 import au.org.intersect.faims.android.data.DownloadResult;
+import au.org.intersect.faims.android.data.FetchResult;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -111,7 +112,7 @@ public class FAIMSClient {
 				return FAIMSClientResultCode.SUCCESS;
 				
 			} catch (Exception e) {
-				Log.e("FAIMS", "cannot upload file", e);
+				Log.e("FAIMS", "Error during uploading file", e);
 				
 				return FAIMSClientResultCode.SERVER_FAILURE;
 				
@@ -160,6 +161,44 @@ public class FAIMSClient {
 		}
 	}
 	
+	public FetchResult fetchDatabaseVersion(Project project) {
+		synchronized(FAIMSClient.class) {
+	
+			InputStream stream = null;
+			try {			
+				initClient();
+				
+				FileInfo info = new FileInfo();
+				
+				getFileInfo("/android/project/" + project.key + "/archive_db", info);
+				
+				FAIMSLog.log("fetched database version!");
+				
+				FetchResult result = new FetchResult();
+				result.code = FAIMSClientResultCode.SUCCESS;
+				result.data = info;
+		        
+				return result;
+			} catch(Exception e) {
+				FAIMSLog.log(e);
+				
+				FetchResult result = new FetchResult();
+				result.code = FAIMSClientResultCode.SERVER_FAILURE;
+				return result;
+				
+			} finally {
+				
+				try {
+					if (stream != null) stream.close();
+				} catch (IOException e) {
+					FAIMSLog.log(e);
+				}
+				
+				cleanupClient();
+			}
+		}
+	}
+	
 	public DownloadResult downloadProject(Project project) {
 		FileInfo info = new FileInfo();
 		FAIMSClientResultCode code = downloadFile("/android/project/" + project.key + "/archive", "/android/project/" + project.key + "/download", BASE_DIR, info);
@@ -172,6 +211,16 @@ public class FAIMSClient {
 	public DownloadResult downloadDatabase(Project project) {
 		FileInfo info = new FileInfo();
 		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db", "/android/project/" + project.key + "/download_db", BASE_DIR + project.key, info);
+		DownloadResult result = new DownloadResult();
+		result.code = code;
+		result.info = info;
+		return result;
+	}
+	
+	public DownloadResult downloadDatabase(Project project, String version, String dir) {
+		FileInfo info = new FileInfo();
+		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db?version=" + version, 
+				"/android/project/" + project.key + "/download_db?version=" + version, dir, info);
 		DownloadResult result = new DownloadResult();
 		result.code = code;
 		result.info = info;

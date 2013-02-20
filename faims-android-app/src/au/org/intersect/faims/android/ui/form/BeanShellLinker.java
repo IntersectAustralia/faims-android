@@ -2036,6 +2036,18 @@ public class BeanShellLinker {
 		this.baseDir = dir;
 	}
 	
+	public void setSyncMinInterval(float value) {
+		this.activity.setSyncMinInterval(value);
+	}
+	
+	public void setSyncMaxInterval(float value) {
+		this.activity.setSyncMaxInterval(value);
+	}
+	
+	public void setSyncDelay(float value) {
+		this.activity.setSyncDelay(value);
+	}
+	
 	public void setUser(User user) {
 		this.user = user;
 		this.databaseManager.setUserId(user.getUserId());

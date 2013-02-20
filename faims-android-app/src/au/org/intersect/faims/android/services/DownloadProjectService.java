@@ -25,13 +25,13 @@ public class DownloadProjectService extends DownloadService {
 			if (result.code == FAIMSClientResultCode.SUCCESS) {
 				project = ProjectUtil.getProject(project.key); // get the latest settings
 				project.version = result.info.version;
-				project.timestamp = DateUtil.getCurrentTimestampGMT();
+				project.timestamp = DateUtil.getCurrentTimestampGMT(); // note: updating timestamp as database is overwritten
 				ProjectUtil.saveProject(project);
 			}
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.d("FAIMS", "could not download project");
+			Log.e("FAIMS", "could not download project", e);
 		}
 		return null;
 	}

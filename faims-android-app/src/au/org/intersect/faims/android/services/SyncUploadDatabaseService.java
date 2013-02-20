@@ -10,11 +10,14 @@ import au.org.intersect.faims.android.util.ProjectUtil;
 
 public class SyncUploadDatabaseService extends UploadDatabaseService {
 	
+	private String dumpTimestamp;
+	
 	public SyncUploadDatabaseService() {
 		super("SyncUploadDatabaseService");
 	}
 	
 	protected void dumpDatabase(File tempFile, Project project) throws Exception {
+		dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 		if (project.timestamp == null) {
 			databaseManager.dumpDatabaseTo(tempFile);
 		} else {
@@ -27,7 +30,7 @@ public class SyncUploadDatabaseService extends UploadDatabaseService {
 	protected void doComplete(FAIMSClientResultCode resultCode, Project project) {
 		if (resultCode == FAIMSClientResultCode.SUCCESS) {
 			project = ProjectUtil.getProject(project.key); // get the latest settings
-			project.timestamp = DateUtil.getCurrentTimestampGMT();
+			project.timestamp = dumpTimestamp;
 			ProjectUtil.saveProject(project);
 		}
 	}
