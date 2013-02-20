@@ -1,6 +1,6 @@
-//setSyncMinInterval(10.0f);
-//setSyncMaxInterval(15.0f);
-//setSyncDelay(2.0f);
+setSyncMinInterval(30.0f);
+setSyncMaxInterval(30.0f);
+setSyncDelay(5.0f);
 
 startSync() {
 	setSyncEnabled(true);
@@ -24,6 +24,7 @@ syncStarted() {
 }
 
 syncCompleted() {
+ 	updateEntityRelationship();
 	showToast("sync completed");
 }
 

@@ -297,7 +297,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 	}
 	
-	public final WifiBroadcastReceiver broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
+	public WifiBroadcastReceiver broadcastReceiver;
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
@@ -377,6 +377,8 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		listeners = new ArrayList<SyncListener>();
 		
+		broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
+		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
 		registerReceiver(broadcastReceiver, intentFilter);
@@ -399,6 +401,9 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 		if (this.syncManagerThread != null) {
 			this.syncManagerThread.kill();
+		}
+		if (this.broadcastReceiver != null) {
+			this.unregisterReceiver(broadcastReceiver);
 		}
 		super.onDestroy();
 	}
