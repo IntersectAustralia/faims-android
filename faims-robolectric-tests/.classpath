@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="libs/maps.jar"/>
 	<classpathentry kind="lib" path="libs/roboguice-2.0.jar"/>
 	<classpathentry kind="lib" path="libs/robolectric-1.1-jar-with-dependencies.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/code"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

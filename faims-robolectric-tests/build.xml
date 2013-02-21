@@ -7,7 +7,7 @@
 
 	<property name="libs.dir" value="./libs/"/>
 	<property name="build.dir" value="./build/"/>
-	<property name="android.project.classpath" value="../faims-android-app/bin/classes/"/>
+	<property name="android.project.classpath" value="../faims-android-app/bin/classes/;../android-filechooser/code/bin/"/>
 	<property name="test.report.dir" value="./test-reports/"/>
 	<property name="test.html.dir" value="./test-report-html/"/>
 	<property name="source.dir" value="./src/"/>	
