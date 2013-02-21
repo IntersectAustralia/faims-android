@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
+import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,9 +26,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.LinearLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -97,6 +99,8 @@ public class BeanShellLinker {
 
 	@SuppressWarnings("unused")
 	private User user;
+
+	private String lastFileBrowserCallback;
 
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
 			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
@@ -2065,5 +2069,20 @@ public class BeanShellLinker {
 	public void setUser(User user) {
 		this.user = user;
 		this.databaseManager.setUserId(user.getUserId());
+	}
+	
+	public void showFileBrowser(String callback) {
+		this.lastFileBrowserCallback = callback;
+		this.activity.showFileBrowser();
+	}
+
+	public void setLastSelectedFile(LocalFile localFile) {
+		try {
+			interpreter.set("_last_selected_filename", localFile.getName());
+			interpreter.set("_last_selected_filepath", localFile.getAbsolutePath());
+			this.execute(lastFileBrowserCallback);
+		} catch (Exception e) {
+			Log.d("FAIMS", "Cannot set selected filename", e);
+		}
 	}
 }

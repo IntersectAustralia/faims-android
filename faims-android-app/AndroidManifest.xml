@@ -67,6 +67,14 @@
         <service
             android:name="au.org.intersect.faims.android.services.SyncUploadDatabaseService"
             ></service>
+        
+        <activity android:name="group.pals.android.lib.ui.filechooser.FileChooserActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@android:style/Theme.Dialog"
+            ></activity>
+        
+        <service android:name="group.pals.android.lib.ui.filechooser.services.LocalFileProvider"
+            ></service>
     </application>
 
 </manifest>

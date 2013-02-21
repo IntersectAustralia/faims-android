@@ -378,3 +378,13 @@ onDownload() {
 downloadDatabase() {
 	pullDatabaseFromServer("onDownload()");
 }
+
+setFilename() {
+	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());
+}
+
+selectFile() {
+	showFileBrowser("setFilename()");
+}
+
+onEvent("tabgroup1/tab3/attach", "click", "selectFile()");
