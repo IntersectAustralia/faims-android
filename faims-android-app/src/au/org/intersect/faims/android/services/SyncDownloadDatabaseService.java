@@ -13,6 +13,7 @@ import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
 import com.google.inject.Inject;
@@ -84,7 +85,9 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 		} catch (Exception e) {
 			Log.e("FAIMS", "could not download database", e);
 		} finally {
-			if (tempDir != null) tempDir.delete();
+			if (tempDir != null) {
+				FileUtil.deleteDirectory(tempDir);
+			}
 		}
 		return null;
 	}
