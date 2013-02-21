@@ -20,16 +20,24 @@ onEvent("tabgroup5/tab3/stop", "click", "stopSync()");
 onEvent("tabgroup5/tab3/restart", "click", "restartSync()");
 
 syncStarted() {
-	showToast("starting sync");
+	showToast("staring sync");
+	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/laststart", time);
 }
 
 syncCompleted() {
- 	updateEntityRelationship();
-	showToast("sync completed");
+	showToast("completed sync");
+ 	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/lastsuccess", time);
 }
 
 syncFailed() {
-	showToast("sync failed");
+	showToast("failed sync");
+	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/lastfailure", time);
 }
 
 onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");

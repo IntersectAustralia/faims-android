@@ -107,6 +107,9 @@
                   <start></start>
                   <stop></stop>
                   <restart></restart>
+                  <laststart></laststart>
+                  <lastsuccess></lastsuccess>
+                  <lastfailure></lastfailure>
               </tab3>
           </tabgroup5>
         </faims>
@@ -123,6 +126,8 @@
       <bind nodeset="/faims/tabgroup1/tab3/location-certainty" type="decimal"/>
       <bind nodeset="/faims/tabgroup2/tab1/name" type="string"/>
       <bind nodeset="/faims/tabgroup3/tab1/verb" type="string"/>
+      <bind nodeset="/faims/tabgroup5/tab3/lastsuccess" type="string"/>
+      <bind nodeset="/faims/tabgroup5/tab3/lastfailure" type="string"/>
 
     </model>
   </h:head>
@@ -424,6 +429,15 @@
           <trigger ref="restart">
               <label>Set Test User</label>
           </trigger>
+          <input ref="laststart">
+              <label>Last Start Attempt:</label>
+          </input>
+          <input ref="lastsuccess">
+              <label>Last Success Attempt:</label>
+          </input>
+          <input ref="lastfailure">
+              <label>Last Failure Attempt:</label>
+          </input>
       </group>
     </group>
     
