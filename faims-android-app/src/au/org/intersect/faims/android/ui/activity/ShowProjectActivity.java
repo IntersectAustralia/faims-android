@@ -1,5 +1,9 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import group.pals.android.lib.ui.filechooser.FileChooserActivity;
+import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
+import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import au.org.intersect.faims.android.R;
@@ -301,6 +306,8 @@ public class ShowProjectActivity extends FragmentActivity {
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
+	public static final int FILE_BROWSER_REQUEST_CODE = 2;
+	
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -386,6 +393,9 @@ public class ShowProjectActivity extends FragmentActivity {
 		syncMinInterval = getResources().getInteger(R.integer.sync_min_interval);
 		syncMaxInterval = getResources().getInteger(R.integer.sync_max_interval);
 		syncDelay = getResources().getInteger(R.integer.sync_failure_delay);
+		
+		// set file browser to reset last location when activity is created
+		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
 	}
 	
 	@Override
@@ -439,19 +449,32 @@ public class ShowProjectActivity extends FragmentActivity {
 		FAIMSLog.log();
 		this.manager.dispatchPause(isFinishing());
 	}
-
+	*/
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		FAIMSLog.log();
+		
 		// after taking picture using camera
-		if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+		/*if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
 			Bitmap photo = (Bitmap) data.getExtras().get("data");
 			this.renderer.getCurrentImageView().setImageBitmap(photo);
 			this.renderer.clearCurrentImageView();
+		}*/
+		if (requestCode == FILE_BROWSER_REQUEST_CODE) {
+			if (resultCode == RESULT_OK) {
+				try {
+					@SuppressWarnings("unchecked")
+					List<LocalFile> files = (List<LocalFile>)
+			                data.getSerializableExtra(FileChooserActivity._Results);
+					
+		            linker.setLastSelectedFile(files.get(0));
+				} catch (Exception e) {
+					Log.e("FAIMS", "Error getting selected filename", e);
+				}
+			}
 		}
 	}
-	*/
+	
 	
 	protected void renderUI() {
 		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
@@ -880,6 +903,12 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	public void setSyncDelay(float value) {
 		this.syncDelay = value;
+	}
+
+	public void showFileBrowser() {
+		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
+		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
+		startActivityForResult(intent, FILE_BROWSER_REQUEST_CODE);
 	}
 	
 	/*

@@ -332,15 +332,15 @@ onSyncEvent(String startCallback, String successCallback, String failureCallback
 	linker.addSyncListener(startCallback, successCallback, failureCallback);
 }
 
-public setSyncMinInterval(float value) {
+setSyncMinInterval(float value) {
 	linker.setSyncMinInterval(value);
 }
 
-public setSyncMaxInterval(float value) {
+setSyncMaxInterval(float value) {
 	linker.setSyncMaxInterval(value);
 }
 
-public setSyncDelay(float value) {
+setSyncDelay(float value) {
 	linker.setSyncDelay(value);
 }
 
@@ -374,4 +374,16 @@ String getContactAndAddress(){
 
 String getParticipants(){
 	return linker.getParticipants();
+}
+
+getLastSelectedFilename() {
+	return _last_selected_filename;
+}
+
+getLastSelectedFilepath() {
+	return _last_selected_filepath;
+}
+
+showFileBrowser(String callback) {
+	linker.showFileBrowser(callback);
 }

@@ -33,6 +33,8 @@
                   <location-value></location-value>
                   <location-certainty></location-certainty>
                   <supervisor></supervisor>
+                  <filename></filename>
+                  <attach></attach>
               </tab3>
               <tab4>
                   <save></save>
@@ -215,6 +217,12 @@
                 <value>superd</value>
             </item>
         </select1>
+        <input ref="filename">
+            <label>Filename:</label>
+        </input>
+        <trigger ref="attach">
+            <label>Attach</label>
+        </trigger>
       </group>
       <group ref="tab4" faims_hidden="true">
         <label>Entity 4</label>
