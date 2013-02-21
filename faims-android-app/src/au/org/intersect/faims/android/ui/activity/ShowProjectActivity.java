@@ -194,6 +194,11 @@ public class ShowProjectActivity extends FragmentActivity {
 				return;
 			}
 			
+			if (!activity.isActivityShowing) {
+				Log.d("FAIMS", "WifiBroadcastReceiver activiy is hidden");
+				return;
+			}
+			
 		    final String action = intent.getAction();
 		    Log.d("FAIMS", "WifiBroadcastReceiver action " + action);
 		    
@@ -338,6 +343,8 @@ public class ShowProjectActivity extends FragmentActivity {
 
 	private SyncManagerThread syncManagerThread;
 
+	private boolean isActivityShowing;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -412,6 +419,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		
+		isActivityShowing = true;
+		
 		if (syncEnabled) {
 			startSync();
 		}
@@ -421,6 +430,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
+		isActivityShowing = false;
 		
 		stopSync();
 	}
