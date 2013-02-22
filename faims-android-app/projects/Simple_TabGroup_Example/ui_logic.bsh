@@ -31,6 +31,7 @@ syncCompleted() {
  	time = getCurrentTime();
 	System.out.println(time);
 	setFieldValue("tabgroup5/tab3/lastsuccess", time);
+	updateEntityRelationship();
 }
 
 syncFailed() {
