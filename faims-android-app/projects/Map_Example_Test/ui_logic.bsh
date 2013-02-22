@@ -1,0 +1,476 @@
+
+setupMap(id, lat, lon) {
+	showRasterMap(id, "natural-earth-2-mercator.tif");
+	setMapFocusPoint(id, lat, lon);
+	setMapRotation(id, 360.0f);
+	setMapZoom(id, 8.0f);
+	setMapTilt(id, 90.0f);
+}
+
+showMapTab() {
+	//setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
+	setupMap("tabgroup1/tab2/map", -33.58f, 151.23f); // sydney
+	showTab("tabgroup1/tab2");
+	addVectorLayers();
+}
+
+showMapTabGroup() {
+	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f); // sydney
+	showTabGroup("tabgroup2");
+	
+	refreshLayers();
+}
+
+refreshMapTab() {
+	showRasterMap("tabgroup1/tab2/map", "natural-earth-2-mercator.tif");
+	addVectorLayers();
+}
+
+List layers = new ArrayList();
+Integer pointLayerId;
+
+clearMapTab() {
+	for (Integer layerId : layers) {
+		clearVectorLayer("tabgroup1/tab2/map", layerId);
+	}
+	layers = new ArrayList();
+	
+	pointLayerId = createVectorLayer("tabgroup1/tab2/map");
+	layers.add(pointLayerId);
+}
+
+refreshMapTabGroup() {
+	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
+}
+
+showCurrentPositionTab(){
+	centerOnCurrentPosition("tabgroup1/tab2/map");
+}
+
+onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
+onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
+onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
+onEvent("tabgroup1/tab2/show", "click", "showCurrentPositionTab()");
+onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
+onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
+
+addVectorLayers() {
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp")); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
+}
+
+onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
+onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
+onEvent("tabgroup2/tab1/create", "click", "onDrawAction()");
+onEvent("tabgroup2/tab1/generate", "click", "onGenerateGrid()");
+onEvent("tabgroup2/tab1/layerActionBtn", "click", "onLayerAction()");
+onMapEvent("tabgroup2/tab1/map", "onMapClick()", "onMapSelect()");
+
+POINT = 1;
+LINE = 2;
+POLYGON = 3;
+GRID = 4;
+SELECT_SHAPE = 5;
+
+List canvasLayers = new ArrayList();
+List points = new ArrayList();
+List pointIds = new ArrayList();
+int gridId = 0;
+int tool = POINT;
+int currentLayerId = 0;
+int currentGeometryId = 0;
+
+onGenerateGrid() {
+	drawGrid("tabgroup2/tab1/map", currentLayerId, Color.YELLOW, 3, 5);
+}
+
+onMapSelect() {
+	System.out.println("select");
+	
+	if (tool != SELECT_SHAPE) return;
+	
+	geomId = getMapGeometrySelected();
+	System.out.println(geomId);
+	
+	if (currentGeometryId == geomId) return;
+	currentGeometryId = geomId;
+	
+	drawGeometryOverlay("tabgroup2/tab1/map", currentGeometryId);
+}
+
+onMapClick() {
+	System.out.println("click");
+
+	if (currentGeometryId != 0){
+		replaceGeometryOverlay("tabgroup2/tab1/map", currentGeometryId);
+		clearGeometryOverlay("tabgroup2/tab1/map");
+		currentGeometryId = 0;
+	}
+
+	if (currentLayerId == 0) {
+		showWarning("Logic Error", "No layer selected");
+		return;
+	}
+	
+	switch(tool) {
+		case POINT:
+			point = getMapPointClicked();
+			drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.RED);
+		break;
+		case LINE:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.GREEN)));
+		break;
+		case POLYGON:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.BLUE)));
+		break;
+		case GRID:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.YELLOW)));
+		break;
+	}
+}
+
+refreshLayers() {
+	
+	populateDropDown("tabgroup2/tab1/layers", canvasLayers);
+	
+	// check if current layer exists and set to that layer
+	if (canvasLayers.indexOf(String.valueOf(currentLayerId)) >= 0) {
+		setFieldValue("tabgroup2/tab1/layers", String.valueOf(currentLayerId));
+	} else {
+		currentLayerId = 0;
+		onChangeLayers();
+	}
+}
+
+drawBox(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(createPoint(p1.x, p1.y));
+	pts.add(createPoint(p2.x, p1.y));
+	pts.add(createPoint(p2.x, p2.y));
+	pts.add(createPoint(p1.x, p2.y));
+	pts.add(createPoint(p1.x, p1.y));
+	drawLine(map, layer, pts, color);
+}
+
+drawLine(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(p1);
+	pts.add(p2);
+	drawLine(map, layer, pts, color);
+}
+
+drawGrid(map, layer, color, cols, rows) {
+
+	if (gridId == 0) {
+		showWarning("Logic Error", "Cannot create grid.");
+		return;
+	}
+	
+	polygon = getGeometry(map, layer, gridId);
+	pts = polygon.getVertexList();
+	
+	p1 = pts.get(0);
+	p2 = pts.get(2);
+	
+	// draw a box
+	drawBox(map, layer, p1, p2, color);
+	
+	// draw grid
+	for (i = 1; i < cols; i++) {
+		t = p1.x + (p2.x - p1.x) * ((float) i / cols);
+		drawLine(map, layer, createPoint(t, p1.y), createPoint(t, p2.y), color);
+	}
+	
+	for (i = 1; i < rows; i++) {
+		t = p1.y + (p2.y - p1.y) * ((float) i / rows);
+		drawLine(map, layer, createPoint(p1.x, t), createPoint(p2.x, t), color);
+	}
+
+	clearGeometry(map, layer, gridId);
+	gridId = 0;
+}
+
+createShape() {
+	
+	switch(tool) {
+		case LINE:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			drawLine("tabgroup2/tab1/map", currentLayerId, points, Color.GREEN);
+			clearPoints();
+		break;
+		case POLYGON:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, Color.BLUE);
+			clearPoints();
+		break;
+		case GRID:
+			if (currentLayerId == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			if (points.size() != 2) {
+				showWarning("Logic Error", "Cannot create grid.");
+				return;
+			}
+			
+			p1 = points.get(0);
+			p2 = points.get(1);
+			
+			List pts = new ArrayList();
+			pts.add(createPoint(p1.x, p1.y));
+			pts.add(createPoint(p2.x, p1.y));
+			pts.add(createPoint(p2.x, p2.y));
+			pts.add(createPoint(p1.x, p2.y));
+			
+			gridId = drawPolygon("tabgroup2/tab1/map", currentLayerId, pts, Color.YELLOW);
+			clearPoints();
+		break;
+	}
+	
+}
+
+clearShape() {
+
+}
+
+clearPoints() {
+	//System.out.println("layer: " + String.valueOf(currentLayerId));
+	//System.out.println(pointIds.toString());
+	
+	if (currentLayerId != 0) clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
+	
+	points = new ArrayList();
+	pointIds = new ArrayList();
+}
+
+onChangeLayers() {
+	if (getFieldValue("tabgroup2/tab1/layers") == "") {
+		layerId = 0;
+	} else {
+		layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
+	}
+	if (layerId == 0 || layerId != currentLayerId) {
+		clearPoints();
+		currentLayerId = layerId;
+	}
+}
+
+onChangeAction() {
+	action = getFieldValue("tabgroup2/tab1/drawActions");
+	if ("draw_point".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
+		if (tool != POINT) clearPoints();
+		tool = POINT;
+	} else if ("draw_line".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
+		if (tool != LINE) clearPoints();
+		tool = LINE;
+	} else if ("draw_polygon".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
+		if (tool != POLYGON) clearPoints();
+		tool = POLYGON;
+	} else if ("select_shape".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", true);
+		if (tool != SELECT_SHAPE) clearPoints();
+		tool = SELECT_SHAPE;
+	} else if ("draw_grid".equals(action)) {
+		lockMapView("tabgroup2/tab1/map", false);
+		if (tool != GRID) clearPoints();
+		tool = GRID;
+	}
+}
+
+onDrawAction() {
+	createShape();
+}
+
+onLayerAction() {
+	action = getFieldValue("tabgroup2/tab1/layerActions");
+	
+	if ("create_layer".equals(action)) {
+		canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+		refreshLayers();
+	} else if ("clear_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		clearVectorLayer("tabgroup2/tab1/map", currentLayerId);
+		canvasLayers.remove(String.valueOf(currentLayerId));
+		refreshLayers();
+	} else if ("hide_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		setVectorLayerVisible("tabgroup2/tab1/map", currentLayerId, false);
+	} else if ("show_layer".equals(action)) {
+		if (currentLayerId == 0) return;
+		setVectorLayerVisible("tabgroup2/tab1/map", currentLayerId, true);
+	}
+	
+}
+
+canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+refreshLayers();
+
+onEvent("tabgroup2/tab2/clear", "click", "clearEntity()");
+onEvent("tabgroup2/tab2/save", "click", "saveEntity()");
+onEvent("tabgroup2/tab2/update", "click", "updateEntity(getFieldValue(\"tabgroup2/tab2/entity\"))");
+onEvent("tabgroup2/tab2/load", "click", "loadEntity()");
+
+onEvent("tabgroup2/tab3/clear", "click", "clearRelationship()");
+onEvent("tabgroup2/tab3/save", "click", "saveRelationship()");
+onEvent("tabgroup2/tab3/update", "click", "updateRelationship(getFieldValue(\"tabgroup2/tab3/relationship\"))");
+onEvent("tabgroup2/tab3/load", "click", "loadRelationship()");
+
+refreshEntities() {
+	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
+	
+	populateDropDown("tabgroup2/tab2/entity", entities);
+}
+
+clearEntity() {
+	setFieldValue("tabgroup2/tab2/name", "");
+	setFieldValue("tabgroup2/tab2/value", "");
+}
+
+saveEntity() {
+	updateEntity(null);
+}
+
+updateEntity(String entityId) {
+	
+
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, null));
+	attributes.add(createEntityAttribute("value", null, null, getFieldValue("tabgroup2/tab2/value"), null));
+	
+	List collection = null;
+	if (currentLayerId != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", currentLayerId); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	String id = saveArchEnt(entityId, "simple", collection, attributes);
+	
+	refreshEntities();
+	
+	return id;
+}
+
+loadEntity() {
+	
+	entityId = getFieldValue("tabgroup2/tab2/entity");
+	
+	Object entity = fetchArchEnt(entityId);
+	
+	for (Object attribute : entity.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup2/tab2/name", attribute.getText());
+		} else if ("value".equals(attribute.getName())) {
+			setFieldValue("tabgroup2/tab2/value", attribute.getMeasure());
+		}
+	}
+	
+	System.out.println(entity.getGeometryList());
+	
+	for (Geometry geom : entity.getGeometryList()) {
+		drawGeometry("tabgroup2/tab1/map", currentLayerId, geom, Color.MAGENTA);
+	}
+	
+}
+
+refreshEntities();
+
+refreshRelationships() {
+	Object relationships = fetchAll("select relationshipid, relationshipid from relationship group by relationshipid;");
+	
+	populateDropDown("tabgroup2/tab3/relationship", relationships);
+}
+
+clearRelationship() {
+	setFieldValue("tabgroup2/tab3/name", "");
+}
+
+saveRelationship() {
+	updateRelationship(null);
+}
+
+updateRelationship(String relId) {
+	
+
+	List attributes = createAttributeList();
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null));
+	
+	List collection = null;
+	if (currentLayerId != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", currentLayerId); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	String id = saveRel(relId, "abovebelow", collection, attributes);
+	
+	refreshRelationships();
+	
+	return id;
+}
+
+loadRelationship() {
+	
+	relId = getFieldValue("tabgroup2/tab3/relationship");
+	
+	Object relationship = fetchRel(relId);
+	
+	for (Object attribute : relationship.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup2/tab3/name", attribute.getText());
+		}
+	}
+	
+	System.out.println(relationship.getGeometryList());
+	
+	for (Geometry geom : relationship.getGeometryList()) {
+		drawGeometry("tabgroup2/tab1/map", currentLayerId, geom, Color.MAGENTA);
+	}
+	
+}
+
+refreshRelationships();
+
+User user = new User("0","Default","User");
+setUser(user);
+
+clearMapTab();
+plotGPSPoint() {
+	location = getGPSPosition();
+	if (location == null) {
+		showWarning("Logic Error", "No GPS Signal");
+	} else {
+		Object location = getGPSPosition();
+		longitude = location.getLongitude();
+		latitude = location.getLatitude();
+		point = createPoint(latitude, longitude);
+		//point = createPoint(-33.58f, 151.23f);
+		drawPoint("tabgroup1/tab2/map", pointLayerId, point, Color.RED);
+	}
+}
+
+onEvent("tabgroup1/tab2/plot", "click", "plotGPSPoint()");
