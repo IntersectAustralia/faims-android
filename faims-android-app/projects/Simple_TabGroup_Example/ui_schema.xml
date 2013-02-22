@@ -12,7 +12,6 @@
           <user>
               <tab1>
                   <userlist></userlist>
-                  <skip></skip>
               </tab1>
           </user>
           <tabgroup1>
@@ -33,8 +32,6 @@
                   <location-value></location-value>
                   <location-certainty></location-certainty>
                   <supervisor></supervisor>
-                  <filename></filename>
-                  <attach></attach>
               </tab3>
               <tab4>
                   <save></save>
@@ -113,7 +110,16 @@
                   <lastsuccess></lastsuccess>
                   <lastfailure></lastfailure>
               </tab3>
+              <tab4>
+                  <next></next>
+              </tab4>
           </tabgroup5>
+          <tabgroup6>
+              <tab1>
+                  <filename></filename>
+                  <attach></attach>
+              </tab1>
+          </tabgroup6>
         </faims>
       </instance>
 
@@ -147,9 +153,6 @@
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="skip">
-            <label>Skip</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="simple">
@@ -222,12 +225,6 @@
                 <value>superd</value>
             </item>
         </select1>
-        <input ref="filename">
-            <label>Filename:</label>
-        </input>
-        <trigger ref="attach">
-            <label>Attach</label>
-        </trigger>
       </group>
       <group ref="tab4" faims_hidden="true">
         <label>Entity 4</label>
@@ -399,7 +396,7 @@
 	        </trigger>
         </group>
         <group ref="tab3">
-            <label>Extra</label>
+            <label>Go</label>
             <trigger ref="next">
 	          <label>Next</label>
 	        </trigger>
@@ -447,6 +444,24 @@
               <label>Last Failure Attempt:</label>
           </input>
       </group>
+      <group ref="tab4">
+          <label>Go</label>
+          <trigger ref="next">
+              <label>Next</label>
+          </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup6">
+		<label>Testing</label>
+		<group ref="tab1">
+		    <label>File Browser</label>
+			<input ref="filename">
+			    <label>Filename:</label>
+			</input>
+			<trigger ref="attach">
+			    <label>Attach</label>
+			</trigger>
+		</group>
     </group>
     
   </h:body>

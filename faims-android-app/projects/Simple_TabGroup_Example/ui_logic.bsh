@@ -278,14 +278,32 @@ gotoGroup(n) {
 	showTabGroup("tabgroup" + n);
 }
 
+getDefaultUsersList() {
+	users = new ArrayList();
+	defaultUser = new ArrayList();
+	defaultUser.add("0");
+	defaultUser.add("Default User");
+	users.add(defaultUser);
+	return users;
+}
+
 populateListForUsers(){
 	Object users = fetchAll("select userid,(fname || ' ' || lname) as name from user;");
+	if (users == null || users.size() == 0) {
+		users = getDefaultUsersList();
+	}
 	populateList("user/tab1/userlist",users);
 }
 
 login(){
 	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
-	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	User user;
+	if (userResult == null || userResult.size() == 0) {
+		user = new User("0", "Default", "User");
+	} else {
+		user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	}
+	
 	setUser(user);
 	gotoGroup(1);
 }
@@ -349,16 +367,6 @@ onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");
 
 onEvent("tabgroup5/tab2/push", "click", "uploadDatabase()");
 onEvent("tabgroup5/tab2/pull", "click", "downloadDatabase()");
-
-skip() {
-
-	User user = new User("0","Default","User");
-	setUser(user);
-	
-	showTabGroup("tabgroup1");
-}
-
-onEvent("user/tab1/skip", "click", "skip()");
 	
 onUpload() {
 	showToast("database uploaded successfully");
@@ -380,12 +388,14 @@ downloadDatabase() {
 	pullDatabaseFromServer("onDownload()");
 }
 
+onEvent("tabgroup5/tab4/next", "click", "showTabGroup(\"tabgroup6\")");
+
 setFilename() {
-	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());
+	setFieldValue("tabgroup6/tab1/filename", getLastSelectedFilename());
 }
 
 selectFile() {
 	showFileBrowser("setFilename()");
 }
 
-onEvent("tabgroup1/tab3/attach", "click", "selectFile()");
+onEvent("tabgroup6/tab1/attach", "click", "selectFile()");
