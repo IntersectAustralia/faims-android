@@ -7,10 +7,11 @@
 
 	<property name="libs.dir" value="./libs/"/>
 	<property name="build.dir" value="./build/"/>
-	<property name="android.project.classpath" value="../faims-android-app/bin/classes/;../android-filechooser/code/bin/"/>
+	<property name="android.project.classpath" value="../faims-android-app/bin/classes/"/>
 	<property name="test.report.dir" value="./test-reports/"/>
 	<property name="test.html.dir" value="./test-report-html/"/>
 	<property name="source.dir" value="./src/"/>	
+	<property name="filechooser.dir" value="../android-filechooser/code/src/"/>	
 
 	<filelist id="android_jars" dir="${libs.dir}">
 		<file name="android-support-v4.jar"/>
@@ -42,6 +43,8 @@
 		<file name="httpcore-4.2.2.jar"/>
 		<file name="httpmime-4.2.3.jar"/>
 		<file name="apache-mime4j-core-0.7.2.jar "/>
+		<file name="../../android-filechooser/code/bin/classes.jar "/>
+		<file name="../../android-filechooser/code/bin/code.jar "/>
 	</filelist>
 
 	<path id="compile_classpath">
@@ -68,7 +71,7 @@
 	</target>
 
 	<target name="compile" depends="init" description="compile test source">
-		<javac srcdir="${source.dir}" destdir="${build.dir}" debug="true" >
+		<javac srcdir="${source.dir}:${filechooser.dir}" destdir="${build.dir}" debug="true" >
 			<classpath refid="compile_classpath" />
 		</javac>
 	</target>
