@@ -962,12 +962,10 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setCertainty(value);
 					horizontalScrollView.setCurrentCertainty(value);
+				}else {
+					Log.w("FAIMS","Couldn't set certainty for ref= " + ref + " obj= " + obj.toString());
+					showWarning("Logic Error", "View does not exist.");
 				}
-			}
-			
-			else {
-				Log.w("FAIMS","Couldn't set certainty for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
 			}
 		}
 		catch(Exception e){
@@ -1001,12 +999,10 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setAnnotation(value);
 					horizontalScrollView.setCurrentAnnotation(value);
+				}else {
+					Log.w("FAIMS","Couldn't set annotation for ref= " + ref + " obj= " + obj.toString());
+					showWarning("Logic Error", "View does not exist.");
 				}
-			}
-			
-			else {
-				Log.w("FAIMS","Couldn't set annotation for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
 			}
 		}
 		catch(Exception e){
