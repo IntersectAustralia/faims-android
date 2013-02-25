@@ -1,0 +1,126 @@
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(10.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+	setSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+onEvent("tabgroup1/tab4/start", "click", "startSync()");
+onEvent("tabgroup1/tab4/stop", "click", "stopSync()");
+
+syncStarted() {
+	showToast("starting sync");
+}
+
+syncCompleted() {
+	showToast("completed sync");
+	updateAll();
+}
+
+syncFailed() {
+	showToast("failed sync");
+}
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+
+String entity_id;
+
+saveEntity() {
+	
+	entity_id = updateEntity(null);
+	
+}
+
+loadEntity() {
+
+	entity_id = getFieldValue("tabgroup1/tab2/entities");
+	
+	if (entity_id == null || "".equals(entity_id)) return;
+	
+	showTab("tabgroup1/tab1", entity_id);
+	
+}
+
+updateEntity(entity_id) {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
+	attributes.add(createEntityAttribute("location", null, getFieldValue("tabgroup1/tab1/location"), null, getFieldCertainty("tabgroup1/tab1/location")));
+
+	String id = saveArchEnt(entity_id, "simple", null, attributes);
+	
+	updateAll();
+	
+	return id;
+}
+
+clearEntity() {
+	newTabGroup("tabgroup1");
+	
+	populateDropDown("tabgroup1/tab1/location", locations);
+}
+
+updateAll() {
+	Object entities = fetchAll("select uuid, uuid from archentity group by uuid order by AEntTimestamp;");
+	
+	populateDropDown("tabgroup1/tab2/entities", entities);
+}
+
+onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
+onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
+onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
+
+setFilename() {
+	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());
+}
+
+attachFile() {
+	showFileBrowser("setFilename()");
+}
+
+onEvent("tabgroup1/tab3/attach", "click", "attachFile()");
+
+getUserForList(id, name) {
+	user = new ArrayList();
+	user.add(id);
+	user.add(name);
+	return user;
+}
+
+getDefaultUsersList() {
+	users = new ArrayList();
+	users.add(getUserForList("1", "Test User 1"));
+	users.add(getUserForList("2", "Test User 2"));
+	return users;
+}
+
+populateListForUsers(){
+	users = getDefaultUsersList();
+	populateList("user/tab1/users", users);
+}
+
+login(){
+	User user;
+	if ("1".equals(getListItemValue())) {
+		user = new User("1", "Test", "User 1");
+	} else {
+		user = new User("2", "Test", "User 2");
+	}
+	
+	setUser(user);
+	showTabGroup("tabgroup1");
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");
+
+clearEntity();
+updateAll();
