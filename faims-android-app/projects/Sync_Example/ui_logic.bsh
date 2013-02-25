@@ -66,14 +66,14 @@ clearEntity() {
 	newTab("tabgroup1/tab1");
 	
 	populateDropDown("tabgroup1/tab1/location", locations);
+	
+	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
 
 updateAll() {
 	Object entities = fetchAll("select uuid, uuid from archentity group by uuid order by AEntTimestamp;");
 	
 	populateDropDown("tabgroup1/tab2/entities", entities);
-	
-	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
 
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
