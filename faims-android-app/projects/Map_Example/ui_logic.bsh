@@ -8,8 +8,8 @@ setupMap(id, lat, lon) {
 }
 
 showMapTab() {
-	setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
-	//setupMap("tabgroup1/tab2/map", -33.58f, 151.23f); // sydney
+	//setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
+	setupMap("tabgroup1/tab2/map", -33.58f, 151.23f); // sydney
 	showTab("tabgroup1/tab2");
 	addVectorLayers();
 }
@@ -27,12 +27,16 @@ refreshMapTab() {
 }
 
 List layers = new ArrayList();
+Integer pointLayerId;
 
 clearMapTab() {
 	for (Integer layerId : layers) {
 		clearVectorLayer("tabgroup1/tab2/map", layerId);
 	}
 	layers = new ArrayList();
+	
+	pointLayerId = createVectorLayer("tabgroup1/tab2/map");
+	layers.add(pointLayerId);
 }
 
 refreshMapTabGroup() {
@@ -453,3 +457,20 @@ refreshRelationships();
 
 User user = new User("0","Default","User");
 setUser(user);
+
+clearMapTab();
+plotGPSPoint() {
+	location = getGPSPosition();
+	if (location == null) {
+		showWarning("Logic Error", "No GPS Signal");
+	} else {
+		Object location = getGPSPosition();
+		longitude = location.getLongitude();
+		latitude = location.getLatitude();
+		point = createPoint(latitude, longitude);
+		//point = createPoint(-33.58f, 151.23f);
+		drawPoint("tabgroup1/tab2/map", pointLayerId, point, Color.RED);
+	}
+}
+
+onEvent("tabgroup1/tab2/plot", "click", "plotGPSPoint()");

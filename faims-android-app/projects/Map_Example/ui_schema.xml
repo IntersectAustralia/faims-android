@@ -18,6 +18,7 @@
                   <map></map>
                   <refresh></refresh>
                   <show></show>
+                  <plot></plot>
                   <clear></clear>
               </tab2>
           </tabgroup1>
@@ -80,6 +81,9 @@
         </trigger>
         <trigger ref="show">
             <label>Show current position</label>
+        </trigger>
+        <trigger ref="plot">
+            <label>Plot current position</label>
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>
