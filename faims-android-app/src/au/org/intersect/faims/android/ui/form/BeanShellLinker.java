@@ -1,7 +1,5 @@
 package au.org.intersect.faims.android.ui.form;
 
-import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -2076,10 +2074,10 @@ public class BeanShellLinker {
 		this.activity.showFileBrowser();
 	}
 
-	public void setLastSelectedFile(LocalFile localFile) {
+	public void setLastSelectedFile(File file) {
 		try {
-			interpreter.set("_last_selected_filename", localFile.getName());
-			interpreter.set("_last_selected_filepath", localFile.getAbsolutePath());
+			interpreter.set("_last_selected_filename", file.getName());
+			interpreter.set("_last_selected_filepath", file.getAbsolutePath());
 			this.execute(lastFileBrowserCallback);
 		} catch (Exception e) {
 			Log.d("FAIMS", "Cannot set selected filename", e);
