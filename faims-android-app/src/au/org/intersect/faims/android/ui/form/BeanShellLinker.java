@@ -1449,7 +1449,7 @@ public class BeanShellLinker {
 								Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
 										activity.getResources(), R.drawable.blue_dot);
 			                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-			                            .setSize(0.5f).build();
+			                            .setSize(0.5f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 			                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
 			                            location.getLongitude(), location.getLatitude());
 			                    if(currentPositionLayer != null){
