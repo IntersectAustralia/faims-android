@@ -10,20 +10,17 @@ stopSync() {
 	setSyncEnabled(false);
 }
 
-onEvent("tabgroup1/tab4/start", "click", "startSync()");
-onEvent("tabgroup1/tab4/stop", "click", "stopSync()");
-
 syncStarted() {
-	showToast("starting sync");
+	//showToast("starting sync");
 }
 
 syncCompleted() {
-	showToast("completed sync");
+	//showToast("completed sync");
 	updateAll();
 }
 
 syncFailed() {
-	showToast("failed sync");
+	//showToast("failed sync");
 }
 
 onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
@@ -119,13 +116,22 @@ login(){
 	
 	setUser(user);
 	showTabGroup("tabgroup1");
-	
-	startSync();
 }
 
 populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
 
-clearEntity();
-updateAll();
+init() {
+	clearEntity();
+	updateAll();
+	startSync();
+}
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("tabgroup1", "show", "init()"); 
+onEvent("user", "show", "cleanup()");	
+	

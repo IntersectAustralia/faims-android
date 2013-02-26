@@ -26,6 +26,8 @@ import android.os.Messenger;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.gps.GPSDataManager;
@@ -307,6 +309,12 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 	}
 	
+	enum SyncIndicatorColor {
+		GREEN,
+		ORANGE,
+		RED
+	}
+	
 	public WifiBroadcastReceiver broadcastReceiver;
 
 	public static final int CAMERA_REQUEST_CODE = 1;
@@ -351,6 +359,10 @@ public class ShowProjectActivity extends FragmentActivity {
 	private SyncManagerThread syncManagerThread;
 
 	private boolean isActivityShowing;
+
+	private boolean syncIndicatorVisible;
+
+	private SyncIndicatorColor syncIndicatorColor = SyncIndicatorColor.GREEN;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -486,6 +498,29 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    getMenuInflater().inflate(R.menu.activity_show_project, menu);
+	    return true;
+	}
+	
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+		MenuItem indicator = menu.findItem(R.id.sync_indicator);
+		indicator.setVisible(syncIndicatorVisible);
+		switch(syncIndicatorColor) {
+		case GREEN:
+			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_green));
+			break;
+		case ORANGE:
+			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_orange));
+			break;
+		default:
+			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_red));
+			break;
+		}
+	    return true;
+	}
 	
 	protected void renderUI() {
 		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
@@ -730,12 +765,17 @@ public class ShowProjectActivity extends FragmentActivity {
 		syncEnabled = true;
 		resetSyncInterval();
 		startSync();
+		
+		// show sync indicator
+		setSyncIndicatorVisible(true);
 	}
 
 	public void disableSync() {
 		if (!syncEnabled) return;
 		syncEnabled = false;
 		stopSync();
+		
+		setSyncIndicatorVisible(false);
 	}
 	
 	public void stopSync() {
@@ -890,18 +930,24 @@ public class ShowProjectActivity extends FragmentActivity {
 		for (SyncListener listener : listeners) {
 			listener.handleStart();
 		}
+		
+		setSyncIndicatorColor(SyncIndicatorColor.ORANGE);
 	}
 	
 	public void callSyncSuccess() {
 		for (SyncListener listener : listeners) {
 			listener.handleSuccess();
 		}
+		
+		setSyncIndicatorColor(SyncIndicatorColor.GREEN);
 	}
 	
 	public void callSyncFailure() {
 		for (SyncListener listener : listeners) {
 			listener.handleFailure();
 		}
+		
+		setSyncIndicatorColor(SyncIndicatorColor.RED);
 	}
 
 	public void setSyncMinInterval(float value) {
@@ -949,4 +995,15 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	*/
+	
+	public void setSyncIndicatorVisible(boolean visible) {
+		syncIndicatorVisible = visible;
+		this.invalidateOptionsMenu();
+	}
+	
+	private void setSyncIndicatorColor(SyncIndicatorColor color) {
+		syncIndicatorColor = color;
+		this.invalidateOptionsMenu();
+	}
+
 }

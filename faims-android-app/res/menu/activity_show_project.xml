@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+  <item android:id="@+id/sync_indicator"
+    android:title="Sync Indicator"
+    android:icon="@drawable/ic_sync_indicator_green" 
+    android:showAsAction="ifRoom"/>
+  
+</menu>
