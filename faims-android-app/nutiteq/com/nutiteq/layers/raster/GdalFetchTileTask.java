@@ -19,6 +19,7 @@ import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapTile;
 import com.nutiteq.log.Log;
 import com.nutiteq.tasks.FetchTileTask;
+import com.nutiteq.utils.Utils;
 
 public class GdalFetchTileTask extends FetchTileTask{
 
@@ -29,6 +30,7 @@ public class GdalFetchTileTask extends FetchTileTask{
     private Envelope dataBounds;
     private MapView mapView;
     private static final int TILE_SIZE = 256;
+    private static final float BRIGHTNESS = 1.0f; // used for grayscale only
 
     public GdalFetchTileTask(MapTile tile, Components components,
             Envelope requestedBounds, long tileIdOffset,
@@ -164,6 +166,7 @@ public class GdalFetchTileTask extends FetchTileTask{
                 pixelsSrcMin[1], xSizeData, ySizeData, xSizeBuf, ySizeBuf,gdal
               .GetDataTypeSize(band.getDataType()),band.getDataType()));
 
+        
         //  read data to byte array
         int res = band.ReadRaster(pixelsSrcMin[0], pixelsSrcMin[1], xSizeData,
                 ySizeData, xSizeBuf, ySizeBuf, band.getDataType(), byteBuffer);
@@ -178,6 +181,19 @@ public class GdalFetchTileTask extends FetchTileTask{
         
         // copy colortable to Java array for faster access
         int colorType = band.GetRasterColorInterpretation();
+        
+        // quick check if colortype is implemented below
+        if(!(colorType == gdalconst.GCI_PaletteIndex ||
+                colorType == gdalconst.GCI_RedBand ||
+                colorType == gdalconst.GCI_GreenBand ||
+                colorType == gdalconst.GCI_BlueBand ||
+                colorType == gdalconst.GCI_GrayIndex ||
+                colorType == gdalconst.GCI_AlphaBand))
+        {
+            Log.debug("colorType "+colorType+" not implemented, skipping band");
+            break;
+        }
+        
         ColorTable ct = band.GetRasterColorTable();
         int[] colorTable = null;
         int numColors = 0;
@@ -189,18 +205,53 @@ public class GdalFetchTileTask extends FetchTileTask{
                 }
            }
 
-        // copy data to tile buffer tileData, and apply color table or combine bands
+        int pixelSizeBits=8; // bits
         
+        if(gdal.GetDataTypeSize(band.getDataType()) == 8){
+            // single byte - GDT_Byte usually
+            pixelSizeBits = 8;
+        }else if(gdal.GetDataTypeSize(band.getDataType()) == 16){
+            // 2 bytes - e.g. GDT_UInt16 
+            pixelSizeBits = 16;
+        } // TODO: more bytes?
+        
+        // value range
+        Double[] pass1 = new Double[1], pass2 = new Double[1];
+        band.GetMinimum(pass1); // minimum ignored now
+        band.GetMaximum(pass2);
+        Double bandValueMax = (double) (1<<pixelSizeBits);
+        if(pass2 != null && pass2[0] != null){
+            bandValueMax = pass2[0];
+        }
+        
+        int val = 0;
+        int decoded = 0;
+        
+        // copy data to tile buffer tileData, and apply color table or combine bands
+        int valMin = Integer.MAX_VALUE;
+        int valMax = Integer.MIN_VALUE;
             for (int y = 0; y < TILE_SIZE; y++) {
                 for (int x = 0; x < TILE_SIZE; x++) {
                     if(x >= xOffsetBuf && y >= yOffsetBuf && x<=xMaxBuf && y<=yMaxBuf){
-                        byte val = byteBuffer[((y-yOffsetBuf) * xSizeBuf) + (x-xOffsetBuf)];
+                        
+                        switch (pixelSizeBits){
+                        case 8:
+                            val = Utils.unsigned(byteBuffer[((y-yOffsetBuf) * xSizeBuf) + (x-xOffsetBuf)]);
+                            break;
+                            
+                        case 16:
+                            // assume little endian
+                            val = Utils.unsigned(byteBuffer[(((y-yOffsetBuf) * xSizeBuf) + (x-xOffsetBuf))*2]) |
+                                    (Utils.unsigned(byteBuffer[(((y-yOffsetBuf) * xSizeBuf) + (x-xOffsetBuf))*2 + 1]) << 8);
+                            break;
+                        }
  
+                        valMin=Math.min(valMin, val);
+                        valMax=Math.max(valMax, val);
+                        
                         // decode color
-                        int decoded = 0; 
-
                         // 1) if indexed color
-                        if(colorType == gdalconst.GCI_PaletteIndex){ 
+                        if(colorType == gdalconst.GCI_PaletteIndex && colorTable != null){ 
                             if(val<numColors && val>=0){
                                 decoded = colorTable[val];
                             }else{
@@ -208,30 +259,39 @@ public class GdalFetchTileTask extends FetchTileTask{
                                 decoded = android.graphics.Color.CYAN & 0x88ffffff;
                               Log.debug("no colortable found for value "+val);
                             }
+                            
+                         // 2) ARGB direct color bands to int ARGB
+                        }else{
 
-                         // 2) ARGB bands to int
-                        }else if (colorType == gdalconst.GCI_AlphaBand){
-                            decoded = (int) val  & 0xff << 24;
-                        }else if(colorType == gdalconst.GCI_RedBand){
-                            decoded = ((int) val & 0xff) << 16;
-                        }else if (colorType == gdalconst.GCI_GreenBand){
-                            decoded = ((int) val & 0xff) << 8;
-                        }else if (colorType == gdalconst.GCI_BlueBand){
-                            decoded = (int) val  & 0xff;
+                            if (colorType == gdalconst.GCI_AlphaBand){
+                                decoded = (int) val & 0xff << 24;
+                            }else if(colorType == gdalconst.GCI_RedBand){
+                                decoded = ((int) val & 0xff) << 16;
+                            }else if (colorType == gdalconst.GCI_GreenBand){
+                                decoded = ((int) val & 0xff) << 8;
+                            }else if (colorType == gdalconst.GCI_BlueBand){
+                                decoded = (int) val & 0xff;
+                            }else if (colorType == gdalconst.GCI_GrayIndex){
+                                // normalize to single byte value range if multibyte
+                                // apply brightness, you may want to add pixel value adjustments: histogram modifications, contrast etc here
+                                if(pixelSizeBits > 8){
+                                   val = (int)((val * 255.0f) / bandValueMax * BRIGHTNESS);
+                                }
+                                decoded = (((int) val & 0xff) << 16 | ((int) val & 0xff) << 8 | (int) val & 0xff);
+                            }
                         }
-                        
-                        // TODO Handle other color schemas: RGB in one band etc. Test data needed
-                       // following forces alpha=FF for the case where alphaband is missing. Better solution needed to support dataset what really has alpha
-                        
-                        tileData[y * TILE_SIZE + x] |=  decoded | 0xFF000000;   
-                        
+                            // TODO Handle other color schemas: RGB in one band etc. Test data needed
+                           // following forces alpha=FF for the case where alphaband is missing. Better solution needed to support dataset what really has alpha
+                            
+                            tileData[y * TILE_SIZE + x] |=  decoded | 0xFF000000;   
+                            
                     }else{
                         // outside of tile bounds. Normally keep transparent, tint green just for debugging 
                         //tileData[y * TILE_SIZE + x] = android.graphics.Color.GREEN & 0x88ffffff;
                     }
                 }
             }
-
+            Log.debug("band "+iBand+". min="+valMin+" max="+valMax);
         } // loop for over bands
 //        Log.debug("gdalfetchtile time  = " + (System.nanoTime() - time)
 //                / 1000000 + " ms");

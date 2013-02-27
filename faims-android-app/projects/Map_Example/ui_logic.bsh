@@ -1,21 +1,22 @@
 
 setupMap(id, lat, lon) {
-	showRasterMap(id, "natural-earth-2-mercator.tif");
+	showRasterMap(id, "trap3785tiled.tif");
 	setMapFocusPoint(id, lat, lon);
 	setMapRotation(id, 360.0f);
-	setMapZoom(id, 8.0f);
+	setMapZoom(id, 18.0f);
 	setMapTilt(id, 90.0f);
 }
 
 showMapTab() {
 	//setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
-	setupMap("tabgroup1/tab2/map", -33.58f, 151.23f); // sydney
+	setupMap("tabgroup1/tab2/map", 42.58401f, 25.33825f); 
+	//setupMap("tabgroup1/tab2/map", 41.526f, 26.513f); 
 	showTab("tabgroup1/tab2");
 	addVectorLayers();
 }
 
 showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", -33.58f, 151.23f); // sydney
+	setupMap("tabgroup2/tab1/map", 42.58401f, 25.33825f); // sydney
 	showTabGroup("tabgroup2");
 	
 	refreshLayers();
@@ -56,9 +57,9 @@ onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
 
 addVectorLayers() {
 	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp")); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
+	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
+	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
+	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
 }
 
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
