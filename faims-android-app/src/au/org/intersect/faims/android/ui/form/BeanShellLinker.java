@@ -59,6 +59,7 @@ import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.style.Style;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
@@ -1497,7 +1498,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void setMapFocusPoint(String ref, float latitude, float longitude) {
+	public void setMapFocusPoint(String ref, float longitude, float latitude) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1599,8 +1600,8 @@ public class BeanShellLinker {
 				StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
 		        lineStyleSet.setZoomStyle(minZoom, LineStyle.builder().setWidth(0.1f).setColor(Color.GREEN).build());
 		        
-		        PolygonStyle polygonStyle = PolygonStyle.builder().setColor(Color.BLUE).build();
-		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
+		        PolygonStyle polygonStyle = PolygonStyle.builder().setColor(Color.BLUE).setLineStyle(LineStyle.builder().setWidth(0.01f).setColor(Color.BLACK).build()).build();
+		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
 				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
 				
 				try {
@@ -1654,7 +1655,7 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				try {
-					CanvasLayer layer = new CanvasLayer(activity, new EPSG3857());
+					CanvasLayer layer = new CanvasLayer(new EPSG3857());
 					return mapView.addVectorLayer(layer);
 				} catch (Exception e) {
 					Log.e("FAIMS", "Could not create layer", e);
@@ -1693,7 +1694,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public int drawPoint(String ref, int layerId, MapPos point, int color) {
+	public int drawPoint(String ref, int layerId, MapPos point, StyleSet<PointStyle> styleSet) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1703,7 +1704,7 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					int id = canvas.addPoint(point, color);
+					int id = canvas.addPoint(point, styleSet);
 					canvas.updateRenderer();
 					return id;
 				} catch (Exception e) {
@@ -1721,7 +1722,7 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public int drawLine(String ref, int layerId, List<MapPos> points, int color) {
+	public int drawLine(String ref, int layerId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1731,7 +1732,7 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					int id = canvas.addLine(points, color);
+					int id = canvas.addLine(points, styleSet);
 					canvas.updateRenderer();
 					return id;
 				} catch (Exception e) {
@@ -1749,7 +1750,7 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public int drawPolygon(String ref, int layerId, List<MapPos> points, int color) {
+	public int drawPolygon(String ref, int layerId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1759,7 +1760,7 @@ public class BeanShellLinker {
 				try {
 					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 					
-					int id = canvas.addPolygon(points, color);
+					int id = canvas.addPolygon(points, styleSet);
 					canvas.updateRenderer();
 					return id;
 				} catch (Exception e) {
@@ -2079,4 +2080,41 @@ public class BeanShellLinker {
 			Log.d("FAIMS", "Cannot set selected filename", e);
 		}
 	}
+	
+	public PointStyle createPointStyle(int color, float size, float pickSize) {
+		return PointStyle.builder().setColor(color).setSize(size).setPickingSize(pickSize).build();
+	}
+	
+	public LineStyle createLineStyle(int color, float width, float pickWidth) {
+		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).build();
+	}
+	
+	public LineStyle createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
+		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).setPointStyle(pointStyle).build();
+	}
+	
+	public PolygonStyle createPolygonStyle(int color) {
+		return PolygonStyle.builder().setColor(color).build();
+	}
+	
+	public PolygonStyle createPolygonStyle(int color, LineStyle lineStyle) {
+		return PolygonStyle.builder().setColor(color).setLineStyle(lineStyle).build();
+	}
+	
+	public StyleSet<? extends Style> createStyleSet(int minZoom, Style style) {
+		if (style instanceof PointStyle) {
+			StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
+			pointStyleSet.setZoomStyle(minZoom, (PointStyle) style);
+			return pointStyleSet;
+		} else if (style instanceof LineStyle) {
+			StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
+			lineStyleSet.setZoomStyle(minZoom, (LineStyle) style);
+			return lineStyleSet;
+		} else {
+			StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
+			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
+			return polygonStyleSet;
+		}
+	}
+
 }

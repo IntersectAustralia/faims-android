@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import android.app.Activity;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.SparseArray;
-import au.org.intersect.faims.android.R;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
@@ -20,23 +17,21 @@ import com.nutiteq.projections.Projection;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.style.Style;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.Const;
 import com.nutiteq.utils.Quadtree;
-import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CanvasLayer extends GeometryLayer {
 
 	private Quadtree<Geometry> objects;
-	private Activity activity;
 	private SparseArray<Geometry> objectMap;
 	private static int geomId = 1;
 	private Stack<Geometry> geomBuffer;
 	
-	public CanvasLayer(Activity activity, Projection projection) {
+	public CanvasLayer(Projection projection) {
 		super(projection);
-		this.activity = activity;
 		objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
 		objectMap = new SparseArray<Geometry>();
 		geomBuffer = new Stack<Geometry>();
@@ -55,17 +50,12 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 	
-	public int addPoint(MapPos point, int color) {
-		return addPoint(point, color, geomId++);
+	public int addPoint(MapPos point, StyleSet<PointStyle> styleSet) {
+		return addPoint(point, styleSet, geomId++);
 	}
 
-	public int addPoint(MapPos point, int color, int id) {
-		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
-		PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.1f).setColor(color).setPickingSize(0.3f).build();
-		pointStyleSet.setZoomStyle(0, pointStyle);
-		
-		Point p = new Point(projection.fromWgs84(point.x, point.y), null, pointStyleSet, null);
+	public int addPoint(MapPos point, StyleSet<PointStyle> styleSet, int id) {		
+		Point p = new Point(projection.fromWgs84(point.x, point.y), null, styleSet, null);
 		p.attachToLayer(this);
 		
 		objects.insert(p.getInternalState().envelope, p);
@@ -105,19 +95,16 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 	
-	public int addLine(List<MapPos> points, int color) {
-		return addLine(points, color, geomId++);
+	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet) {
+		return addLine(points, styleSet, geomId++);
 	}
 	
-	public int addLine(List<MapPos> points, int color, int id) {
-		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-        lineStyleSet.setZoomStyle(0, LineStyle.builder().setWidth(0.1f).setColor(color).setPickingWidth(0.3f).build());
-        
+	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet, int id) {
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		Line l = new Line(vertices, null, lineStyleSet, null);
+		Line l = new Line(vertices, null, styleSet, null);
 		l.attachToLayer(this);
 		
 		objects.insert(l.getInternalState().envelope, l);
@@ -129,20 +116,16 @@ public class CanvasLayer extends GeometryLayer {
 		return id;
 	}
 
-	public int addPolygon(List<MapPos> points, int color) {
-		return addPolygon(points, color, geomId++);
+	public int addPolygon(List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
+		return addPolygon(points, styleSet, geomId++);
 	}
 	
-	public int addPolygon(List<MapPos> points, int color, int id) {
-		PolygonStyle polygonStyle = PolygonStyle.builder().setColor(color).build();
-        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>(null);
-		polygonStyleSet.setZoomStyle(0, polygonStyle);
-		
+	public int addPolygon(List<MapPos> points, StyleSet<PolygonStyle> styleSet, int id) {		
 		List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, polygonStyle, null);
+		Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, styleSet, null);
 		p.attachToLayer(this);
 		
 		objects.insert(p.getInternalState().envelope, p);
@@ -213,17 +196,18 @@ public class CanvasLayer extends GeometryLayer {
 		return objectMap.get(geomId);
 	}
 	
-	public int addGeometry(Geometry geom, int color) {
-		return addGeometry(geom, color, geomId++);
+	public int addGeometry(Geometry geom, StyleSet<? extends Style> styleSet) {
+		return addGeometry(geom, styleSet, geomId++);
 	}
 
-	public int addGeometry(Geometry geom, int color, int id) {
+	@SuppressWarnings("unchecked")
+	public int addGeometry(Geometry geom, StyleSet<? extends Style> styleSet, int id) {
 		if (geom instanceof Point) {
-			return addPoint(((Point) geom).getMapPos(), color, id);
+			return addPoint(((Point) geom).getMapPos(), (StyleSet<PointStyle>) styleSet, id);
 		} else if  (geom instanceof Line) {
-			return addLine(((Line) geom).getVertexList(), color, id);
+			return addLine(((Line) geom).getVertexList(), (StyleSet<LineStyle>) styleSet, id);
 		} else if (geom instanceof Polygon) {
-			return addPolygon(((Polygon) geom).getVertexList(), color, id);
+			return addPolygon(((Polygon) geom).getVertexList(), (StyleSet<PolygonStyle>) styleSet, id);
 		}
 		return 0;
 	}

@@ -11,6 +11,7 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
+import com.nutiteq.style.*;
 
 newTabGroup(String label) {
 	linker.newTabGroup(label);
@@ -210,8 +211,8 @@ showRasterMap(String ref, String filename) {
 	linker.showRasterMap(ref, filename);
 }
 
-setMapFocusPoint(String ref, float latitude, float longitude) {
-	linker.setMapFocusPoint(ref, latitude, longitude);
+setMapFocusPoint(String ref, float longitude, float latitude) {
+	linker.setMapFocusPoint(ref, longitude, latitude);
 }
 
 setMapRotation(String ref, float rotation) {
@@ -250,16 +251,16 @@ getMapPointClicked() {
 	return _map_point_clicked;
 }
 
-drawPoint(String ref, int layerId, MapPos point, int color) {
-	linker.drawPoint(ref, layerId, point, color);
+drawPoint(String ref, int layerId, MapPos point, StyleSet styleSet) {
+	linker.drawPoint(ref, layerId, point, styleSet);
 }
 
-drawLine(String ref, int layerId, List points, int color) {
-	linker.drawLine(ref, layerId, points, color);
+drawLine(String ref, int layerId, List points, StyleSet styleSet) {
+	linker.drawLine(ref, layerId, points, styleSet);
 }
 
-drawPolygon(String ref, int layerId, List points, int color) {
-	linker.drawPolygon(ref, layerId, points, color);
+drawPolygon(String ref, int layerId, List points, StyleSet styleSet) {
+	linker.drawPolygon(ref, layerId, points, styleSet);
 }
 
 clearGeometry(String ref, int layerId, int geomId) {
@@ -270,11 +271,11 @@ clearGeometryList(String ref, int layerId, List geomList) {
 	linker.clearGeometryList(ref, layerId, geomList);
 }
 
-createPoint(float lat, float lon) {
+createPoint(float lon, float lat) {
 	return new MapPos(lon, lat);
 }
 
-createPoint(double lat, double lon) {
+createPoint(double lon, double lat) {
 	return new MapPos((float) lon, (float) lat);
 }
 
@@ -286,14 +287,38 @@ getGeometry(String ref, int layerId, int geomId) {
 	return linker.getGeometry(ref, layerId, geomId);
 }
 
-drawGeometry(String ref, int layerId, Geometry geom, int color) {
+drawGeometry(String ref, int layerId, Geometry geom, StyleSet styleSet) {
 	if (geom instanceof Point) {
-		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), color);
+		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), styleSet);
 	} else if (geom instanceof Line) {
-		return drawLine(ref, layerId, ((Line) geom).getVertexList(), color);
+		return drawLine(ref, layerId, ((Line) geom).getVertexList(), styleSet);
 	} else if (geom instanceof Polygon) {
-		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), color);
+		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), styleSet);
 	}
+}
+
+createPointStyle(int color, float size, float pickSize) {
+	return linker.createPointStyle(color, size, pickSize);
+}
+
+createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
+	if (pointStyle == null)
+		return linker.createLineStyle(color, width, pickWidth);
+	return linker.createLineStyle(color, width, pickWidth, pointStyle);
+}
+
+createPolygonStyle(int color, LineStyle lineStyle) {
+	if (lineStyle == null)
+		return linker.createPolygonStyle(color);
+	return linker.createPolygonStyle(color, lineStyle);
+}
+
+createStyleSet(int minZoom, Style style) {
+	return linker.createStyleSet(minZoom, style);
+}
+
+addStyleToSet(StyleSet styleSet, int minZoom, Style style) {
+	styleSet.setZoomStyle(minZoom, style);
 }
 
 lockMapView(String ref, boolean lock) {

@@ -1,29 +1,28 @@
+mapfilename = "trap3785tiled.tif";
 
-setupMap(id, lat, lon) {
-	showRasterMap(id, "trap3785tiled.tif");
-	setMapFocusPoint(id, lat, lon);
+setupMap(id, lon, lat) {
+	showRasterMap(id, mapfilename);
+	setMapFocusPoint(id, lon, lat);
 	setMapRotation(id, 360.0f);
 	setMapZoom(id, 18.0f);
 	setMapTilt(id, 90.0f);
 }
 
 showMapTab() {
-	//setupMap("tabgroup1/tab2/map", 42.7026f, 25.4426f); // vector layer positions
-	setupMap("tabgroup1/tab2/map", 42.58401f, 25.33825f); 
-	//setupMap("tabgroup1/tab2/map", 41.526f, 26.513f); 
+	setupMap("tabgroup1/tab2/map", 25.33825f, 42.58401f); 
 	showTab("tabgroup1/tab2");
 	addVectorLayers();
 }
 
 showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", 42.58401f, 25.33825f); // sydney
+	setupMap("tabgroup2/tab1/map", 25.33825f, 42.58401f); 
 	showTabGroup("tabgroup2");
 	
 	refreshLayers();
 }
 
 refreshMapTab() {
-	showRasterMap("tabgroup1/tab2/map", "natural-earth-2-mercator.tif");
+	showRasterMap("tabgroup1/tab2/map", mapfilename);
 	addVectorLayers();
 }
 
@@ -41,7 +40,7 @@ clearMapTab() {
 }
 
 refreshMapTabGroup() {
-	showRasterMap("tabgroup2/tab1/map", "natural-earth-2-mercator.tif");
+	showRasterMap("tabgroup2/tab1/map", mapfilename);
 }
 
 showCurrentPositionTab(){
@@ -74,6 +73,24 @@ LINE = 2;
 POLYGON = 3;
 GRID = 4;
 SELECT_SHAPE = 5;
+
+pointStyle(int color) {
+	pointStyleSet = createStyleSet(10, createPointStyle(color, 0.1f, 0.3f));
+	addStyleToSet(pointStyleSet, 16, createPointStyle(color, 0.3f, 0.3f));
+	return pointStyleSet;
+}
+
+lineStyle(int color) {
+	lineStyleSet = createStyleSet(10, createLineStyle(color, 0.1f, 0.3f, null));
+	addStyleToSet(lineStyleSet, 16, createLineStyle(color, 0.1f, 0.3f, createPointStyle(color, 0.3f, 0.3f)));
+	return lineStyleSet;
+}
+
+polygonStyle(int color, int lineColor) {
+	polygonStyleSet = createStyleSet(10, createPolygonStyle(color, null));
+	addStyleToSet(polygonStyleSet, 16, createPolygonStyle(color, createLineStyle(lineColor, 0.1f, 0.3f, null)));
+	return polygonStyleSet;
+}
 
 List canvasLayers = new ArrayList();
 List points = new ArrayList();
@@ -118,22 +135,22 @@ onMapClick() {
 	switch(tool) {
 		case POINT:
 			point = getMapPointClicked();
-			drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.RED);
+			drawPoint("tabgroup2/tab1/map", currentLayerId, point, pointStyle(Color.RED));
 		break;
 		case LINE:
 			point = getMapPointClicked();
 			points.add(point);
-			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.GREEN)));
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, pointStyle(Color.GREEN))));
 		break;
 		case POLYGON:
 			point = getMapPointClicked();
 			points.add(point);
-			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.BLUE)));
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, pointStyle(Color.BLUE))));
 		break;
 		case GRID:
 			point = getMapPointClicked();
 			points.add(point);
-			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, Color.YELLOW)));
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", currentLayerId, point, pointStyle(Color.YELLOW))));
 		break;
 	}
 }
@@ -158,14 +175,14 @@ drawBox(map, layer, p1, p2, color) {
 	pts.add(createPoint(p2.x, p2.y));
 	pts.add(createPoint(p1.x, p2.y));
 	pts.add(createPoint(p1.x, p1.y));
-	drawLine(map, layer, pts, color);
+	drawLine(map, layer, pts, lineStyle(color));
 }
 
 drawLine(map, layer, p1, p2, color) {
 	List pts = new ArrayList();
 	pts.add(p1);
 	pts.add(p2);
-	drawLine(map, layer, pts, color);
+	drawLine(map, layer, pts, lineStyle(color));
 }
 
 drawGrid(map, layer, color, cols, rows) {
@@ -208,7 +225,7 @@ createShape() {
 				return;
 			}
 			
-			drawLine("tabgroup2/tab1/map", currentLayerId, points, Color.GREEN);
+			drawLine("tabgroup2/tab1/map", currentLayerId, points, lineStyle(Color.GREEN));
 			clearPoints();
 		break;
 		case POLYGON:
@@ -217,7 +234,7 @@ createShape() {
 				return;
 			}
 			
-			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, Color.BLUE);
+			drawPolygon("tabgroup2/tab1/map", currentLayerId, points, polygonStyle(Color.BLUE, Color.BLACK));
 			clearPoints();
 		break;
 		case GRID:
@@ -240,7 +257,7 @@ createShape() {
 			pts.add(createPoint(p2.x, p2.y));
 			pts.add(createPoint(p1.x, p2.y));
 			
-			gridId = drawPolygon("tabgroup2/tab1/map", currentLayerId, pts, Color.YELLOW);
+			gridId = drawPolygon("tabgroup2/tab1/map", currentLayerId, pts, polygonStyle(Color.YELLOW, Color.BLACK));
 			clearPoints();
 		break;
 	}
@@ -468,9 +485,9 @@ plotGPSPoint() {
 		Object location = getGPSPosition();
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
-		point = createPoint(latitude, longitude);
-		//point = createPoint(-33.58f, 151.23f);
-		drawPoint("tabgroup1/tab2/map", pointLayerId, point, Color.RED);
+		point = createPoint(longitude, latitude);
+		//point = createPoint(151.23f, -33.58f);
+		drawPoint("tabgroup1/tab2/map", pointLayerId, point, pointStyle(Color.RED));
 	}
 }
 

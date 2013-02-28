@@ -131,15 +131,9 @@ public class OgrLayer extends GeometryLayer {
 		for (int n = 0; feature != null && n < maxObjects; n++) {
 
 		    poSrcGeom = feature.GetGeometryRef();
-		    if (poSrcGeom == null) {
-		    	Log.error("unknown src geom " + n);
-		    	android.util.Log.e("FAIMS", "unknown src geom " + n);
-		    	continue;
-		    }
 			int eType = poSrcGeom.GetGeometryType();
 			if (eType == ogr.wkbUnknown) {
 			    Log.error("unknown object type "+eType);
-			    android.util.Log.e("FAIMS", "unknown object type "+eType);
 				continue;
 			}
 
@@ -176,7 +170,6 @@ public class OgrLayer extends GeometryLayer {
 		}
 		long timeEnd = System.currentTimeMillis();
 		Log.debug("OgrLayer loaded "+tableName+" N:"+ newVisibleElementsList.size()+" time ms:"+(timeEnd-timeStart));
-		android.util.Log.d("FAIMS", "OgrLayer loaded "+tableName+" N:"+ newVisibleElementsList.size()+" time ms:"+(timeEnd-timeStart));
 		setVisibleElementsList(newVisibleElementsList);
 	}
 

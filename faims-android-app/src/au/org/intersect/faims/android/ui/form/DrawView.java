@@ -30,7 +30,7 @@ public class DrawView extends View {
 		if (geometry != null) {
 			if (geometry instanceof Point) {
 				Point p = (Point) geometry;
-				canvas.drawCircle((float) p.getMapPos().x, (float) p.getMapPos().y, 5.0f, paint);
+				canvas.drawCircle((float) p.getMapPos().x, (float) p.getMapPos().y, 10.0f, paint);
 			} else if (geometry instanceof Line) {
 				Line l = (Line) geometry;
 				MapPos lp = null;
