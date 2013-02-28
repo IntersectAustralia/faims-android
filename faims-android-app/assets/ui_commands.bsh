@@ -231,6 +231,10 @@ showVectorLayer(String ref, String filename, StyleSet pointStyleSet, StyleSet li
 	linker.showVectorLayer(ref, filename, pointStyleSet, lineStyleSet, polygonStyleSet);
 }
 
+showSpatialLayer(String ref, String filename, String tableName, String labelName, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
+	linker.showSpatialLayer(ref, filename, tableName, labelName, pointStyleSet, lineStyleSet, polygonStyleSet);
+}
+
 clearVectorLayer(String ref, int layerId) {
 	linker.clearVectorLayer(ref, layerId);
 }

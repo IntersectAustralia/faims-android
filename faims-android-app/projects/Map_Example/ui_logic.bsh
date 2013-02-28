@@ -1,10 +1,10 @@
-mapfilename = "trap3785tiled.tif";
+mapfilename = "natural-earth-2-mercator.tif";
 
 setupMap(id, lon, lat) {
 	showRasterMap(id, mapfilename);
 	setMapFocusPoint(id, lon, lat);
 	setMapRotation(id, 360.0f);
-	setMapZoom(id, 18.0f);
+	setMapZoom(id, 12.0f);
 	setMapTilt(id, 90.0f);
 }
 
@@ -59,10 +59,8 @@ addVectorLayers() {
 	ls = createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
 	pos = createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp", ps, ls, pos)); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp", ps, ls, pos)); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp", ps, ls, pos)); 
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp", ps, ls, pos)); 
+	layers.add(showSpatialLayer("tabgroup1/tab2/map", "Kaz.sqlite", "KAZ_AllTeams_out", null, ps, ls, pos));
+	layers.add(showSpatialLayer("tabgroup1/tab2/map", "Kaz.sqlite", "KAZ_SitePoints_out", null, ps, ls, pos)); 
 }
 
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");

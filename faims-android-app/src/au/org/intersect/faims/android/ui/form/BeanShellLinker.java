@@ -54,6 +54,7 @@ import com.nutiteq.geometry.Marker;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.layers.vector.OgrLayer;
+import com.nutiteq.layers.vector.SpatialiteLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
@@ -1607,6 +1608,31 @@ public class BeanShellLinker {
 		}
 		catch(Exception e){
 			Log.e("FAIMS","Exception showing vector layer",e);
+		}
+		return 0;
+	}
+	
+	public int showSpatialLayer(String ref, String filename, String tablename, String labelColumn, StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				try {
+					SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), baseDir + "/maps/" + filename, tablename, "Geometry",
+	                        new String[]{labelColumn}, MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+					return mapView.addVectorLayer(spatialLayer);
+				} catch (Exception e) {
+					Log.e("FAIMS","Could not show spatial layer", e);
+                    showWarning("Map Error", "Could not show spatial layer");
+				}
+			} else {
+				Log.d("FAIMS","Could not find map view");
+				showWarning("Logic Error", "Map does not exist.");
+			}
+		}
+		catch(Exception e){
+			Log.e("FAIMS","Exception showing spatial layer",e);
 		}
 		return 0;
 	}
