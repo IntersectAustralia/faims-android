@@ -227,8 +227,8 @@ setMapTilt(String ref, float tilt) {
 	linker.setMapTilt(ref, tilt);
 }
 
-showVectorLayer(String ref, String filename) {
-	linker.showVectorLayer(ref, filename);
+showVectorLayer(String ref, String filename, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
+	linker.showVectorLayer(ref, filename, pointStyleSet, lineStyleSet, polygonStyleSet);
 }
 
 clearVectorLayer(String ref, int layerId) {

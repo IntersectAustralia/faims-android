@@ -55,10 +55,14 @@ onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
 onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
 
 addVectorLayers() {
-	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp")); 
-	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp")); 
-	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp")); 
-	//layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp")); 
+	ps = createStyleSet(10, createPointStyle(Color.RED, 0.05f, 0.1f));
+	ls = createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
+	pos = createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
+
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_AllTeams_out.shp", ps, ls, pos)); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_Scatters_out.shp", ps, ls, pos)); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_ScatterPoints_out.shp", ps, ls, pos)); 
+	layers.add(showVectorLayer("tabgroup1/tab2/map", "KAZ_SitePoints_out.shp", ps, ls, pos)); 
 }
 
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");

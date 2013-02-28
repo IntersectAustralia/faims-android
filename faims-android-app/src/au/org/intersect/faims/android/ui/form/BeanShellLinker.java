@@ -1584,25 +1584,11 @@ public class BeanShellLinker {
 		}
 	}
 
-	public int showVectorLayer(String ref, String filename) {
+	public int showVectorLayer(String ref, String filename, StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
-				int minZoom = 10;
-				
-				StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-		        Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(activity.getResources(), R.drawable.point);
-		        PointStyle pointStyle = PointStyle.builder().setBitmap(pointMarker).setSize(0.05f).setColor(Color.RED).build();
-				pointStyleSet.setZoomStyle(minZoom, pointStyle);
-
-				StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-		        lineStyleSet.setZoomStyle(minZoom, LineStyle.builder().setWidth(0.1f).setColor(Color.GREEN).build());
-		        
-		        PolygonStyle polygonStyle = PolygonStyle.builder().setColor(Color.BLUE).setLineStyle(LineStyle.builder().setWidth(0.01f).setColor(Color.BLACK).build()).build();
-		        StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-				polygonStyleSet.setZoomStyle(minZoom, polygonStyle);
 				
 				try {
 					OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null,
