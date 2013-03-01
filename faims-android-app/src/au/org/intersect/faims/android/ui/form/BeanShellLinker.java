@@ -2122,10 +2122,13 @@ public class BeanShellLinker {
 			StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
 			lineStyleSet.setZoomStyle(minZoom, (LineStyle) style);
 			return lineStyleSet;
-		} else {
+		} else if (style instanceof PolygonStyle) {
 			StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
 			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
 			return polygonStyleSet;
+		} else {
+			Log.e("FAIMS", "Cannot add invalid style to styleset");
+			return null;
 		}
 	}
 
