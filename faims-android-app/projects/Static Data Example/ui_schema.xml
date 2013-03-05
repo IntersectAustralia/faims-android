@@ -11,8 +11,7 @@
         <faims id="simple_example">
           <user>
               <tab1>
-                  <userlist></userlist>
-                  <skip></skip>
+                  <users></users>
               </tab1>
           </user>
           <tabgroup1>
@@ -39,16 +38,13 @@
       <label>User List</label>
       <group ref="tab1" faims_scrollable="false">
         <label>User List</label>
-        <select1 ref="userlist" appearance="compact">
+        <select1 ref="users" appearance="compact">
           <label>Users:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="skip">
-            <label>Skip</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup1">

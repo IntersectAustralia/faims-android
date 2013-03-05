@@ -9,6 +9,11 @@
     <model>
       <instance>
         <faims id="simple_example">
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
           <tabgroup1>
               <tab1>
                   <name></name>
@@ -46,10 +51,23 @@
 
   
   <h:body>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
     <group ref="tabgroup1" faims_archent_type="simple">
       <label>Simple Entity Example</label>
       <group ref="tab1">
-        <label>{entity}</label>
+        <label>{entity} Tab1</label>
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
           <label>{name}:</label>
         </input>
@@ -83,7 +101,7 @@
         </trigger>
 	  </group>
       <group ref="tab2">
-        <label>Load</label>
+        <label>{entity} Tab2</label>
         <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
             <label>Location:</label>
             <item>

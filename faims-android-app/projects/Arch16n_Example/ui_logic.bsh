@@ -1,0 +1,55 @@
+createUser(id, firstname, lastname) {
+	user = new User(id, firstname, lastname);
+	return user;
+}
+
+toUsersList(users) {
+	users_array = new ArrayList();
+	for (User user : users) {
+		ua = new ArrayList();
+		ua.add(user.getUserId());
+		ua.add(user.getFirstName() + " " + user.getLastName());
+		users_array.add(ua);
+	}
+	return users_array;
+}
+
+getDefaultUsersList() {
+	users = new ArrayList();
+	users.add(createUser("0", "Default", "User"));
+	return users;
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+	populateList("user/tab1/users", toUsersList(usersList));
+}
+
+login(){
+	User user = (User) usersList.get(0);
+	
+	setUser(user);
+	showTabGroup("tabgroup1");
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");
+
+Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
+Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+
+initialise() {
+	setUser();
+	populateDropDown("tabgroup1/tab1/type", types);
+	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
+}
+
+setUser(){
+	User user = new User("0","Default","User");
+	setUser(user);
+}
+
+onEvent("tabgroup1", "load", "initialise()");
+onEvent("tabgroup1/tab1/settype", "click", "setFieldValue(\"tabgroup1/tab1/name\",\"{typeC}\")");

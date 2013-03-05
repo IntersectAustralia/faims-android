@@ -1,3 +1,42 @@
+createUser(id, firstname, lastname) {
+	user = new User(id, firstname, lastname);
+	return user;
+}
+
+toUsersList(users) {
+	users_array = new ArrayList();
+	for (User user : users) {
+		ua = new ArrayList();
+		ua.add(user.getUserId());
+		ua.add(user.getFirstName() + " " + user.getLastName());
+		users_array.add(ua);
+	}
+	return users_array;
+}
+
+getDefaultUsersList() {
+	users = new ArrayList();
+	users.add(createUser("0", "Default", "User"));
+	return users;
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+	populateList("user/tab1/users", toUsersList(usersList));
+}
+
+login(){
+	User user = (User) usersList.get(0);
+	
+	setUser(user);
+	showTabGroup("tabgroup1");
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");
+
 Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';");
@@ -5,7 +44,6 @@ Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabular
 String entity_id;
 
 initialise() {
-	setUser();
 	updateEntities();
 	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
 	populateDropDown("tabgroup1/tab1/type", types);
@@ -17,11 +55,6 @@ saveEntity() {
 	
 	entity_id = updateEntity(null);
 	
-}
-
-setUser(){
-	User user = new User("0","Default","User");
-	setUser(user);
 }
 
 updateEntity(entity_id) {
@@ -50,8 +83,15 @@ updateEntities() {
 	populateDropDown("tabgroup1/tab3/entity", entities);
 }
 
+loadEntity() {
+	String id = getFieldValue("tabgroup1/tab3/entity");
+	if (id == null || "".equals(id)) return;
+	showTabGroup("tabgroup1", id);
+}
+
 onEvent("tabgroup1", "load", "initialise()");
 onEvent("tabgroup1/tab1/cancel", "click", "cancelTab(\"tabgroup1/tab1\",true)");
 onEvent("tabgroup1/tab3/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab3/update", "click", "updateEntity(entity_id)");
-onEvent("tabgroup1/tab3/load", "click", "showTabGroup(\"tabgroup1\",getFieldValue(\"tabgroup1/tab3/entity\"))");
+onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab3/clear", "click", "newTabGroup(\"tabgroup1\")");

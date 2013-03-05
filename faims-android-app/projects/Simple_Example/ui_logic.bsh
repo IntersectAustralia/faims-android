@@ -1,3 +1,71 @@
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(10.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+	setSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+restartSync() {
+	User user = new User("1","Test","User");
+	setUser(user);
+}
+
+onEvent("tabgroup5/tab3/start", "click", "startSync()");
+onEvent("tabgroup5/tab3/stop", "click", "stopSync()");
+onEvent("tabgroup5/tab3/restart", "click", "restartSync()");
+
+syncStarted() {
+	showToast("staring sync");
+	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/laststart", time);
+}
+
+syncCompleted() {
+	showToast("completed sync");
+ 	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/lastsuccess", time);
+	updateEntityRelationship();
+}
+
+syncFailed() {
+	showToast("failed sync");
+	time = getCurrentTime();
+	System.out.println(time);
+	setFieldValue("tabgroup5/tab3/lastfailure", time);
+}
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+onLoadPage() {
+	showToast("This is the entity page");
+}
+
+onShowPage() {
+	showToast("This is the relationship page");
+}
+
+onFocusEntity() {
+	showToast("Focus on Value");
+}
+
+onBlurEntity() {
+	if (!getFieldValue("tabgroup1/tab1/value").equals("")) {
+		showAlert("Message", "Do you want to keep value", "", "setFieldValue(\"tabgroup1/tab1/value\", \"\")");
+	}
+	
+}
+
+onEvent("tabgroup1", "load", "onLoadPage()");
+onEvent("tabgroup2", "show", "onShowPage()");
+onFocus("tabgroup1/tab1/value", "onFocusEntity()", "onBlurEntity()");
+
 Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 Object relationships = fetchAll("select relntypename, relntypename from relntype;");
@@ -26,20 +94,20 @@ loadEntity() {
 			setFieldValue("tabgroup1/tab1/value-description", attribute.getText());
 			setFieldValue("tabgroup1/tab1/value-certainty", attribute.getCertainty());
 		} else if ("date".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/date", attribute.getText());
+			setFieldValue("tabgroup1/tab2/date", attribute.getText());
 		} else if ("time".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/time", attribute.getText());
+			setFieldValue("tabgroup1/tab2/time", attribute.getText());
 		} else if ("type".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/type", attribute.getVocab());
-			setFieldValue("tabgroup1/tab1/type-description", attribute.getText());
+			setFieldValue("tabgroup1/tab3/type", attribute.getVocab());
+			setFieldValue("tabgroup1/tab3/type-description", attribute.getText());
 		} else if ("location".equals(attribute.getName())) {
 			List locations = new ArrayList();
 			locations.add(new NameValuePair(attribute.getVocab(), "true"));
-			setFieldValue("tabgroup1/tab1/location", locations);
-			setFieldValue("tabgroup1/tab1/location-value", attribute.getMeasure());
-			setFieldValue("tabgroup1/tab1/location-certainty", attribute.getCertainty());
+			setFieldValue("tabgroup1/tab3/location", locations);
+			setFieldValue("tabgroup1/tab3/location-value", attribute.getMeasure());
+			setFieldValue("tabgroup1/tab3/location-certainty", attribute.getCertainty());
 		} else if ("supervisor".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/supervisor", attribute.getText());
+			setFieldValue("tabgroup1/tab3/supervisor", attribute.getText());
 		}
 	}
 	
@@ -49,17 +117,17 @@ updateEntity(entity_id) {
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
 	attributes.add(createEntityAttribute("value", getFieldValue("tabgroup1/tab1/value-description"), null, getFieldValue("tabgroup1/tab1/value"), getFieldValue("tabgroup1/tab1/value-certainty")));
-	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab1/date"), null, null, null));
-	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab1/time"), null, null, null));
-	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab1/type-description"), getFieldValue("tabgroup1/tab1/type"), null, null));
+	attributes.add(createEntityAttribute("date", getFieldValue("tabgroup1/tab2/date"), null, null, null));
+	attributes.add(createEntityAttribute("time", getFieldValue("tabgroup1/tab2/time"), null, null, null));
+	attributes.add(createEntityAttribute("type", getFieldValue("tabgroup1/tab3/type-description"), getFieldValue("tabgroup1/tab3/type"), null, null));
 	
-	Object values = getFieldValue("tabgroup1/tab1/location");
+	Object values = getFieldValue("tabgroup1/tab3/location");
 	
 	for (Object value : values) {
-		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab1/location-value"), getFieldValue("tabgroup1/tab1/location-certainty")));
+		attributes.add(createEntityAttribute("location", null, value.getName(), getFieldValue("tabgroup1/tab3/location-value"), getFieldValue("tabgroup1/tab3/location-certainty")));
 	}
 	
-	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab1/supervisor"), null, null, null));
+	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab3/supervisor"), null, null, null));
 	
 	String id = saveArchEnt(entity_id, "simple", null, attributes);
 	
@@ -73,11 +141,11 @@ clearEntity() {
 	setFieldValue("tabgroup1/tab1/value", "");
 	setFieldValue("tabgroup1/tab1/value-description", "");
 	setFieldValue("tabgroup1/tab1/value-certainty", "");
-	setFieldValue("tabgroup1/tab1/type-description", "");
-	setFieldValue("tabgroup1/tab1/location-value", "");
-	setFieldValue("tabgroup1/tab1/location-certainty", "");
-	populateDropDown("tabgroup1/tab1/type", types);
-	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	setFieldValue("tabgroup1/tab3/type-description", "");
+	setFieldValue("tabgroup1/tab3/location-value", "");
+	setFieldValue("tabgroup1/tab3/location-certainty", "");
+	populateDropDown("tabgroup1/tab3/type", types);
+	populateCheckBoxGroup("tabgroup1/tab3/location", locations);
 }
 
 saveRelationship() {
@@ -118,14 +186,17 @@ clearRelationship() {
 }
 
 updateEntityRelationship() {
-	Object entities = fetchAll("select uuid, uuid from archentity;");
-	Object relationships = fetchAll("select relationshipid, relationshipid from relationship;");
+	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
+	Object relationships = fetchAll("select relationshipid, relationshipid from relationship group by relationshipid;");
 	
-	populateDropDown("tabgroup1/tab2/entity", entities);
+	populateDropDown("tabgroup1/tab5/entity", entities);
 	populateDropDown("tabgroup2/tab2/relationship", relationships);
 	populateDropDown("tabgroup3/tab1/entity", entities);
 	populateDropDown("tabgroup3/tab1/relationship", relationships);
+	populateDropDown("tabgroup4/tab1/entity", entities);
+	populateDropDown("tabgroup4/tab2/relationship", relationships);
 	
+	populateList("tabgroup5/tab1/entity", entities);
 }
 
 saveEntityRelationship() {
@@ -140,10 +211,37 @@ hideEntityTab() {
 
 showEntityTab() {
 	showTab("tabgroup1/tab1");
+	showTab("tabgroup1/tab2");
+	showTab("tabgroup1/tab3");
+	showTab("tabgroup1/tab4");
 }
 
 loadEntityTab() {
-	showTab("tabgroup1/tab1", getFieldValue("tabgroup1/tab2/entity"));
+	entity_id = getFieldValue("tabgroup1/tab5/entity");
+	showTab("tabgroup1/tab1", entity_id);
+	showTab("tabgroup1/tab2", entity_id);
+	showTab("tabgroup1/tab3", entity_id);
+	showTab("tabgroup1/tab4", entity_id);
+}
+
+newEntityTab() {
+	newTab("tabgroup1/tab1");
+	newTab("tabgroup1/tab2");
+	newTab("tabgroup1/tab3");
+	newTab("tabgroup1/tab4");
+}
+
+showEntityTabGroup() {
+	showTabGroup("tabgroup1");
+}
+
+loadEntityTabGroup() {
+	entity_id = getFieldValue("tabgroup4/tab1/entity");
+	showTabGroup("tabgroup1", entity_id);
+}
+
+newEntityTabGroup() {
+	newTabGroup("tabgroup1");
 }
 
 hideRelationshipTab() {
@@ -155,22 +253,74 @@ showRelationshipTab() {
 }
 
 loadRelationshipTab() {
-	showTab("tabgroup2/tab1", getFieldValue("tabgroup2/tab2/relationship"));
+	rel_id = getFieldValue("tabgroup2/tab2/relationship");
+	showTab("tabgroup2/tab1", rel_id);
+}
+
+newRelationshipTab() {
+	newTab("tabgroup2/tab1");
+}
+
+showRelationshipTabGroup() {
+	showTabGroup("tabgroup2");
+}
+
+loadRelationshipTabGroup() {
+	rel_id = getFieldValue("tabgroup4/tab2/relationship");
+	showTabGroup("tabgroup2", rel_id);
+}
+
+newRelationshipTabGroup() {
+	newTabGroup("tabgroup2");
 }
 
 gotoGroup(n) {
 	showTabGroup("tabgroup" + n);
 }
 
-onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
-onEvent("tabgroup1/tab1/update", "click", "updateEntity(entity_id)");
-onEvent("tabgroup1/tab1/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
+getDefaultUsersList() {
+	users = new ArrayList();
+	defaultUser = new ArrayList();
+	defaultUser.add("0");
+	defaultUser.add("Default User");
+	users.add(defaultUser);
+	return users;
+}
 
-onEvent("tabgroup1/tab2/hide", "click", "hideEntityTab()");
-onEvent("tabgroup1/tab2/show", "click", "showEntityTab()");
-onEvent("tabgroup1/tab2/load", "click", "loadEntityTab()");
-onEvent("tabgroup1/tab2/next", "click", "gotoGroup(2)");
+populateListForUsers(){
+	Object users = fetchAll("select userid,(fname || ' ' || lname) as name from user;");
+	if (users == null || users.size() == 0) {
+		users = getDefaultUsersList();
+	}
+	populateList("user/tab1/userlist",users);
+}
+
+login(){
+	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+	User user;
+	if (userResult == null || userResult.size() == 0) {
+		user = new User("0", "Default", "User");
+	} else {
+		user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	}
+	
+	setUser(user);
+	gotoGroup(1);
+}
+
+onEvent("user", "show", "populateListForUsers()");
+onEvent("user/tab1/userlist", "click", "login()");
+
+onEvent("tabgroup1/tab4/save", "click", "saveEntity()");
+onEvent("tabgroup1/tab4/update", "click", "updateEntity(entity_id)");
+onEvent("tabgroup1/tab4/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab4/clear", "click", "clearEntity()");
+
+onEvent("tabgroup1/tab5/hide", "click", "hideEntityTab()");
+onEvent("tabgroup1/tab5/show", "click", "showEntityTab()");
+onEvent("tabgroup1/tab5/load", "click", "loadEntityTab()");
+onEvent("tabgroup1/tab5/new", "click", "newEntityTab()");
+onEvent("tabgroup1/tab5/next", "click", "gotoGroup(2)");
 
 onEvent("tabgroup2/tab1/save", "click", "saveRelationship()");
 onEvent("tabgroup2/tab1/update", "click", "updateRelationship(rel_id)");
@@ -180,17 +330,72 @@ onEvent("tabgroup2/tab1/clear", "click", "clearRelationship()");
 onEvent("tabgroup2/tab2/hide", "click", "hideRelationshipTab()");
 onEvent("tabgroup2/tab2/show", "click", "showRelationshipTab()");
 onEvent("tabgroup2/tab2/load", "click", "loadRelationshipTab()");
+onEvent("tabgroup2/tab2/new", "click", "newRelationshipTab()");
 onEvent("tabgroup2/tab2/next", "click", "gotoGroup(3)");
 
 onEvent("tabgroup3/tab1/save", "click", "saveEntityRelationship()");
 onEvent("tabgroup3/tab1/next", "click", "gotoGroup(4)");
 
+onEvent("tabgroup4/tab1/show", "click", "showEntityTabGroup()");
+onEvent("tabgroup4/tab1/load", "click", "loadEntityTabGroup()");
+onEvent("tabgroup4/tab1/new", "click", "newEntityTabGroup()");
+onEvent("tabgroup4/tab2/show", "click", "showRelationshipTabGroup()");
+onEvent("tabgroup4/tab2/load", "click", "loadRelationshipTabGroup()");
+onEvent("tabgroup4/tab2/new", "click", "newRelationshipTabGroup()");
+onEvent("tabgroup4/tab3/next", "click", "gotoGroup(5)");
+
 clearEntity();
 clearRelationship();
 updateEntityRelationship();
 
-selectedName() {
-	System.out.println(getListItemValue());
+selectedEntity() {
+	showToast(getListItemValue());
 }
 
-onEvent("tabgroup4/tab1/names", "click", "selectedName()");
+onEvent("tabgroup5/tab1/entity", "click", "selectedEntity()");
+
+cancelEntity() {
+	cancelTab("tabgroup1/tab1", true);
+}
+
+cancelEntityGroup() {
+	cancelTabGroup("tabgroup1", true);
+}
+
+onEvent("tabgroup1/tab5/cancel", "click", "cancelEntity()");
+onEvent("tabgroup1/tab5/close", "click", "cancelEntityGroup()");
+
+onEvent("tabgroup5/tab2/push", "click", "uploadDatabase()");
+onEvent("tabgroup5/tab2/pull", "click", "downloadDatabase()");
+	
+onUpload() {
+	showToast("database uploaded successfully");
+}
+	
+uploadDatabase() {
+	pushDatabaseToServer("onUpload()");
+}
+
+
+onDownload() {
+	
+	showToast("database downloaded successfully");
+	
+	updateEntityRelationship();
+}
+
+downloadDatabase() {
+	pullDatabaseFromServer("onDownload()");
+}
+
+onEvent("tabgroup5/tab4/next", "click", "showTabGroup(\"tabgroup6\")");
+
+setFilename() {
+	setFieldValue("tabgroup6/tab1/filename", getLastSelectedFilename());
+}
+
+selectFile() {
+	showFileBrowser("setFilename()");
+}
+
+onEvent("tabgroup6/tab1/attach", "click", "selectFile()");

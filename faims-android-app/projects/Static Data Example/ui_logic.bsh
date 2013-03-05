@@ -1,0 +1,47 @@
+createUser(id, firstname, lastname) {
+	user = new User(id, firstname, lastname);
+	return user;
+}
+
+toUsersList(users) {
+	users_array = new ArrayList();
+	for (User user : users) {
+		ua = new ArrayList();
+		ua.add(user.getUserId());
+		ua.add(user.getFirstName() + " " + user.getLastName());
+		users_array.add(ua);
+	}
+	return users_array;
+}
+
+getDefaultUsersList() {
+	users = new ArrayList();
+	users.add(createUser("0", "Default", "User"));
+	return users;
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+	populateList("user/tab1/users", toUsersList(usersList));
+}
+
+login(){
+	User user = (User) usersList.get(0);
+	
+	setUser(user);
+	showTabGroup("tabgroup1");
+
+	setFieldValue("tabgroup1/tab1/name", getProjectName());
+	setFieldValue("tabgroup1/tab1/id", getProjectId());
+	setFieldValue("tabgroup1/tab1/season", getProjectSeason());
+	setFieldValue("tabgroup1/tab1/description", getProjectDescription());
+	setFieldValue("tabgroup1/tab1/permit_no", getPermitNo());
+	setFieldValue("tabgroup1/tab1/permit_holder", getPermitHolder());
+	setFieldValue("tabgroup1/tab1/contact_address", getContactAndAddress());
+	setFieldValue("tabgroup1/tab1/participants", getParticipants());
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");

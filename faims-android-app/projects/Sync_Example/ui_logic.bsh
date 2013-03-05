@@ -101,18 +101,15 @@ getDefaultUsersList() {
 	return users;
 }
 
+usersList = getDefaultUsersList();
+
 populateListForUsers(){
-	users = getDefaultUsersList();
-	populateList("user/tab1/users", users);
+	populateList("user/tab1/users", usersList);
 }
 
+
 login(){
-	User user;
-	if ("1".equals(getListItemValue())) {
-		user = new User("1", "Test", "User 1");
-	} else {
-		user = new User("2", "Test", "User 2");
-	}
+	User user = usersList.get(Integer.parseInt(getListItemValue()) - 1);
 	
 	setUser(user);
 	showTabGroup("tabgroup1");
