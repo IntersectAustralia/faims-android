@@ -115,7 +115,7 @@
       </group>
       <group ref="tab3">
         <label>Load</label>
-        <select1 ref="entity">
+        <select1 ref="entity" faims_certainty="false">
           <label>Entity:</label>
           <item>
             <label>dummy</label>
