@@ -16,7 +16,11 @@ toUsersList(users) {
 
 getDefaultUsersList() {
 	users = new ArrayList();
-	users.add(createUser("0", "Default", "User"));
+	users.add(createUser("1", "Test", "User 1"));
+	users.add(createUser("2", "Test", "User 2"));
+	users.add(createUser("3", "Test", "User 3"));
+	users.add(createUser("4", "Test", "User 4"));
+	users.add(createUser("5", "Test", "User 5"));
 	return users;
 }
 
@@ -27,7 +31,7 @@ populateListForUsers(){
 }
 
 login(){
-	User user = (User) usersList.get(0);
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
 	showTabGroup("tabgroup1");
@@ -43,7 +47,7 @@ setupMap(id, lon, lat) {
 	showRasterMap(id, mapfilename);
 	setMapFocusPoint(id, lon, lat);
 	setMapRotation(id, 360.0f);
-	setMapZoom(id, 16.0f);
+	setMapZoom(id, 17.0f);
 	setMapTilt(id, 90.0f);
 }
 
@@ -77,10 +81,7 @@ clearMapTab() {
 	pointLayerId = createVectorLayer("tabgroup1/tab2/map");
 	layers.add(pointLayerId);
 }
-
-refreshMapTabGroup() {
-	showRasterMap("tabgroup2/tab1/map", mapfilename);
-}
+clearMapTab();
 
 showCurrentPositionTab(){
 	centerOnCurrentPosition("tabgroup1/tab2/map");
@@ -305,10 +306,6 @@ createShape() {
 	
 }
 
-clearShape() {
-
-}
-
 clearPoints() {
 	//System.out.println("layer: " + String.valueOf(currentLayerId));
 	//System.out.println(pointIds.toString());
@@ -411,6 +408,7 @@ saveEntity() {
 
 updateEntity(String entityId) {
 	
+	if (entityId == null || "".equals(entityId)) entityId = null;
 
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, null));
@@ -435,6 +433,8 @@ loadEntity() {
 	
 	entityId = getFieldValue("tabgroup2/tab2/entity");
 	
+	if (entityId == null || "".equals(entityId)) return;
+	
 	Object entity = fetchArchEnt(entityId);
 	
 	for (Object attribute : entity.getAttributes()) {
@@ -445,8 +445,6 @@ loadEntity() {
 			setFieldValue("tabgroup2/tab2/value", attribute.getMeasure());
 		}
 	}
-	
-	System.out.println(entity.getGeometryList());
 	
 	drawGeometryList(entity.getGeometryList());
 	
@@ -482,6 +480,7 @@ saveRelationship() {
 
 updateRelationship(String relId) {
 	
+	if (relId == null || "".equals(relId)) relId = null;	
 
 	List attributes = createAttributeList();
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null));
@@ -505,6 +504,8 @@ loadRelationship() {
 	
 	relId = getFieldValue("tabgroup2/tab3/relationship");
 	
+	if (relId == null || "".equals(relId)) return;
+	
 	Object relationship = fetchRel(relId);
 	
 	for (Object attribute : relationship.getAttributes()) {
@@ -514,18 +515,12 @@ loadRelationship() {
 		}
 	}
 	
-	System.out.println(relationship.getGeometryList());
-	
 	drawGeometryList(relationship.getGeometryList());
 	
 }
 
 refreshRelationships();
 
-User user = new User("0","Default","User");
-setUser(user);
-
-clearMapTab();
 plotGPSPoint() {
 	location = getGPSPosition();
 	if (location == null) {

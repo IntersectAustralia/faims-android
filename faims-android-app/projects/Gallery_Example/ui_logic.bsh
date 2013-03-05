@@ -16,7 +16,11 @@ toUsersList(users) {
 
 getDefaultUsersList() {
 	users = new ArrayList();
-	users.add(createUser("0", "Default", "User"));
+	users.add(createUser("1", "Test", "User 1"));
+	users.add(createUser("2", "Test", "User 2"));
+	users.add(createUser("3", "Test", "User 3"));
+	users.add(createUser("4", "Test", "User 4"));
+	users.add(createUser("5", "Test", "User 5"));
 	return users;
 }
 
@@ -27,7 +31,7 @@ populateListForUsers(){
 }
 
 login(){
-	User user = (User) usersList.get(0);
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
 	showTabGroup("tabgroup1");
@@ -58,9 +62,11 @@ saveEntity() {
 }
 
 updateEntity(entity_id) {
+	if (entity_id == null || "".equals(entity_id)) entity_id = null;
+	
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
-	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/time"), null, null, getFieldCertainty("tabgroup1/tab1/time")));
+	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/time"), null, null, null));
 	attributes.add(createEntityAttribute("type", getFieldAnnotation("tabgroup1/tab1/type"), getFieldValue("tabgroup1/tab1/type"), null, getFieldCertainty("tabgroup1/tab1/type")));
 	attributes.add(createEntityAttribute("picture", getFieldAnnotation("tabgroup1/tab1/picture"), getFieldValue("tabgroup1/tab1/picture"), null, getFieldCertainty("tabgroup1/tab1/picture")));
 	
@@ -89,9 +95,13 @@ loadEntity() {
 	showTabGroup("tabgroup1", id);
 }
 
+clearEntity() {
+	newTabGroup("tabgroup1");
+	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
+}
+
 onEvent("tabgroup1", "load", "initialise()");
-onEvent("tabgroup1/tab1/cancel", "click", "cancelTab(\"tabgroup1/tab1\",true)");
 onEvent("tabgroup1/tab3/save", "click", "saveEntity()");
-onEvent("tabgroup1/tab3/update", "click", "updateEntity(entity_id)");
+onEvent("tabgroup1/tab3/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab3/entity\"))");
 onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab3/clear", "click", "newTabGroup(\"tabgroup1\")");
+onEvent("tabgroup1/tab3/clear", "click", "clearEntity()");

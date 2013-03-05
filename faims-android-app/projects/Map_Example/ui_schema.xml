@@ -21,7 +21,6 @@
               </tab1>
               <tab2>
                   <map></map>
-                  <refresh></refresh>
                   <show></show>
                   <plot></plot>
                   <clear></clear>
@@ -94,9 +93,6 @@
         <input ref="map" faims_map="true">
             <label>Map:</label>
         </input>
-        <trigger ref="refresh">
-            <label>Refresh</label>
-        </trigger>
         <trigger ref="show">
             <label>Show current position</label>
         </trigger>
