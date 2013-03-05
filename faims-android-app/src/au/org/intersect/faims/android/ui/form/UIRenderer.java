@@ -42,8 +42,6 @@ public class UIRenderer {
     
     private Arch16n arch16n;
 
-	private TabGroup currentTabGroup;
-
     public UIRenderer(FormEntryController fem, Arch16n arch16n, Context context) {
         this.fem = fem;
         this.arch16n = arch16n;
@@ -144,31 +142,35 @@ public class UIRenderer {
     }
     
     public TabGroup showTabGroup(FragmentActivity activity, int index) {
-	    TabGroup tabGroup = this.tabGroupList.get(index);
-	    if (tabGroup == currentTabGroup) return currentTabGroup;
-	    
     	FragmentManager fm = activity.getSupportFragmentManager();
+    	
+    	TabGroup tabGroup = this.tabGroupList.get(index);
+    	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
+	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
+	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
-        ft.add(R.id.fragment_content, tabGroup);
+        ft.add(R.id.fragment_content, tabGroup, tag);
         ft.commit();
         
-        currentTabGroup = tabGroup;
         return tabGroup;
     }
     
     public TabGroup showTabGroup(FragmentActivity activity, String name) {
+    	FragmentManager fm = activity.getSupportFragmentManager();
+    	
     	TabGroup tabGroup = this.tabGroupMap.get(name);
     	if (tabGroup == null) return null;
-    	if (tabGroup == currentTabGroup) return currentTabGroup;
     	
-    	FragmentManager fm = activity.getSupportFragmentManager();
+    	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
+	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
+	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
+    	
     	FragmentTransaction ft = fm.beginTransaction();
-	    ft.replace(R.id.fragment_content, tabGroup);
+	    ft.replace(R.id.fragment_content, tabGroup, tag);
         ft.addToBackStack(null);
         ft.commit();
         
-        currentTabGroup = tabGroup;
         return tabGroup;
     }
     

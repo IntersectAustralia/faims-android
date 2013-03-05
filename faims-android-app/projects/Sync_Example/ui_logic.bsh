@@ -87,29 +87,39 @@ attachFile() {
 
 onEvent("tabgroup1/tab3/attach", "click", "attachFile()");
 
-getUserForList(id, name) {
-	user = new ArrayList();
-	user.add(id);
-	user.add(name);
+createUser(id, firstname, lastname) {
+	user = new User(id, firstname, lastname);
 	return user;
+}
+
+toUsersList(users) {
+	users_array = new ArrayList();
+	for (User user : users) {
+		ua = new ArrayList();
+		ua.add(user.getUserId());
+		ua.add(user.getFirstName() + " " + user.getLastName());
+		users_array.add(ua);
+	}
+	return users_array;
 }
 
 getDefaultUsersList() {
 	users = new ArrayList();
-	users.add(getUserForList("1", "Test User 1"));
-	users.add(getUserForList("2", "Test User 2"));
+	users.add(createUser("0", "Default", "User"));
+	users.add(createUser("1", "Test", "User 1"));
+	users.add(createUser("2", "Test", "User 2"));
 	return users;
 }
 
 usersList = getDefaultUsersList();
 
 populateListForUsers(){
-	populateList("user/tab1/users", usersList);
+	populateList("user/tab1/users", toUsersList(usersList));
 }
 
-
 login(){
-	User user = usersList.get(Integer.parseInt(getListItemValue()) - 1);
+	System.out.println(getListItemValue());
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue()));
 	
 	setUser(user);
 	showTabGroup("tabgroup1");
