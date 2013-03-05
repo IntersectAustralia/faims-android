@@ -9,6 +9,11 @@
     <model>
       <instance>
         <faims id="map_example">
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
           <tabgroup1>
               <tab1>
                   <show></show>
@@ -60,6 +65,19 @@
   </h:head>
 
   <h:body>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
     <group ref="tabgroup1">
       <label>Map Example</label>
       <group ref="tab1">
