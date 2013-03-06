@@ -7,7 +7,8 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.os.Environment;
@@ -31,7 +32,6 @@ public class ProjectUtil {
 			
 		});
 		
-		Arrays.sort(directories);
 		ArrayList<Project> list = new ArrayList<Project>();
 		FileInputStream is = null;
 		try {
@@ -57,6 +57,16 @@ public class ProjectUtil {
 				FAIMSLog.log(e);
 			}
 		}
+		
+		Collections.sort(list, new Comparator<Project>() {
+
+			@Override
+			public int compare(Project arg0, Project arg1) {
+				return arg0.name.compareToIgnoreCase(arg1.name);
+			}
+			
+		});
+		
 		return list;
 	}
 
