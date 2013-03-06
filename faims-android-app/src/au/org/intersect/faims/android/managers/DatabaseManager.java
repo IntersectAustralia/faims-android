@@ -80,7 +80,7 @@ public class DatabaseManager {
 				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
 									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
 									"FROM aenttype " + 
-									"WHERE aenttypename = ?;";
+									"WHERE aenttypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
@@ -160,7 +160,7 @@ public class DatabaseManager {
 				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
 									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
 									"FROM relntype " +
-									"WHERE relntypename = ?;";
+									"WHERE relntypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
