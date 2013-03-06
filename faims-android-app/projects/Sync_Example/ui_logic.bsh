@@ -46,6 +46,8 @@ loadEntity() {
 }
 
 updateEntity(entity_id) {
+	if (entity_id == null || "".equals(entity_id)) entity_id = null;
+
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
@@ -76,6 +78,7 @@ updateAll() {
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab2/entities\"))");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());

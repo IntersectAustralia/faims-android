@@ -21,6 +21,7 @@
                   <timestamp></timestamp>
                   <location></location>
                   <save></save>
+                  <update></update>
                   <clear></clear>
               </tab1>
               <tab2>
@@ -80,6 +81,9 @@
         </select1>
         <trigger ref="save">
             <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+            <label>Update</label>
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>

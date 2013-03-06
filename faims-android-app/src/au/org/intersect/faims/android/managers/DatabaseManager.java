@@ -77,13 +77,15 @@ public class DatabaseManager {
 					
 				}
 				
-				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
-						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
+									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"FROM aenttype " + 
+									"WHERE aenttypename = ?;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, entity_type);
-				st.bind(4, geo_data);
+				st.bind(3, geo_data);
+				st.bind(4, entity_type);
 				st.step();
 				st.close();
 				
@@ -155,13 +157,15 @@ public class DatabaseManager {
 					uuid = rel_id;
 				}
 				
-				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
-						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
+									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"FROM relntype " +
+									"WHERE relntypename = ?;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, rel_type);
-				st.bind(4, geo_data);
+				st.bind(3, geo_data);
+				st.bind(4, rel_type);
 				st.step();
 				st.close();
 				
