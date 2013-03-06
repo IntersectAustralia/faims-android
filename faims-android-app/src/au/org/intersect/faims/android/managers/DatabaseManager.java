@@ -340,7 +340,7 @@ public class DatabaseManager {
 					}
 				}
 	
-				ArchEntity archEntity = new ArchEntity(type, attributes, geomList);
+				ArchEntity archEntity = new ArchEntity(id, type, attributes, geomList);
 				
 				db.close();
 	
@@ -391,7 +391,7 @@ public class DatabaseManager {
 					}
 				}
 				
-				Relationship relationship = new Relationship(type, attributes, geomList);
+				Relationship relationship = new Relationship(id, type, attributes, geomList);
 				
 				db.close();
 	

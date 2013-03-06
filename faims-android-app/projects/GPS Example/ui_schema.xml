@@ -1,0 +1,180 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>GPS Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="map_example">
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
+          <tabgroup1>
+              <tab1>
+                  <show></show>
+                  <new></new>
+              </tab1>
+              <tab2>
+                  <map></map>
+                  <name></name>
+                  <show></show>
+                  <plot></plot>
+                  <save></save>
+                  <clear></clear>
+              </tab2>
+              <tab3>
+                  <entity></entity>
+                  <load></load>
+              </tab3>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>  
+                  <drawActions></drawActions> 
+                  <create></create>           
+                  <generate></generate>           
+                  <map></map>
+                  <layers></layers>
+                  <layerActions></layerActions>
+                  <layerActionBtn></layerActionBtn>
+              </tab1>
+          </tabgroup2>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+
+  <h:body>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="tabgroup1">
+      <label>Menu</label>
+      <group ref="tab1">
+        <label>Controls</label>
+        <trigger ref="show">
+            <label>Show</label>
+        </trigger>
+        <trigger ref="new">
+            <label>New</label>
+        </trigger>
+      </group>
+      <group ref="tab2" faims_hidden="true" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+        <input ref="name">
+            <label>Name:</label>
+        </input>
+        <trigger ref="show">
+            <label>Show current position</label>
+        </trigger>
+        <trigger ref="plot">
+            <label>Plot current position</label>
+        </trigger>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab3" faims_hidden="true">
+          <label>Entity</label>
+          <select1 ref="entity">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="load">
+            <label>Load</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup2">
+      <label>Map Example</label>
+      <group ref="tab1"  faims_scrollable="false">
+        <label>Map</label>
+        <select1 ref="drawActions">
+            <label>Draw Actions:</label>
+            <item>
+                <label>Draw Point</label>
+                <value>draw_point</value>
+            </item>
+            <item>
+                <label>Draw Line</label>
+                <value>draw_line</value>
+            </item>
+            <item>
+                <label>Draw Polygon</label>
+                <value>draw_polygon</value>
+            </item>
+            <item>
+                <label>Draw Grid</label>
+                <value>draw_grid</value>
+            </item>
+            <item>
+                <label>Select Shape</label>
+                <value>select_shape</value>
+            </item>
+        </select1>
+        <trigger ref="create">
+            <label>Create</label>
+        </trigger>
+        <trigger ref="generate">
+            <label>Generate grid</label>
+        </trigger>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+        <select1 ref="layers">
+            <label>Layers:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="layerActions">
+            <label>Layers Actions:</label>
+            <item>
+                <label>Create Layer</label>
+                <value>create_layer</value>
+            </item>
+            <item>
+                <label>Clear Layer</label>
+                <value>clear_layer</value>
+            </item>
+            <item>
+                <label>Hide Layer</label>
+                <value>hide_layer</value>
+            </item>
+            <item>
+                <label>Show Layer</label>
+                <value>show_layer</value>
+            </item>
+        </select1> 
+        <trigger ref="layerActionBtn">
+            <label>Ok</label>
+        </trigger>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
