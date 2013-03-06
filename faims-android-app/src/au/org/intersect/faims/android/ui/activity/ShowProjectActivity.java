@@ -34,10 +34,13 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
+import au.org.intersect.faims.android.services.DownloadAppDirectoryService;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
 import au.org.intersect.faims.android.services.SyncDownloadDatabaseService;
 import au.org.intersect.faims.android.services.SyncUploadDatabaseService;
+import au.org.intersect.faims.android.services.UploadAppDirectoryService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
+import au.org.intersect.faims.android.services.UploadServerDirectoryService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.IActionListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
@@ -169,10 +172,15 @@ public class ShowProjectActivity extends FragmentActivity {
 				Message message) {
 			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
 			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.resetSyncInterval();
-				activity.waitForNextSync();
 				
-				activity.callSyncSuccess();
+				if(activity.fileSyncEnabled) {
+					activity.startUploadServerDirectorySync();
+				} else {
+					activity.resetSyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncSuccess();
+				}
 			} else if (resultCode != null) {
 				activity.delaySyncInterval();
 				activity.waitForNextSync();
@@ -182,6 +190,80 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 			activity.isSyncDownloading = false;
 		}
+		
+	}
+	
+	private static class SyncUploadServerDirectoryHandler extends ShowProjectActivityHandler {
+
+		public SyncUploadServerDirectoryHandler(ShowProjectActivity activity) {
+			super(activity);
+		}
+
+		@Override
+		public void handleMessageSafe(ShowProjectActivity activity,
+				Message message) {
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+				activity.startUploadAppDirectorySync();
+			} else if (resultCode != null) {
+				activity.delaySyncInterval();
+				activity.waitForNextSync();
+				
+				activity.callSyncFailure();
+			}
+		
+			activity.isServerDirectoryUploading = false;
+		}
+		
+	}
+	
+	private static class SyncUploadAppDirectoryHandler extends ShowProjectActivityHandler {
+
+		public SyncUploadAppDirectoryHandler(ShowProjectActivity activity) {
+			super(activity);
+		}
+
+		@Override
+		public void handleMessageSafe(ShowProjectActivity activity,
+				Message message) {
+			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+				activity.startDownloadAppDirectorySync();
+			} else if (resultCode != null) {
+				activity.delaySyncInterval();
+				activity.waitForNextSync();
+				
+				activity.callSyncFailure();
+			}
+		
+			activity.isAppDirectoryUploading = false;
+		}
+	}
+		
+	private static class SyncDownloadAppDirectoryHandler extends ShowProjectActivityHandler {
+
+			public SyncDownloadAppDirectoryHandler(ShowProjectActivity activity) {
+				super(activity);
+			}
+
+			@Override
+			public void handleMessageSafe(ShowProjectActivity activity,
+					Message message) {
+				FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
+				if (resultCode == FAIMSClientResultCode.SUCCESS) {
+					activity.resetSyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncSuccess();
+				} else if (resultCode != null) {
+					activity.delaySyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncFailure();
+				}
+			
+				activity.isAppDirectoryDownloading = false;
+			}
 		
 	}
 	
@@ -261,7 +343,7 @@ public class ShowProjectActivity extends FragmentActivity {
 							}
 							break;
 						case WAIT_FOR_SYNC_END:
-							if (!isSyncUploading && !isSyncDownloading) {
+							if (!isSyncServicesRunning()) {
 								ShowProjectActivity.this.startSync();
 							}
 							break;
@@ -363,6 +445,14 @@ public class ShowProjectActivity extends FragmentActivity {
 	private boolean syncIndicatorVisible;
 
 	private SyncIndicatorColor syncIndicatorColor = SyncIndicatorColor.GREEN;
+
+	private boolean fileSyncEnabled;
+
+	protected boolean isServerDirectoryUploading;
+
+	protected boolean isAppDirectoryUploading;
+
+	protected boolean isAppDirectoryDownloading;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -797,12 +887,28 @@ public class ShowProjectActivity extends FragmentActivity {
 		Intent downloadIntent = new Intent(ShowProjectActivity.this, SyncDownloadDatabaseService.class);
 		ShowProjectActivity.this.stopService(downloadIntent);
 		
+		// stop download sync
+		Intent uploadServerDirectoryIntent = new Intent(ShowProjectActivity.this, UploadServerDirectoryService.class);
+		ShowProjectActivity.this.stopService(uploadServerDirectoryIntent);
+		
+		// stop download sync
+		Intent uploadAppDirectoryIntent = new Intent(ShowProjectActivity.this, UploadAppDirectoryService.class);
+		ShowProjectActivity.this.stopService(uploadAppDirectoryIntent);
+		
+		// stop download sync
+		Intent downloadAppDirectoryIntent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
+		ShowProjectActivity.this.stopService(downloadAppDirectoryIntent);
+		
+	}
+	
+	public boolean isSyncServicesRunning() {
+		return isSyncUploading || isSyncDownloading || isServerDirectoryUploading || isAppDirectoryUploading || isAppDirectoryDownloading;
 	}
 	
 	public void startSync() {
 		if (!syncEnabled) return;
 		
-		if (isSyncUploading || isSyncDownloading) {
+		if (isSyncServicesRunning()) {
 			waitForSyncToEnd();
 		} else {
 			Log.d("FAIMS", "starting sync");
@@ -1005,5 +1111,87 @@ public class ShowProjectActivity extends FragmentActivity {
 		syncIndicatorColor = color;
 		this.invalidateOptionsMenu();
 	}
-
+	
+	public void enableFileSync() {
+		this.fileSyncEnabled = true;
+	}
+	
+	public void disableFileSync() {
+		this.fileSyncEnabled = false;
+	}
+	
+	private void startUploadServerDirectorySync() {
+		Log.d("FAIMS", "uploading server directory sync");
+		
+		// handler must be created on ui thread
+		runOnUiThread(new Runnable() {
+			
+			@Override 
+			public void run() {
+				// start upload server directory service
+				Intent intent = new Intent(ShowProjectActivity.this, UploadServerDirectoryService.class);
+						
+				Project project = ProjectUtil.getProject(projectKey);
+				
+				SyncUploadServerDirectoryHandler handler = new SyncUploadServerDirectoryHandler(ShowProjectActivity.this);
+				
+				Messenger messenger = new Messenger(handler);
+				intent.putExtra("MESSENGER", messenger);
+				intent.putExtra("project", project);
+				ShowProjectActivity.this.startService(intent);
+				
+				ShowProjectActivity.this.isServerDirectoryUploading = true;
+			}
+		});
+	}
+	
+	private void startUploadAppDirectorySync() {
+		Log.d("FAIMS", "uploading app directory sync");
+		
+		// handler must be created on ui thread
+		runOnUiThread(new Runnable() {
+			
+			@Override 
+			public void run() {
+				// start upload app directory service
+				Intent intent = new Intent(ShowProjectActivity.this, UploadAppDirectoryService.class);
+						
+				Project project = ProjectUtil.getProject(projectKey);
+				
+				SyncUploadAppDirectoryHandler handler = new SyncUploadAppDirectoryHandler(ShowProjectActivity.this);
+				
+				Messenger messenger = new Messenger(handler);
+				intent.putExtra("MESSENGER", messenger);
+				intent.putExtra("project", project);
+				ShowProjectActivity.this.startService(intent);
+				
+				ShowProjectActivity.this.isAppDirectoryUploading = true;
+			}
+		});
+	}
+	
+	private void startDownloadAppDirectorySync() {
+		Log.d("FAIMS", "downloading app directory sync");
+		
+		// handler must be created on ui thread
+		runOnUiThread(new Runnable() {
+			
+			@Override 
+			public void run() {
+				// start download app directory service
+				Intent intent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
+						
+				Project project = ProjectUtil.getProject(projectKey);
+				
+				SyncDownloadAppDirectoryHandler handler = new SyncDownloadAppDirectoryHandler(ShowProjectActivity.this);
+				
+				Messenger messenger = new Messenger(handler);
+				intent.putExtra("MESSENGER", messenger);
+				intent.putExtra("project", project);
+				ShowProjectActivity.this.startService(intent);
+				
+				ShowProjectActivity.this.isAppDirectoryDownloading = true;
+			}
+		});
+	}
 }

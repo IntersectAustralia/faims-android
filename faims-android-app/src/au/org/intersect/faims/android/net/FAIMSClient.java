@@ -385,5 +385,20 @@ public class FAIMSClient {
 			}
 		}
 	}
+
+	public FAIMSClientResultCode uploadServerDirectory(Project project) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public FAIMSClientResultCode dowmnloadAppDirectory(Project project) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public FAIMSClientResultCode uploadAppDirectory(Project project) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

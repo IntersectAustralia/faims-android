@@ -2131,5 +2131,13 @@ public class BeanShellLinker {
 			return null;
 		}
 	}
+	
+	public void setFileSyncEnabled(boolean enabled) {
+		if (enabled) {
+			activity.enableFileSync();
+		} else {
+			activity.disableFileSync();
+		}
+	}
 
 }

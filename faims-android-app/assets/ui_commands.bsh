@@ -416,3 +416,7 @@ getLastSelectedFilepath() {
 showFileBrowser(String callback) {
 	linker.showFileBrowser(callback);
 }
+
+setFileSyncEnabled(boolean enabled) {
+	linker.setFileSyncEnabled(enabled);
+}
