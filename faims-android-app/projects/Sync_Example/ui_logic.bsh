@@ -70,7 +70,7 @@ clearEntity() {
 }
 
 updateAll() {
-	Object entities = fetchAll("select uuid, uuid from archentity group by uuid order by AEntTimestamp;");
+	Object entities = fetchAll("select uuid, uuid from archentity where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);");
 	
 	populateDropDown("tabgroup1/tab2/entities", entities);
 }

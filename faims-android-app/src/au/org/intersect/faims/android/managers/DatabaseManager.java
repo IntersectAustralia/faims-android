@@ -46,6 +46,7 @@ public class DatabaseManager {
 		synchronized(DatabaseManager.class) {
 			FAIMSLog.log("entity_id:" + entity_id);
 			FAIMSLog.log("entity_type:" + entity_type);
+			FAIMSLog.log("geo_data:" + geo_data);
 			
 			for (EntityAttribute attribute : attributes) {
 				FAIMSLog.log(attribute.toString());
@@ -129,6 +130,7 @@ public class DatabaseManager {
 		synchronized(DatabaseManager.class) {
 			FAIMSLog.log("rel_id:" + rel_id);
 			FAIMSLog.log("rel_type:" + rel_type);
+			FAIMSLog.log("geo_data:" + geo_data);
 			
 			for (RelationshipAttribute attribute : attributes) {
 				FAIMSLog.log(attribute.toString());
