@@ -16,7 +16,11 @@ toUsersList(users) {
 
 getDefaultUsersList() {
 	users = new ArrayList();
-	users.add(createUser("0", "Default", "User"));
+	users.add(createUser("1", "Test", "User 1"));
+	users.add(createUser("2", "Test", "User 2"));
+	users.add(createUser("3", "Test", "User 3"));
+	users.add(createUser("4", "Test", "User 4"));
+	users.add(createUser("5", "Test", "User 5"));
 	return users;
 }
 
@@ -27,7 +31,7 @@ populateListForUsers(){
 }
 
 login(){
-	User user = (User) usersList.get(0);
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
 	showTabGroup("tabgroup1");

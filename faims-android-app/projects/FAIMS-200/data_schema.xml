@@ -12,7 +12,7 @@
     <child>
       Below
     </child>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1" isIdentifier="true">
+     <property type="string" name="name" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -21,7 +21,7 @@
     <description>
       Indicates that one element is next to another element.
     </description>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1" isIdentifier="true">
+     <property type="string" name="name" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -30,7 +30,7 @@
     <description>
       Indicates that one element similar to another element.
     </description>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1" isIdentifier="true">
+     <property type="string" name="name" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -39,19 +39,19 @@
     <description>
       An simple entity
     </description>
-    <property type="string" name="name" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="string" name="name" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="integer" name="value" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="integer" name="value" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="date" name="date" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="date" name="date" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="time" name="time" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="time" name="time" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
-    <property type="checklist" name="type" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="checklist" name="type" minCardinality="1" maxCardinality="1">
 	  <bundle>DOI</bundle>
       <lookup>
         <term>Type A</term>
@@ -60,7 +60,7 @@
         <term>Type D</term>
       </lookup>
     </property>
-    <property type="dropdown" name="location" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="dropdown" name="location" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
       <lookup>
         <term>Loc A</term>
@@ -69,7 +69,7 @@
         <term>Loc D</term>
       </lookup>
     </property>
-    <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">
       <bundle>DOI</bundle>
     </property>
   </ArchaeologicalElement>

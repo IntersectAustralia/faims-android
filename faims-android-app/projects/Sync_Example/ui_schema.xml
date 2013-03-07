@@ -21,6 +21,7 @@
                   <timestamp></timestamp>
                   <location></location>
                   <save></save>
+                  <update></update>
                   <clear></clear>
               </tab1>
               <tab2>
@@ -68,7 +69,7 @@
         <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
             <label>Value:</label>
         </input>
-        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
             <label>Timestamp:</label>
         </input>
         <select1 ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -80,6 +81,9 @@
         </select1>
         <trigger ref="save">
             <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+            <label>Update</label>
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>

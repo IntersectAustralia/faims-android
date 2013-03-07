@@ -1451,7 +1451,7 @@ public class BeanShellLinker {
 								Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
 										activity.getResources(), R.drawable.blue_dot);
 			                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-			                            .setSize(0.5f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+			                            .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 			                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
 			                            location.getLongitude(), location.getLatitude());
 			                    if(currentPositionLayer != null){
@@ -1581,7 +1581,7 @@ public class BeanShellLinker {
 		Object currentLocation = getGPSPosition();
 		if(currentLocation != null){
 			GPSLocation location = (GPSLocation) currentLocation;
-			setMapFocusPoint(ref, (float) location.getLatitude(), (float) location.getLongitude());
+			setMapFocusPoint(ref, (float) location.getLongitude(), (float) location.getLatitude());
 		}
 	}
 

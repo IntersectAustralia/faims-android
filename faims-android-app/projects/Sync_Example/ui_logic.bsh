@@ -1,5 +1,5 @@
 setSyncMinInterval(10.0f);
-setSyncMaxInterval(10.0f);
+setSyncMaxInterval(20.0f);
 setSyncDelay(5.0f);
 
 startSync() {
@@ -46,10 +46,12 @@ loadEntity() {
 }
 
 updateEntity(entity_id) {
+	if (entity_id == null || "".equals(entity_id)) entity_id = null;
+
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
-	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, getFieldCertainty("tabgroup1/tab1/timestamp")));
+	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
 	attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), getFieldValue("tabgroup1/tab1/location"), null, getFieldCertainty("tabgroup1/tab1/location")));
 
 	String id = saveArchEnt(entity_id, "small", null, attributes);
@@ -68,7 +70,7 @@ clearEntity() {
 }
 
 updateAll() {
-	Object entities = fetchAll("select uuid, uuid from archentity group by uuid order by AEntTimestamp;");
+	Object entities = fetchAll("select uuid, uuid from archentity where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);");
 	
 	populateDropDown("tabgroup1/tab2/entities", entities);
 }
@@ -76,6 +78,7 @@ updateAll() {
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab2/entities\"))");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());
@@ -105,9 +108,11 @@ toUsersList(users) {
 
 getDefaultUsersList() {
 	users = new ArrayList();
-	users.add(createUser("0", "Default", "User"));
 	users.add(createUser("1", "Test", "User 1"));
 	users.add(createUser("2", "Test", "User 2"));
+	users.add(createUser("3", "Test", "User 3"));
+	users.add(createUser("4", "Test", "User 4"));
+	users.add(createUser("5", "Test", "User 5"));
 	return users;
 }
 
@@ -118,8 +123,7 @@ populateListForUsers(){
 }
 
 login(){
-	System.out.println(getListItemValue());
-	User user = (User) usersList.get(Integer.parseInt(getListItemValue()));
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
 	showTabGroup("tabgroup1");

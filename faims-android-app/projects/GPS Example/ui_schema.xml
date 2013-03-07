@@ -4,7 +4,7 @@
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:jr="http://openrosa.org/javarosa">
   <h:head>
-    <h:title>Map Example</h:title>
+    <h:title>GPS Example</h:title>
 
     <model>
       <instance>
@@ -21,10 +21,16 @@
               </tab1>
               <tab2>
                   <map></map>
+                  <name></name>
                   <show></show>
                   <plot></plot>
+                  <save></save>
                   <clear></clear>
               </tab2>
+              <tab3>
+                  <entity></entity>
+                  <load></load>
+              </tab3>
           </tabgroup1>
           <tabgroup2>
               <tab1>  
@@ -36,30 +42,9 @@
                   <layerActions></layerActions>
                   <layerActionBtn></layerActionBtn>
               </tab1>
-              <tab2>
-                  <entity></entity>
-                  <name></name>
-                  <value></value>
-                  <clear></clear>
-                  <save></save>
-                  <update></update>
-                  <load></load>
-              </tab2>
-              <tab3>
-                  <relationship></relationship>
-                  <name></name>
-                  <clear></clear>
-                  <save></save>
-                  <update></update>
-                  <load></load>
-              </tab3>
           </tabgroup2>
         </faims>
       </instance>
-      <bind nodeset="/faims/tabgroup2/tab1/action" type="string"/>
-      <bind nodeset="/faims/tabgroup2/tab2/name" type="string"/>
-      <bind nodeset="/faims/tabgroup2/tab2/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup2/tab3/value" type="string"/>
     </model>
   </h:head>
 
@@ -78,7 +63,7 @@
       </group>
     </group>
     <group ref="tabgroup1">
-      <label>Map Example</label>
+      <label>Menu</label>
       <group ref="tab1">
         <label>Controls</label>
         <trigger ref="show">
@@ -93,14 +78,33 @@
         <input ref="map" faims_map="true">
             <label>Map:</label>
         </input>
+        <input ref="name">
+            <label>Name:</label>
+        </input>
         <trigger ref="show">
             <label>Show current position</label>
         </trigger>
         <trigger ref="plot">
             <label>Plot current position</label>
         </trigger>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
         <trigger ref="clear">
             <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab3" faims_hidden="true">
+          <label>Entity</label>
+          <select1 ref="entity">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="load">
+            <label>Load</label>
         </trigger>
       </group>
     </group>
@@ -169,59 +173,6 @@
         <trigger ref="layerActionBtn">
             <label>Ok</label>
         </trigger>
-      </group>
-      <group ref="tab2">
-          <label>Entity</label>
-          <select1 ref="entity">
-              <label>Entity</label>
-              <item>
-                  <label>dummy</label>
-                  <value>dummy</value>
-              </item>
-          </select1>
-          <input ref="name">
-              <label>Name:</label>
-          </input>
-          <input ref="value">
-              <label>Value:</label>
-          </input>
-          <trigger ref="clear">
-              <label>Clear</label>
-          </trigger>
-          <trigger ref="save">
-              <label>Save</label>
-          </trigger>
-          <trigger ref="update">
-              <label>Update</label>
-          </trigger>
-          <trigger ref="load">
-              <label>Load</label>
-          </trigger>
-      </group>
-      <group ref="tab3">
-          <label>Relationship</label>
-          <select1 ref="relationship">
-              <label>Relationship</label>
-              <item>
-                  <label>dummy</label>
-                  <value>dummy</value>
-              </item>
-          </select1>
-          <input ref="name">
-              <label>Name:</label>
-          </input>
-          <trigger ref="clear">
-              <label>Clear</label>
-          </trigger>
-          <trigger ref="save">
-              <label>Save</label>
-          </trigger>
-          <trigger ref="update">
-              <label>Update</label>
-          </trigger>
-          <trigger ref="load">
-              <label>Load</label>
-          </trigger>
       </group>
     </group>
     

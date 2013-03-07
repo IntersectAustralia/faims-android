@@ -13,10 +13,17 @@ public class ArchEntity {
 
 	private List<Geometry> geometryList;
 
-	public ArchEntity(String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList){
+	private String id;
+
+	public ArchEntity(String id, String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList){
+		this.id = id;
 		this.type = type;
 		this.attributes = attributes;
 		this.geometryList = geometryList;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	public String getType() {

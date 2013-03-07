@@ -18,18 +18,13 @@
               <tab1>
                   <name></name>
                   <value></value>
-                  <value-description></value-description>
-                  <value-certainty></value-certainty>
                   <date></date>
                   <time></time>
                   <type></type>
-                  <type-description></type-description>
                   <settype></settype>
               </tab1>
               <tab2>
                   <location></location>
-                  <location-value></location-value>
-                  <location-certainty></location-certainty>
                   <supervisor></supervisor>
               </tab2>
           </tabgroup1>
@@ -38,13 +33,8 @@
 
       <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup1/tab1/value-description" type="string"/>
-      <bind nodeset="/faims/tabgroup1/tab1/value-certainty" type="decimal"/>
       <bind nodeset="/faims/tabgroup1/tab1/date" type="date"/>
       <bind nodeset="/faims/tabgroup1/tab1/time" type="time"/>
-      <bind nodeset="/faims/tabgroup1/tab1/type-description" type="string"/>
-      <bind nodeset="/faims/tabgroup1/tab1/location-value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup1/tab1/location-certainty" type="decimal"/>
 
     </model>
   </h:head>
@@ -74,12 +64,6 @@
         <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
             <label>{value}:</label>
         </input>
-        <input ref="value-description" faims_attribute_name="value" faims_attribute_type="freetext">
-            <label>Description:</label>
-        </input>
-        <input ref="value-certainty" faims_attribute_name="value" faims_attribute_type="certainty">
-            <label>Certainty:</label>
-        </input>
         <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
             <label>Date:</label>
         </input>
@@ -93,9 +77,6 @@
                 <value>dummy</value>
             </item>
         </select1>
-        <input ref="type-description" faims_attribute_name="type" faims_attribute_type="freetext">
-            <label>Description:</label>
-        </input>
         <trigger ref="settype">
             <label>Set type</label>
         </trigger>
@@ -109,12 +90,6 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="location-value" faims_attribute_name="location" faims_attribute_type="measure">
-            <label>Value:</label>
-        </input>
-        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
-            <label>Certainty:</label>
-        </input>
         <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
             <label>Supervisor:</label>
             <item>

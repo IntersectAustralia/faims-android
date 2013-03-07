@@ -20,7 +20,6 @@
                   <time></time>
                   <type></type>
                   <picture></picture>
-                  <cancel></cancel>
               </tab1>
               <tab2>
                   <location></location>
@@ -80,9 +79,6 @@
                 <value>dummy</value>
             </item>
         </select1>
-        <trigger ref="cancel">
-          <label>Cancel This Tab</label>
-        </trigger>
 	  </group>
       <group ref="tab2">
         <label>Entity Tab2</label>

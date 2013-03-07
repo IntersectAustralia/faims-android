@@ -13,10 +13,17 @@ public class Relationship {
 
 	private List<Geometry> geometryList;
 
-	public Relationship(String type, Collection<RelationshipAttribute> attributes, List<Geometry> geomList){
+	private String id;
+
+	public Relationship(String id, String type, Collection<RelationshipAttribute> attributes, List<Geometry> geomList){
+		this.id = id;
 		this.type = type;
 		this.attributes = attributes;
 		this.geometryList = geomList;
+	}
+	
+	public String getId() {
+		return id;
 	}
 
 	public String getType() {

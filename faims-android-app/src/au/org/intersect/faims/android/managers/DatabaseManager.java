@@ -46,6 +46,7 @@ public class DatabaseManager {
 		synchronized(DatabaseManager.class) {
 			FAIMSLog.log("entity_id:" + entity_id);
 			FAIMSLog.log("entity_type:" + entity_type);
+			FAIMSLog.log("geo_data:" + geo_data);
 			
 			for (EntityAttribute attribute : attributes) {
 				FAIMSLog.log(attribute.toString());
@@ -77,13 +78,15 @@ public class DatabaseManager {
 					
 				}
 				
-				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " + 
-						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
+									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"FROM aenttype " + 
+									"WHERE aenttypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, entity_type);
-				st.bind(4, geo_data);
+				st.bind(3, geo_data);
+				st.bind(4, entity_type);
 				st.step();
 				st.close();
 				
@@ -127,6 +130,7 @@ public class DatabaseManager {
 		synchronized(DatabaseManager.class) {
 			FAIMSLog.log("rel_id:" + rel_id);
 			FAIMSLog.log("rel_type:" + rel_type);
+			FAIMSLog.log("geo_data:" + geo_data);
 			
 			for (RelationshipAttribute attribute : attributes) {
 				FAIMSLog.log(attribute.toString());
@@ -155,13 +159,15 @@ public class DatabaseManager {
 					uuid = rel_id;
 				}
 				
-				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " + 
-						   "VALUES (cast(? as integer), ?, ?, 'GEOMETRYCOLLECTION', GeomFromText(?, 4326), CURRENT_TIMESTAMP);";
+				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
+									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"FROM relntype " +
+									"WHERE relntypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, rel_type);
-				st.bind(4, geo_data);
+				st.bind(3, geo_data);
+				st.bind(4, rel_type);
 				st.step();
 				st.close();
 				
@@ -309,7 +315,12 @@ public class DatabaseManager {
 					return null;
 				}
 	
-				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID FROM (SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in (SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid)) JOIN attributekey USING (attributeid) JOIN ArchEntity USING (uuid);";
+				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
+								    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
+								        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid having deleted is null) ) " +
+								"JOIN attributekey USING (attributeid) " +
+								"JOIN ArchEntity USING (uuid) " +
+								"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
 				Stmt stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
@@ -340,7 +351,7 @@ public class DatabaseManager {
 					}
 				}
 	
-				ArchEntity archEntity = new ArchEntity(type, attributes, geomList);
+				ArchEntity archEntity = new ArchEntity(id, type, attributes, geomList);
 				
 				db.close();
 	
@@ -362,7 +373,12 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM (SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in (SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid)) JOIN attributekey USING (attributeid) JOIN Relationship USING (relationshipid);";
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM " +
+								    "(SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
+								        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
+								"JOIN attributekey USING (attributeid) " +
+								"JOIN Relationship USING (relationshipid) " +
+								"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
 				Stmt stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
@@ -391,7 +407,7 @@ public class DatabaseManager {
 					}
 				}
 				
-				Relationship relationship = new Relationship(type, attributes, geomList);
+				Relationship relationship = new Relationship(id, type, attributes, geomList);
 				
 				db.close();
 	
