@@ -4,6 +4,7 @@ setSyncDelay(5.0f);
 
 startSync() {
 	setSyncEnabled(true);
+	setFileSyncEnabled(true);
 }
 
 stopSync() {

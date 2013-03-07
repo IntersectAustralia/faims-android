@@ -17,7 +17,7 @@ public class DownloadAppDirectoryService extends DownloadService {
 			Project project = (Project) intent.getExtras().get("project");
 			Log.d("FAIMS", "downloading app directory for project " + project.name);
 			
-			return faimsClient.downloadAppDirectory(project);
+			//return faimsClient.downloadAppDirectory(project);
 		} catch (Exception e) {
 			Log.e("FAIMS", "could not download app directory for project", e);
 		}

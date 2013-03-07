@@ -13,6 +13,8 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -45,6 +47,10 @@ public class FileUtil {
 	}
 	
 	public static void tarFile(String dir, String filename) throws IOException, FileNotFoundException {
+		tarFile(dir, new File(dir).getName(), filename, null);
+	}
+	
+	public static void tarFile(String dir, String baseDir, String filename, List<String> excludeFiles) throws IOException, FileNotFoundException {
 		Log.d("FAIMS", "tar file " + dir + " to " + filename);
 		TarArchiveOutputStream ts = null;
 		try {
@@ -52,14 +58,14 @@ public class FileUtil {
 				 new GZIPOutputStream(
 						 new FileOutputStream(filename)));
 		 
-		 tarDirToStream(dir, new File(dir).getName(), ts);
+		 tarDirToStream(dir, baseDir, ts, excludeFiles);
 		}
 		finally {
 			if (ts != null) ts.close();
 		}
 	}
 	
-	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts) throws IOException, FileNotFoundException {
+	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
 		Log.d("FAIMS", "add dir " + dir + "  to tarname " + tarname);
 		File d = new File(dir);
 		if (d.isDirectory()) {
@@ -68,9 +74,25 @@ public class FileUtil {
 			for (int i = 0; i < fileList.length; i++) {
 				File f = new File(d, fileList[i]);
 				if (f.isDirectory()) {
-					tarDirToStream(f.getPath(), tarname + "/" + f.getName(), ts);
+					tarDirToStream(f.getPath(), tarname + "/" + f.getName(), ts, excludeFiles);
 				} else {
-					tarFileToStream(f.getPath(), tarname + "/" + f.getName(), ts);
+					
+					String tarFile = tarname + "/" + f.getName();
+					
+					boolean fileExcluded = false;
+					if (excludeFiles != null) {
+						
+						for (String exf : excludeFiles) {
+							if (exf.equals(tarFile)) {
+								fileExcluded = true;
+								break;
+							}
+						}
+					}
+					
+					if (!fileExcluded) {
+						tarFileToStream(f.getPath(), tarFile, ts);
+					}
 				}
 			}
 		} else {
@@ -297,6 +319,22 @@ public class FileUtil {
 		}
 		
 		Log.d("FAIMS", "Copied file " + fromPath + " to " + toPath);
+	}
+
+	public static List<String> listDir(String uploadPath) {
+		ArrayList<String> fileList = new ArrayList<String>();
+		getDirectoryList(new File(uploadPath), fileList, "");
+		return fileList;
+	}
+	
+	private static void getDirectoryList(File dir, List<String> fileList, String base) {
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory()) {
+				getDirectoryList(f, fileList, base + f.getName() + "/");
+			} else {
+				fileList.add(base + f.getName());
+			}
+		}
 	}
 
 	

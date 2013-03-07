@@ -6,10 +6,12 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,6 +37,7 @@ import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,17 +60,22 @@ public class FAIMSClient {
 	private void initClient() throws UnknownHostException {
 		FAIMSLog.log();
 		
-		String userAgent = InetAddress.getLocalHost().toString();
-		httpClient = AndroidHttpClient.newInstance(userAgent);
+		if (httpClient == null) {
 		
-		FAIMSLog.log("userAgent is " + userAgent);
+			String userAgent = InetAddress.getLocalHost().toString();
+			httpClient = AndroidHttpClient.newInstance(userAgent);
+			
+			FAIMSLog.log("userAgent is " + userAgent);
+		}
 	}
 	
 	private void cleanupClient() {
 		FAIMSLog.log();
 		
-		httpClient.close();
-		httpClient = null;
+		if (httpClient != null) {
+			httpClient.close();
+			httpClient = null;
+		}
 	}
 	
 	public FAIMSClientResultCode uploadDatabase(Project project, File file, String userId) {
@@ -79,6 +87,10 @@ public class FAIMSClient {
 			Log.e("FAIMS", "Error during uploading database", e);
 		} 
 		return FAIMSClientResultCode.SERVER_FAILURE;
+	}
+	
+	public FAIMSClientResultCode uploadFile(File file, String path) {
+		return uploadFile(file, path, null);
 	}
 	
 	public FAIMSClientResultCode uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
@@ -386,17 +398,81 @@ public class FAIMSClient {
 		}
 	}
 
-	public FAIMSClientResultCode uploadServerDirectory(Project project) {
-		// TODO Auto-generated method stub
-		return null;
+	public FAIMSClientResultCode uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
+		synchronized(FAIMSClient.class) {
+			InputStream stream = null;
+			try {
+				initClient();
+				
+				String uploadDirPath = projectDir + "/" + uploadDir;
+				
+				if (!new File(uploadDirPath).isDirectory()) {
+					Log.d("FAIMS", "No new files to upload");
+					return FAIMSClientResultCode.SUCCESS;
+				}
+				
+				List<String> localFiles = FileUtil.listDir(uploadDirPath);
+				
+				Log.d("FAIMS", "Local Files: " + localFiles.toString());
+				
+				if (localFiles.size() == 0) {
+					Log.d("FAIMS", "No new files to upload");
+					return FAIMSClientResultCode.SUCCESS;
+				}
+				
+				HttpEntity entity = getRequest(getUri(requestExcludePath));
+				stream = entity.getContent();
+				JsonObject object = JsonUtil.deserializeJsonObject(stream);
+				
+				ArrayList<String> files = new ArrayList<String>();
+				JsonArray filesArray = object.getAsJsonArray("files");
+				for (int i = 0; i < filesArray.size(); i++) {
+					files.add(filesArray.get(i).getAsString());
+				}
+				
+				Log.d("FAIMS", "Server Files: " + files.toString());
+				
+				// check if new files to upload
+				boolean doUpload = false;
+				for (String lf : localFiles) {
+					boolean fileNew = true;
+					for (String sf : files) {
+						if (lf.equals(sf)) {
+							fileNew = false;
+							break;
+						}
+					}
+					if (fileNew) {
+						doUpload = true;
+						break;
+					}
+				}
+				
+				if (!doUpload) {
+					Log.d("FAIMS", "No new files to upload");
+					return FAIMSClientResultCode.SUCCESS;
+				}
+				
+				File file = new File(projectDir + "/" + UUID.randomUUID());
+				FileUtil.tarFile(projectDir + "/" + uploadDir, "", file.getAbsolutePath(), files);
+				
+				return uploadFile(file, uploadPath);
+			} catch (Exception e) {
+				Log.e("FAIMS", "Error during uploading directory", e);
+			} finally {
+				try {
+					if (stream != null) stream.close();
+				} catch (IOException ioe) {
+					Log.e("FAIMS", "Error during uploading directory", ioe);
+				}
+				
+				cleanupClient();
+			}
+			return FAIMSClientResultCode.SERVER_FAILURE;
+		}
 	}
 
-	public FAIMSClientResultCode downloadAppDirectory(Project project) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FAIMSClientResultCode uploadAppDirectory(Project project) {
+	public FAIMSClientResultCode downloadDirectory() {
 		// TODO Auto-generated method stub
 		return null;
 	}

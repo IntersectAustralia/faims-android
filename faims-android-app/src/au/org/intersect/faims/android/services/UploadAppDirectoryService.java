@@ -1,27 +1,19 @@
 package au.org.intersect.faims.android.services;
 
-import android.content.Intent;
-import android.util.Log;
-import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.R;
 
-public class UploadAppDirectoryService extends UploadService {
+public class UploadAppDirectoryService extends UploadDirectoryService {
 
 	public UploadAppDirectoryService() {
 		super("UploadAppDirectoryService");
 	}
-
+	
 	@Override
-	protected FAIMSClientResultCode doUpload(Intent intent) throws Exception {
-		try {
-			Project project = (Project) intent.getExtras().get("project");
-			Log.d("FAIMS", "uploading app directory for project " + project.name);
-			
-			return faimsClient.uploadAppDirectory(project);
-		} catch (Exception e) {
-			Log.e("FAIMS", "could not upload app directory for project", e);
-		}
-		return null;
+	public void onCreate() {
+		super.onCreate();
+		this.uploadDir = this.getResources().getString(R.string.app_dir);
+		this.requestExcludePath = "app_file_list";
+		this.uploadPath = "app_upload";
 	}
 
 }
