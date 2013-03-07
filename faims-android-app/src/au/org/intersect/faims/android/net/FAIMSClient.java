@@ -391,7 +391,7 @@ public class FAIMSClient {
 		return null;
 	}
 
-	public FAIMSClientResultCode dowmnloadAppDirectory(Project project) {
+	public FAIMSClientResultCode downloadAppDirectory(Project project) {
 		// TODO Auto-generated method stub
 		return null;
 	}

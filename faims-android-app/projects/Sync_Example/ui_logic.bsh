@@ -145,4 +145,18 @@ cleanup() {
 
 onEvent("tabgroup1", "show", "init()"); 
 onEvent("user", "show", "cleanup()");	
-	
+
+onEvent("tabgroup1/tab3/server", "click", "saveToServer()");
+onEvent("tabgroup1/tab3/app", "click", "saveToApp()");
+
+saveToServer() {
+	filepath = getLastSelectedFilepath();
+	if (filepath == null || "".equals(filepath)) return;
+	attachFile(filepath, false);
+}
+
+saveToApp() {
+	filepath = getLastSelectedFilepath();
+	if (filepath == null || "".equals(filepath)) return;
+	attachFile(filepath, true, "dir3/dir4");
+}

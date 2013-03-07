@@ -420,3 +420,11 @@ showFileBrowser(String callback) {
 setFileSyncEnabled(boolean enabled) {
 	linker.setFileSyncEnabled(enabled);
 }
+
+attachFile(String filePath, boolean sync, String dir) {
+	return linker.attachFile(filePath, sync, dir);
+}
+
+attachFile(String filePath, boolean sync) {
+	return linker.attachFile(filePath, sync, null);
+}

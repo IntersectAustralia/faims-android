@@ -284,6 +284,21 @@ public class FileUtil {
 		dir.delete();
 	}
 
+	public static void copyFile(String fromPath, String toPath) throws IOException {
+		FileInputStream input = null;
+		FileOutputStream output = null;
+		try {
+			input = new FileInputStream(fromPath);
+			output = new FileOutputStream(toPath);
+			IOUtils.copy(input, output);
+		} finally {
+			if (input != null) input.close();
+			if (output != null) output.close();
+		}
+		
+		Log.d("FAIMS", "Copied file " + fromPath + " to " + toPath);
+	}
+
 	
 }
 

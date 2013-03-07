@@ -31,6 +31,8 @@
               <tab3>
                   <filename></filename>
                   <attach></attach>
+                  <server></server>
+                  <app></app>
               </tab3>
           </tabgroup1>
           
@@ -104,11 +106,17 @@
       </group>
       <group ref="tab3" faims_hidden="false">
           <label>File Picker</label>
-          <input ref="filename" faims_certainty="false">
+          <input ref="filename" faims_certainty="false" faims_read_only="true">
               <label>Filename:</label>
           </input>
           <trigger ref="attach">
               <label>Attach</label>
+          </trigger>
+          <trigger ref="server">
+              <label>Save to server</label>
+          </trigger>
+          <trigger ref="app">
+              <label>Save to app</label>
           </trigger>
       </group>
     </group>

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -41,6 +42,7 @@ import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
+import au.org.intersect.faims.android.tasks.CopyFileTask;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -2138,6 +2140,35 @@ public class BeanShellLinker {
 		} else {
 			activity.disableFileSync();
 		}
+	}
+	
+	public String attachFile(String filePath, boolean sync, String dir) {
+		if (!new File(filePath).exists()) {
+			showWarning("Logic Error", "Attach file cannot find file.");
+			return null;
+		}
+		
+		String attachFile = "";
+		
+		if (sync) {
+			attachFile += activity.getResources().getString(R.string.app_dir);
+		} else {
+			attachFile += activity.getResources().getString(R.string.server_dir);
+		}
+		
+		if (dir != null && !"".equals(dir)) {
+			attachFile += "/" + dir;
+		}
+		
+		// create directories
+		FileUtil.makeDirs(baseDir + "/" + attachFile);
+		
+		// create random file path
+		attachFile += "/" + UUID.randomUUID();
+		
+		new CopyFileTask(filePath, baseDir + "/" + attachFile).execute();
+		
+		return attachFile;
 	}
 
 }
