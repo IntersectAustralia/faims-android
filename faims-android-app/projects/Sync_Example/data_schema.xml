@@ -12,6 +12,9 @@
     <property type="integer" name="value" minCardinality="1" maxCardinality="1" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
+    <property type="string" name="filename" minCardinality="1" maxCardinality="1" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
     <property type="timestamp" name="timestamp" minCardinality="1" maxCardinality="1" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>

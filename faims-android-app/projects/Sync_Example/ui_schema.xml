@@ -20,6 +20,10 @@
                   <value></value>
                   <timestamp></timestamp>
                   <location></location>
+                  <filename></filename>
+                  <file></file>
+                  <sync></sync>
+                  <attach></attach>
                   <save></save>
                   <update></update>
                   <clear></clear>
@@ -29,10 +33,8 @@
                   <load></load>
               </tab2>
               <tab3>
-                  <filename></filename>
-                  <attach></attach>
-                  <server></server>
-                  <app></app>
+                  <start></start>
+                  <stop></stop>
               </tab3>
           </tabgroup1>
           
@@ -41,7 +43,7 @@
 
       <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup1/tab3/filename" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/filename" type="string"/>
       
     </model>
   </h:head>
@@ -81,6 +83,26 @@
             	<value>dummy</value>
           	</item>
         </select1>
+        <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
+            <label>Filename:</label>
+        </input>
+        <input ref="file" faims_read_only="true" faims_certainty="false">
+            <label>Attached File:</label>
+        </input>
+        <select1 ref="sync" appearance="full" faims_certainty="false">
+            <label>Sync:</label>
+            <item>
+                <label>On</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Off</label>
+                <value>0</value>
+            </item>
+        </select1>
+        <trigger ref="attach">
+            <label>Attach</label>
+        </trigger>
         <trigger ref="save">
             <label>Save</label>
         </trigger>
@@ -105,18 +127,12 @@
         </trigger>
       </group>
       <group ref="tab3" faims_hidden="false">
-          <label>File Picker</label>
-          <input ref="filename" faims_certainty="false" faims_read_only="true">
-              <label>Filename:</label>
-          </input>
-          <trigger ref="attach">
-              <label>Attach</label>
+          <label>Controls</label>
+          <trigger ref="start">
+              <label>Enable File Sync</label>
           </trigger>
-          <trigger ref="server">
-              <label>Save to server</label>
-          </trigger>
-          <trigger ref="app">
-              <label>Save to app</label>
+          <trigger ref="stop">
+              <label>Disable File Sync</label>
           </trigger>
       </group>
     </group>

@@ -1,3 +1,46 @@
+createUser(id, firstname, lastname) {
+	user = new User(id, firstname, lastname);
+	return user;
+}
+
+toUsersList(users) {
+	users_array = new ArrayList();
+	for (User user : users) {
+		ua = new ArrayList();
+		ua.add(user.getUserId());
+		ua.add(user.getFirstName() + " " + user.getLastName());
+		users_array.add(ua);
+	}
+	return users_array;
+}
+
+getDefaultUsersList() {
+	users = new ArrayList();
+	users.add(createUser("1", "Test", "User 1"));
+	users.add(createUser("2", "Test", "User 2"));
+	users.add(createUser("3", "Test", "User 3"));
+	users.add(createUser("4", "Test", "User 4"));
+	users.add(createUser("5", "Test", "User 5"));
+	return users;
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+	populateList("user/tab1/users", toUsersList(usersList));
+}
+
+login(){
+	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
+	
+	setUser(user);
+	showTabGroup("tabgroup1");
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");
+
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
 setSyncDelay(5.0f);
@@ -54,10 +97,18 @@ updateEntity(entity_id) {
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
 	attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), getFieldValue("tabgroup1/tab1/location"), null, getFieldCertainty("tabgroup1/tab1/location")));
-
+	
+	if (!"".equals(getFieldValue("tabgroup1/tab1/file"))) {
+		sync = getFieldValue("tabgroup1/tab1/sync");
+		filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
+		attributes.add(createEntityAttribute("filename", filename, null, null, null));
+	}
+	
 	String id = saveArchEnt(entity_id, "small", null, attributes);
 	
 	updateAll();
+	
+	showTabGroup("tabgroup1", id);
 	
 	return id;
 }
@@ -82,57 +133,16 @@ onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
 onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab2/entities\"))");
 
 setFilename() {
-	setFieldValue("tabgroup1/tab3/filename", getLastSelectedFilename());
+	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
 }
 
 attachFile() {
 	showFileBrowser("setFilename()");
 }
 
-onEvent("tabgroup1/tab3/attach", "click", "attachFile()");
+onEvent("tabgroup1/tab1/attach", "click", "attachFile()");
 
-createUser(id, firstname, lastname) {
-	user = new User(id, firstname, lastname);
-	return user;
-}
 
-toUsersList(users) {
-	users_array = new ArrayList();
-	for (User user : users) {
-		ua = new ArrayList();
-		ua.add(user.getUserId());
-		ua.add(user.getFirstName() + " " + user.getLastName());
-		users_array.add(ua);
-	}
-	return users_array;
-}
-
-getDefaultUsersList() {
-	users = new ArrayList();
-	users.add(createUser("1", "Test", "User 1"));
-	users.add(createUser("2", "Test", "User 2"));
-	users.add(createUser("3", "Test", "User 3"));
-	users.add(createUser("4", "Test", "User 4"));
-	users.add(createUser("5", "Test", "User 5"));
-	return users;
-}
-
-usersList = getDefaultUsersList();
-
-populateListForUsers(){
-	populateList("user/tab1/users", toUsersList(usersList));
-}
-
-login(){
-	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
-	
-	setUser(user);
-	showTabGroup("tabgroup1");
-}
-
-populateListForUsers();
-
-onEvent("user/tab1/users", "click", "login()");
 
 init() {
 	clearEntity();
@@ -147,17 +157,7 @@ cleanup() {
 onEvent("tabgroup1", "show", "init()"); 
 onEvent("user", "show", "cleanup()");	
 
-onEvent("tabgroup1/tab3/server", "click", "saveToServer()");
-onEvent("tabgroup1/tab3/app", "click", "saveToApp()");
+onEvent("tabgroup1/tab3/start", "click", "setFileSyncEnabled(true)");
+onEvent("tabgroup1/tab3/stop", "click", "setFileSyncEnabled(false)");
 
-saveToServer() {
-	filepath = getLastSelectedFilepath();
-	if (filepath == null || "".equals(filepath)) return;
-	attachFile(filepath, false);
-}
-
-saveToApp() {
-	filepath = getLastSelectedFilepath();
-	if (filepath == null || "".equals(filepath)) return;
-	attachFile(filepath, true, "dir3/dir4");
-}
+setFieldValue("tabgroup1/tab1/sync", "0");

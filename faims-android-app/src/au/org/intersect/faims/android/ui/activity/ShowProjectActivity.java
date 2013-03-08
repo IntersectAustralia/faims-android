@@ -907,17 +907,19 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	public void startSync() {
 		if (!syncEnabled) return;
+		Log.d("FAIMS", "starting sync");
+		
+		if (syncManagerThread == null) {
+			syncManagerThread = new SyncManagerThread();
+			syncManagerThread.start();
+		}
+		syncManagerThread.wakeup();
 		
 		if (isSyncServicesRunning()) {
 			waitForSyncToEnd();
 		} else {
-			Log.d("FAIMS", "starting sync");
+			
 			isSyncing = true;
-			if (syncManagerThread == null) {
-				syncManagerThread = new SyncManagerThread();
-				syncManagerThread.start();
-			}
-			syncManagerThread.wakeup();
 			syncLocateServer();	
 		}
 	}
@@ -935,6 +937,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void syncLocateServer() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "sync locating server");
 		
 		if (serverDiscovery.isServerHostValid()) {
@@ -962,6 +966,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void startUploadSync() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "sync uploading");
 		
 		// handler must be created on ui thread
@@ -994,6 +1000,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void startDownloadSync() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "sync downloading");
 		
 		// handler must be created on ui thread
@@ -1121,6 +1129,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void startUploadServerDirectorySync() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "uploading server directory sync");
 		
 		// handler must be created on ui thread
@@ -1146,6 +1156,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void startUploadAppDirectorySync() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "uploading app directory sync");
 		
 		// handler must be created on ui thread
@@ -1171,6 +1183,8 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	private void startDownloadAppDirectorySync() {
+		if (!isSyncing) return;
+		
 		Log.d("FAIMS", "downloading app directory sync");
 		
 		// handler must be created on ui thread
