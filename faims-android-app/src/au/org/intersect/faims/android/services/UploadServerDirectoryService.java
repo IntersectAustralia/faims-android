@@ -14,7 +14,7 @@ public class UploadServerDirectoryService extends UploadDirectoryService {
 		super.onCreate();
 		this.uploadDir = this.getResources().getString(R.string.server_dir);
 		this.requestExcludePath = "server_file_list";
-		this.uploadPath = "server_upload";
+		this.uploadPath = "server_file_upload";
 	}
 
 }

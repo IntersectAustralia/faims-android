@@ -13,7 +13,7 @@ public class UploadAppDirectoryService extends UploadDirectoryService {
 		super.onCreate();
 		this.uploadDir = this.getResources().getString(R.string.app_dir);
 		this.requestExcludePath = "app_file_list";
-		this.uploadPath = "app_upload";
+		this.uploadPath = "app_file_upload";
 	}
 
 }

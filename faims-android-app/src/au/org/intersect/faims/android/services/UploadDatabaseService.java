@@ -46,7 +46,7 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	if (uploadStopped) {
-	    		Log.d("FAIMS", "cancelled upload");
+	    		Log.d("FAIMS", "upload cancelled");
 	    		return null; 
 	    	}
 	    	
@@ -55,7 +55,7 @@ public class UploadDatabaseService extends UploadService {
 	    	FileUtil.tarFile(tempFile.getAbsolutePath(), file.getAbsolutePath());
 	    	
 	    	if (uploadStopped) {
-	    		Log.d("FAIMS", "cancelled upload");
+	    		Log.d("FAIMS", "upload cancelled");
 	    		return null;
 	    	}
 	    	

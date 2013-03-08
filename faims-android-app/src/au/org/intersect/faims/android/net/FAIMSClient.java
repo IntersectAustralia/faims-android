@@ -401,22 +401,23 @@ public class FAIMSClient {
 	public FAIMSClientResultCode uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
+			File file = null;
 			try {
 				initClient();
 				
 				String uploadDirPath = projectDir + "/" + uploadDir;
 				
 				if (!new File(uploadDirPath).isDirectory()) {
-					Log.d("FAIMS", "No new files to upload");
+					Log.d("FAIMS", "no new files to upload");
 					return FAIMSClientResultCode.SUCCESS;
 				}
 				
 				List<String> localFiles = FileUtil.listDir(uploadDirPath);
 				
-				Log.d("FAIMS", "Local Files: " + localFiles.toString());
+				Log.d("FAIMS", "local Files: " + localFiles.toString());
 				
 				if (localFiles.size() == 0) {
-					Log.d("FAIMS", "No new files to upload");
+					Log.d("FAIMS", "no new files to upload");
 					return FAIMSClientResultCode.SUCCESS;
 				}
 				
@@ -430,7 +431,7 @@ public class FAIMSClient {
 					files.add(filesArray.get(i).getAsString());
 				}
 				
-				Log.d("FAIMS", "Server Files: " + files.toString());
+				Log.d("FAIMS", "server Files: " + files.toString());
 				
 				// check if new files to upload
 				boolean doUpload = false;
@@ -449,12 +450,12 @@ public class FAIMSClient {
 				}
 				
 				if (!doUpload) {
-					Log.d("FAIMS", "No new files to upload");
+					Log.d("FAIMS", "no new files to upload");
 					return FAIMSClientResultCode.SUCCESS;
 				}
 				
-				File file = new File(projectDir + "/" + UUID.randomUUID());
-				FileUtil.tarFile(projectDir + "/" + uploadDir, "", file.getAbsolutePath(), files);
+				file = new File(projectDir + "/" + UUID.randomUUID());
+				FileUtil.tarFile(uploadDirPath, "", file.getAbsolutePath(), files);
 				
 				return uploadFile(file, uploadPath);
 			} catch (Exception e) {
@@ -466,15 +467,17 @@ public class FAIMSClient {
 					Log.e("FAIMS", "Error during uploading directory", ioe);
 				}
 				
+				if (file != null) file.delete();
+				
 				cleanupClient();
 			}
 			return FAIMSClientResultCode.SERVER_FAILURE;
 		}
 	}
 
-	public FAIMSClientResultCode downloadDirectory() {
+	public FAIMSClientResultCode downloadDirectory(String projectDir, String downloadDir, String requestExcludePath, String downloadPath) {
 		// TODO Auto-generated method stub
-		return null;
+		return FAIMSClientResultCode.SUCCESS;
 	}
 	
 }

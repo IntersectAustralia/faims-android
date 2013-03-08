@@ -37,13 +37,9 @@ import android.util.Log;
 public class FileUtil {
 
 	public static void makeDirs(String dir) {
-		FAIMSLog.log();
-		
 		File file = new File(dir);
 		if (!file.exists())
 			file.mkdirs();
-		
-		FAIMSLog.log(dir + " is present " + String.valueOf(file.exists()));
 	}
 	
 	public static void tarFile(String dir, String filename) throws IOException, FileNotFoundException {
@@ -52,6 +48,7 @@ public class FileUtil {
 	
 	public static void tarFile(String dir, String baseDir, String filename, List<String> excludeFiles) throws IOException, FileNotFoundException {
 		Log.d("FAIMS", "tar file " + dir + " to " + filename);
+		
 		TarArchiveOutputStream ts = null;
 		try {
 		 ts = new TarArchiveOutputStream(
@@ -67,6 +64,7 @@ public class FileUtil {
 	
 	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
 		Log.d("FAIMS", "add dir " + dir + "  to tarname " + tarname);
+		
 		File d = new File(dir);
 		if (d.isDirectory()) {
 			String[] fileList = d.list();
@@ -102,6 +100,7 @@ public class FileUtil {
 	
 	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
 		Log.d("FAIMS", "add file " + filename + "  to tarname " + tarname);
+		
 		FileInputStream fs = null;
 		try {
 			File f = new File(filename);
@@ -119,7 +118,7 @@ public class FileUtil {
 	}
 	
 	public static void untarFile(String dir, String filename) throws IOException {
-		FAIMSLog.log();
+		Log.d("FAIMS", "untar file " + filename + " to " + dir);
 		
 		TarArchiveInputStream ts = null;
 		try {
@@ -138,14 +137,10 @@ public class FileUtil {
 		} finally {
 			if (ts != null) ts.close();
 		}
-		
-		FAIMSLog.log("untared file " + filename);
 	}
 	
 	// from: http://stackoverflow.com/questions/3163045/android-how-to-check-availability-of-space-on-external-storage
 	public static long getExternalStorageSpace() throws Exception {
-		FAIMSLog.log();
-		
 	    long availableSpace = -1L;
 	    
 	    StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
@@ -156,7 +151,7 @@ public class FileUtil {
 	}
 	
 	public static void saveFile(InputStream input, String filename) throws IOException {
-		FAIMSLog.log();
+		Log.d("FAIMS", "saving to file " + filename);
 		
 		FileOutputStream os = null;
 		try {
@@ -165,13 +160,9 @@ public class FileUtil {
 		} finally {
 			if (os != null) os.close();
 		}
-        
-		FAIMSLog.log("saved file " + filename);
 	}
 	
 	public static String generateMD5Hash(String filename) throws IOException, NoSuchAlgorithmException {
-		FAIMSLog.log();
-		
 		FileInputStream fs = null;
 		try {
 			fs = new FileInputStream(filename);
@@ -182,9 +173,6 @@ public class FileUtil {
 			while ((byteCount = fs.read(bytes)) > 0) {
 				digester.update(bytes, 0, byteCount);
 			}
-			
-			FAIMSLog.log("generated md5 for hash for file " + filename);
-			
 			return new String(Hex.encodeHex(digester.digest()));
 		} finally {
 			if (fs != null) fs.close();
@@ -192,8 +180,7 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		FAIMSLog.log();
-		
+		Log.d("FAIMS", "Writing tar file " + file.getName());
 		FileOutputStream os = null;
 		
 		try {
@@ -208,8 +195,6 @@ public class FileUtil {
 		} finally {
 			if (os != null) os.close();
 		}
-		
-		FAIMSLog.log("writing tar file " + file.getName());
 	}
 	
 	public static FormEntryController readXmlContent(String path) {
@@ -307,6 +292,8 @@ public class FileUtil {
 	}
 
 	public static void copyFile(String fromPath, String toPath) throws IOException {
+		Log.d("FAIMS", "copying file " + fromPath + " to " + toPath);
+		
 		FileInputStream input = null;
 		FileOutputStream output = null;
 		try {
@@ -317,8 +304,6 @@ public class FileUtil {
 			if (input != null) input.close();
 			if (output != null) output.close();
 		}
-		
-		Log.d("FAIMS", "Copied file " + fromPath + " to " + toPath);
 	}
 
 	public static List<String> listDir(String uploadPath) {

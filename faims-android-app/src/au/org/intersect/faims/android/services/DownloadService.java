@@ -25,7 +25,6 @@ public abstract class DownloadService extends IntentService {
 	
 	@Override
 	public void onCreate() {
-		Log.d("FAIMS", "DownloadService.onCreate");
 		super.onCreate();
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 	}
@@ -33,9 +32,9 @@ public abstract class DownloadService extends IntentService {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.d("FAIMS", "stopping download service");
 		faimsClient.interrupt();
 		downloadStopped = true;
+		Log.d("FAIMS", "stopping download service");
 	}
 
 	@Override
@@ -47,7 +46,7 @@ public abstract class DownloadService extends IntentService {
 			resultCode = doDownload(intent);
 			
 			if (downloadStopped) {
-				Log.d("FAIMS", "cancelled download");
+				Log.d("FAIMS", "download cancelled");
 				resultCode = null;
 				return;
 			}

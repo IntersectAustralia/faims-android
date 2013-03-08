@@ -333,7 +333,7 @@ public class ShowProjectActivity extends FragmentActivity {
 				while (!isDead) {
 				
 					while(isSyncing) {
-						Log.d("FAIMS", "SyncManager synching");
+						Log.d("FAIMS", "SyncManager synching: " + this.state);
 						
 						switch(this.state) {
 						case WAIT_FOR_NEXT_SYNC:

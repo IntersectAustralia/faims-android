@@ -1,27 +1,18 @@
 package au.org.intersect.faims.android.services;
 
-import android.content.Intent;
-import android.util.Log;
-import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.R;
 
-public class DownloadAppDirectoryService extends DownloadService {
+public class DownloadAppDirectoryService extends DownloadDirectoryService {
 
 	public DownloadAppDirectoryService() {
 		super("DownloadAppDirectoryService");
 	}
 
 	@Override
-	protected FAIMSClientResultCode doDownload(Intent intent) {
-		try {
-			Project project = (Project) intent.getExtras().get("project");
-			Log.d("FAIMS", "downloading app directory for project " + project.name);
-			
-			//return faimsClient.downloadAppDirectory(project);
-		} catch (Exception e) {
-			Log.e("FAIMS", "could not download app directory for project", e);
-		}
-		return null;
+	public void onCreate() {
+		super.onCreate();
+		this.downloadDir = this.getResources().getString(R.string.app_dir);
+		this.requestExcludePath = "app_file_list";
+		this.downloadPath = "app_file_download";
 	}
-
 }

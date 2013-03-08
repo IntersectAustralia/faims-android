@@ -51,11 +51,11 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 				serverVersion = Integer.parseInt(info.version == null ? "0" : info.version);
 				projectVersion = Integer.parseInt(project.version == null ? "0" : project.version);
 				if (serverVersion == projectVersion) {
-					Log.d("FAIMS", "Database already latest");
+					Log.d("FAIMS", "database already latest");
 					return fetchResult.code;
 				}
 			} else {
-				Log.d("FAIMS", "Failed to get database version");
+				Log.d("FAIMS", "failed to get database version");
 				return fetchResult.code;
 			}
 			
@@ -70,7 +70,7 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), dir);
 			
 			if (downloadResult.code == FAIMSClientResultCode.SUCCESS) {
-				Log.d("FAIMS", "Merging database to version " + serverVersion);
+				Log.d("FAIMS", "merging database to version " + serverVersion);
 				
 				// merge database 
 				databaseManager.mergeDatabaseFrom(new File(tempDir.getAbsoluteFile() + "/db.sqlite3"));

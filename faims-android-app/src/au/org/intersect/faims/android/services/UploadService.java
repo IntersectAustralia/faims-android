@@ -41,12 +41,12 @@ public abstract class UploadService extends IntentService {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.d("FAIMS", "stopping upload service");
 		faimsClient.interrupt();
 		uploadStopped = true;
 		if (file != null) {
 			file.delete();
 		}
+		Log.d("FAIMS", "stopping upload service");
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public abstract class UploadService extends IntentService {
 			resultCode = doUpload(intent);
 			
 			if (uploadStopped) {
-				Log.d("FAIMS", "cancelled upload");
+				Log.d("FAIMS", "upload cancelled");
 				resultCode = null;
 				return;
 			}

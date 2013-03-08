@@ -21,7 +21,7 @@ public class SyncUploadDatabaseService extends UploadDatabaseService {
 		if (project.timestamp == null) {
 			databaseManager.dumpDatabaseTo(tempFile);
 		} else {
-			Log.d("FAIMS", "Dumping database from " + project.timestamp);
+			Log.d("FAIMS", "dumping database from " + project.timestamp);
 			databaseManager.dumpDatabaseTo(tempFile, project.timestamp); 
 		}
 	}
