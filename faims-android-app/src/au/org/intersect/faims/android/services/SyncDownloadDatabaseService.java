@@ -61,13 +61,11 @@ public class SyncDownloadDatabaseService extends DownloadDatabaseService {
 			
 			int syncVersion = projectVersion + 1;
 			
-			String dir = "/faims/projects/" + project.key + "/" + UUID.randomUUID();
-			
 			// download database from version
-			tempDir = new File(Environment.getExternalStorageDirectory() + dir);
+			tempDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/" + UUID.randomUUID());
 			tempDir.mkdirs();
 			
-			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), dir);
+			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());
 			
 			if (downloadResult.code == FAIMSClientResultCode.SUCCESS) {
 				Log.d("FAIMS", "merging database to version " + serverVersion);

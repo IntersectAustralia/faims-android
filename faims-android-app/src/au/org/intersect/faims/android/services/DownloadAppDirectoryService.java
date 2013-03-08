@@ -13,6 +13,7 @@ public class DownloadAppDirectoryService extends DownloadDirectoryService {
 		super.onCreate();
 		this.downloadDir = this.getResources().getString(R.string.app_dir);
 		this.requestExcludePath = "app_file_list";
+		this.infoPath = "app_file_archive";
 		this.downloadPath = "app_file_download";
 	}
 }

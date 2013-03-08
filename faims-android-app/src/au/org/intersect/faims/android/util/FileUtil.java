@@ -38,7 +38,7 @@ public class FileUtil {
 
 	public static void makeDirs(String dir) {
 		File file = new File(dir);
-		if (!file.exists())
+		if (!file.isDirectory())
 			file.mkdirs();
 	}
 	
@@ -72,10 +72,10 @@ public class FileUtil {
 			for (int i = 0; i < fileList.length; i++) {
 				File f = new File(d, fileList[i]);
 				if (f.isDirectory()) {
-					tarDirToStream(f.getPath(), tarname + "/" + f.getName(), ts, excludeFiles);
+					tarDirToStream(f.getPath(), tarname + f.getName() + "/", ts, excludeFiles);
 				} else {
 					
-					String tarFile = tarname + "/" + f.getName();
+					String tarFile = tarname + f.getName();
 					
 					boolean fileExcluded = false;
 					if (excludeFiles != null) {
@@ -180,7 +180,11 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		Log.d("FAIMS", "Writing tar file " + file.getName());
+		Log.d("FAIMS", "Writing tar file " + file.getAbsolutePath());
+		
+		// make sure directory path exists
+		makeDirs(file.getParent());
+		
 		FileOutputStream os = null;
 		
 		try {
