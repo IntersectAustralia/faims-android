@@ -487,6 +487,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
 		
+		/*
 		choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
 				getString(R.string.render_project_title),
 				getString(R.string.render_project_message), new IDialogListener() {
@@ -501,6 +502,7 @@ public class ShowProjectActivity extends FragmentActivity {
 			
 		});
 		choiceDialog.show();
+		*/
 		
 		listeners = new ArrayList<SyncListener>();
 		
@@ -516,6 +518,9 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
+		
+		renderUI();
+		gpsDataManager.startGPSListener();
 	}
 	
 	@Override
@@ -910,8 +915,9 @@ public class ShowProjectActivity extends FragmentActivity {
 		Intent downloadAppDirectoryIntent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
 		ShowProjectActivity.this.stopService(downloadAppDirectoryIntent);
 		
-		syncManagerThread.putToSleep();
-		
+		if (syncManagerThread != null) {
+			syncManagerThread.putToSleep();
+		}
 	}
 	
 	public boolean isSyncServicesRunning() {
