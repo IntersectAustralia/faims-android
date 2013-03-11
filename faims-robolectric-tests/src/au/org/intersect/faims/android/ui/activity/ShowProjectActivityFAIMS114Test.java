@@ -46,13 +46,13 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		activity.onCreate(null);
 		
 		// There should now be a dialog asking if we want to render the project
-		
+		/*
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
 		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.render_project_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.render_project_message), choiceDialog.getMessage());
-		
+		*/
 		// We now tell the activity to render the project UI
 		
 		activity.renderUI();
