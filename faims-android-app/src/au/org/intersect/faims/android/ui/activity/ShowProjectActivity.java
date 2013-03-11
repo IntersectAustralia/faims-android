@@ -308,6 +308,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	private enum SyncState {
 		WAIT_FOR_NEXT_SYNC,
 		WAIT_FOR_SYNC_END,
+		WAIT_FOR_SYNC_TO_SLEEP,
 		IDLE
 	}
 	
@@ -332,7 +333,7 @@ public class ShowProjectActivity extends FragmentActivity {
 				
 				while (!isDead) {
 				
-					while(isSyncing) {
+					while(!isSleeping) {
 						Log.d("FAIMS", "SyncManager synching: " + this.state);
 						
 						switch(this.state) {
@@ -347,6 +348,11 @@ public class ShowProjectActivity extends FragmentActivity {
 								ShowProjectActivity.this.startSync();
 							}
 							break;
+						case WAIT_FOR_SYNC_TO_SLEEP:
+							if (!isSyncServicesRunning()) {
+								this.isSleeping = true;
+							}
+							break;
 						default:
 							// do nothing
 							break;
@@ -358,7 +364,6 @@ public class ShowProjectActivity extends FragmentActivity {
 					Log.d("FAIMS", "SyncManager shutdown");
 					
 					// go into sleep mode
-					isSleeping = true;
 					while(isSleeping) {
 						Thread.yield();
 					}
@@ -371,13 +376,19 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 		
 		public void waitForNextSync(long delay) {
+			this.isSleeping = false;
+			this.state = SyncState.WAIT_FOR_NEXT_SYNC;
 			this.syncDelay = delay;
 			this.lastTime = System.currentTimeMillis();
-			this.state = SyncState.WAIT_FOR_NEXT_SYNC;
 		}
 		
 		public void waitForSyncToEnd() {
+			this.isSleeping = false;
 			this.state = SyncState.WAIT_FOR_SYNC_END;
+		}
+		
+		public void putToSleep() {
+			this.state = SyncState.WAIT_FOR_SYNC_TO_SLEEP;
 		}
 		
 		public void wakeup() {
@@ -899,6 +910,8 @@ public class ShowProjectActivity extends FragmentActivity {
 		Intent downloadAppDirectoryIntent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
 		ShowProjectActivity.this.stopService(downloadAppDirectoryIntent);
 		
+		syncManagerThread.putToSleep();
+		
 	}
 	
 	public boolean isSyncServicesRunning() {
@@ -918,7 +931,6 @@ public class ShowProjectActivity extends FragmentActivity {
 		if (isSyncServicesRunning()) {
 			waitForSyncToEnd();
 		} else {
-			
 			isSyncing = true;
 			syncLocateServer();	
 		}
