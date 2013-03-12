@@ -108,8 +108,6 @@ updateEntity(entity_id) {
 	
 	updateAll();
 	
-	showTabGroup("tabgroup1", id);
-	
 	return id;
 }
 
