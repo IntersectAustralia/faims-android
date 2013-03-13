@@ -239,6 +239,7 @@ public class Tab {
                     		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
                     		
                     		CustomMapView mapView = new CustomMapView(this.context, drawView);
+
                     		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
                     		mapView.startMapping();
                     		

@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -1387,6 +1390,41 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchAll(String query){
 		return databaseManager.fetchAll(query);
+	}
+	
+	private void initialiseBluetoohConnection(BluetoothAdapter adapter) {
+        if (adapter != null && adapter.isEnabled()) {
+            final Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+            if (pairedDevices.size() > 0) {
+                final List<CharSequence> sequences = new ArrayList<CharSequence>();
+            	for (BluetoothDevice bluetoothDevice : pairedDevices) {
+            		sequences.add(bluetoothDevice.getName());
+                }
+            	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            	builder.setTitle("Select bluetooth to connect");
+            	builder.setItems(sequences.toArray(new CharSequence[sequences.size()]), new DialogInterface.OnClickListener() {
+            	    public void onClick(DialogInterface dialog, int item) {
+            	    	for (BluetoothDevice bluetoothDevice : pairedDevices) {
+	                		if(bluetoothDevice.getName().equals(sequences.get(item))){
+	                			gpsDataManager.setGpsDevice(bluetoothDevice);
+	                			gpsDataManager.startExternalGPSListener();
+	                			break;
+	                		}
+	                    }
+            	    }
+            	});
+            	AlertDialog alert = builder.create();
+            	alert.show();
+            }
+        }
+    }
+	
+	public void startExternalGPS(){
+		initialiseBluetoohConnection(BluetoothAdapter.getDefaultAdapter());
+	}
+	
+	public void startInternalGPS(){
+		gpsDataManager.startInternalGPSListener();
 	}
 	
 	public Object getGPSPosition(){

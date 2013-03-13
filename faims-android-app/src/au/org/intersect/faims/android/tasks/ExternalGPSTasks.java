@@ -6,12 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
@@ -102,7 +100,6 @@ public class ExternalGPSTasks implements Runnable {
 	                }
 	            }
 	        } catch (IOException e) {
-	        	this.gpsDevice = null;
 	        	if(this.bluetoothSocket != null){
 	        		try {
 	        			if(this.br != null){
@@ -119,33 +116,11 @@ public class ExternalGPSTasks implements Runnable {
 					} catch (IOException exception) {
 					}
 	        	}
-	            BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-	            if( adapter != null){
-	                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-	                if (pairedDevices.size() > 0) {
-	                    for (BluetoothDevice bluetoothDevice : pairedDevices) {
-	                        this.gpsDevice = bluetoothDevice;
-	                        break;
-	                    }
-	                }
-	            }
 	        } catch (IllegalArgumentException e) {
 	        } catch (NoSuchMethodException e) {
 			} catch (IllegalAccessException e) {
 			} catch (InvocationTargetException e) {
 			}
-        }else{
-        	this.gpsDevice = null;
-        	BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-            if( adapter != null){
-                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    for (BluetoothDevice bluetoothDevice : pairedDevices) {
-                        this.gpsDevice = bluetoothDevice;
-                        break;
-                    }
-                }
-            }
         }
     }
 

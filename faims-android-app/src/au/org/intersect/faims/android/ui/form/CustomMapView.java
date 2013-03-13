@@ -3,6 +3,8 @@ package au.org.intersect.faims.android.ui.form;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
@@ -204,4 +206,10 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
+	public static void registerLicense(Context context){
+    	final String LICENSE = "XTUMwQ0ZIRklrbEZ2T0dIdkZ3QkRieVBtcWJqdjZ1RUtBaFVBa1RreXdabUIraER4UjFmZ01aUk5oay83a2hzPQoKcGFja2FnZU5hbWU9YXUub3JnLmludGVyc2VjdC5mYWltcy5hbmRyb2lkCndhdGVybWFyaz1jdXN0b20KCg==";
+		CustomMapView.registerLicense(LICENSE, context);
+        Bitmap logo = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
+        CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.2f);
+	}
 }

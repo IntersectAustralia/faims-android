@@ -183,6 +183,14 @@ setGPSUpdateInterval(int seconds){
 	linker.setGpsUpdateInterval(seconds);
 }
 
+startInternalGPS(){
+	linker.startInternalGPS();
+}
+
+startExternalGPS(){
+	linker.startExternalGPS();
+}
+
 Object getGPSPosition(){
 	return linker.getGPSPosition();
 }

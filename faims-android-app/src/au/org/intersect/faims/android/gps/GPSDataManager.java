@@ -1,13 +1,10 @@
 package au.org.intersect.faims.android.gps;
 
-import java.util.Set;
-
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.BODSentence;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.util.CompassPoint;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.location.Location;
 import android.location.LocationListener;
@@ -36,10 +33,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private HandlerThread handlerThread;
 
 	private int gpsUpdateInterval=10000;
-
+	
 	public GPSDataManager(LocationManager manager){
-		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-		this.gpsDevice = initialiseBluetoohConnection(adapter);
 		this.locationManager = manager;
 	}
     @Override
@@ -71,16 +66,27 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
 
-	public void startGPSListener() {
+	public void startInternalGPSListener(){
+		destroyInternalGPSListener();
+		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval(), 0, this);
+	}
+
+	public void startExternalGPSListener(){
+		destroyExternalGPSListener();
 		this.handlerThread = new HandlerThread("GPSHandler");
 		this.handlerThread.start();
 		this.handler = new Handler(this.handlerThread.getLooper());
 		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval());
 		this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
-		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval(), 0, this);
 	}
 
-	public void destroyListener(){
+	public void destroyInternalGPSListener(){
+		if(this.locationManager != null){
+			this.locationManager.removeUpdates(this);
+		}
+	}
+	
+	public void destroyExternalGPSListener(){
 		if(this.handler != null){
 			this.externalGPSTasks.closeBluetoothConnection();
 			this.handler.removeCallbacks(this.externalGPSTasks);
@@ -88,9 +94,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		if(this.handlerThread != null){
 			handlerThread.quit();
 		}
-		if(this.locationManager != null){
-			this.locationManager.removeUpdates(this);
-		}
+	}
+	
+	public void destroyListener(){
+		destroyInternalGPSListener();
+		destroyExternalGPSListener();
 	}
 
 	public GPSLocation getGPSPosition(){
@@ -235,22 +243,6 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
 		this.gpsUpdateInterval = gpsUpdateInterval*1000;
 		destroyListener();
-		startGPSListener();
-		
 	}
-
-	private BluetoothDevice initialiseBluetoohConnection(BluetoothAdapter adapter) {
-        if (adapter != null && adapter.isEnabled()) {
-        	BluetoothDevice device = null;
-            Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-            if (pairedDevices.size() > 0) {
-                for (BluetoothDevice bluetoothDevice : pairedDevices) {
-                    device = bluetoothDevice;
-                    break;
-                }
-            }
-            return device;
-        }
-        return null;
-    }
+	
 }

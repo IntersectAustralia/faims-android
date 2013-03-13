@@ -18,6 +18,8 @@
               <tab1>
                   <show></show>
                   <new></new>
+                  <connectexternal></connectexternal>
+                  <connectinternal></connectinternal>
               </tab1>
               <tab2>
                   <map></map>
@@ -71,6 +73,12 @@
         </trigger>
         <trigger ref="new">
             <label>New</label>
+        </trigger>
+        <trigger ref="connectexternal">
+            <label>Connect external gps</label>
+        </trigger>
+        <trigger ref="connectinternal">
+            <label>Connect internal gps</label>
         </trigger>
       </group>
       <group ref="tab2" faims_hidden="true" faims_scrollable="false">

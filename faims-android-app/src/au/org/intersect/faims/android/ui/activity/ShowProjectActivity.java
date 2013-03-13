@@ -50,6 +50,7 @@ import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.Arch16n;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
+import au.org.intersect.faims.android.ui.form.CustomMapView;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -519,8 +520,9 @@ public class ShowProjectActivity extends FragmentActivity {
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
 		
+		// Need to register license for the map view before create an instance of map view
+		CustomMapView.registerLicense(getApplicationContext());
 		renderUI();
-		gpsDataManager.startGPSListener();
 	}
 	
 	@Override
