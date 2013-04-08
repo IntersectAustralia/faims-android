@@ -26,7 +26,7 @@ public class Arch16n {
 			FileInputStream fileInputStream = new FileInputStream(path+"/faims.properties");
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
 			for(String s : propertyResourceBundle.keySet()){
-				properties.put(s, propertyResourceBundle.getString(s));
+				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));
 			}
 		} catch (FileNotFoundException e) {
 			FAIMSLog.log("Required faims.properties is not found in the project");
@@ -37,7 +37,7 @@ public class Arch16n {
 			FileInputStream fileInputStream = new FileInputStream(path+"/faims_"+projectName.replaceAll("\\s", "_")+".properties");
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
 			for(String s : propertyResourceBundle.keySet()){
-				properties.put(s, propertyResourceBundle.getString(s));
+				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));
 			}
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
