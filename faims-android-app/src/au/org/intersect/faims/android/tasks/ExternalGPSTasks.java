@@ -13,6 +13,7 @@ import net.sf.marineapi.nmea.sentence.GGASentence;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
+import android.util.Log;
 
 public class ExternalGPSTasks implements Runnable {
 
@@ -47,9 +48,13 @@ public class ExternalGPSTasks implements Runnable {
 
 	@Override
 	public void run() {
-		handler.postDelayed(this, this.gpsUpdateInterval);
-		readSentences();
-		this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
+		try{
+			handler.postDelayed(this, this.gpsUpdateInterval);
+			readSentences();
+			this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
+		}catch(Exception e){
+			Log.d("bluetooth-faims", "run method exception", e);
+		}
 	}
 
 	public void closeBluetoothConnection(){
@@ -65,7 +70,8 @@ public class ExternalGPSTasks implements Runnable {
     				in.close();
     			}
 				this.bluetoothSocket.close();
-			} catch (IOException exception) {
+			} catch (IOException e) {
+				Log.d("bluetooth-faims", "close bluetooth connection exception", e);
 			}
     	}
 	}
@@ -73,14 +79,19 @@ public class ExternalGPSTasks implements Runnable {
 	private void readSentences() {
         this.GGAMessage = null;
         this.BODMessage = null;
+        InputStream in = null;
+        InputStreamReader isr = null;
+        BufferedReader br = null;
         if(this.gpsDevice != null){
 	        try {
 	            if(this.bluetoothSocket == null){
 	            	initialiseBluetoothSocket();
 	            }
-	
 	            long start = System.currentTimeMillis();
-	            long end = start + 1000; // check for 0.5 seconds to get valid GPGGA message
+	            long end = start + 1000; // check for 1 seconds to get valid GPGGA message
+	            in = bluetoothSocket.getInputStream();
+	    		isr = new InputStreamReader(in);
+	    		br = new BufferedReader(isr);
 	            while (System.currentTimeMillis() < end){
 	                String nmeaMessage = br.readLine();
 	                if(nmeaMessage == null){
@@ -88,6 +99,7 @@ public class ExternalGPSTasks implements Runnable {
 	                }
 	                if (nmeaMessage.startsWith("$GPGGA")) {
 	                    if(hasValidGGAMessage()){
+	                    	Log.d("bluetooth-faims", "valid nmea message");
 	                        break;
 	                    }else{
 	                        this.GGAMessage = nmeaMessage;
@@ -99,7 +111,17 @@ public class ExternalGPSTasks implements Runnable {
 	                    this.BODMessage = nmeaMessage;
 	                }
 	            }
-	        } catch (IOException e) {
+	            if(this.br != null){
+    				br.close();
+    			}
+    			if(this.isr != null){
+    				isr.close();
+    			}
+    			if(this.in != null){
+    				in.close();
+    			}
+	        } catch (Exception e) {
+	        	Log.d("bluetooth-faims", "init connection exception", e);
 	        	if(this.bluetoothSocket != null){
 	        		try {
 	        			if(this.br != null){
@@ -114,13 +136,12 @@ public class ExternalGPSTasks implements Runnable {
 						this.bluetoothSocket.close();
 						this.bluetoothSocket = null;
 					} catch (IOException exception) {
+						Log.d("bluetooth-faims", "closing streams exception", e);
 					}
 	        	}
-	        } catch (IllegalArgumentException e) {
-	        } catch (NoSuchMethodException e) {
-			} catch (IllegalAccessException e) {
-			} catch (InvocationTargetException e) {
 			}
+        }else{
+        	Log.d("bluetooth-faims", "null gps device");
         }
     }
 
@@ -131,9 +152,6 @@ public class ExternalGPSTasks implements Runnable {
 		this.bluetoothSocket = (BluetoothSocket) m.invoke(
 				this.gpsDevice, 1);
 		this.bluetoothSocket.connect();
-		in = bluetoothSocket.getInputStream();
-		isr = new InputStreamReader(in);
-		br = new BufferedReader(isr);
 	}
 
 	private boolean hasValidGGAMessage() {
@@ -145,6 +163,7 @@ public class ExternalGPSTasks implements Runnable {
 	        }
         	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
         } catch (Exception e){
+        	Log.d("bluetooth-faims", "wrong gga format sentence", e);
         	return false;
         }
     }

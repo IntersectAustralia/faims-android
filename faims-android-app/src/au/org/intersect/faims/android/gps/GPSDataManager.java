@@ -12,11 +12,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
 import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 
 public class GPSDataManager implements BluetoothActionListener, LocationListener{
 
+	private static final String EXTERNAL = "external";
+	private static final String INTERNAL = "internal";
 	private String GGAMessage;
     private String BODMessage;
     private long externalGPSTimestamp;
@@ -72,12 +75,16 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 
 	public void startExternalGPSListener(){
-		destroyExternalGPSListener();
-		this.handlerThread = new HandlerThread("GPSHandler");
-		this.handlerThread.start();
-		this.handler = new Handler(this.handlerThread.getLooper());
-		this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval());
-		this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
+		try{
+			destroyExternalGPSListener();
+			this.handlerThread = new HandlerThread("GPSHandler");
+			this.handlerThread.start();
+			this.handler = new Handler(this.handlerThread.getLooper());
+			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval());
+			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
+		}catch (Exception e){
+			Log.d("bluetooth-faims", "start external gps exception", e);
+		}
 	}
 
 	public void destroyInternalGPSListener(){
@@ -87,12 +94,16 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 	
 	public void destroyExternalGPSListener(){
-		if(this.handler != null){
-			this.externalGPSTasks.closeBluetoothConnection();
-			this.handler.removeCallbacks(this.externalGPSTasks);
-		}
-		if(this.handlerThread != null){
-			handlerThread.quit();
+		try{
+			if(this.handler != null){
+				this.externalGPSTasks.closeBluetoothConnection();
+				this.handler.removeCallbacks(this.externalGPSTasks);
+			}
+			if(this.handlerThread != null){
+				handlerThread.quit();
+			}
+		}catch (Exception e) {
+			Log.d("bluetooth-faims", "destroy external gps exception", e);
 		}
 	}
 	
@@ -144,14 +155,14 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 
 	public Object getGPSPosition(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
+		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
 			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 			double latitude = ggaSentence.getPosition().getLatitude();
 			double longitude = ggaSentence.getPosition().getLongitude();
 			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
 			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
 			return new GPSLocation(longitude, latitude, this.externalGPSTimestamp);
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
+		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
 		}else{
 			return null;
@@ -159,11 +170,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
+		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
 			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
 			return nmeaAccuracy;
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
+		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			return this.accuracy;
 		}else{
 			return null;
@@ -171,14 +182,14 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 
 	public Object getGPSHeading(String gps){
-		if("external".equals(gps) && this.GGAMessage != null){
+		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
 			if(this.BODMessage != null){
 				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
 				return bodSentence.getTrueBearing();
 			}else{
 				return 0.0;
 			}
-		}else if("internal".equals(gps) && isUsingInternalGPS()){
+		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			return this.location.getBearing();
 		}else{
 			return null;
