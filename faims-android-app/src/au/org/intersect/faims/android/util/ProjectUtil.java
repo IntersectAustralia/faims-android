@@ -34,27 +34,28 @@ public class ProjectUtil {
 		
 		ArrayList<Project> list = new ArrayList<Project>();
 		FileInputStream is = null;
-		try {
-			for (String dirname : directories) {
-				is = new FileInputStream(
-							Environment.getExternalStorageDirectory() + "/faims/projects/" + dirname + "/project.settings");
-				String config = FileUtil.convertStreamToString(is);
-				if (config == null) {
-					FAIMSLog.log("project " + "/faims/projects/" + dirname + "/project.settings" + " settings malformed");
-					continue;
+		
+		for (String dirname : directories) {
+			File f = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + dirname + "/project.settings");
+			if (f.exists()) {
+				try {
+					is = new FileInputStream(f);
+					String config = FileUtil.convertStreamToString(is);
+					JsonObject object = JsonUtil.deserializeJson(config);
+					Project project = Project.fromJson(object);	
+					list.add(project);
+				} catch (Exception e) {
+					Log.w("FAIMS", "cannot read projects settings " + "/faims/projects/" + dirname + "/project.settings", e);
+					
+					try {
+						if (is != null)
+							is.close();
+					} catch (IOException ioe) {
+						Log.e("FAIMS", "error closing file stream", ioe);
+					}
 				}
-				JsonObject object = JsonUtil.deserializeJson(config);
-				Project project = Project.fromJson(object);	
-				list.add(project);
-			}
-		} catch (IOException e) {
-			FAIMSLog.log(e);
-		} finally {
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException e) {
-				FAIMSLog.log(e);
+			} else {
+				Log.i("FAIMS", "ignoring directory " + dirname);
 			}
 		}
 		
