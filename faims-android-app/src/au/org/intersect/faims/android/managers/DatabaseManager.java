@@ -16,6 +16,7 @@ import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
+import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Singleton;
@@ -78,8 +79,10 @@ public class DatabaseManager {
 					
 				}
 				
+				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
+				
 				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
-									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), " + currentTimestamp + " " +
 									"FROM aenttype " + 
 									"WHERE aenttypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
@@ -93,7 +96,7 @@ public class DatabaseManager {
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
 					query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, CURRENT_TIMESTAMP " + 
+								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, " + currentTimestamp + " " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
@@ -159,8 +162,10 @@ public class DatabaseManager {
 					uuid = rel_id;
 				}
 				
+				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
+				
 				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
-									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), CURRENT_TIMESTAMP " +
+									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), " + currentTimestamp + " " +
 									"FROM relntype " +
 									"WHERE relntypename = ? COLLATE NOCASE;";
 				st = db.prepare(query);
@@ -174,7 +179,7 @@ public class DatabaseManager {
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
 					query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-								   "SELECT cast(? as integer), ?, attributeId, ?, CURRENT_TIMESTAMP " + 
+								   "SELECT cast(? as integer), ?, attributeId, ?, " + currentTimestamp + " " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
@@ -275,9 +280,11 @@ public class DatabaseManager {
 					return false;
 				}
 				
+				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
+				
 				// create new entity relationship
 				String query = "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
-							   "VALUES (?, ?, ?, CURRENT_TIMESTAMP);";
+							   "VALUES (?, ?, ?, " + currentTimestamp + ");";
 				Stmt st = db.prepare(query);
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);

@@ -374,7 +374,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		// initialise wifi connection state
-		if (mWifi.isConnected()) {
+		if (mWifi != null && mWifi.isConnected()) {
 			wifiConnected = true;
 		}
 	}
