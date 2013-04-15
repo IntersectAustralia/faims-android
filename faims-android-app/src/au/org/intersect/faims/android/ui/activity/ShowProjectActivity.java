@@ -14,8 +14,10 @@ import java.util.concurrent.Semaphore;
 import org.javarosa.form.api.FormEntryController;
 
 import roboguice.RoboGuice;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
@@ -470,28 +472,43 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	protected void renderUI() {
-		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
-		
-		Log.d("FAIMS", "loading schema: " + projectDir + "/ui_schema.xml");
-		
-		// Read, validate and parse the xforms
-		ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
-		
-		arch16n.generatePropertiesMap();
-
-		// render the ui definition
-		ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-		ShowProjectActivity.this.renderer.createUI("/faims/projects/" + projectKey);
-		ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
-		
-		Project project = ProjectUtil.getProject(projectKey);
-		
-		// bind the logic to the ui
-		Log.d("FAIMS","Binding logic to the UI");
-		linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
-		linker.setBaseDir(projectDir);
-		linker.sourceFromAssets("ui_commands.bsh");
-		linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
+		try {
+			String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
+			
+			Log.d("FAIMS", "loading schema: " + projectDir + "/ui_schema.xml");
+			
+			// Read, validate and parse the xforms
+			ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
+			
+			arch16n.generatePropertiesMap();
+	
+			// render the ui definition
+			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
+			ShowProjectActivity.this.renderer.createUI("/faims/projects/" + projectKey);
+			ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+			
+			Project project = ProjectUtil.getProject(projectKey);
+			
+			// bind the logic to the ui
+			Log.d("FAIMS","Binding logic to the UI");
+			linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
+			linker.setBaseDir(projectDir);
+			linker.sourceFromAssets("ui_commands.bsh");
+			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
+		} catch (Exception e) {
+			Log.e("FAIMS", "could not render ui", e);
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			
+			builder.setTitle(getString(R.string.render_ui_failure_title));
+			builder.setMessage(getString(R.string.render_ui_failure_message));
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			        	   ShowProjectActivity.this.finish();
+			           }
+			       });
+			builder.create().show();
+		}
 	}
 	
 	public BeanShellLinker getBeanShellLinker(){

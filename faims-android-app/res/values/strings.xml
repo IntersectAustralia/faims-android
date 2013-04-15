@@ -48,5 +48,8 @@
     
     <string name="download_database_failure_title">Could not download database</string>
     <string name="download_database_failure_message">Would you like to try again?</string>
+    
+    <string name="render_ui_failure_title">Error</string>
+    <string name="render_ui_failure_message">Failed to load project due to invalid ui schema.</string>
 
 </resources>
