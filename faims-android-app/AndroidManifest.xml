@@ -57,27 +57,15 @@
             ></service>
         
         <service
-            android:name="au.org.intersect.faims.android.services.SyncDownloadDatabaseService"
-            ></service>
-        
-        <service
             android:name="au.org.intersect.faims.android.services.UploadDatabaseService"
             ></service>
         
         <service
-            android:name="au.org.intersect.faims.android.services.SyncUploadDatabaseService"
+            android:name="au.org.intersect.faims.android.services.SyncDatabaseService"
             ></service>
         
          <service
-            android:name="au.org.intersect.faims.android.services.UploadServerDirectoryService"
-            ></service>
-         
-          <service
-            android:name="au.org.intersect.faims.android.services.UploadAppDirectoryService"
-            ></service>
-          
-           <service
-            android:name="au.org.intersect.faims.android.services.DownloadAppDirectoryService"
+            android:name="au.org.intersect.faims.android.services.SyncFilesService"
             ></service>
         
         <activity android:name="group.pals.android.lib.ui.filechooser.FileChooserActivity"

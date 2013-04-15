@@ -7,6 +7,9 @@ import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 
 import org.javarosa.form.api.FormEntryController;
 
@@ -16,6 +19,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,18 +34,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.MessageResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
-import au.org.intersect.faims.android.services.DownloadAppDirectoryService;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
-import au.org.intersect.faims.android.services.SyncDownloadDatabaseService;
-import au.org.intersect.faims.android.services.SyncUploadDatabaseService;
-import au.org.intersect.faims.android.services.UploadAppDirectoryService;
+import au.org.intersect.faims.android.services.MessageType;
+import au.org.intersect.faims.android.services.SyncDatabaseService;
+import au.org.intersect.faims.android.services.SyncFilesService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
-import au.org.intersect.faims.android.services.UploadServerDirectoryService;
 import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.IActionListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
@@ -88,7 +92,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		public abstract void handleMessageSafe(ShowProjectActivity activity, Message message);
 		
-	};
+	}
 	
 	private static class DownloadDatabaseHandler extends ShowProjectActivityHandler {
 
@@ -138,133 +142,80 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 	}
 	
-	private static class SyncUploadDatabaseHandler extends ShowProjectActivityHandler {
+	private static class SyncDatabaseHandler extends ShowProjectActivityHandler {
 
-		public SyncUploadDatabaseHandler(ShowProjectActivity activity) {
+		public SyncDatabaseHandler(ShowProjectActivity activity) {
 			super(activity);
 		}
 
 		@Override
 		public void handleMessageSafe(ShowProjectActivity activity,
 				Message message) {
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.startDownloadSync();
-			} else if (resultCode != null) {
-				activity.delaySyncInterval();
-				activity.waitForNextSync();
-				
-				activity.callSyncFailure();
-			}
-			
-			activity.isSyncUploading = false;
-		}
-		
-	}
-	
-	private static class SyncDownloadDatabaseHandler extends ShowProjectActivityHandler {
-
-		public SyncDownloadDatabaseHandler(ShowProjectActivity activity) {
-			super(activity);
-		}
-
-		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
-				Message message) {
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				
-				if(activity.fileSyncEnabled) {
-					activity.startUploadServerDirectorySync();
+			MessageResult mr = (MessageResult) message.obj;
+			if (mr.result == FAIMSClientResultCode.SUCCESS){
+				if (mr.type == MessageType.SYNC_DATABASE_DOWNLOAD) {
+					if(activity.fileSyncEnabled) {
+						activity.startSyncingFiles();
+					} else {
+						activity.resetSyncInterval();
+						activity.waitForNextSync();
+						
+						activity.callSyncSuccess();
+						
+						activity.syncLock.release();
+					}
 				} else {
-					activity.resetSyncInterval();
-					activity.waitForNextSync();
-					
-					activity.callSyncSuccess();
+					// ignore
 				}
-			} else if (resultCode != null) {
+			} else if (mr.result != null) {
+				// failure
 				activity.delaySyncInterval();
 				activity.waitForNextSync();
 				
 				activity.callSyncFailure();
+				 
+				activity.syncLock.release();
+			} else {
+				// cancelled
+				activity.syncLock.release();
 			}
-		
-			activity.isSyncDownloading = false;
 		}
-		
 	}
-	
-	private static class SyncUploadServerDirectoryHandler extends ShowProjectActivityHandler {
+		
+	private static class SyncFilesHandler extends ShowProjectActivityHandler {
 
-		public SyncUploadServerDirectoryHandler(ShowProjectActivity activity) {
+		public SyncFilesHandler(ShowProjectActivity activity) {
 			super(activity);
 		}
 
 		@Override
 		public void handleMessageSafe(ShowProjectActivity activity,
 				Message message) {
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.startUploadAppDirectorySync();
-			} else if (resultCode != null) {
-				activity.delaySyncInterval();
-				activity.waitForNextSync();
-				
-				activity.callSyncFailure();
-			}
-		
-			activity.isServerDirectoryUploading = false;
-		}
-		
-	}
-	
-	private static class SyncUploadAppDirectoryHandler extends ShowProjectActivityHandler {
-
-		public SyncUploadAppDirectoryHandler(ShowProjectActivity activity) {
-			super(activity);
-		}
-
-		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
-				Message message) {
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.startDownloadAppDirectorySync();
-			} else if (resultCode != null) {
-				activity.delaySyncInterval();
-				activity.waitForNextSync();
-				
-				activity.callSyncFailure();
-			}
-		
-			activity.isAppDirectoryUploading = false;
-		}
-	}
-		
-	private static class SyncDownloadAppDirectoryHandler extends ShowProjectActivityHandler {
-
-			public SyncDownloadAppDirectoryHandler(ShowProjectActivity activity) {
-				super(activity);
-			}
-
-			@Override
-			public void handleMessageSafe(ShowProjectActivity activity,
-					Message message) {
-				FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-				if (resultCode == FAIMSClientResultCode.SUCCESS) {
+			MessageResult mr = (MessageResult) message.obj;
+			if (mr.result == FAIMSClientResultCode.SUCCESS) {
+				if (mr.type == MessageType.SYNC_DOWNLOAD_APP_FILES) {
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
 					activity.callSyncSuccess();
-				} else if (resultCode != null) {
-					activity.delaySyncInterval();
-					activity.waitForNextSync();
 					
-					activity.callSyncFailure();
+					activity.syncLock.release();
+				} else {
+					// ignore
 				}
-			
-				activity.isAppDirectoryDownloading = false;
+			} else if (mr.result != null) {
+				// failure
+				activity.delaySyncInterval();
+				activity.waitForNextSync();
+				
+				activity.callSyncFailure();
+				
+				activity.syncLock.release();
+			} else {
+				// cancelled
+				activity.syncLock.release();
 			}
+		}
 		
 	}
 	
@@ -284,123 +235,23 @@ public class ShowProjectActivity extends FragmentActivity {
 				return;
 			}
 			
-			if (!activity.isActivityShowing) {
-				Log.d("FAIMS", "WifiBroadcastReceiver activiy is hidden");
-				return;
-			}
-			
 		    final String action = intent.getAction();
 		    Log.d("FAIMS", "WifiBroadcastReceiver action " + action);
 		    
 		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
 		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
-		            if (!activity.isSyncing && activity.syncEnabled) {
+		        	activity.wifiConnected = true;
+		            if (activity.syncEnabled && activity.isActivityShowing && !activity.syncActive) {
 		            	activity.startSync();
 		            }
 		        } else {
-		        	if (activity.isSyncing) {
+		        	activity.wifiConnected = false;
+		        	if (activity.syncActive) {
 		        		activity.stopSync();
 		            }
 		        }
 		    }
 		}
-	}
-	
-	private enum SyncState {
-		WAIT_FOR_NEXT_SYNC,
-		WAIT_FOR_SYNC_END,
-		WAIT_FOR_SYNC_TO_SLEEP,
-		IDLE
-	}
-	
-	// Note: This manager class handle starting the thread from a waiting state
-	private class SyncManagerThread extends Thread {
-		
-		private SyncState state;
-		private long lastTime;
-		private long syncDelay;
-		private boolean isDead;
-		private boolean isSleeping;
-		
-		@Override 
-		public void start() {
-			wakeup();
-			super.start();
-		}
-		
-		@Override
-		public void run() {
-			try {
-				
-				while (!isDead) {
-				
-					while(!isSleeping) {
-						Log.d("FAIMS", "SyncManager synching: " + this.state);
-						
-						switch(this.state) {
-						case WAIT_FOR_NEXT_SYNC:
-							long delta = System.currentTimeMillis() - this.lastTime;
-							if (delta > this.syncDelay) {
-								ShowProjectActivity.this.startSync();
-							}
-							break;
-						case WAIT_FOR_SYNC_END:
-							if (!isSyncServicesRunning()) {
-								ShowProjectActivity.this.startSync();
-							}
-							break;
-						case WAIT_FOR_SYNC_TO_SLEEP:
-							if (!isSyncServicesRunning()) {
-								this.isSleeping = true;
-							}
-							break;
-						default:
-							// do nothing
-							break;
-						}
-						
-						Thread.sleep(1000);
-					}
-					
-					Log.d("FAIMS", "SyncManager shutdown");
-					
-					// go into sleep mode
-					while(isSleeping) {
-						Thread.yield();
-					}
-					
-				}
-				
-			} catch (Exception e) {
-				Log.e("FAIMS", "SyncManager error", e);
-			}
-		}
-		
-		public void waitForNextSync(long delay) {
-			this.isSleeping = false;
-			this.state = SyncState.WAIT_FOR_NEXT_SYNC;
-			this.syncDelay = delay;
-			this.lastTime = System.currentTimeMillis();
-		}
-		
-		public void waitForSyncToEnd() {
-			this.isSleeping = false;
-			this.state = SyncState.WAIT_FOR_SYNC_END;
-		}
-		
-		public void putToSleep() {
-			this.state = SyncState.WAIT_FOR_SYNC_TO_SLEEP;
-		}
-		
-		public void wakeup() {
-			this.isSleeping = false;
-			this.state = SyncState.IDLE;
-		}
-		
-		public void kill() {
-			this.isDead = true;
-		}
-		
 	}
 	
 	enum SyncIndicatorColor {
@@ -438,33 +289,28 @@ public class ShowProjectActivity extends FragmentActivity {
 	private Arch16n arch16n;
 
 	private boolean syncEnabled;
-	private boolean isSyncing;
-	
-	private boolean isSyncUploading;
-	private boolean isSyncDownloading;
+	private boolean fileSyncEnabled;
 	
 	private float syncInterval;
 	private float syncMinInterval;
 	private float syncMaxInterval;
 	private float syncDelay;
 	
+	private boolean syncActive;
+	private Semaphore syncLock = new Semaphore(1);
+	
 	private List<SyncListener> listeners;
-
-	private SyncManagerThread syncManagerThread;
-
-	private boolean isActivityShowing;
 
 	private boolean syncIndicatorVisible;
 
 	private SyncIndicatorColor syncIndicatorColor = SyncIndicatorColor.GREEN;
+	private SyncIndicatorColor lastSyncIndicatorColor = SyncIndicatorColor.GREEN;
 
-	private boolean fileSyncEnabled;
+	private boolean isActivityShowing;
 
-	protected boolean isServerDirectoryUploading;
+	private Timer syncTaskTimer;
 
-	protected boolean isAppDirectoryUploading;
-
-	protected boolean isAppDirectoryDownloading;
+	public boolean wifiConnected;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -523,6 +369,14 @@ public class ShowProjectActivity extends FragmentActivity {
 		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
 		renderUI();
+		
+		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		// initialise wifi connection state
+		if (mWifi.isConnected()) {
+			wifiConnected = true;
+		}
 	}
 	
 	@Override
@@ -536,11 +390,11 @@ public class ShowProjectActivity extends FragmentActivity {
 		if (this.locateTask != null) {
 			this.locateTask.cancel(true);
 		}
-		if (this.syncManagerThread != null) {
-			this.syncManagerThread.kill();
-		}
 		if (this.broadcastReceiver != null) {
 			this.unregisterReceiver(broadcastReceiver);
+		}
+		if (syncEnabled) {
+			stopSync();
 		}
 		super.onDestroy();
 	}
@@ -554,7 +408,6 @@ public class ShowProjectActivity extends FragmentActivity {
 		if (syncEnabled) {
 			startSync();
 		}
-		
 	}
 	
 	@Override
@@ -563,24 +416,10 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		isActivityShowing = false;
 		
-		stopSync();
+		if (syncActive) {
+			stopSync();
+		}
 	}
-
-	/*
-	@Override
-	protected void onResume() {
-		super.onResume();
-		FAIMSLog.log();
-		this.manager.dispatchResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		FAIMSLog.log();
-		this.manager.dispatchPause(isFinishing());
-	}
-	*/
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -873,96 +712,102 @@ public class ShowProjectActivity extends FragmentActivity {
 		syncEnabled = true;
 		resetSyncInterval();
 		startSync();
-		
-		// show sync indicator
-		setSyncIndicatorVisible(true);
 	}
 
 	public void disableSync() {
 		if (!syncEnabled) return;
 		syncEnabled = false;
 		stopSync();
-		
-		setSyncIndicatorVisible(false);
 	}
 	
 	public void stopSync() {
 		Log.d("FAIMS", "stopping sync");
 		
-		isSyncing = false;
+		syncActive = false;
 		
 		// locating server
 		if (ShowProjectActivity.this.locateTask != null){
 			ShowProjectActivity.this.locateTask.cancel(true);
 			ShowProjectActivity.this.locateTask = null;
+			
+			syncLock.release();
 		}
 		
-		// stop upload sync
-		Intent uploadIntent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
-		ShowProjectActivity.this.stopService(uploadIntent);
+		// stop database sync
+		Intent syncDatabaseIntent = new Intent(ShowProjectActivity.this, SyncDatabaseService.class);
+		ShowProjectActivity.this.stopService(syncDatabaseIntent);
 		
-		// stop download sync
-		Intent downloadIntent = new Intent(ShowProjectActivity.this, SyncDownloadDatabaseService.class);
-		ShowProjectActivity.this.stopService(downloadIntent);
+		// stop files sync
+		Intent syncFilesIntent = new Intent(ShowProjectActivity.this, SyncFilesService.class);
+		ShowProjectActivity.this.stopService(syncFilesIntent);
 		
-		// stop download sync
-		Intent uploadServerDirectoryIntent = new Intent(ShowProjectActivity.this, UploadServerDirectoryService.class);
-		ShowProjectActivity.this.stopService(uploadServerDirectoryIntent);
-		
-		// stop download sync
-		Intent uploadAppDirectoryIntent = new Intent(ShowProjectActivity.this, UploadAppDirectoryService.class);
-		ShowProjectActivity.this.stopService(uploadAppDirectoryIntent);
-		
-		// stop download sync
-		Intent downloadAppDirectoryIntent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
-		ShowProjectActivity.this.stopService(downloadAppDirectoryIntent);
-		
-		if (syncManagerThread != null) {
-			syncManagerThread.putToSleep();
+		if (syncTaskTimer != null) {
+			syncTaskTimer.cancel();
+			syncTaskTimer = null;
 		}
-	}
-	
-	public boolean isSyncServicesRunning() {
-		return isSyncUploading || isSyncDownloading || isServerDirectoryUploading || isAppDirectoryUploading || isAppDirectoryDownloading;
+		
+		if (syncIndicatorColor == SyncIndicatorColor.ORANGE) {
+			revertSyncIndicatorColor();
+		}
+		
+		setSyncIndicatorVisible(false);
 	}
 	
 	public void startSync() {
-		if (!syncEnabled) return;
 		Log.d("FAIMS", "starting sync");
 		
-		if (syncManagerThread == null) {
-			syncManagerThread = new SyncManagerThread();
-			syncManagerThread.start();
-		}
-		syncManagerThread.wakeup();
-		
-		if (isSyncServicesRunning()) {
-			waitForSyncToEnd();
+		if (wifiConnected) {
+			syncActive = true;
+			
+			waitForNextSync();
+			
+			setSyncIndicatorVisible(true);
 		} else {
-			isSyncing = true;
-			syncLocateServer();	
+			setSyncIndicatorVisible(false);
+			Log.d("FAIMS", "cannot start sync wifi disabled");
 		}
+	}
+	
+	private void doSync() {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					syncLock.acquire();
+					
+					syncLocateServer();
+				} catch (Exception e) {
+					Log.d("FAIMS", "sync error", e);
+				}
+			}
+			
+		}).start();
 	}
 	
 	private void waitForNextSync() {
-		if (!syncEnabled) return;
+		if (!syncActive) return;
+		
 		Log.d("FAIMS", "waiting for sync interval");
-		syncManagerThread.waitForNextSync((long) syncInterval * 1000);
-	}
-	
-	private void waitForSyncToEnd() {
-		if (!syncEnabled) return;
-		Log.d("FAIMS", "waiting for sync to end");
-		syncManagerThread.waitForSyncToEnd();
+		
+		TimerTask task = new TimerTask() {
+
+			@Override
+			public void run() {
+				doSync();
+			}
+			
+		};
+		
+		syncTaskTimer = new Timer();
+		syncTaskTimer.schedule(task, (long) syncInterval * 1000);
 	}
 	
 	private void syncLocateServer() {
-		if (!isSyncing) return;
-		
 		Log.d("FAIMS", "sync locating server");
 		
 		if (serverDiscovery.isServerHostValid()) {
-			startUploadSync();
+			startSyncingDatabase();
 		} else {
 		
 			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
@@ -970,37 +815,38 @@ public class ShowProjectActivity extends FragmentActivity {
 		    	@Override
 		    	public void handleActionResponse(ActionResultCode resultCode,
 		    			Object data) {
+		    		locateTask = null;
+		    		
 		    		if (resultCode == ActionResultCode.SUCCESS) {
-		    			waitForNextSync(); 
+		    			startSyncingDatabase();
 		    		} else {
 		    			delaySyncInterval();
 		    			waitForNextSync();
 		    			
 		    			callSyncFailure();
+
+			    		syncLock.release();
 		    		}
-		    		
 		    	}
 		      		
 			}).execute();
 		}
 	}
 	
-	private void startUploadSync() {
-		if (!isSyncing) return;
-		
-		Log.d("FAIMS", "sync uploading");
+	private void startSyncingDatabase() {
+		Log.d("FAIMS", "start syncing database");
 		
 		// handler must be created on ui thread
 		runOnUiThread(new Runnable() {
 			
 			@Override 
 			public void run() {
-				// start sync upload service
-				Intent intent = new Intent(ShowProjectActivity.this, SyncUploadDatabaseService.class);
+				// start sync database service
+				Intent intent = new Intent(ShowProjectActivity.this, SyncDatabaseService.class);
 						
 				Project project = ProjectUtil.getProject(projectKey);
 				
-				SyncUploadDatabaseHandler handler = new SyncUploadDatabaseHandler(ShowProjectActivity.this);
+				SyncDatabaseHandler handler = new SyncDatabaseHandler(ShowProjectActivity.this);
 				
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
@@ -1012,36 +858,7 @@ public class ShowProjectActivity extends FragmentActivity {
 				intent.putExtra("userId", userId);
 				ShowProjectActivity.this.startService(intent);
 				
-				isSyncUploading = true;
-				
 				callSyncStart();
-			}
-		});
-	}
-	
-	private void startDownloadSync() {
-		if (!isSyncing) return;
-		
-		Log.d("FAIMS", "sync downloading");
-		
-		// handler must be created on ui thread
-		runOnUiThread(new Runnable() {
-			
-			@Override 
-			public void run() {
-				// start sync download service
-				Intent intent = new Intent(ShowProjectActivity.this, SyncDownloadDatabaseService.class);
-						
-				Project project = ProjectUtil.getProject(projectKey);
-				
-				SyncDownloadDatabaseHandler handler = new SyncDownloadDatabaseHandler(ShowProjectActivity.this);
-				
-				Messenger messenger = new Messenger(handler);
-				intent.putExtra("MESSENGER", messenger);
-				intent.putExtra("project", project);
-				ShowProjectActivity.this.startService(intent);
-				
-				isSyncDownloading = true;
 			}
 		});
 	}
@@ -1135,7 +952,13 @@ public class ShowProjectActivity extends FragmentActivity {
 		this.invalidateOptionsMenu();
 	}
 	
+	private void revertSyncIndicatorColor() {
+		syncIndicatorColor = lastSyncIndicatorColor;
+		this.invalidateOptionsMenu();
+	}
+	
 	private void setSyncIndicatorColor(SyncIndicatorColor color) {
+		lastSyncIndicatorColor = syncIndicatorColor;
 		syncIndicatorColor = color;
 		this.invalidateOptionsMenu();
 	}
@@ -1148,10 +971,8 @@ public class ShowProjectActivity extends FragmentActivity {
 		this.fileSyncEnabled = false;
 	}
 	
-	private void startUploadServerDirectorySync() {
-		if (!isSyncing) return;
-		
-		Log.d("FAIMS", "uploading server directory sync");
+	private void startSyncingFiles() {
+		Log.d("FAIMS", "start syncing files");
 		
 		// handler must be created on ui thread
 		runOnUiThread(new Runnable() {
@@ -1159,72 +980,17 @@ public class ShowProjectActivity extends FragmentActivity {
 			@Override 
 			public void run() {
 				// start upload server directory service
-				Intent intent = new Intent(ShowProjectActivity.this, UploadServerDirectoryService.class);
+				Intent intent = new Intent(ShowProjectActivity.this, SyncFilesService.class);
 						
 				Project project = ProjectUtil.getProject(projectKey);
 				
-				SyncUploadServerDirectoryHandler handler = new SyncUploadServerDirectoryHandler(ShowProjectActivity.this);
+				SyncFilesHandler handler = new SyncFilesHandler(ShowProjectActivity.this);
 				
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("project", project);
 				ShowProjectActivity.this.startService(intent);
-				
-				ShowProjectActivity.this.isServerDirectoryUploading = true;
-			}
-		});
-	}
-	
-	private void startUploadAppDirectorySync() {
-		if (!isSyncing) return;
-		
-		Log.d("FAIMS", "uploading app directory sync");
-		
-		// handler must be created on ui thread
-		runOnUiThread(new Runnable() {
-			
-			@Override 
-			public void run() {
-				// start upload app directory service
-				Intent intent = new Intent(ShowProjectActivity.this, UploadAppDirectoryService.class);
-						
-				Project project = ProjectUtil.getProject(projectKey);
-				
-				SyncUploadAppDirectoryHandler handler = new SyncUploadAppDirectoryHandler(ShowProjectActivity.this);
-				
-				Messenger messenger = new Messenger(handler);
-				intent.putExtra("MESSENGER", messenger);
-				intent.putExtra("project", project);
-				ShowProjectActivity.this.startService(intent);
-				
-				ShowProjectActivity.this.isAppDirectoryUploading = true;
-			}
-		});
-	}
-	
-	private void startDownloadAppDirectorySync() {
-		if (!isSyncing) return;
-		
-		Log.d("FAIMS", "downloading app directory sync");
-		
-		// handler must be created on ui thread
-		runOnUiThread(new Runnable() {
-			
-			@Override 
-			public void run() {
-				// start download app directory service
-				Intent intent = new Intent(ShowProjectActivity.this, DownloadAppDirectoryService.class);
-						
-				Project project = ProjectUtil.getProject(projectKey);
-				
-				SyncDownloadAppDirectoryHandler handler = new SyncDownloadAppDirectoryHandler(ShowProjectActivity.this);
-				
-				Messenger messenger = new Messenger(handler);
-				intent.putExtra("MESSENGER", messenger);
-				intent.putExtra("project", project);
-				ShowProjectActivity.this.startService(intent);
-				
-				ShowProjectActivity.this.isAppDirectoryDownloading = true;
+
 			}
 		});
 	}
