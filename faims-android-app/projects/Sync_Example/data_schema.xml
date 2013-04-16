@@ -1,24 +1,39 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
 <dataSchema name="SyncExample" preparer="Nobody">
+    
+   <RelationshipElement name="AboveBelow" type="hierarchy">
+    <description>
+      Indicates that one element is above or below another element.
+    </description>
+    <parent>
+      Above
+    </parent>
+    <child>
+      Below
+    </child>
+     <property type="string" name="name" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+  </RelationshipElement>
   
   <ArchaeologicalElement type="small">
     <description>
       An small entity
     </description>
-    <property type="string" name="name" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="string" name="name" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="integer" name="value" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="integer" name="value" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="string" name="filename" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="string" name="filename" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="timestamp" name="timestamp" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="timestamp" name="timestamp" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="dropdown" name="location" minCardinality="1" maxCardinality="1" isIdentifier="true">
+    <property type="dropdown" name="location" isIdentifier="true">
       <bundle>DOI</bundle>
       <lookup>
         <term>Location A</term>

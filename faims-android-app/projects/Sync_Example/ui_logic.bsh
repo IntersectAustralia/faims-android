@@ -34,12 +34,39 @@ login(){
 	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
-	showTabGroup("tabgroup1");
+	showTabGroup("menu");
 }
 
 populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
+
+createOption(id, name) {
+	ArrayList option = new ArrayList();
+	option.add(id);
+	option.add(name);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("entity", "Create Entity"));
+options.add(createOption("relationship", "Create Relationship"));
+options.add(createOption("controls", "Controls"));
+
+populateList("menu/tab1/options", options);
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity".equals(value)) {
+		showTabGroup("tabgroup1");
+	} else if ("relationship".equals(value)) {
+		showTabGroup("tabgroup2");
+	} else {
+		showTabGroup("tabgroup3");
+	}
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
@@ -140,11 +167,64 @@ attachFile() {
 
 onEvent("tabgroup1/tab1/attach", "click", "attachFile()");
 
+initEntity() {
+	clearEntity();
+}
 
+String rel_id;
+
+saveRel() {
+	
+	rel_id = updateRel(null);
+	
+}
+
+loadRel() {
+
+	rel_id = getFieldValue("tabgroup2/tab2/relationships");
+	
+	if (rel_id == null || "".equals(rel_id)) return;
+	
+	showTab("tabgroup2/tab1", rel_id);
+	
+}
+
+updateRel(rel_id) {
+	if (rel_id == null || "".equals(rel_id)) rel_id = null;
+
+	List attributes = createAttributeList();
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
+	
+	String id = saveArchEnt(rel_id, "abovebelow", null, attributes);
+	
+	updateAll();
+	
+	return id;
+}
+
+clearRel() {
+	newTab("tabgroup2/tab1");
+}
+
+updateAll() {
+	Object entities = fetchAll("select uuid, uuid from archentity where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);");
+	Object relationships = fetchAll("select relationshipid, relationshipid from relationship where relationshipid || relntimestamp in ( select relationshipid || max(relntimestamp) from relationship group by relationshipid having deleted is null);");
+	
+	populateDropDown("tabgroup1/tab2/entities", entities);
+	populateDropDown("tabgroup3/tab2/relationships", relationships);
+}
+
+onEvent("tabgroup2/tab1/save", "click", "saveRel()");
+onEvent("tabgroup2/tab1/clear", "click", "clearRel()");
+onEvent("tabgroup2/tab2/load", "click", "loadRel()");
+onEvent("tabgroup2/tab1/update", "click", "updateRel(getFieldValue(\"tabgroup2/tab2/relationships\"))");
+
+initRel() {
+	clearRel();
+}
 
 init() {
-	clearEntity();
-	updateAll();
+    updateAll();
 	startSync();
 }
 
@@ -152,10 +232,12 @@ cleanup() {
 	stopSync();
 }
 
-onEvent("tabgroup1", "show", "init()"); 
+onEvent("menu", "show", "init()"); 
 onEvent("user", "show", "cleanup()");	
+onEvent("tabgroup1", "show", "initEntity()");	
+onEvent("tabgroup2", "show", "initRel()");	
 
-onEvent("tabgroup1/tab3/start", "click", "setFileSyncEnabled(true)");
-onEvent("tabgroup1/tab3/stop", "click", "setFileSyncEnabled(false)");
+onEvent("tabgroup3/tab1/start", "click", "setFileSyncEnabled(true)");
+onEvent("tabgroup3/tab1/stop", "click", "setFileSyncEnabled(false)");
 
 setFieldValue("tabgroup1/tab1/sync", "0");

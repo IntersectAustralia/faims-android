@@ -5,6 +5,7 @@ public class RelationshipAttribute {
 	private String name;
 	private String text;
 	private String vocab;
+	private String certainty;
 
 	public String getName() {
 		return name;
@@ -30,8 +31,16 @@ public class RelationshipAttribute {
 		vocab = value;
 	}
 	
+	public String getCertainty() {
+		return certainty;
+	}
+	
+	public void setCertainty(String value) {
+		certainty = value;
+	}
+	
 	public String toString() {
-		return "(" + name + "," + text + "," + vocab +")";
+		return "(" + name + "," + text + "," + vocab + "," + certainty + ")";
 	}
 
 }

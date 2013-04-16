@@ -127,11 +127,12 @@ createEntityAttribute(String name, String text, String vocab, String measure, St
 	return attribute;
 }
 
-createRelationshipAttribute(String name, String text, String vocab) {
+createRelationshipAttribute(String name, String text, String vocab, String certainty) {
 	RelationshipAttribute attribute = new RelationshipAttribute();
 	attribute.setName(name);
 	attribute.setText(text);
 	attribute.setVocab(vocab);
+	attribute.setCertainty(certainty);
 	return attribute;
 }
 

@@ -14,6 +14,11 @@
                   <users></users>
               </tab1>
           </user>
+          <menu>
+              <tab1>
+                  <options></options>
+              </tab1>
+          </menu>
           <tabgroup1>
               <tab1>
                   <name></name>
@@ -32,12 +37,25 @@
                   <entities></entities>
                   <load></load>
               </tab2>
-              <tab3>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>
+                  <name></name>
+                  <save></save>
+                  <update></update>
+                  <clear></clear>
+              </tab1>
+              <tab2>
+                  <relationships></relationships>
+                  <load></load>
+              </tab2>
+          </tabgroup2>
+          <tabgroup3>
+              <tab1>
                   <start></start>
                   <stop></stop>
-              </tab3>
-          </tabgroup1>
-          
+              </tab1>
+          </tabgroup3>
         </faims>
       </instance>
 
@@ -51,7 +69,7 @@
   
   <h:body>
     <group ref="user">
-      <label>User List</label>
+      <label></label>
       <group ref="tab1" faims_scrollable="false">
         <label>User List</label>
         <select1 ref="users" appearance="compact">
@@ -63,8 +81,21 @@
         </select1>
       </group>
     </group>
+    <group ref="menu">
+      <label></label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Menu</label>
+        <select1 ref="options" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
     <group ref="tabgroup1" faims_archent_type="small">
-      <label>Entity Example</label>
+      <label></label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
@@ -126,7 +157,32 @@
             <label>Load</label>
         </trigger>
       </group>
-      <group ref="tab3" faims_hidden="false">
+    </group>
+    <group ref="tabgroup2" faims_rel_type="AboveBelow">
+      <label></label>
+      <group ref="tab1">
+        <label>Save Relationship</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+            <label>Name:</label>
+        </input>
+      </group>
+      <group ref="tab2">
+        <label>Load Relationship</label>
+        <select1 ref="relationships" faims_certainty="false">
+            <label>Relationship:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
+        <trigger ref="load">
+            <label>Load</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup3">
+      <label></label>
+      <group ref="tab1" faims_hidden="false">
           <label>Controls</label>
           <trigger ref="start">
               <label>Enable File Sync</label>
@@ -136,6 +192,5 @@
           </trigger>
       </group>
     </group>
-    
   </h:body>
 </h:html>
