@@ -793,7 +793,14 @@ public class ShowProjectActivity extends FragmentActivity {
 				try {
 					syncLock.acquire();
 					
-					syncLocateServer();
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							syncLocateServer();
+						}
+						
+					});
 				} catch (Exception e) {
 					Log.d("FAIMS", "sync error", e);
 				}
