@@ -417,7 +417,8 @@ public class Tab implements Parcelable{
             // create control for trigger showing as a button
             case Constants.CONTROL_TRIGGER:
                 Button button = new Button(this.context);
-                button.setText(input.getQuestionText());
+                String questionText = arch16n.substituteValue(input.getQuestionText());
+                button.setText(questionText);
                 view = button;
                 linearLayout.addView(button);
                 break;
