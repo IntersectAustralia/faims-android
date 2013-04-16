@@ -49,7 +49,7 @@ public class Arch16n {
 	}
 
 	public String substituteValue(String value){
-		if(value.contains("{") && value.contains("}")){
+		if(value.startsWith("{") && value.endsWith("}")){
 			String toBeSubbed = value.substring(value.indexOf("{"), value.indexOf("}")+1);
 			String subs = toBeSubbed.substring(1, toBeSubbed.length()-1);
 			return (getProperties(subs) != null) ? value.replace(toBeSubbed, getProperties(subs)) : value;
