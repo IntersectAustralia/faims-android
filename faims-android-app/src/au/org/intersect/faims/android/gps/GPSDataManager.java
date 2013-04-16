@@ -37,6 +37,9 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 
 	private int gpsUpdateInterval=10000;
 	
+	private boolean isExternalGPSStarted;
+	private boolean isInternalGPSStarted;
+	
 	public GPSDataManager(LocationManager manager){
 		this.locationManager = manager;
 	}
@@ -72,6 +75,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	public void startInternalGPSListener(){
 		destroyInternalGPSListener();
 		this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval(), 0, this);
+		setInternalGPSStarted(true);
 	}
 
 	public void startExternalGPSListener(){
@@ -82,6 +86,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.handler = new Handler(this.handlerThread.getLooper());
 			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval());
 			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
+			setExternalGPSStarted(true);
 		}catch (Exception e){
 			Log.d("bluetooth-faims", "start external gps exception", e);
 		}
@@ -91,6 +96,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		if(this.locationManager != null){
 			this.locationManager.removeUpdates(this);
 		}
+		setInternalGPSStarted(false);
 	}
 	
 	public void destroyExternalGPSListener(){
@@ -102,6 +108,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.handlerThread != null){
 				handlerThread.quit();
 			}
+			setExternalGPSStarted(false);
 		}catch (Exception e) {
 			Log.d("bluetooth-faims", "destroy external gps exception", e);
 		}
@@ -253,7 +260,22 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
 		this.gpsUpdateInterval = gpsUpdateInterval*1000;
-		destroyListener();
+	}
+
+	public boolean isExternalGPSStarted() {
+		return isExternalGPSStarted;
+	}
+
+	public void setExternalGPSStarted(boolean isExternalGPSStarted) {
+		this.isExternalGPSStarted = isExternalGPSStarted;
+	}
+
+	public boolean isInternalGPSStarted() {
+		return isInternalGPSStarted;
+	}
+
+	public void setInternalGPSStarted(boolean isInternalGPSStarted) {
+		this.isInternalGPSStarted = isInternalGPSStarted;
 	}
 	
 }

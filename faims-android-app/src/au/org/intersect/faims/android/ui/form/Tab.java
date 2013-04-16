@@ -17,7 +17,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.InputType;
 import android.text.format.Time;
 import android.util.DisplayMetrics;
@@ -41,7 +44,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.DateUtil;
 
-public class Tab {
+public class Tab implements Parcelable{
 
 	private Context context;
 	private ScrollView scrollView;
@@ -56,15 +59,22 @@ public class Tab {
 	//private boolean scrollable;
 	private View view;
 	private Arch16n arch16n;
+	private String reference;
 	private static final String FREETEXT = "freetext";
 
-	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n) {
+	public Tab(Parcel source){
+		hidden = source.readBundle().getBoolean("hidden");
+		reference = source.readString();
+	}
+	
+	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
 		this.context = context;
 		this.name = name;
 		this.arch16n = arch16n;
 		label = this.arch16n.substituteValue(label);
 		this.label = label;
 		this.hidden = hidden;
+		this.reference = reference;
 		//this.scrollable = scrollable;
 		
 		this.linearLayout = new LinearLayout(context);
@@ -86,6 +96,16 @@ public class Tab {
         	this.view = linearLayout;
         }
 	}
+
+	public static final Parcelable.Creator<Tab> CREATOR = new Parcelable.Creator<Tab>() {
+		public Tab createFromParcel(Parcel source) {
+			return new Tab(source);
+		}
+
+		public Tab[] newArray(int size) {
+			return new Tab[size];
+		}
+	};
 
 	public View addInput(FormEntryPrompt input,String path, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
 		LinearLayout fieldLinearLayout = new LinearLayout(this.context);
@@ -581,6 +601,14 @@ public class Tab {
 	public boolean getHidden() {
 		return hidden;
 	}
+	
+	public void setHidden(boolean hidden){
+		this.hidden = hidden;
+	}
+
+	public String getReference() {
+		return reference;
+	}
 
 	public boolean hasView(String name){
 		return this.viewMap.containsKey(name);
@@ -611,6 +639,10 @@ public class Tab {
 	
 	public Object getStoredValue(String ref){
 		return this.valueReference.get(ref);
+	}
+
+	public Map<String, String> getViewReference() {
+		return viewReference;
 	}
 
 	public void setValueReference(String ref, Object value){
@@ -762,6 +794,19 @@ public class Tab {
 	
 	private int getDpi(int size) {
 		return (size * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		Bundle tabBundle = new Bundle();
+		tabBundle.putBoolean("hidden", hidden);
+		dest.writeBundle(tabBundle);
+		dest.writeString(reference);
 	}
 
 }

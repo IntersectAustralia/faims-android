@@ -55,7 +55,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		*/
 		// We now tell the activity to render the project UI
 		
-		activity.renderUI();
+		activity.renderUI(null);
 		// We should have Field1, Field2 and a copy button
 		
 		String field1Ref = "tabgroup1/tab1/field1";

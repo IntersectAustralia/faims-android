@@ -13,6 +13,10 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.style.*;
 
+persistObject(String name) {
+	linker.setPersistedObjectName(name);
+}
+
 newTabGroup(String label) {
 	linker.newTabGroup(label);
 }

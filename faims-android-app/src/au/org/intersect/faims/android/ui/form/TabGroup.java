@@ -31,8 +31,13 @@ public class TabGroup extends Fragment {
 	private String label = "";
 	private String archEntType;
 	private String relType;
+	private IRestoreActionListener actionListener;
 	
-	public TabGroup(String archEntType, String relType) {
+	public TabGroup(){
+		
+	}
+	
+	public TabGroup(String archEntType, String relType, IRestoreActionListener actionListener) {
 		if(archEntType != null && relType != null){
 			FAIMSLog.log("tabgroup can only contain either archEntId or relId not both");
 		}
@@ -42,6 +47,7 @@ public class TabGroup extends Fragment {
 		onShowCommands = new ArrayList<String>();
 		this.archEntType = archEntType;
 		this.relType = relType;
+		this.actionListener = actionListener;
 	}
 	
 	@Override
@@ -85,6 +91,9 @@ public class TabGroup extends Fragment {
 			executeCommands(this.onShowCommands);
 		}
 		
+		this.actionListener.restoreViewValuesForTabGroup(this);
+		this.actionListener.restoreTabsForTabGroup(this);
+		
 		// Solves a prob the back button gives us with the TabHost already having a parent
 		if (tabHost.getParent() != null){
 			((ViewGroup) tabHost.getParent()).removeView(tabHost);
@@ -118,8 +127,8 @@ public class TabGroup extends Fragment {
 	}
 	*/
 	
-	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n) {
-		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n);
+	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
+		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n, reference);
 		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;
@@ -131,6 +140,7 @@ public class TabGroup extends Fragment {
 			if (tab.getName().equals(name)) {
 				TabWidget widget = tabHost.getTabWidget();
 				widget.getChildAt(i).setVisibility(View.VISIBLE);
+				tab.setHidden(false);
 				tabHost.setCurrentTab(i);
 				return tab;
 			}
@@ -138,6 +148,9 @@ public class TabGroup extends Fragment {
 		return null;
 	}
 
+	public Tab getCurrentTab(){
+		return tabs.get(tabHost.getCurrentTab());
+	}
 	public void hideTab(String name){
 		for (int i = 0; i < tabs.size(); i++) {
 			Tab tab = tabs.get(i);

@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +17,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.format.Time;
@@ -101,6 +103,8 @@ public class BeanShellLinker {
 
 	private Arch16n arch16n;
 	private Project project;
+	
+	private String persistedObjectName;
 
 	@SuppressWarnings("unused")
 	private User user;
@@ -134,6 +138,18 @@ public class BeanShellLinker {
     		FAIMSLog.log(e);
     		showWarning("Logic Error", "Error encountered in logic script");
     	}
+	}
+
+	public void persistObject(String name){
+		setPersistedObjectName(name);
+	}
+	
+	public String getPersistedObjectName() {
+		return persistedObjectName;
+	}
+
+	public void setPersistedObjectName(String persistedObjectName) {
+		this.persistedObjectName = persistedObjectName;
 	}
 
 	public void execute(String code) {
@@ -584,7 +600,6 @@ public class BeanShellLinker {
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		destroyListener();
 		this.gpsDataManager.setGpsUpdateInterval(gpsUpdateInterval);
 	}
 
@@ -2210,4 +2225,26 @@ public class BeanShellLinker {
 		return attachFile;
 	}
 
+	public void storeBeanShellData(Bundle savedInstanceState) {
+		String persistedObjectName = getPersistedObjectName();
+		if(persistedObjectName != null){
+			try {
+				Object persistedObject = interpreter.get(persistedObjectName);
+				savedInstanceState.putSerializable(persistedObjectName, (Serializable) persistedObject);
+			} catch (EvalError e) {
+				Log.d("beanshell_linker", "Get persisted object exception : " + e);
+			}
+		}
+	}
+
+	public void restoreBeanShellData(Bundle savedInstanceState){
+		if(persistedObjectName != null){
+			Object object = savedInstanceState.getSerializable(persistedObjectName);
+			try {
+				interpreter.set(persistedObjectName, object);
+			} catch (EvalError e) {
+				Log.d("beanshell_linker", "Set persisted object exception : " + e);
+			}
+		}
+	}
 }

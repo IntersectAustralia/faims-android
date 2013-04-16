@@ -32,12 +32,15 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.MessageResult;
+import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.ShowProjectActivityData;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.managers.DatabaseManager;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
@@ -57,6 +60,7 @@ import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.Arch16n;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
 import au.org.intersect.faims.android.ui.form.CustomMapView;
+import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -64,7 +68,7 @@ import au.org.intersect.faims.android.util.ProjectUtil;
 
 import com.google.inject.Inject;
 
-public class ShowProjectActivity extends FragmentActivity {
+public class ShowProjectActivity extends FragmentActivity implements IFAIMSRestorable{
 	
 	public interface SyncListener {
 		
@@ -156,7 +160,7 @@ public class ShowProjectActivity extends FragmentActivity {
 			MessageResult mr = (MessageResult) message.obj;
 			if (mr.result == FAIMSClientResultCode.SUCCESS){
 				if (mr.type == MessageType.SYNC_DATABASE_DOWNLOAD) {
-					if(activity.fileSyncEnabled) {
+					if(activity.getData().isFileSyncEnabled()) {
 						activity.startSyncingFiles();
 					} else {
 						activity.resetSyncInterval();
@@ -243,7 +247,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
 		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
 		        	activity.wifiConnected = true;
-		            if (activity.syncEnabled && activity.isActivityShowing && !activity.syncActive) {
+		            if (activity.getData().isSyncEnabled() && activity.isActivityShowing && !activity.syncActive) {
 		            	activity.startSync();
 		            }
 		        } else {
@@ -289,14 +293,12 @@ public class ShowProjectActivity extends FragmentActivity {
 	private String projectKey;
 
 	private Arch16n arch16n;
-
-	private boolean syncEnabled;
-	private boolean fileSyncEnabled;
 	
 	private float syncInterval;
 	private float syncMinInterval;
 	private float syncMaxInterval;
 	private float syncDelay;
+	private ShowProjectActivityData data;
 	
 	private boolean syncActive;
 	private Semaphore syncLock = new Semaphore(1);
@@ -309,10 +311,13 @@ public class ShowProjectActivity extends FragmentActivity {
 	private SyncIndicatorColor lastSyncIndicatorColor = SyncIndicatorColor.GREEN;
 
 	private boolean isActivityShowing;
+	protected boolean isServerDirectoryUploading;
 
 	private Timer syncTaskTimer;
 
 	public boolean wifiConnected;
+
+	protected boolean isAppDirectoryDownloading;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -333,6 +338,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
+		this.data = new ShowProjectActivityData();
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
 		
@@ -370,7 +376,7 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
-		renderUI();
+		renderUI(savedInstanceState);
 		
 		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -381,6 +387,12 @@ public class ShowProjectActivity extends FragmentActivity {
 		}
 	}
 	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		restoreFrom(savedInstanceState);
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
 	@Override
 	protected void onDestroy() {
 		if(this.linker != null){
@@ -395,10 +407,20 @@ public class ShowProjectActivity extends FragmentActivity {
 		if (this.broadcastReceiver != null) {
 			this.unregisterReceiver(broadcastReceiver);
 		}
-		if (syncEnabled) {
+		if (data.isSyncEnabled()) {
 			stopSync();
 		}
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		if(fragmentManager.getBackStackEntryCount() > 0){
+			TabGroup currentTabGroup = (TabGroup) fragmentManager.findFragmentByTag(fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName());
+			renderer.setCurrentTabGroup(currentTabGroup);
+		}
+		super.onBackPressed();
 	}
 	
 	@Override
@@ -407,8 +429,15 @@ public class ShowProjectActivity extends FragmentActivity {
 		
 		isActivityShowing = true;
 		
-		if (syncEnabled) {
+		if (getData().isSyncEnabled()) {
 			startSync();
+		}
+		gpsDataManager.setGpsUpdateInterval(this.data.getGpsUpdateInterval());
+		if(data.isExternalGPSStarted()){
+			gpsDataManager.startExternalGPSListener();
+		}
+		if(data.isInternalGPSStarted()){
+			gpsDataManager.startInternalGPSListener();
 		}
 	}
 	
@@ -422,7 +451,23 @@ public class ShowProjectActivity extends FragmentActivity {
 			stopSync();
 		}
 	}
-	
+
+	/*
+	@Override
+	protected void onResume() {
+		super.onResume();
+		FAIMSLog.log();
+		this.manager.dispatchResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		FAIMSLog.log();
+		this.manager.dispatchPause(isFinishing());
+	}
+	*/
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		
@@ -471,7 +516,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	    return true;
 	}
 	
-	protected void renderUI() {
+	protected void renderUI(Bundle savedInstanceState) {
 		try {
 			String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
 			
@@ -485,7 +530,9 @@ public class ShowProjectActivity extends FragmentActivity {
 			// render the ui definition
 			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
 			ShowProjectActivity.this.renderer.createUI("/faims/projects/" + projectKey);
-			ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+			if(savedInstanceState == null){
+				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+			}
 			
 			Project project = ProjectUtil.getProject(projectKey);
 			
@@ -724,16 +771,24 @@ public class ShowProjectActivity extends FragmentActivity {
     	choiceDialog.show();
     }
 	
+	public ShowProjectActivityData getData() {
+		return data;
+	}
+
+	public void setData(ShowProjectActivityData data) {
+		this.data = data;
+	}
+
 	public void enableSync() {
-		if (syncEnabled) return;
-		syncEnabled = true;
+		if (getData().isSyncEnabled()) return;
+		getData().setSyncEnabled(true);
 		resetSyncInterval();
 		startSync();
 	}
 
 	public void disableSync() {
-		if (!syncEnabled) return;
-		syncEnabled = false;
+		if (!getData().isSyncEnabled()) return;
+		getData().setSyncEnabled(false);
 		stopSync();
 	}
 	
@@ -829,7 +884,7 @@ public class ShowProjectActivity extends FragmentActivity {
 	
 	private void syncLocateServer() {
 		Log.d("FAIMS", "sync locating server");
-		
+		Log.d("FAIMS", "userid : " + databaseManager.getUserId());
 		if (serverDiscovery.isServerHostValid()) {
 			startSyncingDatabase();
 		} else {
@@ -876,6 +931,7 @@ public class ShowProjectActivity extends FragmentActivity {
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("project", project);
 				String userId = databaseManager.getUserId();
+				Log.d("upload", "user id : " + userId);
 				if (userId == null) {
 					userId = "0"; // TODO: what should happen if user sets no user?
 				}
@@ -988,11 +1044,11 @@ public class ShowProjectActivity extends FragmentActivity {
 	}
 	
 	public void enableFileSync() {
-		this.fileSyncEnabled = true;
+		getData().setFileSyncEnabled(true);
 	}
 	
 	public void disableFileSync() {
-		this.fileSyncEnabled = false;
+		getData().setFileSyncEnabled(false);
 	}
 	
 	private void startSyncingFiles() {
@@ -1017,5 +1073,40 @@ public class ShowProjectActivity extends FragmentActivity {
 
 			}
 		});
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		saveTo(outState);
+	}
+
+	@Override
+	public void saveTo(Bundle savedInstanceState) {
+		linker.storeBeanShellData(savedInstanceState);
+		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
+		renderer.storeTabs(savedInstanceState);
+		renderer.storeViewValues(savedInstanceState);
+		data.setExternalGPSStarted(gpsDataManager.isExternalGPSStarted());
+		data.setInternalGPSStarted(gpsDataManager.isInternalGPSStarted());
+		data.setUserId(databaseManager.getUserId());
+		data.saveTo(savedInstanceState);
+		gpsDataManager.destroyListener();
+	}
+
+	@Override
+	public void restoreFrom(Bundle savedInstanceState) {
+		linker.restoreBeanShellData(savedInstanceState);
+		renderer.restoreBackStack(savedInstanceState, this);
+		renderer.restoreTabs(savedInstanceState);
+		renderer.restoreViewValues(savedInstanceState);
+		this.data.restoreFrom(savedInstanceState);
+		gpsDataManager.setGpsUpdateInterval(this.data.getGpsUpdateInterval());
+		if(data.isExternalGPSStarted()){
+			gpsDataManager.startExternalGPSListener();
+		}
+		if(data.isInternalGPSStarted()){
+			gpsDataManager.startInternalGPSListener();
+		}
+		this.databaseManager.setUserId(this.data.getUserId());
 	}
 }
