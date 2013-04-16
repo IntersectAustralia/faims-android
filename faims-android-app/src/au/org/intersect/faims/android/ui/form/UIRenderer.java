@@ -120,7 +120,7 @@ public class UIRenderer {
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory,tabGroup.isArchEnt());
+	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory, tabGroup.isArchEnt(), tabGroup.isRelationship());
 	                        
 	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);

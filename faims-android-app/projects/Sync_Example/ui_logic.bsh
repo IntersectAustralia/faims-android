@@ -195,7 +195,7 @@ updateRel(rel_id) {
 	List attributes = createAttributeList();
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
 	
-	String id = saveArchEnt(rel_id, "abovebelow", null, attributes);
+	String id = saveRel(rel_id, "abovebelow", null, attributes);
 	
 	updateAll();
 	
@@ -211,7 +211,7 @@ updateAll() {
 	Object relationships = fetchAll("select relationshipid, relationshipid from relationship where relationshipid || relntimestamp in ( select relationshipid || max(relntimestamp) from relationship group by relationshipid having deleted is null);");
 	
 	populateDropDown("tabgroup1/tab2/entities", entities);
-	populateDropDown("tabgroup3/tab2/relationships", relationships);
+	populateDropDown("tabgroup2/tab2/relationships", relationships);
 }
 
 onEvent("tabgroup2/tab1/save", "click", "saveRel()");

@@ -209,4 +209,8 @@ public class TabGroup extends Fragment {
 		}
 	}
 
+	public boolean isRelationship() {
+		return this.relType != null && this.archEntType == null;
+	}
+
 }

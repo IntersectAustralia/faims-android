@@ -386,8 +386,8 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, relntypeid FROM " +
-								    "(SELECT relationshipid, attributeid, vocabid, freetext FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, relntypeid FROM " +
+								    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
 								        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
 								"JOIN attributekey USING (attributeid) " +
 								"JOIN Relationship USING (relationshipid) " +
@@ -402,6 +402,7 @@ public class DatabaseManager {
 					relAttribute.setName(stmt.column_string(1));
 					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 					relAttribute.setText(stmt.column_string(3));
+					relAttribute.setCertainty(stmt.column_string(4));
 					attributes.add(relAttribute);
 				}
 				
@@ -758,7 +759,7 @@ public class DatabaseManager {
 						"insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);" +
 						"insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);" +
 						"insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);" +
-						"insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);" + 
+						"insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);" + 
 						"insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);" +
 						"detach database import;";
 				db.exec(query, createCallback());

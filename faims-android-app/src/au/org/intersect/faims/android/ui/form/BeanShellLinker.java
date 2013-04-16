@@ -765,6 +765,7 @@ public class BeanShellLinker {
 			setFieldValue(ref,relationshipAttribute.getVocab());
 			setFieldAnnotation(ref, relationshipAttribute.getText());
 		}
+		setFieldCertainty(ref,relationshipAttribute.getCertainty());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
 

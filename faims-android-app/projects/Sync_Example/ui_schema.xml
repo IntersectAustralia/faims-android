@@ -165,6 +165,15 @@
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
             <label>Name:</label>
         </input>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+            <label>Update</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
       </group>
       <group ref="tab2">
         <label>Load Relationship</label>

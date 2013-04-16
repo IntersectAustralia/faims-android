@@ -87,7 +87,7 @@ public class Tab {
         }
 	}
 
-	public View addInput(FormEntryPrompt input,String path, String viewName, String directory, boolean isArchEnt) {
+	public View addInput(FormEntryPrompt input,String path, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
 		LinearLayout fieldLinearLayout = new LinearLayout(this.context);
     	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
@@ -117,12 +117,8 @@ public class Tab {
 		certaintyButton.setLayoutParams(layoutParams);
 		certaintyButton.setText("C");
 		certaintyButton.setTextSize(10);
-		if(isArchEnt){
-			if(certainty != null){
-				if(!certainty.equals("false")){
-					fieldLinearLayout.addView(certaintyButton);
-				}
-			}else{
+		if(isArchEnt || isRelationship){
+			if(!"false".equals(certainty)){
 				fieldLinearLayout.addView(certaintyButton);
 			}
 		}
@@ -132,11 +128,7 @@ public class Tab {
 		annotationButton.setText("A");
 		annotationButton.setTextSize(10);
 		if(!FREETEXT.equals(attributeType)){
-			if(annotation != null){
-				if(!annotation.equals("false")){
-					fieldLinearLayout.addView(annotationButton);
-				}
-			}else{
+			if(!"false".equals(annotation)) {
 				fieldLinearLayout.addView(annotationButton);
 			}
 		}
