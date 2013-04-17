@@ -37,8 +37,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.data.MessageResult;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
+import au.org.intersect.faims.android.data.MessageResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.ShowProjectActivityData;
 import au.org.intersect.faims.android.gps.GPSDataManager;
@@ -328,6 +328,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 
 		setContentView(R.layout.activity_show_project);
+
+		serverDiscovery.setApplication(getApplication());
+
 		Intent data = getIntent();
 		
 		Project project = ProjectUtil.getProject(data.getStringExtra("key"));

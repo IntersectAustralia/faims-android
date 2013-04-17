@@ -99,6 +99,8 @@ public class FetchProjectsActivity extends RoboActivity {
         
         setContentView(R.layout.activity_fetch_projects);
         
+        serverDiscovery.setApplication(getApplication());
+        
         ListView projectList = (ListView) findViewById(R.id.project_list);
         
         projectListAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);

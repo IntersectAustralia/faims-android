@@ -13,18 +13,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
-import com.google.inject.Inject;
-
 public class MainActivity extends RoboActivity {
 
-	@Inject
-	ServerDiscovery serverDiscovery;
-	
 	private ArrayAdapter<NameValuePair> projectListAdapter;
 	
     @Override
@@ -33,9 +27,6 @@ public class MainActivity extends RoboActivity {
         FAIMSLog.log();
         
         setContentView(R.layout.activity_main);
-        
-		// Need to set the application to get state information
-        serverDiscovery.setApplication(getApplication());
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
         
