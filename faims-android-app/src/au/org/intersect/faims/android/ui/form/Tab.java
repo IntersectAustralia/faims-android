@@ -630,6 +630,13 @@ public class Tab implements Parcelable{
 		viewList.add(view);
 	}
 	
+	public List<View> getAllChildrenViews(){
+		List<View> views = new ArrayList<View>();
+		for(int i = 0; i < linearLayout.getChildCount(); i++){
+			views.add(linearLayout.getChildAt(i));
+		}
+		return views;
+	}
 	public List<View> getAllViews(){
 		return this.viewList;
 	}
