@@ -176,6 +176,7 @@ public class UIRenderer implements IRestoreActionListener{
     	FragmentManager fm = activity.getSupportFragmentManager();
     	
     	TabGroup tabGroup = this.tabGroupList.get(index);
+    	invalidateListViews(tabGroup);
     	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
 	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
 	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
@@ -200,7 +201,7 @@ public class UIRenderer implements IRestoreActionListener{
     	
     	TabGroup tabGroup = this.tabGroupMap.get(name);
     	if (tabGroup == null) return null;
-    	
+    	invalidateListViews(tabGroup);
     	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
 	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
 	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
@@ -219,7 +220,18 @@ public class UIRenderer implements IRestoreActionListener{
         
         return tabGroup;
     }
-    
+
+    public void invalidateListViews(TabGroup tabGroup){
+    	for(Tab tab : tabGroup.getTabs()){
+			for(View view : tab.getAllChildrenViews()){
+				if(view instanceof CustomListView){
+					CustomListView listView = (CustomListView) view;
+					listView.invalidateViews();
+				}
+			}
+		}
+    }
+
     public View getViewByRef(String ref) {
     	return viewMap.get(ref);
     }
