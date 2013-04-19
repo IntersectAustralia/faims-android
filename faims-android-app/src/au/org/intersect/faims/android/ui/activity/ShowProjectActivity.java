@@ -36,7 +36,6 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.MessageResult;
@@ -60,9 +59,7 @@ import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.Arch16n;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
-import au.org.intersect.faims.android.ui.form.CustomListView;
 import au.org.intersect.faims.android.ui.form.CustomMapView;
-import au.org.intersect.faims.android.ui.form.Tab;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.util.FAIMSLog;
@@ -424,14 +421,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		if(fragmentManager.getBackStackEntryCount() > 0){
 			TabGroup currentTabGroup = (TabGroup) fragmentManager.findFragmentByTag(fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName());
-			for(Tab tab : currentTabGroup.getTabs()){
-				for(View view : tab.getAllChildrenViews()){
-					if(view instanceof CustomListView){
-						CustomListView listView = (CustomListView) view;
-						listView.invalidateViews();
-					}
-				}
-			}
+			renderer.invalidateListViews(currentTabGroup);
 			renderer.setCurrentTabGroup(currentTabGroup);
 		}
 		super.onBackPressed();
