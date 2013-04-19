@@ -41,6 +41,7 @@
           <tabgroup2>
               <tab1>
                   <name></name>
+                  <location></location>
                   <save></save>
                   <update></update>
                   <clear></clear>
@@ -107,13 +108,13 @@
         <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
             <label>Timestamp:</label>
         </input>
-        <select1 ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
             <label>Location:</label>
             <item>
             	<label>dummy</label>
             	<value>dummy</value>
           	</item>
-        </select1>
+        </select>
         <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
             <label>Filename:</label>
         </input>
@@ -165,6 +166,13 @@
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
             <label>Name:</label>
         </input>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select>
         <trigger ref="save">
             <label>Save</label>
         </trigger>

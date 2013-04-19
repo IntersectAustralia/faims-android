@@ -123,7 +123,11 @@ updateEntity(entity_id) {
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
-	attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), getFieldValue("tabgroup1/tab1/location"), null, getFieldCertainty("tabgroup1/tab1/location")));
+	Object values = getFieldValue("tabgroup1/tab1/location");
+	
+	for (Object value : values) {
+		attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), value.getName(), null, getFieldCertainty("tabgroup1/tab1/location")));
+	}
 	
 	if (!"".equals(getFieldValue("tabgroup1/tab1/file"))) {
 		sync = getFieldValue("tabgroup1/tab1/sync");
@@ -141,7 +145,7 @@ updateEntity(entity_id) {
 clearEntity() {
 	newTab("tabgroup1/tab1");
 	
-	populateDropDown("tabgroup1/tab1/location", locations);
+	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
@@ -194,6 +198,11 @@ updateRel(rel_id) {
 
 	List attributes = createAttributeList();
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
+	Object values = getFieldValue("tabgroup2/tab1/location");
+	
+	for (Object value : values) {
+		attributes.add(createRelationshipAttribute("location", getFieldAnnotation("tabgroup2/tab1/location"), value.getName(), getFieldCertainty("tabgroup2/tab1/location")));
+	}
 	
 	String id = saveRel(rel_id, "abovebelow", null, attributes);
 	
@@ -204,6 +213,8 @@ updateRel(rel_id) {
 
 clearRel() {
 	newTab("tabgroup2/tab1");
+	
+	populateCheckBoxGroup("tabgroup2/tab1/location", locations);
 }
 
 updateAll() {

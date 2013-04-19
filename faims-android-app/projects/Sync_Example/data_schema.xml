@@ -15,6 +15,15 @@
      <property type="string" name="name" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
+    <property type="dropdown" name="location" isIdentifier="true">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
   </RelationshipElement>
   
   <ArchaeologicalElement type="small">
