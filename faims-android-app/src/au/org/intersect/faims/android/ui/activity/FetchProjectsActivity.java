@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
@@ -32,7 +32,6 @@ import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Inject;
 
@@ -49,7 +48,7 @@ public class FetchProjectsActivity extends RoboActivity {
 		public void handleMessage(Message message) {
 			FetchProjectsActivity activity = activityRef.get();
 			if (activity == null) {
-				Log.d("FAIMS", "FetchProjectsHandler cannot get activity");
+				FLog.d("FetchProjectsHandler cannot get activity");
 				return;
 			}
 			
@@ -95,7 +94,6 @@ public class FetchProjectsActivity extends RoboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FAIMSLog.log();
         
         setContentView(R.layout.activity_fetch_projects);
         
@@ -135,27 +133,8 @@ public class FetchProjectsActivity extends RoboActivity {
     }
 
     @Override
-    protected void onStart() {
-    	super.onStart();
-    	FAIMSLog.log();
-    }
-    
-    @Override
-    protected void onPause() {
-    	super.onPause();
-    	FAIMSLog.log();
-    }
-    
-    @Override
-    protected void onStop() {
-    	super.onStop();
-    	FAIMSLog.log();
-    }
-    
-    @Override
     protected void onDestroy() {
     	super.onDestroy();
-    	FAIMSLog.log();
     	
     	if (busyDialog.isShowing())
     		busyDialog.dismiss();
@@ -182,7 +161,6 @@ public class FetchProjectsActivity extends RoboActivity {
      * Fetch projects from the server to load into list
      */
     protected void fetchProjectsList() {
-    	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyFetchingProjectsDialog();
@@ -230,7 +208,6 @@ public class FetchProjectsActivity extends RoboActivity {
     }
     
 	protected void downloadProjectArchive() {
-    	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyDownloadingProjectsDialog();

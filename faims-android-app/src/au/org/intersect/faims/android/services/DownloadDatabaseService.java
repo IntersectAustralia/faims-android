@@ -1,9 +1,9 @@
 package au.org.intersect.faims.android.services;
 
 import android.content.Intent;
-import android.util.Log;
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
@@ -22,7 +22,7 @@ public class DownloadDatabaseService extends DownloadService {
 	protected FAIMSClientResultCode doDownload(Intent intent) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
-			Log.d("FAIMS", "downloading database for " + project.name);
+			FLog.d("downloading database for " + project.name);
 			DownloadResult result = faimsClient.downloadDatabase(project);
 			
 			// if result is success then update the project settings with version and timestamp
@@ -35,7 +35,7 @@ public class DownloadDatabaseService extends DownloadService {
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.e("FAIMS", "could not download database", e);
+			FLog.e("error downloading database", e);
 		}
 		return null;
 	}

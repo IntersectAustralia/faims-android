@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.tasks;
 import java.io.File;
 
 import android.os.AsyncTask;
-import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.FileUtil;
 
 public class CopyFileTask extends AsyncTask<Void, Void, Void> {
@@ -22,7 +22,7 @@ public class CopyFileTask extends AsyncTask<Void, Void, Void> {
 		try {
 			FileUtil.copyFile(fromPath, toPath);
 		} catch (Exception e) {
-			Log.e("FAIMS", "Failed to copy file", e);
+			FLog.e("error copying file", e);
 		}
 		
 		return null;
@@ -32,7 +32,6 @@ public class CopyFileTask extends AsyncTask<Void, Void, Void> {
 	protected void onCancelled() {
 		File file = new File(toPath);
 		if (file.exists()) file.delete();
-		Log.d("FAIMS", "Cancelled copy file");
 	}
 
 }

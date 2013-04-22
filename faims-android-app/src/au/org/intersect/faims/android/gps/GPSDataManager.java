@@ -12,7 +12,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
 import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 
@@ -78,7 +78,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval(), 0, this);
 			setInternalGPSStarted(true);
 		}catch(Exception e){
-			Log.d("internal-gps", "Starting internal gps exception : " + e);
+			FLog.e("Starting internal gps exception : " + e);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval());
 			setExternalGPSStarted(true);
 		}catch (Exception e){
-			Log.d("bluetooth-faims", "Starting external gps exception", e);
+			FLog.e("Starting external gps exception", e);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			}
 			setInternalGPSStarted(false);
 		}catch(Exception e){
-			Log.d("internal-gps", "Stopping internal gps exception : " + e);
+			FLog.e("Stopping internal gps exception : " + e);
 		}
 	}
 	
@@ -118,7 +118,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			}
 			setExternalGPSStarted(false);
 		}catch (Exception e) {
-			Log.d("bluetooth-faims", "Stopping external gps exception", e);
+			FLog.e("Stopping external gps exception", e);
 		}
 	}
 	

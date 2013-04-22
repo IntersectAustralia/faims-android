@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,15 +40,15 @@ import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
-import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.tasks.CopyFileTask;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.DateUtil;
-import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import bsh.EvalError;
 import bsh.Interpreter;
@@ -124,19 +122,16 @@ public class BeanShellLinker {
 		try {
 			interpreter.set("linker", this);
 		} catch (EvalError e) {
-			FAIMSLog.log(e);
+			FLog.e("error setting linker", e);
 		}
 	}
 	
 	public void sourceFromAssets(String filename) {
 		try {
     		interpreter.eval(FileUtil.convertStreamToString(assets.open(filename)));
-    	} catch (EvalError e) {
-    		FAIMSLog.log(e); 
-    		showWarning("Logic Error", "Error encountered in logic script");
-    	} catch (IOException e) {
-    		FAIMSLog.log(e);
-    		showWarning("Logic Error", "Error encountered in logic script");
+    	} catch(Exception e) {
+    		FLog.w("error sourcing script from assets", e);
+    		showWarning("Logic Error", "Error encountered in logic commands");
     	}
 	}
 
@@ -154,22 +149,21 @@ public class BeanShellLinker {
 
 	public void execute(String code) {
 		try {
-			
     		interpreter.eval(code);
     	} catch (EvalError e) {
-    		FAIMSLog.log(e);
+    		FLog.i("error executing code", e);
     		showWarning("Logic Error", "Error encountered in logic script");
     	}
 	}
 	
 	public void bindViewToEvent(String ref, String type, final String code) {
-		FAIMSLog.log(ref);
 		try{
 			
 			if (type == "click") {
 				View view = renderer.getViewByRef(ref);
 				if (view ==  null) {
-					Log.e("FAIMS","Can't find view for " + ref);
+					FLog.w("cannot find view " + ref);
+					showWarning("Logic Error", "Error cannot find view " + ref);
 					return;
 				}
 				else {
@@ -185,7 +179,7 @@ public class BeanShellLinker {
 									interpreter.set("_list_item_value", pair.getValue());
 									execute(code);
 								} catch (Exception e) {
-									FAIMSLog.log(e);
+									FLog.e("error setting list item value", e);
 								}
 							}
 							
@@ -223,7 +217,8 @@ public class BeanShellLinker {
 			else if (type == "load") {
 				TabGroup tg = renderer.getTabGroupByLabel(ref);
 				if (tg == null){
-					Log.e("FAIMS","Could not find TabGroup with label: " + ref);
+					FLog.w("cannot find tabgroup " + ref);
+					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
 					return;
 				}
 				else{
@@ -233,7 +228,8 @@ public class BeanShellLinker {
 			else if (type == "show") {
 				TabGroup tg = renderer.getTabGroupByLabel(ref);
 				if (tg == null){
-					Log.e("FAIMS","Could not find TabGroup with label: " + ref);
+					FLog.w("cannot find tabgroup " + ref);
+					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
 					return;
 				}
 				else{
@@ -241,36 +237,44 @@ public class BeanShellLinker {
 				}
 			}
 			else {
-				FAIMSLog.log("Not implemented");
+				FLog.w("cannot find event type " + type);
+				showWarning("Logic Error", "Error bind event type " + type);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception binding event to view",e);
+			FLog.e("exception binding event to view " + ref,e);
+			showWarning("Logic Error", "Error binding event to view " + ref);
 		}
 	}
 
 	public void bindFocusAndBlurEvent(String ref, final String focusCallback, final String blurCallBack){
-		View view = renderer.getViewByRef(ref);
-		if (view ==  null) {
-			Log.e("FAIMS","Can't find view for " + ref);
-			return;
-		}
-		else {
-			view.setOnFocusChangeListener(new OnFocusChangeListener() {
-				
-				@Override
-				public void onFocusChange(View v, boolean hasFocus) {
-					if(hasFocus){
-						if(focusCallback != null && !focusCallback.isEmpty()){
-							execute(focusCallback);
-						}
-					}else{
-						if(blurCallBack != null && !blurCallBack.isEmpty()){
-							execute(blurCallBack);
+		try {
+			View view = renderer.getViewByRef(ref);
+			if (view ==  null) {
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Error cannot find view " + ref);
+				return;
+			}
+			else {
+				view.setOnFocusChangeListener(new OnFocusChangeListener() {
+					
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if(hasFocus){
+							if(focusCallback != null && !focusCallback.isEmpty()){
+								execute(focusCallback);
+							}
+						}else{
+							if(blurCallBack != null && !blurCallBack.isEmpty()){
+								execute(blurCallBack);
+							}
 						}
 					}
-				}
-			});
+				});
+			}
+		} catch (Exception e) {
+			FLog.e("exception binding focus and blur event to view " + ref,e);
+			showWarning("Logic Error", "Error cannot bind focus and blur event to view " + ref);
 		}
 	}
 	
@@ -288,7 +292,7 @@ public class BeanShellLinker {
 							interpreter.set("_map_point_clicked", (new EPSG3857()).toWgs84(x, y));
 							execute(clickCallback);
 						} catch (Exception e) {
-							FAIMSLog.log(e);
+							FLog.e("error setting map point clicked", e);
 						}
 					}
 
@@ -301,41 +305,51 @@ public class BeanShellLinker {
 							interpreter.set("_map_geometry_selected", geomId);
 							execute(selectCallback);
 						} catch (Exception e) {
-							FAIMSLog.log(e);
+							FLog.e("error setting map geometry selected", e);
 						}
 					}
 					
 				});
 			}
 			else {
-				Log.e("FAIMS","Can't find view for " + ref);
+				FLog.w("cannot bind map event to view " + ref);
+				showWarning("Logic Error", "Error cannot bind map event to view " + ref);
 			}
 		}catch(Exception e){
-			Log.e("FAIMS","Exception binding map event to view",e);
+			FLog.e("exception binding map event to view " + ref,e);
+			showWarning("Logic Error", "Error cannot bind map event to view " + ref);
 		}
 	}
 	
 	public void newTabGroup(String label) {
 		try{
 			TabGroup tabGroup = showTabGroup(label);
-			if (tabGroup == null) return;
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error showing new tab group " + label);
+				return;
+			}
 			
 			tabGroup.clearTabs();
 		}
 		catch(Exception e){
-			Log.e("FAIMS", "Exception showing tab group",e);
+			FLog.e("error showing new tabgroup " + label,e);
+			showWarning("Logic Error", "Error showing new tab group " + label);
 		}
 	}
 	
 	public void newTab(String label) {
 		try {
 			Tab tab = showTab(label);
-			if (tab == null) return;
+			if (tab == null) {
+				showWarning("Logic Error", "Error showing new tab group " + label);
+				return;
+			}
 			
 			tab.clearViews();
 		}
 		catch(Exception e) {
-			Log.e("FAIMS", "Exception showing tab",e);
+			FLog.e("error showing new tab " + label,e);
+			showWarning("Logic Error", "Error showing new tab " + label);
 		}
 	}
 
@@ -343,13 +357,14 @@ public class BeanShellLinker {
 		try{
 			TabGroup tabGroup = renderer.showTabGroup(this.activity, label);
 			if (tabGroup == null) {
-				showWarning("Logic Error", "Could not show tab group");
+				showWarning("Logic Error", "Error showing tabgroup " + label);
 				return null;
 			}
 			return tabGroup;
 		}
 		catch(Exception e){
-			Log.e("FAIMS", "Exception showing tab group",e);
+			FLog.e("error showing tabgroup " + label,e);
+			showWarning("Logic Error", "Error showing tab group " + label);
 		}
 		return null;
 	}
@@ -358,163 +373,184 @@ public class BeanShellLinker {
 		try{
 			Tab tab = renderer.showTab(label);
 			if (tab == null) {
-				showWarning("Logic Error", "Could not show tab");
+				showWarning("Logic Error", "Error showing tab " + label);
 				return null;
 			}
 			return tab;
 		}
 		catch(Exception e){
-			Log.e("FAIMS", "Exception showing tab",e);
+			FLog.e("error showing tab " + label,e);
+			showWarning("Logic Error", "Error showing tab " + label);
 		}
 		return null;
 	}
 
 	public void showTabGroup(String id, String uuid){
-		TabGroup tabGroup = renderer.showTabGroup(activity, id);
-		if (tabGroup == null) {
-			showWarning("Logic Error", "Could not show tab group");
-			return ;
-		}
-		if(tabGroup.getArchEntType() != null){
-			showArchEntityTabGroup(uuid, tabGroup);
-		}else if(tabGroup.getRelType() != null){
-			showRelationshipTabGroup(uuid, tabGroup);
-		}else{
-			showTabGroup(id);
+		try {
+			TabGroup tabGroup = renderer.showTabGroup(activity, id);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error showing tab group " + id);
+				return ;
+			}
+			if(tabGroup.getArchEntType() != null){
+				showArchEntityTabGroup(uuid, tabGroup);
+			}else if(tabGroup.getRelType() != null){
+				showRelationshipTabGroup(uuid, tabGroup);
+			}else{
+				showTabGroup(id);
+			}
+		} catch (Exception e) {
+			FLog.e("error showing tabgroup " + id);
+			showWarning("Logic Error", "Error showing tab group " + id);
 		}
 	}
 	
 	public void showTab(String id, String uuid) {
-		if (id == null) {
-			showWarning("Logic Error", "Could not show tab");
-			return ;
-		}
-		String[] ids = id.split("/");
-		if (ids.length < 2) {
-			showWarning("Logic Error", "Could not show tab");
-			return ;
-		}
-		String groupId = ids[0];
-		String tabId = ids[1];
-		TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
-		if (tabGroup == null) {
-			showWarning("Logic Error", "Could not show tab");
-			return ;
-		}
-		Tab tab = tabGroup.showTab(tabId);
-		if (tab == null) {
-			showWarning("Logic Error", "Could not show tab");
-			return ;
-		}
-		if(tabGroup.getArchEntType() != null){
-			showArchEntityTab(uuid, tab);
-		}else if(tabGroup.getRelType() != null){
-			showRelationshipTab(uuid, tab);
-		}else{
-			showTab(id);
+		try {
+			if (id == null) {
+				showWarning("Logic Error", "Error showing tab " + id);
+				return ;
+			}
+			String[] ids = id.split("/");
+			if (ids.length < 2) {
+				showWarning("Logic Error", "Error showing tab " + id);
+				return ;
+			}
+			String groupId = ids[0];
+			String tabId = ids[1];
+			TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error showing tab " + id);
+				return ;
+			}
+			Tab tab = tabGroup.showTab(tabId);
+			if (tab == null) {
+				showWarning("Logic Error", "Error showing tab " + id);
+				return ;
+			}
+			if(tabGroup.getArchEntType() != null){
+				showArchEntityTab(uuid, tab);
+			}else if(tabGroup.getRelType() != null){
+				showRelationshipTab(uuid, tab);
+			}else{
+				showTab(id);
+			}
+		} catch (Exception e) {
+			FLog.e("error showing tab " + id);
+			showWarning("Logic Error", "Error showing tab " + id);
 		}
 	}
 
 	public void cancelTabGroup(String id, boolean warn){
-		if (id == null) {
-			showWarning("Logic Error", "Could not cancel tab group");
-			return ;
-		}
-		final TabGroup tabGroup = renderer.getTabGroupByLabel(id);
-		if (tabGroup == null) {
-			showWarning("Logic Error", "Could not show tab group");
-			return ;
-		}
-		if(warn){
-			boolean hasChanges = false;
-			if(tabGroup.getArchEntType() != null || tabGroup.getRelType() != null){
-				for(Tab tab : tabGroup.getTabs()){
-					if(hasChanges(tab)){
-						hasChanges = true;
+		try {
+			if (id == null) {
+				showWarning("Logic Error", "Error cancelling tab group" + id);
+				return ;
+			}
+			final TabGroup tabGroup = renderer.getTabGroupByLabel(id);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error cancelling tab group" + id);
+				return ;
+			}
+			if(warn){
+				boolean hasChanges = false;
+				if(tabGroup.getArchEntType() != null || tabGroup.getRelType() != null){
+					for(Tab tab : tabGroup.getTabs()){
+						if(hasChanges(tab)){
+							hasChanges = true;
+						}
 					}
 				}
-			}
-			if(hasChanges){
-				AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-				
-				builder.setTitle("Warning");
-				builder.setMessage("Are you sure you want to cancel the tab group? You have unsaved changes there.");
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User clicked OK button
-				        	   goBack();
-				           }
-				       });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User cancelled the dialog
-				           }
-				       });
-				
-				builder.create().show();
+				if(hasChanges){
+					AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+					
+					builder.setTitle("Warning");
+					builder.setMessage("Are you sure you want to cancel the tab group? You have unsaved changes there.");
+					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					               // User clicked OK button
+					        	   goBack();
+					           }
+					       });
+					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					               // User cancelled the dialog
+					           }
+					       });
+					
+					builder.create().show();
+				}else{
+					goBack();
+				}
 			}else{
-				goBack();
+	     		goBack();
 			}
-		}else{
-     		goBack();
+		} catch (Exception e) {
+			FLog.e("error cancelling tab group " + id);
+			showWarning("Logic Error", "Error cancelling tab group " + id);
 		}
 	}
 
 	public void cancelTab(String id, boolean warn){
-		if (id == null) {
-			showWarning("Logic Error", "Could not cancel tab");
-			return ;
-		}
-		String[] ids = id.split("/");
-		if (ids.length < 2) {
-			showWarning("Logic Error", "Could not cancel tab");
-			return ;
-		}
-		String groupId = ids[0];
-		final String tabId = ids[1];
-		final TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
-		if (tabGroup == null) {
-			showWarning("Logic Error", "Could not show tab");
-			return ;
-		}
-		Tab tab = tabGroup.getTab(tabId);
-		if(warn){
-			if(hasChanges(tab) && (tabGroup.getArchEntType() != null || tabGroup.getRelType() != null)){
-				AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-				
-				builder.setTitle("Warning");
-				builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User clicked OK button
-				        	   if(tabGroup.getTabs().size() == 1){
-				        		   goBack();
-				        	   }else{
-				        		   tabGroup.hideTab(tabId);
-				        	   }
-				           }
-				       });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User cancelled the dialog
-				        	   tabGroup.showTab(tabId);
-				           }
-				       });
-				
-				builder.create().show();
+		try {
+			if (id == null) {
+				showWarning("Logic Error", "Error cancelling tab " + id);
+				return ;
+			}
+			String[] ids = id.split("/");
+			if (ids.length < 2) {
+				showWarning("Logic Error", "Error cancelling tab " + id);
+				return ;
+			}
+			String groupId = ids[0];
+			final String tabId = ids[1];
+			final TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error cancelling tab " + id);
+				return ;
+			}
+			Tab tab = tabGroup.getTab(tabId);
+			if(warn){
+				if(hasChanges(tab) && (tabGroup.getArchEntType() != null || tabGroup.getRelType() != null)){
+					AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+					
+					builder.setTitle("Warning");
+					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
+					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					               // User clicked OK button
+					        	   if(tabGroup.getTabs().size() == 1){
+					        		   goBack();
+					        	   }else{
+					        		   tabGroup.hideTab(tabId);
+					        	   }
+					           }
+					       });
+					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					           public void onClick(DialogInterface dialog, int id) {
+					               // User cancelled the dialog
+					        	   tabGroup.showTab(tabId);
+					           }
+					       });
+					
+					builder.create().show();
+				}else{
+					if(tabGroup.getTabs().size() == 1){
+		        	   goBack();
+		        	}else{
+		        	   tabGroup.hideTab(tabId);
+		           }
+				}
 			}else{
 				if(tabGroup.getTabs().size() == 1){
-	        	   goBack();
-	        	}else{
-	        	   tabGroup.hideTab(tabId);
-	           }
+	     		   goBack();
+	     	   }else{
+	     		   tabGroup.hideTab(tabId);
+	     	   }
 			}
-		}else{
-			if(tabGroup.getTabs().size() == 1){
-     		   goBack();
-     	   }else{
-     		   tabGroup.hideTab(tabId);
-     	   }
+		} catch (Exception e) {
+			FLog.e("error cancelling tab " + id);
+			showWarning("Logic Error", "Error cancelling tab " + id);
 		}
 	}
 	
@@ -615,7 +651,8 @@ public class BeanShellLinker {
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
-			showWarning("Logic Error", "Could not fetch arch entity");
+			FLog.d("cannot find arch entity " + tabGroup.getLabel());
+			showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
 			return ;
 		}
 		if(archEntityObj instanceof ArchEntity){
@@ -625,7 +662,8 @@ public class BeanShellLinker {
 					reinitiateArchEntFieldsValue(tab, archEntity);
 			    }
 			} catch (Exception e) {
-				Log.e("FAIMS", "Exception showing tab group and load value",e);
+				FLog.e("error showing arch entity tab group " + tabGroup.getLabel(),e);
+				showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
 			}
 		}
 	}
@@ -633,7 +671,8 @@ public class BeanShellLinker {
 	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
 		Object relationshipObj = fetchRel(uuid);
 		if (relationshipObj == null) {
-			showWarning("Logic Error", "Could not fetch relationship");
+			FLog.d("cannot find relationship " + tabGroup.getLabel());
+			showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
 			return ;
 		}
 		if(relationshipObj instanceof Relationship){
@@ -643,7 +682,8 @@ public class BeanShellLinker {
 					reinitiateRelationshipFieldsValue(tab, relationship);
 			    }
 			} catch (Exception e) {
-				Log.e("FAIMS", "Exception showing tab group and load value",e);
+				FLog.e("error showing relationship tab group " + tabGroup.getLabel(),e);
+				showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
 			}
 		}
 	}
@@ -651,7 +691,7 @@ public class BeanShellLinker {
 	private void showArchEntityTab(String uuid, Tab tab) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
-			showWarning("Logic Error", "Could not fetch arch entity");
+			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
 			return ;
 		}
 		if(archEntityObj instanceof ArchEntity){
@@ -659,7 +699,8 @@ public class BeanShellLinker {
 			try {
 				reinitiateArchEntFieldsValue(tab, archEntity);
 			} catch (Exception e) {
-				Log.e("FAIMS", "Exception showing tab and load value",e);
+				FLog.e("error showing arch entity tab " + tab.getLabel(),e);
+				showWarning("Logic Error", "Error showing tab " + tab.getLabel());
 			}
 		}
 	}
@@ -678,7 +719,7 @@ public class BeanShellLinker {
 	private void showRelationshipTab(String uuid, Tab tab) {
 		Object relationshipObj = fetchRel(uuid);
 		if (relationshipObj == null) {
-			showWarning("Logic Error", "Could not fetch relationship");
+			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
 			return ;
 		}
 		if(relationshipObj instanceof Relationship){
@@ -686,7 +727,8 @@ public class BeanShellLinker {
 			try {
 				reinitiateRelationshipFieldsValue(tab, relationship);
 			} catch (Exception e) {
-				Log.e("FAIMS", "Exception showing tab and load value",e);
+				FLog.e("error showing relationship tab " + tab.getLabel(),e);
+				showWarning("Logic Error", "Error showing tab " + tab.getLabel());
 			}
 		}
 	}
@@ -791,7 +833,8 @@ public class BeanShellLinker {
 			toast.show();
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception showing toast message",e);
+			FLog.e("error showing toast",e);
+			showWarning("Logic Error", "Error showing toast");
 		}
 	}
 	
@@ -894,6 +937,9 @@ public class BeanShellLinker {
 								}
 							}
 						}
+					} else {
+						FLog.w("cannot find view " + ref);
+						showWarning("Logic Error", "Cannot find view " + ref);
 					}
 				}
 				else if (obj instanceof DatePicker) {
@@ -912,6 +958,9 @@ public class BeanShellLinker {
 							break;
 						}
 					};
+				} else {
+					FLog.w("cannot find view " + ref);
+					showWarning("Logic Error", "Cannot find view " + ref);
 				}
 			}
 			
@@ -935,15 +984,19 @@ public class BeanShellLinker {
 							}
 						}
 					}
+				} else {
+					FLog.w("cannot find view " + ref);
+					showWarning("Logic Error", "Cannot find view " + ref);
 				}
 			}
 			else {
-				Log.w("FAIMS","Couldn't set value for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
+				FLog.w("cannot set field value " + ref + " = " + valueObj.toString());
+				showWarning("Logic Error", "Cannot set field value " + ref + " = " + valueObj.toString());
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field value",e);
+			FLog.e("error setting field value " + ref,e);
+			showWarning("Logic Error", "Error setting field value " + ref);
 		}
 	}
 
@@ -984,13 +1037,17 @@ public class BeanShellLinker {
 					horizontalScrollView.setCertainty(value);
 					horizontalScrollView.setCurrentCertainty(value);
 				}else {
-					Log.w("FAIMS","Couldn't set certainty for ref= " + ref + " obj= " + obj.toString());
-					showWarning("Logic Error", "View does not exist.");
+					FLog.w("cannot set field certainty " + ref + " = " + valueObj.toString());
+					showWarning("Logic Error", "Cannot set field certainty " + ref + " = " + valueObj.toString());
 				}
+			} else {
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Cannot find view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field certainty",e);
+			FLog.e("error setting field certainty " + ref,e);
+			showWarning("Logic Error", "Error setting field certainty " + ref);
 		}
 	}
 
@@ -1021,13 +1078,17 @@ public class BeanShellLinker {
 					horizontalScrollView.setAnnotation(value);
 					horizontalScrollView.setCurrentAnnotation(value);
 				}else {
-					Log.w("FAIMS","Couldn't set annotation for ref= " + ref + " obj= " + obj.toString());
-					showWarning("Logic Error", "View does not exist.");
+					FLog.w("cannot set field certainty " + ref + " = " + valueObj.toString());
+					showWarning("Logic Error", "Cannot set field certainty " + ref + " = " + valueObj.toString());
 				}
+			} else {
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Cannot find view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field annotation",e);
+			FLog.e("error setting field annotation " + ref,e);
+			showWarning("Logic Error", "Error setting field annotation " + ref);
 		}
 	}
 
@@ -1083,9 +1144,9 @@ public class BeanShellLinker {
 					return value;
 				}
 				else{
-					Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
-					showWarning("Logic Error", "View does not exist.");
-					return "";
+					FLog.w("cannot find view " + ref);
+					showWarning("Logic Error", "Cannot find view " + ref);
+					return null;
 				}
 			}
 			else if (obj instanceof DatePicker) {
@@ -1105,15 +1166,16 @@ public class BeanShellLinker {
 				}
 			}
 			else {
-				Log.w("FAIMS","Couldn't get value for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
-				return "";
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Cannot find view " + ref);
+				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field value",e);
-			return "";
+			FLog.e("error getting field value " + ref,e);
+			showWarning("Logic Error", "Error getting field value " + ref);
 		}
+		return null;
 	}
 
 	public Object getFieldCertainty(String ref){
@@ -1146,15 +1208,16 @@ public class BeanShellLinker {
 				return String.valueOf(horizontalScrollView.getCurrentCertainty());
 			}
 			else {
-				Log.w("FAIMS","Couldn't get certainty for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
-				return "";
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Cannot find view " + ref);
+				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field certainty",e);
-			return "";
+			FLog.e("error getting field certainty " + ref, e);
+			showWarning("Logic Error", "Error getting field certainty " + ref);
 		}
+		return null;
 	}
 
 	public Object getFieldAnnotation(String ref){
@@ -1179,15 +1242,16 @@ public class BeanShellLinker {
 				return horizontalScrollView.getCurrentAnnotation();
 			}
 			else {
-				Log.w("FAIMS","Couldn't get annotation for ref= " + ref + " obj= " + obj.toString());
-				showWarning("Logic Error", "View does not exist.");
-				return "";
+				FLog.w("cannot find view " + ref);
+				showWarning("Logic Error", "Cannot find view " + ref);
+				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field annotation",e);
-			return "";
+			FLog.e("error getting field annotation " + ref,e);
+			showWarning("Logic Error", "Error getting field annotation " + ref);
 		}
+		return null;
 	}
 
 	public String getCurrentTime(){
@@ -1197,215 +1261,263 @@ public class BeanShellLinker {
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
-		FAIMSLog.log();
-		
-		entity_id = databaseManager.saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
-		if (entity_id == null) {
-			showWarning("Database Error", "Could not save arch entity.");
+		try {
+			return databaseManager.saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
+			
+		} catch (Exception e) {
+			FLog.e("error saving arch entity");
+			showWarning("Logic Error", "Error saving arch entity");
 		}
-		
-		return entity_id;
+		return null;
 	}
 	
 	public String saveRel(String rel_id, String rel_type, List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
-		FAIMSLog.log();
-		
-		rel_id = databaseManager.saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
-		if (rel_id == null) {
-			showWarning("Database Error", "Could not save relationship.");
+		try {
+			
+			return databaseManager.saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
+
+		} catch (Exception e) {
+			FLog.e("error saving relationship");
+			showWarning("Logic Error", "Error saving relationship");
 		}
-		
-		return rel_id;
+		return null;
 	}
 	
-	public void addReln(String entity_id, String rel_id, String verb) {
-		FAIMSLog.log();
-		
-		if (!databaseManager.addReln(entity_id, rel_id, verb)) {
-			showWarning("Database Error", "Could not save entity relationship.");
+	public boolean addReln(String entity_id, String rel_id, String verb) {
+		try {
+			return databaseManager.addReln(entity_id, rel_id, verb);
+		} catch (Exception e) {
+			FLog.e("error saving arch entity relationship");
+			showWarning("Logic Error", "Error saving arch entity relationship");
 		}
+		return false;
 	}
 	
 	@SuppressWarnings("rawtypes")
 	public void populateDropDown(String ref, Collection valuesObj){
 		
-		Object obj = renderer.getViewByRef(ref);
-
-		if (obj instanceof Spinner && valuesObj instanceof ArrayList){
-			Spinner spinner = (Spinner) obj;
-			
-			
-			ArrayList<NameValuePair> pairs = null;
-			boolean isList = false;
-			try {
-				@SuppressWarnings("unchecked")
-				ArrayList<String> values = (ArrayList<String>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (String s : values) {
-					pairs.add(new NameValuePair(s, s));
+		try {
+			Object obj = renderer.getViewByRef(ref);
+	
+			if (obj instanceof Spinner && valuesObj instanceof ArrayList){
+				Spinner spinner = (Spinner) obj;
+				
+				
+				ArrayList<NameValuePair> pairs = null;
+				boolean isList = false;
+				try {
+					@SuppressWarnings("unchecked")
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					pairs = new ArrayList<NameValuePair>();
+					for (String s : values) {
+						pairs.add(new NameValuePair(s, s));
+					}
+				} catch (Exception e) {
+					isList = true;
 				}
-			} catch (Exception e) {
-				isList = true;
-			}
-			
-			if (isList) {
-				@SuppressWarnings("unchecked")
-				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (List<String> list : values) {
-					pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
+				
+				if (isList) {
+					@SuppressWarnings("unchecked")
+					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
+					pairs = new ArrayList<NameValuePair>();
+					for (List<String> list : values) {
+						pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
+					}
 				}
+				
+				ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+	                    this.activity,
+	                    android.R.layout.simple_spinner_dropdown_item,
+	                    pairs);
+	            spinner.setAdapter(arrayAdapter);
+	            renderer.getTabForView(ref).setValueReference(ref, getFieldValue(ref));
 			}
-			
-			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                    this.activity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    pairs);
-            spinner.setAdapter(arrayAdapter);
-            renderer.getTabForView(ref).setValueReference(ref, getFieldValue(ref));
+			else {
+				showWarning("Logic Error", "Cannot populate drop down " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate drop down " + ref);
+			showWarning("Logic Error", "Error populate drop down " + ref);
 		}
 	}
 	
 	@SuppressWarnings("rawtypes")
 	public void populateList(String ref, Collection valuesObj){
-		
-		Object obj = renderer.getViewByRef(ref);
-
-		if (valuesObj instanceof ArrayList){
-			ArrayList<NameValuePair> pairs = null;
-			boolean isList = false;
-			try {
-				@SuppressWarnings("unchecked")
-				ArrayList<String> values = (ArrayList<String>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (String s : values) {
-					pairs.add(new NameValuePair(s, s));
+		try {
+			Object obj = renderer.getViewByRef(ref);
+	
+			if (valuesObj instanceof ArrayList){
+				ArrayList<NameValuePair> pairs = null;
+				boolean isList = false;
+				try {
+					@SuppressWarnings("unchecked")
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					pairs = new ArrayList<NameValuePair>();
+					for (String s : values) {
+						pairs.add(new NameValuePair(s, s));
+					}
+				} catch (Exception e) {
+					isList = true;
 				}
-			} catch (Exception e) {
-				isList = true;
-			}
-			
-			if (isList) {
-				@SuppressWarnings("unchecked")
-				ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (List<String> list : values) {
-					pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
-				}
-			}
-			if(obj instanceof LinearLayout){
-				LinearLayout ll = (LinearLayout) obj;
 				
-				View child0 = ll.getChildAt(0);
-				
-				
-				if( child0 instanceof CheckBox){
-					ll.removeAllViews();
-					
-					for (NameValuePair pair : pairs) {
-						CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
-	                    checkBox.setText(pair.getName());
-	                    checkBox.setValue(pair.getValue());
-	                    ll.addView(checkBox);
+				if (isList) {
+					@SuppressWarnings("unchecked")
+					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
+					pairs = new ArrayList<NameValuePair>();
+					for (List<String> list : values) {
+						pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
 					}
 				}
-				else if (child0 instanceof RadioGroup){
-					RadioGroup rg = (RadioGroup) child0;
-					rg.removeAllViews();
+				if(obj instanceof LinearLayout){
+					LinearLayout ll = (LinearLayout) obj;
 					
-					for (NameValuePair pair : pairs) {
-						CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
-	                    radioButton.setText(pair.getName());
-	                    radioButton.setValue(pair.getValue());
-	                    rg.addView(radioButton);
+					View child0 = ll.getChildAt(0);
+					
+					
+					if( child0 instanceof CheckBox){
+						ll.removeAllViews();
+						
+						for (NameValuePair pair : pairs) {
+							CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
+		                    checkBox.setText(pair.getName());
+		                    checkBox.setValue(pair.getValue());
+		                    ll.addView(checkBox);
+						}
 					}
+					else if (child0 instanceof RadioGroup){
+						RadioGroup rg = (RadioGroup) child0;
+						rg.removeAllViews();
+						
+						for (NameValuePair pair : pairs) {
+							CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
+		                    radioButton.setText(pair.getName());
+		                    radioButton.setValue(pair.getValue());
+		                    rg.addView(radioButton);
+						}
+					}
+				}else if(obj instanceof CustomListView){
+					CustomListView list = (CustomListView) obj;
+	                ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+	                        list.getContext(),
+	                        android.R.layout.simple_list_item_1,
+	                        pairs);
+	                list.setAdapter(arrayAdapter);
+				} else {
+					showWarning("Logic Error", "Cannot populate list " + ref);
 				}
-			}else if(obj instanceof CustomListView){
-				CustomListView list = (CustomListView) obj;
-                ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                        list.getContext(),
-                        android.R.layout.simple_list_item_1,
-                        pairs);
-                list.setAdapter(arrayAdapter);
 			}
+		} catch (Exception e) {
+			FLog.e("error populate list " + ref);
+			showWarning("Logic Error", "Error populate list " + ref);
 		}
 	}
 	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populatePictureGallery(String ref, Collection valuesObj){
-		Object obj = renderer.getViewByRef(ref);
-		
-		List<Picture> pictures = new ArrayList<Picture>();
-		if(valuesObj instanceof ArrayList<?>){
-			ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
-			for(List<String> pictureList : arrayList){
-				Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
-				pictures.add(picture);
+		try {
+			Object obj = renderer.getViewByRef(ref);
+			
+			List<Picture> pictures = new ArrayList<Picture>();
+			if(valuesObj instanceof ArrayList<?>){
+				ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
+				for(List<String> pictureList : arrayList){
+					Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+					pictures.add(picture);
+				}
 			}
-		}
+			
+			if(obj instanceof HorizontalScrollView){
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+		        galleriesLayout.removeAllViews();
+		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+		        for (Picture picture : pictures) {
+		        	File pictureFile = new File(baseDir + "/" + picture.getUrl());
+		        	if(pictureFile.exists()){
+		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+		                gallery.setImageURI(Uri.parse(baseDir + "/" + picture.getUrl()));
+		                gallery.setBackgroundColor(Color.RED);
+		                gallery.setPadding(10, 10, 10, 10);
+		                gallery.setLayoutParams(layoutParams);
+		                gallery.setPicture(picture);
+		                gallery.setOnClickListener(new OnClickListener() {
 		
-		if(obj instanceof HorizontalScrollView){
-			final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-	        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
-	        galleriesLayout.removeAllViews();
-	        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-	        for (Picture picture : pictures) {
-	        	File pictureFile = new File(baseDir + "/" + picture.getUrl());
-	        	if(pictureFile.exists()){
-	        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
-	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-	        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
-	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-	                gallery.setImageURI(Uri.parse(baseDir + "/" + picture.getUrl()));
-	                gallery.setBackgroundColor(Color.RED);
-	                gallery.setPadding(10, 10, 10, 10);
-	                gallery.setLayoutParams(layoutParams);
-	                gallery.setPicture(picture);
-	                gallery.setOnClickListener(new OnClickListener() {
-	
-	                    @Override
-	                    public void onClick(View v) {
-	                    	CustomImageView selectedImageView = (CustomImageView) v;
-	                        horizontalScrollView.setSelectedImageView(selectedImageView);
-	                        for (ImageView view : galleryImages) {
-	                            if (view.equals(selectedImageView)) {
-	                                view.setBackgroundColor(Color.GREEN);
-	                            } else {
-	                                view.setBackgroundColor(Color.RED);
-	                            }
-	                        }
-	                    }
-	                });
-	                TextView textView = new TextView(galleriesLayout.getContext());
-	                textView.setText(picture.getName());
-	                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-	                textView.setTextSize(20);
-	                galleryLayout.addView(textView);
-	                galleryImages.add(gallery);
-	                galleryLayout.addView(gallery);
-	                galleriesLayout.addView(galleryLayout);
-	        	}
-	        }
-	        horizontalScrollView.setImageViews(galleryImages);
+		                    @Override
+		                    public void onClick(View v) {
+		                    	CustomImageView selectedImageView = (CustomImageView) v;
+		                        horizontalScrollView.setSelectedImageView(selectedImageView);
+		                        for (ImageView view : galleryImages) {
+		                            if (view.equals(selectedImageView)) {
+		                                view.setBackgroundColor(Color.GREEN);
+		                            } else {
+		                                view.setBackgroundColor(Color.RED);
+		                            }
+		                        }
+		                    }
+		                });
+		                TextView textView = new TextView(galleriesLayout.getContext());
+		                textView.setText(picture.getName());
+		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		                textView.setTextSize(20);
+		                galleryLayout.addView(textView);
+		                galleryImages.add(gallery);
+		                galleryLayout.addView(gallery);
+		                galleriesLayout.addView(galleryLayout);
+		        	}
+		        }
+		        horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate picture gallery " + ref , e);
+			showWarning("Logic Error", "Error populate picture gallery " + ref);
 		}
 	}
 
 	public Object fetchArchEnt(String id){
-		return databaseManager.fetchArchEnt(id);
+		try {
+			return databaseManager.fetchArchEnt(id);
+		} catch (Exception e) {
+			FLog.e("error fetching arch entity");
+			showWarning("Logic Error", "Error fetching arch entity");
+		}
+		return null;
 	}
 
 	public Object fetchRel(String id){
-		return databaseManager.fetchRel(id);
+		try {
+			return databaseManager.fetchRel(id);
+		} catch (Exception e) {
+			FLog.e("error fetching relationship");
+			showWarning("Logic Error", "Error fetching relationship");
+		}
+		return null;
 	}
 
 	public Object fetchOne(String query){
-		return databaseManager.fetchOne(query);
+		try {
+			return databaseManager.fetchOne(query);
+		} catch (Exception e) {
+			FLog.e("error fetching one");
+			showWarning("Logic Error", "Error fetching one");
+		}
+		return null;
 	}
 
 	@SuppressWarnings("rawtypes")
 	public Collection fetchAll(String query){
-		return databaseManager.fetchAll(query);
+		try {
+			return databaseManager.fetchAll(query);
+		} catch (Exception e) {
+			FLog.e("error fetching all");
+			showWarning("Logic Error", "Error fetching all");
+		}
+		return null;
 	}
 	
 	private void initialiseBluetoohConnection(BluetoothAdapter adapter) {
@@ -1475,107 +1587,101 @@ public class BeanShellLinker {
 				
 				String filepath = baseDir + "/maps/" + filename;
 				if (!new File(filepath).exists()) {
-					Log.d("FAIMS","Map file " + filepath + " does not exist");
-                    showWarning("Map Error", "Could not render map.");
+					FLog.w("Map file " + filepath + " does not exist");
+                    showWarning("Logic Error", "Erorr map does not exist " + filename);
 					return;
 				}
 				
         		final GdalMapLayer gdalLayer;
-                try {
-                    gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
-                    gdalLayer.setShowAlways(true);
-                    mapView.getLayers().setBaseLayer(gdalLayer);
-                    if(this.handlerThread != null){
-                    	this.handlerThread.quit();
-                    }
-                    if(this.currentLocationHandler != null){
-                    	if(this.currentLocationTask != null){
-                    		this.currentLocationHandler.removeCallbacks(currentLocationTask);
-                    	}
-                    }
-                    this.handlerThread = new HandlerThread("MapHandler");
-            		this.handlerThread.start();
-            		this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
-                    this.currentLocationTask = new Runnable() {
-							
-						@Override
-						public void run() {
-							Object currentLocation = getGPSPosition();
-							if(currentLocation != null){
-								GPSLocation location = (GPSLocation) currentLocation;
-								previousLocation = location;
-								Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-										activity.getResources(), R.drawable.blue_dot);
-			                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-			                            .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
-			                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-			                            location.getLongitude(), location.getLatitude());
-			                    if(currentPositionLayer != null){
-			                    	mapView.getLayers().removeLayer(currentPositionLayer);
-			                    }
-			                    currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-			                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-			                    mapView.getLayers().addLayer(currentPositionLayer);
-							}else{
-								if(previousLocation != null){
-									// when there is no gps signal for two minutes, change the color of the marker to be grey
-									if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
-										Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-					                            activity.getResources(), R.drawable.grey_dot);
-					                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-					                            .setSize(0.5f).build();
-					                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-					                    		previousLocation.getLongitude(), previousLocation.getLatitude());
-				                    	if(currentPositionLayer != null){
-					                    	mapView.getLayers().removeLayer(currentPositionLayer);
-					                    }
-				                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-					                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-					                    mapView.getLayers().addLayer(currentPositionLayer);
-										previousLocation = null;
-									}
+                gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
+                gdalLayer.setShowAlways(true);
+                mapView.getLayers().setBaseLayer(gdalLayer);
+                if(this.handlerThread != null){
+                	this.handlerThread.quit();
+                }
+                if(this.currentLocationHandler != null){
+                	if(this.currentLocationTask != null){
+                		this.currentLocationHandler.removeCallbacks(currentLocationTask);
+                	}
+                }
+                this.handlerThread = new HandlerThread("MapHandler");
+        		this.handlerThread.start();
+        		this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
+                this.currentLocationTask = new Runnable() {
+						
+					@Override
+					public void run() {
+						Object currentLocation = getGPSPosition();
+						if(currentLocation != null){
+							GPSLocation location = (GPSLocation) currentLocation;
+							previousLocation = location;
+							Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+									activity.getResources(), R.drawable.blue_dot);
+		                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+		                            .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+		                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+		                            location.getLongitude(), location.getLatitude());
+		                    if(currentPositionLayer != null){
+		                    	mapView.getLayers().removeLayer(currentPositionLayer);
+		                    }
+		                    currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+		                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+		                    mapView.getLayers().addLayer(currentPositionLayer);
+						}else{
+							if(previousLocation != null){
+								// when there is no gps signal for two minutes, change the color of the marker to be grey
+								if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
+									Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+				                            activity.getResources(), R.drawable.grey_dot);
+				                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+				                            .setSize(0.5f).build();
+				                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
+				                    		previousLocation.getLongitude(), previousLocation.getLatitude());
+			                    	if(currentPositionLayer != null){
+				                    	mapView.getLayers().removeLayer(currentPositionLayer);
+				                    }
+			                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+				                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
+				                    mapView.getLayers().addLayer(currentPositionLayer);
+									previousLocation = null;
 								}
 							}
-							currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
 						}
-					};
-                    this.currentLocationHandler.postDelayed(currentLocationTask, getGpsUpdateInterval());
-                } catch (IOException e) {
-                	Log.e("FAIMS","Could not render raster layer",e);
-                    showWarning("Map Error", "Could not render map.");
-                }
-                
+						currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
+					}
+				};
+                this.currentLocationHandler.postDelayed(currentLocationTask, getGpsUpdateInterval());
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception showing raster map",e);
+			FLog.e("error rendering raster map",e);
+			showWarning("Logic Error", "Error cannot render raster map " + ref);
 		}
 	}
 	
 	public void setMapFocusPoint(String ref, float longitude, float latitude) {
-		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				if (latitude < -90.0f || latitude > 90.0f) {
-					Log.d("FAIMS", "Latitude out of range " + latitude);
-					showWarning("Logic Error", "Map data out of range.");
+					FLog.w("latitude out of range " + latitude);
+					showWarning("Logic Error", "Error map latitude out of range " + latitude);
 				}
 				
 				mapView.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting map focus point",e);
-			showWarning("Logic Error", "Map is malformed");
+			FLog.e("error setting map focus point " + ref,e);
+			showWarning("Logic Error", "Error setting map focus point " + ref);
 		}
 	}
 	
@@ -1587,13 +1693,13 @@ public class BeanShellLinker {
 				// rotation - 0 = north-up
                 mapView.setRotation(rotation);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting map rotation",e);
-			showWarning("Logic Error", "Map is malformed");
+			FLog.e("error setting map rotation " + ref,e);
+			showWarning("Logic Error", "Error setting map rotation " + ref);
 		}
 	}
 	
@@ -1605,13 +1711,13 @@ public class BeanShellLinker {
 				// zoom - 0 = world, like on most web maps
                 mapView.setZoom(zoom);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting map zoom",e);
-			showWarning("Logic Error", "Map is malformed");
+			FLog.e("error setting map zoom " + ref,e);
+			showWarning("Logic Error", "Error setting map zoom " + ref);
 		}
 	}
 	
@@ -1623,13 +1729,13 @@ public class BeanShellLinker {
 				// tilt means perspective view. Default is 90 degrees for "normal" 2D map view, minimum allowed is 30 degrees.
                 mapView.setTilt(tilt);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting map tilt",e);
-			showWarning("Logic Error", "Map is malformed");
+			FLog.e("error setting map tilt " + ref,e);
+			showWarning("Logic Error", "Error setting map tilt " + ref);
 		}
 	}
 	
@@ -1647,25 +1753,21 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null,
-	                        MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
-	                // ogrLayer.printSupportedDrivers();
-	                // ogrLayer.printLayerDetails(table);
-					return mapView.addVectorLayer(ogrLayer);
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not show vector layer", e);
-                    showWarning("Map Error", "Could not show vector layer");
-				}
+				OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null, 
+						MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+                // ogrLayer.printSupportedDrivers();
+                // ogrLayer.printLayerDetails(table);
+				return mapView.addVectorLayer(ogrLayer);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception showing vector layer",e);
+			FLog.e("error showing vector layer" + ref,e);
+			showWarning("Logic Error", "Error showing vector layer " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public int showSpatialLayer(String ref, String filename, String tablename, String labelColumn, StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
@@ -1674,23 +1776,19 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), baseDir + "/maps/" + filename, tablename, "Geometry",
-	                        new String[]{labelColumn}, MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
-					return mapView.addVectorLayer(spatialLayer);
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not show spatial layer", e);
-                    showWarning("Map Error", "Could not show spatial layer");
-				}
+				SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), baseDir + "/maps/" + filename, tablename, "Geometry",
+                        new String[]{labelColumn}, MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+				return mapView.addVectorLayer(spatialLayer);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception showing spatial layer",e);
+			FLog.e("error showing spatialite layer" + ref,e);
+			showWarning("Logic Error", "Error showing spatialite layer " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public void clearVectorLayer(String ref, int layerId) {
@@ -1699,20 +1797,16 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					mapView.removeVectorLayer(layerId);
-				} catch (Exception e) {
-					Log.e("FAIMS", "Could not clear layer", e);
-					showWarning("Logic Error", "Could not clear layer");
-				}
+				mapView.removeVectorLayer(layerId);
 				
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception clearing vector layer",e);
+			FLog.e("error clearing vector layer" + ref,e);
+			showWarning("Logic Error", "Error clearing vector layer " + ref);
 		}
 	}
 	
@@ -1722,22 +1816,18 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer layer = new CanvasLayer(new EPSG3857());
-					return mapView.addVectorLayer(layer);
-				} catch (Exception e) {
-					Log.e("FAIMS", "Could not create layer", e);
-					showWarning("Logic Error", "Could not create layer");
-				}
+				CanvasLayer layer = new CanvasLayer(new EPSG3857());
+				return mapView.addVectorLayer(layer);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception creating vector layer",e);
+			FLog.e("error creating vector layer " + ref,e);
+			showWarning("Logic Error", "Error creating vector layer " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public void setVectorLayerVisible(String ref, int layerId, boolean visible) {
@@ -1746,19 +1836,15 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					mapView.setLayerVisible(layerId, visible);
-				} catch (Exception e) {
-					Log.e("FAIMS", "Could not set layer visibility", e);
-					showWarning("Logic Error", "Could not set layer visibility");
-				}
+				mapView.setLayerVisible(layerId, visible);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception showing vector layer",e);
+			FLog.e("error setting vector layer visiblity " + ref,e);
+			showWarning("Logic Error", "Error setting vector layer visibility " + ref);
 		}
 	}
 	
@@ -1769,25 +1855,21 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					int id = canvas.addPoint(point, styleSet);
-					canvas.updateRenderer();
-					return id;
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not draw point",e);
-					showWarning("Logic Error", "Could not draw point");
-				}
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				int id = canvas.addPoint(point, styleSet);
+				canvas.updateRenderer();
+				return id;
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception drawing point on vector layer",e);
+			FLog.e("error drawing point " + ref,e);
+			showWarning("Logic Error", "Error drawing point " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public int drawLine(String ref, int layerId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
@@ -1797,25 +1879,21 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					int id = canvas.addLine(points, styleSet);
-					canvas.updateRenderer();
-					return id;
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not draw line",e);
-					showWarning("Logic Error", "Could not draw line");
-				}
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				int id = canvas.addLine(points, styleSet);
+				canvas.updateRenderer();
+				return id;
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception drawing line on vector layer",e);
+			FLog.e("error drawing line " + ref,e);
+			showWarning("Logic Error", "Error drawing line " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public int drawPolygon(String ref, int layerId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
@@ -1825,25 +1903,21 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					int id = canvas.addPolygon(points, styleSet);
-					canvas.updateRenderer();
-					return id;
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not draw polygon",e);
-					showWarning("Logic Error", "Could not draw polygon");
-				}
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				int id = canvas.addPolygon(points, styleSet);
+				canvas.updateRenderer();
+				return id;
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception drawing polygon on vector layer",e);
+			FLog.e("error drawing polygon " + ref,e);
+			showWarning("Logic Error", "Error drawing polygon " + ref);
 		}
-		return 0;
+		return -1;
 	}
 	
 	public void clearGeometry(String ref, int layerId, int geomId) {
@@ -1852,53 +1926,44 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					canvas.removeGeometry(geomId);
-					canvas.updateRenderer();
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not clear geometry",e);
-					showWarning("Logic Error", "Could not clear geometry");
-				}
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				canvas.removeGeometry(geomId);
+				canvas.updateRenderer();
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception clearing geometry",e);
+			FLog.e("error clearing geometry " + ref,e);
+			showWarning("Logic Error", "Error clearing geometry " + ref);
 		}
 	}
 	
-	public int clearGeometryList(String ref, int layerId, List<Integer> geomList) {
+	public void clearGeometryList(String ref, int layerId, List<Integer> geomList) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					if (geomList.size() > 0) {
-						for (Integer geomId : geomList) {
-							canvas.removeGeometry(geomId);
-						}
-						canvas.updateRenderer();
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				if (geomList.size() > 0) {
+					for (Integer geomId : geomList) {
+						canvas.removeGeometry(geomId);
 					}
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not clear geometry list",e);
-					showWarning("Logic Error", "Could not clear geometry list");
+					canvas.updateRenderer();
 				}
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception clearing geometry",e);
+			FLog.e("error clearing geometry list " + ref,e);
+			showWarning("Logic Error", "Error clearing geometry list " + ref);
 		}
-		return 0;
 	}
 	
 	public List<Geometry> getGeometryList(String ref, int layerId) {
@@ -1906,22 +1971,18 @@ public class BeanShellLinker {
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
+
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					return canvas.getTransformedGeometryList();
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not get geometry list",e);
-					showWarning("Logic Error", "Could not get geometry list");
-				}
+				return canvas.getTransformedGeometryList();
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting geometry list",e);
+			FLog.e("error getting geometry list " + ref,e);
+			showWarning("Logic Error", "Error getting geometry list " + ref);
 		}
 		return null;
 	}
@@ -1932,21 +1993,17 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				try {
-					CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-					
-					return canvas.getTransformedGeometry(geomId);
-				} catch (Exception e) {
-					Log.e("FAIMS","Could not get geometry",e);
-					showWarning("Logic Error", "Could not get geometry");
-				}
+				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
+				
+				return canvas.getTransformedGeometry(geomId);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting geometry list",e);
+			FLog.e("error getting geomtry " + ref,e);
+			showWarning("Logic Error", "Error getting geometry " + ref);
 		}
 		return null;
 	}
@@ -1958,12 +2015,13 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.setViewLocked(lock);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception locking map view",e);
+			FLog.e("error locking map view " + ref,e);
+			showWarning("Logic Error", "Error locking map view " + ref);
 		}
 	}
 	
@@ -1974,18 +2032,19 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				Geometry geom = mapView.getGeometry(geomId);
 				if (geom == null) {
-					Log.d("FAIMS","Could not find geometry.");
-					showWarning("Logic Error", "Could not find geometry.");
+					FLog.d("cannot find geometry to overlay");
+					showWarning("Logic Error", "Cannot find geometry to overlay");
 					return ;
 				}
 				mapView.drawGeometrOverlay(geom);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception drawing geometry overlay",e);
+			FLog.e("error drawing geometry overlay " + ref,e);
+			showWarning("Logic Error", "Error drawing geometry overlay " + ref);
 		}
 	}
 	
@@ -1996,12 +2055,13 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.drawGeometrOverlay(null);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception clearing geometry overlay",e);
+			FLog.e("error clearing geometry overlay " + ref,e);
+			showWarning("Logic Error", "Error clearing geometry overlay " + ref);
 		}
 	}
 	
@@ -2012,18 +2072,19 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				Geometry geom = mapView.getGeometry(geomId);
 				if (geom == null) {
-					Log.d("FAIMS","Could not find geometry.");
-					showWarning("Logic Error", "Could not find geometry.");
+					FLog.d("cannot find geometry overlay");
+					showWarning("Logic Error", "Cannot find geometry overlay");
 					return ;
 				}
 				mapView.replaceGeometryOverlay(geomId);
 			} else {
-				Log.d("FAIMS","Could not find map view");
-				showWarning("Logic Error", "Map does not exist.");
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception replacing geometry overlay",e);
+			FLog.e("error replacing geometry overlay " + ref,e);
+			showWarning("Logic Error", "Error replacing geometry overlay " + ref);
 		}
 	}
 	
@@ -2105,7 +2166,7 @@ public class BeanShellLinker {
 	
 	public void setSyncMinInterval(float value) {
 		if (value < 0) {
-			showWarning("Logic Error", "Invalid sync min interval");
+			showWarning("Logic Error", "Invalid sync min interval " + value);
 			return;
 		}
 		
@@ -2114,7 +2175,7 @@ public class BeanShellLinker {
 	
 	public void setSyncMaxInterval(float value) {
 		if (value < 0 || value < this.activity.getSyncMinInterval()) {
-			showWarning("Logic Error", "Invalid sync max interval");
+			showWarning("Logic Error", "Invalid sync max interval " + value);
 			return;
 		}
 		
@@ -2123,7 +2184,7 @@ public class BeanShellLinker {
 	
 	public void setSyncDelay(float value) {
 		if (value < 0) {
-			showWarning("Logic Error", "Invalid sync delay");
+			showWarning("Logic Error", "Invalid sync delay " + value);
 			return;
 		}
 		this.activity.setSyncDelay(value);
@@ -2145,7 +2206,7 @@ public class BeanShellLinker {
 			interpreter.set("_last_selected_filepath", file.getAbsolutePath());
 			this.execute(lastFileBrowserCallback);
 		} catch (Exception e) {
-			Log.d("FAIMS", "Cannot set selected filename", e);
+			FLog.e("error setting last selected file", e);
 		}
 	}
 	
@@ -2183,7 +2244,8 @@ public class BeanShellLinker {
 			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
 			return polygonStyleSet;
 		} else {
-			Log.e("FAIMS", "Cannot add invalid style to styleset");
+			FLog.e("cannot create style set");
+			showWarning("Logic Error", "Error cannot create style set");
 			return null;
 		}
 	}
@@ -2198,7 +2260,7 @@ public class BeanShellLinker {
 	
 	public String attachFile(String filePath, boolean sync, String dir) {
 		if (!new File(filePath).exists()) {
-			showWarning("Logic Error", "Attach file cannot find file.");
+			showWarning("Logic Error", "Error cannot find file " + filePath);
 			return null;
 		}
 		
@@ -2232,7 +2294,7 @@ public class BeanShellLinker {
 				Object persistedObject = interpreter.get(persistedObjectName);
 				savedInstanceState.putSerializable(persistedObjectName, (Serializable) persistedObject);
 			} catch (EvalError e) {
-				Log.d("beanshell_linker", "Get persisted object exception : " + e);
+				FLog.e("error storing bean shell data", e);
 			}
 		}
 	}
@@ -2243,7 +2305,7 @@ public class BeanShellLinker {
 			try {
 				interpreter.set(persistedObjectName, object);
 			} catch (EvalError e) {
-				Log.d("beanshell_linker", "Set persisted object exception : " + e);
+				FLog.e("error restoring bean shell data", e);
 			}
 		}
 	}

@@ -8,9 +8,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
-import android.util.Log;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 
@@ -46,19 +46,19 @@ public abstract class UploadService extends IntentService {
 		if (file != null) {
 			file.delete();
 		}
-		Log.d("FAIMS", "stopping upload service");
+		FLog.d("stopping upload service");
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		Log.d("FAIMS", "starting upload service");
+		FLog.d("starting upload service");
 		
 		FAIMSClientResultCode resultCode = null;
 		try {
 			resultCode = doUpload(intent);
 			
 			if (uploadStopped) {
-				Log.d("FAIMS", "upload cancelled");
+				FLog.d("upload cancelled");
 				resultCode = null;
 				return;
 			}
@@ -73,7 +73,7 @@ public abstract class UploadService extends IntentService {
 			doComplete(resultCode, project);
 			
 		} catch (Exception e) {
-			Log.e("FAIMS", "upload service failed", e);
+			FLog.e("error in upload service", e);
 			resultCode = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			try {
@@ -83,7 +83,7 @@ public abstract class UploadService extends IntentService {
 				msg.obj = resultCode;
 				messenger.send(msg);
 			} catch (Exception me) {
-				Log.e("FAIMS", "upload service messenger failed", me);
+				FLog.e("error sending message", me);
 			}
 		}
 	}

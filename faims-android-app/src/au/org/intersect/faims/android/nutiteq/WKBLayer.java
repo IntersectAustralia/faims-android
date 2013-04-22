@@ -9,6 +9,7 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.geometry.Geometry;
@@ -39,7 +40,7 @@ public class WKBLayer extends GeometryLayer {
 
 		@Override
 		protected Void doInBackground(String... params) {
-			Log.d("FAIMS", "Reading file");
+			FLog.d("Reading file");
 			String filename = params[0];
 
 			ByteArrayInputStream byteIn;
@@ -54,13 +55,13 @@ public class WKBLayer extends GeometryLayer {
 				is.close();
 				byteIn = new ByteArrayInputStream(byteOut.toByteArray());
 			} catch (IOException e) {
-				Log.e("FAIMS", "Could not read .wkb file " + filename, e);
+				FLog.e("Could not read .wkb file " + filename, e);
 				return null;
 			}
 
 			Quadtree<Geometry> objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
 
-			Log.d("FAIMS", "Creating elements");
+			FLog.d("Creating elements");
 			Label pointLabel = new DefaultLabel("Point");
 			Label lineLabel = new DefaultLabel("Line");
 			Label polyLabel = new DefaultLabel("Polygon");
@@ -84,7 +85,7 @@ public class WKBLayer extends GeometryLayer {
 				}
 
 			}
-			Log.d("FAIMS", "Finished creating elements");
+			FLog.d("Finished creating elements");
 
 			layer.objects = objects;
 			if (layer.components != null) {
@@ -126,7 +127,7 @@ public class WKBLayer extends GeometryLayer {
 	}
 
 	private void readFile(String filename) throws Exception {
-		Log.d("FAIMS", filename);
+		FLog.d(filename);
 
 		File file = new File(filename);
 		if (!file.exists()) {

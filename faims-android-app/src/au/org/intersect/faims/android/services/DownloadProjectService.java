@@ -1,9 +1,9 @@
 package au.org.intersect.faims.android.services;
 
 import android.content.Intent;
-import android.util.Log;
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
@@ -18,7 +18,7 @@ public class DownloadProjectService extends DownloadService {
 	protected FAIMSClientResultCode doDownload(Intent intent) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
-			Log.d("FAIMS", "downloading project " + project.name);
+			FLog.d("downloading project " + project.name);
 			DownloadResult result = faimsClient.downloadProject(project);
 			
 			// if result is success then update the project settings with version and timestamp
@@ -31,7 +31,7 @@ public class DownloadProjectService extends DownloadService {
 			
 			return result.code;
 		} catch (Exception e) {
-			Log.e("FAIMS", "could not download project", e);
+			FLog.e("error downloading project", e);
 		}
 		return null;
 	}

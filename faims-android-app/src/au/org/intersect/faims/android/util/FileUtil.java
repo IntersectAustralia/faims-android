@@ -32,7 +32,7 @@ import org.javarosa.xform.util.XFormUtils;
 
 import android.os.Environment;
 import android.os.StatFs;
-import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 
 public class FileUtil {
 
@@ -47,7 +47,7 @@ public class FileUtil {
 	}
 	
 	public static void tarFile(String dir, String baseDir, String filename, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		Log.d("FAIMS", "tar file " + dir + " to " + filename);
+		FLog.d("tar file " + dir + " to " + filename);
 		
 		TarArchiveOutputStream ts = null;
 		try {
@@ -63,7 +63,7 @@ public class FileUtil {
 	}
 	
 	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		Log.d("FAIMS", "add dir " + dir + "  to tarname " + tarname);
+		FLog.d("add dir " + dir + "  to tarname " + tarname);
 		
 		File d = new File(dir);
 		if (d.isDirectory()) {
@@ -99,7 +99,7 @@ public class FileUtil {
 	}
 	
 	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
-		Log.d("FAIMS", "add file " + filename + "  to tarname " + tarname);
+		FLog.d("add file " + filename + "  to tarname " + tarname);
 		
 		FileInputStream fs = null;
 		try {
@@ -118,7 +118,7 @@ public class FileUtil {
 	}
 	
 	public static void untarFile(String dir, String filename) throws IOException {
-		Log.d("FAIMS", "untar file " + filename + " to " + dir);
+		FLog.d("untar file " + filename + " to " + dir);
 		
 		TarArchiveInputStream ts = null;
 		try {
@@ -151,7 +151,7 @@ public class FileUtil {
 	}
 	
 	public static void saveFile(InputStream input, String filename) throws IOException {
-		Log.d("FAIMS", "saving to file " + filename);
+		FLog.d("saving to file " + filename);
 		
 		FileOutputStream os = null;
 		try {
@@ -180,7 +180,7 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		Log.d("FAIMS", "Writing tar file " + file.getAbsolutePath());
+		FLog.d("Writing tar file " + file.getAbsolutePath());
 		
 		// make sure directory path exists
 		makeDirs(file.getParent());
@@ -272,13 +272,13 @@ public class FileUtil {
 			} 
 	
 			return sb.toString();
-		} catch (IOException e) {
-			FAIMSLog.log(e);
+		} catch (Exception e) {
+			FLog.e("error converting stream to string", e);
 		} finally {
 			try {
 				if (br != null) br.close();
 			} catch (IOException e) {
-				FAIMSLog.log(e);
+				FLog.e("error closing reader", e);
 			}
 		}
 		return null;
@@ -296,7 +296,7 @@ public class FileUtil {
 	}
 
 	public static void copyFile(String fromPath, String toPath) throws IOException {
-		Log.d("FAIMS", "copying file " + fromPath + " to " + toPath);
+		FLog.d("copying file " + fromPath + " to " + toPath);
 		
 		FileInputStream input = null;
 		FileOutputStream output = null;

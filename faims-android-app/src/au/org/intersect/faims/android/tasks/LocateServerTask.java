@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.tasks;
 import android.os.AsyncTask;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.net.ServerDiscovery.ServerDiscoveryListener;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Inject;
 
@@ -23,7 +22,6 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	
 	@Override
 	public Void doInBackground(Void... values) {
-		FAIMSLog.log();
 		
 		searching = true;
 		serverDiscovery.startDiscovery(this);
@@ -42,7 +40,6 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	
 	@Override
 	protected void onCancelled() {
-		FAIMSLog.log();
 		
 		serverDiscovery.stopDiscovery();
 		searching = false;
@@ -50,7 +47,7 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	
 	@Override
 	protected void onPostExecute(Void v) {
-		FAIMSLog.log();
+		
 		listener.handleActionResponse(
 				serverDiscovery.isServerHostValid() ? 
 						ActionResultCode.SUCCESS : ActionResultCode.FAILURE, null);
@@ -58,7 +55,7 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	
 	@Override
 	public void handleDiscoveryResponse(boolean success) {
-		FAIMSLog.log();
+		
 		searching = false;
 	}
 	

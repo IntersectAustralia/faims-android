@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.managers;
+package au.org.intersect.faims.android.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -8,16 +8,14 @@ import java.util.Collection;
 import java.util.List;
 
 import jsqlite.Callback;
-import jsqlite.Database;
 import jsqlite.Stmt;
-import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
 import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.util.DateUtil;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 import com.google.inject.Singleton;
 import com.nutiteq.geometry.Geometry;
@@ -43,40 +41,35 @@ public class DatabaseManager {
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type,
-			String geo_data, List<EntityAttribute> attributes) {
+			String geo_data, List<EntityAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FAIMSLog.log("entity_id:" + entity_id);
-			FAIMSLog.log("entity_type:" + entity_type);
-			FAIMSLog.log("geo_data:" + geo_data);
+			FLog.d("entity_id:" + entity_id);
+			FLog.d("entity_type:" + entity_type);
+			FLog.d("geo_data:" + geo_data);
 			
 			for (EntityAttribute attribute : attributes) {
-				FAIMSLog.log(attribute.toString());
+				FLog.d(attribute.toString());
 			}
 			
 			jsqlite.Database db = null;
+			Stmt st = null;
 			try {
-				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				if (!validArchEnt(db, entity_id, entity_type, geo_data, attributes)) {
-					FAIMSLog.log("not valid arch entity");
+					FLog.d("arch entity not valid");
 					return null;
 				}
 				
 				String uuid;
-				Stmt st;
 				
 				if (entity_id == null) {
-					
 					// create new entity
 					uuid = generateUUID();
-					
 				} else {
-					
 					// update entity
 					uuid = entity_id;
-					
 				}
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
@@ -93,6 +86,7 @@ public class DatabaseManager {
 				st.bind(5, entity_type);
 				st.step();
 				st.close();
+				st = null;
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
@@ -110,50 +104,50 @@ public class DatabaseManager {
 					st.bind(7, attribute.getName());
 					st.step();
 					st.close();
+					st = null;
 				}
-				
-				//debugSaveArchEnt(db, uuid);
 				
 				return uuid;
 				
-			} catch (Exception e) {
-				FAIMSLog.log(e);
 			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
-			
-			return null;
 		}
 	}
 	
 	public String saveRel(String rel_id, String rel_type,
-			String geo_data, List<RelationshipAttribute> attributes) {
+			String geo_data, List<RelationshipAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FAIMSLog.log("rel_id:" + rel_id);
-			FAIMSLog.log("rel_type:" + rel_type);
-			FAIMSLog.log("geo_data:" + geo_data);
+			FLog.d("rel_id:" + rel_id);
+			FLog.d("rel_type:" + rel_type);
+			FLog.d("geo_data:" + geo_data);
 			
 			for (RelationshipAttribute attribute : attributes) {
-				FAIMSLog.log(attribute.toString());
+				FLog.d(attribute.toString());
 			}
 			
 			jsqlite.Database db = null;
+			Stmt st = null;
 			try {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				if (!validRel(db, rel_id, rel_type, geo_data, attributes)) {
-					FAIMSLog.log("not valid rel");
+					FLog.d("relationship not valid");
 					return null;
 				}
 				
 				String uuid;
-				Stmt st;
 				
 				if (rel_id == null) {
 					// create new relationship
@@ -178,6 +172,7 @@ public class DatabaseManager {
 				st.bind(5, rel_type);
 				st.step();
 				st.close();
+				st = null;
 				
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
@@ -194,94 +189,104 @@ public class DatabaseManager {
 					st.bind(6, attribute.getName());
 					st.step();
 					st.close();
+					st = null;
 				}
-	
-				//debugSaveRel(db, uuid);
 				
 				return uuid;
 				
-			} catch (Exception e) {
-				FAIMSLog.log(e);
 			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
 			
-			return null;
 		}
 	}
 	
 	private boolean validArchEnt(jsqlite.Database db, String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) throws Exception {
-		
-		if (entity_id == null && !hasEntityType(db, entity_type)) {
-			return false;
-		} else if (entity_id != null && !hasEntity(db, entity_id)) {
-			return false;
-		}
-		
-		// check if attributes exist
-		for (EntityAttribute attribute : attributes) {
-			String query = "SELECT count(AEntTypeName) " + 
-						   "FROM IdealAEnt left outer join AEntType using (AEntTypeId) left outer join AttributeKey using (AttributeId) " + 
-						   "WHERE AEntTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
-			
-			Stmt st = db.prepare(query);
-			st.bind(1, entity_type);
-			st.bind(2, attribute.getName());
-			st.step();
-			if (st.column_int(0) == 0) {
-				st.close();
+		Stmt st = null;
+		try {
+			if (entity_id == null && !hasEntityType(db, entity_type)) {
+				return false;
+			} else if (entity_id != null && !hasEntity(db, entity_id)) {
 				return false;
 			}
-			st.close();
+			
+			// check if attributes exist
+			for (EntityAttribute attribute : attributes) {
+				String query = "SELECT count(AEntTypeName) " + 
+							   "FROM IdealAEnt left outer join AEntType using (AEntTypeId) left outer join AttributeKey using (AttributeId) " + 
+							   "WHERE AEntTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+				
+				st = db.prepare(query);
+				st.bind(1, entity_type);
+				st.bind(2, attribute.getName());
+				st.step();
+				if (st.column_int(0) == 0) {
+					return false;
+				}
+				st.close();
+				st = null;
+			}
+		} finally {
+			if (st != null) st.close();
 		}
-		
 		return true;
 	}
 	
 	private boolean validRel(jsqlite.Database db, String rel_id, String rel_type, String geo_data, List<RelationshipAttribute> attributes) throws Exception {
-		
-		if (rel_id == null && !hasRelationshipType(db, rel_type)) {
-			return false;
-		} else if (rel_id != null && !hasRelationship(db, rel_id)) {
-			return false;
-		}
-		
-		// check if attributes exist
-		for (RelationshipAttribute attribute : attributes) {
-			String query = "SELECT count(RelnTypeName) " + 
-					   	   "FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
-					       "WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
-			Stmt st = db.prepare(query);
-			st.bind(1, rel_type);
-			st.bind(2, attribute.getName());
-			st.step();
-			if (st.column_int(0) == 0) {
-				st.close();
+		Stmt st = null;
+		try {
+			if (rel_id == null && !hasRelationshipType(db, rel_type)) {
+				return false;
+			} else if (rel_id != null && !hasRelationship(db, rel_id)) {
 				return false;
 			}
-			st.close();
+			
+			// check if attributes exist
+			for (RelationshipAttribute attribute : attributes) {
+				String query = "SELECT count(RelnTypeName) " + 
+						   	   "FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
+						       "WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+				st = db.prepare(query);
+				st.bind(1, rel_type);
+				st.bind(2, attribute.getName());
+				st.step();
+				if (st.column_int(0) == 0) {
+					return false;
+				}
+				st.close();
+				st = null;
+			}
+		} finally {
+			if (st != null) st.close();
 		}
 		
 		return true;
 	}
 	
-	public boolean addReln(String entity_id, String rel_id, String verb) {
+	public boolean addReln(String entity_id, String rel_id, String verb) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FAIMSLog.log("entity_id:" + entity_id);
-			FAIMSLog.log("rel_id:" + rel_id);
-			FAIMSLog.log("verb:" + verb);
+			FLog.d("entity_id:" + entity_id);
+			FLog.d("rel_id:" + rel_id);
+			FLog.d("verb:" + verb);
 			
 			jsqlite.Database db = null;
+			Stmt st = null;
 			try {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				if (!hasEntity(db, entity_id) || !hasRelationship(db, rel_id)) {
+					FLog.d("cannot add entity to relationship");
 					return false;
 				}
 				
@@ -290,39 +295,39 @@ public class DatabaseManager {
 				// create new entity relationship
 				String query = "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
 							   "VALUES (?, ?, ?, ?);";
-				Stmt st = db.prepare(query);
+				st = db.prepare(query);
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);
 				st.bind(3, verb);
 				st.bind(4, currentTimestamp);
 				st.step();
 				st.close();
-				
-				FAIMSLog.log("test");
-				
-				debugAddReln(db, entity_id, rel_id);
+				st = null;
 				
 				return true;
 				
-			} catch (Exception e) {
-				FAIMSLog.log(e);
 			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
-			
-			return false;
 		}
 	}
 
-	public Object fetchArchEnt(String id){
+	public Object fetchArchEnt(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
+			jsqlite.Database db = null;
+			Stmt stmt = null;
 			try {
 				
-				jsqlite.Database db = new jsqlite.Database();
+				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				if (!hasEntity(db, id)) {
 					return null;
@@ -334,7 +339,7 @@ public class DatabaseManager {
 								"JOIN attributekey USING (attributeid) " +
 								"JOIN ArchEntity USING (uuid) " +
 								"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
-				Stmt stmt = db.prepare(query);
+				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
 				String type = null;
@@ -348,6 +353,8 @@ public class DatabaseManager {
 					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 					attributes.add(archAttribute);
 				}
+				stmt.close();
+				stmt = null;
 				
 				// get vector geometry
 				stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
@@ -363,23 +370,33 @@ public class DatabaseManager {
 			            }
 					}
 				}
+				stmt.close();
+				stmt = null;
 	
 				ArchEntity archEntity = new ArchEntity(id, type, attributes, geomList);
 				
-				db.close();
-	
 				return archEntity;
-			} catch (Exception e) {
-				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
-			return null;
 		}
 	}
 	
-	public Object fetchRel(String id){
+	public Object fetchRel(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
+			jsqlite.Database db = null;
+			Stmt stmt = null;
 			try {
-				jsqlite.Database db = new jsqlite.Database();
+				 db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				if (!hasRelationship(db, id)) {
@@ -392,7 +409,7 @@ public class DatabaseManager {
 								"JOIN attributekey USING (attributeid) " +
 								"JOIN Relationship USING (relationshipid) " +
 								"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
-				Stmt stmt = db.prepare(query);
+				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
 				String type = null;
@@ -405,6 +422,8 @@ public class DatabaseManager {
 					relAttribute.setCertainty(stmt.column_string(4));
 					attributes.add(relAttribute);
 				}
+				stmt.close();
+				stmt = null;
 				
 				// get vector geometry
 				stmt = db.prepare("SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN ( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);");
@@ -420,47 +439,68 @@ public class DatabaseManager {
 			            }
 					}
 				}
+				stmt.close();
+				stmt = null;
 				
 				Relationship relationship = new Relationship(id, type, attributes, geomList);
-				
-				db.close();
 	
 				return relationship;
-			} catch (Exception e) {
-				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
-			return null;
 		}
 	}
 
-	public Object fetchOne(String query){
+	public Object fetchOne(String query) throws Exception {
 		synchronized(DatabaseManager.class) {
+			jsqlite.Database db = null;
+			Stmt stmt = null;
 			try {
-				jsqlite.Database db = new jsqlite.Database();
+				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-				Stmt stmt = db.prepare(query);
+				stmt = db.prepare(query);
 				Collection<String> results = new ArrayList<String>();
 				if(stmt.step()){
 					for(int i = 0; i < stmt.column_count(); i++){
 						results.add(stmt.column_string(i));
 					}
 				}
-				db.close();
-	
+				stmt.close();
+				stmt = null;
+				
 				return results;
-			} catch (jsqlite.Exception e) {
-				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
-			return null;
 		}
 	}
 
-	public Collection<List<String>> fetchAll(String query){
+	public Collection<List<String>> fetchAll(String query) throws Exception {
 		synchronized(DatabaseManager.class) {
+			jsqlite.Database db = null;
+			Stmt stmt = null;
 			try {
-				jsqlite.Database db = new jsqlite.Database();
+				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-				Stmt stmt = db.prepare(query);
+				stmt = db.prepare(query);
 				Collection<List<String>> results = new ArrayList<List<String>>();
 				while(stmt.step()){
 					List<String> result = new ArrayList<String>();
@@ -469,137 +509,108 @@ public class DatabaseManager {
 					}
 					results.add(result);
 				}
-				db.close();
+				stmt.close();
+				stmt = null;
 	
 				return results;
-			} catch (jsqlite.Exception e) {
-				FAIMSLog.log(e);
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
-			return null;
 		}
 	}
 	
 	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {
-		Stmt st = db.prepare("select count(AEntTypeID) from AEntType where AEntTypeName = ? COLLATE NOCASE;");
-		st.bind(1, entity_type);
-		st.step();
-		if (st.column_int(0) == 0) {
-			FAIMSLog.log("entity type does not exist");
-			st.close();
-			return false;
+		Stmt st = null;
+		try {
+			st = db.prepare("select count(AEntTypeID) from AEntType where AEntTypeName = ? COLLATE NOCASE;");
+			st.bind(1, entity_type);
+			st.step();
+			if (st.column_int(0) == 0) {
+				FLog.d("entity type does not exist");
+				return false;
+			}
+		} finally {
+			if (st != null) st.close();
 		}
-		st.close();
 		return true;
 	}
 	
 	private boolean hasEntity(jsqlite.Database db, String entity_id) throws Exception {
-		Stmt st = db.prepare("select count(UUID) from ArchEntity where UUID = ?;");
-		st.bind(1, entity_id);
-		st.step();
-		if (st.column_int(0) == 0) {
-			FAIMSLog.log("entity id " + entity_id + " does not exist");
-			st.close();
-			return false;
+		Stmt st = null;
+		try {
+			st = db.prepare("select count(UUID) from ArchEntity where UUID = ?;");
+			st.bind(1, entity_id);
+			st.step();
+			if (st.column_int(0) == 0) {
+				FLog.d("entity id " + entity_id + " does not exist");
+				return false;
+			}
+		} finally {
+			if (st != null) st.close();
 		}
-		st.close();
 		return true;
 	}
 	
-	/*
-	private void debugSaveArchEnt(jsqlite.Database db, String uuid) throws Exception {
-
-		// Test various queries
-		db.exec("select uuid, AsText(GeoSpatialColumn) from ArchEntity;", createCallback());
-		db.exec("select uuid, valuetimestamp, attributename, freetext, vocabid, measure, certainty from aentvalue left outer join attributekey using (attributeid) where uuid || valuetimestamp || attributeid in (select uuid || max(valuetimestamp) || attributeid from aentvalue group by uuid, attributeid);", createCallback());
-		//db.exec("select attributeid, valuetimestamp from aentvalue where uuid="+uuid+";", cb);
-	}
-	*/
-	
 	private boolean hasRelationshipType(jsqlite.Database db, String rel_type) throws Exception {
-		Stmt st = db.prepare("select count(RelnTypeID) from RelnType where RelnTypeName = ? COLLATE NOCASE;");
-		st.bind(1, rel_type);
-		st.step();
-		if (st.column_int(0) == 0) {
-			FAIMSLog.log("rel type does not exist");
-			st.close();
-			return false;
+		Stmt st = null;
+		try {
+			st = db.prepare("select count(RelnTypeID) from RelnType where RelnTypeName = ? COLLATE NOCASE;");
+			st.bind(1, rel_type);
+			st.step();
+			if (st.column_int(0) == 0) {
+				FLog.d("rel type does not exist");
+				return false;
+			}
+		} finally {
+			if (st != null) st.close();
 		}
-		st.close();
 		return true;
 	}
 	
 	private boolean hasRelationship(jsqlite.Database db, String rel_id) throws Exception {
-		Stmt st = db.prepare("select count(RelationshipID) from Relationship where RelationshipID = ?;");
-		st.bind(1, rel_id);
-		st.step();
-		if (st.column_int(0) == 0) {
-			FAIMSLog.log("rel id " + rel_id + " does not exist");
-			st.close();
-			return false;
-		}
-		st.close();
-		return true;
-	}
-	
-	/*
-	private void debugSaveRel(jsqlite.Database db, String uuid) throws Exception {
-		Callback cb = new Callback() {
-			@Override
-			public void columns(String[] coldata) {
-				FAIMSLog.log("Columns: " + Arrays.toString(coldata));
-			}
-
-			@Override
-			public void types(String[] types) {
-				FAIMSLog.log("Types: " + Arrays.toString(types));
-			}
-
-			@Override
-			public boolean newrow(String[] rowdata) {
-				FAIMSLog.log("Row: " + Arrays.toString(rowdata));
-
+		Stmt st = null;
+		try {
+			st = db.prepare("select count(RelationshipID) from Relationship where RelationshipID = ?;");
+			st.bind(1, rel_id);
+			st.step();
+			if (st.column_int(0) == 0) {
+				FLog.d("rel id " + rel_id + " does not exist");
 				return false;
 			}
-		};
-		
-		// Test various queries
-		db.exec("select RelationshipID, AsText(GeoSpatialColumn) from Relationship;", cb);
-		db.exec("select attributename, vocabname, freetext, RelnValueTimestamp " + 
-				"from RelnValue " +
-				"left outer join attributekey using (attributeid) " + 
-				"left outer join vocabulary using (attributeid) " +
-				"where RelationshipID = " + uuid + " group by RelationshipID, attributeid having max(RelnValueTimestamp);", cb);
+		} finally {
+			if (st != null) st.close();
+		}
+		return true;
 	}
-	*/
 	
 	private Callback createCallback() {
 		return new Callback() {
 			@Override
 			public void columns(String[] coldata) {
-				FAIMSLog.log("Columns: " + Arrays.toString(coldata));
+				FLog.d("Columns: " + Arrays.toString(coldata));
 			}
 
 			@Override
 			public void types(String[] types) {
-				FAIMSLog.log("Types: " + Arrays.toString(types));
+				FLog.d("Types: " + Arrays.toString(types));
 			}
 
 			@Override
 			public boolean newrow(String[] rowdata) {
-				FAIMSLog.log("Row: " + Arrays.toString(rowdata));
+				FLog.d("Row: " + Arrays.toString(rowdata));
 
 				return false;
 			}
 		};
-	}
-
-	private void debugAddReln(Database db, String entity_id, String rel_id) throws Exception {
-		
-		// Test various queries
-		db.exec("select count(UUID) from AEntReln;", createCallback());
-		db.exec("select UUID, RelationshipID, ParticipatesVerb " + 
-				"from AEntReln " +
-				"where uuid = " + entity_id + " and RelationshipID = " + rel_id + ";", createCallback());
 	}
 	
 	private String generateUUID() {
@@ -610,9 +621,9 @@ public class DatabaseManager {
 		return "1"+ s + String.valueOf(System.currentTimeMillis());
 	}
 
-	public void dumpDatabaseTo(File file) throws jsqlite.Exception {
+	public void dumpDatabaseTo(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
-			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
+			FLog.d("dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
 			try {
 				
@@ -633,15 +644,15 @@ public class DatabaseManager {
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
 		}
 	}
 	
-	public void dumpDatabaseTo(File file, String fromTimestamp) throws jsqlite.Exception {
+	public void dumpDatabaseTo(File file, String fromTimestamp) throws Exception {
 		synchronized(DatabaseManager.class) {
-			Log.d("FAIMS", "dumping database to " + file.getAbsolutePath());
+			FLog.d("dumping database to " + file.getAbsolutePath());
 			jsqlite.Database db = null;
 			try {
 				
@@ -662,7 +673,7 @@ public class DatabaseManager {
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
 		}
@@ -678,36 +689,36 @@ public class DatabaseManager {
 			db.exec("select * from archentity;", new Callback() {
 				@Override
 				public void columns(String[] coldata) {
-					FAIMSLog.log("Columns: " + Arrays.toString(coldata));
+					FLog.d("Columns: " + Arrays.toString(coldata));
 				}
 
 				@Override
 				public void types(String[] types) {
-					FAIMSLog.log("Types: " + Arrays.toString(types));
+					FLog.d("Types: " + Arrays.toString(types));
 				}
 
 				@Override
 				public boolean newrow(String[] rowdata) {
-					FAIMSLog.log("Row: " + Arrays.toString(rowdata));
+					FLog.d("Row: " + Arrays.toString(rowdata));
 
 					return false;
 				}
 			});
 			
 		} catch (Exception e) {
-			FAIMSLog.log(e);
+			FLog.e("error dumping database", e);
 		} finally {
 			try {
 				if (db != null) db.close();
 			} catch (Exception e) {
-				FAIMSLog.log(e);
+				FLog.e("error closing database", e);
 			}
 		}
 	}
 
-	public boolean isEmpty(File file) throws jsqlite.Exception {
+	public boolean isEmpty(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
-			Log.d("FAIMS", "checking if database " + file.getAbsolutePath() + " is empty");
+			FLog.d("checking if database " + file.getAbsolutePath() + " is empty");
 			jsqlite.Database db = null;
 			try {
 				
@@ -724,13 +735,13 @@ public class DatabaseManager {
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
 		}
 	}
 	
-	private boolean isTableEmpty(jsqlite.Database db, String table) throws jsqlite.Exception {
+	private boolean isTableEmpty(jsqlite.Database db, String table) throws Exception {
 		Stmt st = null;
 		try {
 			st = db.prepare("select count(*) from " + table + ";");
@@ -743,12 +754,11 @@ public class DatabaseManager {
 		} finally {
 			if (st != null) st.close();
 		}
-		
 	}
 	
-	public void mergeDatabaseFrom(File file) throws jsqlite.Exception {
+	public void mergeDatabaseFrom(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
-			Log.d("FAIMS", "merging database");
+			FLog.d("merging database");
 			jsqlite.Database db = null;
 			try {
 				db = new jsqlite.Database();
@@ -767,7 +777,7 @@ public class DatabaseManager {
 				try {
 					if (db != null) db.close();
 				} catch (Exception e) {
-					FAIMSLog.log(e);
+					FLog.e("error closing database", e);
 				}
 			}
 		}

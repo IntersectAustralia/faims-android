@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import android.util.Log;
 import android.util.SparseArray;
+import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
@@ -62,7 +62,7 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.put(id, p);
 		
-		Log.d("FAIMS", p.toString());
+		FLog.d(p.toString());
 		
 		return id;
 	}
@@ -75,16 +75,12 @@ public class CanvasLayer extends GeometryLayer {
 		objectMap.remove(geomId);
 		
 		geomBuffer.add(geom); // Issue with removing objects when object is still in visible list so buffering objects to be removed later
-		
-		Log.d("FAIMS", "Removed: " + geom.toString());
 	}
 	
 	private void clearGeometryBuffer() {
 		while(geomBuffer.size() > 0) {
 			Geometry geom = geomBuffer.pop();
 			this.remove(geom);
-			
-			Log.d("FAIMS", "Cleared: " + geom.toString());
 		}
 	}
 	
@@ -111,7 +107,7 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.put(id, l);
 		
-		Log.d("FAIMS", l.toString());
+		FLog.d(l.toString());
 		
 		return id;
 	}
@@ -132,7 +128,7 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.put(id, p);
 		
-		Log.d("FAIMS", p.toString());
+		FLog.d(p.toString());
 		
 		return id;
 	}
@@ -220,8 +216,6 @@ public class CanvasLayer extends GeometryLayer {
 		objects.insert(geom.getInternalState().envelope, geom);
 		
 		objectMap.put(geomId, geom);
-		
-		Log.d("FAIMS", geom.toString());
 		
 	}
 

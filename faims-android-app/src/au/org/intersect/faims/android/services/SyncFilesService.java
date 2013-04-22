@@ -3,9 +3,10 @@ package au.org.intersect.faims.android.services;
 import roboguice.RoboGuice;
 import android.content.Intent;
 import android.os.Environment;
-import android.util.Log;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 
@@ -33,12 +34,12 @@ public class SyncFilesService extends MessageIntentService {
 		super.onDestroy();
 		syncStopped = true;
 		faimsClient.interrupt();
-		Log.d("FAIMS", "SyncFilesService: stopping service");
+		FLog.d("stopping service");
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		Log.d("FAIMS", "SyncDatabaseService: starting service");
+		FLog.d("starting service");
 		
 		// 1. upload server directory
 		// 2. upload app directory
@@ -50,7 +51,7 @@ public class SyncFilesService extends MessageIntentService {
 	}
 	
 	private boolean uploadServerDirectory(Intent intent) {
-		Log.d("FAIMS", "SyncFilesService: uploading server directory");
+		FLog.d("uploading server directory");
 		return uploadDirectory(intent, 
 				this.getResources().getString(R.string.server_dir),
 				"server_file_list",
@@ -59,7 +60,7 @@ public class SyncFilesService extends MessageIntentService {
 	}
 	
 	private boolean uploadAppDirectory(Intent intent) {
-		Log.d("FAIMS", "SyncFilesService: uploading app directory");
+		FLog.d("uploading app directory");
 		return uploadDirectory(intent, 
 				this.getResources().getString(R.string.app_dir),
 				"app_file_list",
@@ -68,7 +69,7 @@ public class SyncFilesService extends MessageIntentService {
 	}
 
 	private boolean downloadAppDirectory(Intent intent) {
-		Log.d("FAIMS", "SyncFilesService: downloading app directory");
+		FLog.d("downloading app directory");
 		return downloadDirectory(intent,
 				this.getResources().getString(R.string.app_dir),
 				"app_file_list",
@@ -81,7 +82,7 @@ public class SyncFilesService extends MessageIntentService {
 		FAIMSClientResultCode result = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
 			result = faimsClient.uploadDirectory(projectDir, 
 					uploadDir, 
@@ -98,16 +99,16 @@ public class SyncFilesService extends MessageIntentService {
 				return false;
 			}
 			
-			Log.d("FAIMS", "SyncFilesService: uploading dir " + uploadDir + " success");
+			FLog.d("uploaded dir " + uploadDir + " success");
 			return true;
 		} catch (Exception e) {
-			Log.d("FAIMS", "SyncFilesService: uploading dir " + uploadDir + " error");
+			FLog.e("uploading dir " + uploadDir + " error");
 			result = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			try {
 				sendMessage(intent, type, result);
 			} catch (Exception me) {
-				Log.d("FAIMS", "SyncFilesService: message error", me);
+				FLog.e("error sending message", me);
 			}
 		}
 		return false;
@@ -118,7 +119,7 @@ public class SyncFilesService extends MessageIntentService {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			
-			String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			result = faimsClient.downloadDirectory(projectDir, downloadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
 					"/android/project/" + project.key + "/" + infoPath,
@@ -134,17 +135,17 @@ public class SyncFilesService extends MessageIntentService {
 				return false;
 			}
 			
-			Log.d("FAIMS", "SyncFilesService: downloading dir " + downloadDir + " success");
+			FLog.d("downloading dir " + downloadDir + " success");
 			return true;
 		} catch (Exception e) {
-			Log.d("FAIMS", "SyncFilesService: downloading dir " + downloadDir + " error");
+			FLog.e("downloading dir " + downloadDir + " error");
 			result = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			try {
 				sendMessage(intent, type, result);
 				
 			} catch (Exception me) {
-				Log.d("FAIMS", "SyncFilesService: message error", me);
+				FLog.e("error sending message", me);
 			}
 		}
 		return false;

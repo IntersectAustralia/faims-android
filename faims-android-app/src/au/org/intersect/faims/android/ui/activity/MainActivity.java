@@ -14,7 +14,6 @@ import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
-import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
 public class MainActivity extends RoboActivity {
@@ -24,7 +23,6 @@ public class MainActivity extends RoboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FAIMSLog.log();
         
         setContentView(R.layout.activity_main);
         
@@ -50,7 +48,6 @@ public class MainActivity extends RoboActivity {
     @Override
     protected void onStart() {
     	super.onStart();
-    	FAIMSLog.log();
     	
     	readStoredProjects();
     }
@@ -58,19 +55,16 @@ public class MainActivity extends RoboActivity {
     @Override
     protected void onPause() {
     	super.onPause();
-    	FAIMSLog.log();
     }
     
     @Override
     protected void onStop() {
     	super.onStop();
-    	FAIMSLog.log();
     }
     
     @Override
     protected void onDestroy() {
     	super.onDestroy();
-    	FAIMSLog.log();
     }
 
     @Override
@@ -94,7 +88,6 @@ public class MainActivity extends RoboActivity {
 	 * Open a new activity and shows a list of projects from the server
 	 */
 	private void fetchProjectsFromServer(){
-		FAIMSLog.log();
 		
 		Intent fetchProjectsIntent = new Intent(MainActivity.this, FetchProjectsActivity.class);
 		MainActivity.this.startActivityForResult(fetchProjectsIntent,1);

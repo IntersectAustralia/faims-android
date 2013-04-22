@@ -7,12 +7,13 @@ import roboguice.RoboGuice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.FetchResult;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -46,12 +47,12 @@ public class SyncDatabaseService extends MessageIntentService {
 		super.onDestroy();
 		syncStopped = true;
 		faimsClient.interrupt();
-		Log.d("FAIMS", "SyncDatabaseService: stopping service");
+		FLog.d("stopping service");
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		Log.d("FAIMS", "SyncDatabaseService: starting service");
+		FLog.d("starting service");
 		
 		// 1. upload database to server
 		// 2. download database from server
@@ -61,7 +62,7 @@ public class SyncDatabaseService extends MessageIntentService {
 	}
 
 	private boolean uploadDatabaseToServer(Intent intent) {
-		Log.d("FAIMS", "SyncDatabaseService: uploading database");
+		FLog.d("uploading database");
 		
 		FAIMSClientResultCode result = null;
 		File tempDB = null;
@@ -70,12 +71,12 @@ public class SyncDatabaseService extends MessageIntentService {
 			Bundle extras = intent.getExtras();
 			String userId = intent.getStringExtra("userId");
 			Project project = (Project) extras.get("project");
-			String database = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3";
+			String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
 			
 			// create temp database to upload
 			String dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 			databaseManager.init(database);
-			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key);
+			File outputDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 			tempDB = File.createTempFile("temp_", ".sqlite3", outputDir);
 			if (project.timestamp == null) {
 				databaseManager.dumpDatabaseTo(tempDB);
@@ -85,7 +86,7 @@ public class SyncDatabaseService extends MessageIntentService {
 			
 	    	// check if database is empty
 	    	if (databaseManager.isEmpty(tempDB)) {
-	    		Log.d("FAIMS", "SyncDatabaseService: nothing to upload");
+	    		FLog.d("nothing to upload");
 	    		result = FAIMSClientResultCode.SUCCESS;
 	    		return true;
 	    	}
@@ -113,17 +114,18 @@ public class SyncDatabaseService extends MessageIntentService {
 			
 			if (result != FAIMSClientResultCode.SUCCESS) {
 				faimsClient.invalidate();
-				Log.d("FAIMS", "SyncDatabaseService: upload failure");
+				FLog.d("upload failure");
 				return false;
 			} 
 			
 			project = ProjectUtil.getProject(project.key); // get the latest settings
 			project.timestamp = dumpTimestamp;
 			ProjectUtil.saveProject(project);
-			Log.d("FAIMS", "SyncDatabaseService: upload success");
+			
+			FLog.d("upload success");
 			return true;
 		} catch (Exception e) {
-			Log.e("FAIMS", "SyncDatabaseService: upload error", e);
+			FLog.e("error syncing database", e);
 			result = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			if (tempDB != null) {
@@ -137,14 +139,14 @@ public class SyncDatabaseService extends MessageIntentService {
 			try {
 				sendMessage(intent, MessageType.SYNC_DATABASE_UPLOAD, result);
 			} catch (Exception me) {
-				Log.e("FAIMS", "SyncDatabaseService: message error", me);
+				FLog.e("error sending message", me);
 			}
 		}
 		return false;
 	}
 
 	private boolean downloadDatabaseFromServer(Intent intent) {
-		Log.d("FAIMS", "SyncDatabaseService: downloading database");
+		FLog.d("downloading database");
 		
 		FAIMSClientResultCode result = null;
 		File tempDir = null;
@@ -160,28 +162,28 @@ public class SyncDatabaseService extends MessageIntentService {
 			
 			if (result != FAIMSClientResultCode.SUCCESS) {
 				faimsClient.invalidate();
-				Log.d("FAIMS", "SyncDatabaseService: download failure");
+				FLog.d("download failure");
 				return false;
 			} else {
 				info = (FileInfo) fetchResult.data;
 				int serverVersion = Integer.parseInt(info.version == null ? "0" : info.version);
 				int projectVersion = Integer.parseInt(project.version == null ? "0" : project.version);
 				if (serverVersion == projectVersion) {
-					Log.d("FAIMS", "SyncDatabaseService: already up to date");
+					FLog.d("already up to date");
 					return true;
 				}
 				syncVersion = projectVersion + 1;
 			}
 				
 			// download database from version
-			tempDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/" + UUID.randomUUID());
+			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/" + UUID.randomUUID());
 			tempDir.mkdirs();
 			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());
 			result = downloadResult.code;
 			
 			if (result != FAIMSClientResultCode.SUCCESS) {
 				faimsClient.invalidate();
-				Log.d("FAIMS", "SyncDatabaseService: download failure");
+				FLog.d("download failure");
 				return false;
 			} 
 			
@@ -193,10 +195,10 @@ public class SyncDatabaseService extends MessageIntentService {
 			project.version = downloadResult.info.version;
 			ProjectUtil.saveProject(project);
 			
-			Log.d("FAIMS", "SyncDatabaseService: download success");
+			FLog.d("download success");
 			return true;
 		} catch (Exception e) {
-			Log.e("FAIMS", "SyncDatabaseService: download error", e);
+			FLog.e("error syncing database", e);
 			result = FAIMSClientResultCode.SERVER_FAILURE;
 		} finally {
 			if (tempDir != null) {
@@ -206,7 +208,7 @@ public class SyncDatabaseService extends MessageIntentService {
 			try {
 				sendMessage(intent, MessageType.SYNC_DATABASE_DOWNLOAD, result);
 			} catch (Exception me) {
-				Log.e("FAIMS", "SyncDatabaseServiceL message error", me);
+				FLog.e("error sending message", me);
 			}
 		}
 		return false;

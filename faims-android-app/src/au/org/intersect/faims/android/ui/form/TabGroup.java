@@ -9,15 +9,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
@@ -39,7 +38,7 @@ public class TabGroup extends Fragment {
 	
 	public TabGroup(String archEntType, String relType, IRestoreActionListener actionListener) {
 		if(archEntType != null && relType != null){
-			FAIMSLog.log("tabgroup can only contain either archEntId or relId not both");
+			FLog.w("tabgroup can only contain either archEntId or relId not both");
 		}
 		tabMap = new HashMap<String, Tab>();
 		tabs = new LinkedList<Tab>();
@@ -55,7 +54,6 @@ public class TabGroup extends Fragment {
     		                  ViewGroup container,
                               Bundle savedInstanceState) {	
 		
-		Log.d("FAIMS","TabGroup: " + this.label + " onCreateView()");
 		if (tabHost == null){
 			tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
 			tabHost.setup();
@@ -101,31 +99,6 @@ public class TabGroup extends Fragment {
 		
 		return tabHost;
     }
-	
-	/*
-	private TabSpec createTabSpec(TabHost tabHost, final String name) {
-		TabSpec spec = tabHost.newTabSpec(name);
-		spec.setIndicator(name);
-		
-		final ScrollView scrollView = new ScrollView(this.context);
-		
-        LinearLayout linearLayout = new LinearLayout(context);
-        linearLayout.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-		
-        spec.setContent(new TabContentFactory() {
-
-            @Override
-            public View createTabContent(String tag) {
-            	TextView text =  new TextView(context);
-            	text.setText(name);
-                return text;
-            }
-        });
-        return spec;
-	}
-	*/
 	
 	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
 		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n, reference);

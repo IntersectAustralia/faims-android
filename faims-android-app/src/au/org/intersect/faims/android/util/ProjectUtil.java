@@ -12,15 +12,16 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.os.Environment;
-import android.util.Log;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 
 import com.google.gson.JsonObject;
 
 public class ProjectUtil {
 
 	public static List<Project> getProjects() {
-		final File dir = new File(Environment.getExternalStorageDirectory() + "/faims/projects");
+		final File dir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir);
 		if (!dir.isDirectory()) return null;
 		
 		String[] directories = dir.list(new FilenameFilter() {
@@ -36,7 +37,7 @@ public class ProjectUtil {
 		FileInputStream is = null;
 		
 		for (String dirname : directories) {
-			File f = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + dirname + "/project.settings");
+			File f = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + dirname + "/project.settings");
 			if (f.exists()) {
 				try {
 					is = new FileInputStream(f);
@@ -45,17 +46,17 @@ public class ProjectUtil {
 					Project project = Project.fromJson(object);	
 					list.add(project);
 				} catch (Exception e) {
-					Log.w("FAIMS", "cannot read projects settings " + "/faims/projects/" + dirname + "/project.settings", e);
+					FLog.w("cannot read projects settings " + FaimsSettings.projectsDir + dirname + "/project.settings", e);
 					
 					try {
 						if (is != null)
 							is.close();
 					} catch (IOException ioe) {
-						Log.e("FAIMS", "error closing file stream", ioe);
+						FLog.e("error closing file stream", ioe);
 					}
 				}
 			} else {
-				Log.i("FAIMS", "ignoring directory " + dirname);
+				FLog.i("ignoring directory " + dirname);
 			}
 		}
 		
@@ -84,12 +85,12 @@ public class ProjectUtil {
 
 	public static void saveProject(Project project) {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/project.settings"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/project.settings"));
 	    	writer.write(project.toJson().toString());
 	    	writer.flush();
 	    	writer.close();
 		} catch (IOException e) {
-			Log.e("FAIMS", "Error saving project", e);
+			FLog.e("error saving project", e);
 		}
 	}
 	

@@ -21,7 +21,6 @@ import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -31,8 +30,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.DateUtil;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 /**
  * Class that reads the ui defintion file and render the UI
@@ -120,7 +119,7 @@ public class UIRenderer implements IRestoreActionListener{
 	    		tabGroup.setLabel(tabGroupText);
 	    		
 	    		String tabGroupName = tabGroupCaption.getIndex().getReference().getNameLast();
-	    		FAIMSLog.log(tabGroupName);
+
 	    		tabGroupMap.put(tabGroupName, tabGroup);
 	    		tabGroupList.add(tabGroup);
 	    		
@@ -142,7 +141,6 @@ public class UIRenderer implements IRestoreActionListener{
                                 .getAdditionalAttribute(null, "faims_hidden")), !"false".equals(tabElement
                                         .getAdditionalAttribute(null, "faims_scrollable")), arch16n, tabGroupName + "/" + tabName);	                 
 	                	
-	                	FAIMSLog.log(tabGroupName + "/" + tabName);
 	                    tabMap.put(tabGroupName + "/" + tabName, tab);
 	                    tabList.add(tab);
 	                    
@@ -153,7 +151,6 @@ public class UIRenderer implements IRestoreActionListener{
 	                        String viewName = input.getIndex().getReference().getNameLast();
 	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory, tabGroup.isArchEnt(), tabGroup.isRelationship());
 	                        
-	                        FAIMSLog.log(tabGroupName + "/" + tabName + "/" + viewName);
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
 	                        viewTabMap.put(tabGroupName + "/" + tabName + "/" + viewName, tab);
 	                        viewList.add(view);
@@ -345,11 +342,13 @@ public class UIRenderer implements IRestoreActionListener{
 				}
 			}
 			else {
+				// TODO show warning
 				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field value",e);
+			FLog.e("error getting field value",e);
+			// TODO show warning
 			return null;
 		}
 	}
@@ -384,12 +383,14 @@ public class UIRenderer implements IRestoreActionListener{
 				return String.valueOf(horizontalScrollView.getCurrentCertainty());
 			}
 			else {
+				// TODO show warning
 				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field certainty",e);
-			return "";
+			FLog.e("error getting field certainty",e);
+			// TODO show warning
+			return null;
 		}
 	}
 
@@ -415,11 +416,13 @@ public class UIRenderer implements IRestoreActionListener{
 				return horizontalScrollView.getCurrentAnnotation();
 			}
 			else {
+				// TODO show warning
 				return null;
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception getting field annotation",e);
+			FLog.e("error getting field annotation",e);
+			// TODO show warning
 			return null;
 		}
 	}
@@ -504,6 +507,10 @@ public class UIRenderer implements IRestoreActionListener{
 						}
 					};
 				}
+				else
+				{
+					// TODO show warning
+				}
 			}
 			
 			else if (valueObj instanceof List<?>){
@@ -527,10 +534,19 @@ public class UIRenderer implements IRestoreActionListener{
 						}
 					}
 				}
+				else
+				{
+					// TODO show warning
+				}
+			}
+			else
+			{
+				// TODO show warning
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field value",e);
+			FLog.e("error setting field value",e);
+			// TODO show warning
 		}
 	}
 
@@ -570,11 +586,14 @@ public class UIRenderer implements IRestoreActionListener{
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setCertainty(value);
 					horizontalScrollView.setCurrentCertainty(value);
+				}else {
+					// TODO show warning
 				}
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field certainty",e);
+			FLog.e("error setting field certainty",e);
+			// TODO show warning
 		}
 	}
 
@@ -604,11 +623,14 @@ public class UIRenderer implements IRestoreActionListener{
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setAnnotation(value);
 					horizontalScrollView.setCurrentAnnotation(value);
+				}else {
+					// TODO show warning
 				}
 			}
 		}
 		catch(Exception e){
-			Log.e("FAIMS","Exception setting field annotation",e);
+			FLog.e("error setting field annotation",e);
+			// TODO show warning
 		}
 	}
 

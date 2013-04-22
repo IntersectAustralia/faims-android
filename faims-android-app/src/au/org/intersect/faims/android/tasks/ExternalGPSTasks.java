@@ -9,11 +9,10 @@ import java.lang.reflect.Method;
 
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
-
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
-import android.util.Log;
+import au.org.intersect.faims.android.log.FLog;
 
 public class ExternalGPSTasks implements Runnable {
 
@@ -53,7 +52,7 @@ public class ExternalGPSTasks implements Runnable {
 			readSentences();
 			this.actionListener.handleGPSUpdates(this.GGAMessage, this.BODMessage);
 		}catch(Exception e){
-			Log.d("bluetooth-faims", "run method exception", e);
+			FLog.e("run method exception", e);
 		}
 	}
 
@@ -71,7 +70,7 @@ public class ExternalGPSTasks implements Runnable {
     			}
 				this.bluetoothSocket.close();
 			} catch (IOException e) {
-				Log.d("bluetooth-faims", "close bluetooth connection exception", e);
+				FLog.e("close bluetooth connection exception", e);
 			}
     	}
 	}
@@ -99,7 +98,7 @@ public class ExternalGPSTasks implements Runnable {
 	                }
 	                if (nmeaMessage.startsWith("$GPGGA")) {
 	                    if(hasValidGGAMessage()){
-	                    	Log.d("bluetooth-faims", "valid nmea message");
+	                    	FLog.d("valid nmea message");
 	                        break;
 	                    }else{
 	                        this.GGAMessage = nmeaMessage;
@@ -121,7 +120,7 @@ public class ExternalGPSTasks implements Runnable {
     				in.close();
     			}
 	        } catch (Exception e) {
-	        	Log.d("bluetooth-faims", "init connection exception", e);
+	        	FLog.e("init connection exception", e);
 	        	if(this.bluetoothSocket != null){
 	        		try {
 	        			if(this.br != null){
@@ -136,12 +135,12 @@ public class ExternalGPSTasks implements Runnable {
 						this.bluetoothSocket.close();
 						this.bluetoothSocket = null;
 					} catch (IOException exception) {
-						Log.d("bluetooth-faims", "closing streams exception", e);
+						FLog.e("closing streams exception", e);
 					}
 	        	}
 			}
         }else{
-        	Log.d("bluetooth-faims", "null gps device");
+        	FLog.d("null gps device");
         }
     }
 
@@ -163,7 +162,7 @@ public class ExternalGPSTasks implements Runnable {
 	        }
         	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
         } catch (Exception e){
-        	Log.d("bluetooth-faims", "wrong gga format sentence", e);
+        	FLog.e("wrong gga format sentence", e);
         	return false;
         }
     }

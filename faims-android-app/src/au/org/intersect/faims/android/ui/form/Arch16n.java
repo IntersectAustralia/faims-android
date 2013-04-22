@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 
-import au.org.intersect.faims.android.util.FAIMSLog;
+import au.org.intersect.faims.android.log.FLog;
 
 public class Arch16n {
 
@@ -29,7 +29,7 @@ public class Arch16n {
 				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));
 			}
 		} catch (FileNotFoundException e) {
-			FAIMSLog.log("Required faims.properties is not found in the project");
+			FLog.d("Required faims.properties is not found in the project");
 		} catch (IOException e) {
 		}
 		

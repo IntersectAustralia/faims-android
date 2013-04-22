@@ -5,8 +5,9 @@ import java.io.File;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.FileUtil;
 
@@ -28,12 +29,12 @@ public class UploadDatabaseService extends UploadService {
 			String userId = intent.getStringExtra("userId");
 			Bundle extras = intent.getExtras();
 			Project project = (Project) extras.get("project");
-			String database = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key + "/db.sqlite3";
+			String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
 			
 			// create temp database to upload
 			databaseManager.init(database);
 			
-			File outputDir = new File(Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key);
+			File outputDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 			
 	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
 	    	
@@ -41,12 +42,12 @@ public class UploadDatabaseService extends UploadService {
 	    	
 	    	// check if database is empty
 	    	if (databaseManager.isEmpty(tempFile)) {
-	    		Log.d("FAIMS", "database is empty");
+	    		FLog.d("database is empty");
 	    		return FAIMSClientResultCode.SUCCESS;
 	    	}
 	    	
 	    	if (uploadStopped) {
-	    		Log.d("FAIMS", "upload cancelled");
+	    		FLog.d("upload cancelled");
 	    		return null; 
 	    	}
 	    	
@@ -55,7 +56,7 @@ public class UploadDatabaseService extends UploadService {
 	    	FileUtil.tarFile(tempFile.getAbsolutePath(), file.getAbsolutePath());
 	    	
 	    	if (uploadStopped) {
-	    		Log.d("FAIMS", "upload cancelled");
+	    		FLog.d("upload cancelled");
 	    		return null;
 	    	}
 	    	

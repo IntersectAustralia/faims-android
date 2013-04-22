@@ -33,16 +33,17 @@ import android.os.Messenger;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.MessageResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.ShowProjectActivityData;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
-import au.org.intersect.faims.android.managers.DatabaseManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
@@ -62,7 +63,6 @@ import au.org.intersect.faims.android.ui.form.BeanShellLinker;
 import au.org.intersect.faims.android.ui.form.CustomMapView;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
-import au.org.intersect.faims.android.util.FAIMSLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
@@ -89,7 +89,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		public void handleMessage(Message message) {
 			ShowProjectActivity activity = activityRef.get();
 			if (activity == null) {
-				Log.d("FAIMS", "ShowProjectActivityHandler cannot get activity");
+				FLog.d("ShowProjectActivityHandler cannot get activity");
 				return;
 			}
 			
@@ -237,12 +237,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		public void onReceive(Context context, Intent intent) {
 			ShowProjectActivity activity = this.activityRef.get();
 			if (activity == null) {
-				Log.d("FAIMS", "WifiBroadcastReciever cannot get activity");
+				FLog.d("WifiBroadcastReciever cannot get activity");
 				return;
 			}
 			
 		    final String action = intent.getAction();
-		    Log.d("FAIMS", "WifiBroadcastReceiver action " + action);
+		    FLog.d("WifiBroadcastReceiver action " + action);
 		    
 		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
 		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
@@ -322,7 +322,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		FAIMSLog.log();
 		
 		// inject faimsClient and serverDiscovery
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
@@ -338,7 +337,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		this.projectKey = project.key;
 		
-		String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + project.key;
+		String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
 		this.data = new ShowProjectActivityData();
@@ -490,7 +489,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					
 		            linker.setLastSelectedFile(files.get(0));
 				} catch (Exception e) {
-					Log.e("FAIMS", "Error getting selected filename", e);
+					FLog.e("error getting selected filename", e);
 				}
 			}
 		}
@@ -522,9 +521,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	protected void renderUI(Bundle savedInstanceState) {
 		try {
-			String projectDir = Environment.getExternalStorageDirectory() + "/faims/projects/" + projectKey;
+			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
 			
-			Log.d("FAIMS", "loading schema: " + projectDir + "/ui_schema.xml");
+			FLog.d("loading schema: " + projectDir + "/ui_schema.xml");
 			
 			// Read, validate and parse the xforms
 			ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
@@ -533,7 +532,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 			// render the ui definition
 			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-			ShowProjectActivity.this.renderer.createUI("/faims/projects/" + projectKey);
+			ShowProjectActivity.this.renderer.createUI(FaimsSettings.projectsDir + projectKey);
 			if(savedInstanceState == null){
 				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 			}
@@ -541,13 +540,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			Project project = ProjectUtil.getProject(projectKey);
 			
 			// bind the logic to the ui
-			Log.d("FAIMS","Binding logic to the UI");
+			FLog.d("Binding logic to the UI");
 			linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
 			linker.setBaseDir(projectDir);
 			linker.sourceFromAssets("ui_commands.bsh");
 			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
 		} catch (Exception e) {
-			Log.e("FAIMS", "could not render ui", e);
+			FLog.e("error rendering ui", e);
 			
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			
@@ -567,7 +566,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void downloadDatabaseFromServer(final String callback) {
-		FAIMSLog.log();
 		
 		if (serverDiscovery.isServerHostValid()) {
 			showBusyDownloadDatabaseDialog();
@@ -605,7 +603,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void uploadDatabaseToServer(final String callback) {
-    	FAIMSLog.log();
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyUploadDatabaseDialog();
@@ -797,7 +794,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void stopSync() {
-		Log.d("FAIMS", "stopping sync");
+		FLog.d("stopping sync");
 		
 		syncActive = false;
 		
@@ -830,7 +827,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void startSync() {
-		Log.d("FAIMS", "starting sync");
+		FLog.d("starting sync");
 		
 		if (wifiConnected) {
 			syncActive = true;
@@ -840,7 +837,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			setSyncIndicatorVisible(true);
 		} else {
 			setSyncIndicatorVisible(false);
-			Log.d("FAIMS", "cannot start sync wifi disabled");
+			FLog.d("cannot start sync wifi disabled");
 		}
 	}
 	
@@ -861,7 +858,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 						
 					});
 				} catch (Exception e) {
-					Log.d("FAIMS", "sync error", e);
+					FLog.d("sync error", e);
 				}
 			}
 			
@@ -871,7 +868,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private void waitForNextSync() {
 		if (!syncActive) return;
 		
-		Log.d("FAIMS", "waiting for sync interval");
+		FLog.d("waiting for sync interval");
 		
 		TimerTask task = new TimerTask() {
 
@@ -887,8 +884,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	private void syncLocateServer() {
-		Log.d("FAIMS", "sync locating server");
-		Log.d("FAIMS", "userid : " + databaseManager.getUserId());
+		FLog.d("sync locating server");
+		FLog.d("userid : " + databaseManager.getUserId());
 		if (serverDiscovery.isServerHostValid()) {
 			startSyncingDatabase();
 		} else {
@@ -917,7 +914,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	private void startSyncingDatabase() {
-		Log.d("FAIMS", "start syncing database");
+		FLog.d("start syncing database");
 		
 		// handler must be created on ui thread
 		runOnUiThread(new Runnable() {
@@ -935,7 +932,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("project", project);
 				String userId = databaseManager.getUserId();
-				Log.d("upload", "user id : " + userId);
+				FLog.d("user id : " + userId);
 				if (userId == null) {
 					userId = "0"; // TODO: what should happen if user sets no user?
 				}
@@ -1021,7 +1018,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private boolean isServiceRunning(Class c) {
 	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	    	Log.d("FAIMS", service.service.getClassName());
+	    	FLog.d(service.service.getClassName());
 	        if (c.getName().equals(service.service.getClass().getName())) {
 	            return true;
 	        }
@@ -1056,7 +1053,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	private void startSyncingFiles() {
-		Log.d("FAIMS", "start syncing files");
+		FLog.d("start syncing files");
 		
 		// handler must be created on ui thread
 		runOnUiThread(new Runnable() {

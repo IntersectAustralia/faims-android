@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.util.FAIMSLog;
 
 
 public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
@@ -24,7 +23,6 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	
 	@Override
 	protected Void doInBackground(Void... values) {
-		FAIMSLog.log();
 		
 		projects = new LinkedList<Project>();
 		errorCode = faimsClient.fetchProjectList(projects);
@@ -34,7 +32,6 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	
 	@Override
 	protected void onPostExecute(Void v) {
-		FAIMSLog.log();
 		
 		ActionResultCode code = null;
 		

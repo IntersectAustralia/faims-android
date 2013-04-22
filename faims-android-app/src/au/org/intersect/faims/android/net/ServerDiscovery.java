@@ -18,7 +18,7 @@ import android.app.Application;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.util.FAIMSLog;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.gson.JsonObject;
@@ -80,16 +80,12 @@ public class ServerDiscovery {
 	}
 	
 	public synchronized void stopDiscovery() {
-		FAIMSLog.log();
-		
 		killThreads();
 	}
 	
 	public synchronized void startDiscovery(ServerDiscoveryListener listener) {
-		FAIMSLog.log();
-		
 		if (isServerHostValid()) {
-			FAIMSLog.log("WARNING: server is already valid");
+			FLog.w("server is already valid");
 			listener.handleDiscoveryResponse(true);
 			return ;
 		}
@@ -105,7 +101,8 @@ public class ServerDiscovery {
 		
 		// wait for discovery time before killing search
 		if (timer != null) {
-			FAIMSLog.log("WARNING: already looking for server");
+			FLog.w("already looking for server");
+			return ;
 		}
 		
 		timer = new Timer();
@@ -113,8 +110,6 @@ public class ServerDiscovery {
 
 			@Override
 			public void run() {
-				FAIMSLog.log();
-				
 				killThreads();
 			}
 			
@@ -122,7 +117,6 @@ public class ServerDiscovery {
 	}
 	
 	private void killThreads() {
-		FAIMSLog.log();
 		
 		if (timer != null) {
 			timer.cancel();
@@ -141,7 +135,6 @@ public class ServerDiscovery {
 	}
 	
 	private void startReceiverThread() {
-		FAIMSLog.log();
 		
 		new Thread(new Runnable() {
 			
@@ -163,16 +156,14 @@ public class ServerDiscovery {
 						}
 					}
 						
-				} catch(SocketException e) {
-					FAIMSLog.log(e);
-				} catch(IOException e) {
-					FAIMSLog.log(e);
+				} catch(Exception e) {
+					FLog.e("error listening for packets", e);
 				} finally {
 					if (socket != null) socket.close();
 					try {
 						if (channel != null) channel.close();
 					} catch (IOException e) {
-						FAIMSLog.log(e);
+						FLog.e("error closing channel", e);
 					}
 				}
 			}
@@ -181,7 +172,6 @@ public class ServerDiscovery {
 	}
 	
 	private void startBroadcastThread() {
-		FAIMSLog.log();
 		
 		new Thread(new Runnable() {
 			
@@ -194,19 +184,14 @@ public class ServerDiscovery {
 						Thread.sleep(1000);
 					}
 						
-				} catch(SocketException e) {
-					FAIMSLog.log(e);
-				} catch(IOException e) {
-					FAIMSLog.log(e);
-				} catch(InterruptedException e) {
-					FAIMSLog.log(e);
+				} catch(Exception e) {
+					FLog.e("error broadcasting packets", e);
 				}
 			}
 		}).start();
 	}
 	
 	private void sendBroadcast() throws SocketException, IOException {
-		FAIMSLog.log();
 		
 		DatagramSocket s = new DatagramSocket();
 		try {
@@ -220,17 +205,15 @@ public class ServerDiscovery {
 	    	
 	    	s.send(p);
 	    	
-	    	FAIMSLog.log("AndroidIP: " + getIPAddress());
-	    	FAIMSLog.log("AndroidPort: " + getDevicePort());
+	    	FLog.d("AndroidIP: " + getIPAddress());
+	    	FLog.d("AndroidPort: " + getDevicePort());
 		} finally {
 			s.close();
 		}
 	}
 	
 	private void receivePacket(DatagramSocket r) throws SocketException, IOException {
-		FAIMSLog.log();
 		
-		//DatagramSocket r = new DatagramSocket(getDevicePort());
 		try {
 			r.setSoTimeout(getPacketTimeout());
 			
@@ -246,10 +229,10 @@ public class ServerDiscovery {
 	        if (data.has("server_port"))
 	        	serverPort = data.get("server_port").getAsString();
 	        
-	        FAIMSLog.log("ServerIP: " + serverIP);
-	        FAIMSLog.log("ServerPort: " + serverPort);
+	        FLog.d("ServerIP: " + serverIP);
+	        FLog.d("ServerPort: " + serverPort);
 		} finally {
-			//r.close();
+			
 		}
 	}
 	
@@ -257,7 +240,7 @@ public class ServerDiscovery {
 		WifiManager wifiManager = (WifiManager) application.getSystemService(Application.WIFI_SERVICE);
     	DhcpInfo myDhcpInfo = wifiManager.getDhcpInfo();
     	if (myDhcpInfo == null) {
-    		FAIMSLog.log("could not determine device ip");
+    		FLog.d("could not determine device ip");
     		return null;
     	}
     	int broadcast = myDhcpInfo.ipAddress;
@@ -288,7 +271,6 @@ public class ServerDiscovery {
 	}
 	
 	private String getPacketDataAsString(DatagramPacket packet) throws IOException {
-		FAIMSLog.log();
 		
 		InputStreamReader reader = null;
 		try {

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import android.os.Environment;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 
 import com.google.gson.JsonObject;
 
@@ -16,7 +17,7 @@ public class TestProjectUtil {
 
 	public static void createProject(String name, String key) {
 		try {
-			String dir = Environment.getExternalStorageDirectory() + "/faims/projects/" + key;
+			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + key;
 			File file = new File(dir);
 			if (!file.isDirectory())
 				file.mkdirs();
@@ -41,7 +42,7 @@ public class TestProjectUtil {
 	
 	public static void createProjectFrom(String name, String key, String dirname) {
 		try {
-			String dir = Environment.getExternalStorageDirectory() + "/faims/projects/" + key;
+			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + key;
 			File file = new File(dir);
 			if (!file.isDirectory())
 				file.mkdirs();
