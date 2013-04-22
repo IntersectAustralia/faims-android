@@ -65,6 +65,7 @@ public class UploadDatabaseService extends UploadService {
 			
 		} finally {
 			if (tempFile != null) tempFile.delete();
+			if (file != null) file.delete();
 		}
 	}
 

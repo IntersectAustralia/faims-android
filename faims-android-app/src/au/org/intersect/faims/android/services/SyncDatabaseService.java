@@ -76,8 +76,10 @@ public class SyncDatabaseService extends MessageIntentService {
 			// create temp database to upload
 			String dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 			databaseManager.init(database);
+			
 			File outputDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 			tempDB = File.createTempFile("temp_", ".sqlite3", outputDir);
+			
 			if (project.timestamp == null) {
 				databaseManager.dumpDatabaseTo(tempDB);
 			} else {
