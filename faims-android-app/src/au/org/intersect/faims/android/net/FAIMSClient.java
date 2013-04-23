@@ -292,7 +292,7 @@ public class FAIMSClient {
 				
 				// unpack into temp directory
 				
-				tempDir = new File(dir + "/" + UUID.randomUUID());
+				tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + "temp_" + UUID.randomUUID());
 				tempDir.mkdirs();
 				
 				FileUtil.untarFile(tempDir.getAbsolutePath(), downloadFileIS);
@@ -367,7 +367,7 @@ public class FAIMSClient {
 	
 	private File downloadArchive(String path, FileInfo archive) throws Exception {
 		InputStream stream = null;
-		
+		File tempFile = null;
 		try {
 			HttpParams params = new BasicHttpParams();
 			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
@@ -385,7 +385,7 @@ public class FAIMSClient {
 			
 	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir); // make sure directory exists
 			
-	    	File tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
 			FileUtil.saveFile(stream, tempFile.getAbsolutePath());
 			
@@ -413,6 +413,10 @@ public class FAIMSClient {
 			return tempFile;
 		} finally {
 			if (stream != null) stream.close();
+			
+			if (isInterrupted && tempFile != null) {
+				tempFile.delete();
+			}
 		}
 	}
 	
@@ -493,7 +497,7 @@ public class FAIMSClient {
 					return Result.SUCCESS;
 				}
 				
-				uploadFileRef = new File(projectDir + "/" + UUID.randomUUID());
+				uploadFileRef = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 				
 				uploadFileOS = FileUtil.createTarOutputStream(uploadFileRef.getAbsolutePath());
 				

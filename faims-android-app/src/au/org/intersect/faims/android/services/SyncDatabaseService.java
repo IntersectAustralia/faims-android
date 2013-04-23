@@ -113,8 +113,7 @@ public class SyncDatabaseService extends IntentService {
 			String dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 			databaseManager.init(database);
 			
-			File outputDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
-			tempDB = File.createTempFile("temp_", ".sqlite3", outputDir);
+			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 			
 			if (project.timestamp == null) {
 				databaseManager.dumpDatabaseTo(tempDB);
@@ -134,14 +133,11 @@ public class SyncDatabaseService extends IntentService {
 	    	} 
 	    	
 		    // tar file
-	    	tempProject = File.createTempFile("temp_", ".tar.gz", outputDir);
+	    	tempProject = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
 	    	os = FileUtil.createTarOutputStream(tempProject.getAbsolutePath());
 	    	
 		    FileUtil.tarFile(tempDB.getAbsolutePath(), os);
-		    
-		    // note: no need to close file stream as tar file will close the stream when finished
-		    os = null;
 		    
 		    if (syncStopped) {
 	    		FLog.d("sync cancelled");
@@ -224,7 +220,7 @@ public class SyncDatabaseService extends IntentService {
 			}
 				
 			// download database from version
-			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/" + UUID.randomUUID());
+			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + "temp_" + UUID.randomUUID());
 			tempDir.mkdirs();
 			
 			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());

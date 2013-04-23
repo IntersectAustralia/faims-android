@@ -30,9 +30,7 @@ public class UploadDatabaseService extends UploadService {
 			// create temp database to upload
 			databaseManager.init(database);
 			
-			File outputDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
-			
-	    	tempFile = File.createTempFile("temp_", ".sqlite3", outputDir);
+	    	tempFile = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
 	    	dumpDatabase(tempFile, project);
 	    	
@@ -48,7 +46,7 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	// tar file
-	    	file = File.createTempFile("temp_", ".tar.gz", outputDir);
+	    	file = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
 	    	os = FileUtil.createTarOutputStream(file.getAbsolutePath());
 	    	
