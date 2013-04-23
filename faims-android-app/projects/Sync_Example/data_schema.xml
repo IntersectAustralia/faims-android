@@ -36,7 +36,7 @@
     <property type="integer" name="value" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="string" name="filename" isIdentifier="true">
+    <property type="file" name="filename" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
     <property type="timestamp" name="timestamp" isIdentifier="true">

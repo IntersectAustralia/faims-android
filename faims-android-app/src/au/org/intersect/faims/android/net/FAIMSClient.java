@@ -66,6 +66,8 @@ public class FAIMSClient {
 		if (httpClient == null) {
 			isInterrupted = false;
 			uploadFileRef = null;
+			uploadFileOS = null;
+			downloadFileIS = null;
 			String userAgent = InetAddress.getLocalHost().toString();
 			httpClient = AndroidHttpClient.newInstance(userAgent);
 		}
@@ -629,6 +631,16 @@ public class FAIMSClient {
 			isInterrupted = true;
 			if (uploadFileRef != null) {
 				uploadFileRef.delete();
+			}
+			try {
+				if (uploadFileOS != null) uploadFileOS.close();
+			} catch (Exception e) {
+				FLog.e("erorr closing stream", e);
+			}
+			try {
+				if (downloadFileIS != null) downloadFileIS.close();
+			} catch (Exception e) {
+				FLog.e("erorr closing stream", e);
 			}
 			httpClient.getConnectionManager().shutdown();
 		}

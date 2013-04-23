@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.services;
 
+import java.io.File;
+
 import roboguice.RoboGuice;
 import android.app.IntentService;
 import android.content.Intent;
@@ -79,6 +81,17 @@ public class SyncFilesService extends IntentService {
 		}
 	}
 	
+	private void waitIfLocked(String projectDir) {
+		try {
+			while(new File(projectDir + "/.lock").exists()) {
+				FLog.d("waiting for project to be unlocked");
+				Thread.sleep(1000);
+			}
+		} catch (InterruptedException e) {
+			FLog.e("interrupted wait", e);
+		}
+	}
+	
 	private Result uploadServerDirectory(Intent intent) {
 		FLog.d("uploading server directory");
 		return uploadDirectory(intent, 
@@ -109,6 +122,8 @@ public class SyncFilesService extends IntentService {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
+			waitIfLocked(projectDir);
+			
 			Result uploadResult = faimsClient.uploadDirectory(projectDir, 
 					uploadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
@@ -138,8 +153,10 @@ public class SyncFilesService extends IntentService {
 	private Result downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
-			
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			
+			waitIfLocked(projectDir);
+			
 			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
 					"/android/project/" + project.key + "/" + infoPath,

@@ -2259,32 +2259,49 @@ public class BeanShellLinker {
 	}
 	
 	public String attachFile(String filePath, boolean sync, String dir) {
-		if (!new File(filePath).exists()) {
-			showWarning("Logic Error", "Error cannot find file " + filePath);
+		File lock = null;
+		try {
+			if (!new File(filePath).exists()) {
+				showWarning("Logic Error", "Error cannot find file " + filePath);
+				return null;
+			}
+			
+			String attachFile = "";
+			
+			if (sync) {
+				attachFile += activity.getResources().getString(R.string.app_dir);
+			} else {
+				attachFile += activity.getResources().getString(R.string.server_dir);
+			}
+			
+			if (dir != null && !"".equals(dir)) {
+				attachFile += "/" + dir;
+			}
+			
+			// create directories
+			FileUtil.makeDirs(baseDir + "/" + attachFile);
+			
+			// create random file path
+			attachFile += "/" + UUID.randomUUID();
+			
+			// TODO create manager to lock the current project
+			lock = new File(baseDir + "/.lock");
+			
+			FileUtil.touch(lock);
+			
+			new CopyFileTask(filePath, baseDir + "/" + attachFile).execute();
+			
+			lock.delete();
+			
+			return attachFile;
+		} catch (Exception e) {
+			FLog.e("error attaching file " + filePath, e);
 			return null;
+		} finally {
+			if (lock != null) {
+				lock.delete();
+			}
 		}
-		
-		String attachFile = "";
-		
-		if (sync) {
-			attachFile += activity.getResources().getString(R.string.app_dir);
-		} else {
-			attachFile += activity.getResources().getString(R.string.server_dir);
-		}
-		
-		if (dir != null && !"".equals(dir)) {
-			attachFile += "/" + dir;
-		}
-		
-		// create directories
-		FileUtil.makeDirs(baseDir + "/" + attachFile);
-		
-		// create random file path
-		attachFile += "/" + UUID.randomUUID();
-		
-		new CopyFileTask(filePath, baseDir + "/" + attachFile).execute();
-		
-		return attachFile;
 	}
 
 	public void storeBeanShellData(Bundle savedInstanceState) {

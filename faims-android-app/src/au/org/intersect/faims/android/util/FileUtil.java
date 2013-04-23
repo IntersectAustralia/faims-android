@@ -356,6 +356,18 @@ public class FileUtil {
 		file.renameTo(new File(dir + file.getName()));
 	}
 
+	public static void touch(File lock) {
+		try
+	    {
+	        if (!lock.exists())
+	            new FileOutputStream(lock).close();
+	        lock.setLastModified(System.currentTimeMillis());
+	    }
+	    catch (IOException e)
+	    {
+	    }
+	}
+
 	
 }
 
