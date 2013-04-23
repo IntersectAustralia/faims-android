@@ -2204,7 +2204,8 @@ public class BeanShellLinker {
 	}
 	
 	public String attachFile(String filePath, boolean sync, String dir) {
-		if (!new File(filePath).exists()) {
+		File file = new File(filePath);
+		if (!file.exists()) {
 			showWarning("Logic Error", "Attach file cannot find file.");
 			return null;
 		}
@@ -2225,7 +2226,7 @@ public class BeanShellLinker {
 		FileUtil.makeDirs(baseDir + "/" + attachFile);
 		
 		// create random file path
-		attachFile += "/" + UUID.randomUUID();
+		attachFile += "/" + UUID.randomUUID() + "_" + file.getName();
 		
 		new CopyFileTask(filePath, baseDir + "/" + attachFile).execute();
 		
