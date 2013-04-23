@@ -4,6 +4,7 @@ import group.pals.android.lib.ui.filechooser.FileChooserActivity;
 import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ import au.org.intersect.faims.android.services.DownloadDatabaseService;
 import au.org.intersect.faims.android.services.SyncDatabaseService;
 import au.org.intersect.faims.android.services.SyncFilesService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
+import au.org.intersect.faims.android.tasks.CopyFileTask;
 import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
@@ -1119,5 +1121,37 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			gpsDataManager.startInternalGPSListener();
 		}
 		this.databaseManager.setUserId(this.data.getUserId());
+	}
+
+	// TODO think about what happens if copy fails
+	public void copyFile(final String fromFile, final String toFile) {
+		final String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
+		
+		File lock = null;
+		try {
+			
+			// TODO create manager to lock the current project
+			lock = new File(projectDir + "/.lock");
+			FileUtil.touch(lock);
+			FLog.d("locked: " + lock.exists());
+			
+			new CopyFileTask(fromFile, toFile, new ITaskListener() {
+	
+				@Override
+				public void handleTaskCompleted(Object result) {
+					File f = new File(projectDir + "/.lock");
+					if (f.exists()) f.delete();
+					FLog.d("locked: " + f.exists());
+				}
+				
+			}).execute();
+			
+		} catch (Exception e) {
+			FLog.e("error copying file", e);
+		} finally {
+			if (lock != null) {
+				lock.delete();
+			}
+		}
 	}
 }

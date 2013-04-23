@@ -10,10 +10,12 @@ public class CopyFileTask extends AsyncTask<Void, Void, Void> {
 	
 	private String fromPath;
 	private String toPath;
+	private ITaskListener listener;
 
-	public CopyFileTask(String fromPath, String toPath) {
+	public CopyFileTask(String fromPath, String toPath, ITaskListener listener) {
 		this.fromPath = fromPath;
 		this.toPath = toPath;
+		this.listener = listener;
 	}
 
 	@Override
@@ -32,6 +34,11 @@ public class CopyFileTask extends AsyncTask<Void, Void, Void> {
 	protected void onCancelled() {
 		File file = new File(toPath);
 		if (file.exists()) file.delete();
+	}
+	
+	@Override
+	protected void onPostExecute(Void v) {
+		listener.handleTaskCompleted(null);
 	}
 
 }

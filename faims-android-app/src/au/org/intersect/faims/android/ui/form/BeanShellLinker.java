@@ -46,7 +46,6 @@ import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
-import au.org.intersect.faims.android.tasks.CopyFileTask;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -2259,7 +2258,6 @@ public class BeanShellLinker {
 	}
 	
 	public String attachFile(String filePath, boolean sync, String dir) {
-		File lock = null;
 		try {
 			if (!new File(filePath).exists()) {
 				showWarning("Logic Error", "Error cannot find file " + filePath);
@@ -2284,23 +2282,12 @@ public class BeanShellLinker {
 			// create random file path
 			attachFile += "/" + UUID.randomUUID();
 			
-			// TODO create manager to lock the current project
-			lock = new File(baseDir + "/.lock");
-			
-			FileUtil.touch(lock);
-			
-			new CopyFileTask(filePath, baseDir + "/" + attachFile).execute();
-			
-			lock.delete();
+			activity.copyFile(filePath, baseDir + "/" + attachFile);
 			
 			return attachFile;
 		} catch (Exception e) {
 			FLog.e("error attaching file " + filePath, e);
 			return null;
-		} finally {
-			if (lock != null) {
-				lock.delete();
-			}
 		}
 	}
 
