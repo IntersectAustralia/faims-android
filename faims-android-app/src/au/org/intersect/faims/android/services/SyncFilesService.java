@@ -1,18 +1,24 @@
 package au.org.intersect.faims.android.services;
 
 import roboguice.RoboGuice;
+import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
+import android.os.Messenger;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.Result;
 
 import com.google.inject.Inject;
 
-public class SyncFilesService extends MessageIntentService {
+public class SyncFilesService extends IntentService {
 
 	@Inject
 	FAIMSClient faimsClient;
@@ -45,110 +51,114 @@ public class SyncFilesService extends MessageIntentService {
 		// 2. upload app directory
 		// 3. download app directory
 		
-		if (!uploadServerDirectory(intent)) return;
-		if (!uploadAppDirectory(intent)) return;
-		if (!downloadAppDirectory(intent)) return;
+		Result uploadServerResult = uploadServerDirectory(intent);
+		if (uploadServerResult.resultCode != FAIMSClientResultCode.SUCCESS) {
+			sendMessage(intent, uploadServerResult);
+			return;
+		}
+		
+		Result uploadAppResult = uploadAppDirectory(intent);
+		if (uploadAppResult.resultCode != FAIMSClientResultCode.SUCCESS) {
+			sendMessage(intent, uploadAppResult);
+			return;
+		}
+		
+		Result downloadAppResult = downloadAppDirectory(intent);
+		sendMessage(intent, downloadAppResult);
 	}
 	
-	private boolean uploadServerDirectory(Intent intent) {
+	private void sendMessage(Intent intent, Result result) {
+		try {
+			Bundle extras = intent.getExtras();
+			Messenger messenger = (Messenger) extras.get("MESSENGER");
+			Message msg = Message.obtain();
+			msg.obj = result;
+			messenger.send(msg);
+		} catch (Exception me) {
+			FLog.e("error sending message", me);
+		}
+	}
+	
+	private Result uploadServerDirectory(Intent intent) {
 		FLog.d("uploading server directory");
 		return uploadDirectory(intent, 
 				this.getResources().getString(R.string.server_dir),
 				"server_file_list",
-				"server_file_upload",
-				MessageType.SYNC_UPLOAD_SERVER_FILES);
+				"server_file_upload");
 	}
 	
-	private boolean uploadAppDirectory(Intent intent) {
+	private Result uploadAppDirectory(Intent intent) {
 		FLog.d("uploading app directory");
 		return uploadDirectory(intent, 
 				this.getResources().getString(R.string.app_dir),
 				"app_file_list",
-				"app_file_upload",
-				MessageType.SYNC_UPLOAD_APP_FILES);
+				"app_file_upload");
 	}
 
-	private boolean downloadAppDirectory(Intent intent) {
+	private Result downloadAppDirectory(Intent intent) {
 		FLog.d("downloading app directory");
 		return downloadDirectory(intent,
 				this.getResources().getString(R.string.app_dir),
 				"app_file_list",
 				"app_file_archive",
-				"app_file_download", 
-				MessageType.SYNC_DOWNLOAD_APP_FILES);
+				"app_file_download");
 	}
 
-	private boolean uploadDirectory(Intent intent, String uploadDir, String requestExcludePath, String uploadPath, MessageType type) {
-		FAIMSClientResultCode result = null;
+	private Result uploadDirectory(Intent intent, String uploadDir, String requestExcludePath, String uploadPath) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
-			result = faimsClient.uploadDirectory(projectDir, 
+			Result uploadResult = faimsClient.uploadDirectory(projectDir, 
 					uploadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
 					"/android/project/" + project.key + "/" + uploadPath);
-
-			if (syncStopped) {
-				result = null;
-				return false;
-			}
 			
-			if (result != FAIMSClientResultCode.SUCCESS) {
+			if (syncStopped) {
+	    		FLog.d("sync cancelled");
+	    		return Result.INTERRUPTED;
+	    	}
+			
+			if (uploadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
-				return false;
+				FLog.d("upload failure");
+				return uploadResult;
 			}
 			
 			FLog.d("uploaded dir " + uploadDir + " success");
-			return true;
+			return uploadResult;
 		} catch (Exception e) {
 			FLog.e("uploading dir " + uploadDir + " error");
-			result = FAIMSClientResultCode.SERVER_FAILURE;
+			return Result.FAILURE;
 		} finally {
-			try {
-				sendMessage(intent, type, result);
-			} catch (Exception me) {
-				FLog.e("error sending message", me);
-			}
+			
 		}
-		return false;
 	}
 	
-	private boolean downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath, MessageType type) {
-		FAIMSClientResultCode result = null;
+	private Result downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
-			result = faimsClient.downloadDirectory(projectDir, downloadDir, 
+			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
 					"/android/project/" + project.key + "/" + infoPath,
 					"/android/project/" + project.key + "/" + downloadPath);
-			
-			if (syncStopped) {
-				result = null;
-				return false;
-			}
 		
-			if (result != FAIMSClientResultCode.SUCCESS) {
+			if (downloadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
-				return false;
+				FLog.d("download failure");
+				return downloadResult;
 			}
 			
 			FLog.d("downloading dir " + downloadDir + " success");
-			return true;
+			return downloadResult;
 		} catch (Exception e) {
 			FLog.e("downloading dir " + downloadDir + " error");
-			result = FAIMSClientResultCode.SERVER_FAILURE;
+			return DownloadResult.FAILURE;
 		} finally {
-			try {
-				sendMessage(intent, type, result);
-				
-			} catch (Exception me) {
-				FLog.e("error sending message", me);
-			}
+			
 		}
-		return false;
 	}
 
 }

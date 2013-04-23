@@ -11,11 +11,11 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
-	private IActionListener listener;
+	private ITaskListener listener;
 	
 	private boolean searching;
 	
-	public LocateServerTask(ServerDiscovery serverDiscovery, IActionListener listener) {
+	public LocateServerTask(ServerDiscovery serverDiscovery, ITaskListener listener) {
 		this.serverDiscovery = serverDiscovery;
 		this.listener = listener;
 	}
@@ -48,9 +48,7 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	@Override
 	protected void onPostExecute(Void v) {
 		
-		listener.handleActionResponse(
-				serverDiscovery.isServerHostValid() ? 
-						ActionResultCode.SUCCESS : ActionResultCode.FAILURE, null);
+		listener.handleTaskCompleted(serverDiscovery.isServerHostValid());
 	}
 	
 	@Override

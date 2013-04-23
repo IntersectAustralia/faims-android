@@ -1,22 +1,19 @@
 package au.org.intersect.faims.android.tasks;
 
-import java.util.LinkedList;
-
 import android.os.AsyncTask;
-import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.FetchResult;
 
 
 public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 
 	private FAIMSClient faimsClient;
-	private IActionListener listener;
+	private ITaskListener listener;
 	
-	private LinkedList<Project> projects;
-	private FAIMSClientResultCode errorCode;
+	private FetchResult result;
 	
-	public FetchProjectsListTask(FAIMSClient faimsClient, IActionListener listener) {
+	public FetchProjectsListTask(FAIMSClient faimsClient, ITaskListener listener) {
 		this.faimsClient = faimsClient;
 		this.listener = listener;
 	}
@@ -24,8 +21,7 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... values) {
 		
-		projects = new LinkedList<Project>();
-		errorCode = faimsClient.fetchProjectList(projects);
+		result = faimsClient.fetchProjectList();
 	
 		return null;
 	}
@@ -33,16 +29,11 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onPostExecute(Void v) {
 		
-		ActionResultCode code = null;
-		
-		if (errorCode == FAIMSClientResultCode.SUCCESS) {
-			code = ActionResultCode.SUCCESS;
-		} else {
-			code = ActionResultCode.FAILURE;
+		if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 			faimsClient.invalidate();
-		}		
+		}
 		
-		listener.handleActionResponse(code, projects);
+		listener.handleTaskCompleted(result);
 	}
 	
 }

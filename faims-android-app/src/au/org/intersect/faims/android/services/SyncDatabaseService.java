@@ -4,25 +4,29 @@ import java.io.File;
 import java.util.UUID;
 
 import roboguice.RoboGuice;
+import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
+import android.os.Messenger;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.DownloadResult;
-import au.org.intersect.faims.android.data.FetchResult;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.FetchResult;
+import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
 import com.google.inject.Inject;
 
-public class SyncDatabaseService extends MessageIntentService {
+public class SyncDatabaseService extends IntentService {
 
 	@Inject
 	FAIMSClient faimsClient;
@@ -57,14 +61,31 @@ public class SyncDatabaseService extends MessageIntentService {
 		// 1. upload database to server
 		// 2. download database from server
 		
-		if (!uploadDatabaseToServer(intent)) return;
-		if (!downloadDatabaseFromServer(intent)) return;
+		Result uploadResult = uploadDatabaseToServer(intent);
+		if (uploadResult.resultCode != FAIMSClientResultCode.SUCCESS) {
+			sendMessage(intent, uploadResult);
+			return;
+		}
+		
+		Result downloadResult = downloadDatabaseFromServer(intent);
+		sendMessage(intent, downloadResult);
+	}
+	
+	private void sendMessage(Intent intent, Result result) {
+		try {
+			Bundle extras = intent.getExtras();
+			Messenger messenger = (Messenger) extras.get("MESSENGER");
+			Message msg = Message.obtain();
+			msg.obj = result;
+			messenger.send(msg);
+		} catch (Exception me) {
+			FLog.e("error sending message", me);
+		}
 	}
 
-	private boolean uploadDatabaseToServer(Intent intent) {
+	private Result uploadDatabaseToServer(Intent intent) {
 		FLog.d("uploading database");
 		
-		FAIMSClientResultCode result = null;
 		File tempDB = null;
 		File tempProject = null;
 		try {
@@ -89,13 +110,12 @@ public class SyncDatabaseService extends MessageIntentService {
 	    	// check if database is empty
 	    	if (databaseManager.isEmpty(tempDB)) {
 	    		FLog.d("nothing to upload");
-	    		result = FAIMSClientResultCode.SUCCESS;
-	    		return true;
+	    		return Result.SUCCESS;
 	    	}
 	    	
 	    	if (syncStopped) {
-	    		result = null;
-	    		return false;
+	    		FLog.d("sync cancelled");
+	    		return Result.INTERRUPTED;
 	    	} 
 	    	
 		    // tar file
@@ -103,21 +123,21 @@ public class SyncDatabaseService extends MessageIntentService {
 		    FileUtil.tarFile(tempDB.getAbsolutePath(), tempProject.getAbsolutePath());
 		    
 		    if (syncStopped) {
-		    	result = null;
-		    	return false;
-		    }
+	    		FLog.d("sync cancelled");
+	    		return Result.INTERRUPTED;
+	    	} 
 			    	
-		    result = faimsClient.uploadDatabase(project, tempProject, userId);
+		    Result result = faimsClient.uploadDatabase(project, tempProject, userId);
+		    
+		    if (syncStopped) {
+	    		FLog.d("sync cancelled");
+	    		return Result.INTERRUPTED;
+	    	} 
 			
-			if (syncStopped) {
-				result = null;
-				return false;
-			}
-			
-			if (result != FAIMSClientResultCode.SUCCESS) {
+			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
 				FLog.d("upload failure");
-				return false;
+				return result;
 			} 
 			
 			project = ProjectUtil.getProject(project.key); // get the latest settings
@@ -125,10 +145,10 @@ public class SyncDatabaseService extends MessageIntentService {
 			ProjectUtil.saveProject(project);
 			
 			FLog.d("upload success");
-			return true;
+			return result;
 		} catch (Exception e) {
 			FLog.e("error syncing database", e);
-			result = FAIMSClientResultCode.SERVER_FAILURE;
+			return Result.FAILURE;
 		} finally {
 			if (tempDB != null) {
 				tempDB.delete();
@@ -137,20 +157,12 @@ public class SyncDatabaseService extends MessageIntentService {
 			if (tempProject != null) {
 				tempProject.delete();
 			}
-			
-			try {
-				sendMessage(intent, MessageType.SYNC_DATABASE_UPLOAD, result);
-			} catch (Exception me) {
-				FLog.e("error sending message", me);
-			}
 		}
-		return false;
 	}
 
-	private boolean downloadDatabaseFromServer(Intent intent) {
+	private Result downloadDatabaseFromServer(Intent intent) {
 		FLog.d("downloading database");
 		
-		FAIMSClientResultCode result = null;
 		File tempDir = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
@@ -160,19 +172,23 @@ public class SyncDatabaseService extends MessageIntentService {
 				
 			// check if there is a new version to download
 			FetchResult fetchResult = faimsClient.fetchDatabaseVersion(project);
-			result = fetchResult.code;
 			
-			if (result != FAIMSClientResultCode.SUCCESS) {
+			if (syncStopped) {
+				FLog.d("sync cancelled");
+				return Result.INTERRUPTED;
+			}
+			
+			if (fetchResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
 				FLog.d("download failure");
-				return false;
+				return fetchResult;
 			} else {
 				info = (FileInfo) fetchResult.data;
 				int serverVersion = Integer.parseInt(info.version == null ? "0" : info.version);
 				int projectVersion = Integer.parseInt(project.version == null ? "0" : project.version);
 				if (serverVersion == projectVersion) {
 					FLog.d("already up to date");
-					return true;
+					return Result.SUCCESS;
 				}
 				syncVersion = projectVersion + 1;
 			}
@@ -180,13 +196,18 @@ public class SyncDatabaseService extends MessageIntentService {
 			// download database from version
 			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/" + UUID.randomUUID());
 			tempDir.mkdirs();
-			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());
-			result = downloadResult.code;
 			
-			if (result != FAIMSClientResultCode.SUCCESS) {
+			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());
+			
+			if (syncStopped) {
+				FLog.d("sync cancelled");
+				return Result.INTERRUPTED;
+			}
+			
+			if (downloadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
 				FLog.d("download failure");
-				return false;
+				return downloadResult;
 			} 
 			
 			// merge database 
@@ -198,22 +219,15 @@ public class SyncDatabaseService extends MessageIntentService {
 			ProjectUtil.saveProject(project);
 			
 			FLog.d("download success");
-			return true;
+			return downloadResult;
 		} catch (Exception e) {
 			FLog.e("error syncing database", e);
-			result = FAIMSClientResultCode.SERVER_FAILURE;
+			return Result.FAILURE;
 		} finally {
 			if (tempDir != null) {
 				FileUtil.deleteDirectory(tempDir);
 			}
-			
-			try {
-				sendMessage(intent, MessageType.SYNC_DATABASE_DOWNLOAD, result);
-			} catch (Exception me) {
-				FLog.e("error sending message", me);
-			}
 		}
-		return false;
 	}
 
 }

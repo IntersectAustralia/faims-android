@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.ui.activity;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
@@ -10,12 +9,8 @@ import org.junit.runner.RunWith;
 
 import android.content.Intent;
 import android.widget.Button;
-import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.util.TestProjectUtil;
-
-import com.xtremelabs.robolectric.Robolectric;
-import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
 
 @RunWith(FAIMSRobolectricTestRunner.class)
 public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {

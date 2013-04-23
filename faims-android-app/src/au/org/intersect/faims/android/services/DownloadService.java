@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 
@@ -17,7 +18,7 @@ public abstract class DownloadService extends IntentService {
 	@Inject
 	FAIMSClient faimsClient;
 
-	private boolean downloadStopped;
+	protected boolean downloadStopped;
 
 	public DownloadService(String name) {
 		super(name);
@@ -41,29 +42,24 @@ public abstract class DownloadService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		FLog.d("starting download service");
 		
-		FAIMSClientResultCode resultCode = null;
+		DownloadResult result = null;
 		try {
-			resultCode = doDownload(intent);
+			result = doDownload(intent);
 			
-			if (downloadStopped) {
-				FLog.d("download cancelled");
-				resultCode = null;
-				return;
-			}
-		
-			if (resultCode != FAIMSClientResultCode.SUCCESS) {
+			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
+				FLog.d("download failure");
 			}
 			
 		} catch (Exception e) {
 			FLog.e("error in download service", e);
-			resultCode = FAIMSClientResultCode.SERVER_FAILURE;
+			result = DownloadResult.FAILURE;
 		} finally {
 			try {
 				Bundle extras = intent.getExtras();
 				Messenger messenger = (Messenger) extras.get("MESSENGER");
 				Message msg = Message.obtain();
-				msg.obj = resultCode;
+				msg.obj = result;
 				messenger.send(msg);
 			} catch (Exception me) {
 				FLog.e("error sending message", me);
@@ -71,6 +67,6 @@ public abstract class DownloadService extends IntentService {
 		}
 	}
 	
-	protected abstract FAIMSClientResultCode doDownload(Intent intent);
+	protected abstract DownloadResult doDownload(Intent intent);
 
 }

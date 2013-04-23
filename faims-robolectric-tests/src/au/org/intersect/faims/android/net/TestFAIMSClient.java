@@ -1,9 +1,8 @@
 package au.org.intersect.faims.android.net;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.UUID;
 
-import au.org.intersect.faims.android.data.DownloadResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.util.TestProjectUtil;
 
@@ -13,22 +12,22 @@ public class TestFAIMSClient extends FAIMSClient {
 	
 	private int projectsCount = 0;
 	private FAIMSClientResultCode projectsCode;
-	private FAIMSClientResultCode downloadCode;
+	private FAIMSClientResultCode downloadResultCode;
+	private FAIMSClientErrorCode downlaodErrorCode;
 
 	@Override
-	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
+	public FetchResult fetchProjectList() {
+		ArrayList<Project> projects = new ArrayList<Project>();
 		for (int i = 0; i < projectsCount; i++) {
 			projects.add(new Project("Project " + i, UUID.randomUUID().toString()));
 		}
-		return projectsCode;
+		return new FetchResult(projectsCode, null, projects);
 	}
 
 	@Override
 	public DownloadResult downloadProject(Project project) {
 		TestProjectUtil.createProjectFrom(project.name, project.key, "Common");
-		DownloadResult result = new DownloadResult();
-		result.code = downloadCode;
-		return result;
+		return new DownloadResult(downloadResultCode, downlaodErrorCode);
 	}
 	
 	public void setProjectsCount(int value) {
@@ -39,11 +38,12 @@ public class TestFAIMSClient extends FAIMSClient {
 		projectsCode = value;
 	}
 	
-	public void setDownloadResultCode(FAIMSClientResultCode value) {
-		downloadCode = value;
+	public void setDownloadResultCode(FAIMSClientResultCode resultCode, FAIMSClientErrorCode errorCode) {
+		downloadResultCode = resultCode;
+		downlaodErrorCode = errorCode;
 	}
 	
-	public static Provider<TestFAIMSClient> createProvider(final int count, final FAIMSClientResultCode fetchCode, final FAIMSClientResultCode downloadCode)
+	public static Provider<TestFAIMSClient> createProvider(final int count, final FAIMSClientResultCode fetchCode, final FAIMSClientResultCode resultCode, final FAIMSClientErrorCode errorCode)
 	{
 		return new Provider<TestFAIMSClient>() {
 
@@ -52,7 +52,7 @@ public class TestFAIMSClient extends FAIMSClient {
 				TestFAIMSClient client = new TestFAIMSClient();
 				client.setProjectsCount(count);
 				client.setProjectsResultCode(fetchCode);
-				client.setDownloadResultCode(downloadCode);
+				client.setDownloadResultCode(resultCode, errorCode);
 				return client;
 			}
 			

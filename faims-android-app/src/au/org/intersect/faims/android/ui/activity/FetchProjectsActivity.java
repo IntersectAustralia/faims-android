@@ -19,13 +19,15 @@ import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
+import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.FetchResult;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadProjectService;
-import au.org.intersect.faims.android.tasks.ActionResultCode;
 import au.org.intersect.faims.android.tasks.FetchProjectsListTask;
-import au.org.intersect.faims.android.tasks.IActionListener;
+import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
@@ -37,11 +39,11 @@ import com.google.inject.Inject;
 
 public class FetchProjectsActivity extends RoboActivity {
 	
-	public static class FetchProjectsHandler extends Handler {
+	public static class DownloadProjectHandler extends Handler {
 		
 		private WeakReference<FetchProjectsActivity> activityRef;
 
-		public FetchProjectsHandler(FetchProjectsActivity activity) {
+		public DownloadProjectHandler(FetchProjectsActivity activity) {
 			this.activityRef = new WeakReference<FetchProjectsActivity>(activity);
 		}
 		
@@ -54,19 +56,21 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			activity.busyDialog.dismiss();
 			
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+			DownloadResult result = (DownloadResult) message.obj;
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show project activity
 				
 				Intent showProjectsIntent = new Intent(activity, ShowProjectActivity.class);
 				showProjectsIntent.putExtra("key", activity.selectedProject.key);
 				activity.startActivityForResult(showProjectsIntent, 1);
-			} else {
-				if (resultCode == FAIMSClientResultCode.STORAGE_LIMIT_ERROR) {
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
 					activity.showDownloadProjectErrorDialog();
 				} else {
 					activity.showDownloadProjectFailureDialog();
 				}
+			} else {
+				// ignore
 			}
 		}
 		
@@ -89,7 +93,7 @@ public class FetchProjectsActivity extends RoboActivity {
 	private AsyncTask<Void, Void, Void> locateTask;
 	private AsyncTask<Void, Void, Void> fetchTask;
 	
-	protected final FetchProjectsHandler handler = new FetchProjectsHandler(FetchProjectsActivity.this);
+	protected final DownloadProjectHandler handler = new DownloadProjectHandler(FetchProjectsActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,22 +169,25 @@ public class FetchProjectsActivity extends RoboActivity {
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyFetchingProjectsDialog();
     		
-    		fetchTask = new FetchProjectsListTask(faimsClient, new IActionListener() {
+    		fetchTask = new FetchProjectsListTask(faimsClient, new ITaskListener() {
 
 				@SuppressWarnings("unchecked")
 				@Override
-				public void handleActionResponse(ActionResultCode resultCode,
-						Object data) {
+				public void handleTaskCompleted(Object result) {
 					FetchProjectsActivity.this.busyDialog.dismiss();
 					
-					if (resultCode == ActionResultCode.SUCCESS) {
+					FetchResult fetchResult = (FetchResult) result;
+					
+					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
 						if (projectListAdapter != null) projectListAdapter.clear();
-		    			FetchProjectsActivity.this.projects = (List<Project>) data;
+		    			FetchProjectsActivity.this.projects = (List<Project>) fetchResult.data;
 		    			for (Project p : projects) {
 		    				FetchProjectsActivity.this.projectListAdapter.add(p.name);
 		    			}
-					} else {
+					} else if (fetchResult.resultCode == FAIMSClientResultCode.FAILURE) {
 						showFetchProjectsFailureDialog();
+					} else {
+						// ignore
 					}
 				}
     			
@@ -188,17 +195,16 @@ public class FetchProjectsActivity extends RoboActivity {
     	} else {
     		showBusyLocatingServerDialog();
     		
-    		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+    		locateTask = new LocateServerTask(serverDiscovery, new ITaskListener() {
 
     			@Override
-    			public void handleActionResponse(ActionResultCode resultCode,
-    					Object data) {
+    			public void handleTaskCompleted(Object result) {
     				FetchProjectsActivity.this.busyDialog.dismiss();
     				
-    				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerFetchProjectsFailureDialog();
-    				} else {
+    				if ((Boolean) result) {
     					fetchProjectsList();
+    				} else {
+    					showLocateServerFetchProjectsFailureDialog();
     				}
     			}
         		
@@ -222,17 +228,16 @@ public class FetchProjectsActivity extends RoboActivity {
     	} else {
     		showBusyLocatingServerDialog();
     		
-    		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+    		locateTask = new LocateServerTask(serverDiscovery, new ITaskListener() {
 
     			@Override
-    			public void handleActionResponse(ActionResultCode resultCode,
-    					Object data) {
+    			public void handleTaskCompleted(Object result) {
     				FetchProjectsActivity.this.busyDialog.dismiss();
     				
-    				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerDownloadArchiveFailureDialog();
-    				} else {
+    				if ((Boolean) result) {
     					downloadProjectArchive();
+    				} else {
+    					showLocateServerDownloadArchiveFailureDialog();
     				}
     			}
         		

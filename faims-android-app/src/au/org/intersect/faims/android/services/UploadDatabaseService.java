@@ -8,7 +8,7 @@ import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.FileUtil;
 
 public class UploadDatabaseService extends UploadService {
@@ -17,12 +17,8 @@ public class UploadDatabaseService extends UploadService {
 		super("UploadDatabaseService");
 	}
 	
-	public UploadDatabaseService(String name) {
-		super(name);
-	}
-	
 	@Override
-	protected FAIMSClientResultCode doUpload(Intent intent) throws Exception {
+	protected Result doUpload(Intent intent) throws Exception {
 		File tempFile = null;
 		
 		try {
@@ -43,12 +39,12 @@ public class UploadDatabaseService extends UploadService {
 	    	// check if database is empty
 	    	if (databaseManager.isEmpty(tempFile)) {
 	    		FLog.d("database is empty");
-	    		return FAIMSClientResultCode.SUCCESS;
+	    		return Result.SUCCESS;
 	    	}
 	    	
 	    	if (uploadStopped) {
 	    		FLog.d("upload cancelled");
-	    		return null; 
+	    		return Result.INTERRUPTED;
 	    	}
 	    	
 	    	// tar file
@@ -57,12 +53,11 @@ public class UploadDatabaseService extends UploadService {
 	    	
 	    	if (uploadStopped) {
 	    		FLog.d("upload cancelled");
-	    		return null;
+	    		return Result.INTERRUPTED;
 	    	}
 	    	
 	    	// upload database
 			return faimsClient.uploadDatabase(project, file, userId);
-			
 		} finally {
 			if (tempFile != null) tempFile.delete();
 			if (file != null) file.delete();

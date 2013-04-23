@@ -8,11 +8,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
-import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.Result;
 
 import com.google.inject.Inject;
 
@@ -53,34 +53,29 @@ public abstract class UploadService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		FLog.d("starting upload service");
 		
-		FAIMSClientResultCode resultCode = null;
+		Result result = null;
 		try {
-			resultCode = doUpload(intent);
+			result = doUpload(intent);
 			
 			if (uploadStopped) {
 				FLog.d("upload cancelled");
-				resultCode = null;
-				return;
+				result.resultCode = FAIMSClientResultCode.INTERRUPTED;
 			}
 			
-			if (resultCode != FAIMSClientResultCode.SUCCESS) {
+			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();
+				FLog.d("upload failure");
 			}
-			
-			Bundle extras = intent.getExtras();
-			Project project = (Project) extras.get("project");
-			
-			doComplete(resultCode, project);
 			
 		} catch (Exception e) {
 			FLog.e("error in upload service", e);
-			resultCode = FAIMSClientResultCode.SERVER_FAILURE;
+			result = Result.FAILURE;
 		} finally {
 			try {
 				Bundle extras = intent.getExtras();
 				Messenger messenger = (Messenger) extras.get("MESSENGER");
 				Message msg = Message.obtain();
-				msg.obj = resultCode;
+				msg.obj = result;
 				messenger.send(msg);
 			} catch (Exception me) {
 				FLog.e("error sending message", me);
@@ -88,10 +83,6 @@ public abstract class UploadService extends IntentService {
 		}
 	}
 	
-	protected abstract FAIMSClientResultCode doUpload(Intent intent) throws Exception;
-	
-	protected void doComplete(FAIMSClientResultCode resultCode, Project project) throws Exception {
-		
-	}
+	protected abstract Result doUpload(Intent intent) throws Exception;
 
 }

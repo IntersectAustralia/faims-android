@@ -9,7 +9,6 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -30,8 +29,6 @@ import org.apache.http.params.HttpParams;
 import android.net.http.AndroidHttpClient;
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.DownloadResult;
-import au.org.intersect.faims.android.data.FetchResult;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
@@ -56,8 +53,11 @@ public class FAIMSClient {
 	
 	AndroidHttpClient httpClient;
 	
+	private boolean isInterrupted;
+	
 	private void initClient() throws UnknownHostException {
 		if (httpClient == null) {
+			isInterrupted = false;
 			String userAgent = InetAddress.getLocalHost().toString();
 			httpClient = AndroidHttpClient.newInstance(userAgent);
 		}
@@ -70,24 +70,26 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FAIMSClientResultCode uploadDatabase(Project project, File file, String userId) {
+	public Result uploadDatabase(Project project, File file, String userId) {
 		try {
 			HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
 			extraParts.put("user", new StringBody(userId));
 			return uploadFile(file, "/android/project/" + project.key + "/upload_db", extraParts);
 		} catch (Exception e) {
 			FLog.e("error uploading database", e);
+			return new Result(FAIMSClientResultCode.FAILURE);
 		} 
-		return FAIMSClientResultCode.SERVER_FAILURE;
 	}
 	
-	public FAIMSClientResultCode uploadFile(File file, String path) {
+	public Result uploadFile(File file, String path) {
 		return uploadFile(file, path, null);
 	}
 	
-	public FAIMSClientResultCode uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
+	// note: this upload can be killed
+	public Result uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
 		synchronized(FAIMSClient.class) {
 			try {
+				
 				initClient();
 				
 				MultipartEntity entity = new MultipartEntity();
@@ -105,20 +107,26 @@ public class FAIMSClient {
 				
 				HttpResponse response = httpClient.execute(post);
 				
+				if (isInterrupted) {
+					FLog.d("upload interrupted");
+					
+					return Result.INTERRUPTED;
+				}
+				
 				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 					FLog.d("upload failed");
 					
-					return FAIMSClientResultCode.SERVER_FAILURE;
+					return Result.FAILURE;
 				}
 				
 				FLog.d("uploaded file!");
 				
-				return FAIMSClientResultCode.SUCCESS;
+				return Result.SUCCESS;
 				
 			} catch (Exception e) {
 				FLog.e("error uploading file", e);
 				
-				return FAIMSClientResultCode.SERVER_FAILURE;
+				return Result.FAILURE;
 				
 			} finally {
 				cleanupClient();
@@ -126,7 +134,7 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FAIMSClientResultCode fetchProjectList(LinkedList<Project> projects) {
+	public FetchResult fetchProjectList() {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			try {			
@@ -134,21 +142,28 @@ public class FAIMSClient {
 				
 				HttpEntity entity = getRequest(getUri("/android/projects"));
 				
+				if (isInterrupted) {
+					FLog.d("fetch projects list interrupted");
+					
+					return FetchResult.INTERRUPTED;
+				}
+				
 				stream = entity.getContent();
 				
 				List<Project> ps = JsonUtil.deserializeProjects(stream);
 				
+				ArrayList<Project> projects = new ArrayList<Project>();
 				for (Project p : ps) {
-					projects.push(p);
+					projects.add(p);
 				}
 				
 				FLog.d("fetched projects!");
 		        
-				return FAIMSClientResultCode.SUCCESS;
+				return new FetchResult(FAIMSClientResultCode.SUCCESS, null, projects);
 			} catch(Exception e) {
 				FLog.e("error fetching projects list", e);
 				
-				return FAIMSClientResultCode.SERVER_FAILURE;
+				return FetchResult.FAILURE;
 				
 			} finally {
 				
@@ -170,23 +185,21 @@ public class FAIMSClient {
 			try {			
 				initClient();
 				
-				FileInfo info = new FileInfo();
+				FileInfo info = getFileInfo("/android/project/" + project.key + "/archive_db");
 				
-				getFileInfo("/android/project/" + project.key + "/archive_db", info);
+				if (isInterrupted) {
+					FLog.d("fetch database version interrupted");
+					
+					return FetchResult.INTERRUPTED;
+				}
 				
 				FLog.d("fetched database version!");
-				
-				FetchResult result = new FetchResult();
-				result.code = FAIMSClientResultCode.SUCCESS;
-				result.data = info;
 		        
-				return result;
+				return new FetchResult(FAIMSClientResultCode.SUCCESS, null, info);
 			} catch(Exception e) {
 				FLog.e("error fetching database version", e);
 				
-				FetchResult result = new FetchResult();
-				result.code = FAIMSClientResultCode.SERVER_FAILURE;
-				return result;
+				return FetchResult.FAILURE;
 				
 			} finally {
 				
@@ -202,76 +215,76 @@ public class FAIMSClient {
 	}
 	
 	public DownloadResult downloadProject(Project project) {
-		FileInfo info = new FileInfo();
-		FAIMSClientResultCode code = downloadFile("/android/project/" + project.key + "/archive", 
+		return downloadFile("/android/project/" + project.key + "/archive", 
 				"/android/project/" + project.key + "/download", 
-				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir, info);
-		DownloadResult result = new DownloadResult();
-		result.code = code;
-		result.info = info;
-		return result;
+				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir);
 	}
 	
 	public DownloadResult downloadDatabase(Project project) {
-		FileInfo info = new FileInfo();
-		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db", 
+		return downloadFile("/android/project/" + project.key + "/archive_db", 
 				"/android/project/" + project.key + "/download_db", 
-				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key, info);
-		
-		DownloadResult result = new DownloadResult();
-		result.code = code;
-		result.info = info;
-		return result;
+				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 	}
 	
 	public DownloadResult downloadDatabase(Project project, String version, String dir) {
-		FileInfo info = new FileInfo();
-		FAIMSClientResultCode code =  downloadFile("/android/project/" + project.key + "/archive_db?version=" + version, 
+		return downloadFile("/android/project/" + project.key + "/archive_db?version=" + version, 
 				"/android/project/" + project.key + "/download_db?version=" + version, 
-				dir, info);
-		DownloadResult result = new DownloadResult();
-		result.code = code;
-		result.info = info;
-		return result;
+				dir);
 	}
 	
-	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir) {
-		return downloadFile(infoPath, downloadPath, dir, new FileInfo());
+	public DownloadResult downloadFile(String infoPath, String downloadPath, String dir) {
+		return downloadFile(infoPath, downloadPath, dir, false);
 	}
 	
-	public FAIMSClientResultCode downloadFile(String infoPath, String downloadPath, String dir, FileInfo info) {
+	public DownloadResult downloadFile(String infoPath, String downloadPath, String dir, boolean chooseFileFromInfo) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			File file = null;
 			try {
 				initClient();
 				
-				getFileInfo(infoPath, info);
+				FileInfo info = getFileInfo(infoPath);
+				
+				if (isInterrupted) {
+					FLog.d("download file interrupted");
+					
+					return DownloadResult.INTERRUPTED;
+				}
 				
 		        long freeSpace = FileUtil.getExternalStorageSpace();
 		        
 		        if (info.size > freeSpace) {
 		        	FLog.d("storage limit error");
-		        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
+		        	return new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR, info);
 		        } 
 		        
-		        file = downloadArchive(downloadPath, info);
+		        if (chooseFileFromInfo) {
+		        	file = downloadArchive(downloadPath + "?file=" + URLEncoder.encode(info.filename, "UTF-8"), info);
+		        } else {
+		        	file = downloadArchive(downloadPath, info);
+		        }
+		        
+		        if (isInterrupted) {
+					FLog.d("download file interrupted");
+					
+					return DownloadResult.INTERRUPTED;
+				}
 				
 				if (file == null) {
 					FLog.d("download corrupted");
-					return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
+					return new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR, info);
 				}
 				
 				FileUtil.untarFile(dir, file.getAbsolutePath());
 				
 				FLog.d("downloaded file!");
 				
-				return FAIMSClientResultCode.SUCCESS;
+				return new DownloadResult(FAIMSClientResultCode.SUCCESS, null, info);
 		        
 			} catch (Exception e) {
 				FLog.e("error downloading file", e);
 				
-				return FAIMSClientResultCode.SERVER_FAILURE;
+				return DownloadResult.FAILURE;
 				
 			} finally {
 				
@@ -290,10 +303,12 @@ public class FAIMSClient {
 		}
 	}
 	
-	private void getFileInfo(String path, FileInfo info) throws Exception {
+	private FileInfo getFileInfo(String path) throws Exception {
 		InputStream stream = null;
 		
 		try {
+			FileInfo info = new FileInfo();
+			
 			HttpEntity entity = getRequest(getUri(path));
 			
 			stream = entity.getContent();
@@ -301,6 +316,8 @@ public class FAIMSClient {
 			JsonObject object = JsonUtil.deserializeJsonObject(stream);
 			
 			info.parseJson(object);
+			
+			return info;
 			
 		} finally {
 			if (stream != null) stream.close();
@@ -318,6 +335,12 @@ public class FAIMSClient {
 			
 			HttpEntity entity = getRequest(getUri(path), params);
 			
+			if (isInterrupted) {
+				FLog.d("download archive interrupted");
+				
+				return null;
+			}
+			
 			stream = entity.getContent();
 			
 	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir); // make sure directory exists
@@ -326,7 +349,19 @@ public class FAIMSClient {
 	    	
 			FileUtil.saveFile(stream, tempFile.getAbsolutePath());
 			
+			if (isInterrupted) {
+				FLog.d("download archive interrupted");
+				
+				return null;
+			}
+			
 			String md5 = FileUtil.generateMD5Hash(tempFile.getAbsolutePath());
+			
+			if (isInterrupted) {
+				FLog.d("download archive interrupted");
+				
+				return null;
+			}
 			
 			if (!archive.md5.equals(md5)) {
 				
@@ -337,7 +372,6 @@ public class FAIMSClient {
 			
 			return tempFile;
 		} finally {
-			// TODO check if file needs to be deleted
 			if (stream != null) stream.close();
 		}
 	}
@@ -369,20 +403,8 @@ public class FAIMSClient {
 		
 		return entity;
 	}
-	
-	public void invalidate() {
-		serverDiscovery.invalidateServerHost();
-	}
 
-	public void interrupt() {
-		synchronized(FAIMSClient.class) {
-			if (httpClient != null) {
-				httpClient.getConnectionManager().shutdown();
-			}
-		}
-	}
-
-	public FAIMSClientResultCode uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
+	public Result uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			File file = null;
@@ -393,7 +415,7 @@ public class FAIMSClient {
 				
 				if (!new File(uploadDirPath).isDirectory()) {
 					FLog.d("no files to upload");
-					return FAIMSClientResultCode.SUCCESS;
+					return Result.SUCCESS;
 				}
 				
 				List<String> localFiles = FileUtil.listDir(uploadDirPath);
@@ -402,10 +424,17 @@ public class FAIMSClient {
 				
 				if (localFiles.size() == 0) {
 					FLog.d("no files to upload");
-					return FAIMSClientResultCode.SUCCESS;
+					return Result.SUCCESS;
 				}
 				
 				HttpEntity entity = getRequest(getUri(requestExcludePath));
+				
+				if (isInterrupted) {
+					FLog.d("upload directory interrupted");
+					
+					return Result.INTERRUPTED;
+				}
+				
 				stream = entity.getContent();
 				JsonObject object = JsonUtil.deserializeJsonObject(stream);
 				
@@ -418,20 +447,26 @@ public class FAIMSClient {
 				FLog.d("server Files: " + serverFiles.toString());
 				
 				// check if new files to upload
-				boolean canUpload = !isFileListInFileList(localFiles, serverFiles);
+				boolean canUpload = !isListSubsetOfList(localFiles, serverFiles);
 				
 				if (!canUpload) {
 					FLog.d("no files to upload");
-					return FAIMSClientResultCode.SUCCESS;
+					return Result.SUCCESS;
 				}
 				
 				file = new File(projectDir + "/" + UUID.randomUUID());
 				FileUtil.tarFile(uploadDirPath, "", file.getAbsolutePath(), serverFiles);
 				
+				if (isInterrupted) {
+					FLog.d("upload directory interrupted");
+					
+					return Result.INTERRUPTED;
+				}
+				
 				return uploadFile(file, uploadPath);
 			} catch (Exception e) {
 				FLog.e("error uploading directory", e);
-				return FAIMSClientResultCode.SERVER_FAILURE;
+				return Result.FAILURE;
 			} finally {
 				
 				if (file != null) {
@@ -449,13 +484,20 @@ public class FAIMSClient {
 		}
 	}
 
-	public FAIMSClientResultCode downloadDirectory(String projectDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
+	public DownloadResult downloadDirectory(String projectDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			try {
 				initClient();
 				
 				HttpEntity entity = getRequest(getUri(requestExcludePath));
+				
+				if (isInterrupted) {
+					FLog.d("download directory interrupted");
+					
+					return DownloadResult.INTERRUPTED;
+				}
+				
 				stream = entity.getContent();
 				JsonObject object = JsonUtil.deserializeJsonObject(stream);
 				
@@ -469,7 +511,7 @@ public class FAIMSClient {
 				
 				if (serverFiles.size() == 0) {
 					FLog.d("no files to download");
-					return FAIMSClientResultCode.SUCCESS;
+					return DownloadResult.SUCCESS;
 				}
 				
 				String downloadDirPath = projectDir + "/" + downloadDir;
@@ -482,11 +524,11 @@ public class FAIMSClient {
 				FLog.d("local Files: " + serverFiles.toString());
 				
 				// check if new files to download
-				boolean canDownload = !isFileListInFileList(serverFiles, localFiles);
+				boolean canDownload = !isListSubsetOfList(serverFiles, localFiles);
 				
 				if (!canDownload) {
 					FLog.d("no files to download");
-					return FAIMSClientResultCode.SUCCESS;
+					return DownloadResult.SUCCESS;
 				}
 				
 				// construct info path with exclude files
@@ -497,11 +539,11 @@ public class FAIMSClient {
 					sb.append("&");
 				}
 				
-				return downloadTempFile(sb.toString(), downloadPath, downloadDirPath);
+				return downloadFile(sb.toString(), downloadPath, downloadDirPath, true);
 			} catch (Exception e) {
 				FLog.e("error downloading directory", e);
 
-				return FAIMSClientResultCode.SERVER_FAILURE;
+				return DownloadResult.FAILURE;
 			} finally {
 				try {
 					if (stream != null) stream.close();
@@ -514,7 +556,7 @@ public class FAIMSClient {
 		}
 	}
 	
-	private boolean isFileListInFileList(List<String> subFiles, List<String> files) {
+	private boolean isListSubsetOfList(List<String> subFiles, List<String> files) {
 		for (String sf : subFiles) {
 			boolean fileInList = false;
 			for (String f : files) {
@@ -530,56 +572,16 @@ public class FAIMSClient {
 		return true;
 	}
 	
-	public FAIMSClientResultCode downloadTempFile(String infoPath, String downloadPath, String dir) {
-		return downloadTempFile(infoPath, downloadPath, dir, new FileInfo());
+
+	public void invalidate() {
+		serverDiscovery.invalidateServerHost();
 	}
-	
-	public FAIMSClientResultCode downloadTempFile(String infoPath, String downloadPath, String dir, FileInfo info) {
+
+	public void interrupt() {
 		synchronized(FAIMSClient.class) {
-			InputStream stream = null;
-			File file = null;
-			
-			try {
-				initClient();
-				
-				getFileInfo(infoPath, info);
-				
-		        long freeSpace = FileUtil.getExternalStorageSpace();
-		        
-		        if (info.size > freeSpace) {
-		        	FLog.d("storage limit error");
-		        	return FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
-		        } 
-		        
-		        file = downloadArchive(downloadPath + "?file=" + URLEncoder.encode(info.filename, "UTF-8"), info);
-				
-				if (file == null) {
-					FLog.d("download corrupted");
-					return FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
-				}
-				
-				FileUtil.untarFile(dir, file.getAbsolutePath());
-				
-				FLog.d("downloaded file!");
-				
-				return FAIMSClientResultCode.SUCCESS;
-		        
-			} catch (Exception e) {
-				FLog.e("error downloading temporary file", e);
-				
-				return FAIMSClientResultCode.SERVER_FAILURE;
-			} finally {
-				if (file != null) {
-					file.delete();
-				}
-				
-				try {
-					if (stream != null) stream.close();
-				} catch (IOException e) {
-					FLog.e("error closing stream", e);
-				}
-				
-				cleanupClient();
+			if (httpClient != null) {
+				isInterrupted = true;
+				httpClient.getConnectionManager().shutdown();
 			}
 		}
 	}

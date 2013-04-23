@@ -16,6 +16,8 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.net.DownloadResult;
+import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.TestFAIMSClient;
 import au.org.intersect.faims.android.net.TestServerDiscovery;
@@ -208,7 +210,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		int count = 10;
 		client.setProjectsCount(count);
-		client.setProjectsResultCode(FAIMSClientResultCode.SERVER_FAILURE);
+		client.setProjectsResultCode(FAIMSClientResultCode.FAILURE);
 		
 		// fetch projects list
 		activity.fetchProjectsList();
@@ -240,7 +242,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		int count = 10;
 		client.setProjectsCount(count);
-		client.setProjectsResultCode(FAIMSClientResultCode.SERVER_FAILURE);
+		client.setProjectsResultCode(FAIMSClientResultCode.FAILURE);
 		
 		// fetch projects list
 		activity.fetchProjectsList();
@@ -318,7 +320,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		client.setProjectsCount(1);
 		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
-		client.setDownloadResultCode(FAIMSClientResultCode.SUCCESS);
+		client.setDownloadResultCode(FAIMSClientResultCode.SUCCESS, null);
 		
 		// fetch project list
 		activity.fetchProjectsList();
@@ -374,7 +376,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		client.setProjectsCount(10);
 		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
-		client.setDownloadResultCode(FAIMSClientResultCode.SERVER_FAILURE);
+		client.setDownloadResultCode(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.SERVER_ERROR);
 		
 		activity.fetchProjectsList();
 		
@@ -391,7 +393,7 @@ public class FetchProjectsActivityTest {
 		// TODO assert no project has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = FAIMSClientResultCode.SERVER_FAILURE;
+		msg.obj = DownloadResult.FAILURE;
 		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
@@ -414,7 +416,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		client.setProjectsCount(10);
 		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
-		client.setDownloadResultCode(FAIMSClientResultCode.DOWNLOAD_CORRUPTED);
+		client.setDownloadResultCode(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
 		
 		activity.fetchProjectsList();
 		
@@ -432,7 +434,7 @@ public class FetchProjectsActivityTest {
 		// TODO assert no project has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = FAIMSClientResultCode.DOWNLOAD_CORRUPTED;
+		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
 		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
@@ -454,7 +456,7 @@ public class FetchProjectsActivityTest {
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
 		client.setProjectsCount(10);
 		client.setProjectsResultCode(FAIMSClientResultCode.SUCCESS);
-		client.setDownloadResultCode(FAIMSClientResultCode.STORAGE_LIMIT_ERROR);
+		client.setDownloadResultCode(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
 		
 		activity.fetchProjectsList();
 		
@@ -472,7 +474,7 @@ public class FetchProjectsActivityTest {
 		// TODO assert no project has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = FAIMSClientResultCode.STORAGE_LIMIT_ERROR;
+		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
 		activity.handler.handleMessage(msg);
 		
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);

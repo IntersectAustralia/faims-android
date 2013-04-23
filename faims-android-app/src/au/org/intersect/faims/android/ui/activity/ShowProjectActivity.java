@@ -38,24 +38,25 @@ import android.view.MenuItem;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
-import au.org.intersect.faims.android.data.MessageResult;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.ShowProjectActivityData;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.net.DownloadResult;
+import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
-import au.org.intersect.faims.android.services.MessageType;
 import au.org.intersect.faims.android.services.SyncDatabaseService;
 import au.org.intersect.faims.android.services.SyncFilesService;
 import au.org.intersect.faims.android.services.UploadDatabaseService;
-import au.org.intersect.faims.android.tasks.ActionResultCode;
-import au.org.intersect.faims.android.tasks.IActionListener;
+import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
+import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.Arch16n;
@@ -114,11 +115,17 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				Message message) {
 			activity.busyDialog.dismiss();
 			
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+			DownloadResult result = (DownloadResult) message.obj;
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				activity.linker.execute(callback);
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
+					activity.showDownloadDatabaseErrorDialog(callback);
+				} else {
+					activity.showDownloadDatabaseFailureDialog(callback);
+				}
 			} else {
-				activity.showDownloadDatabaseFailureDialog(callback);
+				// ignore
 			}
 		}
 		
@@ -138,11 +145,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				Message message) {
 			activity.busyDialog.dismiss();
 			
-			FAIMSClientResultCode resultCode = (FAIMSClientResultCode) message.obj;
-			if (resultCode == FAIMSClientResultCode.SUCCESS) {
+			Result result = (Result) message.obj;
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				activity.linker.execute(callback);
-			} else {
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				activity.showUploadDatabaseFailureDialog(callback);
+			} else {
+				// ignore
 			}
 		}
 		
@@ -157,23 +166,19 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		@Override
 		public void handleMessageSafe(ShowProjectActivity activity,
 				Message message) {
-			MessageResult mr = (MessageResult) message.obj;
-			if (mr.result == FAIMSClientResultCode.SUCCESS){
-				if (mr.type == MessageType.SYNC_DATABASE_DOWNLOAD) {
-					if(activity.getData().isFileSyncEnabled()) {
-						activity.startSyncingFiles();
-					} else {
-						activity.resetSyncInterval();
-						activity.waitForNextSync();
-						
-						activity.callSyncSuccess();
-						
-						activity.syncLock.release();
-					}
+			Result result = (Result) message.obj;
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS){
+				if(activity.getData().isFileSyncEnabled()) {
+					activity.startSyncingFiles();
 				} else {
-					// ignore
+					activity.resetSyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncSuccess();
+					
+					activity.syncLock.release();
 				}
-			} else if (mr.result != null) {
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				// failure
 				activity.delaySyncInterval();
 				activity.waitForNextSync();
@@ -197,30 +202,23 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		@Override
 		public void handleMessageSafe(ShowProjectActivity activity,
 				Message message) {
-			MessageResult mr = (MessageResult) message.obj;
-			if (mr.result == FAIMSClientResultCode.SUCCESS) {
-				if (mr.type == MessageType.SYNC_DOWNLOAD_APP_FILES) {
-					activity.resetSyncInterval();
-					activity.waitForNextSync();
-					
-					activity.callSyncSuccess();
-					
-					activity.syncLock.release();
-				} else {
-					// ignore
-				}
-			} else if (mr.result != null) {
+			Result result = (Result) message.obj;
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
+				activity.resetSyncInterval();
+				activity.waitForNextSync();
+				
+				activity.callSyncSuccess();
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				// failure
 				activity.delaySyncInterval();
 				activity.waitForNextSync();
 				
 				activity.callSyncFailure();
-				
-				activity.syncLock.release();
 			} else {
 				// cancelled
-				activity.syncLock.release();
 			}
+			
+			activity.syncLock.release();
 		}
 		
 	}
@@ -288,6 +286,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	protected BusyDialog busyDialog;
 	protected ChoiceDialog choiceDialog;
+	protected ConfirmDialog confirmDialog;
 	private AsyncTask<Void, Void, Void> locateTask;
 
 	private String projectKey;
@@ -584,17 +583,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		} else {
 			showBusyLocatingServerDialog();
 			
-			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+			locateTask = new LocateServerTask(serverDiscovery, new ITaskListener() {
 
     			@Override
-    			public void handleActionResponse(ActionResultCode resultCode,
-    					Object data) {
+    			public void handleTaskCompleted(Object result) {
     				ShowProjectActivity.this.busyDialog.dismiss();
     				
-    				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerDownloadDatabaseFailureDialog(callback);
+    				if ((Boolean) result) {
+    					downloadDatabaseFromServer(callback);			
     				} else {
-    					downloadDatabaseFromServer(callback);
+    					showLocateServerDownloadDatabaseFailureDialog(callback);
     				}
     			}
         		
@@ -615,7 +613,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     		UploadDatabaseHandler handler = new UploadDatabaseHandler(ShowProjectActivity.this, callback);
     		
 	    	// start upload service
-	    	// note: the temp file is automatically deleted by the service after it has finished
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("project", project);
@@ -625,17 +622,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     	} else {
     		showBusyLocatingServerDialog();
     		
-    		locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+    		locateTask = new LocateServerTask(serverDiscovery, new ITaskListener() {
 
     			@Override
-    			public void handleActionResponse(ActionResultCode resultCode,
-    					Object data) {
+    			public void handleTaskCompleted(Object result) {
     				ShowProjectActivity.this.busyDialog.dismiss();
     				
-    				if (resultCode == ActionResultCode.FAILURE) {
-    					showLocateServerUploadDatabaseFailureDialog(callback);
-    				} else {
+    				if ((Boolean) result) {
     					uploadDatabaseToServer(callback);
+    				} else {
+    					showLocateServerUploadDatabaseFailureDialog(callback);
     				}
     			}
         		
@@ -772,6 +768,21 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     	choiceDialog.show();
     }
 	
+	private void showDownloadDatabaseErrorDialog(final String callback) {
+    	confirmDialog = new ConfirmDialog(ShowProjectActivity.this,
+				getString(R.string.download_database_error_title),
+				getString(R.string.download_database_error_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						
+					}
+    		
+    	});
+    	confirmDialog.show();
+    }
+	
 	public ShowProjectActivityData getData() {
 		return data;
 	}
@@ -890,14 +901,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			startSyncingDatabase();
 		} else {
 		
-			locateTask = new LocateServerTask(serverDiscovery, new IActionListener() {
+			locateTask = new LocateServerTask(serverDiscovery, new ITaskListener() {
 				
 		    	@Override
-		    	public void handleActionResponse(ActionResultCode resultCode,
-		    			Object data) {
+		    	public void handleTaskCompleted(Object result) {
 		    		locateTask = null;
 		    		
-		    		if (resultCode == ActionResultCode.SUCCESS) {
+		    		if ((Boolean) result) {
 		    			startSyncingDatabase();
 		    		} else {
 		    			delaySyncInterval();
