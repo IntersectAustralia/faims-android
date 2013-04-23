@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -55,9 +57,15 @@ public class FAIMSClient {
 	
 	private boolean isInterrupted;
 	
+	private File uploadFileRef;
+	
+	private TarArchiveOutputStream uploadFileOS;
+	private TarArchiveInputStream downloadFileIS;
+	
 	private void initClient() throws UnknownHostException {
 		if (httpClient == null) {
 			isInterrupted = false;
+			uploadFileRef = null;
 			String userAgent = InetAddress.getLocalHost().toString();
 			httpClient = AndroidHttpClient.newInstance(userAgent);
 		}
@@ -88,6 +96,7 @@ public class FAIMSClient {
 	// note: this upload can be killed
 	public Result uploadFile(File file, String path, HashMap<String, ContentBody> extraParts) {
 		synchronized(FAIMSClient.class) {
+			FLog.d("uploading file " + file.getName());
 			try {
 				
 				initClient();
@@ -238,8 +247,10 @@ public class FAIMSClient {
 	
 	public DownloadResult downloadFile(String infoPath, String downloadPath, String dir, boolean chooseFileFromInfo) {
 		synchronized(FAIMSClient.class) {
+			FLog.d("downloading file");
 			InputStream stream = null;
-			File file = null;
+			File tempFile = null;
+			File tempDir = null;
 			try {
 				initClient();
 				
@@ -259,9 +270,9 @@ public class FAIMSClient {
 		        } 
 		        
 		        if (chooseFileFromInfo) {
-		        	file = downloadArchive(downloadPath + "?file=" + URLEncoder.encode(info.filename, "UTF-8"), info);
+		        	tempFile = downloadArchive(downloadPath + "?file=" + URLEncoder.encode(info.filename, "UTF-8"), info);
 		        } else {
-		        	file = downloadArchive(downloadPath, info);
+		        	tempFile = downloadArchive(downloadPath, info);
 		        }
 		        
 		        if (isInterrupted) {
@@ -270,12 +281,29 @@ public class FAIMSClient {
 					return DownloadResult.INTERRUPTED;
 				}
 				
-				if (file == null) {
+				if (tempFile == null) {
 					FLog.d("download corrupted");
 					return new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR, info);
 				}
 				
-				FileUtil.untarFile(dir, file.getAbsolutePath());
+				downloadFileIS = FileUtil.createTarInputStream(tempFile.getAbsolutePath());
+				
+				// unpack into temp directory
+				
+				tempDir = new File(dir + "/" + UUID.randomUUID());
+				tempDir.mkdirs();
+				
+				FileUtil.untarFile(tempDir.getAbsolutePath(), downloadFileIS);
+				
+				if (isInterrupted) {
+					FLog.d("download file interrupted");
+					
+					return DownloadResult.INTERRUPTED;
+				}
+				
+				// move files
+				
+				FileUtil.moveDir(tempDir.getAbsolutePath(), dir);
 				
 				FLog.d("downloaded file!");
 				
@@ -288,12 +316,22 @@ public class FAIMSClient {
 				
 			} finally {
 				
-				if (file != null) {
-					file.delete();
+				if (tempFile != null) {
+					tempFile.delete();
+				}
+				
+				if (tempDir != null) {
+					FileUtil.deleteDirectory(tempDir);
 				}
 				
 				try {
 					if (stream != null) stream.close();
+				} catch (IOException e) {
+					FLog.e("error closing stream", e);
+				}
+				
+				try {
+					if (downloadFileIS != null) downloadFileIS.close();
 				} catch (IOException e) {
 					FLog.e("error closing stream", e);
 				}
@@ -407,7 +445,6 @@ public class FAIMSClient {
 	public Result uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
-			File file = null;
 			try {
 				initClient();
 				
@@ -454,8 +491,11 @@ public class FAIMSClient {
 					return Result.SUCCESS;
 				}
 				
-				file = new File(projectDir + "/" + UUID.randomUUID());
-				FileUtil.tarFile(uploadDirPath, "", file.getAbsolutePath(), serverFiles);
+				uploadFileRef = new File(projectDir + "/" + UUID.randomUUID());
+				
+				uploadFileOS = FileUtil.createTarOutputStream(uploadFileRef.getAbsolutePath());
+				
+				FileUtil.tarFile(uploadDirPath, "", uploadFileOS, serverFiles);
 				
 				if (isInterrupted) {
 					FLog.d("upload directory interrupted");
@@ -463,18 +503,24 @@ public class FAIMSClient {
 					return Result.INTERRUPTED;
 				}
 				
-				return uploadFile(file, uploadPath);
+				return uploadFile(uploadFileRef, uploadPath);
 			} catch (Exception e) {
 				FLog.e("error uploading directory", e);
 				return Result.FAILURE;
 			} finally {
 				
-				if (file != null) {
-					file.delete();
+				if (uploadFileRef != null) {
+					uploadFileRef.delete();
 				}
 				
 				try {
 					if (stream != null) stream.close();
+				} catch (IOException ioe) {
+					FLog.e("error closing stream", ioe);
+				}
+				
+				try {
+					if (uploadFileOS != null) uploadFileOS.close();
 				} catch (IOException ioe) {
 					FLog.e("error closing stream", ioe);
 				}
@@ -578,11 +624,13 @@ public class FAIMSClient {
 	}
 
 	public void interrupt() {
-		synchronized(FAIMSClient.class) {
-			if (httpClient != null) {
-				isInterrupted = true;
-				httpClient.getConnectionManager().shutdown();
+		// note: this method is non synchronized because we want to terminate currently running operations
+		if (httpClient != null) {
+			isInterrupted = true;
+			if (uploadFileRef != null) {
+				uploadFileRef.delete();
 			}
+			httpClient.getConnectionManager().shutdown();
 		}
 	}
 	

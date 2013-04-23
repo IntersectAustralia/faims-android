@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.services;
 
 import java.io.File;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+
 import roboguice.RoboGuice;
 import android.app.IntentService;
 import android.content.Intent;
@@ -27,6 +29,8 @@ public abstract class UploadService extends IntentService {
 	protected boolean uploadStopped;
 
 	protected File file;
+	
+	protected TarArchiveOutputStream os;
 
 	public UploadService(String name) {
 		super(name);
@@ -41,8 +45,15 @@ public abstract class UploadService extends IntentService {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		faimsClient.interrupt();
 		uploadStopped = true;
+		faimsClient.interrupt();
+		if (os != null) {
+			try {
+				os.close();
+			} catch (Exception e) {
+				FLog.e("error closing steam", e);
+			}
+		}
 		if (file != null) {
 			file.delete();
 		}

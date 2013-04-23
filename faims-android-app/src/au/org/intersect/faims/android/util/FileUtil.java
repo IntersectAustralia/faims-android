@@ -42,23 +42,30 @@ public class FileUtil {
 			file.mkdirs();
 	}
 	
-	public static void tarFile(String dir, String filename) throws IOException, FileNotFoundException {
-		tarFile(dir, new File(dir).getName(), filename, null);
-	}
-	
-	public static void tarFile(String dir, String baseDir, String filename, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		FLog.d("tar file " + dir + " to " + filename);
-		
-		TarArchiveOutputStream ts = null;
-		try {
-		 ts = new TarArchiveOutputStream(
+	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
+		return new TarArchiveOutputStream(
 				 new GZIPOutputStream(
 						 new FileOutputStream(filename)));
-		 
-		 tarDirToStream(dir, baseDir, ts, excludeFiles);
+	}
+	
+	public static TarArchiveInputStream createTarInputStream(String filename) throws IOException {
+		return new TarArchiveInputStream(
+				 new GZIPInputStream(
+						 new FileInputStream(filename)));
+	}
+	
+	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
+		tarFile(dir, new File(dir).getName(), os, null);
+	}
+	
+	public static void tarFile(String dir, String baseDir, TarArchiveOutputStream os, List<String> excludeFiles) throws IOException, FileNotFoundException {
+		FLog.c();
+		
+		try {		 
+		 tarDirToStream(dir, baseDir, os, excludeFiles);
 		}
 		finally {
-			if (ts != null) ts.close();
+			if (os != null) os.close();
 		}
 	}
 	
@@ -117,29 +124,23 @@ public class FileUtil {
 		}
 	}
 	
-	public static void untarFile(String dir, String filename) throws IOException {
-		FLog.d("untar file " + filename + " to " + dir);
+	public static void untarFile(String dir, TarArchiveInputStream is) throws IOException {
+		FLog.c();
 		
-		TarArchiveInputStream ts = null;
 		try {
-		 ts = new TarArchiveInputStream(
-				 new GZIPInputStream(
-						 new FileInputStream(filename)));
-		 
-	     TarArchiveEntry e;
-	     while((e = ts.getNextTarEntry()) != null) {
-	    	 if (e.isDirectory()) {
-	    		 makeDirs(dir + "/" + e.getName());
-	    	 } else {
-	    		 writeTarFile(ts, e, new File(dir + "/" + e.getName()));
-	    	 }
-	     }
+			TarArchiveEntry e;
+			while((e = is.getNextTarEntry()) != null) {
+				if (e.isDirectory()) {
+					makeDirs(dir + "/" + e.getName());
+				} else {
+					writeTarFile(is, e, new File(dir + "/" + e.getName()));
+				}
+			}
 		} finally {
-			if (ts != null) ts.close();
+			if (is != null) is.close();
 		}
 	}
 	
-	// from: http://stackoverflow.com/questions/3163045/android-how-to-check-availability-of-space-on-external-storage
 	public static long getExternalStorageSpace() throws Exception {
 	    long availableSpace = -1L;
 	    
@@ -180,7 +181,7 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		FLog.d("Writing tar file " + file.getAbsolutePath());
+		FLog.d("writing tar file " + file.getAbsolutePath());
 		
 		// make sure directory path exists
 		makeDirs(file.getParent());
@@ -324,6 +325,35 @@ public class FileUtil {
 				fileList.add(base + f.getName());
 			}
 		}
+	}
+
+	public static void moveDir(String fromDir, String toDir) {
+		FLog.c();
+		toDir = new File(toDir).getAbsolutePath() + "/";
+		
+		File d = new File(fromDir);
+		if (d.isDirectory()) {
+			String[] fileList = d.list();
+			
+			for (int i = 0; i < fileList.length; i++) {
+				File f = new File(d, fileList[i]);
+				if (f.isDirectory()) {
+					moveDir(f.getAbsolutePath(), toDir + f.getName() + "/");
+				} else {
+					moveFile(f, toDir);
+				}
+			}
+		} else {
+			moveFile(d, toDir);
+		}
+	}
+	
+	private static void moveFile(File file, String dir) {
+		File d = new File(dir);
+		if (!d.isDirectory()) {
+			d.mkdirs();
+		}
+		file.renameTo(new File(dir + file.getName()));
 	}
 
 	

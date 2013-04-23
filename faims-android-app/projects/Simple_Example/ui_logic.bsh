@@ -171,7 +171,7 @@ updateRelationship(rel_id) {
 	String type = getFieldValue("tabgroup2/tab1/type");
 
 	List attributes = createAttributeList();
-	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null));
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
 	
 	String id = saveRel(rel_id, type, null, attributes);
 	

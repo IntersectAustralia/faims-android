@@ -49,7 +49,10 @@ public class UploadDatabaseService extends UploadService {
 	    	
 	    	// tar file
 	    	file = File.createTempFile("temp_", ".tar.gz", outputDir);
-	    	FileUtil.tarFile(tempFile.getAbsolutePath(), file.getAbsolutePath());
+	    	
+	    	os = FileUtil.createTarOutputStream(file.getAbsolutePath());
+	    	
+	    	FileUtil.tarFile(tempFile.getAbsolutePath(), os);
 	    	
 	    	if (uploadStopped) {
 	    		FLog.d("upload cancelled");
@@ -60,7 +63,17 @@ public class UploadDatabaseService extends UploadService {
 			return faimsClient.uploadDatabase(project, file, userId);
 		} finally {
 			if (tempFile != null) tempFile.delete();
+			
 			if (file != null) file.delete();
+			
+			// TODO check if this is necessary as file util also closes the stream
+			if (os != null) {
+				try {
+					os.close();
+				} catch (Exception e) {
+					FLog.e("error closing steam", e);
+				}
+			}
 		}
 	}
 

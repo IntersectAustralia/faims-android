@@ -33,8 +33,8 @@ public abstract class DownloadService extends IntentService {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		faimsClient.interrupt();
 		downloadStopped = true;
+		faimsClient.interrupt();
 		FLog.d("stopping download service");
 	}
 

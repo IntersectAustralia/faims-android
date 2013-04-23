@@ -3,6 +3,8 @@ package au.org.intersect.faims.android.services;
 import java.io.File;
 import java.util.UUID;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+
 import roboguice.RoboGuice;
 import android.app.IntentService;
 import android.content.Intent;
@@ -34,6 +36,10 @@ public class SyncDatabaseService extends IntentService {
 	@Inject
 	DatabaseManager databaseManager;
 	
+	private File tempProject;
+	
+	private TarArchiveOutputStream os;
+	
 	private boolean syncStopped;
 	
 	public SyncDatabaseService() {
@@ -51,6 +57,16 @@ public class SyncDatabaseService extends IntentService {
 		super.onDestroy();
 		syncStopped = true;
 		faimsClient.interrupt();
+		if (os != null) {
+			try {
+				os.close();
+			} catch (Exception e) {
+				FLog.e("error closing steam", e);
+			}
+		}
+		if (tempProject != null) {
+			tempProject.delete();
+		}
 		FLog.d("stopping service");
 	}
 
@@ -87,7 +103,6 @@ public class SyncDatabaseService extends IntentService {
 		FLog.d("uploading database");
 		
 		File tempDB = null;
-		File tempProject = null;
 		try {
 			Bundle extras = intent.getExtras();
 			String userId = intent.getStringExtra("userId");
@@ -120,7 +135,13 @@ public class SyncDatabaseService extends IntentService {
 	    	
 		    // tar file
 	    	tempProject = File.createTempFile("temp_", ".tar.gz", outputDir);
-		    FileUtil.tarFile(tempDB.getAbsolutePath(), tempProject.getAbsolutePath());
+	    	
+	    	os = FileUtil.createTarOutputStream(tempProject.getAbsolutePath());
+	    	
+		    FileUtil.tarFile(tempDB.getAbsolutePath(), os);
+		    
+		    // note: no need to close file stream as tar file will close the stream when finished
+		    os = null;
 		    
 		    if (syncStopped) {
 	    		FLog.d("sync cancelled");
@@ -156,6 +177,15 @@ public class SyncDatabaseService extends IntentService {
 			
 			if (tempProject != null) {
 				tempProject.delete();
+			}
+			
+			// TODO check if this is necessary as file util also closes the stream
+			if (os != null) {
+				try {
+					os.close();
+				} catch (Exception e) {
+					FLog.e("error closing steam", e);
+				}
 			}
 		}
 	}
