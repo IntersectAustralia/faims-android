@@ -398,6 +398,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	@Override
 	protected void onDestroy() {
+		FLog.c();
 		if(this.linker != null){
 			this.linker.destroyListener();
 		}
@@ -413,6 +414,20 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if (data.isSyncEnabled()) {
 			stopSync();
 		}
+		if (busyDialog != null) {
+			busyDialog.dismiss();
+		}
+		if (confirmDialog != null) {
+			confirmDialog.dismiss();
+		}
+		if (choiceDialog != null) {
+			confirmDialog.dismiss();
+		}
+		// kill all services
+		Intent uploadIntent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+		stopService(uploadIntent);
+		Intent downloadIntent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+		stopService(downloadIntent);
 		super.onDestroy();
 	}
 	

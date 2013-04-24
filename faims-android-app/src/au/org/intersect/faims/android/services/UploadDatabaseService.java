@@ -13,14 +13,22 @@ import au.org.intersect.faims.android.util.FileUtil;
 
 public class UploadDatabaseService extends UploadService {
 
+	private File tempDB;
+	
 	public UploadDatabaseService() {
 		super("UploadDatabaseService");
 	}
 	
 	@Override
+	public void onDestroy() {
+		if (tempDB != null) {
+			tempDB.delete();
+		}
+		super.onDestroy();
+	}
+	
+	@Override
 	protected Result doUpload(Intent intent) throws Exception {
-		File tempFile = null;
-		
 		try {
 			String userId = intent.getStringExtra("userId");
 			Bundle extras = intent.getExtras();
@@ -30,12 +38,12 @@ public class UploadDatabaseService extends UploadService {
 			// create temp database to upload
 			databaseManager.init(database);
 			
-	    	tempFile = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
-	    	dumpDatabase(tempFile, project);
+	    	dumpDatabase(tempDB, project);
 	    	
 	    	// check if database is empty
-	    	if (databaseManager.isEmpty(tempFile)) {
+	    	if (databaseManager.isEmpty(tempDB)) {
 	    		FLog.d("database is empty");
 	    		return Result.SUCCESS;
 	    	}
@@ -46,11 +54,11 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	// tar file
-	    	file = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
-	    	os = FileUtil.createTarOutputStream(file.getAbsolutePath());
+	    	os = FileUtil.createTarOutputStream(tempFile.getAbsolutePath());
 	    	
-	    	FileUtil.tarFile(tempFile.getAbsolutePath(), os);
+	    	FileUtil.tarFile(tempDB.getAbsolutePath(), os);
 	    	
 	    	if (uploadStopped) {
 	    		FLog.d("upload cancelled");
@@ -58,11 +66,11 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	// upload database
-			return faimsClient.uploadDatabase(project, file, userId);
+			return faimsClient.uploadDatabase(project, tempFile, userId);
 		} finally {
+			if (tempDB != null) tempDB.delete();
+
 			if (tempFile != null) tempFile.delete();
-			
-			if (file != null) file.delete();
 			
 			// TODO check if this is necessary as file util also closes the stream
 			if (os != null) {

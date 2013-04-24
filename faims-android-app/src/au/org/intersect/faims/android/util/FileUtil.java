@@ -286,6 +286,9 @@ public class FileUtil {
 	}
 
 	public static void deleteDirectory(File dir) {
+		if (!dir.isDirectory()) {
+			return;
+		}
 		for (File f : dir.listFiles()) {
 			if (f.isDirectory()) {
 				deleteDirectory(f);

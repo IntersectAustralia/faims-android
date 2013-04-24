@@ -38,6 +38,10 @@ public class SyncDatabaseService extends IntentService {
 	
 	private File tempProject;
 	
+	private File tempDB;
+	
+	private File tempDir;
+	
 	private TarArchiveOutputStream os;
 	
 	private boolean syncStopped;
@@ -66,6 +70,12 @@ public class SyncDatabaseService extends IntentService {
 		}
 		if (tempProject != null) {
 			tempProject.delete();
+		}
+		if (tempDB != null) {
+			tempDB.delete();
+		}
+		if (tempDir != null) {
+			FileUtil.deleteDirectory(tempDir);
 		}
 		FLog.d("stopping service");
 	}
@@ -102,7 +112,6 @@ public class SyncDatabaseService extends IntentService {
 	private Result uploadDatabaseToServer(Intent intent) {
 		FLog.d("uploading database");
 		
-		File tempDB = null;
 		try {
 			Bundle extras = intent.getExtras();
 			String userId = intent.getStringExtra("userId");
@@ -189,7 +198,6 @@ public class SyncDatabaseService extends IntentService {
 	private Result downloadDatabaseFromServer(Intent intent) {
 		FLog.d("downloading database");
 		
-		File tempDir = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 

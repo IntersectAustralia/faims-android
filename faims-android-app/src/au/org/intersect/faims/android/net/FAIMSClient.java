@@ -62,12 +62,19 @@ public class FAIMSClient {
 	private TarArchiveOutputStream uploadFileOS;
 	private TarArchiveInputStream downloadFileIS;
 	
+	private File tempFile;
+	private File tempDir;
+	private File tempArchive;
+	
 	private void initClient() throws UnknownHostException {
 		if (httpClient == null) {
 			isInterrupted = false;
 			uploadFileRef = null;
 			uploadFileOS = null;
 			downloadFileIS = null;
+			tempFile = null;
+			tempDir = null;
+			tempArchive = null;
 			String userAgent = InetAddress.getLocalHost().toString();
 			httpClient = AndroidHttpClient.newInstance(userAgent);
 		}
@@ -251,8 +258,8 @@ public class FAIMSClient {
 		synchronized(FAIMSClient.class) {
 			FLog.d("downloading file");
 			InputStream stream = null;
-			File tempFile = null;
-			File tempDir = null;
+			tempFile = null;
+			tempDir = null;
 			try {
 				initClient();
 				
@@ -367,7 +374,7 @@ public class FAIMSClient {
 	
 	private File downloadArchive(String path, FileInfo archive) throws Exception {
 		InputStream stream = null;
-		File tempFile = null;
+		tempArchive = null;
 		try {
 			HttpParams params = new BasicHttpParams();
 			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
@@ -385,9 +392,9 @@ public class FAIMSClient {
 			
 	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir); // make sure directory exists
 			
-	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempArchive = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
 	    	
-			FileUtil.saveFile(stream, tempFile.getAbsolutePath());
+			FileUtil.saveFile(stream, tempArchive.getAbsolutePath());
 			
 			if (isInterrupted) {
 				FLog.d("download archive interrupted");
@@ -395,7 +402,7 @@ public class FAIMSClient {
 				return null;
 			}
 			
-			String md5 = FileUtil.generateMD5Hash(tempFile.getAbsolutePath());
+			String md5 = FileUtil.generateMD5Hash(tempArchive.getAbsolutePath());
 			
 			if (isInterrupted) {
 				FLog.d("download archive interrupted");
@@ -405,17 +412,17 @@ public class FAIMSClient {
 			
 			if (!archive.md5.equals(md5)) {
 				
-				tempFile.delete();
+				tempArchive.delete();
 				
 				return null;
 			}
 			
-			return tempFile;
+			return tempArchive;
 		} finally {
 			if (stream != null) stream.close();
 			
-			if (isInterrupted && tempFile != null) {
-				tempFile.delete();
+			if (isInterrupted && tempArchive != null) {
+				tempArchive.delete();
 			}
 		}
 	}
@@ -633,6 +640,15 @@ public class FAIMSClient {
 		// note: this method is non synchronized because we want to terminate currently running operations
 		if (httpClient != null) {
 			isInterrupted = true;
+			if (tempArchive != null) {
+				tempArchive.delete();
+			}
+			if (tempFile != null) {
+				tempFile.delete();
+			}
+			if (tempDir != null) {
+				FileUtil.deleteDirectory(tempDir);
+			}
 			if (uploadFileRef != null) {
 				uploadFileRef.delete();
 			}

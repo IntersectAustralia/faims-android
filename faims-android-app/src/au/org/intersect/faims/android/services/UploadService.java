@@ -28,7 +28,7 @@ public abstract class UploadService extends IntentService {
 	
 	protected boolean uploadStopped;
 
-	protected File file;
+	protected File tempFile;
 	
 	protected TarArchiveOutputStream os;
 
@@ -54,8 +54,8 @@ public abstract class UploadService extends IntentService {
 				FLog.e("error closing steam", e);
 			}
 		}
-		if (file != null) {
-			file.delete();
+		if (tempFile != null) {
+			tempFile.delete();
 		}
 		FLog.d("stopping upload service");
 	}
