@@ -8,31 +8,35 @@
 
     <model>
       <instance>
-        <faims id="map_example">
+        <faims id="gps_example">
           <user>
               <tab1>
                   <users></users>
               </tab1>
           </user>
-          <tabgroup1>
+          <controls>
               <tab1>
-                  <show></show>
-                  <new></new>
                   <connectexternal></connectexternal>
                   <connectinternal></connectinternal>
               </tab1>
               <tab2>
-                  <map></map>
+                  <screens></screens>
+              </tab2>
+          </controls>
+          <tabgroup1>
+              <tab1>
                   <name></name>
+                  <position></position>
+                  <map></map>
                   <show></show>
                   <plot></plot>
                   <save></save>
                   <clear></clear>
-              </tab2>
-              <tab3>
+              </tab1>
+              <tab2>
                   <entity></entity>
                   <load></load>
-              </tab3>
+              </tab2>
           </tabgroup1>
           <tabgroup2>
               <tab1>  
@@ -45,6 +49,15 @@
                   <layerActionBtn></layerActionBtn>
               </tab1>
           </tabgroup2>
+          <tabgroup3>
+              <tab1>
+                  <longitude></longitude>
+                  <latitude></latitude>
+                  <map></map>
+				  <create></create>
+				  <clear></clear>
+              </tab1>
+          </tabgroup3>
         </faims>
       </instance>
     </model>
@@ -64,36 +77,46 @@
         </select1>
       </group>
     </group>
-    <group ref="tabgroup1">
-      <label>Menu</label>
-      <group ref="tab1">
+    <group ref="controls">
         <label>Controls</label>
-        <trigger ref="show">
-            <label>Show</label>
-        </trigger>
-        <trigger ref="new">
-            <label>New</label>
-        </trigger>
-        <trigger ref="connectexternal">
-            <label>Connect external gps</label>
-        </trigger>
-        <trigger ref="connectinternal">
-            <label>Connect internal gps</label>
-        </trigger>
-      </group>
-      <group ref="tab2" faims_hidden="true" faims_scrollable="false">
+        <group ref="tab1">
+            <label>Controls</label>
+            <trigger ref="connectexternal">
+	            <label>Connect external gps</label>
+	        </trigger>
+	        <trigger ref="connectinternal">
+	            <label>Connect internal gps</label>
+	        </trigger>
+        </group>
+        <group ref="tab2" faims_scrollable="false">
+            <label>Screens</label>
+            <select1 ref="screens" appearance="compact">
+	          <label>Screens:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+	        </select1>
+        </group>
+    </group>
+    <group ref="tabgroup1">
+      <label>GPS Plotting</label>
+      <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
-        <input ref="map" faims_map="true">
-            <label>Map:</label>
-        </input>
         <input ref="name">
             <label>Name:</label>
         </input>
+        <input ref="position" faims_read_only="true">
+            <label>Position:</label>
+        </input>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
         <trigger ref="show">
-            <label>Show current position</label>
+            <label>Snap to GPS position</label>
         </trigger>
         <trigger ref="plot">
-            <label>Plot current position</label>
+            <label>Plot GPS position</label>
         </trigger>
         <trigger ref="save">
             <label>Save</label>
@@ -102,18 +125,18 @@
             <label>Clear</label>
         </trigger>
       </group>
-      <group ref="tab3" faims_hidden="true">
+      <group ref="tab2">
           <label>Entity</label>
           <select1 ref="entity">
-          <label>Entity:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
+	          <label>Entity:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+		  </select1>
+		  <trigger ref="load">
+			  <label>Load</label>
+		  </trigger>
       </group>
     </group>
     <group ref="tabgroup2">
@@ -183,6 +206,26 @@
         </trigger>
       </group>
     </group>
-    
+    <group ref="tabgroup3">
+      <label>GPS Plotting</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="longitude">
+            <label>Longitude:</label>
+        </input>
+        <input ref="latitude">
+            <label>Latitude:</label>
+        </input>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+        <trigger ref="create">
+            <label>Create Point</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear Points</label>
+        </trigger>
+      </group>
+    </group>
   </h:body>
 </h:html>

@@ -34,12 +34,50 @@ login(){
 	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
 	
 	setUser(user);
-	showTabGroup("tabgroup1");
+	showTabGroup("controls");
 }
 
 populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
+
+onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
+onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
+
+getScreen(id, name) {
+	ArrayList screen = new ArrayList();
+	screen.add(id);
+	screen.add(name);
+	return screen;
+}
+
+populateScreens() {
+
+	ArrayList screens = new ArrayList();
+	screens.add(getScreen("tabgroup1", "GPS test"));
+	screens.add(getScreen("tabgroup2", "Drawing test"));
+	screens.add(getScreen("tabgroup3", "Point test"));
+	
+	populateList("controls/tab2/screens", screens);
+}
+
+populateScreens();
+
+onEvent("controls/tab2/screens", "click", "gotoScreen()");
+
+gotoScreen() {
+	screen = getListItemValue();
+	showTabGroup(screen);
+}
+
+onEvent("tabgroup1", "load", "showScreen(\"tabgroup1\")");
+onEvent("tabgroup2", "load", "showScreen(\"tabgroup2\")");
+onEvent("tabgroup3", "load", "showScreen(\"tabgroup3\")");
+
+showScreen(name) {
+	setGPSUpdateInterval(4);
+	setupMap(name + "/tab1/map", 151.26854f, -33.88190f); // sydney
+}
 
 mapfilename = "map.tif";
 
@@ -47,27 +85,8 @@ setupMap(id, lon, lat) {
 	showRasterMap(id, mapfilename);
 	setMapFocusPoint(id, lon, lat);
 	setMapRotation(id, 360.0f);
-	setMapZoom(id, 15.0f);
+	setMapZoom(id, 12.0f);
 	setMapTilt(id, 90.0f);
-}
-
-showMapTab() {
-	setupMap("tabgroup1/tab2/map", 151.26854f, -33.88190f); 
-	showTab("tabgroup1/tab2");
-	showTab("tabgroup1/tab3");
-	clearMapTab();
-}
-
-showMapTabGroup() {
-	setupMap("tabgroup2/tab1/map", 151.26854f, -33.88190f); 
-	showTabGroup("tabgroup2");
-	
-	refreshLayers();
-}
-
-refreshMapTab() {
-	showRasterMap("tabgroup1/tab2/map", mapfilename);
-	addVectorLayers();
 }
 
 List layers = new ArrayList();
@@ -75,11 +94,11 @@ Integer pointLayerId;
 
 clearMapTab() {
 	for (Integer layerId : layers) {
-		clearVectorLayer("tabgroup1/tab2/map", layerId);
+		clearVectorLayer("tabgroup1/tab1/map", layerId);
 	}
 	layers = new ArrayList();
 	
-	pointLayerId = createVectorLayer("tabgroup1/tab2/map");
+	pointLayerId = createVectorLayer("tabgroup1/tab1/map");
 	layers.add(pointLayerId);
 	
 	clearTabEntity();
@@ -90,14 +109,19 @@ clearMapTab() {
 	bluePointId = 0;
 }
 
-showCurrentPositionTab(){
-	centerOnCurrentPosition("tabgroup1/tab2/map");
+snapToGPSPosition(){
+	location = getGPSPosition();
+	if (location == null) {
+		showWarning("Logic Error", "No GPS Signal");
+	} else {
+		centerOnCurrentPosition("tabgroup1/tab1/map");
+	}
 }
 
 refreshTabEntities() {
 	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
 	
-	populateDropDown("tabgroup1/tab3/entity", entities);
+	populateDropDown("tabgroup1/tab2/entity", entities);
 }
 
 saveTabEntity() {
@@ -105,10 +129,10 @@ saveTabEntity() {
 	collection = null;
 	if (lastPointId != 0) {
 		collection = new ArrayList();
-		collection.add(getGeometry("tabgroup1/tab2/map", pointLayerId, lastPointId));
+		collection.add(getGeometry("tabgroup1/tab1/map", pointLayerId, lastPointId));
 		
 		// clear geometry
-		clearGeometry("tabgroup1/tab2/map", pointLayerId, lastPointId);
+		clearGeometry("tabgroup1/tab1/map", pointLayerId, lastPointId);
 		
 		lastPointId = 0;
 	} else {
@@ -117,7 +141,7 @@ saveTabEntity() {
 	}
 
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab2/name"), null, null, null));
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
 	
 	String id = saveArchEnt(null, "simple", collection, attributes);
 	
@@ -129,9 +153,20 @@ saveTabEntity() {
 loadedEntities = new ArrayList();
 loadedPoints = new ArrayList();
 
+setEntity(entity) {
+	for (Object attribute : entity.getAttributes()) {
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab1/name", attribute.getText());
+		}
+	}
+	point = entity.getGeometryList().get(0);
+	
+	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getMapPos().x + ", Latitude = " + point.getMapPos().y);
+}
+
 loadTabEntity(id) {
 	if (id == null) {
-		entityId = getFieldValue("tabgroup1/tab3/entity");
+		entityId = getFieldValue("tabgroup1/tab2/entity");
 	} else {
 		entityId = id;
 	}
@@ -140,12 +175,7 @@ loadTabEntity(id) {
 	
 	Object entity = fetchArchEnt(entityId);
 	
-	for (Object attribute : entity.getAttributes()) {
-		System.out.println(attribute.toString());
-		if ("name".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab2/name", attribute.getText());
-		}
-	}
+	setEntity(entity);
 	
 	for (Object e : loadedEntities) {
 		if (e.getId().equals(entityId)) {
@@ -155,12 +185,13 @@ loadTabEntity(id) {
 	}
 	
 	loadedEntities.add(entity);
+	
 	redrawEntities();
 }
 
 clearLoadedPoints() {
 	for (Integer id : loadedPoints) {
-		clearGeometry("tabgroup1/tab2/map", pointLayerId, id);
+		clearGeometry("tabgroup1/tab1/map", pointLayerId, id);
 	}
 	loadedPoints = new ArrayList();
 }
@@ -170,17 +201,18 @@ redrawEntities() {
 	
 	for (Object entity : loadedEntities) {
 		point = entity.getGeometryList().get(0);
-		loadedPoints.add(drawGeometry("tabgroup1/tab2/map", pointLayerId, point, gpsPointStyle(Color.GREEN)));
+		loadedPoints.add(drawGeometry("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.GREEN)));
 	}
 }
 
 clearTabEntity() {
-	setFieldValue("tabgroup1/tab2/name", "");
+	setFieldValue("tabgroup1/tab1/name", "");
+	setFieldValue("tabgroup1/tab1/position", "");
 }
 
 clearBluePoint() {
 	if (bluePointId != 0) {
-		clearGeometry("tabgroup1/tab2/map", pointLayerId, bluePointId);
+		clearGeometry("tabgroup1/tab1/map", pointLayerId, bluePointId);
 		bluePointId = 0;
 	}
 }
@@ -196,8 +228,6 @@ onTabMapSelect() {
 	
 	selectedId = getMapGeometrySelected();
 	
-	System.out.println("Selected point is " + selectedId);
-	
 	for (int i = 0; i < loadedPoints.size(); i++) {
 		id = loadedPoints.get(i);
 		
@@ -205,15 +235,10 @@ onTabMapSelect() {
 			// load entity name
 			Object entity = loadedEntities.get(i);
 		
-			for (Object attribute : entity.getAttributes()) {
-				System.out.println(attribute.toString());
-				if ("name".equals(attribute.getName())) {
-					setFieldValue("tabgroup1/tab2/name", attribute.getText());
-				}
-			}
+			setEntity(entity);
 			
-			point = getGeometry("tabgroup1/tab2/map", pointLayerId, id);
-			bluePointId = drawGeometry("tabgroup1/tab2/map", pointLayerId, point, gpsPointStyle(Color.BLUE));
+			point = getGeometry("tabgroup1/tab1/map", pointLayerId, id);
+			bluePointId = drawGeometry("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.BLUE));
 			break;
 		}
 	}
@@ -223,7 +248,7 @@ lastPointId = 0;
 
 plotGPSPoint() {
 	if (lastPointId != 0) {
-		clearGeometry("tabgroup1/tab2/map", pointLayerId, lastPointId);
+		clearGeometry("tabgroup1/tab1/map", pointLayerId, lastPointId);
 	}
 
 	location = getGPSPosition();
@@ -234,26 +259,19 @@ plotGPSPoint() {
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
 		point = createPoint(longitude, latitude);
-		//point = createPoint(151.26854f, -33.88190f);
-		lastPointId = drawPoint("tabgroup1/tab2/map", pointLayerId, point, gpsPointStyle(Color.RED));
+		lastPointId = drawPoint("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.RED));
 	}
 }
 
 refreshTabEntities();
+clearMapTab();
 
-onEvent("tabgroup1/tab2/plot", "click", "plotGPSPoint()");
-
-onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
-onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
-onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
-onEvent("tabgroup1/tab1/connectexternal", "click", "startExternalGPS()");
-onEvent("tabgroup1/tab1/connectinternal", "click", "startInternalGPS()");
-onEvent("tabgroup1/tab2/show", "click", "showCurrentPositionTab()");
-onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
-onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
-onEvent("tabgroup1/tab2/save", "click", "saveTabEntity()");
-onEvent("tabgroup1/tab3/load", "click", "loadTabEntity(null)");
-onMapEvent("tabgroup1/tab2/map", "onTabMapClick()", "onTabMapSelect()");
+onEvent("tabgroup1/tab1/show", "click", "snapToGPSPosition()");
+onEvent("tabgroup1/tab1/plot", "click", "plotGPSPoint()");
+onEvent("tabgroup1/tab1/save", "click", "saveTabEntity()");
+onEvent("tabgroup1/tab1/clear", "click", "clearMapTab()");
+onEvent("tabgroup1/tab2/load", "click", "loadTabEntity(null)");
+onMapEvent("tabgroup1/tab1/map", "onTabMapClick()", "onTabMapSelect()");
 
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
 onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
@@ -304,12 +322,9 @@ onGenerateGrid() {
 }
 
 onMapSelect() {
-	System.out.println("select");
-	
 	if (tool != SELECT_SHAPE) return;
 	
 	geomId = getMapGeometrySelected();
-	System.out.println(geomId);
 	
 	if (currentGeometryId == geomId) return;
 	currentGeometryId = geomId;
@@ -318,7 +333,6 @@ onMapSelect() {
 }
 
 onMapClick() {
-	System.out.println("click");
 
 	if (currentGeometryId != 0){
 		replaceGeometryOverlay("tabgroup2/tab1/map", currentGeometryId);
@@ -464,8 +478,6 @@ createShape() {
 }
 
 clearPoints() {
-	//System.out.println("layer: " + String.valueOf(currentLayerId));
-	//System.out.println(pointIds.toString());
 	
 	if (currentLayerId != 0) clearGeometryList("tabgroup2/tab1/map", currentLayerId, pointIds);
 	
@@ -474,7 +486,7 @@ clearPoints() {
 }
 
 onChangeLayers() {
-	if (getFieldValue("tabgroup2/tab1/layers") == "") {
+	if ("".equals(getFieldValue("tabgroup2/tab1/layers"))) {
 		layerId = 0;
 	} else {
 		layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
@@ -549,3 +561,42 @@ drawGeometryList(geometryList) {
 		}
 	}
 }
+
+int lonlatlayer = 0;
+
+createLonLatPoint() {
+	lon = getFieldValue("tabgroup3/tab1/longitude");
+	lat = getFieldValue("tabgroup3/tab1/latitude");
+	
+	if ("".equals(lon) || "".equals(lat)) {
+		return;
+	}
+	
+	point = createPoint(lon, lat);
+	
+	drawPoint("tabgroup3/tab1/map", lonlatlayer, point, pointStyle(Color.RED));
+}
+
+clearLonLatPoints() {
+	if (lonlatlayer > 0)
+		clearVectorLayer("tabgroup3/tab1/map", lonlatlayer);
+	
+	lonlatlayer = createVectorLayer("tabgroup3/tab1/map");
+}
+
+onSelectLonLatPoint() {
+	selectedId = getMapGeometrySelected();
+	point = getGeometry("tabgroup3/tab1/map", lonlatlayer, selectedId);
+}
+
+onClickSelectedLonLatPoint() {
+	point = getMapPointClicked();
+	setFieldValue("tabgroup3/tab1/longitude", "" + point.x);
+	setFieldValue("tabgroup3/tab1/latitude", "" + point.y);
+}
+
+onEvent("tabgroup3/tab1/create", "click", "createLonLatPoint()");
+onEvent("tabgroup3/tab1/clear", "click", "clearLonLatPoints()");
+onMapEvent("tabgroup3/tab1/map", "onClickSelectedLonLatPoint()", "onSelectLonLatPoint()");
+
+clearLonLatPoints();

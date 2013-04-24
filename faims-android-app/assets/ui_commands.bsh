@@ -288,12 +288,16 @@ clearGeometryList(String ref, int layerId, List geomList) {
 	linker.clearGeometryList(ref, layerId, geomList);
 }
 
+createPoint(String lon, String lat) {
+	return createPoint(Float.parseFloat(lon), Float.parseFloat(lat));
+}
+
 createPoint(float lon, float lat) {
 	return new MapPos(lon, lat);
 }
 
 createPoint(double lon, double lat) {
-	return new MapPos((float) lon, (float) lat);
+	return createPoint((float) lon, (float) lat);
 }
 
 getGeometryList(String ref, int layerId) {

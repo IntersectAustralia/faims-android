@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -158,7 +159,7 @@ public class BeanShellLinker {
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try{
 			
-			if (type == "click") {
+			if ("click".equals(type.toLowerCase(Locale.ENGLISH))) {
 				View view = renderer.getViewByRef(ref);
 				if (view ==  null) {
 					FLog.w("cannot find view " + ref);
@@ -213,7 +214,7 @@ public class BeanShellLinker {
 					}
 				}
 			}
-			else if (type == "load") {
+			else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = renderer.getTabGroupByLabel(ref);
 				if (tg == null){
 					FLog.w("cannot find tabgroup " + ref);
@@ -224,7 +225,7 @@ public class BeanShellLinker {
 					tg.addOnLoadCommand(code);
 				}
 			} 
-			else if (type == "show") {
+			else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = renderer.getTabGroupByLabel(ref);
 				if (tg == null){
 					FLog.w("cannot find tabgroup " + ref);

@@ -317,7 +317,7 @@ clearPoints() {
 }
 
 onChangeLayers() {
-	if (getFieldValue("tabgroup2/tab1/layers") == "") {
+	if ("".equals(getFieldValue("tabgroup2/tab1/layers"))) {
 		layerId = 0;
 	} else {
 		layerId = Integer.valueOf(getFieldValue("tabgroup2/tab1/layers")).intValue();
