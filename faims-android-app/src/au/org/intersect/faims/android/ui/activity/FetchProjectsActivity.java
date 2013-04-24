@@ -140,8 +140,16 @@ public class FetchProjectsActivity extends RoboActivity {
     protected void onDestroy() {
     	super.onDestroy();
     	
-    	if (busyDialog.isShowing())
+    	if (busyDialog != null)
     		busyDialog.dismiss();
+    	if (choiceDialog != null)
+    		choiceDialog.dismiss();
+    	if (confirmDialog != null)
+    		confirmDialog.dismiss();
+    	
+    	// kill all services
+		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+		stopService(intent);
     }
 
     @Override
