@@ -426,7 +426,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		// kill all services
 		Intent uploadIntent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
 		stopService(uploadIntent);
-		Intent downloadIntent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+		Intent downloadIntent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
 		stopService(downloadIntent);
 		super.onDestroy();
 	}
