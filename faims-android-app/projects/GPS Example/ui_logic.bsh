@@ -572,9 +572,14 @@ createLonLatPoint() {
 		return;
 	}
 	
+	lon = Float.parseFloat(lon);
+	lat = Float.parseFloat(lat);
+	
 	point = createPoint(lon, lat);
 	
 	drawPoint("tabgroup3/tab1/map", lonlatlayer, point, pointStyle(Color.RED));
+	
+	setMapFocusPoint("tabgroup3/tab1/map", lon, lat);
 }
 
 clearLonLatPoints() {
