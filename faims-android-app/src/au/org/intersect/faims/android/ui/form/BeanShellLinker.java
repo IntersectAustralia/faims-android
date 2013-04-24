@@ -880,6 +880,10 @@ public class BeanShellLinker {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			
+			if (valueObj instanceof Number) {
+				valueObj = valueObj.toString();
+			}
+			
 			if (valueObj instanceof String){
 				
 				String value = (String) valueObj;
@@ -1003,6 +1007,10 @@ public class BeanShellLinker {
 	public void setFieldCertainty(String ref, Object valueObj) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
+			
+			if (valueObj instanceof Number) {
+				valueObj = valueObj.toString();
+			}
 			
 			if (valueObj instanceof String){
 				

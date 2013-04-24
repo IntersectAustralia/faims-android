@@ -431,6 +431,10 @@ public class UIRenderer implements IRestoreActionListener{
 		try{
 			Object obj = getViewByRef(ref);
 			
+			if (valueObj instanceof Number) {
+				valueObj = valueObj.toString();
+			}
+			
 			if (valueObj instanceof String){
 				
 				String value = (String) valueObj;
@@ -553,6 +557,10 @@ public class UIRenderer implements IRestoreActionListener{
 	private void setFieldCertainty(String ref, Object valueObj) {
 		try{
 			Object obj = getViewByRef(ref);
+			
+			if (valueObj instanceof Number) {
+				valueObj = valueObj.toString();
+			}
 			
 			if (valueObj instanceof String){
 				

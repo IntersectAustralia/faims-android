@@ -591,8 +591,8 @@ onSelectLonLatPoint() {
 
 onClickSelectedLonLatPoint() {
 	point = getMapPointClicked();
-	setFieldValue("tabgroup3/tab1/longitude", "" + point.x);
-	setFieldValue("tabgroup3/tab1/latitude", "" + point.y);
+	setFieldValue("tabgroup3/tab1/longitude", point.x);
+	setFieldValue("tabgroup3/tab1/latitude", point.y);
 }
 
 onEvent("tabgroup3/tab1/create", "click", "createLonLatPoint()");
