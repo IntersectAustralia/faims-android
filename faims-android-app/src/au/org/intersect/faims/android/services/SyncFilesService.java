@@ -13,10 +13,12 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.LockManager;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
+import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
 
@@ -81,17 +83,6 @@ public class SyncFilesService extends IntentService {
 		}
 	}
 	
-	private void waitIfLocked(String projectDir) {
-		try {
-			while(new File(projectDir + "/.lock").exists()) {
-				FLog.d("waiting for project to be unlocked");
-				Thread.sleep(1000);
-			}
-		} catch (InterruptedException e) {
-			FLog.e("interrupted wait", e);
-		}
-	}
-	
 	private Result uploadServerDirectory(Intent intent) {
 		FLog.d("uploading server directory");
 		return uploadDirectory(intent, 
@@ -118,11 +109,13 @@ public class SyncFilesService extends IntentService {
 	}
 
 	private Result uploadDirectory(Intent intent, String uploadDir, String requestExcludePath, String uploadPath) {
+		String lock = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
-			waitIfLocked(projectDir);
+			lock = projectDir + "./lock";
+			waitForLock(lock);
 			
 			Result uploadResult = faimsClient.uploadDirectory(projectDir, 
 					uploadDir, 
@@ -146,16 +139,18 @@ public class SyncFilesService extends IntentService {
 			FLog.e("uploading dir " + uploadDir + " error");
 			return Result.FAILURE;
 		} finally {
-			
+			if (lock != null) LockManager.clearLock(lock);
 		}
 	}
 	
 	private Result downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
+		String lock = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
-			waitIfLocked(projectDir);
+			lock = projectDir + "./lock";
+			waitForLock(lock);
 			
 			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
 					"/android/project/" + project.key + "/" + requestExcludePath, 
@@ -174,8 +169,16 @@ public class SyncFilesService extends IntentService {
 			FLog.e("downloading dir " + downloadDir + " error");
 			return DownloadResult.FAILURE;
 		} finally {
-			
+			if (lock != null) LockManager.clearLock(lock);
 		}
+	}
+	
+	// note: cannot use lock manager as we need to check if service has stopped
+	private void waitForLock(String filename) throws Exception {
+		while(!syncStopped && new File(filename).exists()) {
+			Thread.sleep(1000);
+		}
+		FileUtil.touch(new File(filename));
 	}
 
 }

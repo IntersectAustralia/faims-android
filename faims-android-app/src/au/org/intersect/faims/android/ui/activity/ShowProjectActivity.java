@@ -4,7 +4,6 @@ import group.pals.android.lib.ui.filechooser.FileChooserActivity;
 import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +43,7 @@ import au.org.intersect.faims.android.data.ShowProjectActivityData;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.LockManager;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
@@ -379,6 +379,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		databaseManager.init(projectDir + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
+		
+		// clear any lock files that may exist
+		String lock = projectDir + "/.lock";
+		LockManager.clearLock(lock);
 	}
 	
 	@Override
@@ -1107,33 +1111,33 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	// TODO think about what happens if copy fails
 	public void copyFile(final String fromFile, final String toFile) {
-		final String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
-		
-		File lock = null;
-		try {
-			
-			// TODO create manager to lock the current project
-			lock = new File(projectDir + "/.lock");
-			FileUtil.touch(lock);
-			FLog.d("locked: " + lock.exists());
-			
-			new CopyFileTask(fromFile, toFile, new ITaskListener() {
-	
-				@Override
-				public void handleTaskCompleted(Object result) {
-					File f = new File(projectDir + "/.lock");
-					if (f.exists()) f.delete();
-					FLog.d("locked: " + f.exists());
-				}
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				final String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
+				final String lock = projectDir + "/.lock";
 				
-			}).execute();
+				try {
+					
+					LockManager.waitForLock(lock);
+					
+					new CopyFileTask(fromFile, toFile, new ITaskListener() {
 			
-		} catch (Exception e) {
-			FLog.e("error copying file", e);
-		} finally {
-			if (lock != null) {
-				lock.delete();
+						@Override
+						public void handleTaskCompleted(Object result) {
+							LockManager.clearLock(lock);
+						}
+						
+					}).execute();
+					
+				} catch (Exception e) {
+					FLog.e("error copying file", e);
+				} finally {
+					LockManager.clearLock(lock);
+				}
 			}
-		}
+			
+		}).start();
 	}
 }
