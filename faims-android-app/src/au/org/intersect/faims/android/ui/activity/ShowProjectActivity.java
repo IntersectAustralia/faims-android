@@ -170,7 +170,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				Message message) {
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS){
-				if(activity.getData().isFileSyncEnabled()) {
+				if(activity.activityData.isFileSyncEnabled()) {
 					activity.startSyncingFiles();
 				} else {
 					activity.resetSyncInterval();
@@ -247,7 +247,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		    if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
 		        if (intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
 		        	activity.wifiConnected = true;
-		            if (activity.getData().isSyncEnabled() && activity.isActivityShowing && !activity.syncActive) {
+		            if (activity.activityData.isSyncEnabled() && activity.isActivityShowing && !activity.syncActive) {
 		            	activity.startSync();
 		            }
 		        } else {
@@ -265,8 +265,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		ORANGE,
 		RED
 	}
-	
-	public WifiBroadcastReceiver broadcastReceiver;
 
 	public static final int CAMERA_REQUEST_CODE = 1;
 	
@@ -278,6 +276,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	@Inject
 	DatabaseManager databaseManager;
 
+	private WifiBroadcastReceiver broadcastReceiver;
+	
 	private FormEntryController fem;
 
 	private UIRenderer renderer;
@@ -286,22 +286,22 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	private GPSDataManager gpsDataManager;
 
-	protected BusyDialog busyDialog;
-	protected ChoiceDialog choiceDialog;
-	protected ConfirmDialog confirmDialog;
+	private BusyDialog busyDialog;
+	private ChoiceDialog choiceDialog;
+	private ConfirmDialog confirmDialog;
+	
 	private AsyncTask<Void, Void, Void> locateTask;
 
-	private String projectKey;
-
 	private Arch16n arch16n;
+
+	private String projectKey;
 	
-	private float syncInterval;
-	private float syncMinInterval;
-	private float syncMaxInterval;
-	private float syncDelay;
-	private ShowProjectActivityData data;
+	private boolean wifiConnected;
 	
 	private boolean syncActive;
+	
+	private float syncInterval;
+
 	private Semaphore syncLock = new Semaphore(1);
 	
 	private List<SyncListener> listeners;
@@ -312,25 +312,61 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private SyncIndicatorColor lastSyncIndicatorColor = SyncIndicatorColor.GREEN;
 
 	private boolean isActivityShowing;
-	protected boolean isServerDirectoryUploading;
 
 	private Timer syncTaskTimer;
 
-	public boolean wifiConnected;
-
-	protected boolean isAppDirectoryDownloading;
+	private ShowProjectActivityData activityData;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_show_project);
 		
 		// inject faimsClient and serverDiscovery
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
-
-		setContentView(R.layout.activity_show_project);
-
+		
+		// set file browser to reset last location when activity is created
+		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
+		
+		// initialize server discovery
 		serverDiscovery.setApplication(getApplication());
-
+		
+		// Need to register license for the map view before create an instance of map view
+		CustomMapView.registerLicense(getApplicationContext());
+		
+		this.activityData = new ShowProjectActivityData();
+		
+		setupSync();
+		setupWifiBroadcast();
+		setupProject();
+		
+		renderUI(savedInstanceState);
+	}
+	
+	private void setupSync() {
+		listeners = new ArrayList<SyncListener>();
+		activityData.setSyncMinInterval(getResources().getInteger(R.integer.sync_min_interval));
+		activityData.setSyncMaxInterval(getResources().getInteger(R.integer.sync_max_interval));
+		activityData.setSyncDelay(getResources().getInteger(R.integer.sync_failure_delay));
+	}
+	
+	private void setupWifiBroadcast() {
+		broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
+		
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+		registerReceiver(broadcastReceiver, intentFilter);
+		
+		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		
+		// initialize wifi connection state
+		if (mWifi != null && mWifi.isConnected()) {
+			wifiConnected = true;
+		}
+	}
+	
+	private void setupProject() {
 		Intent data = getIntent();
 		
 		Project project = ProjectUtil.getProject(data.getStringExtra("key"));
@@ -341,53 +377,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
-		this.data = new ShowProjectActivityData();
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
-		
-		/*
-		choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
-				getString(R.string.render_project_title),
-				getString(R.string.render_project_message), new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.SELECT_YES) {
-							renderUI();
-							gpsDataManager.startGPSListener();
-						}
-					}
-			
-		});
-		choiceDialog.show();
-		*/
-		
-		listeners = new ArrayList<SyncListener>();
-		
-		broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
-		
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-		registerReceiver(broadcastReceiver, intentFilter);
-		
-		syncMinInterval = getResources().getInteger(R.integer.sync_min_interval);
-		syncMaxInterval = getResources().getInteger(R.integer.sync_max_interval);
-		syncDelay = getResources().getInteger(R.integer.sync_failure_delay);
-		
-		// set file browser to reset last location when activity is created
-		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
-		
-		// Need to register license for the map view before create an instance of map view
-		CustomMapView.registerLicense(getApplicationContext());
-		renderUI(savedInstanceState);
-		
-		ConnectivityManager connManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-		// initialise wifi connection state
-		if (mWifi != null && mWifi.isConnected()) {
-			wifiConnected = true;
-		}
 	}
 	
 	@Override
@@ -411,7 +402,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if (this.broadcastReceiver != null) {
 			this.unregisterReceiver(broadcastReceiver);
 		}
-		if (data.isSyncEnabled()) {
+		if (activityData.isSyncEnabled()) {
 			stopSync();
 		}
 		if (busyDialog != null) {
@@ -448,14 +439,14 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		isActivityShowing = true;
 		
-		if (getData().isSyncEnabled()) {
+		if (activityData.isSyncEnabled()) {
 			startSync();
 		}
-		gpsDataManager.setGpsUpdateInterval(this.data.getGpsUpdateInterval());
-		if(data.isExternalGPSStarted()){
+		gpsDataManager.setGpsUpdateInterval(this.activityData.getGpsUpdateInterval());
+		if(activityData.isExternalGPSStarted()){
 			gpsDataManager.startExternalGPSListener();
 		}
-		if(data.isInternalGPSStarted()){
+		if(activityData.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
 	}
@@ -799,25 +790,17 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     	});
     	confirmDialog.show();
     }
-	
-	public ShowProjectActivityData getData() {
-		return data;
-	}
-
-	public void setData(ShowProjectActivityData data) {
-		this.data = data;
-	}
 
 	public void enableSync() {
-		if (getData().isSyncEnabled()) return;
-		getData().setSyncEnabled(true);
+		if (activityData.isSyncEnabled()) return;
+		activityData.setSyncEnabled(true);
 		resetSyncInterval();
 		startSync();
 	}
 
 	public void disableSync() {
-		if (!getData().isSyncEnabled()) return;
-		getData().setSyncEnabled(false);
+		if (!activityData.isSyncEnabled()) return;
+		activityData.setSyncEnabled(false);
 		stopSync();
 	}
 	
@@ -913,7 +896,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	private void syncLocateServer() {
 		FLog.d("sync locating server");
-		FLog.d("userid : " + databaseManager.getUserId());
+
 		if (serverDiscovery.isServerHostValid()) {
 			startSyncingDatabase();
 		} else {
@@ -972,13 +955,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	private void resetSyncInterval() {
-		syncInterval = syncMinInterval;
+		syncInterval = activityData.getSyncMinInterval();
 	}
 	
 	private void delaySyncInterval() {
-		syncInterval += syncDelay;
-		if (syncInterval > syncMaxInterval) 
-			syncInterval = syncMaxInterval;
+		syncInterval += activityData.getSyncDelay();
+		if (syncInterval > activityData.getSyncMaxInterval()) 
+			syncInterval = activityData.getSyncMaxInterval();
 	}
 	
 	public void addSyncListener(SyncListener listener) {
@@ -1010,27 +993,27 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 
 	public void setSyncMinInterval(float value) {
-		this.syncMinInterval = value;
+		activityData.setSyncMinInterval(value);
 	}
 	
 	public void setSyncMaxInterval(float value) {
-		this.syncMaxInterval = value;
+		activityData.setSyncMaxInterval(value);
 	}
 	
 	public void setSyncDelay(float value) {
-		this.syncDelay = value;
+		activityData.setSyncDelay(value);
 	}
 
 	public float getSyncMinInterval() {
-		return this.syncMinInterval;
+		return activityData.getSyncMinInterval();
 	}
 	
 	public float getSyncMaxInterval(float value) {
-		return this.syncMaxInterval;
+		return activityData.getSyncMaxInterval();
 	}
 	
 	public float gettSyncDelay(float value) {
-		return this.syncDelay;
+		return activityData.getSyncDelay();
 	}
 	
 	public void showFileBrowser() {
@@ -1072,11 +1055,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void enableFileSync() {
-		getData().setFileSyncEnabled(true);
+		activityData.setFileSyncEnabled(true);
 	}
 	
 	public void disableFileSync() {
-		getData().setFileSyncEnabled(false);
+		activityData.setFileSyncEnabled(false);
 	}
 	
 	private void startSyncingFiles() {
@@ -1114,10 +1097,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
 		renderer.storeTabs(savedInstanceState);
 		renderer.storeViewValues(savedInstanceState);
-		data.setExternalGPSStarted(gpsDataManager.isExternalGPSStarted());
-		data.setInternalGPSStarted(gpsDataManager.isInternalGPSStarted());
-		data.setUserId(databaseManager.getUserId());
-		data.saveTo(savedInstanceState);
+		activityData.setExternalGPSStarted(gpsDataManager.isExternalGPSStarted());
+		activityData.setInternalGPSStarted(gpsDataManager.isInternalGPSStarted());
+		activityData.setUserId(databaseManager.getUserId());
+		activityData.saveTo(savedInstanceState);
 		gpsDataManager.destroyListener();
 	}
 
@@ -1127,15 +1110,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		renderer.restoreBackStack(savedInstanceState, this);
 		renderer.restoreTabs(savedInstanceState);
 		renderer.restoreViewValues(savedInstanceState);
-		this.data.restoreFrom(savedInstanceState);
-		gpsDataManager.setGpsUpdateInterval(this.data.getGpsUpdateInterval());
-		if(data.isExternalGPSStarted()){
+		activityData.restoreFrom(savedInstanceState);
+		gpsDataManager.setGpsUpdateInterval(activityData.getGpsUpdateInterval());
+		if(activityData.isExternalGPSStarted()){
 			gpsDataManager.startExternalGPSListener();
 		}
-		if(data.isInternalGPSStarted()){
+		if(activityData.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		this.databaseManager.setUserId(this.data.getUserId());
+		this.databaseManager.setUserId(activityData.getUserId());
 	}
 
 	// TODO think about what happens if copy fails

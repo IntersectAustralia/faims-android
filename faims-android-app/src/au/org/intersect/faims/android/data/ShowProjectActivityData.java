@@ -3,6 +3,10 @@ package au.org.intersect.faims.android.data;
 import android.os.Bundle;
 
 public class ShowProjectActivityData implements ActivityData {
+	
+	private float syncMinInterval;
+	private float syncMaxInterval;
+	private float syncDelay;
 
 	private boolean syncEnabled;
 
@@ -72,6 +76,9 @@ public class ShowProjectActivityData implements ActivityData {
 		savedInstanceState.putBoolean("isExternalGPSStarted", isExternalGPSStarted);
 		savedInstanceState.putBoolean("isInternalGPSStarted", isInternalGPSStarted);
 		savedInstanceState.putInt("gpsUpdateInterval", gpsUpdateInterval);
+		savedInstanceState.putFloat("syncMaxInterval", syncMaxInterval);
+		savedInstanceState.putFloat("syncMinInterval", syncMinInterval);
+		savedInstanceState.putFloat("syncDelay", syncDelay);
 	}
 
 	@Override
@@ -82,6 +89,33 @@ public class ShowProjectActivityData implements ActivityData {
 		setExternalGPSStarted(savedInstancestate.getBoolean("isExternalGPSStarted"));
 		setInternalGPSStarted(savedInstancestate.getBoolean("isInternalGPSStarted"));
 		setGpsUpdateInterval(savedInstancestate.getInt("gpsUpdateInterval"));
+		setSyncMaxInterval(savedInstancestate.getFloat("syncMaxInterval"));
+		setSyncMinInterval(savedInstancestate.getFloat("syncMinInterval"));
+		setSyncDelay(savedInstancestate.getFloat("syncDelay"));
+	}
+
+	public float getSyncMinInterval() {
+		return syncMinInterval;
+	}
+
+	public void setSyncMinInterval(float syncMinInterval) {
+		this.syncMinInterval = syncMinInterval;
+	}
+
+	public float getSyncMaxInterval() {
+		return syncMaxInterval;
+	}
+
+	public void setSyncMaxInterval(float syncMaxInterval) {
+		this.syncMaxInterval = syncMaxInterval;
+	}
+
+	public float getSyncDelay() {
+		return syncDelay;
+	}
+
+	public void setSyncDelay(float syncDelay) {
+		this.syncDelay = syncDelay;
 	}
 
 }
