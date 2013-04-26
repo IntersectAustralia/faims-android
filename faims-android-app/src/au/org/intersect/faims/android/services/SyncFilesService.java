@@ -114,7 +114,7 @@ public class SyncFilesService extends IntentService {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
-			lock = projectDir + "./lock";
+			lock = projectDir + "/.lock";
 			waitForLock(lock);
 			
 			Result uploadResult = faimsClient.uploadDirectory(projectDir, 
@@ -149,7 +149,7 @@ public class SyncFilesService extends IntentService {
 			Project project = (Project) intent.getExtras().get("project");
 			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
-			lock = projectDir + "./lock";
+			lock = projectDir + "/.lock";
 			waitForLock(lock);
 			
 			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
