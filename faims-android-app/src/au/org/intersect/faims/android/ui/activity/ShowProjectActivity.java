@@ -462,22 +462,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 	}
 
-	/*
-	@Override
-	protected void onResume() {
-		super.onResume();
-		FAIMSLog.log();
-		this.manager.dispatchResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		FAIMSLog.log();
-		this.manager.dispatchPause(isFinishing());
-	}
-	*/
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		
