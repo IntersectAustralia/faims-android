@@ -24,6 +24,7 @@ public class UploadDatabaseService extends UploadService {
 		if (tempDB != null) {
 			tempDB.delete();
 		}
+		databaseManager.interrupt();
 		super.onDestroy();
 	}
 	

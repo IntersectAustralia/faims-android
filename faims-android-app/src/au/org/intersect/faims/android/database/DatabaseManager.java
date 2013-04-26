@@ -27,6 +27,8 @@ public class DatabaseManager {
 
 	private String dbname;
 	private String userId;
+	
+	private jsqlite.Database db;
 
 	public void init(String filename) {
 		this.dbname = filename;
@@ -38,6 +40,17 @@ public class DatabaseManager {
 	
 	public String getUserId() {
 		return this.userId;
+	}
+	
+	public void interrupt() {
+		try {
+			if (db != null) {
+				db.close();
+				db = null;
+			}
+		} catch (Exception e) {
+			FLog.e("error closing database", e);
+		}
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type,
@@ -51,7 +64,6 @@ public class DatabaseManager {
 				FLog.d(attribute.toString());
 			}
 			
-			jsqlite.Database db = null;
 			Stmt st = null;
 			try {
 				db = new jsqlite.Database();
@@ -116,7 +128,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -135,7 +150,6 @@ public class DatabaseManager {
 				FLog.d(attribute.toString());
 			}
 			
-			jsqlite.Database db = null;
 			Stmt st = null;
 			try {
 				
@@ -201,7 +215,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -278,7 +295,6 @@ public class DatabaseManager {
 			FLog.d("rel_id:" + rel_id);
 			FLog.d("verb:" + verb);
 			
-			jsqlite.Database db = null;
 			Stmt st = null;
 			try {
 				
@@ -313,7 +329,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -323,7 +342,6 @@ public class DatabaseManager {
 
 	public Object fetchArchEnt(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
-			jsqlite.Database db = null;
 			Stmt stmt = null;
 			try {
 				
@@ -383,7 +401,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -393,7 +414,6 @@ public class DatabaseManager {
 	
 	public Object fetchRel(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
-			jsqlite.Database db = null;
 			Stmt stmt = null;
 			try {
 				 db = new jsqlite.Database();
@@ -452,7 +472,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -462,7 +485,6 @@ public class DatabaseManager {
 
 	public Object fetchOne(String query) throws Exception {
 		synchronized(DatabaseManager.class) {
-			jsqlite.Database db = null;
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
@@ -485,7 +507,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -495,7 +520,6 @@ public class DatabaseManager {
 
 	public Collection<List<String>> fetchAll(String query) throws Exception {
 		synchronized(DatabaseManager.class) {
-			jsqlite.Database db = null;
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
@@ -520,7 +544,10 @@ public class DatabaseManager {
 					FLog.e("error closing statement", e);
 				}
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -624,7 +651,6 @@ public class DatabaseManager {
 	public void dumpDatabaseTo(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("dumping database to " + file.getAbsolutePath());
-			jsqlite.Database db = null;
 			try {
 				
 				db = new jsqlite.Database();
@@ -642,7 +668,10 @@ public class DatabaseManager {
 				
 			} finally {
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -653,7 +682,6 @@ public class DatabaseManager {
 	public void dumpDatabaseTo(File file, String fromTimestamp) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("dumping database to " + file.getAbsolutePath());
-			jsqlite.Database db = null;
 			try {
 				
 				db = new jsqlite.Database();
@@ -671,7 +699,10 @@ public class DatabaseManager {
 				
 			} finally {
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -709,7 +740,10 @@ public class DatabaseManager {
 			FLog.e("error dumping database", e);
 		} finally {
 			try {
-				if (db != null) db.close();
+				if (db != null) {
+					db.close();
+					db = null;
+				}
 			} catch (Exception e) {
 				FLog.e("error closing database", e);
 			}
@@ -719,7 +753,6 @@ public class DatabaseManager {
 	public boolean isEmpty(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("checking if database " + file.getAbsolutePath() + " is empty");
-			jsqlite.Database db = null;
 			try {
 				
 				db = new jsqlite.Database();
@@ -733,7 +766,10 @@ public class DatabaseManager {
 				return true;
 			} finally {
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
@@ -759,7 +795,6 @@ public class DatabaseManager {
 	public void mergeDatabaseFrom(File file) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("merging database");
-			jsqlite.Database db = null;
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
@@ -775,7 +810,10 @@ public class DatabaseManager {
 				db.exec(query, createCallback());
 			} finally {
 				try {
-					if (db != null) db.close();
+					if (db != null) {
+						db.close();
+						db = null;
+					}
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}

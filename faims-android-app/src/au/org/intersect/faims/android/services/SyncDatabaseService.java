@@ -77,6 +77,7 @@ public class SyncDatabaseService extends IntentService {
 		if (tempDir != null) {
 			FileUtil.deleteDirectory(tempDir);
 		}
+		databaseManager.interrupt();
 		FLog.d("stopping service");
 	}
 
@@ -246,6 +247,11 @@ public class SyncDatabaseService extends IntentService {
 			
 			// merge database 
 			databaseManager.mergeDatabaseFrom(new File(tempDir.getAbsoluteFile() + "/db.sqlite3"));
+			
+			if (syncStopped) {
+				FLog.d("sync cancelled");
+				return Result.INTERRUPTED;
+			}
 				
 			// update settings
 			project = ProjectUtil.getProject(project.key); // get the latest settings
