@@ -91,7 +91,7 @@ public class FAIMSClient {
 		try {
 			HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
 			extraParts.put("user", new StringBody(userId));
-			return uploadFile(file, "/android/project/" + project.key + "/upload_db", extraParts);
+			return uploadFile(file, "/android/project/" + project.key + "/db_upload", extraParts);
 		} catch (Exception e) {
 			FLog.e("error uploading database", e);
 			return new Result(FAIMSClientResultCode.FAILURE);
@@ -203,7 +203,7 @@ public class FAIMSClient {
 			try {			
 				initClient();
 				
-				FileInfo info = getFileInfo("/android/project/" + project.key + "/archive_db");
+				FileInfo info = getFileInfo("/android/project/" + project.key + "/db_archive");
 				
 				if (isInterrupted) {
 					FLog.d("fetch database version interrupted");
@@ -232,21 +232,21 @@ public class FAIMSClient {
 		}
 	}
 	
-	public DownloadResult downloadProject(Project project) {
-		return downloadFile("/android/project/" + project.key + "/archive", 
-				"/android/project/" + project.key + "/download", 
-				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir);
+	public DownloadResult downloadSettings(Project project) {
+		return downloadFile("/android/project/" + project.key + "/settings_archive", 
+				"/android/project/" + project.key + "/settings_download", 
+				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 	}
 	
 	public DownloadResult downloadDatabase(Project project) {
-		return downloadFile("/android/project/" + project.key + "/archive_db", 
-				"/android/project/" + project.key + "/download_db", 
+		return downloadFile("/android/project/" + project.key + "/db_archive", 
+				"/android/project/" + project.key + "/db_download", 
 				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
 	}
 	
 	public DownloadResult downloadDatabase(Project project, String version, String dir) {
-		return downloadFile("/android/project/" + project.key + "/archive_db?version=" + version, 
-				"/android/project/" + project.key + "/download_db?version=" + version, 
+		return downloadFile("/android/project/" + project.key + "/db_archive?version=" + version, 
+				"/android/project/" + project.key + "/db_download?version=" + version, 
 				dir);
 	}
 	
@@ -580,7 +580,7 @@ public class FAIMSClient {
 				
 				List<String> localFiles = FileUtil.listDir(downloadDirPath);
 				
-				FLog.d("local Files: " + serverFiles.toString());
+				FLog.d("local Files: " + localFiles.toString());
 				
 				// check if new files to download
 				boolean canDownload = !isListSubsetOfList(serverFiles, localFiles);

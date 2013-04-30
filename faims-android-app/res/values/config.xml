@@ -12,5 +12,6 @@
     <integer name="sync_restart_time">5</integer>
     <string name="app_dir">files/app</string>
     <string name="server_dir">files/server</string>
+    <string name="data_dir">files/data</string>
     
 </resources>
