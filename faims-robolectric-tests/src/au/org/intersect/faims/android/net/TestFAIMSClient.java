@@ -25,7 +25,7 @@ public class TestFAIMSClient extends FAIMSClient {
 	}
 
 	@Override
-	public DownloadResult downloadProject(Project project) {
+	public DownloadResult downloadSettings(Project project) {
 		TestProjectUtil.createProjectFrom(project.name, project.key, "Common");
 		return new DownloadResult(downloadResultCode, downlaodErrorCode);
 	}
