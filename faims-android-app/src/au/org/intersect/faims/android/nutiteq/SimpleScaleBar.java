@@ -28,10 +28,10 @@ public class SimpleScaleBar {
   private static final int KM_TO_M=1000;
   private static final int MI_TO_FT=5280;
 
-  private static final int BAR_SIZE = 6;
-  private static final int BAR_BORDER = 2;
+  private static final int BAR_SIZE = 10;
+  private static final int BAR_BORDER = 5;
 
-  private int alignment=BOTTOM_RIGHT;
+  private int alignment=TOP_LEFT;
   private int startx;
   private int starty;
   private int offsetx=20;
@@ -41,8 +41,8 @@ public class SimpleScaleBar {
   private int mapWidthPx;
   private int mapHeightPx;
   private double mapWidthKm;
-  private int barMinWidth=40;
-  private int barMaxWidth=101;
+  private int barMinWidth=100;
+  private int barMaxWidth=150;
   private int barWidth;
   private int unitMode = METRIC;
 
@@ -84,12 +84,12 @@ public class SimpleScaleBar {
 
   private void calculateScaleBar(){
     double mapWidthInUnits=mapWidthKm;
-    FLog.d("mapWidthKM: " + mapWidthKm);
+    //FLog.d("mapWidthKM: " + mapWidthKm);
     
     if (unitMode==IMPERIAL){
       mapWidthInUnits*=METRIC_TO_IMPERIAL;
     }
-    FLog.d("mapWidthInUnits: " + mapWidthInUnits);
+    //FLog.d("mapWidthInUnits: " + mapWidthInUnits);
     
 
     if (mapWidthPx>0 && mapWidthInUnits>0){
@@ -98,9 +98,9 @@ public class SimpleScaleBar {
 
       for (int i=0;i<allowedScales.length;i++){ 
         double tempBarWidth = allowedScales[i]*currentScale; 
-        FLog.d("barMinWidth: " + barMinWidth);
-        FLog.d("barMaxWidth: " + barMaxWidth);
-        FLog.d("tempBarWidth: " + tempBarWidth);
+        //FLog.d("barMinWidth: " + barMinWidth);
+        //FLog.d("barMaxWidth: " + barMaxWidth);
+        //FLog.d("tempBarWidth: " + tempBarWidth);
         
         if((tempBarWidth > barMinWidth) & (tempBarWidth <= barMaxWidth)){ 
           barWidth=(int) tempBarWidth;
@@ -166,10 +166,12 @@ public class SimpleScaleBar {
     	FLog.d("startx: " + startx);
     	FLog.d("starty: " + starty);
     	FLog.d("endx: " + endx);
-      g.drawRect(startx, starty, Math.abs(startx-endx), BAR_SIZE, getPaint(Color.BLACK));
-      
-      /*
-      g.drawRect(startx+BAR_BORDER, starty+BAR_BORDER, Math.abs(startx-endx)-2*BAR_BORDER, BAR_SIZE-2*BAR_BORDER, getPaint(Color.BLUE));
+    	
+    	//g.drawRect(0, 0, 100, 100, getPaint(Color.BLUE));
+    	
+    	g.drawRect(startx, starty, startx + Math.abs(startx-endx), starty + BAR_SIZE, getPaint(Color.BLUE));
+
+    	g.drawRect(startx+BAR_BORDER, starty+BAR_BORDER, startx+BAR_BORDER + Math.abs(startx-endx)-2*BAR_BORDER, starty+BAR_BORDER + BAR_SIZE-2*BAR_BORDER, getPaint(Color.BLACK));
      
       if (unitMode==METRIC){
         if (scale>=1.0){
@@ -184,7 +186,6 @@ public class SimpleScaleBar {
           g.drawText(Double.toString(round2Places(scale*MI_TO_FT))+IMPERIAL_UNIT_SMALL, (startx+endx)/2, starty-BAR_BORDER, getPaint(Color.RED));
         }
       }
-      */
     }
   }
   

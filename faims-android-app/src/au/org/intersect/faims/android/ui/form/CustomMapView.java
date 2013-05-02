@@ -8,17 +8,18 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
 import com.nutiteq.components.Constraints;
+import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.GeometryLayer;
@@ -80,14 +81,17 @@ public class CustomMapView extends MapView {
 
 	private DrawView drawView;
 	
-	private MapOverlayView overlayView;
+	private MapNorthView northView;
+	
+	private ScaleBarView scaleView;
 
 	private Geometry overlayGeometry;
 	
-	public CustomMapView(Context context, DrawView drawView, MapOverlayView overlayView) {
+	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView) {
 		this(context);
 		this.drawView = drawView;
-		this.overlayView = overlayView;
+		this.northView = northView;
+		this.scaleView = scaleView;
 	}
 	
 	public CustomMapView(Context context) {
@@ -218,9 +222,12 @@ public class CustomMapView extends MapView {
 	}
 	
 	public void updateOverlay() {
-		FLog.c();
-		overlayView.setMapRotation(this.getRotation());
-		overlayView.setMapBoundary(this.getWidth(), this.getHeight(), this.screenToWorld(0,  0), this.screenToWorld(this.getWidth(), this.getHeight()));
+		northView.setMapRotation(this.getRotation());
+		scaleView.setMapBoundary(this.getZoom(), this.getWidth(), this.getHeight(), convertToWgs84(this.screenToWorld(0,  this.getHeight())), convertToWgs84(this.screenToWorld(this.getWidth(), this.getHeight())));
+	}
+	
+	private MapPos convertToWgs84(MapPos p) {
+		return (new EPSG3857()).toWgs84(p.x, p.y);
 	}
 
 }
