@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 
@@ -78,12 +79,15 @@ public class CustomMapView extends MapView {
 	private int vectorId = 1;
 
 	private DrawView drawView;
+	
+	private MapOverlayView overlayView;
 
 	private Geometry overlayGeometry;
 	
-	public CustomMapView(Context context, DrawView drawView) {
+	public CustomMapView(Context context, DrawView drawView, MapOverlayView overlayView) {
 		this(context);
 		this.drawView = drawView;
+		this.overlayView = overlayView;
 	}
 	
 	public CustomMapView(Context context) {
@@ -212,4 +216,11 @@ public class CustomMapView extends MapView {
         Bitmap logo = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
         CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.2f);
 	}
+	
+	public void updateOverlay() {
+		FLog.c();
+		overlayView.setMapRotation(this.getRotation());
+		overlayView.setMapBoundary(this.getWidth(), this.getHeight(), this.screenToWorld(0,  0), this.screenToWorld(this.getWidth(), this.getHeight()));
+	}
+
 }
