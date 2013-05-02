@@ -11,6 +11,7 @@ import jsqlite.Callback;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
@@ -50,6 +51,83 @@ public class DatabaseManager {
 			}
 		} catch (Exception e) {
 			FLog.e("error closing database", e);
+		}
+	}
+
+	public double getDistanceBetween(String prevLong, String prevLat, String curLong, String curLat) throws jsqlite.Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt st = null;
+			double distance = 0;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				String query = "select geodesiclength(linefromtext('LINESTRING("+ prevLong+" " + prevLat + ", " + curLong + " " + curLat + ")', 4326));";
+				st = db.prepare(query);
+				
+				if(st.step()){
+					distance = st.column_double(0);
+				}
+				st.close();
+				st = null;
+				return distance;
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public void saveGPSTrack(List<Geometry> geo_data, String longitude, String latitude, String heading, String accuracy, String type){
+		String currentTimestamp = DateUtil.getCurrentTimestampGMT();
+		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+		EntityAttribute user_attribute = new EntityAttribute();
+		user_attribute.setName("gps_user");
+		user_attribute.setText(userId);
+		EntityAttribute timestamp_attribute = new EntityAttribute();
+		timestamp_attribute.setName("gps_timestamp");
+		timestamp_attribute.setText(currentTimestamp);
+		EntityAttribute long_attribute = new EntityAttribute();
+		long_attribute.setName("gps_longitude");
+		long_attribute.setText(longitude);
+		EntityAttribute lat_attribute = new EntityAttribute();
+		lat_attribute.setName("gps_latitude");
+		lat_attribute.setText(latitude);
+		EntityAttribute heading_attribute = new EntityAttribute();
+		heading_attribute.setName("gps_heading");
+		heading_attribute.setText(heading);
+		EntityAttribute accuracy_attribute = new EntityAttribute();
+		accuracy_attribute.setName("gps_accuracy");
+		accuracy_attribute.setText(accuracy);
+		EntityAttribute type_attribute = new EntityAttribute();
+		type_attribute.setName("gps_type");
+		if("time".equals(type)){
+			type_attribute.setText("track using time");
+		}else if("distance".equals(type)){
+			type_attribute.setText("track using distance");
+		}
+		attributes.add(user_attribute);
+		attributes.add(timestamp_attribute);
+		attributes.add(long_attribute);
+		attributes.add(lat_attribute);
+		attributes.add(heading_attribute);
+		attributes.add(accuracy_attribute);
+		attributes.add(type_attribute);
+		try {
+			saveArchEnt(null, "gps_track", WKTUtil.collectionToWKT(geo_data), attributes);
+		} catch (Exception e) {
+			FLog.e("error saving gps track data", e);
 		}
 	}
 
@@ -820,5 +898,4 @@ public class DatabaseManager {
 			}
 		}
 	}
-	
 }

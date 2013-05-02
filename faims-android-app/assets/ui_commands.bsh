@@ -13,6 +13,14 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.style.*;
 
+startTrackingGPS(String type, int interval){
+	linker.startTrackingGPS(type, interval);
+}
+
+stopTrackingGPS(){
+	linker.stopTrackingGPS();
+}
+
 persistObject(String name) {
 	linker.setPersistedObjectName(name);
 }

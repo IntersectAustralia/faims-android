@@ -56,6 +56,7 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Marker;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.layers.vector.OgrLayer;
@@ -109,6 +110,12 @@ public class BeanShellLinker {
 
 	private String lastFileBrowserCallback;
 
+	private HandlerThread trackingHandlerThread;
+	private Handler trackingHandler;
+	private Runnable trackingTask;
+	private String prevLong;
+	private String prevLat;
+
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
 			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
 		this.activity = activity;
@@ -156,6 +163,104 @@ public class BeanShellLinker {
     	}
 	}
 	
+	public void startTrackingGPS(final String type, final int value){
+		
+		if (trackingHandlerThread == null && trackingHandler == null) {
+			if (!gpsDataManager.isExternalGPSStarted()
+					&& !gpsDataManager.isInternalGPSStarted()) {
+				showWarning("GPS", "No GPS is being used");
+				return;
+			}
+			trackingHandlerThread = new HandlerThread("tracking");
+			trackingHandlerThread.start();
+			trackingHandler = new Handler(trackingHandlerThread.getLooper());
+			if("time".equals(type)){
+				trackingTask = new Runnable() {
+	
+					@Override
+					public void run() {
+						trackingHandler.postDelayed(this, value * 1000);
+						if (getGPSPosition() != null) {
+							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
+							float heading = (Float) getGPSHeading();
+							float accuracy = (Float) getGPSEstimatedAccuracy();
+							Double longitude = currentLocation.getLongitude();
+							Double latitude = currentLocation.getLatitude();
+							if (longitude != null && latitude != null) {
+								List<Geometry> geo_data = new ArrayList<Geometry>();
+								geo_data.add(createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
+										Float.parseFloat(Double.toString(latitude)))));
+								databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
+										Double.toString(currentLocation.getLatitude()), Float.toString(heading),
+										Float.toString(accuracy),type);
+							}
+						} else {
+							showToast("no gps signal at the moment");
+						}
+					}
+				};
+				trackingHandler.postDelayed(trackingTask, value * 1000);
+//			}else if("distance".equals(type)){
+//				trackingTask = new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//						trackingHandler.postDelayed(this, 1000);
+//						if (getGPSPosition() != null) {
+//							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
+//							float heading = (Float) getGPSHeading();
+//							float accuracy = (Float) getGPSEstimatedAccuracy();
+//							Double longitude = currentLocation.getLongitude();
+//							Double latitude = currentLocation.getLatitude();
+//							if (longitude != null && latitude != null) {
+//								double distance = 0;
+//								if(prevLong != null && prevLat != null){
+//									try {
+//										distance = databaseManager.getDistanceBetween(prevLong,prevLat, Double.toString(longitude), Double.toString(latitude));
+//										FLog.d("distance is " + distance);
+//									} catch (Exception e) {
+//										FLog.e("error when calculating distance", e);
+//									}
+//								}else{
+//									prevLong = Double.toString(longitude);
+//									prevLat = Double.toString(latitude);
+//								}
+//								if(distance > value){
+//									List<Geometry> geo_data = new ArrayList<Geometry>();
+//									Geometry point = createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
+//											Float.parseFloat(Double.toString(latitude))));
+//									geo_data.add(point);
+//									databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
+//											Double.toString(currentLocation.getLatitude()), Float.toString(heading),
+//											Float.toString(accuracy),type);
+//								}
+//							}
+//						} else {
+//							showToast("no gps signal at the moment");
+//						}
+//					}
+//				};
+//				trackingHandler.postDelayed(trackingTask, 1000);
+			}else{
+				FLog.e("wrong type format is used");
+			}
+			FLog.d("gps tracking is started");
+		}else{
+			showToast("gps tracking has been started, please stop it before starting");
+		}
+	}
+	
+	public void stopTrackingGPS(){
+		if(trackingHandler !=  null){
+			trackingHandler.removeCallbacks(trackingTask);
+			trackingHandler = null;
+		}
+		if(trackingHandlerThread != null){
+			trackingHandlerThread.quit();
+			trackingHandlerThread = null;
+		}
+	}
+
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try{
 			
@@ -2329,5 +2434,9 @@ public class BeanShellLinker {
 				FLog.e("error restoring bean shell data", e);
 			}
 		}
+	}
+	
+	public Geometry createGeometryPoint(MapPos point) {
+		return new Point(point, null, createPointStyle(0,0,0), null);
 	}
 }

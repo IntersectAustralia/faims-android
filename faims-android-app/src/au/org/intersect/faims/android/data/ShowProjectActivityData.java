@@ -19,6 +19,8 @@ public class ShowProjectActivityData implements ActivityData {
 	private boolean isInternalGPSStarted;
 
 	private int gpsUpdateInterval;
+	private String trackingType;
+	private int trackingValue;
 
 	public boolean isSyncEnabled() {
 		return syncEnabled;
@@ -68,6 +70,22 @@ public class ShowProjectActivityData implements ActivityData {
 		this.gpsUpdateInterval = gpsUpdateInterval;
 	}
 
+	public String getTrackingType() {
+		return trackingType;
+	}
+
+	public void setTrackingType(String trackingType) {
+		this.trackingType = trackingType;
+	}
+
+	public int getTrackingValue() {
+		return trackingValue;
+	}
+
+	public void setTrackingValue(int trackingValue) {
+		this.trackingValue = trackingValue;
+	}
+
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		savedInstanceState.putBoolean("syncEnabled", syncEnabled);
@@ -79,6 +97,8 @@ public class ShowProjectActivityData implements ActivityData {
 		savedInstanceState.putFloat("syncMaxInterval", syncMaxInterval);
 		savedInstanceState.putFloat("syncMinInterval", syncMinInterval);
 		savedInstanceState.putFloat("syncDelay", syncDelay);
+		savedInstanceState.putString("trackingType", trackingType);
+		savedInstanceState.putInt("trackingValue", trackingValue);
 	}
 
 	@Override
@@ -92,6 +112,8 @@ public class ShowProjectActivityData implements ActivityData {
 		setSyncMaxInterval(savedInstancestate.getFloat("syncMaxInterval"));
 		setSyncMinInterval(savedInstancestate.getFloat("syncMinInterval"));
 		setSyncDelay(savedInstancestate.getFloat("syncDelay"));
+		setTrackingType(savedInstancestate.getString("trackingType"));
+		setTrackingValue(savedInstancestate.getInt("trackingValue"));
 	}
 
 	public float getSyncMinInterval() {
