@@ -205,22 +205,35 @@ public class FAIMSClient {
 	public FetchResult fetchDatabaseVersion(Project project) {
 		synchronized(FAIMSClient.class) {
 	
+			InputStream infoStream = null;
 			InputStream stream = null;
 			try {			
 				initClient();
 				
-				FileInfo info = getFileInfo("/android/project/" + project.key + "/db_archive");
+				FileInfo info = new FileInfo();
+				
+				HttpResponse response = getRequest(getUri("/android/project/" + project.key + "/db_archive"));
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					FLog.d("request busy");
+					return new FetchResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				} else if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return null;
+				}
+				
+				HttpEntity entity = response.getEntity();
+				
+				infoStream = entity.getContent();
+				
+				JsonObject object = JsonUtil.deserializeJsonObject(infoStream);
+				
+				info.parseJson(object);
 				
 				if (isInterrupted) {
 					FLog.d("fetch database version interrupted");
 					
 					return FetchResult.INTERRUPTED;
-				}
-				
-				if (info == null) {
-					FLog.d("fetch failure");
-					
-					return FetchResult.FAILURE;
 				}
 				
 				FLog.d("fetched database version!");
@@ -232,6 +245,12 @@ public class FAIMSClient {
 				return FetchResult.FAILURE;
 				
 			} finally {
+				
+				try {
+					if (infoStream != null) infoStream.close();
+				} catch (IOException e) {
+					FLog.e("error closing stream", e);
+				}
 				
 				try {
 					if (stream != null) stream.close();
@@ -385,34 +404,6 @@ public class FAIMSClient {
 				cleanupClient();
 			}
 		}
-	}
-	
-	private FileInfo getFileInfo(String path) throws Exception {
-		InputStream stream = null;
-		
-		try {
-			FileInfo info = new FileInfo();
-			
-			HttpResponse response = getRequest(getUri(path));
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				FLog.d("request failed");
-				return null;
-			}
-			
-			HttpEntity entity = response.getEntity();
-			
-			stream = entity.getContent();
-			
-			JsonObject object = JsonUtil.deserializeJsonObject(stream);
-			
-			info.parseJson(object);
-			
-			return info;
-			
-		} finally {
-			if (stream != null) stream.close();
-		}
-		
 	}
 	
 	private File downloadArchive(String path, FileInfo archive) throws Exception {

@@ -121,7 +121,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				activity.linker.execute(callback);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
+				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
+					activity.showBusyErrorDialog();
+				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
 					activity.showDownloadDatabaseErrorDialog(callback);
 				} else {
 					activity.showDownloadDatabaseFailureDialog(callback);
@@ -181,13 +183,23 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					activity.syncLock.release();
 				}
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				// failure
-				activity.delaySyncInterval();
-				activity.waitForNextSync();
+				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
+					activity.resetSyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncSuccess();
+					
+					activity.syncLock.release();
+				} else {
 				
-				activity.callSyncFailure();
-				 
-				activity.syncLock.release();
+					// failure
+					activity.delaySyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncFailure();
+					 
+					activity.syncLock.release();
+				}
 			} else {
 				// cancelled
 				activity.syncLock.release();
@@ -211,11 +223,18 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				
 				activity.callSyncSuccess();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				// failure
-				activity.delaySyncInterval();
-				activity.waitForNextSync();
-				
-				activity.callSyncFailure();
+				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
+					activity.resetSyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncSuccess();
+				} else {
+					// failure
+					activity.delaySyncInterval();
+					activity.waitForNextSync();
+					
+					activity.callSyncFailure();
+				}
 			} else {
 				// cancelled
 			}
@@ -762,6 +781,21 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     		
     	});
     	choiceDialog.show();
+    }
+	
+	private void showBusyErrorDialog() {
+    	confirmDialog = new ConfirmDialog(ShowProjectActivity.this,
+				getString(R.string.download_busy_project_error_title),
+				getString(R.string.download_busy_project_error_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						// do nothing
+					}
+    		
+    	});
+    	confirmDialog.show();
     }
 	
 	private void showDownloadDatabaseErrorDialog(final String callback) {
