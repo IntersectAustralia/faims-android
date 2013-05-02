@@ -41,7 +41,7 @@ populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
 
-mapfilename = "map.tif";
+mapfilename = "files/data/maps/map.tif";
 
 setupMap(id, lon, lat) {
 	showRasterMap(id, mapfilename);
@@ -91,7 +91,6 @@ onEvent("tabgroup1", "load", "setGPSUpdateInterval(4)");
 onEvent("tabgroup1/tab1/show", "click", "showMapTab()");
 onEvent("tabgroup1/tab1/new", "click", "showMapTabGroup()");
 onEvent("tabgroup1/tab2/show", "click", "showCurrentPositionTab()");
-onEvent("tabgroup1/tab2/refresh", "click", "refreshMapTab()");
 onEvent("tabgroup1/tab2/clear", "click", "clearMapTab()");
 
 addVectorLayers() {
@@ -99,8 +98,8 @@ addVectorLayers() {
 	ls = createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
 	pos = createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
 
-	showSpatialLayer("tabgroup1/tab2/map", "KAZ.sqlite", "KAZ_AllTeams", null, ps, ls, pos);
-	showSpatialLayer("tabgroup1/tab2/map", "KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos); 
+	showSpatialLayer("tabgroup1/tab2/map", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", null, ps, ls, pos);
+	showSpatialLayer("tabgroup1/tab2/map", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos); 
 }
 
 onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");

@@ -1593,7 +1593,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 				
-				String filepath = baseDir + "/maps/" + filename;
+				String filepath = baseDir + "/" + filename;
 				if (!new File(filepath).exists()) {
 					FLog.w("Map file " + filepath + " does not exist");
                     showWarning("Logic Error", "Erorr map does not exist " + filename);
@@ -1768,7 +1768,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/maps/" + filename, null, 
+				OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), baseDir + "/"  + filename, null, 
 						MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
                 // ogrLayer.printSupportedDrivers();
                 // ogrLayer.printLayerDetails(table);
@@ -1791,7 +1791,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), baseDir + "/maps/" + filename, tablename, "Geometry",
+				SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), baseDir + "/" + filename, tablename, "Geometry",
                         new String[]{labelColumn}, MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
 				return mapView.addVectorLayer(spatialLayer);
 			} else {

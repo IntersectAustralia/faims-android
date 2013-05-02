@@ -190,13 +190,7 @@ public class FileUtil {
 		
 		try {
 			os = new FileOutputStream(file);
-		        
-			byte[] buffer = new byte[(int)entry.getSize()];
-	        int bufferLength = 0; //used to store a temporary size of the buffer
-	        
-	        while ( (bufferLength = ts.read(buffer)) > 0 ) {
-	            os.write(buffer, 0, bufferLength);
-	        }
+	        IOUtils.copy(ts, os);
 		} finally {
 			if (os != null) os.close();
 		}
