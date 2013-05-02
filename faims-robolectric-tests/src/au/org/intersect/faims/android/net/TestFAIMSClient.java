@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.net;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.util.TestProjectUtil;
 
@@ -27,6 +28,18 @@ public class TestFAIMSClient extends FAIMSClient {
 	@Override
 	public DownloadResult downloadSettings(Project project) {
 		TestProjectUtil.createProjectFrom(project.name, project.key, "Common");
+		FileInfo info = new FileInfo();
+		info.version = "0";
+		return new DownloadResult(downloadResultCode, downlaodErrorCode, info);
+	}
+	
+	@Override
+	public DownloadResult downloadDatabase(Project project) {
+		return new DownloadResult(downloadResultCode, downlaodErrorCode);
+	}
+	
+	@Override
+	public DownloadResult downloadDirectory(String projectDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		return new DownloadResult(downloadResultCode, downlaodErrorCode);
 	}
 	
