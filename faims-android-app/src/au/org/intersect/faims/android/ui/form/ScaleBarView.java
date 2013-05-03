@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.ui.form;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.View;
-import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.SimpleScaleBar;
 
 public class ScaleBarView extends View {
@@ -30,6 +29,10 @@ public class ScaleBarView extends View {
 		bar.reSize(width, height, mapWidth);
 		
 		invalidate();
+	}
+
+	public void setBarWidthRange(int minWidth, int maxWidth) {
+		bar.setBarWidthRange(minWidth, maxWidth);
 	}
 	
 }

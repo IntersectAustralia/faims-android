@@ -94,6 +94,8 @@ public class CustomMapView extends MapView {
 		this.drawView = drawView;
 		this.northView = northView;
 		this.scaleView = scaleView;
+		
+		scaleView.setBarWidthRange(getDpi(40), getDpi(100));
 	}
 	
 	public CustomMapView(Context context) {
@@ -132,6 +134,10 @@ public class CustomMapView extends MapView {
         //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
         
         vectorMap = new SparseArray<GeometryLayer>();
+	}
+	
+	private int getDpi(int size) {
+		return (size * getContext().getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
 	}
 
 	public static int nextId() {
