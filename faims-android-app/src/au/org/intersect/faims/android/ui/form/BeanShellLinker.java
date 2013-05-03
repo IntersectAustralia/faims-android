@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -113,8 +114,8 @@ public class BeanShellLinker {
 	private HandlerThread trackingHandlerThread;
 	private Handler trackingHandler;
 	private Runnable trackingTask;
-	private String prevLong;
-	private String prevLat;
+	private Double prevLong;
+	private Double prevLat;
 
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
 			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
@@ -166,11 +167,11 @@ public class BeanShellLinker {
 	public void startTrackingGPS(final String type, final int value){
 		
 		if (trackingHandlerThread == null && trackingHandler == null) {
-			if (!gpsDataManager.isExternalGPSStarted()
-					&& !gpsDataManager.isInternalGPSStarted()) {
-				showWarning("GPS", "No GPS is being used");
-				return;
-			}
+//			if (!gpsDataManager.isExternalGPSStarted()
+//					&& !gpsDataManager.isInternalGPSStarted()) {
+//				showWarning("GPS", "No GPS is being used");
+//				return;
+//			}
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -200,47 +201,46 @@ public class BeanShellLinker {
 					}
 				};
 				trackingHandler.postDelayed(trackingTask, value * 1000);
-//			}else if("distance".equals(type)){
-//				trackingTask = new Runnable() {
-//					
-//					@Override
-//					public void run() {
-//						trackingHandler.postDelayed(this, 1000);
-//						if (getGPSPosition() != null) {
-//							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
-//							float heading = (Float) getGPSHeading();
-//							float accuracy = (Float) getGPSEstimatedAccuracy();
-//							Double longitude = currentLocation.getLongitude();
-//							Double latitude = currentLocation.getLatitude();
-//							if (longitude != null && latitude != null) {
-//								double distance = 0;
-//								if(prevLong != null && prevLat != null){
-//									try {
-//										distance = databaseManager.getDistanceBetween(prevLong,prevLat, Double.toString(longitude), Double.toString(latitude));
-//										FLog.d("distance is " + distance);
-//									} catch (Exception e) {
-//										FLog.e("error when calculating distance", e);
-//									}
-//								}else{
-//									prevLong = Double.toString(longitude);
-//									prevLat = Double.toString(latitude);
-//								}
-//								if(distance > value){
-//									List<Geometry> geo_data = new ArrayList<Geometry>();
-//									Geometry point = createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
-//											Float.parseFloat(Double.toString(latitude))));
-//									geo_data.add(point);
-//									databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
-//											Double.toString(currentLocation.getLatitude()), Float.toString(heading),
-//											Float.toString(accuracy),type);
-//								}
-//							}
-//						} else {
-//							showToast("no gps signal at the moment");
-//						}
-//					}
-//				};
-//				trackingHandler.postDelayed(trackingTask, 1000);
+			}else if("distance".equals(type)){
+				trackingTask = new Runnable() {
+					
+					@Override
+					public void run() {
+						trackingHandler.postDelayed(this, 1000);
+						if (getGPSPosition() != null) {
+							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
+							float heading = (Float) getGPSHeading();
+							float accuracy = (Float) getGPSEstimatedAccuracy();
+							Double longitude = currentLocation.getLongitude();
+							Double latitude = currentLocation.getLatitude();
+							if (longitude != null && latitude != null) {
+								double distance = 0;
+								if(prevLong != null && prevLat != null){
+									float[] results = new float[1];
+									Location.distanceBetween(prevLat, prevLong, latitude, longitude, results);
+									distance = results[0];
+									if(distance > value){
+										List<Geometry> geo_data = new ArrayList<Geometry>();
+										Geometry point = createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
+												Float.parseFloat(Double.toString(latitude))));
+										geo_data.add(point);
+										databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
+												Double.toString(currentLocation.getLatitude()), Float.toString(heading),
+												Float.toString(accuracy),type);
+										prevLong = longitude;
+										prevLat = latitude;
+									}
+								}else{
+									prevLong = longitude;
+									prevLat = latitude;
+								}
+							}
+						} else {
+							showToast("no gps signal at the moment");
+						}
+					}
+				};
+				trackingHandler.postDelayed(trackingTask, 1000);
 			}else{
 				FLog.e("wrong type format is used");
 			}
