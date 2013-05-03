@@ -31,7 +31,7 @@ public class SimpleScaleBar {
   private static final int BAR_SIZE = 10;
   private static final int BAR_BORDER = 5;
 
-  private int alignment=TOP_LEFT;
+  private int alignment=BOTTOM_RIGHT;
   private int startx;
   private int starty;
   private int offsetx=20;
@@ -41,8 +41,8 @@ public class SimpleScaleBar {
   private int mapWidthPx;
   private int mapHeightPx;
   private double mapWidthKm;
-  private int barMinWidth=100;
-  private int barMaxWidth=150;
+  private int barMinWidth=40;
+  private int barMaxWidth=101;
   private int barWidth;
   private int unitMode = METRIC;
 
@@ -135,19 +135,20 @@ public class SimpleScaleBar {
       endy=starty;
       break;
     case BOTTOM_RIGHT:
-      startx=mapWidthPx-offsetx;
+      endx=mapWidthPx-offsetx;
       starty=mapHeightPx-offsety;
-      endx=startx-barWidth;
+      startx=endx-barWidth;
       endy=starty;
       break;
     }
   }
 
+  /*
   public void mapMoved(MapPos min, MapPos max) {
     double lat1 = (min.y + max.y)/2.0;  
     double lat2 = lat1; 
     double lon1 = min.x;
-    double lon2 = min.y;
+    double lon2 = max.x;
     double dLat = Math.toRadians(lat2-lat1);  
     double dLon = Math.toRadians(lon2-lon1);  
     double a = Math.sin(dLat/2) * Math.sin(dLat/2) +  
@@ -157,7 +158,12 @@ public class SimpleScaleBar {
     mapWidthKm = EARTH_RADIUS * c;
     calculateScaleBar();
   }
-
+*/
+  
+  public void setMapWidth(double value) {
+	  mapWidthKm = value;
+	  calculateScaleBar();
+  }
   public void paint(Canvas g) {
 	FLog.d("scale: " + scale);
 	FLog.d("barWidth: " + barWidth);
@@ -202,11 +208,11 @@ public class SimpleScaleBar {
   }
 
 
-  public void reSize(int width, int height, MapPos min, MapPos max) {
+  public void reSize(int width, int height, double mapWidth) {
     this.mapWidthPx=width;
     this.mapHeightPx=height;
-    mapMoved(min, max);
-
+    //mapMoved(min, max);
+    setMapWidth(mapWidth);
   }
 
 

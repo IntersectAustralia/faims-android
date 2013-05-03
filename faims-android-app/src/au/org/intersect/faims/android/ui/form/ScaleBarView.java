@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.form;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.View;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.SimpleScaleBar;
 
 import com.nutiteq.components.MapPos;
@@ -24,11 +25,12 @@ public class ScaleBarView extends View {
 	}
 
 	public void setMapBoundary(float zoom, int width, int height,
-			MapPos min, MapPos max) {
+			double mapWidth) {
 		if (lastZoom == zoom) return;
 		lastZoom = zoom;
 		
-		bar.reSize(width, height, min, max);
+		FLog.d("mapWidth: " + mapWidth);
+		bar.reSize(width, height, mapWidth);
 		
 		invalidate();
 	}

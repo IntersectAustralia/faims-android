@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -223,7 +224,16 @@ public class CustomMapView extends MapView {
 	
 	public void updateOverlay() {
 		northView.setMapRotation(this.getRotation());
-		scaleView.setMapBoundary(this.getZoom(), this.getWidth(), this.getHeight(), convertToWgs84(this.screenToWorld(0,  this.getHeight())), convertToWgs84(this.screenToWorld(this.getWidth(), this.getHeight())));
+		int width = this.getWidth();
+		int height = this.getHeight();
+		scaleView.setMapBoundary(this.getZoom(), width, height, 
+				distance(convertToWgs84(this.screenToWorld(0,  0)), convertToWgs84(this.screenToWorld(width, height))));
+	}
+	
+	private double distance(MapPos p1, MapPos p2) {
+		float[] results = new float[3];
+		Location.distanceBetween(p1.x, p1.y, p2.x, p2.y, results);
+		return results[0] / 1000;
 	}
 	
 	private MapPos convertToWgs84(MapPos p) {
