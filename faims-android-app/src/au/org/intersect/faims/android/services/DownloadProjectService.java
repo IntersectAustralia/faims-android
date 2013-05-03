@@ -22,6 +22,7 @@ public class DownloadProjectService extends DownloadService {
 	
 	@Override
 	protected DownloadResult doDownload(Intent intent) {
+		File projectDir = null;
 		try {
 			Project project = (Project) intent.getExtras().get("project");
 			
@@ -35,19 +36,22 @@ public class DownloadProjectService extends DownloadService {
 			
 			// 0.
 			
-			File projectDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
-			if (projectDir.isDirectory())
-				FileUtil.deleteDirectory(projectDir);
+			projectDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
+			FileUtil.deleteDirectory(projectDir);
 			
 			// 1.
 			DownloadResult result = faimsClient.downloadSettings(project);
 			
 			if (downloadStopped) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download settings failure");
 				return result;
 			}
@@ -58,11 +62,15 @@ public class DownloadProjectService extends DownloadService {
 			result = faimsClient.downloadDatabase(project);
 			
 			if (downloadStopped) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download database failure");
 				return result;
 			}
@@ -71,11 +79,15 @@ public class DownloadProjectService extends DownloadService {
 			result = downloadDataDirectory(intent);
 			
 			if (downloadStopped) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download data directory failure");
 				return result;
 			}
@@ -84,11 +96,15 @@ public class DownloadProjectService extends DownloadService {
 			result = downloadAppDirectory(intent);
 			
 			if (downloadStopped) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				FileUtil.deleteDirectory(projectDir);
+				
 				FLog.d("download app directory failure");
 				return result;
 			}
@@ -103,6 +119,9 @@ public class DownloadProjectService extends DownloadService {
 			
 			return result;
 		} catch (Exception e) {
+			if (projectDir != null)
+				FileUtil.deleteDirectory(projectDir);
+			
 			FLog.e("error downloading project", e);
 		}
 		return null;

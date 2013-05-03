@@ -64,7 +64,9 @@ public class FetchProjectsActivity extends RoboActivity {
 				showProjectsIntent.putExtra("key", activity.selectedProject.key);
 				activity.startActivityForResult(showProjectsIntent, 1);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
+				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
+					activity.showBusyErrorDialog();
+				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
 					activity.showDownloadProjectErrorDialog();
 				} else {
 					activity.showDownloadProjectFailureDialog();
@@ -320,6 +322,21 @@ public class FetchProjectsActivity extends RoboActivity {
     		
     	});
     	choiceDialog.show();
+    }
+    
+    private void showBusyErrorDialog() {
+    	confirmDialog = new ConfirmDialog(FetchProjectsActivity.this,
+				getString(R.string.download_busy_project_error_title),
+				getString(R.string.download_busy_project_error_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						// do nothing
+					}
+    		
+    	});
+    	confirmDialog.show();
     }
     
     private void showDownloadProjectErrorDialog() {

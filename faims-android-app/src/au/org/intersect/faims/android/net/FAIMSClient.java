@@ -158,7 +158,13 @@ public class FAIMSClient {
 			try {			
 				initClient();
 				
-				HttpEntity entity = getRequest(getUri("/android/projects"));
+				HttpResponse response = getRequest(getUri("/android/projects"));
+				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return FetchResult.FAILURE;
+				}
+				
+				HttpEntity entity = response.getEntity();
 				
 				if (isInterrupted) {
 					FLog.d("fetch projects list interrupted");
@@ -199,11 +205,30 @@ public class FAIMSClient {
 	public FetchResult fetchDatabaseVersion(Project project) {
 		synchronized(FAIMSClient.class) {
 	
+			InputStream infoStream = null;
 			InputStream stream = null;
 			try {			
 				initClient();
 				
-				FileInfo info = getFileInfo("/android/project/" + project.key + "/db_archive");
+				FileInfo info = new FileInfo();
+				
+				HttpResponse response = getRequest(getUri("/android/project/" + project.key + "/db_archive"));
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					FLog.d("request busy");
+					return new FetchResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				} else if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return null;
+				}
+				
+				HttpEntity entity = response.getEntity();
+				
+				infoStream = entity.getContent();
+				
+				JsonObject object = JsonUtil.deserializeJsonObject(infoStream);
+				
+				info.parseJson(object);
 				
 				if (isInterrupted) {
 					FLog.d("fetch database version interrupted");
@@ -220,6 +245,12 @@ public class FAIMSClient {
 				return FetchResult.FAILURE;
 				
 			} finally {
+				
+				try {
+					if (infoStream != null) infoStream.close();
+				} catch (IOException e) {
+					FLog.e("error closing stream", e);
+				}
 				
 				try {
 					if (stream != null) stream.close();
@@ -257,14 +288,33 @@ public class FAIMSClient {
 	public DownloadResult downloadFile(String infoPath, String downloadPath, String dir, boolean chooseFileFromInfo) {
 		synchronized(FAIMSClient.class) {
 			FLog.d("downloading file");
+			InputStream infoStream = null;
 			InputStream stream = null;
 			tempFile = null;
 			tempDir = null;
 			try {
 				initClient();
 				
-				FileInfo info = getFileInfo(infoPath);
+				FileInfo info = new FileInfo();
 				
+				HttpResponse response = getRequest(getUri(infoPath));
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					FLog.d("request busy");
+					return new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				} else if (statusCode != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return DownloadResult.FAILURE;
+				}
+				
+				HttpEntity entity = response.getEntity();
+				
+				infoStream = entity.getContent();
+				
+				JsonObject object = JsonUtil.deserializeJsonObject(infoStream);
+				
+				info.parseJson(object);
+
 				if (isInterrupted) {
 					FLog.d("download file interrupted");
 					
@@ -334,6 +384,12 @@ public class FAIMSClient {
 				}
 				
 				try {
+					if (infoStream != null) infoStream.close();
+				} catch (IOException e) {
+					FLog.e("error closing stream", e);
+				}
+				
+				try {
 					if (stream != null) stream.close();
 				} catch (IOException e) {
 					FLog.e("error closing stream", e);
@@ -350,28 +406,6 @@ public class FAIMSClient {
 		}
 	}
 	
-	private FileInfo getFileInfo(String path) throws Exception {
-		InputStream stream = null;
-		
-		try {
-			FileInfo info = new FileInfo();
-			
-			HttpEntity entity = getRequest(getUri(path));
-			
-			stream = entity.getContent();
-			
-			JsonObject object = JsonUtil.deserializeJsonObject(stream);
-			
-			info.parseJson(object);
-			
-			return info;
-			
-		} finally {
-			if (stream != null) stream.close();
-		}
-		
-	}
-	
 	private File downloadArchive(String path, FileInfo archive) throws Exception {
 		InputStream stream = null;
 		tempArchive = null;
@@ -380,7 +414,12 @@ public class FAIMSClient {
 			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
 			HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
 			
-			HttpEntity entity = getRequest(getUri(path), params);
+			HttpResponse response = getRequest(getUri(path), params);
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				FLog.d("request failed");
+				return null;
+			}
+			HttpEntity entity = response.getEntity();
 			
 			if (isInterrupted) {
 				FLog.d("download archive interrupted");
@@ -431,11 +470,11 @@ public class FAIMSClient {
 		return serverDiscovery.getServerHost() + path;
 	}
 	
-	private HttpEntity getRequest(String uri) throws IOException {
+	private HttpResponse getRequest(String uri) throws IOException {
 		return getRequest(uri, null);
 	}
 	
-	private HttpEntity getRequest(String uri, HttpParams params) throws IOException {
+	private HttpResponse getRequest(String uri, HttpParams params) throws IOException {
 		FLog.d(uri);
 		
 		HttpGet get = new HttpGet(uri);
@@ -445,14 +484,7 @@ public class FAIMSClient {
 		}
 
 		HttpResponse response = httpClient.execute(get);
-		if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-			FLog.d("request failed " + uri);
-			return null;
-		}
-		
-		HttpEntity entity = response.getEntity();
-		
-		return entity;
+		return response;
 	}
 
 	public Result uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
@@ -477,7 +509,12 @@ public class FAIMSClient {
 					return Result.SUCCESS;
 				}
 				
-				HttpEntity entity = getRequest(getUri(requestExcludePath));
+				HttpResponse response = getRequest(getUri(requestExcludePath));
+				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return Result.FAILURE;
+				}
+				HttpEntity entity = response.getEntity();
 				
 				if (isInterrupted) {
 					FLog.d("upload directory interrupted");
@@ -549,7 +586,17 @@ public class FAIMSClient {
 			try {
 				initClient();
 				
-				HttpEntity entity = getRequest(getUri(requestExcludePath));
+				HttpResponse response = getRequest(getUri(requestExcludePath));
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					FLog.d("request busy");
+					return new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				} else if (statusCode != HttpStatus.SC_OK) {
+					FLog.d("request failed");
+					return DownloadResult.FAILURE;
+				}
+				
+				HttpEntity entity = response.getEntity();
 				
 				if (isInterrupted) {
 					FLog.d("download directory interrupted");

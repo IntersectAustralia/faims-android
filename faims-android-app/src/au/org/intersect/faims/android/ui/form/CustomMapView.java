@@ -6,6 +6,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
+import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -14,10 +16,12 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
 import com.nutiteq.components.Constraints;
+import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.GeometryLayer;
@@ -78,12 +82,18 @@ public class CustomMapView extends MapView {
 	private int vectorId = 1;
 
 	private DrawView drawView;
+	
+	private MapNorthView northView;
+	
+	private ScaleBarView scaleView;
 
 	private Geometry overlayGeometry;
 	
-	public CustomMapView(Context context, DrawView drawView) {
+	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView) {
 		this(context);
 		this.drawView = drawView;
+		this.northView = northView;
+		this.scaleView = scaleView;
 	}
 	
 	public CustomMapView(Context context) {
@@ -212,4 +222,23 @@ public class CustomMapView extends MapView {
         Bitmap logo = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
         CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.2f);
 	}
+	
+	public void updateOverlay() {
+		northView.setMapRotation(this.getRotation());
+		int width = this.getWidth();
+		int height = this.getHeight();
+		scaleView.setMapBoundary(this.getZoom(), width, height, 
+				distance(convertToWgs84(this.screenToWorld(0,  0)), convertToWgs84(this.screenToWorld(width, height))));
+	}
+	
+	private double distance(MapPos p1, MapPos p2) {
+		float[] results = new float[3];
+		Location.distanceBetween(p1.x, p1.y, p2.x, p2.y, results);
+		return results[0] / 1000;
+	}
+	
+	private MapPos convertToWgs84(MapPos p) {
+		return (new EPSG3857()).toWgs84(p.x, p.y);
+	}
+	
 }

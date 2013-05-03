@@ -79,7 +79,7 @@ showScreen(name) {
 	setupMap(name + "/tab1/map", 151.26854f, -33.88190f); // sydney
 }
 
-mapfilename = "map.tif";
+mapfilename = "files/data/maps/sydney_map.tif";
 
 setupMap(id, lon, lat) {
 	showRasterMap(id, mapfilename);

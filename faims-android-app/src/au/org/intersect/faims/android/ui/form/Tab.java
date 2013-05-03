@@ -250,13 +250,26 @@ public class Tab implements Parcelable{
                     		DrawView drawView = new DrawView(this.context);
                     		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
                     		
-                    		CustomMapView mapView = new CustomMapView(this.context, drawView);
+                    		MapNorthView northView = new MapNorthView(this.context);
+                    		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    		northLayout.alignWithParent = true;
+                    		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
+                    		northLayout.topMargin = getDpi(10);
+                    		northLayout.rightMargin = getDpi(10);
+                    		northView.setLayoutParams(northLayout);
+                    		
+                    		ScaleBarView scaleView = new ScaleBarView(this.context);
+                    		scaleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+                    		
+                    		CustomMapView mapView = new CustomMapView(this.context, drawView, northView, scaleView);
 
                     		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
                     		mapView.startMapping();
                     		
                     		mapLayout.addView(mapView);
                     		mapLayout.addView(drawView);
+                    		mapLayout.addView(northView);
+                    		mapLayout.addView(scaleView);
                     		
                     		view = mapView;
                     		linearLayout.addView(mapLayout);
