@@ -146,11 +146,15 @@ public class ExternalGPSTasks implements Runnable {
 
 	private void initialiseBluetoothSocket() throws NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException, IOException {
-		Method m = this.gpsDevice.getClass().getMethod("createRfcommSocket",
-		        new Class[] { int.class });
-		this.bluetoothSocket = (BluetoothSocket) m.invoke(
-				this.gpsDevice, 1);
-		this.bluetoothSocket.connect();
+		try{
+			Method m = this.gpsDevice.getClass().getMethod("createRfcommSocket",
+			        new Class[] { int.class });
+			this.bluetoothSocket = (BluetoothSocket) m.invoke(
+					this.gpsDevice, 1);
+			this.bluetoothSocket.connect();
+		}catch(Exception e){
+			FLog.e("error when initialing bluetooth socket", e);
+		}
 	}
 
 	private boolean hasValidGGAMessage() {

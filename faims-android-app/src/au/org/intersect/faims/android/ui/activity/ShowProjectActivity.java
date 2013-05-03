@@ -415,6 +415,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		FLog.c();
 		if(this.linker != null){
 			this.linker.destroyListener();
+			this.linker.stopTrackingGPS();
 		}
 		if(this.gpsDataManager != null){
 			this.gpsDataManager.destroyListener();
@@ -471,6 +472,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 		if(activityData.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
+		}
+		if(activityData.getTrackingType() != null){
+			linker.startTrackingGPS(activityData.getTrackingType(), activityData.getTrackingValue());
 		}
 	}
 	
@@ -1116,6 +1120,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		linker.storeBeanShellData(savedInstanceState);
+		linker.stopTrackingGPS();
 		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
 		renderer.storeTabs(savedInstanceState);
 		renderer.storeViewValues(savedInstanceState);
@@ -1139,6 +1144,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 		if(activityData.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
+		}
+		if(activityData.getTrackingType() != null){
+			linker.startTrackingGPS(activityData.getTrackingType(), activityData.getTrackingValue());
 		}
 		this.databaseManager.setUserId(activityData.getUserId());
 	}

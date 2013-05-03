@@ -146,7 +146,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		if(isUsingExternalGPS()){
 			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return nmeaAccuracy;
+			return (float) nmeaAccuracy;
 		}else if(isUsingInternalGPS()){
 			return this.accuracy;
 		}else{
@@ -160,7 +160,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
 				return bodSentence.getTrueBearing();
 			}else{
-				return 0.0;
+				return 0.0f;
 			}
 		}else if(isUsingInternalGPS()){
 			return this.location.getBearing();
@@ -188,7 +188,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
 			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return nmeaAccuracy;
+			return (float)nmeaAccuracy;
 		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			return this.accuracy;
 		}else{
@@ -202,7 +202,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
 				return bodSentence.getTrueBearing();
 			}else{
-				return 0.0;
+				return 0.0f;
 			}
 		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			return this.location.getBearing();
