@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -239,5 +240,5 @@ public class CustomMapView extends MapView {
 	private MapPos convertToWgs84(MapPos p) {
 		return (new EPSG3857()).toWgs84(p.x, p.y);
 	}
-
+	
 }

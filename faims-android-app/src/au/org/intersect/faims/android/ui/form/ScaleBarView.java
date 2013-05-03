@@ -6,8 +6,6 @@ import android.view.View;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.SimpleScaleBar;
 
-import com.nutiteq.components.MapPos;
-
 public class ScaleBarView extends View {
 
 	private SimpleScaleBar bar;
@@ -29,7 +27,6 @@ public class ScaleBarView extends View {
 		if (lastZoom == zoom) return;
 		lastZoom = zoom;
 		
-		FLog.d("mapWidth: " + mapWidth);
 		bar.reSize(width, height, mapWidth);
 		
 		invalidate();
