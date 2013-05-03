@@ -26,6 +26,8 @@ public class ScaleBarView extends View {
 		if (lastZoom == zoom) return;
 		lastZoom = zoom;
 		
+		//FLog.d("mapWidth:"+mapWidth);
+		
 		bar.reSize(width, height, mapWidth);
 		
 		invalidate();

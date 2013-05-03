@@ -116,9 +116,6 @@ public class BeanShellLinker {
 	private Runnable trackingTask;
 	private Double prevLong;
 	private Double prevLat;
-	private Runnable mapOverlayTask;
-
-	private Handler mapOverlayHandler;
 
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
 			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
@@ -1734,29 +1731,29 @@ public class BeanShellLinker {
 	}
 	
 	private void startMapOverlayThread(final CustomMapView mapView) throws Exception {
-		if(this.mapOverlayHandler != null){
-        	if(this.mapOverlayTask != null){
-        		this.mapOverlayHandler.removeCallbacks(mapOverlayTask);
-        	}
-        }
-		this.mapOverlayHandler = new Handler(this.handlerThread.getLooper());
-        this.mapOverlayTask = new Runnable() {
+		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
-				activity.runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						mapView.updateOverlay();
+				try {
+					Thread.sleep(1000);
+					while(true) {
+						activity.runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								mapView.updateOverlay();
+							}
+							
+						});
+						Thread.sleep(100);
 					}
-					
-				});
-				mapOverlayHandler.postDelayed(mapOverlayTask, (long) 100);
+				} catch (Exception e) {
+					FLog.d("error on map overlay thread", e);
+				}
 			}
         	
-        };
-        mapOverlayHandler.postDelayed(mapOverlayTask, (long) 100);
+        }).start();
 	}
 	
 	private void startGPSLocationThread(final CustomMapView mapView, final GdalMapLayer gdalLayer) {

@@ -157,8 +157,8 @@ public class SimpleScaleBar {
 			
 			//g.drawRect(sx - BAR_BORDER, sy - BAR_BORDER, ex + BAR_BORDER, ey + BAR_BORDER, black);
 			int barEndHeight = 8;
-			g.drawRect(sx - BAR_BORDER, sy - barEndHeight, sx, ey, white);
-			g.drawRect(ex, sy - barEndHeight, ex + BAR_BORDER, ey, white);
+			g.drawRect(sx, sy - barEndHeight, sx + BAR_BORDER, ey, white);
+			g.drawRect(ex - BAR_BORDER, sy - barEndHeight, ex, ey, white);
 			
 			g.drawRect(sx, sy, ex, ey, white);
 

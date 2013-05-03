@@ -233,8 +233,10 @@ public class CustomMapView extends MapView {
 		northView.setMapRotation(this.getRotation());
 		int width = this.getWidth();
 		int height = this.getHeight();
+		//FLog.d("min: " + convertToWgs84(this.screenToWorld(0,  height)));
+		//FLog.d("max: " + convertToWgs84(this.screenToWorld(width,  height)));
 		scaleView.setMapBoundary(this.getZoom(), width, height, 
-				distance(convertToWgs84(this.screenToWorld(0,  0)), convertToWgs84(this.screenToWorld(width, height))));
+				distance(convertToWgs84(this.screenToWorld(0,  height)), convertToWgs84(this.screenToWorld(width, height))));
 	}
 	
 	private double distance(MapPos p1, MapPos p2) {
