@@ -23,7 +23,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.format.Time;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +32,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -43,6 +41,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.DateUtil;
+import au.org.intersect.faims.android.util.Dpi;
 
 public class Tab implements Parcelable{
 
@@ -133,7 +132,7 @@ public class Tab implements Parcelable{
 		attributeType = (attributeType == null) ? "freetext" : attributeType;
 		Button certaintyButton = new Button(this.context);
 		certaintyButton.setBackgroundResource(R.drawable.square_button);
-		int size = getDpi(30);
+		int size = Dpi.getDpi(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		certaintyButton.setLayoutParams(layoutParams);
@@ -246,36 +245,10 @@ public class Tab implements Parcelable{
                     default:
                     	// check if map type
                     	if ("true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"))) {
-                    		RelativeLayout mapLayout = new RelativeLayout(this.context);
-                    		mapLayout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
+                    		MapLayout mapLayout = new MapLayout(this.context);
+                    		mapViewList.add(mapLayout.getMapView());
                     		
-                    		DrawView drawView = new DrawView(this.context);
-                    		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-                    		
-                    		MapNorthView northView = new MapNorthView(this.context);
-                    		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                    		northLayout.alignWithParent = true;
-                    		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-                    		northLayout.topMargin = getDpi(10);
-                    		northLayout.rightMargin = getDpi(10);
-                    		northView.setLayoutParams(northLayout);
-                    		
-                    		ScaleBarView scaleView = new ScaleBarView(this.context);
-                    		scaleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-                    		
-                    		CustomMapView mapView = new CustomMapView(this.context, drawView, northView, scaleView);
-
-                    		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                    		mapView.startMapping();
-                    		
-                    		mapLayout.addView(mapView);
-                    		mapLayout.addView(drawView);
-                    		mapLayout.addView(northView);
-                    		mapLayout.addView(scaleView);
-                    		
-                    		mapViewList.add(mapView);
-                    		
-                    		view = mapView;
+                    		view = mapLayout.getMapView();
                     		linearLayout.addView(mapLayout);
                     	} else {
                     		text = new CustomEditText(this.context, attributeName, attributeType, path);
@@ -697,7 +670,7 @@ public class Tab implements Parcelable{
 	        		LinearLayout galleryLayout = new LinearLayout(this.context);
 	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 	        		CustomImageView gallery = new CustomImageView(this.context);
-	        		int size = getDpi(400);
+	        		int size = Dpi.getDpi(context, 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(path+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);
@@ -817,9 +790,7 @@ public class Tab implements Parcelable{
 		}
 	}
 	
-	private int getDpi(int size) {
-		return (size * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
-	}
+	
 
 	@Override
 	public int describeContents() {
@@ -843,6 +814,18 @@ public class Tab implements Parcelable{
 	public void onHideTab() {
 		for (CustomMapView mapView : mapViewList) {
 			mapView.killThreads();
+		}
+	}
+
+	public void recreateMapViews() {
+		for (int i = 0; i < linearLayout.getChildCount(); i++) {
+			View v = linearLayout.getChildAt(i);
+			if (v instanceof MapLayout) {
+				//MapLayout mapLayout = (MapLayout) v;
+				//CustomMapView mapView = mapLayout.getMapView();
+				
+				// TODO clone mapView
+			}
 		}
 	}
 

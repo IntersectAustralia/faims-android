@@ -9,12 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.util.Dpi;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
@@ -103,7 +103,7 @@ public class CustomMapView extends MapView {
 		this.northView = northView;
 		this.scaleView = scaleView;
 		
-		scaleView.setBarWidthRange(getDpi(40), getDpi(100));
+		scaleView.setBarWidthRange(Dpi.getDpi(context, 40), Dpi.getDpi(context, 100));
 	}
 	
 	public CustomMapView(Context context) {
@@ -145,10 +145,6 @@ public class CustomMapView extends MapView {
         
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
-	}
-	
-	private int getDpi(int size) {
-		return (size * getContext().getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
 	}
 
 	public static int nextId() {
