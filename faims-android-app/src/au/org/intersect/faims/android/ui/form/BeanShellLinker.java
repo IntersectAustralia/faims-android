@@ -40,6 +40,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -94,10 +95,6 @@ public class BeanShellLinker {
 	private static final String MEASURE = "measure";
 	private static final String VOCAB = "vocab";
 	
-	private HandlerThread handlerThread;
-	private Handler currentLocationHandler;
-	private Runnable currentLocationTask;
-
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
 
@@ -105,9 +102,6 @@ public class BeanShellLinker {
 	private Project project;
 	
 	private String persistedObjectName;
-
-	@SuppressWarnings("unused")
-	private User user;
 
 	private String lastFileBrowserCallback;
 
@@ -742,15 +736,6 @@ public class BeanShellLinker {
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
 		this.gpsDataManager.setGpsUpdateInterval(gpsUpdateInterval);
-	}
-
-	public void destroyListener(){
-		if(this.currentLocationHandler != null){
-			this.currentLocationHandler.removeCallbacks(this.currentLocationTask);
-		}
-		if(this.handlerThread != null){
-			handlerThread.quit();
-		}
 	}
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
@@ -1710,12 +1695,6 @@ public class BeanShellLinker {
 	            gdalLayer.setShowAlways(true);
 	            mapView.getLayers().setBaseLayer(gdalLayer);
 	            
-	            if(this.handlerThread != null){
-	            	this.handlerThread.quit();
-	            }
-	            this.handlerThread = new HandlerThread("MapHandler");
-	    		this.handlerThread.start();
-	            
 	            startMapOverlayThread(mapView);
 	            startGPSLocationThread(mapView, gdalLayer);
 	            
@@ -1731,13 +1710,15 @@ public class BeanShellLinker {
 	}
 	
 	private void startMapOverlayThread(final CustomMapView mapView) throws Exception {
-		new Thread(new Runnable() {
+		mapView.startThread(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
+					FLog.d("starting map overlay thread");
+					
 					Thread.sleep(1000);
-					while(true) {
+					while(mapView.canRunThreads()) {
 						activity.runOnUiThread(new Runnable() {
 							
 							@Override
@@ -1748,71 +1729,74 @@ public class BeanShellLinker {
 						});
 						Thread.sleep(100);
 					}
+					
+					FLog.d("stopping map overlay thread");
 				} catch (Exception e) {
-					FLog.d("error on map overlay thread", e);
+					FLog.e("error on map overlay thread", e);
 				}
 			}
         	
-        }).start();
+        });
+	}
+	
+	private Marker createGPSMarker(GdalMapLayer layer, GPSLocation location) {
+		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+				activity.getResources(), R.drawable.blue_dot);
+        MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+        MapPos markerLocation = layer.getProjection().fromWgs84(
+                location.getLongitude(), location.getLatitude());
+        return new Marker(markerLocation, null, markerStyle, null);
 	}
 	
 	private void startGPSLocationThread(final CustomMapView mapView, final GdalMapLayer gdalLayer) {
-        if(this.currentLocationHandler != null){
-        	if(this.currentLocationTask != null){
-        		this.currentLocationHandler.removeCallbacks(currentLocationTask);
-        	}
-        }
-		this.currentLocationHandler = new Handler(this.handlerThread.getLooper());
-        this.currentLocationTask = new Runnable() {
-				
+		mapView.startThread(new Runnable() {
+			
 			@Override
 			public void run() {
-				Object currentLocation = getGPSPosition();
-				if(currentLocation != null){
-					GPSLocation location = (GPSLocation) currentLocation;
-					previousLocation = location;
-					Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-							activity.getResources(), R.drawable.blue_dot);
-                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-                            .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
-                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-                            location.getLongitude(), location.getLatitude());
-                    if(currentPositionLayer == null){
-                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-	                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-	                    mapView.getLayers().addLayer(currentPositionLayer);
-                    }else{
-                    	currentPositionLayer.clear();
-                    	currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-                    	currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
-                    }
-				}else{
-					if(previousLocation != null){
-						// when there is no gps signal for two minutes, change the color of the marker to be grey
-						if(System.currentTimeMillis() - previousLocation.getTimeStamp() > 120 * 1000){
-							Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-		                            activity.getResources(), R.drawable.grey_dot);
-		                    MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-		                            .setSize(0.5f).build();
-		                    MapPos markerLocation = gdalLayer.getProjection().fromWgs84(
-		                    		previousLocation.getLongitude(), previousLocation.getLatitude());
-		                    if(currentPositionLayer == null){
+				try {
+					FLog.d("starting map gps thread");
+					
+					Thread.sleep(1000);
+					while(mapView.canRunThreads()) {
+					
+						Object currentLocation = getGPSPosition();
+						if(currentLocation != null){
+							GPSLocation location = (GPSLocation) currentLocation;
+							previousLocation = location;
+							Marker gpsMarker = createGPSMarker(gdalLayer, location);
+							if(currentPositionLayer == null){
 		                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-			                    currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
 			                    mapView.getLayers().addLayer(currentPositionLayer);
-		                    }else{
-		                    	currentPositionLayer.clear();
-		                    	currentPositionLayer.add(new Marker(markerLocation, null, markerStyle, null));
-		                    	currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
 		                    }
-							previousLocation = null;
+		                    currentPositionLayer.clear();
+		                    currentPositionLayer.add(gpsMarker);
+		                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+						}else{
+							if(previousLocation != null){
+								// when there is no gps signal for two minutes, change the color of the marker to be grey
+								if(System.currentTimeMillis() - previousLocation.getTimeStamp() > FaimsSettings.GPS_MARKER_TIMEOUT){
+				                    Marker gpsMarker = createGPSMarker(gdalLayer, previousLocation);
+				                    if(currentPositionLayer == null){
+				                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+					                    mapView.getLayers().addLayer(currentPositionLayer);
+				                    }
+				                    currentPositionLayer.clear();
+				                    currentPositionLayer.add(gpsMarker);
+				                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+									previousLocation = null;
+								}
+							}
 						}
+						
+						Thread.sleep(getGpsUpdateInterval());
 					}
+					FLog.d("stopping map gps thread");
+				} catch (Exception e) {
+					FLog.e("error on map gps thread", e);
 				}
-				currentLocationHandler.postDelayed(this, getGpsUpdateInterval());
 			}
-		};
-        this.currentLocationHandler.postDelayed(currentLocationTask, getGpsUpdateInterval());
+		});
 	}
 	
 	public void setMapFocusPoint(String ref, float longitude, float latitude) {
@@ -2358,7 +2342,6 @@ public class BeanShellLinker {
 	}
 	
 	public void setUser(User user) {
-		this.user = user;
 		this.databaseManager.setUserId(user.getUserId());
 	}
 	

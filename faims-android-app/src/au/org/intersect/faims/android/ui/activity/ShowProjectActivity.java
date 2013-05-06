@@ -414,7 +414,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void onDestroy() {
 		FLog.c();
 		if(this.linker != null){
-			this.linker.destroyListener();
 			this.linker.stopTrackingGPS();
 		}
 		if(this.gpsDataManager != null){

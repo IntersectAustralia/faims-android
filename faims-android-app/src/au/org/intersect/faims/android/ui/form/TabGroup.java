@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
@@ -31,6 +32,7 @@ public class TabGroup extends Fragment {
 	private String archEntType;
 	private String relType;
 	private IRestoreActionListener actionListener;
+	private Tab lastTab;
 	
 	public TabGroup(){
 		
@@ -97,8 +99,36 @@ public class TabGroup extends Fragment {
 			((ViewGroup) tabHost.getParent()).removeView(tabHost);
 		}
 		
+		// TODO does this need to be removed?
+		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
+
+			@Override
+			public void onTabChanged(String arg0) {
+				if (lastTab != null) {
+					lastTab.onHideTab();
+					lastTab = null;
+				}
+				
+				Tab tab = getCurrentTab();
+				if (tab != null) {
+					tab.onShowTab();
+					lastTab = tab;
+				}
+			}
+			
+		});
+		
+		onShowTabGroup();
+		
 		return tabHost;
     }
+	
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		
+		onHideTabGroup();
+	}
 	
 	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
 		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n, reference);
@@ -115,7 +145,6 @@ public class TabGroup extends Fragment {
 				widget.getChildAt(i).setVisibility(View.VISIBLE);
 				tab.setHidden(false);
 				tabHost.setCurrentTab(i);
-				tab.onShowTab();
 				return tab;
 			}
 		}
@@ -125,13 +154,13 @@ public class TabGroup extends Fragment {
 	public Tab getCurrentTab(){
 		return tabs.get(tabHost.getCurrentTab());
 	}
+	
 	public void hideTab(String name){
 		for (int i = 0; i < tabs.size(); i++) {
 			Tab tab = tabs.get(i);
 			if (tab.getName().equals(name)) {
 				TabWidget widget = tabHost.getTabWidget();
 				widget.getChildAt(i).setVisibility(View.GONE);
-				tab.onHideTab();
 			}
 		}
 	}
@@ -199,6 +228,22 @@ public class TabGroup extends Fragment {
 
 	public boolean isRelationship() {
 		return this.relType != null && this.archEntType == null;
+	}
+	
+	public void onShowTabGroup() {
+		Tab tab = getCurrentTab();
+		if (tab != null) {
+			tab.onShowTab();
+			lastTab = getCurrentTab();
+		}
+	}
+	
+	public void onHideTabGroup() {
+		Tab tab = getCurrentTab();
+		if (tab != null) {
+			tab.onHideTab();
+			lastTab = null;
+		}
 	}
 
 }

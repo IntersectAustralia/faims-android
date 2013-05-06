@@ -53,6 +53,7 @@ public class Tab implements Parcelable{
 	private Map<String, List<View>> viewMap;
 	private Map<String, Object> valueReference;
 	private List<View> viewList;
+	private List<CustomMapView> mapViewList;
 	private String name;
 	private String label;
 	private boolean hidden;
@@ -82,6 +83,7 @@ public class Tab implements Parcelable{
 		this.valueReference = new HashMap<String, Object>();
 		this.viewMap = new HashMap<String, List<View>>();
 		this.viewList = new ArrayList<View>();
+		this.mapViewList = new ArrayList<CustomMapView>();
         linearLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -270,6 +272,8 @@ public class Tab implements Parcelable{
                     		mapLayout.addView(drawView);
                     		mapLayout.addView(northView);
                     		mapLayout.addView(scaleView);
+                    		
+                    		mapViewList.add(mapView);
                     		
                     		view = mapView;
                     		linearLayout.addView(mapLayout);
@@ -831,11 +835,15 @@ public class Tab implements Parcelable{
 	}
 
 	public void onShowTab() {
-		
+		for (CustomMapView mapView : mapViewList) {
+			mapView.restartThreads();
+		}
 	}
 
 	public void onHideTab() {
-		
+		for (CustomMapView mapView : mapViewList) {
+			mapView.killThreads();
+		}
 	}
 
 }

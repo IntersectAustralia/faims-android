@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.util.ArrayList;
+
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
@@ -10,6 +12,7 @@ import android.location.Location;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 
@@ -89,6 +92,11 @@ public class CustomMapView extends MapView {
 
 	private Geometry overlayGeometry;
 	
+	private ArrayList<Runnable> runnableList;
+	private ArrayList<Thread> threadList;
+
+	private boolean canRunThreads;
+	
 	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView) {
 		this(context);
 		this.drawView = drawView;
@@ -134,6 +142,9 @@ public class CustomMapView extends MapView {
         //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
         
         vectorMap = new SparseArray<GeometryLayer>();
+        
+        runnableList = new ArrayList<Runnable>();
+        threadList = new ArrayList<Thread>();
 	}
 	
 	private int getDpi(int size) {
@@ -246,6 +257,53 @@ public class CustomMapView extends MapView {
 	
 	private MapPos convertToWgs84(MapPos p) {
 		return (new EPSG3857()).toWgs84(p.x, p.y);
+	}
+
+	public void startThread(Runnable runnable) {
+		runnableList.add(runnable);
+		
+		// Note: the runnable will need to handle stopping the thread
+		Thread t = new Thread(runnable);
+		threadList.add(t);
+		t.start();
+	}
+	
+	public void restartThreads() {
+		try {
+			// wait for all threads to finish
+			canRunThreads = false;
+			while(true) {
+				boolean allThreadsTerminated = true;
+				for (Thread t : threadList) {
+					if (t.getState() != Thread.State.TERMINATED) {
+						allThreadsTerminated = false;
+						break;
+					}
+				}
+				if (allThreadsTerminated) {
+					break;
+				}
+				FLog.d("Waiting to start map threads");
+				Thread.sleep(1000);
+			}
+			canRunThreads = true;
+			threadList.clear();
+			for (Runnable r : runnableList) {
+				Thread t = new Thread(r);
+				threadList.add(t);
+				t.start();
+			}
+		} catch (Exception e) {
+			FLog.e("error restarting map threads", e);
+		}
+	}
+
+	public void killThreads() {
+		canRunThreads = false;
+	}
+	
+	public boolean canRunThreads() {
+		return canRunThreads;
 	}
 	
 }
