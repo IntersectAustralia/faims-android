@@ -1723,7 +1723,7 @@ public class BeanShellLinker {
 							
 							@Override
 							public void run() {
-								mapView.updateOverlay();
+								mapView.updateMapOverlay();
 							}
 							
 						});

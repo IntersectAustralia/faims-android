@@ -35,55 +35,42 @@ public class CustomMapView extends MapView {
 
 		@Override
 		public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void onDrawFrameBefore3D(GL10 arg0, float arg1) {
-			// TODO Auto-generated method stub
-			
-		}
+			}
 
 		@Override
 		public void onLabelClicked(VectorElement arg0, boolean arg1) {
-			// TODO Auto-generated method stub
-			
-		}
+			}
 
 		@Override
 		public void onMapClicked(double arg0, double arg1, boolean arg2) {
-			// TODO Auto-generated method stub
-			
-		}
+			}
 
 		@Override
 		public void onMapMoved() {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void onSurfaceChanged(GL10 arg0, int arg1, int arg2) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void onVectorElementClicked(VectorElement arg0, double arg1,
 				double arg2, boolean arg3) {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}
 	
+	// TODO what is this?
 	private static int cacheId = 9991;
+	
+	private int vectorId = 1;
 	
 	private SparseArray<GeometryLayer> vectorMap;
 	
-	private int vectorId = 1;
-
 	private DrawView drawView;
 	
 	private MapNorthView northView;
@@ -99,10 +86,12 @@ public class CustomMapView extends MapView {
 	
 	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView) {
 		this(context);
+		
 		this.drawView = drawView;
 		this.northView = northView;
 		this.scaleView = scaleView;
 		
+		// TODO make this configurable
 		scaleView.setBarWidthRange(Dpi.getDpi(context, 40), Dpi.getDpi(context, 100));
 	}
 	
@@ -137,12 +126,12 @@ public class CustomMapView extends MapView {
         this.getOptions().setTextureMemoryCacheSize(40 * 1024 * 1024);
         this.getOptions().setCompressedMemoryCacheSize(8 * 1024 * 1024);
         
+        // TODO find out how this works? can we pass different paths for different maps?
         //this.getOptions().setPersistentCachePath(activity.getDatabasePath("mapcache").getPath());
         // set persistent raster cache limit to 100MB
         //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
         
         vectorMap = new SparseArray<GeometryLayer>();
-        
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
 	}
@@ -236,7 +225,7 @@ public class CustomMapView extends MapView {
         CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.2f);
 	}
 	
-	public void updateOverlay() {
+	public void updateMapOverlay() {
 		northView.setMapRotation(this.getRotation());
 		int width = this.getWidth();
 		int height = this.getHeight();

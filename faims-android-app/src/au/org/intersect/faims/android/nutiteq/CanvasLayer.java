@@ -67,30 +67,6 @@ public class CanvasLayer extends GeometryLayer {
 		return id;
 	}
 	
-	public void removeGeometry(int geomId) {
-		Geometry geom = objectMap.get(geomId);
-		
-		objects.remove(geom.getInternalState().envelope, geom);
-		
-		objectMap.remove(geomId);
-		
-		geomBuffer.add(geom); // Issue with removing objects when object is still in visible list so buffering objects to be removed later
-	}
-	
-	private void clearGeometryBuffer() {
-		while(geomBuffer.size() > 0) {
-			Geometry geom = geomBuffer.pop();
-			this.remove(geom);
-		}
-	}
-	
-	public void updateRenderer() {
-
-		if (components != null) {
-			components.mapRenderers.getMapRenderer().frustumChanged();
-		}
-	}
-	
 	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet) {
 		return addLine(points, styleSet, geomId++);
 	}
@@ -131,6 +107,30 @@ public class CanvasLayer extends GeometryLayer {
 		FLog.d(p.toString());
 		
 		return id;
+	}
+	
+	public void removeGeometry(int geomId) {
+		Geometry geom = objectMap.get(geomId);
+		
+		objects.remove(geom.getInternalState().envelope, geom);
+		
+		objectMap.remove(geomId);
+		
+		geomBuffer.add(geom); // Issue with removing objects when object is still 
+							  // in visible list so buffering objects to be removed later
+	}
+	
+	private void clearGeometryBuffer() {
+		while(geomBuffer.size() > 0) {
+			Geometry geom = geomBuffer.pop();
+			this.remove(geom);
+		}
+	}
+	
+	public void updateRenderer() {
+		if (components != null) {
+			components.mapRenderers.getMapRenderer().frustumChanged();
+		}
 	}
 	
 	public Geometry getTransformedGeometry(int geomId) {
@@ -216,7 +216,6 @@ public class CanvasLayer extends GeometryLayer {
 		objects.insert(geom.getInternalState().envelope, geom);
 		
 		objectMap.put(geomId, geom);
-		
 	}
 
 }
