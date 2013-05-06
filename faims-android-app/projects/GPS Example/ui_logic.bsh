@@ -591,10 +591,16 @@ clearLonLatPoints() {
 
 onSelectLonLatPoint() {
 	selectedId = getMapGeometrySelected();
-	point = getGeometry("tabgroup3/tab1/map", lonlatlayer, selectedId);
+	point = getGeometry("tabgroup3/tab1/map", lonlatlayer, selectedId).getMapPos();
+	
+	drawGeometryOverlay("tabgroup3/tab1/map", selectedId);
+	
+	showToast("selected point at (" + point.x + ", " + point.y + ")");
 }
 
 onClickSelectedLonLatPoint() {
+	clearGeometryOverlay("tabgroup3/tab1/map");
+
 	point = getMapPointClicked();
 	setFieldValue("tabgroup3/tab1/longitude", point.x);
 	setFieldValue("tabgroup3/tab1/latitude", point.y);
