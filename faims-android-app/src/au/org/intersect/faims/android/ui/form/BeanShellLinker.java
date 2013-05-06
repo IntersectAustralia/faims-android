@@ -44,10 +44,10 @@ import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -61,8 +61,6 @@ import com.nutiteq.geometry.Marker;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.raster.GdalMapLayer;
-import com.nutiteq.layers.vector.OgrLayer;
-import com.nutiteq.layers.vector.SpatialiteLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
@@ -75,8 +73,6 @@ import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class BeanShellLinker {
 	
-	private static final int MAX_OBJECTS = 500;
-
 	private Interpreter interpreter;
 
 	private UIRenderer renderer;
@@ -1684,24 +1680,19 @@ public class BeanShellLinker {
 				final CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				if (!new File(filepath).exists()) {
-					FLog.w("Map file " + filepath + " does not exist");
-                    showWarning("Logic Error", "Error map does not exist " + filename);
-					return;
-				}
-				
-        		final GdalMapLayer gdalLayer;
-	            gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), filepath, mapView, true);
-	            gdalLayer.setShowAlways(true);
-	            mapView.getLayers().setBaseLayer(gdalLayer);
+				mapView.addRasterMap(filepath);
 	            
 	            startMapOverlayThread(mapView);
-	            startGPSLocationThread(mapView, gdalLayer);
+	            startGPSLocationThread(mapView);
 	            
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.w("warning showing raster map", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error rendering raster map",e);
@@ -1749,7 +1740,7 @@ public class BeanShellLinker {
         return new Marker(markerLocation, null, markerStyle, null);
 	}
 	
-	private void startGPSLocationThread(final CustomMapView mapView, final GdalMapLayer gdalLayer) {
+	private void startGPSLocationThread(final CustomMapView mapView) {
 		mapView.startThread(new Runnable() {
 			
 			@Override
@@ -1759,7 +1750,7 @@ public class BeanShellLinker {
 					
 					Thread.sleep(1000);
 					while(mapView.canRunThreads()) {
-					
+						GdalMapLayer gdalLayer = (GdalMapLayer) mapView.getLayers().getBaseLayer();
 						Object currentLocation = getGPSPosition();
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
@@ -1805,16 +1796,15 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				if (latitude < -90.0f || latitude > 90.0f) {
-					FLog.w("latitude out of range " + latitude);
-					showWarning("Logic Error", "Error map latitude out of range " + latitude);
-				}
-				
-				mapView.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
+				mapView.setMapFocusPoint(longitude, latitude);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.w("warning setting map focus point", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error setting map focus point " + ref,e);
@@ -1884,28 +1874,23 @@ public class BeanShellLinker {
 		}
 	}
 
-	public int showVectorLayer(String ref, String filename, StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+	public int showVectorLayer(String ref, String filename, 
+			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				if (!new File(filepath).exists()) {
-					FLog.w("Vector file" + filepath + " does not exist");
-                    showWarning("Logic Error", "Error file does not exist " + filename);
-					return -1;
-				}
-				
-				OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), filepath, null, 
-						MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
-                // ogrLayer.printSupportedDrivers();
-                // ogrLayer.printLayerDetails(table);
-				return mapView.addVectorLayer(ogrLayer);
+				return mapView.addShapeLayer(filepath, pointStyleSet, lineStyleSet, polygonStyleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.w("warning showing vector layer", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error showing vector layer" + ref,e);
@@ -1914,30 +1899,27 @@ public class BeanShellLinker {
 		return -1;
 	}
 	
-	public int showSpatialLayer(String ref, String filename, String tablename, String labelColumn, StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+	public int showSpatialLayer(String ref, String filename, String tablename, String labelColumn, 
+			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				if (!new File(filepath).exists()) {
-					FLog.w("Spatialite file" + filepath + " does not exist");
-                    showWarning("Logic Error", "Error file does not exist " + filename);
-					return -1;
-				}
-				
-				SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), filepath, tablename, "Geometry",
-                        new String[]{labelColumn}, MAX_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
-				return mapView.addVectorLayer(spatialLayer);
+				return mapView.addSpatialLayer(filepath, tablename, labelColumn, pointStyleSet, lineStyleSet, polygonStyleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
+		catch(MapException e) {
+			FLog.w("warning showing spatial layer", e);
+			showWarning("Logic Error", e.getMessage());
+		}
 		catch(Exception e){
-			FLog.e("error showing spatialite layer" + ref,e);
-			showWarning("Logic Error", "Error showing spatialite layer " + ref);
+			FLog.e("error showing spatial layer" + ref,e);
+			showWarning("Logic Error", "Error showing spatial layer " + ref);
 		}
 		return -1;
 	}
@@ -1949,7 +1931,6 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				mapView.removeVectorLayer(layerId);
-				
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1967,8 +1948,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer layer = new CanvasLayer(new EPSG3857());
-				return mapView.addVectorLayer(layer);
+				return mapView.addCanvasLayer();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2006,11 +1986,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				int id = canvas.addPoint(point, styleSet);
-				canvas.updateRenderer();
-				return id;
+				return mapView.drawPoint(layerId, point, styleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2030,11 +2006,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				int id = canvas.addLine(points, styleSet);
-				canvas.updateRenderer();
-				return id;
+				return mapView.drawLine(layerId, points, styleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2054,11 +2026,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				int id = canvas.addPolygon(points, styleSet);
-				canvas.updateRenderer();
-				return id;
+				return mapView.drawPolygon(layerId, points, styleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2077,10 +2045,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				canvas.removeGeometry(geomId);
-				canvas.updateRenderer();
+				mapView.clearGeometry(layerId, geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2098,14 +2063,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				if (geomList.size() > 0) {
-					for (Integer geomId : geomList) {
-						canvas.removeGeometry(geomId);
-					}
-					canvas.updateRenderer();
-				}
+				mapView.clearGeometryList(layerId, geomList);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2123,9 +2081,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				return canvas.getTransformedGeometryList();
+				return mapView.getGeometryList(layerId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2144,9 +2100,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				CanvasLayer canvas = (CanvasLayer) mapView.getVectorLayer(layerId);
-				
-				return canvas.getTransformedGeometry(geomId);
+				return mapView.getGeometry(layerId, geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2181,17 +2135,15 @@ public class BeanShellLinker {
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				Geometry geom = mapView.getGeometry(geomId);
-				if (geom == null) {
-					FLog.d("cannot find geometry to overlay");
-					showWarning("Logic Error", "Cannot find geometry to overlay");
-					return ;
-				}
-				mapView.drawGeometrOverlay(geom);
+				mapView.drawGeometrOverlay(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.w("warning drawing geometry overlay", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error drawing geometry overlay " + ref,e);
@@ -2221,12 +2173,6 @@ public class BeanShellLinker {
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				Geometry geom = mapView.getGeometry(geomId);
-				if (geom == null) {
-					FLog.d("cannot find geometry overlay");
-					showWarning("Logic Error", "Cannot find geometry overlay");
-					return ;
-				}
 				mapView.replaceGeometryOverlay(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);

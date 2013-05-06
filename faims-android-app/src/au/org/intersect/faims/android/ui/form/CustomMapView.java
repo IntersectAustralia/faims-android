@@ -1,6 +1,8 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -11,6 +13,8 @@ import android.graphics.Color;
 import android.location.Location;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
@@ -24,7 +28,14 @@ import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.layers.raster.GdalMapLayer;
+import com.nutiteq.layers.vector.OgrLayer;
+import com.nutiteq.layers.vector.SpatialiteLayer;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.LineStyle;
+import com.nutiteq.style.PointStyle;
+import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.style.StyleSet;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.GeometryLayer;
@@ -203,7 +214,11 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
-	public void replaceGeometryOverlay(int geomId) {
+	public void replaceGeometryOverlay(int geomId) throws MapException {
+		if (this.getGeometry(geomId) == null) {
+			throw new MapException("Cannot find geometry overlay");
+		}
+		
 		for(int i = 0; i < vectorMap.size(); i++) {
 			int key = vectorMap.keyAt(i);
 			GeometryLayer layer = vectorMap.get(key);
@@ -289,6 +304,122 @@ public class CustomMapView extends MapView {
 	
 	public boolean canRunThreads() {
 		return canRunThreads;
+	}
+
+	public void addRasterMap(String file) throws Exception {
+		if (!new File(file).exists()) {
+			throw new MapException("Error map does not exist " + file);
+		}
+		
+		GdalMapLayer gdalLayer = new GdalMapLayer(new EPSG3857(), 0, 18, CustomMapView.nextId(), file, this, true);
+        gdalLayer.setShowAlways(true);
+        this.getLayers().setBaseLayer(gdalLayer);
+	}
+	
+	public void setMapFocusPoint(float longitude, float latitude) throws Exception {
+		if (latitude < -90.0f || latitude > 90.0f) {
+			throw new MapException("Error map latitude out of range " + latitude);
+		}
+		this.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
+	}
+
+	public int addShapeLayer(String file,
+			StyleSet<PointStyle> pointStyleSet,
+			StyleSet<LineStyle> lineStyleSet,
+			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
+		
+		if (!new File(file).exists()) {
+			throw new MapException("Error file does not exist " + file);
+		}
+		
+		OgrLayer ogrLayer = new OgrLayer(new EPSG3857(), file, null, 
+				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+        // ogrLayer.printSupportedDrivers();
+        // ogrLayer.printLayerDetails(table);
+		return addVectorLayer(ogrLayer);
+	}
+
+	public int addSpatialLayer(String file, String tablename,
+			String labelColumn, StyleSet<PointStyle> pointStyleSet,
+			StyleSet<LineStyle> lineStyleSet,
+			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
+		if (!new File(file).exists()) {
+			throw new MapException("Error file does not exist " + file);
+		}
+		
+		SpatialiteLayer spatialLayer = new SpatialiteLayer(new EPSG3857(), file, tablename, "Geometry",
+                new String[]{labelColumn}, FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+		return addVectorLayer(spatialLayer);
+	}
+
+	public int addCanvasLayer() {
+		CanvasLayer layer = new CanvasLayer(new EPSG3857());
+		return addVectorLayer(layer);
+	}
+
+	public int drawPoint(int layerId, MapPos point,
+			StyleSet<PointStyle> styleSet) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		int id = canvas.addPoint(point, styleSet);
+		canvas.updateRenderer();
+		return id;
+	}
+
+	public int drawLine(int layerId, List<MapPos> points,
+			StyleSet<LineStyle> styleSet) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		int id = canvas.addLine(points, styleSet);
+		canvas.updateRenderer();
+		return id;
+	}
+
+	public int drawPolygon(int layerId, List<MapPos> points,
+			StyleSet<PolygonStyle> styleSet) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		int id = canvas.addPolygon(points, styleSet);
+		canvas.updateRenderer();
+		return id;
+	}
+
+	public void clearGeometry(int layerId, int geomId) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		canvas.removeGeometry(geomId);
+		canvas.updateRenderer();
+	}
+
+	public void clearGeometryList(int layerId, List<Integer> geomList) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		if (geomList.size() > 0) {
+			for (Integer geomId : geomList) {
+				canvas.removeGeometry(geomId);
+			}
+			canvas.updateRenderer();
+		}
+	}
+
+	public List<Geometry> getGeometryList(int layerId) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		return canvas.getTransformedGeometryList();
+	}
+
+	public Geometry getGeometry(int layerId, int geomId) {
+		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
+		
+		return canvas.getTransformedGeometry(geomId);
+	}
+
+	public void drawGeometrOverlay(int geomId) throws Exception {
+		Geometry geom = this.getGeometry(geomId);
+		if (geom == null) {
+			throw new MapException("Cannot find geometry to overlay");
+		}
+		this.drawGeometrOverlay(geom);
 	}
 	
 }
