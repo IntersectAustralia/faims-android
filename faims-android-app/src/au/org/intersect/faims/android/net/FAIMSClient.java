@@ -702,12 +702,12 @@ public class FAIMSClient {
 			try {
 				if (uploadFileOS != null) uploadFileOS.close();
 			} catch (Exception e) {
-				FLog.e("erorr closing stream", e);
+				FLog.e("error closing stream", e);
 			}
 			try {
 				if (downloadFileIS != null) downloadFileIS.close();
 			} catch (Exception e) {
-				FLog.e("erorr closing stream", e);
+				FLog.e("error closing stream", e);
 			}
 			httpClient.getConnectionManager().shutdown();
 		}

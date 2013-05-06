@@ -830,4 +830,12 @@ public class Tab implements Parcelable{
 		dest.writeString(reference);
 	}
 
+	public void onShowTab() {
+		
+	}
+
+	public void onHideTab() {
+		
+	}
+
 }

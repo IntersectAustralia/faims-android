@@ -1701,7 +1701,7 @@ public class BeanShellLinker {
 				String filepath = baseDir + "/" + filename;
 				if (!new File(filepath).exists()) {
 					FLog.w("Map file " + filepath + " does not exist");
-                    showWarning("Logic Error", "Erorr map does not exist " + filename);
+                    showWarning("Logic Error", "Error map does not exist " + filename);
 					return;
 				}
 				

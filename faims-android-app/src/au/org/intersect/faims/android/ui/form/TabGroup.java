@@ -115,6 +115,7 @@ public class TabGroup extends Fragment {
 				widget.getChildAt(i).setVisibility(View.VISIBLE);
 				tab.setHidden(false);
 				tabHost.setCurrentTab(i);
+				tab.onShowTab();
 				return tab;
 			}
 		}
@@ -130,6 +131,7 @@ public class TabGroup extends Fragment {
 			if (tab.getName().equals(name)) {
 				TabWidget widget = tabHost.getTabWidget();
 				widget.getChildAt(i).setVisibility(View.GONE);
+				tab.onHideTab();
 			}
 		}
 	}
