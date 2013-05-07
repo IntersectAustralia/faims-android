@@ -50,6 +50,11 @@
            
         </activity>
         
+        <activity
+            android:name="au.org.intersect.faims.android.ui.activity.FaimsServerSettingsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+             />
+        
         <service
             android:name="au.org.intersect.faims.android.services.DownloadProjectService"
             ></service>

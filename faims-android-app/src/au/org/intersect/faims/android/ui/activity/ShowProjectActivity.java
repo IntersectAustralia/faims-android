@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -31,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
@@ -349,7 +351,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		// initialize server discovery
 		serverDiscovery.setApplication(getApplication());
-		
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        serverDiscovery.initiateServerIPAndPort(preferences);
 		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
 		
