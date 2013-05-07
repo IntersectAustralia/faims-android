@@ -302,8 +302,8 @@ public class ServerDiscovery {
 	public void initiateServerIPAndPort(SharedPreferences preferences) {
 		String serverIP = preferences.getString("pref_server_ip", null);
         String serverPort = preferences.getString("pref_server_port", null);
-        serverIP = serverIP.isEmpty() ? null : serverIP;
-        serverPort = serverPort.isEmpty() || serverIP.isEmpty() ? null : serverPort;
+        serverIP = serverIP == null || serverIP.isEmpty() ? null : serverIP;
+        serverPort = serverPort == null || serverPort.isEmpty() || serverIP.isEmpty() ? null : serverPort;
         setServerIP(serverIP);
         setServerPort(serverPort);
 	}
