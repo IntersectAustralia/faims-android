@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.javarosa.core.model.Constants;
-import org.javarosa.core.model.QuestionDef;
 import org.javarosa.core.model.SelectChoice;
-import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
@@ -40,6 +38,7 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.Dpi;
 
@@ -108,166 +107,81 @@ public class Tab implements Parcelable{
 		}
 	};
 
-	public View addInput(FormEntryPrompt input,String path, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
+	public View addInput(FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
 		LinearLayout fieldLinearLayout = new LinearLayout(this.context);
     	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
-		if (input.getControlType() != Constants.CONTROL_TRIGGER) {
-            TextView textView = new TextView(this.context);
-            String inputText = input.getQuestionText();
-            inputText = arch16n.substituteValue(inputText);
-            textView.setText(inputText);
+    	
+    	Button certaintyButton = null;
+    	Button annotationButton = null;
+    	
+		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
+            TextView textView = createLabel(attribute);
             fieldLinearLayout.addView(textView);
             linearLayout.addView(fieldLinearLayout);
+                
+    		if(attribute.certainty && (isArchEnt || isRelationship)){
+    			certaintyButton = createCertaintyButton();
+    			fieldLinearLayout.addView(certaintyButton);
+    		}
+    		
+    		if(attribute.annotation && !FREETEXT.equals(attribute.type)){
+    			annotationButton = createAnnotationButton();
+    			fieldLinearLayout.addView(createAnnotationButton());
+    		}
         }
 		
-		viewReference.put(viewName, path);
+		viewReference.put(viewName, ref);
 		View view = null;
-		CustomEditText text = null;
-		String attributeName = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
-		String attributeType = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
-		String certainty = input.getQuestion().getAdditionalAttribute(null, "faims_certainty");
-		String annotation = input.getQuestion().getAdditionalAttribute(null, "faims_annotation");
-		String readOnly = input.getQuestion().getAdditionalAttribute(null, "faims_read_only");
-		boolean isReadOnly = (readOnly != null && readOnly.equals("true"));
-		attributeType = (attributeType == null) ? "freetext" : attributeType;
-		Button certaintyButton = new Button(this.context);
-		certaintyButton.setBackgroundResource(R.drawable.square_button);
-		int size = Dpi.getDpi(context, 30);
-		LayoutParams layoutParams = new LayoutParams(size, size);
-		layoutParams.topMargin = 10;
-		certaintyButton.setLayoutParams(layoutParams);
-		certaintyButton.setText("C");
-		certaintyButton.setTextSize(10);
-		if(isArchEnt || isRelationship){
-			if(!"false".equals(certainty)){
-				fieldLinearLayout.addView(certaintyButton);
-			}
-		}
-		Button annotationButton = new Button(this.context);
-		annotationButton.setBackgroundResource(R.drawable.square_button);
-		annotationButton.setLayoutParams(layoutParams);
-		annotationButton.setText("A");
-		annotationButton.setTextSize(10);
-		if(!FREETEXT.equals(attributeType)){
-			if(!"false".equals(annotation)) {
-				fieldLinearLayout.addView(annotationButton);
-			}
-		}
+		
 		// check the control type to know the type of the question
-        switch (input.getControlType()) {
+        switch (attribute.controlType) {
             case Constants.CONTROL_INPUT:
-                // check the data type of question of type input
-                switch (input.getDataType()) {
-                // set input type as number
-                    case Constants.DATATYPE_INTEGER:
-                    	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                    	if (isReadOnly) {
-                    		text.setEnabled(false);
-                    	}
-                    	view = text;
-                        ((TextView) view)
-                                .setInputType(InputType.TYPE_CLASS_NUMBER);
-                        onCertaintyButtonClicked(certaintyButton, text);
-                        onAnnotationButtonClicked(annotationButton, text);
-                        linearLayout.addView(view);
-                        valueReference.put(path, "");
-                        break;
-                    case Constants.DATATYPE_DECIMAL:
-                    	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                        view = text;
-                        if (isReadOnly) {
-                    		text.setEnabled(false);
-                    	}
-                        ((TextView) view)
-                                .setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                        onCertaintyButtonClicked(certaintyButton, text);
-                        onAnnotationButtonClicked(annotationButton, text);
-                        linearLayout.addView(view);
-                        valueReference.put(path, "");
-                        break;
-                    case Constants.DATATYPE_LONG:
-                    	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                        view = text;
-                        if (isReadOnly) {
-                    		text.setEnabled(false);
-                    	}
-                        ((TextView) view)
-                                .setInputType(InputType.TYPE_CLASS_NUMBER);
-                        onCertaintyButtonClicked(certaintyButton, text);
-                        onAnnotationButtonClicked(annotationButton, text);
-                        linearLayout.addView(view);
-                        break;
-                    // set input type as date picker
-                    case Constants.DATATYPE_DATE:
-                    	CustomDatePicker date = new CustomDatePicker(this.context, attributeName, attributeType, path);
-                    	Time now = new Time();
-        				now.setToNow();
-        				date.updateDate(now.year, now.month, now.monthDay);
-        				if (isReadOnly) {
-                    		date.setEnabled(false);
-                    	}
-                    	view = date;
-                    	onCertaintyButtonClicked(certaintyButton, date);
-                    	onAnnotationButtonClicked(annotationButton, date);
-                    	linearLayout.addView(view);
-                        valueReference.put(path, DateUtil.getDate(date));
-                        break;
-                    // get the text area
-                    case Constants.DATATYPE_TEXT:
-                    	text = new CustomEditText(this.context, attributeName, attributeType, path);
-                    	if (isReadOnly) {
-                    		text.setEnabled(false);
-                    	}
-                    	view = text;
-                        ((TextView) view).setLines(5);
-                        onCertaintyButtonClicked(certaintyButton, text);
-                        onAnnotationButtonClicked(annotationButton, text);
-                        linearLayout.addView(view);
-                        valueReference.put(path, "");
-                        break;
-                    // set input type as time picker
-                    case Constants.DATATYPE_TIME:
-                    	CustomTimePicker time = new CustomTimePicker(this.context, attributeName, attributeType, path);
-                    	Time timeNow = new Time();
-                        timeNow.setToNow();
-        				time.setCurrentHour(timeNow.hour);
-        				time.setCurrentMinute(timeNow.minute);
-        				view = time;
-        				if (isReadOnly) {
-                    		time.setEnabled(false);
-                    	}
-        				onCertaintyButtonClicked(certaintyButton, time);
-        				onAnnotationButtonClicked(annotationButton, time);
-        				linearLayout.addView(view);
-        				valueReference.put(path, DateUtil.getTime(time));
-                        break;
-                    // default is edit text
-                    default:
-                    	// check if map type
-                    	if ("true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"))) {
-                    		MapLayout mapLayout = new MapLayout(this.context);
-                    		mapViewList.add(mapLayout.getMapView());
-                    		
-                    		view = mapLayout.getMapView();
-                    		linearLayout.addView(mapLayout);
-                    	} else {
-                    		text = new CustomEditText(this.context, attributeName, attributeType, path);
-                            view = text;
-                            if (isReadOnly) {
-                        		text.setEnabled(false);
-                        	}
-                            valueReference.put(path, "");
-                            onCertaintyButtonClicked(certaintyButton, text);
-                            linearLayout.addView(view);
-                    	}
-                        break;
-                }
-                if(attributeName != null){
-                	addViewMappings(attributeName, view);
-                }
+            	switch (attribute.dataType) {
+	                case Constants.DATATYPE_INTEGER:
+	                	view = createIntegerTextField(attribute, ref);
+	                	setupView(view, certaintyButton, annotationButton, ref);
+	                    break;
+	                case Constants.DATATYPE_DECIMAL:
+	                	view = createDecimalTextField(attribute, ref);
+	                	setupView(view, certaintyButton, annotationButton, ref);
+	                    break;
+	                case Constants.DATATYPE_LONG:
+	                	view = createLongTextField(attribute, ref);
+	                	setupView(view, certaintyButton, annotationButton, ref);
+	                    break;
+	                // set input type as date picker
+	                case Constants.DATATYPE_DATE:
+	                	view = createDatePicker(attribute, ref);
+	                	setupView(view, certaintyButton, annotationButton, ref, DateUtil.getDate((CustomDatePicker) view));
+	                    break;
+	                // get the text area
+	                case Constants.DATATYPE_TEXT:
+	                	view = createTextArea(attribute, ref);
+	                	setupView(view, certaintyButton, annotationButton, ref);
+	                    break;
+	                // set input type as time picker
+	                case Constants.DATATYPE_TIME:
+	                	view = createTimePicker(attribute, ref);
+	    				setupView(view, certaintyButton, annotationButton, ref, DateUtil.getTime((CustomTimePicker) view));
+	                    break;
+	                // default is edit text
+	                default:
+	                	// check if map type
+	                	if (attribute.map) {
+	                		MapLayout mapLayout = new MapLayout(this.context);
+	                		mapViewList.add(mapLayout.getMapView());
+	                		
+	                		view = mapLayout.getMapView();
+	                		linearLayout.addView(mapLayout);
+	                	} else {
+	                		view = createTextField(-1, attribute, ref);
+	                		setupView(view, certaintyButton, annotationButton, ref);
+	                	}
+	                    break;
+            	}
                 break;
             // uploading image by using camera
-                /*
+            /*
             case Constants.CONTROL_IMAGE_CHOOSE:
                 Button imageButton = new Button(this.context);
                 imageButton.setText("Choose Image");
@@ -289,132 +203,228 @@ public class Tab implements Parcelable{
                 layout.addView(imageButton);
                 layout.addView(imageView);
                 break;
-                 */
+            */
             // create control for select one showing it as drop down
             case Constants.CONTROL_SELECT_ONE:
-                switch (input.getDataType()) {
+                switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE:
-                    	QuestionDef qd = input.getQuestion();
-                        // check if the type if image to create image slider
-                        if ("image".equalsIgnoreCase(input.getQuestion()
-                                .getAdditionalAttribute(null, "type"))) {
-                            view = renderImageSliderForSingleSelection(input, directory, attributeName, attributeType, path);
-                            linearLayout.addView(view);
-                            onCertaintyButtonClicked(certaintyButton, view);
-                            onAnnotationButtonClicked(annotationButton, view);
-                            valueReference.put(path, "");
+                    	// check if the type if image to create image slider
+                        if ("image".equalsIgnoreCase(attribute.questionType)) {
+                            view = renderImageSliderForSingleSelection(attribute, directory, ref);
+                            setupView(view, certaintyButton, annotationButton, ref);
                         }
                         // Radio Button
-                        else if ("full".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
-                        	CustomLinearLayout selectLayout = new CustomLinearLayout(this.context, attributeName, attributeType, path);
-                            selectLayout.setLayoutParams(new LayoutParams(
-                                    LayoutParams.MATCH_PARENT,
-                                    LayoutParams.MATCH_PARENT));
-                            selectLayout.setOrientation(LinearLayout.VERTICAL);
-                            RadioGroup radioGroupLayout = new RadioGroup(this.context);
-                            radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
-                            for (final SelectChoice selectChoice : input.getSelectChoices()) {
-                            	CustomRadioButton radioButton = new CustomRadioButton(this.context);
-                            	String innerText = selectChoice.getLabelInnerText();
-                            	innerText = arch16n.substituteValue(innerText);
-                                radioButton.setText(innerText);
-                                radioButton.setValue(selectChoice.getValue());
-                                radioGroupLayout.addView(radioButton);
-                            }
-                            selectLayout.addView(radioGroupLayout);
-                            view = selectLayout;
-                            onCertaintyButtonClicked(certaintyButton, selectLayout);
-                            onAnnotationButtonClicked(annotationButton, selectLayout);
-                            linearLayout.addView(selectLayout);
-                            valueReference.put(path, "");
+                        else if ("full".equalsIgnoreCase(attribute.questionAppearance)) {
+                        	view = createRadioGroup(attribute, ref);
+                        	setupView(view, certaintyButton, annotationButton, ref);
                         // List
-                        } else if ("compact".equalsIgnoreCase(qd.getAppearanceAttr()) ) {
-                        	CustomListView list = new CustomListView(this.context);
-                            List<NameValuePair> choices = new ArrayList<NameValuePair>();
-                            for (final SelectChoice selectChoice : input
-                                    .getSelectChoices()) {
-                            	String innerText = selectChoice.getLabelInnerText();
-                            	innerText = arch16n.substituteValue(innerText);
-                            	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-                                choices.add(pair);
-                            }
-                            ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                                    this.context,
-                                    android.R.layout.simple_list_item_1,
-                                    choices);
-                            list.setAdapter(arrayAdapter);
-                            view = list;
-                            linearLayout.addView(list);
+                        } else if ("compact".equalsIgnoreCase(attribute.questionAppearance) ) {
+                        	view = createList(attribute);
+                            linearLayout.addView(view); // TODO does this need certainty and annotation buttons
                         // Default is single select dropdown
                         } else {
-                        	CustomSpinner spinner = new CustomSpinner(this.context, attributeName, attributeType, path);
-                            List<NameValuePair> choices = new ArrayList<NameValuePair>();
-                            for (final SelectChoice selectChoice : input
-                                    .getSelectChoices()) {
-                            	String innerText = selectChoice.getLabelInnerText();
-                            	innerText = arch16n.substituteValue(innerText);
-                            	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-                                choices.add(pair);
-                            }
-                            ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                                    this.context,
-                                    android.R.layout.simple_spinner_dropdown_item,
-                                    choices);
-                            spinner.setAdapter(arrayAdapter);
-                            spinner.setSelection(0);
-                            view = spinner;
-                            onCertaintyButtonClicked(certaintyButton, view);
-                            onAnnotationButtonClicked(annotationButton, view);
-                            linearLayout.addView(spinner);
-                            NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-            				valueReference.put(path, pair.getValue());
+                        	view = createDropDown(attribute, ref);
+                        	NameValuePair pair = (NameValuePair) ((CustomSpinner) view).getSelectedItem();
+                        	setupView(view, certaintyButton, annotationButton, ref, pair.getValue());
                         }
                         break;
-                }
-                if(attributeName != null){
-                	addViewMappings(attributeName, view);
                 }
                 break;
             // create control for multi select, showing it as checkbox
             case Constants.CONTROL_SELECT_MULTI:
-                switch (input.getDataType()) {
+                switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
-                    	CustomLinearLayout selectLayout = new CustomLinearLayout(
-                                this.context, attributeName, attributeType, path);
-                        selectLayout.setLayoutParams(new LayoutParams(
-                                LayoutParams.MATCH_PARENT,
-                                LayoutParams.MATCH_PARENT));
-                        selectLayout.setOrientation(LinearLayout.VERTICAL);
-                        for (final SelectChoice selectChoice : input
-                                .getSelectChoices()) {
-                        	CustomCheckBox checkBox = new CustomCheckBox(this.context);
-                        	String innerText = selectChoice.getLabelInnerText();
-                        	innerText = arch16n.substituteValue(innerText);
-                            checkBox.setText(innerText);
-                            checkBox.setValue(selectChoice.getValue());
-                            selectLayout.addView(checkBox);
-                        }
-                        view = selectLayout;
-                        linearLayout.addView(selectLayout);
-                        onCertaintyButtonClicked(certaintyButton, selectLayout);
-                        onAnnotationButtonClicked(annotationButton, selectLayout);
-                        valueReference.put(path, new ArrayList<NameValuePair>());
-                }
-                if(attributeName != null){
-                	addViewMappings(attributeName, view);
+                    	view = createCheckListGroup(attribute, ref);
+                    	setupView(view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
                 }
                 break;
             // create control for trigger showing as a button
             case Constants.CONTROL_TRIGGER:
-                Button button = new Button(this.context);
-                String questionText = arch16n.substituteValue(input.getQuestionText());
-                button.setText(questionText);
-                view = button;
-                linearLayout.addView(button);
+                view = createTrigger(attribute);
+                linearLayout.addView(view);
                 break;
         }
         
+        if(attribute.name != null){
+        	addViewMappings(attribute.name, view);
+        }
+        
         return view;
+	}
+	
+	private TextView createLabel(FormAttribute attribute) {
+		TextView textView = new TextView(this.context);
+        String inputText = attribute.questionText;
+        inputText = arch16n.substituteValue(inputText);
+        textView.setText(inputText);
+        return textView;
+	}
+	
+	private Button createCertaintyButton() {
+		Button button = new Button(this.context);
+		button.setBackgroundResource(R.drawable.square_button);
+		int size = Dpi.getDpi(context, 30);
+		LayoutParams layoutParams = new LayoutParams(size, size);
+		layoutParams.topMargin = 10;
+		button.setLayoutParams(layoutParams);
+		button.setText("C");
+		button.setTextSize(10);
+		return button;
+	}
+	
+	private Button createAnnotationButton() {
+		Button button = new Button(this.context);
+		button.setBackgroundResource(R.drawable.square_button);
+		int size = Dpi.getDpi(context, 30);
+		LayoutParams layoutParams = new LayoutParams(size, size);
+		button.setLayoutParams(layoutParams);
+		button.setText("A");
+		button.setTextSize(10);
+		return button;
+	}
+	
+	private void setupView(View view, Button certaintyButton, Button annotationButton, String ref) {
+		setupView(view, certaintyButton, annotationButton, ref, "");
+	}
+	
+	private void setupView(View view, Button certaintyButton, Button annotationButton, String ref, Object value) {
+		if (certaintyButton != null) onCertaintyButtonClicked(certaintyButton, view);
+        if (annotationButton != null) onAnnotationButtonClicked(annotationButton, view);
+        linearLayout.addView(view);
+        valueReference.put(ref, value);
+	}
+	
+	private CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
+		CustomEditText text = new CustomEditText(this.context, attribute.name, attribute.type, ref);
+    	if (attribute.readOnly) {
+    		text.setEnabled(false);
+    	}
+    	if (type >= 0) text.setInputType(type);
+    	return text;
+	}
+	
+	private CustomEditText createIntegerTextField(FormAttribute attribute, String ref) {
+    	return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref);
+	}
+	
+	private CustomEditText createDecimalTextField(FormAttribute attribute, String ref) {
+        return createTextField(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, attribute, ref);
+	}
+	
+	private CustomEditText createLongTextField(FormAttribute attribute, String ref) {
+        return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref);
+	}
+	
+	private CustomDatePicker createDatePicker(FormAttribute attribute, String ref) {
+		CustomDatePicker date = new CustomDatePicker(this.context, attribute.name, attribute.type, ref);
+    	Time now = new Time();
+		now.setToNow();
+		date.updateDate(now.year, now.month, now.monthDay);
+		if (attribute.readOnly) {
+    		date.setEnabled(false);
+    	}
+    	return date;
+	}
+	
+	private CustomEditText createTextArea(FormAttribute attribute, String ref) {
+		CustomEditText text = new CustomEditText(this.context, attribute.name, attribute.type, ref);
+    	if (attribute.readOnly) {
+    		text.setEnabled(false);
+    	}
+    	text.setLines(5);
+    	return text;
+	}
+	
+	private CustomTimePicker createTimePicker(FormAttribute attribute, String ref) {
+		CustomTimePicker time = new CustomTimePicker(this.context, attribute.name, attribute.type, ref);
+    	Time timeNow = new Time();
+        timeNow.setToNow();
+		time.setCurrentHour(timeNow.hour);
+		time.setCurrentMinute(timeNow.minute);
+		if (attribute.readOnly) {
+    		time.setEnabled(false);
+    	}
+		return time;
+	}
+	
+	private CustomLinearLayout createRadioGroup(FormAttribute attribute, String ref) {
+		CustomLinearLayout selectLayout = new CustomLinearLayout(this.context, attribute.name, attribute.type, ref);
+        selectLayout.setLayoutParams(new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
+        selectLayout.setOrientation(LinearLayout.VERTICAL);
+        RadioGroup radioGroupLayout = new RadioGroup(this.context);
+        radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
+        for (final SelectChoice selectChoice : attribute.selectChoices) {
+        	CustomRadioButton radioButton = new CustomRadioButton(this.context);
+        	String innerText = selectChoice.getLabelInnerText();
+        	innerText = arch16n.substituteValue(innerText);
+            radioButton.setText(innerText);
+            radioButton.setValue(selectChoice.getValue());
+            radioGroupLayout.addView(radioButton);
+        }
+        selectLayout.addView(radioGroupLayout);
+        return selectLayout;
+	}
+	
+	private CustomListView createList(FormAttribute attribute) {
+		CustomListView list = new CustomListView(this.context);
+        List<NameValuePair> choices = new ArrayList<NameValuePair>();
+        for (final SelectChoice selectChoice : attribute.selectChoices) {
+        	String innerText = selectChoice.getLabelInnerText();
+        	innerText = arch16n.substituteValue(innerText);
+        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+            choices.add(pair);
+        }
+        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+                this.context,
+                android.R.layout.simple_list_item_1,
+                choices);
+        list.setAdapter(arrayAdapter);
+        return list;
+	}
+	
+	private CustomSpinner createDropDown(FormAttribute attribute, String ref) {
+		CustomSpinner spinner = new CustomSpinner(this.context, attribute.name, attribute.type, ref);
+        List<NameValuePair> choices = new ArrayList<NameValuePair>();
+        for (final SelectChoice selectChoice : attribute.selectChoices) {
+        	String innerText = selectChoice.getLabelInnerText();
+        	innerText = arch16n.substituteValue(innerText);
+        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+            choices.add(pair);
+        }
+        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+                this.context,
+                android.R.layout.simple_spinner_dropdown_item,
+                choices);
+        spinner.setAdapter(arrayAdapter);
+        spinner.setSelection(0);
+        return spinner;
+	}
+	
+	private CustomLinearLayout createCheckListGroup(FormAttribute attribute, String ref) {
+		CustomLinearLayout selectLayout = new CustomLinearLayout(
+                this.context, attribute.name, attribute.type, ref);
+        selectLayout.setLayoutParams(new LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
+        selectLayout.setOrientation(LinearLayout.VERTICAL);
+        for (final SelectChoice selectChoice : attribute.selectChoices) {
+        	CustomCheckBox checkBox = new CustomCheckBox(this.context);
+        	String innerText = selectChoice.getLabelInnerText();
+        	innerText = arch16n.substituteValue(innerText);
+            checkBox.setText(innerText);
+            checkBox.setValue(selectChoice.getValue());
+            selectLayout.addView(checkBox);
+        }
+        return selectLayout;
+	}
+	
+	private Button createTrigger(FormAttribute attribute) {
+		 Button button = new Button(this.context);
+         String questionText = arch16n.substituteValue(attribute.questionText);
+         button.setText(questionText);
+         return button;
 	}
 
 	private void onAnnotationButtonClicked(Button annotationButton, final View view) {
@@ -656,13 +666,12 @@ public class Tab implements Parcelable{
 	 * @param attributeType 
 	 * @param attributeName 
      */
-    private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormEntryPrompt questionPrompt, String directory, String attributeName, String attributeType, String path) {
-    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.context, attributeName, attributeType, path);
+    private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormAttribute attribute, String directory, String ref) {
+    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.context, attribute.name, attribute.type, ref);
         LinearLayout galleriesLayout = new LinearLayout(this.context);
         galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
         final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-        for (final SelectChoice selectChoice : questionPrompt
-                .getSelectChoices()) {
+        for (final SelectChoice selectChoice : attribute.selectChoices) {
         	final String picturePath = Environment.getExternalStorageDirectory() + directory + "/" + selectChoice.getValue();
         	File pictureFolder = new File(picturePath);
         	if(pictureFolder.exists()){
@@ -672,7 +681,7 @@ public class Tab implements Parcelable{
 	        		CustomImageView gallery = new CustomImageView(this.context);
 	        		int size = Dpi.getDpi(context, 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
-	                gallery.setImageURI(Uri.parse(path+"/"+name));
+	                gallery.setImageURI(Uri.parse(ref+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);
 	                gallery.setPadding(10, 10, 10, 10);
 	                gallery.setLayoutParams(layoutParams);
