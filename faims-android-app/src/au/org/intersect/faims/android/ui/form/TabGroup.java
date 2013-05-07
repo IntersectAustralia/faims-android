@@ -231,10 +231,6 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void onShowTabGroup() {
-		// note: bug with map views when moving back and forth between tab groups
-		for (Tab tab: tabs) {
-			tab.recreateMapViews();
-		}
 		
 		Tab tab = getCurrentTab();
 		if (tab != null) {

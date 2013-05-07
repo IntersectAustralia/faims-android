@@ -817,16 +817,4 @@ public class Tab implements Parcelable{
 		}
 	}
 
-	public void recreateMapViews() {
-		for (int i = 0; i < linearLayout.getChildCount(); i++) {
-			View v = linearLayout.getChildAt(i);
-			if (v instanceof MapLayout) {
-				//MapLayout mapLayout = (MapLayout) v;
-				//CustomMapView mapView = mapLayout.getMapView();
-				
-				// TODO clone mapView
-			}
-		}
-	}
-
 }
