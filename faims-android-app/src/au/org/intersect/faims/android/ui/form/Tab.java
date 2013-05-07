@@ -108,13 +108,13 @@ public class Tab implements Parcelable{
 	};
 
 	public View addInput(FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
-		LinearLayout fieldLinearLayout = new LinearLayout(this.context);
-    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
-    	
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	
 		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
+			LinearLayout fieldLinearLayout = new LinearLayout(this.context);
+	    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+	    	
             TextView textView = createLabel(attribute);
             fieldLinearLayout.addView(textView);
             linearLayout.addView(fieldLinearLayout);
@@ -126,7 +126,7 @@ public class Tab implements Parcelable{
     		
     		if(attribute.annotation && !FREETEXT.equals(attribute.type)){
     			annotationButton = createAnnotationButton();
-    			fieldLinearLayout.addView(createAnnotationButton());
+    			fieldLinearLayout.addView(annotationButton);
     		}
         }
 		
@@ -168,11 +168,9 @@ public class Tab implements Parcelable{
 	                default:
 	                	// check if map type
 	                	if (attribute.map) {
-	                		MapLayout mapLayout = new MapLayout(this.context);
-	                		mapViewList.add(mapLayout.getMapView());
-	                		
-	                		view = mapLayout.getMapView();
+	                		MapLayout mapLayout = createMapView();
 	                		linearLayout.addView(mapLayout);
+	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
 	                		setupView(view, certaintyButton, annotationButton, ref);
@@ -277,6 +275,7 @@ public class Tab implements Parcelable{
 		button.setBackgroundResource(R.drawable.square_button);
 		int size = Dpi.getDpi(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
+		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
 		button.setText("A");
 		button.setTextSize(10);
@@ -425,6 +424,13 @@ public class Tab implements Parcelable{
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
+	}
+	
+	private MapLayout createMapView() {
+		MapLayout mapLayout = new MapLayout(this.context);
+		mapViewList.add(mapLayout.getMapView());
+		
+		return mapLayout;
 	}
 
 	private void onAnnotationButtonClicked(Button annotationButton, final View view) {
