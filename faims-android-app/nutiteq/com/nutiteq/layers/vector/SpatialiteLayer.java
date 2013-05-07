@@ -93,12 +93,10 @@ public class SpatialiteLayer extends GeometryLayer {
     for(Geometry object: objectTemp){
         
         final Map<String, String> userData = (Map<String, String>) object.userData;
+        String name = userData.get(userColumns[0]);
         DefaultLabel label = null;
-        if (userColumns != null) {
-	        String name = userData.get(userColumns[0]);
-	        if (name != null){
-	            label = new DefaultLabel(name);
-	        }
+        if (name != null){
+            label = new DefaultLabel(name);
         }
         
         Geometry newObject = null;

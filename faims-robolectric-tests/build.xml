@@ -24,7 +24,7 @@
 		<file name="commons-codec-1.7.jar"/>
 		<file name="commons-compress-1.4.1.jar"/>
 		<file name="core.jar"/>
-		<file name="gson-2.2.2.jar"/>
+		<file name="gson-2.2.3.jar"/>
 		<file name="guice-2.0-no_aop.jar"/>
 		<file name="hamcrest.jar"/>
 		<file name="javarosa-libraries.jar"/>
@@ -36,13 +36,16 @@
 		<file name="bsh-2.0b4.jar"/>
 		<file name="javaproj-1.0.6-noawt.jar"/>
 		<file name="protobuf-java-2.4.1-lite.jar"/>
-		<file name="nutiteq-3dsdk-1.0.0R.jar"/>
+		<file name="nutiteq-3d-sdk-2.1.0.jar"/>
 		<file name="mapsforge-map-0.3.0-jar-with-dependencies.jar"/>
 		<file name="marineapi.jar"/>
 		<file name="httpclient-4.2.3.jar "/>
 		<file name="httpcore-4.2.2.jar"/>
 		<file name="httpmime-4.2.3.jar"/>
-		<file name="apache-mime4j-core-0.7.2.jar "/>
+		<file name="apache-mime4j-core-0.7.2.jar"/>
+		<file name="jmustache-1.5.jar"/>
+		<file name="slf4j-android-1.6.1-RC1.jar"/>
+		<!-- TODO fix ugly references -->
 		<file name="../../android-filechooser/code/bin/classes.jar "/>
 		<file name="../../android-filechooser/code/bin/code.jar "/>
 	</filelist>
