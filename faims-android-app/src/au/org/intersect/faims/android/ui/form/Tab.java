@@ -168,8 +168,10 @@ public class Tab implements Parcelable{
 	                default:
 	                	// check if map type
 	                	if (attribute.map) {
-	                		MapLayout mapLayout = createMapView();
+	                		MapLayout mapLayout = new MapLayout(this.context);
 	                		linearLayout.addView(mapLayout);
+	                		
+	                		mapViewList.add(mapLayout.getMapView());
 	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
@@ -424,13 +426,6 @@ public class Tab implements Parcelable{
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
-	}
-	
-	private MapLayout createMapView() {
-		MapLayout mapLayout = new MapLayout(this.context);
-		mapViewList.add(mapLayout.getMapView());
-		
-		return mapLayout;
 	}
 
 	private void onAnnotationButtonClicked(Button annotationButton, final View view) {
@@ -804,8 +799,6 @@ public class Tab implements Parcelable{
 			}
 		}
 	}
-	
-	
 
 	@Override
 	public int describeContents() {
