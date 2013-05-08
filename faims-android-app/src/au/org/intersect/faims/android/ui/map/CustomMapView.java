@@ -174,6 +174,17 @@ public class CustomMapView extends MapView {
 		this.getLayers().removeLayer(vectorLayerArray.get(id));
 		vectorLayerArray.remove(id);
 	}
+	
+	public void removeVectorLayer(String layerName) {
+		for(int i = 0; i < vectorLayerArray.size(); i++) {
+			int key = vectorLayerArray.keyAt(i);
+			GeometryLayer layer = vectorLayerArray.get(key);
+			if (getLayerName(layer).equals(layerName)) {
+				vectorLayerArray.remove(key);
+				break;
+			}
+		}
+	}
 
 	public GeometryLayer getVectorLayer(int layerId) {
 		return vectorLayerArray.get(layerId);
@@ -519,6 +530,8 @@ public class CustomMapView extends MapView {
 		}
 		
 		getLayers().removeLayer(layer);
+		
+		removeVectorLayer(layerName);
 	}
 
 	public void renameLayer(Layer layer, String layerName) throws Exception {
