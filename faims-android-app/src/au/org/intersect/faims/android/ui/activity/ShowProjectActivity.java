@@ -63,9 +63,9 @@ import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.form.Arch16n;
 import au.org.intersect.faims.android.ui.form.BeanShellLinker;
-import au.org.intersect.faims.android.ui.form.CustomMapView;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
+import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 

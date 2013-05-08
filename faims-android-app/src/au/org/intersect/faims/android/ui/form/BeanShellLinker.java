@@ -50,6 +50,7 @@ import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import bsh.EvalError;
@@ -1673,14 +1674,14 @@ public class BeanShellLinker {
 		return this.gpsDataManager.getGPSHeading(gps);
 	}
 
-	public void showRasterMap(final String ref, String filename) {
+	public void showRasterMap(final String ref, String layerName, String filename) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				mapView.addRasterMap(filepath);
+				mapView.addRasterMap(layerName, filepath);
 	            
 	            startMapOverlayThread(mapView);
 	            startGPSLocationThread(mapView);
@@ -1874,7 +1875,7 @@ public class BeanShellLinker {
 		}
 	}
 
-	public int showVectorLayer(String ref, String filename, 
+	public int showVectorLayer(String ref, String layerName, String filename, 
 			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1882,7 +1883,7 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addShapeLayer(filepath, pointStyleSet, lineStyleSet, polygonStyleSet);
+				return mapView.addShapeLayer(layerName, filepath, pointStyleSet, lineStyleSet, polygonStyleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1899,7 +1900,7 @@ public class BeanShellLinker {
 		return -1;
 	}
 	
-	public int showSpatialLayer(String ref, String filename, String tablename, String labelColumn, 
+	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String labelColumn, 
 			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1907,7 +1908,7 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addSpatialLayer(filepath, tablename, labelColumn, pointStyleSet, lineStyleSet, polygonStyleSet);
+				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumn, pointStyleSet, lineStyleSet, polygonStyleSet);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1942,13 +1943,13 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public int createVectorLayer(String ref) {
+	public int createVectorLayer(String ref, String layerName) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.addCanvasLayer();
+				return mapView.addCanvasLayer(layerName);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

@@ -25,16 +25,26 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CanvasLayer extends GeometryLayer {
 
+	private String name;
 	private Quadtree<Geometry> objects;
 	private SparseArray<Geometry> objectMap;
 	private static int geomId = 1;
 	private Stack<Geometry> geomBuffer;
 	
-	public CanvasLayer(Projection projection) {
+	public CanvasLayer(String name, Projection projection) {
 		super(projection);
+		this.name = name;
 		objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
 		objectMap = new SparseArray<Geometry>();
 		geomBuffer = new Stack<Geometry>();
+	}
+	
+	public CanvasLayer(Projection projection) {
+		this(null, projection);
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	@Override
@@ -141,7 +151,6 @@ public class CanvasLayer extends GeometryLayer {
 		return transformGeometryList(objects.getAll());
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Geometry transformGeometry(Geometry geom) {
 		if (geom instanceof Point) {
 			Point p = (Point) geom;
