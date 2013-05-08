@@ -5,4 +5,8 @@
     android:icon="@drawable/ic_menu_add" 
     android:showAsAction="ifRoom"/>
   
+  <item android:id="@+id/faims_server_setting"
+    android:title="Faims Server Setting"
+    android:icon="@android:drawable/ic_menu_preferences"
+    android:showAsAction="never"/>
 </menu>

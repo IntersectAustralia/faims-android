@@ -15,6 +15,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import au.org.intersect.faims.android.R;
@@ -66,6 +67,14 @@ public class ServerDiscovery {
 		return String.valueOf(serverPort);
 	}
 	
+	public void setServerIP(String serverIP) {
+		this.serverIP = serverIP;
+	}
+
+	public void setServerPort(String serverPort) {
+		this.serverPort = serverPort;
+	}
+
 	public String getServerHost() {
 		return "http://" + serverIP + ":" + serverPort;
 	}
@@ -288,6 +297,15 @@ public class ServerDiscovery {
 	
 	public void clearListeners() {
 		listenerList.clear();
+	}
+
+	public void initiateServerIPAndPort(SharedPreferences preferences) {
+		String serverIP = preferences.getString("pref_server_ip", null);
+        String serverPort = preferences.getString("pref_server_port", null);
+        serverIP = serverIP == null || serverIP.isEmpty() ? null : serverIP;
+        serverPort = serverPort == null || serverPort.isEmpty() || serverIP.isEmpty() ? null : serverPort;
+        setServerIP(serverIP);
+        setServerPort(serverPort);
 	}
 
 }

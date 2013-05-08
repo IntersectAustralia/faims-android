@@ -79,11 +79,19 @@ public class MainActivity extends RoboActivity {
 			case R.id.fetch_project_list:
 				fetchProjectsFromServer();
 				return (true);
+			case R.id.faims_server_setting:
+				showFaimsServerSettings();
+				return true;
 			default:
 				return (super.onOptionsItemSelected(item));
 		}
 	}
 	
+	private void showFaimsServerSettings() {
+		Intent faimsServerIntent = new Intent(MainActivity.this, FaimsServerSettingsActivity.class);
+		MainActivity.this.startActivityForResult(faimsServerIntent, 2);
+	}
+
 	/**
 	 * Open a new activity and shows a list of projects from the server
 	 */
@@ -102,4 +110,5 @@ public class MainActivity extends RoboActivity {
 			}
 		}
 	}
+	
 }

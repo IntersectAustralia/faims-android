@@ -5,11 +5,13 @@ import java.util.List;
 
 import roboguice.activity.RoboActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -104,6 +106,8 @@ public class FetchProjectsActivity extends RoboActivity {
         setContentView(R.layout.activity_fetch_projects);
         
         serverDiscovery.setApplication(getApplication());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        serverDiscovery.initiateServerIPAndPort(preferences);
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
         
