@@ -115,6 +115,8 @@ public class CustomMapView extends MapView {
 		scaleView.setBarWidthRange(Dip.getDip(context, 40), Dip.getDip(context, 100));
 		
 		initTools();
+		
+		setViewLocked(true); // note: this is the default behaviour for maps
 	}
 	
 	public CustomMapView(Context context) {
@@ -155,6 +157,7 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void initTools() {
+		tools.add(new MapTool("Picker"));
 		tools.add(new MapTool("Create Point"));
 		tools.add(new MapTool("Create Line"));
 		tools.add(new MapTool("Create Polygon"));
