@@ -26,4 +26,8 @@ public class CustomOgrLayer extends OgrLayer {
 		return name;
 	}
 
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
 }

@@ -227,4 +227,8 @@ public class CanvasLayer extends GeometryLayer {
 		objectMap.put(geomId, geom);
 	}
 
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
 }

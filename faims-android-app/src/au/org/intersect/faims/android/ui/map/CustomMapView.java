@@ -7,16 +7,12 @@ import java.util.List;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.util.SparseArray;
-import android.view.WindowManager;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.exceptions.MapException;
@@ -36,6 +32,7 @@ import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
@@ -450,18 +447,7 @@ public class CustomMapView extends MapView {
 		
 		builder.setTitle("Layer Manager");
 		builder.setView(layerManager);
-		Dialog d = builder.create();
-		
-		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-	    lp.copyFrom(d.getWindow().getAttributes());
-	    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-	    lp.height = WindowManager.LayoutParams.MATCH_PARENT;
-	    d.show();
-	    d.getWindow().setAttributes(lp);
-	    
-	    Drawable c = new ColorDrawable(Color.BLACK);
-	    c.setAlpha(130);
-	    d.getWindow().setBackgroundDrawable(c);
+		builder.create().show();
 	}
 
 	public void selectToolIndex(int arg2) {
@@ -495,6 +481,51 @@ public class CustomMapView extends MapView {
 		
 		CanvasLayer layer = new CanvasLayer(layerName, new EPSG3857());
 		return addVectorLayer(layer);
+	}
+	
+	public String getLayerName(Layer layer) {
+		String layerName = "N/A";
+		if (layer instanceof CustomGdalMapLayer) {
+			layerName = ((CustomGdalMapLayer) layer).getName();
+		} else if (layer instanceof CustomOgrLayer) {
+			layerName = ((CustomOgrLayer) layer).getName();
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			layerName = ((CustomSpatialiteLayer) layer).getName();
+		} else if (layer instanceof CanvasLayer) {
+			layerName = ((CanvasLayer) layer).getName();
+		}
+		return layerName;
+	}
+	
+	public void setLayerName(Layer layer, String layerName) {
+		if (layer instanceof CustomGdalMapLayer) {
+			((CustomGdalMapLayer) layer).setName(layerName);
+		} else if (layer instanceof CustomOgrLayer) {
+			((CustomOgrLayer) layer).setName(layerName);
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			((CustomSpatialiteLayer) layer).setName(layerName);
+		} else if (layer instanceof CanvasLayer) {
+			((CanvasLayer) layer).setName(layerName);
+		}
+	}
+
+	public void removeLayer(Layer layer) throws Exception {
+		String layerName = getLayerName(layer);
+		
+		// check if layer is base layer
+		CustomGdalMapLayer baseLayer = (CustomGdalMapLayer) getLayers().getBaseLayer();
+		if (baseLayer.getName().equals(layerName)) {
+			throw new MapException("Cannot remove base layer");
+		}
+		
+		getLayers().removeLayer(layer);
+	}
+
+	public void renameLayer(Layer layer, String layerName) throws Exception {
+		// check if layer is base layer
+		validateLayerName(layerName);
+		
+		setLayerName(layer, layerName);
 	}
 	
 }

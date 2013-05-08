@@ -25,4 +25,8 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 		return name;
 	}
 
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
 }

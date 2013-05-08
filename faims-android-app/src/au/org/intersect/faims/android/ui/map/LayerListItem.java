@@ -1,17 +1,17 @@
 package au.org.intersect.faims.android.ui.map;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.view.View;
+import android.util.TypedValue;
 import android.widget.AbsListView;
-import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
-import au.org.intersect.faims.android.ui.form.CustomToggleButton;
 import au.org.intersect.faims.android.util.Dip;
 
 import com.nutiteq.layers.Layer;
@@ -19,9 +19,7 @@ import com.nutiteq.layers.Layer;
 public class LayerListItem extends LinearLayout {
 
 	private TextView text;
-	private Button infoButton;
-	private CustomToggleButton showButton;
-	private boolean selected;
+	private CheckBox showBox;
 
 	public LayerListItem(Context context) {
 		super(context);
@@ -31,12 +29,34 @@ public class LayerListItem extends LinearLayout {
 		setPadding(size, size, size, size);
 	}
 	
-	public void init(final Layer layer) {
+	public void init(final Layer layer, final LayerManagerView layerManagerView) {
 		text = new TextView(this.getContext());
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-		params.leftMargin = Dip.getDip(this.getContext(), 5);
 		text.setLayoutParams(params);
-		text.setTextSize(18f);
+		int size = Dip.getDip(this.getContext(), 5);
+		text.setPadding(size, size, size, size);
+		text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
+		text.setSingleLine(false);
+		text.setText(getLayerName(layer));
+		
+		showBox = new CheckBox(this.getContext());
+		showBox.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		showBox.setChecked(true);
+		showBox.setFocusable(false);
+		showBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				layer.setVisible(showBox.isChecked());
+			}
+			
+		});
+		
+		addView(text);
+		addView(showBox);
+	}
+	
+	private String getLayerName(Layer layer) {
 		String layerName = "N/A";
 		if (layer instanceof CustomGdalMapLayer) {
 			layerName = ((CustomGdalMapLayer) layer).getName();
@@ -47,47 +67,7 @@ public class LayerListItem extends LinearLayout {
 		} else if (layer instanceof CanvasLayer) {
 			layerName = ((CanvasLayer) layer).getName();
 		}
-		
-		text.setText(layerName);
-		
-		infoButton = new Button(this.getContext());
-		infoButton.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		infoButton.setText("I");
-		
-		showButton = new CustomToggleButton(this.getContext());
-		showButton.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		showButton.setToggle(layer.isVisible());
-		showButton.setText("S");
-		showButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				showButton.toggle();
-				layer.setVisible(showButton.isToggle());
-			}
-			
-		});
-		
-		addView(text);
-		addView(infoButton);
-		addView(showButton);
+		return layerName;
 	}
 	
-	public void toggle() {
-		selected = !selected;
-		updateItem();
-	}
-	
-	public void setSelected(boolean value) {
-		selected = value;
-		updateItem();
-	}
-	
-	private void updateItem() {
-		if (selected) {
-			this.setBackgroundColor(Color.BLUE);
-		} else {
-			this.setBackgroundColor(Color.WHITE);
-		}
-	}
 }

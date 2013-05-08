@@ -177,18 +177,11 @@ public class Tab implements Parcelable{
 	                		MapLayout mapLayout = new MapLayout(this.context);
 	                		final CustomMapView mapView = mapLayout.getMapView();
 	                		
-	                		LinearLayout uiLayout = new LinearLayout(context);
-	                		uiLayout.setOrientation(LinearLayout.HORIZONTAL);
-	                		
-	                		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f);
-	                		
 	                		Button layerButton = createLayerButton();
-	                		layerButton.setLayoutParams(params);
-	                		uiLayout.addView(layerButton);
+	                		linearLayout.addView(layerButton);
 	                		
 	                		Spinner toolsDropDown = createToolsDropDown(mapView);
-	                		toolsDropDown.setLayoutParams(params);
-	                		uiLayout.addView(toolsDropDown);
+	                		linearLayout.addView(toolsDropDown);
 	                		
 	                		layerButton.setOnClickListener(new OnClickListener() {
 
@@ -215,7 +208,6 @@ public class Tab implements Parcelable{
 	                			
 	                		});
 	                		
-	                		linearLayout.addView(uiLayout);
 	                		linearLayout.addView(mapLayout);
 	                		
 	                		mapViewList.add(mapView);

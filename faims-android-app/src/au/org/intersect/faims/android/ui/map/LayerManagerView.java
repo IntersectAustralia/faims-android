@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 
 import com.nutiteq.layers.Layer;
 
@@ -29,7 +33,7 @@ public class LayerManagerView extends LinearLayout {
 			
 			for (Layer layer : layers) {
 				LayerListItem item = new LayerListItem(LayerManagerView.this.getContext());
-				item.init(layer);
+				item.init(layer, LayerManagerView.this);
 				itemViews.add(item);
 			} 
 		}
@@ -57,8 +61,6 @@ public class LayerManagerView extends LinearLayout {
 	}
 
 	private Button addButton;
-	private Button removeButton;
-	private Button renameButton;
 	private CustomMapView mapView;
 	private ListView listView;
 	private LinearLayout layout;
@@ -85,8 +87,6 @@ public class LayerManagerView extends LinearLayout {
 		layout.addView(buttonsLayout);
 		
 		createAddButton();
-		createRemoveButton();
-		createRenameButton();
 		createListView();
 		
 		redrawLayers();
@@ -95,6 +95,56 @@ public class LayerManagerView extends LinearLayout {
 	private void createListView() {
 		listView = new ListView(this.getContext());
 		listView.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+					int position, long arg3) {
+				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				
+				Context context = LayerManagerView.this.getContext();
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle("Layer Options");
+
+				LinearLayout layout = new LinearLayout(context);
+				layout.setOrientation(LinearLayout.VERTICAL);
+				
+				builder.setView(layout);
+				final Dialog d = builder.create();
+				
+				Button removeButton = new Button(context);
+				removeButton.setText("Remove");
+				removeButton.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						d.dismiss();
+						removeLayer(layer);
+					}
+					
+				});
+				
+				Button renameButton = new Button(context);
+				renameButton.setText("Rename");
+				renameButton.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						d.dismiss();
+						renameLayer(layer);
+					}
+					
+				});
+				
+				layout.addView(removeButton);
+				layout.addView(renameButton);
+				
+				d.show();
+				return true;
+			}
+			
+		});
+
 		layout.addView(listView);
 	}
 	
@@ -106,35 +156,7 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View v) {
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-				
-				builder.setTitle("Layer Manager");
-				builder.setMessage("Enter layer name:");
-				
-				final EditText editText = new EditText(LayerManagerView.this.getContext());
-				builder.setView(editText);
-				
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						try {
-							mapView.addCanvasLayer(editText.getText().toString());
-							redrawLayers();
-						} catch (Exception e) {
-							showErrorDialog(e.getMessage());
-						}
-					}
-			        
-			    });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			        public void onClick(DialogInterface dialog, int id) {
-			           // ignore
-			        }
-			    });
-				
-				builder.create().show();
+				addLayer();
 			}
 			
 		});
@@ -142,68 +164,94 @@ public class LayerManagerView extends LinearLayout {
 		buttonsLayout.addView(addButton);
 	}
 	
-	private void createRemoveButton() {
-		removeButton = new Button(this.getContext());
-		removeButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-		removeButton.setText("Remove");
-		
-		removeButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				
-				// TODO
-			}
-			
-		});
-		buttonsLayout.addView(removeButton);
+	public void redrawLayers() {
+		List<Layer> layers = mapView.getLayers().getAllLayers();
+		LayersAdapter layersAdapter = new LayersAdapter(layers);
+		listView.setAdapter(layersAdapter);
 	}
 	
-	private void createRenameButton() {
-		renameButton = new Button(this.getContext());
-		renameButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-		renameButton.setText("Rename");
-		
-		renameButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-				
-				builder.setTitle("Layer Manager");
-				builder.setMessage("Enter layer name:");
-				
-				final EditText editText = new EditText(LayerManagerView.this.getContext());
-				builder.setView(editText);
-				
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface arg0, int arg1) {
-						// TODO
-					}
-			        
-			    });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			        public void onClick(DialogInterface dialog, int id) {
-			           // ignore
-			        }
-			    });
-				
-				builder.create().show();
-			}
-			
-		});
-		buttonsLayout.addView(renameButton);
-	}
-	
-	private void showErrorDialog(String message) {
+	private void addLayer() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 		
-		builder.setTitle("Layer Manager Error");
-		builder.setMessage(message);
-		builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Enter layer name:");
+		
+		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		builder.setView(editText);
+		
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					mapView.addCanvasLayer(editText.getText().toString());
+					redrawLayers();
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
+	}
+
+	private void removeLayer(final Layer layer) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Do you want to delete layer?");
+		
+		builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					mapView.removeLayer(layer);
+					redrawLayers();
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
+	}
+
+	private void renameLayer(final Layer layer) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Enter layer name:");
+		
+		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		builder.setView(editText);
+		
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					mapView.renameLayer(layer, editText.getText().toString());
+					redrawLayers();
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	        public void onClick(DialogInterface dialog, int id) {
 	           // ignore
 	        }
@@ -212,10 +260,8 @@ public class LayerManagerView extends LinearLayout {
 		builder.create().show();
 	}
 	
-	private void redrawLayers() {
-		List<Layer> layers = mapView.getLayers().getAllLayers();
-		LayersAdapter layersAdapter = new LayersAdapter(layers);
-		listView.setAdapter(layersAdapter);
+	private void showErrorDialog(String message) {
+		new ErrorDialog(LayerManagerView.this.getContext(), "Layer Manager Error", message).show();
 	}
 
 }

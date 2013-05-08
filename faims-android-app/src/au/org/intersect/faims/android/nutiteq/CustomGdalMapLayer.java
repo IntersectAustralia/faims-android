@@ -21,4 +21,8 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 		return name;
 	}
 
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
 }
