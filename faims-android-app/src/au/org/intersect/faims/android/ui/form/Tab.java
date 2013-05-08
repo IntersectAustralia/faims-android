@@ -44,7 +44,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
-import au.org.intersect.faims.android.ui.map.MapTool;
+import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.Dip;
 
@@ -209,6 +209,8 @@ public class Tab implements Parcelable{
 	                		});
 	                		
 	                		linearLayout.addView(mapLayout);
+	                		
+	                		mapView.selectDefaultTool();
 	                		
 	                		mapViewList.add(mapView);
 	                		view = mapView;
@@ -546,7 +548,7 @@ public class Tab implements Parcelable{
 				final SeekBar seekBar = new SeekBar(v.getContext());
 				float certainty = 0;
 				seekBar.setMax(100);
-				seekBar.setMinimumWidth(400);
+				seekBar.setMinimumWidth(Dip.getDip(Tab.this.context, 400));
 				if (view instanceof CustomEditText){
 	        		CustomEditText customEditText = (CustomEditText) view;
 	        		certainty = customEditText.getCurrentCertainty();

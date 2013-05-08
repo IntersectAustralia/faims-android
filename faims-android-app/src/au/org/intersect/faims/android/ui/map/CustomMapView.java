@@ -13,6 +13,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.exceptions.MapException;
@@ -22,6 +24,8 @@ import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
+import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.Dip;
 
 import com.nutiteq.MapView;
@@ -44,23 +48,30 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CustomMapView extends MapView {
 	
-	public static class CustomMapListener extends MapListener {
+	public class InternalMapListener extends MapListener {
 
 		@Override
 		public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
+			
 		}
 
 		@Override
 		public void onDrawFrameBefore3D(GL10 arg0, float arg1) {
-			}
+		}
 
 		@Override
 		public void onLabelClicked(VectorElement arg0, boolean arg1) {
-			}
+		}
 
 		@Override
 		public void onMapClicked(double arg0, double arg1, boolean arg2) {
+			if (CustomMapView.this.mapListener != null) {
+				CustomMapView.this.mapListener.onMapClicked(arg0, arg1, arg2);
 			}
+			if (CustomMapView.this.currentTool != null) {
+				CustomMapView.this.currentTool.onMapClicked(arg0, arg1, arg2);
+			}
+		}
 
 		@Override
 		public void onMapMoved() {
@@ -73,8 +84,24 @@ public class CustomMapView extends MapView {
 		@Override
 		public void onVectorElementClicked(VectorElement arg0, double arg1,
 				double arg2, boolean arg3) {
+			if (CustomMapView.this.mapListener != null) {
+				CustomMapView.this.mapListener.onVectorElementClicked(arg0, arg1, arg2, arg3);
+			}
+			if (CustomMapView.this.currentTool != null) {
+				CustomMapView.this.currentTool.onVectorElementClicked(arg0, arg1, arg2, arg3);
+			}
 		}
 		
+	}
+	
+	public static class CustomMapListener {
+		
+		public void onMapClicked(double arg0, double arg1, boolean arg2) {
+			}
+		
+		public void onVectorElementClicked(VectorElement arg0, double arg1,
+				double arg2, boolean arg3) {
+		}
 	}
 	
 	// TODO what is this?
@@ -89,6 +116,8 @@ public class CustomMapView extends MapView {
 	private MapNorthView northView;
 	
 	private ScaleBarView scaleView;
+	
+	private RelativeLayout toolsView;
 
 	private Geometry overlayGeometry;
 	
@@ -98,8 +127,13 @@ public class CustomMapView extends MapView {
 	private boolean canRunThreads;
 	
 	private ArrayList<MapTool> tools;
+
+	private MapTool currentTool;
+
+	private InternalMapListener internalMapListener;
+	private CustomMapListener mapListener;
 	
-	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView) {
+	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
 		
 		vectorLayerArray = new SparseArray<GeometryLayer>();
@@ -110,6 +144,7 @@ public class CustomMapView extends MapView {
 		this.drawView = drawView;
 		this.northView = northView;
 		this.scaleView = scaleView;
+		this.toolsView = toolsView;
 		
 		// TODO make this configurable
 		scaleView.setBarWidthRange(Dip.getDip(context, 40), Dip.getDip(context, 100));
@@ -117,6 +152,9 @@ public class CustomMapView extends MapView {
 		initTools();
 		
 		setViewLocked(true); // note: this is the default behaviour for maps
+		
+		internalMapListener = new InternalMapListener();
+		getOptions().setMapListener(internalMapListener);
 	}
 	
 	public CustomMapView(Context context) {
@@ -154,13 +192,6 @@ public class CustomMapView extends MapView {
         //this.getOptions().setPersistentCachePath(activity.getDatabasePath("mapcache").getPath());
         // set persistent raster cache limit to 100MB
         //this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
-	}
-	
-	private void initTools() {
-		tools.add(new MapTool("Picker"));
-		tools.add(new MapTool("Create Point"));
-		tools.add(new MapTool("Create Line"));
-		tools.add(new MapTool("Create Polygon"));
 	}
 
 	public static int nextId() {
@@ -542,6 +573,45 @@ public class CustomMapView extends MapView {
 		validateLayerName(layerName);
 		
 		setLayerName(layer, layerName);
+	}
+	
+	private void initTools() {
+		tools.add(new CreatePointTool(this));
+	}
+	
+	public MapTool getTool(String name) {
+		for (MapTool tool : tools) {
+			if (tool.toString().equals(name)) {
+				return tool;
+			}
+		}
+		return null;
+	}
+	
+	public void selectTool(String name) {
+		if (currentTool != null) {
+			currentTool.deactivate();
+			currentTool = null;
+		}
+		
+		toolsView.removeAllViews();
+		
+		MapTool tool = getTool(name);
+		View ui = tool.getUI(this.getContext());
+		if (ui != null) {
+			toolsView.addView(ui);
+		}
+		tool.activate();
+		
+		currentTool = tool;
+	}
+
+	public void selectDefaultTool() {
+		selectTool(CreatePointTool.NAME);
+	}
+
+	public void setMapListener(CustomMapListener customMapListener) {
+		this.mapListener = customMapListener;
 	}
 	
 }

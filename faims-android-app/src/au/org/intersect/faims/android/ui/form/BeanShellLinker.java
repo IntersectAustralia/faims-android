@@ -379,7 +379,7 @@ public class BeanShellLinker {
 			View view = renderer.getViewByRef(ref);
 			if (view instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) view;
-				mapView.getOptions().setMapListener(new CustomMapView.CustomMapListener() {
+				mapView.setMapListener(new CustomMapView.CustomMapListener() {
 
 					@Override
 					public void onMapClicked(double x, double y,
