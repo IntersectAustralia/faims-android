@@ -46,7 +46,7 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.ui.map.MapTool;
 import au.org.intersect.faims.android.util.DateUtil;
-import au.org.intersect.faims.android.util.Dpi;
+import au.org.intersect.faims.android.util.Dip;
 
 public class Tab implements Parcelable{
 
@@ -310,7 +310,7 @@ public class Tab implements Parcelable{
 	private Button createCertaintyButton() {
 		Button button = new Button(this.context);
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = Dpi.getDpi(context, 30);
+		int size = Dip.getDip(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -322,7 +322,7 @@ public class Tab implements Parcelable{
 	private Button createAnnotationButton() {
 		Button button = new Button(this.context);
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = Dpi.getDpi(context, 30);
+		int size = Dip.getDip(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -745,7 +745,7 @@ public class Tab implements Parcelable{
 	        		LinearLayout galleryLayout = new LinearLayout(this.context);
 	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 	        		CustomImageView gallery = new CustomImageView(this.context);
-	        		int size = Dpi.getDpi(context, 400);
+	        		int size = Dip.getDip(context, 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(ref+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);

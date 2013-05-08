@@ -26,7 +26,7 @@ import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
-import au.org.intersect.faims.android.util.Dpi;
+import au.org.intersect.faims.android.util.Dip;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
@@ -115,7 +115,7 @@ public class CustomMapView extends MapView {
 		this.scaleView = scaleView;
 		
 		// TODO make this configurable
-		scaleView.setBarWidthRange(Dpi.getDpi(context, 40), Dpi.getDpi(context, 100));
+		scaleView.setBarWidthRange(Dip.getDip(context, 40), Dip.getDip(context, 100));
 		
 		initTools();
 	}

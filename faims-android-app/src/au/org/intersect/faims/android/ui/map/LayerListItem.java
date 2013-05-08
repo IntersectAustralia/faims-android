@@ -12,7 +12,7 @@ import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.ui.form.CustomToggleButton;
-import au.org.intersect.faims.android.util.Dpi;
+import au.org.intersect.faims.android.util.Dip;
 
 import com.nutiteq.layers.Layer;
 
@@ -27,14 +27,14 @@ public class LayerListItem extends LinearLayout {
 		super(context);
 		setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT));
 		setOrientation(LinearLayout.HORIZONTAL);
-		int size = Dpi.getDpi(context, 10);
+		int size = Dip.getDip(context, 10);
 		setPadding(size, size, size, size);
 	}
 	
 	public void init(final Layer layer) {
 		text = new TextView(this.getContext());
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-		params.leftMargin = Dpi.getDpi(this.getContext(), 5);
+		params.leftMargin = Dip.getDip(this.getContext(), 5);
 		text.setLayoutParams(params);
 		text.setTextSize(18f);
 		String layerName = "N/A";
