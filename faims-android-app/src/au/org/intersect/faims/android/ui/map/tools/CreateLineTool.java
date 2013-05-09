@@ -28,7 +28,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Line";
 	
-	private int color = 0xFFFFFFFF;
+	private int color = 0xFF00FF00;
 	private float size = 0.3f;
 	private float pickingSize = 0.3f;
 	private float width = 0.1f;
@@ -79,12 +79,18 @@ public class CreateLineTool extends BaseGeometryTool {
 		clearPoints();
 	}
 	
+	private void showLayerNotFoundError() {
+		super.setSelectedLayer(null);
+		pointsList.clear();
+		showError(context, "No layer selected");
+	}
+	
 	private void clearPoints() {
 		if (pointsList.isEmpty()) return;
 		
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
-			showError(context, "No layer selected");
+			showLayerNotFoundError();
 			return;
 		}
 		
@@ -96,12 +102,12 @@ public class CreateLineTool extends BaseGeometryTool {
 	private void drawLine() {
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
-			showError(context, "No layer selected");
+			showLayerNotFoundError();
 			return;
 		}
 		
 		if (pointsList.size() < 2) {
-			showError(context, "Line requires atleast 2 points");
+			showError(context, "Line requires at least 2 points");
 			return;
 		}
 		
@@ -211,7 +217,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	public void onMapClicked(double x, double y, boolean z) {
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
-			showError(context, "No layer selected");
+			showLayerNotFoundError();
 			return;
 		}
 		

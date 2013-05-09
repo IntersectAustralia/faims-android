@@ -26,6 +26,7 @@ import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
+import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.Dip;
 
@@ -629,6 +630,8 @@ public class CustomMapView extends MapView {
 		getLayers().removeLayer(layer);
 		
 		removeVectorLayer(layerName);
+		
+		if (layer == selectedLayer) selectedLayer = null;
 	}
 
 	public void renameLayer(Layer layer, String layerName) throws Exception {
@@ -641,6 +644,7 @@ public class CustomMapView extends MapView {
 	private void initTools() {
 		tools.add(new CreatePointTool(this.getContext(), this));
 		tools.add(new CreateLineTool(this.getContext(), this));
+		tools.add(new CreatePolygonTool(this.getContext(), this));
 	}
 	
 	public MapTool getTool(String name) {
@@ -723,6 +727,11 @@ public class CustomMapView extends MapView {
 	public int drawLine(CanvasLayer layer, ArrayList<MapPos> points,
 			StyleSet<LineStyle> styleSet) {
 		return drawLine(getVectorLayerId(layer), points, styleSet);
+	}
+
+	public int drawPolygon(CanvasLayer layer, ArrayList<MapPos> points,
+			StyleSet<PolygonStyle> styleSet) {
+		return drawPolygon(getVectorLayerId(layer), points, styleSet);
 	}
 	
 }
