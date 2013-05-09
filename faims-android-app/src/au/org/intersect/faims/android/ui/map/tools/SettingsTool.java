@@ -5,11 +5,12 @@ import java.util.Locale;
 import android.content.Context;
 import android.text.InputType;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -55,6 +56,19 @@ public abstract class SettingsTool extends MapTool {
 		}
 		
 		return ((float) value) / 100;
+	}
+	
+	protected CheckBox addCheckBox(Context context, LinearLayout layout, String labelText, boolean defaultValue) {
+		TextView label = new TextView(context);
+		label.setText(labelText);
+		
+		CheckBox box = new CheckBox(context);
+		box.setChecked(defaultValue);
+		
+		layout.addView(label);
+		layout.addView(box);
+		
+		return box;
 	}
 	
 	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue) {

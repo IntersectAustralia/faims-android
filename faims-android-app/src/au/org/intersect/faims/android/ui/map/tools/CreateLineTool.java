@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -33,6 +34,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	private float pickingSize = 0.3f;
 	private float width = 0.1f;
 	private float pickingWidth = 0.1f;
+	private boolean showPoints;
 
 	private MapButton createButton;
 
@@ -118,7 +120,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			positions.add((new EPSG3857().toWgs84(p.getMapPos().x, p.getMapPos().y)));
 		}
 		
-		mapView.drawLine(layer, positions, createLineStyleSet(color, width, pickingWidth));
+		mapView.drawLine(layer, positions, createLineStyleSet(color, width, pickingWidth, size, pickingSize));
 		
 		clearPoints();
 	}
@@ -172,6 +174,7 @@ public class CreateLineTool extends BaseGeometryTool {
 				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", getPickingSize());
 				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
 				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);
+				final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points:", showPoints);
 				
 				builder.setView(layout);
 				
@@ -185,12 +188,14 @@ public class CreateLineTool extends BaseGeometryTool {
 							float pickingSize = parseSize(pickingSizeBar.getProgress());
 							float width = parseSize(widthBar.getProgress());
 							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							boolean showPoints = showPointsBox.isChecked();
 							
 							CreateLineTool.this.color = color;
 							CreateLineTool.this.setSize(size);
 							CreateLineTool.this.setPickingSize(pickingSize);
 							CreateLineTool.this.width = width;
 							CreateLineTool.this.pickingWidth = pickingWidth;
+							CreateLineTool.this.showPoints = showPoints;
 						} catch (Exception e) {
 							showError(context, e.getMessage());
 						}
@@ -225,9 +230,14 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private StyleSet<LineStyle> createLineStyleSet(int c, float w,
-			float pw) {
+			float pw, float s, float ps) {
 		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-		LineStyle style = LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).build();
+		LineStyle style;
+		if (showPoints) {
+			style = LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).setPointStyle(createPointStyle(c, s, ps)).build();
+		} else {
+			 style = LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).build();
+		}
 		lineStyleSet.setZoomStyle(0, style);
 		return lineStyleSet;
 	}
@@ -238,6 +248,10 @@ public class CreateLineTool extends BaseGeometryTool {
 		PointStyle style = PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
 		pointStyleSet.setZoomStyle(0, style);
 		return pointStyleSet;
+	}
+	
+	private PointStyle createPointStyle(int c, float s, float ps) {
+		return PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
 	}
 
 	@Override
