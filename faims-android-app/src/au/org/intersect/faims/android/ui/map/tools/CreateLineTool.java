@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -38,17 +39,17 @@ public class CreateLineTool extends BaseGeometryTool {
 
 	private MapButton createButton;
 
-	private ArrayList<Integer> pointsList;
+	private LinkedList<Integer> pointsList;
 
-	private MapButton clearButton;
+	private MapButton undoButton;
 
 	public CreateLineTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
 		createButton = createCreateButton(context);
-		clearButton = createClearButton(context);
+		undoButton = createUndoButton(context);
 		
-		pointsList = new ArrayList<Integer>();
+		pointsList = new LinkedList<Integer>();
 		
 		updateLayout();
 	}
@@ -59,7 +60,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		layout.addView(settingsButton);
 		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (createButton != null) layout.addView(createButton);
-		if (clearButton != null) layout.addView(clearButton);
+		if (undoButton != null) layout.addView(undoButton);
 		if (selectedLayer != null) layout.addView(selectedLayer);
 	}
 	
@@ -85,6 +86,20 @@ public class CreateLineTool extends BaseGeometryTool {
 		super.setSelectedLayer(null);
 		pointsList.clear();
 		showError(context, "No layer selected");
+	}
+	
+	private void clearLastPoint() {
+		if (pointsList.isEmpty()) return;
+		
+		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
+		if (layer == null) {
+			showLayerNotFoundError();
+			return;
+		}
+		
+		int id = pointsList.removeLast();
+		
+		mapView.clearGeometry(id);
 	}
 	
 	private void clearPoints() {
@@ -125,14 +140,14 @@ public class CreateLineTool extends BaseGeometryTool {
 		clearPoints();
 	}
 	
-	private MapButton createClearButton(final Context context) {
+	private MapButton createUndoButton(final Context context) {
 		MapButton button = new MapButton(context);
-		button.setText("Clear Points");
+		button.setText("Undo");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				clearPoints();
+				clearLastPoint();
 			}
 			
 		});
@@ -141,7 +156,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	private MapButton createCreateButton(final Context context) {
 		MapButton button = new MapButton(context);
-		button.setText("Finish Line");
+		button.setText("Finish");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
