@@ -7,6 +7,7 @@ import java.util.Stack;
 import android.util.SparseArray;
 import au.org.intersect.faims.android.log.FLog;
 
+import com.nutiteq.components.Components;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -60,6 +61,24 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 	
+	private void updateRenderList(Geometry geom) {
+		List<Geometry> oldVisibleElementsList = getVisibleElements();
+		List<Geometry> newVisibleElementsList = (oldVisibleElementsList != null ? new ArrayList<Geometry>(oldVisibleElementsList) : new ArrayList<Geometry>());
+		newVisibleElementsList.add(geom);
+		
+		for (Geometry g : newVisibleElementsList) {
+			g.setActiveStyle(0);
+		}
+		
+		setVisibleElementsList(newVisibleElementsList); 
+		
+		// Update renderer
+		Components components = getComponents();
+		if (components != null) {
+		  components.mapRenderers.getMapRenderer().frustumChanged();
+		}
+	}
+	
 	public int addPoint(MapPos point, StyleSet<PointStyle> styleSet) {
 		return addPoint(point, styleSet, geomId++);
 	}
@@ -71,6 +90,8 @@ public class CanvasLayer extends GeometryLayer {
 		objects.insert(p.getInternalState().envelope, p);
 		
 		objectMap.put(id, p);
+		
+		updateRenderList(p);
 		
 		FLog.d(p.toString());
 		
@@ -98,6 +119,8 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.put(id, l);
 		
+		updateRenderList(l);
+		
 		FLog.d(l.toString());
 		
 		return id;
@@ -123,6 +146,8 @@ public class CanvasLayer extends GeometryLayer {
 		objects.insert(p.getInternalState().envelope, p);
 		
 		objectMap.put(id, p);
+		
+		updateRenderList(p);
 		
 		FLog.d(p.toString());
 		
