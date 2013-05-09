@@ -139,7 +139,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	private MapButton createCreateButton(final Context context) {
 		MapButton button = new MapButton(context);
-		button.setText("Create Line");
+		button.setText("Finish Line");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

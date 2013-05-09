@@ -137,7 +137,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	
 	private MapButton createCreateButton(final Context context) {
 		MapButton button = new MapButton(context);
-		button.setText("Create Polygon");
+		button.setText("Finish Polygon");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
