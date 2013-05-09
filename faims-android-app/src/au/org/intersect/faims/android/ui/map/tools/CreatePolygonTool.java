@@ -32,10 +32,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	public static final String NAME = "Create Polygon";
 	
 	private int color = 0xFF0000FF;
-	private float size = 0.3f;
-	private float pickingSize = 0.3f;
+	private float size = 0.2f;
+	private float pickingSize = 0.4f;
 	private int lineColor = 0XFF000000;
-	private float width = 0.1f;
+	private float width = 0.05f;
 	private float pickingWidth = 0.1f;
 	private boolean showStroke;
 
@@ -246,7 +246,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			return;
 		}
 		
-		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, getSize(), getPickingSize())));
+		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
 	}
 	
 	private StyleSet<PolygonStyle> createPolygonStyleSet(int c, int lc, float w, float pw) {

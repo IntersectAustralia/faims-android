@@ -31,9 +31,9 @@ public class CreateLineTool extends BaseGeometryTool {
 	public static final String NAME = "Create Line";
 	
 	private int color = 0xFF00FF00;
-	private float size = 0.3f;
-	private float pickingSize = 0.3f;
-	private float width = 0.1f;
+	private float size = 0.2f;
+	private float pickingSize = 0.4f;
+	private float width = 0.05f;
 	private float pickingWidth = 0.1f;
 	private boolean showPoints;
 
@@ -241,7 +241,8 @@ public class CreateLineTool extends BaseGeometryTool {
 			return;
 		}
 		
-		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, getSize(), getPickingSize())));
+		// make point color solid
+		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
 	}
 	
 	private StyleSet<LineStyle> createLineStyleSet(int c, float w,
