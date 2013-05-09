@@ -3,9 +3,9 @@ package au.org.intersect.faims.android.util;
 import android.content.Context;
 import android.util.DisplayMetrics;
 
-public class Dpi {
+public class Dip {
 
-	public static int getDpi(Context context, int size) {
+	public static int getDip(Context context, int size) {
 		return (size * context.getResources().getDisplayMetrics().densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
 	}
 	

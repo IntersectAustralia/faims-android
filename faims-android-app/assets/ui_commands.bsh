@@ -228,8 +228,8 @@ Object getGPSHeading(String gps){
 	return linker.getGPSHeading(gps);
 }
 
-showRasterMap(String ref, String filename) {
-	linker.showRasterMap(ref, filename);
+showRasterMap(String ref, String layerName, String filename) {
+	linker.showRasterMap(ref, layerName, filename);
 }
 
 setMapFocusPoint(String ref, float longitude, float latitude) {
@@ -248,12 +248,12 @@ setMapTilt(String ref, float tilt) {
 	linker.setMapTilt(ref, tilt);
 }
 
-showVectorLayer(String ref, String filename, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
-	linker.showVectorLayer(ref, filename, pointStyleSet, lineStyleSet, polygonStyleSet);
+showVectorLayer(String ref, String layerName, String filename, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
+	linker.showVectorLayer(ref, layerName, filename, pointStyleSet, lineStyleSet, polygonStyleSet);
 }
 
-showSpatialLayer(String ref, String filename, String tableName, String labelName, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
-	linker.showSpatialLayer(ref, filename, tableName, labelName, pointStyleSet, lineStyleSet, polygonStyleSet);
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String labelName, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
+	linker.showSpatialLayer(ref, layerName, filename, tableName, labelName, pointStyleSet, lineStyleSet, polygonStyleSet);
 }
 
 clearVectorLayer(String ref, int layerId) {
@@ -264,8 +264,8 @@ centerOnCurrentPosition(String ref){
 	linker.centerOnCurrentPosition(ref);
 }
 
-createVectorLayer(String ref) {
-	return linker.createVectorLayer(ref);
+createVectorLayer(String ref, String layerName) {
+	return linker.createVectorLayer(ref, layerName);
 }
 
 setVectorLayerVisible(String ref, int layerId, boolean visible) {

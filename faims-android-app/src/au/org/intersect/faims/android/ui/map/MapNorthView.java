@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.ui.form;
+package au.org.intersect.faims.android.ui.map;
 
 import android.content.Context;
 import android.widget.ImageView;

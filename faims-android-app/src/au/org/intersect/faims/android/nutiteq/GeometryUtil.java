@@ -16,7 +16,6 @@ import com.nutiteq.style.StyleSet;
 
 public class GeometryUtil {
 
-	@SuppressWarnings("unchecked")
 	public static Geometry fromGeometry(Geometry geom) {
 		if (geom instanceof Point) {
 			Point p = (Point) geom;
@@ -31,7 +30,6 @@ public class GeometryUtil {
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Geometry cloneGeometry(Geometry geom1, Geometry geom2) {
 		if (geom1 instanceof Point && geom2 instanceof Point) {
 			Point p1 = (Point) geom1;
@@ -57,7 +55,6 @@ public class GeometryUtil {
 		return transformGeometry(geom, mapView, false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static Geometry transformGeometry(Geometry geom, MapView mapView, boolean worldToScreen) {
 		if (geom instanceof Point) {
 			Point p = (Point) geom;

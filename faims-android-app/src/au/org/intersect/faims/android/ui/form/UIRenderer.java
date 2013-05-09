@@ -30,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.DateUtil;
 
@@ -110,8 +111,10 @@ public class UIRenderer implements IRestoreActionListener{
 	    		
 	    		GroupDef tabGroupElement = (GroupDef) element;
 	    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(groupIndex);
+	    		
 	    		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
 	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
+	    		
 	    		TabGroup tabGroup = new TabGroup(archEntType,relType, this);
 	    		tabGroup.setContext(context);
 	    		String tabGroupText = tabGroupCaption.getQuestionText();
@@ -149,7 +152,8 @@ public class UIRenderer implements IRestoreActionListener{
 	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
 	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
 	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(input,tabGroupName + "/" + tabName + "/" + viewName,viewName, directory, tabGroup.isArchEnt(), tabGroup.isRelationship());
+	                        View view = tab.addInput(FormAttribute.parseFromInput(input),
+	                        		tabGroupName + "/" + tabName + "/" + viewName,viewName, directory, tabGroup.isArchEnt(), tabGroup.isRelationship());
 	                        
 	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
 	                        viewTabMap.put(tabGroupName + "/" + tabName + "/" + viewName, tab);

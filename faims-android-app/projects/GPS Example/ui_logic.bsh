@@ -82,7 +82,7 @@ showScreen(name) {
 mapfilename = "files/data/maps/sydney_map.tif";
 
 setupMap(id, lon, lat) {
-	showRasterMap(id, mapfilename);
+	showRasterMap(id, "raster map", mapfilename);
 	setMapFocusPoint(id, lon, lat);
 	setMapRotation(id, 360.0f);
 	setMapZoom(id, 12.0f);
@@ -92,13 +92,19 @@ setupMap(id, lon, lat) {
 List layers = new ArrayList();
 Integer pointLayerId;
 
+int layerCount = 1;
+
+getLayerName() {
+	return "Layer " + layerCount++;
+}
+
 clearMapTab() {
 	for (Integer layerId : layers) {
 		clearVectorLayer("tabgroup1/tab1/map", layerId);
 	}
 	layers = new ArrayList();
 	
-	pointLayerId = createVectorLayer("tabgroup1/tab1/map");
+	pointLayerId = createVectorLayer("tabgroup1/tab1/map", getLayerName());
 	layers.add(pointLayerId);
 	
 	clearTabEntity();
@@ -530,7 +536,7 @@ onLayerAction() {
 	action = getFieldValue("tabgroup2/tab1/layerActions");
 	
 	if ("create_layer".equals(action)) {
-		canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+		canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map", getLayerName())));
 		refreshLayers();
 	} else if ("clear_layer".equals(action)) {
 		if (currentLayerId == 0) return;
@@ -547,7 +553,7 @@ onLayerAction() {
 	
 }
 
-canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map")));
+canvasLayers.add(String.valueOf(createVectorLayer("tabgroup2/tab1/map", getLayerName())));
 refreshLayers();
 
 drawGeometryList(geometryList) {
@@ -586,7 +592,7 @@ clearLonLatPoints() {
 	if (lonlatlayer > 0)
 		clearVectorLayer("tabgroup3/tab1/map", lonlatlayer);
 	
-	lonlatlayer = createVectorLayer("tabgroup3/tab1/map");
+	lonlatlayer = createVectorLayer("tabgroup3/tab1/map", getLayerName());
 }
 
 onSelectLonLatPoint() {
