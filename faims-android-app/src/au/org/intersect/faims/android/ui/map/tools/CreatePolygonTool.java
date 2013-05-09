@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -21,6 +22,7 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
@@ -32,6 +34,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	private int color = 0xFF0000FF;
 	private float size = 0.3f;
 	private float pickingSize = 0.3f;
+	private int lineColor = 0XFF000000;
+	private float width = 0.1f;
+	private float pickingWidth = 0.1f;
+	private boolean showStroke;
 
 	private MapButton createButton;
 
@@ -112,7 +118,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		pointsList.clear();
 	}
 	
-	private void drawLine() {
+	private void drawPolygon() {
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
 			showLayerNotFoundError();
@@ -131,7 +137,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			positions.add((new EPSG3857().toWgs84(p.getMapPos().x, p.getMapPos().y)));
 		}
 		
-		mapView.drawPolygon(layer, positions, createPolygonStyleSet(color));
+		mapView.drawPolygon(layer, positions, createPolygonStyleSet(color, lineColor, width, pickingWidth));
 		
 		clearPoints();
 	}
@@ -157,7 +163,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 
 			@Override
 			public void onClick(View arg0) {
-				drawLine();
+				drawPolygon();
 			}
 			
 		});
@@ -183,6 +189,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
 				final SeekBar sizeBar = addSlider(context, layout, "Size:", getSize());
 				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", getPickingSize());
+				final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(lineColor));
+				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
+				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);
+				final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke:", showStroke);
 				
 				builder.setView(layout);
 				
@@ -194,10 +204,18 @@ public class CreatePolygonTool extends BaseGeometryTool {
 							int color = parseColor(colorSetter.getText().toString());
 							float size = parseSize(sizeBar.getProgress());
 							float pickingSize = parseSize(pickingSizeBar.getProgress());
+							int lineColor = parseColor(strokeColorSetter.getText().toString());
+							float width = parseSize(widthBar.getProgress());
+							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							boolean showStroke = showStrokeBox.isChecked();
 							
 							CreatePolygonTool.this.color = color;
 							CreatePolygonTool.this.setSize(size);
 							CreatePolygonTool.this.setPickingSize(pickingSize);
+							CreatePolygonTool.this.lineColor = lineColor;
+							CreatePolygonTool.this.width = width;
+							CreatePolygonTool.this.pickingWidth = pickingWidth;
+							CreatePolygonTool.this.showStroke = showStroke;
 						} catch (Exception e) {
 							showError(context, e.getMessage());
 						}
@@ -231,9 +249,15 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, getSize(), getPickingSize())));
 	}
 	
-	private StyleSet<PolygonStyle> createPolygonStyleSet(int c) {
+	private StyleSet<PolygonStyle> createPolygonStyleSet(int c, int lc, float w, float pw) {
 		StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-		PolygonStyle style = PolygonStyle.builder().setColor(c).build();
+		PolygonStyle style;
+		if (showStroke) {
+			style = PolygonStyle.builder().setColor(c).setLineStyle(createLineStyle(lc, w, pw)).build();
+		} else {
+			style = PolygonStyle.builder().setColor(c).build();
+		}
+		
 		polygonStyleSet.setZoomStyle(0, style);
 		return polygonStyleSet;
 	}
@@ -244,6 +268,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		PointStyle style = PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
 		pointStyleSet.setZoomStyle(0, style);
 		return pointStyleSet;
+	}
+	
+	private LineStyle createLineStyle(int c, float w, float pw) {
+		return LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).build();
 	}
 
 	@Override
