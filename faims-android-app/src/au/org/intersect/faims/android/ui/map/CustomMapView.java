@@ -176,8 +176,8 @@ public class CustomMapView extends MapView {
 		this.getOptions().setSeamlessHorizontalPan(true);
 		this.getOptions().setTileFading(true);
 		this.getOptions().setKineticPanning(true);
-		this.getOptions().setDoubleClickZoomIn(true);
-		this.getOptions().setDualClickZoomOut(true);
+		//this.getOptions().setDoubleClickZoomIn(true);
+		//this.getOptions().setDualClickZoomOut(true);
 		
 		 // set sky bitmap - optional, default - white
 		this.getOptions().setSkyDrawMode(Options.DRAW_BITMAP);
