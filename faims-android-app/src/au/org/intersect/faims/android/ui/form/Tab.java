@@ -203,7 +203,7 @@ public class Tab implements Parcelable{
 								@Override
 								public void onNothingSelected(
 										AdapterView<?> arg0) {
-									mapView.selectToolIndex(-1);
+									// ignore
 								}
 	                			
 	                		});

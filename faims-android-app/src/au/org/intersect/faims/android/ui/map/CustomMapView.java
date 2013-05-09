@@ -24,6 +24,7 @@ import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.Dip;
@@ -35,6 +36,9 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
@@ -132,6 +136,10 @@ public class CustomMapView extends MapView {
 
 	private InternalMapListener internalMapListener;
 	private CustomMapListener mapListener;
+
+	private Layer selectedLayer;
+
+	private Geometry selectedGeom;
 	
 	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
@@ -285,7 +293,7 @@ public class CustomMapView extends MapView {
 				Geometry geom = canvas.getGeometry(geomId);
 				if (geom != null) {
 					canvas.replaceGeometry(geomId, GeometryUtil.screenToWorld(overlayGeometry, this));
-					canvas.updateRenderer();
+					updateRenderer();
 				}
 			}
 		}
@@ -421,8 +429,40 @@ public class CustomMapView extends MapView {
 		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
 		
 		int id = canvas.addPoint(point, styleSet);
-		canvas.updateRenderer();
+		updateRenderer();
 		return id;
+	}
+	
+	private CanvasLayer getVectorLayerForGeom(Geometry geom) {
+		for(int i = 0; i < vectorLayerArray.size(); i++) {
+			int key = vectorLayerArray.keyAt(i);
+			GeometryLayer layer = vectorLayerArray.get(key);
+			if (layer instanceof CanvasLayer) {
+				if (((CanvasLayer) layer).hasGeometry(geom)) {
+					return (CanvasLayer) layer;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private CanvasLayer getVectorLayerForGeomId(int geomId) {
+		for(int i = 0; i < vectorLayerArray.size(); i++) {
+			int key = vectorLayerArray.keyAt(i);
+			GeometryLayer layer = vectorLayerArray.get(key);
+			if (layer instanceof CanvasLayer) {
+				if (((CanvasLayer) layer).hasGeometryId(geomId)) {
+					return (CanvasLayer) layer;
+				}
+			}
+		}
+		return null;
+	}
+	
+	public void restylePoint(Point point, StyleSet<PointStyle> styleSet) {
+		CanvasLayer canvas = getVectorLayerForGeom(point);
+		canvas.restyleGeometry(point, styleSet);
+		updateRenderer();
 	}
 
 	public int drawLine(int layerId, List<MapPos> points,
@@ -430,8 +470,14 @@ public class CustomMapView extends MapView {
 		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
 		
 		int id = canvas.addLine(points, styleSet);
-		canvas.updateRenderer();
+		updateRenderer();
 		return id;
+	}
+	
+	public void restyleLine(Line line, StyleSet<LineStyle> styleSet) {
+		CanvasLayer canvas = getVectorLayerForGeom(line);
+		canvas.restyleGeometry(line, styleSet);
+		updateRenderer();
 	}
 
 	public int drawPolygon(int layerId, List<MapPos> points,
@@ -439,15 +485,28 @@ public class CustomMapView extends MapView {
 		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
 		
 		int id = canvas.addPolygon(points, styleSet);
-		canvas.updateRenderer();
+		updateRenderer();
 		return id;
+	}
+	
+	public void restylePolygon(Polygon polygon, StyleSet<PolygonStyle> styleSet) {
+		CanvasLayer canvas = getVectorLayerForGeom(polygon);
+		canvas.restyleGeometry(polygon, styleSet);
+		updateRenderer();
 	}
 
 	public void clearGeometry(int layerId, int geomId) {
 		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
 		
 		canvas.removeGeometry(geomId);
-		canvas.updateRenderer();
+		updateRenderer();
+	}
+	
+	public void clearGeometry(int geomId) {
+		CanvasLayer canvas = (CanvasLayer) getVectorLayerForGeomId(geomId);
+		
+		canvas.removeGeometry(geomId);
+		updateRenderer();
 	}
 
 	public void clearGeometryList(int layerId, List<Integer> geomList) {
@@ -457,7 +516,16 @@ public class CustomMapView extends MapView {
 			for (Integer geomId : geomList) {
 				canvas.removeGeometry(geomId);
 			}
-			canvas.updateRenderer();
+			updateRenderer();
+		}
+	}
+	
+	public void clearGeometryList(CanvasLayer canvas, List<Integer> geomList) {
+		if (geomList.size() > 0) {
+			for (Integer geomId : geomList) {
+				canvas.removeGeometry(geomId);
+			}
+			updateRenderer();
 		}
 	}
 
@@ -493,11 +561,6 @@ public class CustomMapView extends MapView {
 		builder.setTitle("Layer Manager");
 		builder.setView(layerManager);
 		builder.create().show();
-	}
-
-	public void selectToolIndex(int arg2) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	private boolean doesVectorLayerExist(String name) {
@@ -576,7 +639,8 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void initTools() {
-		tools.add(new CreatePointTool(this));
+		tools.add(new CreatePointTool(this.getContext(), this));
+		tools.add(new CreateLineTool(this.getContext(), this));
 	}
 	
 	public MapTool getTool(String name) {
@@ -588,6 +652,10 @@ public class CustomMapView extends MapView {
 		return null;
 	}
 	
+	public void selectToolIndex(int index) {
+		selectTool(tools.get(index).toString());
+	}
+	
 	public void selectTool(String name) {
 		if (currentTool != null) {
 			currentTool.deactivate();
@@ -597,7 +665,7 @@ public class CustomMapView extends MapView {
 		toolsView.removeAllViews();
 		
 		MapTool tool = getTool(name);
-		View ui = tool.getUI(this.getContext());
+		View ui = tool.getUI();
 		if (ui != null) {
 			toolsView.addView(ui);
 		}
@@ -612,6 +680,49 @@ public class CustomMapView extends MapView {
 
 	public void setMapListener(CustomMapListener customMapListener) {
 		this.mapListener = customMapListener;
+	}
+
+	public void setSelectedLayer(Layer layer) {
+		selectedLayer = layer;
+	}
+
+	public Layer getSelectedLayer() {
+		return selectedLayer;
+	}
+	
+	private int getVectorLayerId(Layer layer) {
+		for(int i = 0; i < vectorLayerArray.size(); i++) {
+			int key = vectorLayerArray.keyAt(i);
+			GeometryLayer l = vectorLayerArray.get(key);
+			if (l == layer) {
+				return key;
+			}
+		}
+		return 0;
+	}
+
+	public int drawPoint(CanvasLayer layer, MapPos point,
+			StyleSet<PointStyle> styleSet) {
+		return drawPoint(getVectorLayerId(layer), point, styleSet);
+	}
+
+	public void setSelectedGeometry(Geometry geom) {
+		selectedGeom = geom;
+	}
+
+	public Geometry getSelectedGeometry() {
+		return selectedGeom;
+	}
+	
+	public void updateRenderer() {
+		if (getComponents() != null) {
+			getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		}
+	}
+
+	public int drawLine(CanvasLayer layer, ArrayList<MapPos> points,
+			StyleSet<LineStyle> styleSet) {
+		return drawLine(getVectorLayerId(layer), points, styleSet);
 	}
 	
 }

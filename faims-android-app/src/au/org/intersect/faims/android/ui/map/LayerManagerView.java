@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -95,6 +96,19 @@ public class LayerManagerView extends LinearLayout {
 	private void createListView() {
 		listView = new ListView(this.getContext());
 		listView.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		listView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int position,
+					long arg3) {
+				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				LayerListItem itemView = (LayerListItem) view;
+				itemView.toggle();
+				layer.setVisible(itemView.isChecked());
+			}
+			
+		});
+		
 		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override

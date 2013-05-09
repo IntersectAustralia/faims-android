@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.TypedValue;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -41,16 +39,8 @@ public class LayerListItem extends LinearLayout {
 		
 		showBox = new CheckBox(this.getContext());
 		showBox.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		showBox.setChecked(true);
+		showBox.setChecked(layer.isVisible());
 		showBox.setFocusable(false);
-		showBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-			@Override
-			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
-				layer.setVisible(showBox.isChecked());
-			}
-			
-		});
 		
 		addView(text);
 		addView(showBox);
@@ -68,6 +58,14 @@ public class LayerListItem extends LinearLayout {
 			layerName = ((CanvasLayer) layer).getName();
 		}
 		return layerName;
+	}
+
+	public void toggle() {
+		showBox.toggle();
+	}
+
+	public boolean isChecked() {
+		return showBox.isChecked();
 	}
 	
 }

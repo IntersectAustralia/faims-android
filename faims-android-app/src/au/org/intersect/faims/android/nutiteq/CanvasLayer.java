@@ -77,6 +77,11 @@ public class CanvasLayer extends GeometryLayer {
 		return id;
 	}
 	
+	public void restylePoint(Point point, StyleSet<PointStyle> styleSet, int id) {
+		removeGeometry(point);
+		addPoint(point.getMapPos(), styleSet, id);
+	}
+	
 	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet) {
 		return addLine(points, styleSet, geomId++);
 	}
@@ -96,6 +101,11 @@ public class CanvasLayer extends GeometryLayer {
 		FLog.d(l.toString());
 		
 		return id;
+	}
+	
+	public int restyleLine(Line line, StyleSet<LineStyle> styleSet, int id) {
+		removeGeometry(line);
+		return addLine(line.getVertexList(), styleSet, id);
 	}
 
 	public int addPolygon(List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
@@ -119,6 +129,15 @@ public class CanvasLayer extends GeometryLayer {
 		return id;
 	}
 	
+	public int restylePolygon(Polygon polygon, StyleSet<PolygonStyle> styleSet, int id) {
+		removeGeometry(polygon);
+		return addPolygon(polygon.getVertexList(), styleSet, id);
+	}
+	
+	public void removeGeometry(Geometry geom) {
+		removeGeometry(getGeometryId(geom));
+	}
+	
 	public void removeGeometry(int geomId) {
 		Geometry geom = objectMap.get(geomId);
 		
@@ -134,12 +153,6 @@ public class CanvasLayer extends GeometryLayer {
 		while(geomBuffer.size() > 0) {
 			Geometry geom = geomBuffer.pop();
 			this.remove(geom);
-		}
-	}
-	
-	public void updateRenderer() {
-		if (components != null) {
-			components.mapRenderers.getMapRenderer().frustumChanged();
 		}
 	}
 	
@@ -226,9 +239,28 @@ public class CanvasLayer extends GeometryLayer {
 		
 		objectMap.put(geomId, geom);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public void restyleGeometry(Geometry geom, StyleSet<? extends Style> styleSet) {
+		if (geom instanceof Point) {
+			restylePoint(((Point) geom), (StyleSet<PointStyle>) styleSet, getGeometryId(geom));
+		} else if  (geom instanceof Line) {
+			restyleLine(((Line) geom), (StyleSet<LineStyle>) styleSet, getGeometryId(geom));
+		} else if (geom instanceof Polygon) {
+			restylePolygon(((Polygon) geom), (StyleSet<PolygonStyle>) styleSet, getGeometryId(geom));
+		}
+	}
 
 	public void setName(String layerName) {
 		this.name = layerName;
+	}
+
+	public boolean hasGeometry(Geometry geom) {
+		return getGeometryId(geom) != 0;
+	}
+
+	public boolean hasGeometryId(int geomId) {
+		return getGeometry(geomId) != null;
 	}
 
 }
