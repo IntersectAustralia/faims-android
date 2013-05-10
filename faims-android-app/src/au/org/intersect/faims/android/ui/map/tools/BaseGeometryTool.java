@@ -68,7 +68,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 				final ArrayList<Layer> filteredLayers = new ArrayList<Layer>();
 				ArrayList<String> layerNames = new ArrayList<String>();
 				for (Layer layer : layers) {
-					if (layer instanceof CanvasLayer) {
+					if (layer.isVisible() && (layer instanceof CanvasLayer)) {
 						filteredLayers.add(layer);
 						layerNames.add(BaseGeometryTool.this.mapView.getLayerName(layer));
 					}
