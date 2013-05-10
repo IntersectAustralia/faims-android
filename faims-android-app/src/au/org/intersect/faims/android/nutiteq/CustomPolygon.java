@@ -23,6 +23,7 @@ public class CustomPolygon extends Polygon {
 			ArrayList<List<MapPos>> invertices, Label label,
 			StyleSet<PolygonStyle> styleSet, Object userData) {
 		super(vertices, invertices, label, styleSet, userData);
+		this.geomId = geomId;
 	}
 
 	public int getGeomId() {
