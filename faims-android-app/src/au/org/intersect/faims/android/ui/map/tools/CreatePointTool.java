@@ -90,6 +90,7 @@ public class CreatePointTool extends BaseGeometryTool {
 	public void onMapClicked(double x, double y, boolean z) {
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
+			setSelectedLayer(null);
 			showError(context, "No layer selected");
 			return;
 		}

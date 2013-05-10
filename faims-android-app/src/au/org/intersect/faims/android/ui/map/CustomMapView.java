@@ -111,9 +111,9 @@ public class CustomMapView extends MapView {
 	// TODO what is this?
 	private static int cacheId = 9991;
 	
-	private static int layerId = 1234;
+	private static int layerId = 1;
 	
-	private static int geomId = 2345;
+	private static int geomId = 1;
 	
 	private SparseArray<Layer> layerIdMap;
 	
@@ -214,23 +214,21 @@ public class CustomMapView extends MapView {
 	}
 
 	public static int nextId() {
-		return cacheId;
+		return cacheId++;
 	}
 	
 	public static int nextLayerId() {
-		return layerId;
+		return layerId++;
 	}
 	
 	public static int nextGeomId() {
-		return geomId;
+		return geomId++;
 	}
 	
 	public int addLayer(Layer layer) throws Exception {
 		if (layerIdMap.get(getLayerId(layer)) != null) {
 			throw new MapException("Layer already exists");
 		}
-		
-		this.getLayers().addLayer(layer);
 		
 		layerIdMap.put(getLayerId(layer), layer);
 		layerNameMap.put(getLayerName(layer), layer);
@@ -255,8 +253,10 @@ public class CustomMapView extends MapView {
 		}
 		
 		this.getLayers().removeLayer(layer);
-		this.layerIdMap.remove(getLayerId(layer));
-		this.layerNameMap.remove(getLayerName(layer));
+		int id = getLayerId(layer);
+		String name = getLayerName(layer);
+		this.layerIdMap.remove(id);
+		this.layerNameMap.remove(name);
 		if (layer == selectedLayer) this.selectedLayer = null;
 	}
 
@@ -493,6 +493,7 @@ public class CustomMapView extends MapView {
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
         // ogrLayer.printSupportedDrivers();
         // ogrLayer.printLayerDetails(table);
+		this.getLayers().addLayer(ogrLayer);
 		return addLayer(ogrLayer);
 	}
 
@@ -508,6 +509,7 @@ public class CustomMapView extends MapView {
 		
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(nextLayerId(), layerName, new EPSG3857(), file, tablename, "Geometry",
                 new String[]{labelColumn}, FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+		this.getLayers().addLayer(spatialLayer);
 		return addLayer(spatialLayer);
 	}
 	
@@ -515,6 +517,7 @@ public class CustomMapView extends MapView {
 		validateLayerName(layerName);
 		
 		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName, new EPSG3857());
+		this.getLayers().addLayer(layer);
 		return addLayer(layer);
 	}
 
