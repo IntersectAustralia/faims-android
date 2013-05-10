@@ -41,6 +41,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -1983,14 +1984,14 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public int drawPoint(String ref, int layerId, MapPos point, StyleSet<PointStyle> styleSet) {
+	public int drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPoint(layerId, point, styleSet).getGeomId();
+				return mapView.drawPoint(layerId, point, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2003,14 +2004,14 @@ public class BeanShellLinker {
 		return -1;
 	}
 	
-	public int drawLine(String ref, int layerId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
+	public int drawLine(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawLine(layerId, points, styleSet).getGeomId();
+				return mapView.drawLine(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2023,14 +2024,14 @@ public class BeanShellLinker {
 		return -1;
 	}
 	
-	public int drawPolygon(String ref, int layerId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
+	public int drawPolygon(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPolygon(layerId, points, styleSet).getGeomId();
+				return mapView.drawPolygon(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

@@ -9,6 +9,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -16,8 +17,6 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.StyleSet;
 
 public class CreatePointTool extends BaseGeometryTool {
 	
@@ -96,19 +95,19 @@ public class CreatePointTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, size, pickingSize));
+			mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
 			showError(context, e.getMessage());
 		}
 	}
 
-	private StyleSet<PointStyle> createPointStyleSet(int c, float s,
-			float ps) {
-		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-		PointStyle style = PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
-		pointStyleSet.setZoomStyle(0, style);
-		return pointStyleSet;
+	private GeometryStyle createPointStyle() {
+		GeometryStyle style = new GeometryStyle();
+		style.pointColor = color;
+		style.size = size;
+		style.pickingSize = pickingSize;
+		return style;
 	}
 
 	@Override
