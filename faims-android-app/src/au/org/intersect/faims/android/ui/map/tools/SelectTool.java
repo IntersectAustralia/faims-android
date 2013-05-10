@@ -15,7 +15,6 @@ public class SelectTool extends MapTool {
 	public static final String NAME = "Select";
 	private LinearLayout layout;
 	private MapButton clearButton;
-	private MapButton undoButton;
 	
 	public SelectTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -25,10 +24,7 @@ public class SelectTool extends MapTool {
 		
 		clearButton = createClearButton(context);
 		
-		undoButton = createUndoButton(context);
-		
 		layout.addView(clearButton);
-		layout.addView(undoButton);
 	}
 
 	@Override
@@ -65,24 +61,6 @@ public class SelectTool extends MapTool {
 		return button;
 	}
 	
-	private MapButton createUndoButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Undo");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				undoLastSelection();
-			}
-			
-		});
-		return button;
-	}
-	
-	private void undoLastSelection() {
-		mapView.popSelection();
-	}
-	
 	private void clearSelection() {
 		mapView.clearSelection();
 	}
@@ -91,7 +69,13 @@ public class SelectTool extends MapTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
-			mapView.pushSelection((Geometry) element);
+			Geometry geom = (Geometry) element;
+			
+			if (mapView.hasSelection(geom)) {
+				mapView.removeSelection(geom);
+			} else {
+				mapView.addSelection(geom);
+			}
 		} else {
 			// ignore
 		}

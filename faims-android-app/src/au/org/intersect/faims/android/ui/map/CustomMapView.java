@@ -373,7 +373,7 @@ public class CustomMapView extends MapView {
 			throw new MapException("Geometry does not exist");
 		}
 		clearGeometryOverlay();
-		pushSelection(geom);
+		addSelection(geom);
 		overlayGeometry = geom;
 	}
 	
@@ -756,7 +756,7 @@ public class CustomMapView extends MapView {
 		}
 	}
 
-	public void pushSelection(Geometry geom) {
+	public void addSelection(Geometry geom) {
 		selectedGeometryList.push(geom);
 		updateDrawView();
 	}
@@ -767,19 +767,16 @@ public class CustomMapView extends MapView {
 		selectedGeometryList.clear();
 		updateDrawView();
 	}
-
-	public void popSelection() {
-		if (selectedGeometryList.isEmpty()) return;
-		
-		selectedGeometryList.removeFirst();
-		updateDrawView();
-	}
 	
 	public void removeSelection(Geometry geom) {
 		if (selectedGeometryList.isEmpty()) return;
 		
 		selectedGeometryList.remove(geom);
 		updateDrawView();
+	}
+	
+	public boolean hasSelection(Geometry geom) {
+		return selectedGeometryList.contains(geom);
 	}
 
 	public void updateSelection() {

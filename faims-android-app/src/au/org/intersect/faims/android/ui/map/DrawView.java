@@ -50,7 +50,7 @@ public class DrawView extends View {
 	}
 	
 	private void drawPointOverlay(CustomPoint point, Canvas canvas) {
-		float size = point.getStyleSet().getFirstZoomStyle().pickingSize * SCALE_FACTOR;
+		float size = point.getStyle().size * SCALE_FACTOR;
 		canvas.drawCircle((float) point.getMapPos().x, (float) point.getMapPos().y, size, paint);
 	}
 	
