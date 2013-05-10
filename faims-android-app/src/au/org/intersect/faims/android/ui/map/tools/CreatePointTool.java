@@ -9,6 +9,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -93,7 +94,12 @@ public class CreatePointTool extends BaseGeometryTool {
 			return;
 		}
 		
-		mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, size, pickingSize));
+		try {
+			mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color, size, pickingSize));
+		} catch (Exception e) {
+			FLog.e("error drawing point", e);
+			showError(context, e.getMessage());
+		}
 	}
 
 	private StyleSet<PointStyle> createPointStyleSet(int c, float s,

@@ -12,14 +12,16 @@ import com.nutiteq.style.StyleSet;
 public class CustomOgrLayer extends OgrLayer {
 
 	private String name;
+	private int layerId;
 
-	public CustomOgrLayer(String name, Projection proj, String fileName, String tableName,
+	public CustomOgrLayer(int layerId, String name, Projection proj, String fileName, String tableName,
 			int maxObjects, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet) throws IOException {
 		super(proj, fileName, tableName, maxObjects, pointStyleSet, lineStyleSet,
 				polygonStyleSet);
 		this.name = name;
+		this.layerId = layerId;
 	}
 	
 	public String getName() {
@@ -28,6 +30,10 @@ public class CustomOgrLayer extends OgrLayer {
 
 	public void setName(String layerName) {
 		this.name = layerName;
+	}
+
+	public int getLayerId() {
+		return layerId;
 	}
 
 }
