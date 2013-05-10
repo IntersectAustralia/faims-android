@@ -34,8 +34,8 @@
     <string name="download_project_error_title">Project is too big</string>
     <string name="download_project_error_message">Error storage limit reached.</string>
     
-    <string name="download_busy_project_error_title">Project is currently archiving</string>
-    <string name="download_busy_project_error_message">Please wait till archiving is finsihed.</string>
+    <string name="download_busy_project_error_title">Project archive in progress</string>
+    <string name="download_busy_project_error_message">Please wait till project has finished archiving on the server and try again.</string>
     
     <string name="render_project_title">Show Project</string>
     <string name="render_project_message">Do you want to render project?</string>

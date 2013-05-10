@@ -105,6 +105,7 @@ public class LayerManagerView extends LinearLayout {
 				LayerListItem itemView = (LayerListItem) view;
 				itemView.toggle();
 				layer.setVisible(itemView.isChecked());
+				mapView.updateTools();
 			}
 			
 		});

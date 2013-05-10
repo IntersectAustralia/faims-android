@@ -61,6 +61,7 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Marker;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.layers.Layer;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
@@ -1931,7 +1932,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				mapView.removeVectorLayer(layerId);
+				mapView.removeLayer(layerId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1968,7 +1969,9 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				mapView.setLayerVisible(layerId, visible);
+				Layer layer = mapView.getLayer(layerId);
+				layer.setVisible(visible);
+				mapView.updateTools();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1987,7 +1990,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPoint(layerId, point, styleSet);
+				return mapView.drawPoint(layerId, point, styleSet).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2007,7 +2010,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawLine(layerId, points, styleSet);
+				return mapView.drawLine(layerId, points, styleSet).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2027,7 +2030,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPolygon(layerId, points, styleSet);
+				return mapView.drawPolygon(layerId, points, styleSet).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2040,13 +2043,13 @@ public class BeanShellLinker {
 		return -1;
 	}
 	
-	public void clearGeometry(String ref, int layerId, int geomId) {
+	public void clearGeometry(String ref, int geomId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				mapView.clearGeometry(layerId, geomId);
+				mapView.clearGeometry(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2058,13 +2061,18 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void clearGeometryList(String ref, int layerId, List<Integer> geomList) {
+	public void clearGeometryList(String ref, List<Integer> geomList) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				mapView.clearGeometryList(layerId, geomList);
+				ArrayList<Geometry> gl = new ArrayList<Geometry>();
+				for (Integer id : geomList) {
+					gl.add(mapView.getGeometry(id));
+				}
+				
+				mapView.clearGeometryList(gl);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2095,13 +2103,13 @@ public class BeanShellLinker {
 		return null;
 	}
 	
-	public Geometry getGeometry(String ref, int layerId, int geomId) {
+	public Geometry getGeometry(String ref, int geomId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.getGeometry(layerId, geomId);
+				return mapView.getGeometry(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

@@ -9,12 +9,14 @@ import com.nutiteq.projections.Projection;
 public class CustomGdalMapLayer extends GdalMapLayer {
 
 	private String name;
+	private int layerId;
 
-	public CustomGdalMapLayer(String name, Projection projection, int minZoom, int maxZoom,
+	public CustomGdalMapLayer(int layerId, String name, Projection projection, int minZoom, int maxZoom,
 			int id, String gdalSource, MapView mapView, boolean reproject)
 			throws IOException {
 		super(projection, minZoom, maxZoom, id, gdalSource, mapView, reproject);
 		this.name = name;
+		this.layerId = layerId;
 	}
 	
 	public String getName() {
@@ -23,6 +25,10 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 
 	public void setName(String layerName) {
 		this.name = layerName;
+	}
+
+	public int getLayerId() {
+		return layerId;
 	}
 
 }

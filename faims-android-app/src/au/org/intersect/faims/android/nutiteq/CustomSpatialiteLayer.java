@@ -10,8 +10,9 @@ import com.nutiteq.style.StyleSet;
 public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	private String name;
+	private int layerId;
 
-	public CustomSpatialiteLayer(String name, Projection proj, String dbPath,
+	public CustomSpatialiteLayer(int layerId, String name, Projection proj, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
 			int maxObjects, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
@@ -19,6 +20,7 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 		super(proj, dbPath, tableName, geomColumnName, userColumns, maxObjects,
 				pointStyleSet, lineStyleSet, polygonStyleSet);
 		this.name = name;
+		this.layerId = layerId;
 	}
 	
 	public String getName() {
@@ -27,6 +29,10 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	public void setName(String layerName) {
 		this.name = layerName;
+	}
+
+	public int getLayerId() {
+		return layerId;
 	}
 
 }

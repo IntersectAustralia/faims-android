@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.map;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -11,7 +12,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.location.Location;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -21,7 +21,10 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
+import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
+import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -37,9 +40,6 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.Line;
-import com.nutiteq.geometry.Point;
-import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
@@ -49,7 +49,6 @@ import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
-import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CustomMapView extends MapView {
 	
@@ -112,9 +111,17 @@ public class CustomMapView extends MapView {
 	// TODO what is this?
 	private static int cacheId = 9991;
 	
-	private int vectorId = 1;
+	private static int layerId = 1;
 	
-	private SparseArray<GeometryLayer> vectorLayerArray;
+	private static int geomId = 1;
+	
+	private SparseArray<Layer> layerIdMap;
+	
+	private HashMap<String, Layer> layerNameMap;
+	
+	private SparseArray<Geometry> geometryIdMap;
+	
+	private HashMap<Geometry, Layer> geometryLayerMap;
 	
 	private DrawView drawView;
 	
@@ -145,7 +152,10 @@ public class CustomMapView extends MapView {
 	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
 		
-		vectorLayerArray = new SparseArray<GeometryLayer>();
+		layerIdMap = new SparseArray<Layer>();
+		layerNameMap = new HashMap<String, Layer>();
+		geometryIdMap = new SparseArray<Geometry>();
+		geometryLayerMap = new HashMap<Geometry, Layer>();
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
@@ -204,71 +214,150 @@ public class CustomMapView extends MapView {
 	}
 
 	public static int nextId() {
-		return cacheId;
+		return cacheId++;
 	}
 	
-	public int addVectorLayer(GeometryLayer layer) {
-		this.getLayers().addLayer(layer);
-		vectorLayerArray.put(vectorId, layer);
-		return vectorId++;
+	public static int nextLayerId() {
+		return layerId++;
+	}
+	
+	public static int nextGeomId() {
+		return geomId++;
+	}
+	
+	public int addLayer(Layer layer) throws Exception {
+		if (layerIdMap.get(getLayerId(layer)) != null) {
+			throw new MapException("Layer already exists");
+		}
+		
+		layerIdMap.put(getLayerId(layer), layer);
+		layerNameMap.put(getLayerName(layer), layer);
+		
+		return getLayerId(layer);
 	}
 
-	public void removeVectorLayer(int id) {
-		this.getLayers().removeLayer(vectorLayerArray.get(id));
-		vectorLayerArray.remove(id);
+	public void removeLayer(int layerId) throws Exception {
+		Layer layer = layerIdMap.get(layerId);
+		removeLayer(layer);
 	}
 	
-	public void removeVectorLayer(String layerName) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (getLayerName(layer).equals(layerName)) {
-				vectorLayerArray.remove(key);
-				break;
-			}
+	public void removeLayer(Layer layer) throws Exception {
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		
+		// can only remove base layer if its the only layer on the map
+		CustomGdalMapLayer baseLayer = (CustomGdalMapLayer) getLayers().getBaseLayer();
+		if (baseLayer == layer) {
+			throw new MapException("Cannot remove base layer");
+		}
+		
+		this.getLayers().removeLayer(layer);
+		int id = getLayerId(layer);
+		String name = getLayerName(layer);
+		this.layerIdMap.remove(id);
+		this.layerNameMap.remove(name);
+		
+		if (layer == selectedLayer) {
+			this.selectedLayer = null;
+			updateTools();
 		}
 	}
 
-	public GeometryLayer getVectorLayer(int layerId) {
-		return vectorLayerArray.get(layerId);
+	public Layer getLayer(int layerId) {
+		return layerIdMap.get(layerId);
 	}
-
-	public void setLayerVisible(int layerId, boolean visible) {
-		GeometryLayer layer = vectorLayerArray.get(layerId);
-		layer.setVisible(visible);
+	
+	public Layer getLayer(String layerName) {
+		return layerNameMap.get(layerName);
 	}
-
-	public void setViewLocked(boolean lock) {
-		if (lock) {
-			this.getConstraints().setTiltRange(new Range(90.0f, 90.0f));
-			this.setTilt(90.0f);
-		} else {
-			this.getConstraints().setTiltRange(Constraints.DEFAULT_TILT_RANGE);
+	
+	public String getLayerName(Layer layer) {
+		String layerName = "N/A";
+		if (layer instanceof CustomGdalMapLayer) {
+			layerName = ((CustomGdalMapLayer) layer).getName();
+		} else if (layer instanceof CustomOgrLayer) {
+			layerName = ((CustomOgrLayer) layer).getName();
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			layerName = ((CustomSpatialiteLayer) layer).getName();
+		} else if (layer instanceof CanvasLayer) {
+			layerName = ((CanvasLayer) layer).getName();
+		}
+		return layerName;
+	}
+	
+	public void setLayerName(Layer layer, String layerName) {
+		if (layer instanceof CustomGdalMapLayer) {
+			((CustomGdalMapLayer) layer).setName(layerName);
+		} else if (layer instanceof CustomOgrLayer) {
+			((CustomOgrLayer) layer).setName(layerName);
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			((CustomSpatialiteLayer) layer).setName(layerName);
+		} else if (layer instanceof CanvasLayer) {
+			((CanvasLayer) layer).setName(layerName);
 		}
 	}
+	
+	public int getLayerId(Layer layer) {
+		int layerId = 0;
+		if (layer instanceof CustomGdalMapLayer) {
+			layerId = ((CustomGdalMapLayer) layer).getLayerId();
+		} else if (layer instanceof CustomOgrLayer) {
+			layerId = ((CustomOgrLayer) layer).getLayerId();
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			layerId = ((CustomSpatialiteLayer) layer).getLayerId();
+		} else if (layer instanceof CanvasLayer) {
+			layerId = ((CanvasLayer) layer).getLayerId();
+		}
+		return layerId;
+	}
+	
+	public int addGeometry(Layer layer, Geometry geom) throws Exception {
+		if (geometryIdMap.get(getGeometryId(geom)) != null) {
+			throw new MapException("Geometry already exists");
+		}
+		
+		geometryIdMap.put(getGeometryId(geom), geom);
+		geometryLayerMap.put(geom, layer);
+		
+		return getGeometryId(geom);
+	}
+	
+	public void removeGeometry(int geomId) throws Exception {
+		removeGeometry(getGeometry(geomId));
+	}
+	
+	public void removeGeometry(Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+		
+		geometryIdMap.remove(getGeometryId(geom));
+		geometryLayerMap.remove(geom);
+		if (geom == selectedGeom) selectedGeom = null;
+	}
 
-	public int getGeometryId(Geometry geometry) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				int geomId = ((CanvasLayer) layer).getGeometryId(geometry);
-				if (geomId > 0) return geomId;
-			}
+	public int getGeometryId(Geometry geom) {
+		if (geom instanceof CustomPoint) {
+			return ((CustomPoint) geom).getGeomId();
+		} else if (geom instanceof CustomLine) {
+			return ((CustomLine) geom).getGeomId();
+		} else if (geom instanceof CustomPolygon) {
+			return ((CustomPolygon) geom).getGeomId();
 		}
 		return 0;
 	}
 
 	public Geometry getGeometry(int geomId) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				Geometry geom = ((CanvasLayer) layer).getGeometry(geomId);
-				if (geom != null) return geom;
-			}
+		return geometryIdMap.get(geomId);
+	}
+	
+	public void drawGeometrOverlay(int geomId) throws Exception {
+		Geometry geom = this.getGeometry(geomId);
+		if (geom == null) {
+			throw new MapException("Cannot find geometry to overlay");
 		}
-		return null;
+		this.drawGeometrOverlay(geom);
 	}
 
 	public void drawGeometrOverlay(Geometry geom) {
@@ -282,21 +371,30 @@ public class CustomMapView extends MapView {
 	}
 	
 	public void replaceGeometryOverlay(int geomId) throws MapException {
-		if (this.getGeometry(geomId) == null) {
+		replaceGeometryOverlay(getGeometry(geomId));
+	}
+	
+	public void replaceGeometryOverlay(Geometry geom) throws MapException {
+		if (geom == null) {
 			throw new MapException("Cannot find geometry overlay");
 		}
 		
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				CanvasLayer canvas = (CanvasLayer) layer;
-				Geometry geom = canvas.getGeometry(geomId);
-				if (geom != null) {
-					canvas.replaceGeometry(geomId, GeometryUtil.screenToWorld(overlayGeometry, this));
-					updateRenderer();
-				}
-			}
+		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		
+		layer.removeGeometry(geom);
+		layer.addGeometry(GeometryUtil.screenToWorld(overlayGeometry, this));
+		updateRenderer();
+	}
+	
+	public void setViewLocked(boolean lock) {
+		if (lock) {
+			this.getConstraints().setTiltRange(new Range(90.0f, 90.0f));
+			this.setTilt(90.0f);
+		} else {
+			this.getConstraints().setTiltRange(Constraints.DEFAULT_TILT_RANGE);
 		}
 	}
 	
@@ -313,17 +411,7 @@ public class CustomMapView extends MapView {
 		int height = this.getHeight();
 		
 		scaleView.setMapBoundary(this.getZoom(), width, height, 
-				distance(convertToWgs84(this.screenToWorld(0,  height, 0)), convertToWgs84(this.screenToWorld(width, height, 0))));
-	}
-	
-	private double distance(MapPos p1, MapPos p2) {
-		float[] results = new float[3];
-		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
-		return results[0] / 1000;
-	}
-	
-	private MapPos convertToWgs84(MapPos p) {
-		return (new EPSG3857()).toWgs84(p.x, p.y);
+				GeometryUtil.distance(GeometryUtil.convertToWgs84(this.screenToWorld(0,  height, 0)), GeometryUtil.convertToWgs84(this.screenToWorld(width, height, 0))));
 	}
 
 	public void startThread(Runnable runnable) {
@@ -373,16 +461,18 @@ public class CustomMapView extends MapView {
 		return canRunThreads;
 	}
 
-	public void addRasterMap(String layerName, String file) throws Exception {
+	public int addRasterMap(String layerName, String file) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error map does not exist " + file);
 		}
 		
 		validateLayerName(layerName);
 		
-		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file, this, true);
+		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(), layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file, this, true);
         gdalLayer.setShowAlways(true);
         this.getLayers().setBaseLayer(gdalLayer);
+        
+        return addLayer(gdalLayer);
 	}
 	
 	public void setMapFocusPoint(float longitude, float latitude) throws Exception {
@@ -403,11 +493,12 @@ public class CustomMapView extends MapView {
 		
 		validateLayerName(layerName);
 		
-		CustomOgrLayer ogrLayer = new CustomOgrLayer(layerName, new EPSG3857(), file, null, 
+		CustomOgrLayer ogrLayer = new CustomOgrLayer(nextLayerId(), layerName, new EPSG3857(), file, null, 
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
         // ogrLayer.printSupportedDrivers();
         // ogrLayer.printLayerDetails(table);
-		return addVectorLayer(ogrLayer);
+		this.getLayers().addLayer(ogrLayer);
+		return addLayer(ogrLayer);
 	}
 
 	public int addSpatialLayer(String layerName, String file, String tablename,
@@ -420,136 +511,137 @@ public class CustomMapView extends MapView {
 		
 		validateLayerName(layerName);
 		
-		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(layerName, new EPSG3857(), file, tablename, "Geometry",
+		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(nextLayerId(), layerName, new EPSG3857(), file, tablename, "Geometry",
                 new String[]{labelColumn}, FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
-		return addVectorLayer(spatialLayer);
-	}
-
-	public int drawPoint(int layerId, MapPos point,
-			StyleSet<PointStyle> styleSet) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		int id = canvas.addPoint(point, styleSet);
-		updateRenderer();
-		return id;
+		this.getLayers().addLayer(spatialLayer);
+		return addLayer(spatialLayer);
 	}
 	
-	private CanvasLayer getVectorLayerForGeom(Geometry geom) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				if (((CanvasLayer) layer).hasGeometry(geom)) {
-					return (CanvasLayer) layer;
-				}
-			}
+	public int addCanvasLayer(String layerName) throws Exception {
+		validateLayerName(layerName);
+		
+		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName, new EPSG3857());
+		this.getLayers().addLayer(layer);
+		return addLayer(layer);
+	}
+
+	public CustomPoint drawPoint(int layerId, MapPos point,
+			StyleSet<PointStyle> styleSet) throws Exception {
+		return drawPoint(getLayer(layerId), point, styleSet);
+	}
+	
+	public CustomPoint drawPoint(Layer layer, MapPos point,
+			StyleSet<PointStyle> styleSet)  throws Exception {
+		CanvasLayer canvas = (CanvasLayer) layer;
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
 		}
-		return null;
+		CustomPoint p = canvas.addPoint(nextGeomId(), point, styleSet);
+		addGeometry(layer, p);
+		updateRenderer();
+		return p;
 	}
 	
-	private CanvasLayer getVectorLayerForGeomId(int geomId) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				if (((CanvasLayer) layer).hasGeometryId(geomId)) {
-					return (CanvasLayer) layer;
-				}
-			}
+	public void restylePoint(CustomPoint point, StyleSet<PointStyle> styleSet) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(point);
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
 		}
-		return null;
-	}
-	
-	public void restylePoint(Point point, StyleSet<PointStyle> styleSet) {
-		CanvasLayer canvas = getVectorLayerForGeom(point);
-		canvas.restyleGeometry(point, styleSet);
+		canvas.removeGeometry(point);
+		canvas.addGeometry(drawPoint(canvas, GeometryUtil.convertToWgs84(point.getMapPos()), styleSet));
 		updateRenderer();
 	}
 
-	public int drawLine(int layerId, List<MapPos> points,
-			StyleSet<LineStyle> styleSet) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		int id = canvas.addLine(points, styleSet);
-		updateRenderer();
-		return id;
+	public CustomLine drawLine(int layerId, List<MapPos> points,
+			StyleSet<LineStyle> styleSet) throws Exception {
+		return drawLine(getLayer(layerId), points, styleSet);
 	}
 	
-	public void restyleLine(Line line, StyleSet<LineStyle> styleSet) {
-		CanvasLayer canvas = getVectorLayerForGeom(line);
-		canvas.restyleGeometry(line, styleSet);
-		updateRenderer();
-	}
-
-	public int drawPolygon(int layerId, List<MapPos> points,
-			StyleSet<PolygonStyle> styleSet) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		int id = canvas.addPolygon(points, styleSet);
-		updateRenderer();
-		return id;
-	}
-	
-	public void restylePolygon(Polygon polygon, StyleSet<PolygonStyle> styleSet) {
-		CanvasLayer canvas = getVectorLayerForGeom(polygon);
-		canvas.restyleGeometry(polygon, styleSet);
-		updateRenderer();
-	}
-
-	public void clearGeometry(int layerId, int geomId) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		canvas.removeGeometry(geomId);
-		updateRenderer();
-	}
-	
-	public void clearGeometry(int geomId) {
-		CanvasLayer canvas = (CanvasLayer) getVectorLayerForGeomId(geomId);
-		
-		canvas.removeGeometry(geomId);
-		updateRenderer();
-	}
-
-	public void clearGeometryList(int layerId, List<Integer> geomList) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		if (geomList.size() > 0) {
-			for (Integer geomId : geomList) {
-				canvas.removeGeometry(geomId);
-			}
-			updateRenderer();
+	public CustomLine drawLine(Layer layer, List<MapPos> points,
+			StyleSet<LineStyle> styleSet) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) layer;
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
 		}
+		CustomLine l = canvas.addLine(nextGeomId(), points, styleSet);
+		addGeometry(layer, l);
+		updateRenderer();
+		return l;
+	}
+
+	public void restyleLine(CustomLine line, StyleSet<LineStyle> styleSet) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(line);
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
+		}
+		canvas.removeGeometry(line);
+		canvas.addGeometry(drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), styleSet));
+		updateRenderer();
+	}
+
+	public CustomPolygon drawPolygon(int layerId, List<MapPos> points,
+			StyleSet<PolygonStyle> styleSet) throws Exception {
+		return drawPolygon(getLayer(layerId), points, styleSet);
 	}
 	
-	public void clearGeometryList(CanvasLayer canvas, List<Integer> geomList) {
-		if (geomList.size() > 0) {
-			for (Integer geomId : geomList) {
-				canvas.removeGeometry(geomId);
-			}
-			updateRenderer();
+	public CustomPolygon drawPolygon(Layer layer, List<MapPos> points,
+			StyleSet<PolygonStyle> styleSet) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) layer;
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
 		}
+		CustomPolygon p = canvas.addPolygon(nextGeomId(), points, styleSet);
+		addGeometry(layer, p);
+		updateRenderer();
+		return p;
 	}
-
-	public List<Geometry> getGeometryList(int layerId) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		return canvas.getTransformedGeometryList();
+	
+	public void restylePolygon(CustomPolygon polygon, StyleSet<PolygonStyle> styleSet) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(polygon);
+		if (canvas == null) {
+			throw new MapException("Layer does not exist");
+		}
+		canvas.removeGeometry(polygon);
+		canvas.addGeometry(drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), styleSet));
+		updateRenderer();
 	}
-
-	public Geometry getGeometry(int layerId, int geomId) {
-		CanvasLayer canvas = (CanvasLayer) this.getVectorLayer(layerId);
-		
-		return canvas.getTransformedGeometry(geomId);
+	
+	public void clearGeometry(int geomId) throws Exception {
+		clearGeometry(getGeometry(geomId));
 	}
-
-	public void drawGeometrOverlay(int geomId) throws Exception {
-		Geometry geom = this.getGeometry(geomId);
+	
+	public void clearGeometry(Geometry geom) throws Exception {
 		if (geom == null) {
-			throw new MapException("Cannot find geometry to overlay");
+			throw new MapException("Cannot find geometry overlay");
 		}
-		this.drawGeometrOverlay(geom);
+		
+		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		layer.removeGeometry(geom);
+		
+		removeGeometry(geom);
+		
+		updateRenderer();
 	}
 
+	public void clearGeometryList(List<? extends Geometry> geomList) throws Exception {
+		for (Object geom : geomList) {
+			clearGeometry((Geometry) geom);
+		}
+	}
+
+	public List<Geometry> getGeometryList(int layerId) throws Exception {
+		return getGeometryList(getLayer(layerId));
+	}
+	
+	public List<Geometry> getGeometryList(Layer layer) throws Exception {
+		CanvasLayer canvas = (CanvasLayer) layer;
+		
+		return GeometryUtil.projectGeometryList(new EPSG3857(), canvas.getGeometryList());
+	}
+	
 	public List<MapTool> getTools() {
 		return tools;
 	}
@@ -564,78 +656,19 @@ public class CustomMapView extends MapView {
 		builder.create().show();
 	}
 	
-	private boolean doesVectorLayerExist(String name) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer layer = vectorLayerArray.get(key);
-			if (layer instanceof CanvasLayer) {
-				if (name.equals(((CanvasLayer) layer).getName())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
 	private void validateLayerName(String name) throws Exception {
 		if (name == null || "".equals(name)) {
 			throw new MapException("Please specify a name for the layer");
-		} else if (doesVectorLayerExist(name)) {
+		} else if (getLayer(name) != null) {
 			throw new MapException("Layer " + name + " already exists");
 		}
 	}
 
-	public int addCanvasLayer(String layerName) throws Exception {
-		validateLayerName(layerName);
-		
-		CanvasLayer layer = new CanvasLayer(layerName, new EPSG3857());
-		return addVectorLayer(layer);
-	}
-	
-	public String getLayerName(Layer layer) {
-		String layerName = "N/A";
-		if (layer instanceof CustomGdalMapLayer) {
-			layerName = ((CustomGdalMapLayer) layer).getName();
-		} else if (layer instanceof CustomOgrLayer) {
-			layerName = ((CustomOgrLayer) layer).getName();
-		} else if (layer instanceof CustomSpatialiteLayer) {
-			layerName = ((CustomSpatialiteLayer) layer).getName();
-		} else if (layer instanceof CanvasLayer) {
-			layerName = ((CanvasLayer) layer).getName();
-		}
-		return layerName;
-	}
-	
-	public void setLayerName(Layer layer, String layerName) {
-		if (layer instanceof CustomGdalMapLayer) {
-			((CustomGdalMapLayer) layer).setName(layerName);
-		} else if (layer instanceof CustomOgrLayer) {
-			((CustomOgrLayer) layer).setName(layerName);
-		} else if (layer instanceof CustomSpatialiteLayer) {
-			((CustomSpatialiteLayer) layer).setName(layerName);
-		} else if (layer instanceof CanvasLayer) {
-			((CanvasLayer) layer).setName(layerName);
-		}
-	}
-
-	public void removeLayer(Layer layer) throws Exception {
-		String layerName = getLayerName(layer);
-		
-		// check if layer is base layer
-		CustomGdalMapLayer baseLayer = (CustomGdalMapLayer) getLayers().getBaseLayer();
-		if (baseLayer.getName().equals(layerName)) {
-			throw new MapException("Cannot remove base layer");
-		}
-		
-		getLayers().removeLayer(layer);
-		
-		removeVectorLayer(layerName);
-		
-		if (layer == selectedLayer) selectedLayer = null;
-	}
-
 	public void renameLayer(Layer layer, String layerName) throws Exception {
-		// check if layer is base layer
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		
 		validateLayerName(layerName);
 		
 		setLayerName(layer, layerName);
@@ -681,6 +714,12 @@ public class CustomMapView extends MapView {
 	public void selectDefaultTool() {
 		selectTool(CreatePointTool.NAME);
 	}
+	
+	public void updateTools() {
+		for (MapTool tool: tools) {
+			tool.update();
+		}
+	}
 
 	public void setMapListener(CustomMapListener customMapListener) {
 		this.mapListener = customMapListener;
@@ -692,22 +731,6 @@ public class CustomMapView extends MapView {
 
 	public Layer getSelectedLayer() {
 		return selectedLayer;
-	}
-	
-	private int getVectorLayerId(Layer layer) {
-		for(int i = 0; i < vectorLayerArray.size(); i++) {
-			int key = vectorLayerArray.keyAt(i);
-			GeometryLayer l = vectorLayerArray.get(key);
-			if (l == layer) {
-				return key;
-			}
-		}
-		return 0;
-	}
-
-	public int drawPoint(CanvasLayer layer, MapPos point,
-			StyleSet<PointStyle> styleSet) {
-		return drawPoint(getVectorLayerId(layer), point, styleSet);
 	}
 
 	public void setSelectedGeometry(Geometry geom) {
@@ -722,16 +745,6 @@ public class CustomMapView extends MapView {
 		if (getComponents() != null) {
 			getComponents().mapRenderers.getMapRenderer().frustumChanged();
 		}
-	}
-
-	public int drawLine(CanvasLayer layer, ArrayList<MapPos> points,
-			StyleSet<LineStyle> styleSet) {
-		return drawLine(getVectorLayerId(layer), points, styleSet);
-	}
-
-	public int drawPolygon(CanvasLayer layer, ArrayList<MapPos> points,
-			StyleSet<PolygonStyle> styleSet) {
-		return drawPolygon(getVectorLayerId(layer), points, styleSet);
 	}
 	
 }

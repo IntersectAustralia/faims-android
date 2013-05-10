@@ -13,12 +13,13 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
+import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.components.MapPos;
-import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
@@ -39,7 +40,7 @@ public class CreateLineTool extends BaseGeometryTool {
 
 	private MapButton createButton;
 
-	private LinkedList<Integer> pointsList;
+	private LinkedList<CustomPoint> pointsList;
 
 	private MapButton undoButton;
 
@@ -49,7 +50,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
 		
-		pointsList = new LinkedList<Integer>();
+		pointsList = new LinkedList<CustomPoint>();
 		
 		updateLayout();
 	}
@@ -78,13 +79,13 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	@Override
 	protected void setSelectedLayer(Layer layer) {
-		super.setSelectedLayer(layer);
 		clearPoints();
+		super.setSelectedLayer(layer);
 	}
 	
 	private void showLayerNotFoundError() {
+		clearPoints();
 		super.setSelectedLayer(null);
-		pointsList.clear();
 		showError(context, "No layer selected");
 	}
 	
@@ -97,21 +98,31 @@ public class CreateLineTool extends BaseGeometryTool {
 			return;
 		}
 		
-		int id = pointsList.removeLast();
+		CustomPoint p = pointsList.removeLast();
 		
-		mapView.clearGeometry(id);
+		try {
+			mapView.clearGeometry(p);
+		} catch (Exception e) {
+			FLog.e("error clearing point", e);
+			showError(context, e.getMessage());
+		}
 	}
 	
 	private void clearPoints() {
 		if (pointsList.isEmpty()) return;
 		
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
+		CanvasLayer layer = (CanvasLayer) lastLayerSelected;
 		if (layer == null) {
 			showLayerNotFoundError();
 			return;
 		}
 		
-		mapView.clearGeometryList(layer, pointsList);
+		try {
+			mapView.clearGeometryList(pointsList);
+		} catch (Exception e) {
+			FLog.e("error clearing points", e);
+			showError(context, e.getMessage());
+		}
 		
 		pointsList.clear();
 	}
@@ -130,12 +141,16 @@ public class CreateLineTool extends BaseGeometryTool {
 		
 		// convert points to map positions
 		ArrayList<MapPos> positions = new ArrayList<MapPos>();
-		for (Integer id : pointsList) {
-			Point p = (Point) mapView.getGeometry(id);
+		for (CustomPoint p : pointsList) {
 			positions.add((new EPSG3857().toWgs84(p.getMapPos().x, p.getMapPos().y)));
 		}
 		
-		mapView.drawLine(layer, positions, createLineStyleSet(color, width, pickingWidth, size, pickingSize));
+		try {
+			mapView.drawLine(layer, positions, createLineStyleSet(color, width, pickingWidth, size, pickingSize));
+		} catch (Exception e) {
+			FLog.e("error drawing line", e);
+			showError(context, e.getMessage());
+		}
 		
 		clearPoints();
 	}
@@ -242,7 +257,12 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		// make point color solid
-		pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
+		try {
+			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
+		} catch (Exception e) {
+			FLog.e("error drawing point", e);
+			showError(context, e.getMessage());
+		}
 	}
 	
 	private StyleSet<LineStyle> createLineStyleSet(int c, float w,

@@ -4,20 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import android.util.SparseArray;
 import au.org.intersect.faims.android.log.FLog;
 
+import com.nutiteq.components.Components;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.Line;
-import com.nutiteq.geometry.Point;
-import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.Style;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.Const;
 import com.nutiteq.utils.Quadtree;
@@ -27,24 +23,27 @@ public class CanvasLayer extends GeometryLayer {
 
 	private String name;
 	private Quadtree<Geometry> objects;
-	private SparseArray<Geometry> objectMap;
-	private static int geomId = 1;
 	private Stack<Geometry> geomBuffer;
+	private int layerId;
 	
-	public CanvasLayer(String name, Projection projection) {
+	public CanvasLayer(int layerId, String name, Projection projection) {
 		super(projection);
 		this.name = name;
+		this.layerId = layerId;
 		objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
-		objectMap = new SparseArray<Geometry>();
 		geomBuffer = new Stack<Geometry>();
-	}
-	
-	public CanvasLayer(Projection projection) {
-		this(null, projection);
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
+	public int getLayerId() {
+		return this.layerId;
 	}
 	
 	@Override
@@ -60,90 +59,63 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 	
-	public int addPoint(MapPos point, StyleSet<PointStyle> styleSet) {
-		return addPoint(point, styleSet, geomId++);
+	private void updateRenderList(Geometry geom) {
+		List<Geometry> oldVisibleElementsList = getVisibleElements();
+		List<Geometry> newVisibleElementsList = (oldVisibleElementsList != null ? new ArrayList<Geometry>(oldVisibleElementsList) : new ArrayList<Geometry>());
+		newVisibleElementsList.add(geom);
+		
+		for (Geometry g : newVisibleElementsList) {
+			g.setActiveStyle(0);
+		}
+		
+		setVisibleElementsList(newVisibleElementsList); 
+		
+		// Update renderer
+		Components components = getComponents();
+		if (components != null) {
+		  components.mapRenderers.getMapRenderer().frustumChanged();
+		}
 	}
 
-	public int addPoint(MapPos point, StyleSet<PointStyle> styleSet, int id) {		
-		Point p = new Point(projection.fromWgs84(point.x, point.y), null, styleSet, null);
-		p.attachToLayer(this);
-		
-		objects.insert(p.getInternalState().envelope, p);
-		
-		objectMap.put(id, p);
-		
-		FLog.d(p.toString());
-		
-		return id;
+	public CustomPoint addPoint(int geomId, MapPos point, StyleSet<PointStyle> styleSet) {		
+		CustomPoint p = new CustomPoint(geomId, projection.fromWgs84(point.x, point.y), null, styleSet, null);
+		addGeometry(p);
+		return p;
 	}
 	
-	public void restylePoint(Point point, StyleSet<PointStyle> styleSet, int id) {
-		removeGeometry(point);
-		addPoint(point.getMapPos(), styleSet, id);
-	}
-	
-	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet) {
-		return addLine(points, styleSet, geomId++);
-	}
-	
-	public int addLine(List<MapPos> points, StyleSet<LineStyle> styleSet, int id) {
+	public CustomLine addLine(int geomId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		Line l = new Line(vertices, null, styleSet, null);
-		l.attachToLayer(this);
-		
-		objects.insert(l.getInternalState().envelope, l);
-		
-		objectMap.put(id, l);
-		
-		FLog.d(l.toString());
-		
-		return id;
+		CustomLine l = new CustomLine(geomId, vertices, null, styleSet, null);
+		addGeometry(l);
+		return l;
 	}
 	
-	public int restyleLine(Line line, StyleSet<LineStyle> styleSet, int id) {
-		removeGeometry(line);
-		return addLine(line.getVertexList(), styleSet, id);
-	}
-
-	public int addPolygon(List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
-		return addPolygon(points, styleSet, geomId++);
-	}
-	
-	public int addPolygon(List<MapPos> points, StyleSet<PolygonStyle> styleSet, int id) {		
+	public CustomPolygon addPolygon(int geomId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {		
 		List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, styleSet, null);
-		p.attachToLayer(this);
+		CustomPolygon p = new CustomPolygon(geomId, vertices, new ArrayList<List<MapPos>>(), null, styleSet, null);
 		
-		objects.insert(p.getInternalState().envelope, p);
-		
-		objectMap.put(id, p);
-		
-		FLog.d(p.toString());
-		
-		return id;
+		addGeometry(p);
+		return p;
 	}
 	
-	public int restylePolygon(Polygon polygon, StyleSet<PolygonStyle> styleSet, int id) {
-		removeGeometry(polygon);
-		return addPolygon(polygon.getVertexList(), styleSet, id);
+	public void addGeometry(Geometry geom) {
+		geom.attachToLayer(this);
+		
+		objects.insert(geom.getInternalState().envelope, geom);
+		
+		updateRenderList(geom);
+		
+		FLog.d(geom.toString());
 	}
 	
 	public void removeGeometry(Geometry geom) {
-		removeGeometry(getGeometryId(geom));
-	}
-	
-	public void removeGeometry(int geomId) {
-		Geometry geom = objectMap.get(geomId);
-		
 		objects.remove(geom.getInternalState().envelope, geom);
-		
-		objectMap.remove(geomId);
 		
 		geomBuffer.add(geom); // Issue with removing objects when object is still 
 							  // in visible list so buffering objects to be removed later
@@ -155,112 +127,8 @@ public class CanvasLayer extends GeometryLayer {
 			this.remove(geom);
 		}
 	}
-	
-	public Geometry getTransformedGeometry(int geomId) {
-		return transformGeometry(objectMap.get(geomId));
-	}
 
-	public List<Geometry> getTransformedGeometryList() {
-		return transformGeometryList(objects.getAll());
+	public List<Geometry> getGeometryList() {
+		return objects.getAll();
 	}
-	
-	private Geometry transformGeometry(Geometry geom) {
-		if (geom instanceof Point) {
-			Point p = (Point) geom;
-			return new Point(transformVertex(p.getMapPos()), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
-		} else if (geom instanceof Line) {
-			Line l = (Line) geom;
-			return new Line(transformVertices(l.getVertexList()), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
-		} else if (geom instanceof Polygon) {
-			Polygon p = (Polygon) geom;
-			return new Polygon(transformVertices(p.getVertexList()), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
-		}
-		return null;
-	}
-	
-	private List<Geometry> transformGeometryList(List<Geometry> geomList) {
-		if (geomList.size() == 0) return null;
-		
-		List<Geometry> newGeomList = new ArrayList<Geometry>();
-		for (Geometry geom : geomList) {
-			newGeomList.add(transformGeometry(geom));
-		}
-		return newGeomList;
-	}
-	
-	private MapPos transformVertex(MapPos v) {
-		return projection.toWgs84(v.x, v.y);
-	}
-	
-	private List<MapPos> transformVertices(List<MapPos> vertices) {
-		List<MapPos> newVertices = new ArrayList<MapPos>();
-		for (MapPos v : vertices) {
-			newVertices.add(projection.toWgs84(v.x, v.y));
-		}
-		return newVertices;
-	}
-
-	public int getGeometryId(Geometry geometry) {
-		for(int i = 0; i < objectMap.size(); i++) {
-		   int key = objectMap.keyAt(i);
-		   Geometry object = objectMap.get(key);
-		   if (object == geometry)
-			   return key;
-		}
-		return 0;
-	}
-	
-	public Geometry getGeometry(int geomId) {
-		return objectMap.get(geomId);
-	}
-	
-	public int addGeometry(Geometry geom, StyleSet<? extends Style> styleSet) {
-		return addGeometry(geom, styleSet, geomId++);
-	}
-
-	@SuppressWarnings("unchecked")
-	public int addGeometry(Geometry geom, StyleSet<? extends Style> styleSet, int id) {
-		if (geom instanceof Point) {
-			return addPoint(((Point) geom).getMapPos(), (StyleSet<PointStyle>) styleSet, id);
-		} else if  (geom instanceof Line) {
-			return addLine(((Line) geom).getVertexList(), (StyleSet<LineStyle>) styleSet, id);
-		} else if (geom instanceof Polygon) {
-			return addPolygon(((Polygon) geom).getVertexList(), (StyleSet<PolygonStyle>) styleSet, id);
-		}
-		return 0;
-	}
-
-	public void replaceGeometry(int geomId, Geometry geom) {
-		removeGeometry(geomId);
-		
-		geom.attachToLayer(this);
-		
-		objects.insert(geom.getInternalState().envelope, geom);
-		
-		objectMap.put(geomId, geom);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void restyleGeometry(Geometry geom, StyleSet<? extends Style> styleSet) {
-		if (geom instanceof Point) {
-			restylePoint(((Point) geom), (StyleSet<PointStyle>) styleSet, getGeometryId(geom));
-		} else if  (geom instanceof Line) {
-			restyleLine(((Line) geom), (StyleSet<LineStyle>) styleSet, getGeometryId(geom));
-		} else if (geom instanceof Polygon) {
-			restylePolygon(((Polygon) geom), (StyleSet<PolygonStyle>) styleSet, getGeometryId(geom));
-		}
-	}
-
-	public void setName(String layerName) {
-		this.name = layerName;
-	}
-
-	public boolean hasGeometry(Geometry geom) {
-		return getGeometryId(geom) != 0;
-	}
-
-	public boolean hasGeometryId(int geomId) {
-		return getGeometry(geomId) != null;
-	}
-
 }
