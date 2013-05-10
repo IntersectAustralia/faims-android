@@ -40,8 +40,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	}
 	
 	protected void updateLayout() {
-		layout.removeAllViews();
-		layout.addView(settingsButton);
+		super.updateLayout();
 		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (selectedLayer != null) layout.addView(selectedLayer);
 	}

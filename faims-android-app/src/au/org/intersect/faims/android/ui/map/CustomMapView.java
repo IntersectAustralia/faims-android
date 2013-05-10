@@ -33,6 +33,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
+import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.SelectTool;
 import au.org.intersect.faims.android.util.Dip;
@@ -136,7 +137,7 @@ public class CustomMapView extends MapView {
 	
 	private RelativeLayout toolsView;
 
-	private Geometry overlayGeometry;
+	private Geometry geometryOverlay;
 	
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
@@ -360,35 +361,40 @@ public class CustomMapView extends MapView {
 		return geometryIdMap.get(geomId);
 	}
 	
-	public void drawGeometrOverlay(int geomId) throws Exception {
+	public void drawGeometryOverlay(int geomId) throws Exception {
 		Geometry geom = this.getGeometry(geomId);
 		if (geom == null) {
 			throw new MapException("Cannot find geometry to overlay");
 		}
-		this.drawGeometrOverlay(geom);
+		this.drawGeometryOverlay(geom);
+	}
+	
+	public Geometry getGeometryOverlay() {
+		return geometryOverlay;
 	}
 
-	public void drawGeometrOverlay(Geometry geom) throws Exception {
+	public void drawGeometryOverlay(Geometry geom) throws Exception {
 		if (geom == null) {
 			throw new MapException("Geometry does not exist");
 		}
+		
 		clearGeometryOverlay();
 		addSelection(geom);
-		overlayGeometry = geom;
+		geometryOverlay = geom;
 	}
 	
 	public void clearGeometryOverlay() {
-		if (overlayGeometry != null) {
-			removeSelection(overlayGeometry);
-			overlayGeometry = null;
+		if (geometryOverlay != null) {
+			removeSelection(geometryOverlay);
+			geometryOverlay = null;
 		}
 	}
 	
-	public void replaceGeometryOverlay(int geomId) throws MapException {
+	public void replaceGeometryWithOverlay(int geomId) throws MapException {
 		replaceGeometryOverlay(getGeometry(geomId));
 	}
 	
-	public void replaceGeometryOverlay(Geometry geom) throws MapException {
+	public void replaceGeometryWithOverlay(Geometry geom) throws MapException {
 		if (geom == null) {
 			throw new MapException("Cannot find geometry overlay");
 		}
@@ -399,7 +405,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		layer.removeGeometry(geom);
-		layer.addGeometry(overlayGeometry);
+		layer.addGeometry(geometryOverlay);
 		updateRenderer();
 	}
 	
@@ -684,6 +690,7 @@ public class CustomMapView extends MapView {
 	
 	private void initTools() {
 		tools.add(new SelectTool(this.getContext(), this));
+		tools.add(new EditTool(this.getContext(), this));
 		tools.add(new CreatePointTool(this.getContext(), this));
 		tools.add(new CreateLineTool(this.getContext(), this));
 		tools.add(new CreatePolygonTool(this.getContext(), this));
@@ -757,6 +764,8 @@ public class CustomMapView extends MapView {
 	}
 
 	public void addSelection(Geometry geom) {
+		if (hasSelection(geom)) return;
+		
 		selectedGeometryList.push(geom);
 		updateDrawView();
 	}
@@ -793,7 +802,9 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void updateDrawView() {
-		drawView.setDrawList(GeometryUtil.transformGeometryList(selectedGeometryList, this, true));
+		if (!drawView.isLocked()) {
+			drawView.setDrawList(GeometryUtil.transformGeometryList(selectedGeometryList, this, true));
+		}
 	}
 
 	public int getDrawViewColor() {
@@ -810,6 +821,14 @@ public class CustomMapView extends MapView {
 
 	public void setDrawViewStrokeStyle(float strokeSize) {
 		drawView.setStrokeSize(strokeSize);
+	}
+	
+	public boolean isDrawViewLocked() {
+		return drawView.isLocked();
+	}
+
+	public void setDrawViewLock(boolean lock) {
+		drawView.setLock(lock);
 	}
 	
 }

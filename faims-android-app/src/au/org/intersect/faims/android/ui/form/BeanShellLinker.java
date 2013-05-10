@@ -2145,7 +2145,7 @@ public class BeanShellLinker {
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.drawGeometrOverlay(geomId);
+				mapView.drawGeometryOverlay(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2166,7 +2166,7 @@ public class BeanShellLinker {
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.drawGeometrOverlay(null);
+				mapView.clearGeometryOverlay();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

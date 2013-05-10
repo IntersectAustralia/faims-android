@@ -26,6 +26,8 @@ public class DrawView extends View {
 	private int color = Color.CYAN;
 
 	private float strokeSize = 0.5f;
+
+	private boolean lock;
 	
 	public DrawView(Context context) {
 		super(context);
@@ -108,6 +110,14 @@ public class DrawView extends View {
 		paint.setStrokeWidth(strokeSize * STROKE_SCALE);
 		paint.setAntiAlias(true);
 		invalidate();
+	}
+	
+	public boolean isLocked() {
+		return lock;
+	}
+
+	public void setLock(boolean lock) {
+		this.lock = lock;
 	}
 
 }

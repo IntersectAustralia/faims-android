@@ -18,10 +18,15 @@ import com.nutiteq.geometry.VectorElement;
 public class SelectTool extends SettingsTool {
 	
 	public static final String NAME = "Select";
-	private MapButton clearButton;
+	
+	protected MapButton clearButton;
 	
 	public SelectTool(Context context, CustomMapView mapView) {
-		super(context, mapView, NAME);
+		this(context, mapView, NAME);
+	}
+	
+	public SelectTool(Context context, CustomMapView mapView, String name) {
+		super(context, mapView, name);
 		
 		clearButton = createClearButton(context);
 		
@@ -30,8 +35,7 @@ public class SelectTool extends SettingsTool {
 	
 	@Override
 	protected void updateLayout() {
-		layout.removeAllViews();
-		layout.addView(settingsButton);
+		super.updateLayout();
 		if (clearButton != null) layout.addView(clearButton);
 	}
 	
