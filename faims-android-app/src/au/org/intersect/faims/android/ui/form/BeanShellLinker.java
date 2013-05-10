@@ -1971,6 +1971,7 @@ public class BeanShellLinker {
 				
 				Layer layer = mapView.getLayer(layerId);
 				layer.setVisible(visible);
+				mapView.updateTools();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

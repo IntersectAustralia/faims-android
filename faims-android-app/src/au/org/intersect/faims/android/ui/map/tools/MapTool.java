@@ -30,6 +30,10 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 		
 	}
 	
+	public void update() {
+		
+	}
+	
 	// define tool context ui
 	public abstract View getUI();
 	

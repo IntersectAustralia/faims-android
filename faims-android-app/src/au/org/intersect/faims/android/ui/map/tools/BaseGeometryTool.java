@@ -26,6 +26,8 @@ public abstract class BaseGeometryTool extends SettingsTool {
 
 	protected MapButton selectLayerButton;
 
+	protected Layer lastLayerSelected;
+
 	public BaseGeometryTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);
 		
@@ -54,6 +56,11 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	@Override
 	public void deactivate() {
 		mapView.setSelectedGeometry(null);
+	}
+	
+	@Override 
+	public void update() {
+		setSelectedLayer(mapView.getSelectedLayer());
 	}
 	
 	protected MapButton createSelectLayerButton(final Context context) {
@@ -110,13 +117,14 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	}
 	
 	protected void setSelectedLayer(Layer layer) {
-		mapView.setSelectedLayer(layer);
-		
-		if (layer == null) {
+		if (layer == null || !layer.isVisible()) {
 			selectedLayer.setText("No layer selected");
+			mapView.setSelectedLayer(null);
 		} else {
+			mapView.setSelectedLayer(layer);
 			selectedLayer.setText("Current Layer: " + mapView.getLayerName(layer));
 		}
+		lastLayerSelected = layer;
 	}
 
 }

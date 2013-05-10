@@ -248,8 +248,8 @@ public class CustomMapView extends MapView {
 		
 		// can only remove base layer if its the only layer on the map
 		CustomGdalMapLayer baseLayer = (CustomGdalMapLayer) getLayers().getBaseLayer();
-		if (baseLayer == layer && this.getLayers().getAllLayers().size() > 1) {
-			throw new MapException("Can only remove base layer if all other layers are removed");
+		if (baseLayer == layer) {
+			throw new MapException("Cannot remove base layer");
 		}
 		
 		this.getLayers().removeLayer(layer);
@@ -257,7 +257,11 @@ public class CustomMapView extends MapView {
 		String name = getLayerName(layer);
 		this.layerIdMap.remove(id);
 		this.layerNameMap.remove(name);
-		if (layer == selectedLayer) this.selectedLayer = null;
+		
+		if (layer == selectedLayer) {
+			this.selectedLayer = null;
+			updateTools();
+		}
 	}
 
 	public Layer getLayer(int layerId) {
@@ -709,6 +713,12 @@ public class CustomMapView extends MapView {
 
 	public void selectDefaultTool() {
 		selectTool(CreatePointTool.NAME);
+	}
+	
+	public void updateTools() {
+		for (MapTool tool: tools) {
+			tool.update();
+		}
 	}
 
 	public void setMapListener(CustomMapListener customMapListener) {

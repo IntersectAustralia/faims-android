@@ -41,7 +41,6 @@ public class LayerListItem extends LinearLayout {
 		showBox.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		showBox.setChecked(layer.isVisible());
 		showBox.setFocusable(false);
-		showBox.setEnabled(false);
 		
 		addView(text);
 		addView(showBox);

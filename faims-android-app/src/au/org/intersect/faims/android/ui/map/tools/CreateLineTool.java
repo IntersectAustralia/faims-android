@@ -79,13 +79,13 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	@Override
 	protected void setSelectedLayer(Layer layer) {
-		super.setSelectedLayer(layer);
 		clearPoints();
+		super.setSelectedLayer(layer);
 	}
 	
 	private void showLayerNotFoundError() {
+		clearPoints();
 		super.setSelectedLayer(null);
-		pointsList.clear();
 		showError(context, "No layer selected");
 	}
 	
@@ -111,7 +111,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	private void clearPoints() {
 		if (pointsList.isEmpty()) return;
 		
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
+		CanvasLayer layer = (CanvasLayer) lastLayerSelected;
 		if (layer == null) {
 			showLayerNotFoundError();
 			return;
