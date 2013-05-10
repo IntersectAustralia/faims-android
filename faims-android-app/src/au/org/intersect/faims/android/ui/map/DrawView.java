@@ -18,16 +18,19 @@ public class DrawView extends View {
 	
 	private static final float SCALE_FACTOR = 50.0f;
 
+	private static final float STROKE_SCALE = 10.0f;
+
 	private Paint paint = new Paint();
 	private List<Geometry> geometryList;
+
+	private int color = Color.CYAN;
+
+	private float strokeSize = 0.5f;
 	
 	public DrawView(Context context) {
 		super(context);
 		
-		paint.setColor(Color.CYAN);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(5.0f);
-		paint.setAntiAlias(true);
+		updatePaint();
 	}
 	
 	@Override
@@ -79,6 +82,32 @@ public class DrawView extends View {
 	public void setDrawList(List<Geometry> geometryList) {
 		this.geometryList = geometryList;
 		this.invalidate();
+	}
+	
+	public int getColor() {
+		return color;
+	}
+
+	public void setColor(int color) {
+		this.color = color;
+		updatePaint();
+	}
+	
+	public float getStrokeSize() {
+		return strokeSize;
+	}
+	
+	public void setStrokeSize(float strokeSize) {
+		this.strokeSize = strokeSize;
+		updatePaint();
+	}
+
+	private void updatePaint() {
+		paint.setColor(color);
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(strokeSize * STROKE_SCALE);
+		paint.setAntiAlias(true);
+		invalidate();
 	}
 
 }

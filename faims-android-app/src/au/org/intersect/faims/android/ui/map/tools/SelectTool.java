@@ -1,35 +1,38 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class SelectTool extends MapTool {
+public class SelectTool extends SettingsTool {
 	
 	public static final String NAME = "Select";
-	private LinearLayout layout;
 	private MapButton clearButton;
 	
 	public SelectTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
-		layout = new LinearLayout(context);
-		layout.setOrientation(LinearLayout.VERTICAL);
-		
 		clearButton = createClearButton(context);
 		
-		layout.addView(clearButton);
+		updateLayout();
 	}
-
+	
 	@Override
-	public View getUI() {
-		return layout;
+	protected void updateLayout() {
+		layout.removeAllViews();
+		layout.addView(settingsButton);
+		if (clearButton != null) layout.addView(clearButton);
 	}
 	
 	@Override
@@ -79,5 +82,56 @@ public class SelectTool extends MapTool {
 		} else {
 			// ignore
 		}
+	}
+
+	@Override
+	protected MapButton createSettingsButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Style Tool");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setTitle("Style Settings");
+				
+				LinearLayout layout = new LinearLayout(context);
+				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+				layout.setOrientation(LinearLayout.VERTICAL);
+				
+				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				
+				builder.setView(layout);
+				
+				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						try {
+							int color = parseColor(colorSetter.getText().toString());
+							float strokeSize = parseSize(strokeSizeBar.getProgress());
+							
+							mapView.setDrawViewColor(color);
+							mapView.setDrawViewStrokeStyle(strokeSize);
+						} catch (Exception e) {
+							showError(context, e.getMessage());
+						}
+					}
+				});
+				
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// ignore
+					}
+				});
+				
+				builder.create().show();
+			}
+				
+		});
+		return button;
 	}
 }

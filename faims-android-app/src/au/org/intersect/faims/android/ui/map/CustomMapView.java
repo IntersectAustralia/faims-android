@@ -795,5 +795,21 @@ public class CustomMapView extends MapView {
 	private void updateDrawView() {
 		drawView.setDrawList(GeometryUtil.transformGeometryList(selectedGeometryList, this, true));
 	}
+
+	public int getDrawViewColor() {
+		return drawView.getColor();
+	}
+
+	public float getDrawViewStrokeStyle() {
+		return drawView.getStrokeSize();
+	}
+
+	public void setDrawViewColor(int color) {
+		drawView.setColor(color);
+	}
+
+	public void setDrawViewStrokeStyle(float strokeSize) {
+		drawView.setStrokeSize(strokeSize);
+	}
 	
 }
