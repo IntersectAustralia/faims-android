@@ -87,7 +87,7 @@ public class SelectTool extends SettingsTool {
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
-				showError(context, "Error selecting element");
+				showError("Error selecting element");
 			}
 		} else {
 			// ignore
@@ -125,7 +125,7 @@ public class SelectTool extends SettingsTool {
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});

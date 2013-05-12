@@ -84,7 +84,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	private void showLayerNotFoundError() {
 		clearPoints();
 		super.setSelectedLayer(null);
-		showError(context, "No layer selected");
+		showError("No layer selected");
 	}
 	
 	private void clearLastPoint() {
@@ -102,7 +102,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			mapView.clearGeometry(p);
 		} catch (Exception e) {
 			FLog.e("error clearing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
@@ -119,7 +119,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			mapView.clearGeometryList(pointsList);
 		} catch (Exception e) {
 			FLog.e("error clearing points", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		pointsList.clear();
@@ -133,7 +133,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		if (pointsList.size() < 2) {
-			showError(context, "Line requires at least 2 points");
+			showError("Line requires at least 2 points");
 			return;
 		}
 		
@@ -147,7 +147,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			mapView.drawLine(layer, positions, createLineStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing line", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		clearPoints();
@@ -225,7 +225,7 @@ public class CreateLineTool extends BaseGeometryTool {
 							CreateLineTool.this.pickingWidth = pickingWidth;
 							CreateLineTool.this.showPoints = showPoints;
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
@@ -259,7 +259,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createGuidePointStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	

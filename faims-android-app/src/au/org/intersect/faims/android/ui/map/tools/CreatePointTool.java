@@ -64,7 +64,7 @@ public class CreatePointTool extends BaseGeometryTool {
 							CreatePointTool.this.size = size;
 							CreatePointTool.this.pickingSize = pickingSize;
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
@@ -90,7 +90,7 @@ public class CreatePointTool extends BaseGeometryTool {
 		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
 		if (layer == null) {
 			setSelectedLayer(null);
-			showError(context, "No layer selected");
+			showError("No layer selected");
 			return;
 		}
 		
@@ -98,7 +98,7 @@ public class CreatePointTool extends BaseGeometryTool {
 			mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 

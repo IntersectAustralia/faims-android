@@ -59,7 +59,7 @@ public class EditTool extends SelectTool {
 			}
 		} catch (Exception e) {
 			FLog.e("error replacing geometry overlay", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
@@ -76,7 +76,7 @@ public class EditTool extends SelectTool {
 				
 			} catch (Exception e) {
 				FLog.e("error drawing geometry overlay", e);
-				showError(context, e.getMessage());
+				showError(e.getMessage());
 			}
 		} else {
 			// ignore

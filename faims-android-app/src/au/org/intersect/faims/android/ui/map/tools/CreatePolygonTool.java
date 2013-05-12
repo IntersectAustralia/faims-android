@@ -85,7 +85,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	private void showLayerNotFoundError() {
 		clearPoints();
 		super.setSelectedLayer(null);
-		showError(context, "No layer selected");
+		showError("No layer selected");
 	}
 	
 	private void clearLastPoint() {
@@ -103,7 +103,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			mapView.clearGeometry(p);
 		} catch (Exception e) {
 			FLog.e("error clearing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
@@ -120,7 +120,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			mapView.clearGeometryList(pointsList);
 		} catch (Exception e) {
 			FLog.e("error clearing points", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		pointsList.clear();
@@ -134,7 +134,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		if (pointsList.size() < 3) {
-			showError(context, "Polygon requires at least 3 points");
+			showError("Polygon requires at least 3 points");
 			return;
 		}
 		
@@ -148,7 +148,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			mapView.drawPolygon(layer, positions, createPolygonStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing polygon", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		clearPoints();
@@ -229,7 +229,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 							CreatePolygonTool.this.pickingWidth = pickingWidth;
 							CreatePolygonTool.this.showStroke = showStroke;
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
