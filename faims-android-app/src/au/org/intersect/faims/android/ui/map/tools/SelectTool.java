@@ -9,6 +9,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -76,12 +77,17 @@ public class SelectTool extends SettingsTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
-			Geometry geom = (Geometry) element;
-			
-			if (mapView.hasSelection(geom)) {
-				mapView.removeSelection(geom);
-			} else {
-				mapView.addSelection(geom);
+			try {
+				Geometry geom = (Geometry) element;
+				
+				if (mapView.hasSelection(geom)) {
+					mapView.removeSelection(geom);
+				} else {
+					mapView.addSelection(geom);
+				}
+			} catch (Exception e) {
+				FLog.e("error selecting element", e);
+				showError(context, "Error selecting element");
 			}
 		} else {
 			// ignore

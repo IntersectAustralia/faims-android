@@ -55,10 +55,7 @@ public class EditTool extends SelectTool {
 		
 		try {
 			if (!lockButton.isChecked()) {
-				Geometry geom = mapView.getGeometryOverlay();
-				if (geom != null) {
-					mapView.replaceGeometryWithOverlay(geom);
-				}
+				
 			}
 		} catch (Exception e) {
 			FLog.e("error replacing geometry overlay", e);
@@ -67,7 +64,7 @@ public class EditTool extends SelectTool {
 	}
 	
 	public void onMapClicked(double arg0, double arg1, boolean arg2) {
-		mapView.clearGeometryOverlay();
+		mapView.clearSelection();
 	}
 
 	public void onVectorElementClicked(VectorElement element, double arg1,
@@ -76,7 +73,7 @@ public class EditTool extends SelectTool {
 			Geometry geom = (Geometry) element;
 			
 			try {
-				mapView.drawGeometryOverlay(geom);
+				
 			} catch (Exception e) {
 				FLog.e("error drawing geometry overlay", e);
 				showError(context, e.getMessage());

@@ -136,8 +136,6 @@ public class CustomMapView extends MapView {
 	private ScaleBarView scaleView;
 	
 	private RelativeLayout toolsView;
-
-	private Geometry geometryOverlay;
 	
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
@@ -361,54 +359,6 @@ public class CustomMapView extends MapView {
 		return geometryIdMap.get(geomId);
 	}
 	
-	public void drawGeometryOverlay(int geomId) throws Exception {
-		Geometry geom = this.getGeometry(geomId);
-		if (geom == null) {
-			throw new MapException("Cannot find geometry to overlay");
-		}
-		this.drawGeometryOverlay(geom);
-	}
-	
-	public Geometry getGeometryOverlay() {
-		return geometryOverlay;
-	}
-
-	public void drawGeometryOverlay(Geometry geom) throws Exception {
-		if (geom == null) {
-			throw new MapException("Geometry does not exist");
-		}
-		
-		clearGeometryOverlay();
-		addSelection(geom);
-		geometryOverlay = geom;
-	}
-	
-	public void clearGeometryOverlay() {
-		if (geometryOverlay != null) {
-			removeSelection(geometryOverlay);
-			geometryOverlay = null;
-		}
-	}
-	
-	public void replaceGeometryWithOverlay(int geomId) throws MapException {
-		replaceGeometryOverlay(getGeometry(geomId));
-	}
-	
-	public void replaceGeometryWithOverlay(Geometry geom) throws MapException {
-		if (geom == null) {
-			throw new MapException("Cannot find geometry overlay");
-		}
-		
-		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
-		if (layer == null) {
-			throw new MapException("Layer does not exist");
-		}
-		
-		layer.removeGeometry(geom);
-		layer.addGeometry(geometryOverlay);
-		updateRenderer();
-	}
-	
 	public void setViewLocked(boolean lock) {
 		if (lock) {
 			this.getConstraints().setTiltRange(new Range(90.0f, 90.0f));
@@ -626,7 +576,7 @@ public class CustomMapView extends MapView {
 	
 	public void clearGeometry(Geometry geom) throws Exception {
 		if (geom == null) {
-			throw new MapException("Cannot find geometry overlay");
+			throw new MapException("Geometry does not exist");
 		}
 		
 		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
@@ -762,8 +712,16 @@ public class CustomMapView extends MapView {
 			getComponents().mapRenderers.getMapRenderer().frustumChanged();
 		}
 	}
+	
+	public void addSelection(int geomId) throws Exception {
+		addSelection(getGeometry(geomId));
+	}
 
-	public void addSelection(Geometry geom) {
+	public void addSelection(Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+		
 		if (hasSelection(geom)) return;
 		
 		selectedGeometryList.push(geom);
@@ -799,6 +757,10 @@ public class CustomMapView extends MapView {
 			}
 		}
 		updateDrawView();
+	}
+	
+	public void transformSelection() {
+		
 	}
 	
 	private void updateDrawView() {
