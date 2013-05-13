@@ -115,8 +115,8 @@ public class GeometryUtil {
 	}
 	
 	public static String convertToDegrees(double value) {
-		double degrees = Math.floor(value);
-		double totalSeconds = Math.floor((value - degrees) * 3600);
+		double degrees = value < 0 ? Math.ceil(value) : Math.floor(value);
+		double totalSeconds = Math.floor(Math.abs(value - degrees) * 3600);
 		double minutes = Math.floor((totalSeconds / 60));
 		double seconds = totalSeconds - (minutes * 60);
 		return Integer.toString((int) degrees) + ":" + toFixed((int) minutes, 2) + ":" + toFixed((int) seconds, 2);  
