@@ -782,11 +782,16 @@ public class CustomMapView extends MapView {
 			throw new MapException("Geometry selection is locked");
 		}
 		
-		// note: remove geometry from list that no longer exist
+		// note: remove geometry from list that no longer exist or are not visible
 		for (Iterator<Geometry> iterator = selectedGeometryList.iterator(); iterator.hasNext();) {
 			Geometry geom = iterator.next();
 			if (getGeometry(getGeometryId(geom)) == null) {
 				iterator.remove();
+			} else {
+				CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(geom);
+				if (!canvas.isVisible()) {
+					iterator.remove();
+				}
 			}
 		}
 		updateDrawView();
