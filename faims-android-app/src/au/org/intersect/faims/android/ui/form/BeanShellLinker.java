@@ -41,6 +41,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -1693,7 +1694,7 @@ public class BeanShellLinker {
 			}
 		}
 		catch(MapException e) {
-			FLog.w("warning showing raster map", e);
+			FLog.e("error showing raster map", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
@@ -1720,7 +1721,7 @@ public class BeanShellLinker {
 							}
 							
 						});
-						Thread.sleep(100);
+						Thread.sleep(500);
 					}
 					
 					FLog.d("stopping map overlay thread");
@@ -1805,7 +1806,7 @@ public class BeanShellLinker {
 			}
 		}
 		catch(MapException e) {
-			FLog.w("warning setting map focus point", e);
+			FLog.e("error setting map focus point", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
@@ -1876,7 +1877,7 @@ public class BeanShellLinker {
 		}
 	}
 
-	public int showVectorLayer(String ref, String layerName, String filename, 
+	public int showShapeLayer(String ref, String layerName, String filename, 
 			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1891,14 +1892,14 @@ public class BeanShellLinker {
 			}
 		}
 		catch(MapException e) {
-			FLog.w("warning showing vector layer", e);
+			FLog.w("error showing shape layer", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
-			FLog.e("error showing vector layer" + ref,e);
-			showWarning("Logic Error", "Error showing vector layer " + ref);
+			FLog.e("error showing shape layer" + ref,e);
+			showWarning("Logic Error", "Error showing shape layer " + ref);
 		}
-		return -1;
+		return 0;
 	}
 	
 	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String labelColumn, 
@@ -1916,17 +1917,17 @@ public class BeanShellLinker {
 			}
 		}
 		catch(MapException e) {
-			FLog.w("warning showing spatial layer", e);
+			FLog.w("error showing spatial layer", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error showing spatial layer" + ref,e);
 			showWarning("Logic Error", "Error showing spatial layer " + ref);
 		}
-		return -1;
+		return 0;
 	}
 	
-	public void clearVectorLayer(String ref, int layerId) {
+	public void removeLayer(String ref, int layerId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -1938,13 +1939,17 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
+		catch(MapException e) {
+			FLog.e("error removing layer", e);
+			showWarning("Logic Error", e.getMessage());
+		}
 		catch(Exception e){
-			FLog.e("error clearing vector layer" + ref,e);
-			showWarning("Logic Error", "Error clearing vector layer " + ref);
+			FLog.e("error removing layer " + ref,e);
+			showWarning("Logic Error", "Error removing layer " + ref);
 		}
 	}
 	
-	public int createVectorLayer(String ref, String layerName) {
+	public int createCanvasLayer(String ref, String layerName) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -1956,14 +1961,18 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
-		catch(Exception e){
-			FLog.e("error creating vector layer " + ref,e);
-			showWarning("Logic Error", "Error creating vector layer " + ref);
+		catch(MapException e) {
+			FLog.e("error creating canvas layer", e);
+			showWarning("Logic Error", e.getMessage());
 		}
-		return -1;
+		catch(Exception e){
+			FLog.e("error creating canvas layer " + ref,e);
+			showWarning("Logic Error", "Error creating canvas layer " + ref);
+		}
+		return 0;
 	}
 	
-	public void setVectorLayerVisible(String ref, int layerId, boolean visible) {
+	public void setLayerVisible(String ref, int layerId, boolean visible) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -1983,64 +1992,76 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public int drawPoint(String ref, int layerId, MapPos point, StyleSet<PointStyle> styleSet) {
+	public int drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPoint(layerId, point, styleSet).getGeomId();
+				return mapView.drawPoint(layerId, point, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.e("error drawing point", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error drawing point " + ref,e);
 			showWarning("Logic Error", "Error drawing point " + ref);
 		}
-		return -1;
+		return 0;
 	}
 	
-	public int drawLine(String ref, int layerId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
+	public int drawLine(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawLine(layerId, points, styleSet).getGeomId();
+				return mapView.drawLine(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.e("error drawing line", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error drawing line " + ref,e);
 			showWarning("Logic Error", "Error drawing line " + ref);
 		}
-		return -1;
+		return 0;
 	}
 	
-	public int drawPolygon(String ref, int layerId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {
+	public int drawPolygon(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.drawPolygon(layerId, points, styleSet).getGeomId();
+				return mapView.drawPolygon(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
+		catch(MapException e) {
+			FLog.e("error drawing polygon", e);
+			showWarning("Logic Error", e.getMessage());
+		}
 		catch(Exception e){
 			FLog.e("error drawing polygon " + ref,e);
 			showWarning("Logic Error", "Error drawing polygon " + ref);
 		}
-		return -1;
+		return 0;
 	}
 	
 	public void clearGeometry(String ref, int geomId) {
@@ -2054,6 +2075,10 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
+		}
+		catch(MapException e) {
+			FLog.e("error clearing geometry", e);
+			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
 			FLog.e("error clearing geometry " + ref,e);
@@ -2139,58 +2164,75 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void drawGeometryOverlay(String ref, int geomId) {
+	public void addSelection(String ref, int geomId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.drawGeometrOverlay(geomId);
+				mapView.addSelection(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(MapException e) {
-			FLog.w("warning drawing geometry overlay", e);
+			FLog.e("error adding selection", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
-			FLog.e("error drawing geometry overlay " + ref,e);
-			showWarning("Logic Error", "Error drawing geometry overlay " + ref);
+			FLog.e("error adding selection " + ref,e);
+			showWarning("Logic Error", "Error adding selection " + ref);
 		}
 	}
 	
-	public void clearGeometryOverlay(String ref) {
+	public void clearSelection(String ref) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.drawGeometrOverlay(null);
+				mapView.clearSelection();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error clearing geometry overlay " + ref,e);
-			showWarning("Logic Error", "Error clearing geometry overlay " + ref);
+			FLog.e("error clearing selection " + ref,e);
+			showWarning("Logic Error", "Error clearing selection " + ref);
 		}
 	}
 	
-	public void replaceGeometryOverlay(String ref, int geomId) {
+	public void prepareSelectionTransform(String ref) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.replaceGeometryOverlay(geomId);
+				mapView.prepareSelectionTransform();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error replacing geometry overlay " + ref,e);
-			showWarning("Logic Error", "Error replacing geometry overlay " + ref);
+			FLog.e("error preparing selection transform " + ref,e);
+			showWarning("Logic Error", "Error preparing selection transform " + ref);
+		}
+	}
+	
+	public void doSelectionTransform(String ref) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.doSelectionTransform();
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error do selection transform " + ref,e);
+			showWarning("Logic Error", "Error do selection transform " + ref);
 		}
 	}
 	

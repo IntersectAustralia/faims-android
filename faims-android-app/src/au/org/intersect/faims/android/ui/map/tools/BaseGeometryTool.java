@@ -40,8 +40,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	}
 	
 	protected void updateLayout() {
-		layout.removeAllViews();
-		layout.addView(settingsButton);
+		super.updateLayout();
 		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (selectedLayer != null) layout.addView(selectedLayer);
 	}
@@ -82,7 +81,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 				}
 				
 				if (filteredLayers.isEmpty()) {
-					showError(context, "No canvas layers found");
+					showError("No canvas layers found");
 				} else {
 					AlertDialog.Builder builder = new AlertDialog.Builder(context);
 					builder.setTitle("Select Layer");

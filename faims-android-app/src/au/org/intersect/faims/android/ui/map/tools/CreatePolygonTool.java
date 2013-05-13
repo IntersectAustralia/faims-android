@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
@@ -23,10 +24,6 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 
 public class CreatePolygonTool extends BaseGeometryTool {
 	
@@ -88,7 +85,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	private void showLayerNotFoundError() {
 		clearPoints();
 		super.setSelectedLayer(null);
-		showError(context, "No layer selected");
+		showError("No layer selected");
 	}
 	
 	private void clearLastPoint() {
@@ -106,7 +103,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			mapView.clearGeometry(p);
 		} catch (Exception e) {
 			FLog.e("error clearing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
@@ -123,7 +120,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 			mapView.clearGeometryList(pointsList);
 		} catch (Exception e) {
 			FLog.e("error clearing points", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		pointsList.clear();
@@ -137,7 +134,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		if (pointsList.size() < 3) {
-			showError(context, "Polygon requires at least 3 points");
+			showError("Polygon requires at least 3 points");
 			return;
 		}
 		
@@ -148,10 +145,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.drawPolygon(layer, positions, createPolygonStyleSet(color, lineColor, width, pickingWidth));
+			mapView.drawPolygon(layer, positions, createPolygonStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing polygon", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		clearPoints();
@@ -232,7 +229,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 							CreatePolygonTool.this.pickingWidth = pickingWidth;
 							CreatePolygonTool.this.showStroke = showStroke;
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
@@ -262,35 +259,28 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		try {
-			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
+			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createGuidePointStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
 		}
 	}
 	
-	private StyleSet<PolygonStyle> createPolygonStyleSet(int c, int lc, float w, float pw) {
-		StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-		PolygonStyle style;
-		if (showStroke) {
-			style = PolygonStyle.builder().setColor(c).setLineStyle(createLineStyle(lc, w, pw)).build();
-		} else {
-			style = PolygonStyle.builder().setColor(c).build();
-		}
-		
-		polygonStyleSet.setZoomStyle(0, style);
-		return polygonStyleSet;
-	}
-
-	private StyleSet<PointStyle> createPointStyleSet(int c, float s,
-			float ps) {
-		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-		PointStyle style = PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
-		pointStyleSet.setZoomStyle(0, style);
-		return pointStyleSet;
+	private GeometryStyle createPolygonStyle() {
+		GeometryStyle style = new GeometryStyle();
+		style.polygonColor = color;
+		style.lineColor = lineColor;
+		style.width = width;
+		style.pickingWidth = pickingWidth;
+		style.showStroke = showStroke;
+		return style;
 	}
 	
-	private LineStyle createLineStyle(int c, float w, float pw) {
-		return LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).build();
+	private GeometryStyle createGuidePointStyle() {
+		GeometryStyle style = new GeometryStyle();
+		style.pointColor = color;
+		style.size = size;
+		style.pickingSize = pickingSize;
+		return style;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
@@ -23,9 +24,6 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.StyleSet;
 
 public class CreateLineTool extends BaseGeometryTool {
 	
@@ -86,7 +84,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	private void showLayerNotFoundError() {
 		clearPoints();
 		super.setSelectedLayer(null);
-		showError(context, "No layer selected");
+		showError("No layer selected");
 	}
 	
 	private void clearLastPoint() {
@@ -104,7 +102,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			mapView.clearGeometry(p);
 		} catch (Exception e) {
 			FLog.e("error clearing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
@@ -121,7 +119,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			mapView.clearGeometryList(pointsList);
 		} catch (Exception e) {
 			FLog.e("error clearing points", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		pointsList.clear();
@@ -135,7 +133,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		if (pointsList.size() < 2) {
-			showError(context, "Line requires at least 2 points");
+			showError("Line requires at least 2 points");
 			return;
 		}
 		
@@ -146,10 +144,10 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.drawLine(layer, positions, createLineStyleSet(color, width, pickingWidth, size, pickingSize));
+			mapView.drawLine(layer, positions, createLineStyle());
 		} catch (Exception e) {
 			FLog.e("error drawing line", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 		
 		clearPoints();
@@ -227,7 +225,7 @@ public class CreateLineTool extends BaseGeometryTool {
 							CreateLineTool.this.pickingWidth = pickingWidth;
 							CreateLineTool.this.showPoints = showPoints;
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
@@ -258,36 +256,31 @@ public class CreateLineTool extends BaseGeometryTool {
 		
 		// make point color solid
 		try {
-			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyleSet(color | 0xFF000000, getSize(), getPickingSize())));
+			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createGuidePointStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
-			showError(context, e.getMessage());
+			showError(e.getMessage());
 		}
 	}
 	
-	private StyleSet<LineStyle> createLineStyleSet(int c, float w,
-			float pw, float s, float ps) {
-		StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-		LineStyle style;
-		if (showPoints) {
-			style = LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).setPointStyle(createPointStyle(c, s, ps)).build();
-		} else {
-			 style = LineStyle.builder().setColor(c).setWidth(w).setPickingWidth(pw).build();
-		}
-		lineStyleSet.setZoomStyle(0, style);
-		return lineStyleSet;
-	}
-
-	private StyleSet<PointStyle> createPointStyleSet(int c, float s,
-			float ps) {
-		StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-		PointStyle style = PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
-		pointStyleSet.setZoomStyle(0, style);
-		return pointStyleSet;
+	private GeometryStyle createLineStyle() {
+		GeometryStyle style = new GeometryStyle();
+		style.pointColor = color;
+		style.size = size;
+		style.pickingSize = pickingSize;
+		style.lineColor = color;
+		style.width = width;
+		style.pickingWidth = pickingWidth;
+		style.showPoints = showPoints;
+		return style;
 	}
 	
-	private PointStyle createPointStyle(int c, float s, float ps) {
-		return PointStyle.builder().setColor(c).setSize(s).setPickingSize(ps).build();
+	private GeometryStyle createGuidePointStyle() {
+		GeometryStyle style = new GeometryStyle();
+		style.pointColor = color;
+		style.size = size;
+		style.pickingSize = pickingSize;
+		return style;
 	}
 
 	@Override

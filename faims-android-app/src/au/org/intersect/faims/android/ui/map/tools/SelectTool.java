@@ -6,35 +6,137 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
+import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
+import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
 public class SelectTool extends SettingsTool {
 	
 	public static final String NAME = "Select";
 	
-	private int color = 0xFF00FFFF;
-	private float size = 0.3f;
-	private float pickingSize = 0.3f;
-	private float width = 0.1f;
-	private float pickingWidth = 0.1f;
+	protected MapButton clearButton;
+
+	private MapToggleButton detailButton;
+	
+	public SelectTool(Context context, CustomMapView mapView) {
+		this(context, mapView, NAME);
+	}
 	
 	public SelectTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);
+		
+		detailButton = createDetailButton(context);
+		clearButton = createClearButton(context);
+		
+		updateLayout();
+	}
+	
+	@Override
+	protected void updateLayout() {
+		super.updateLayout();
+		if (detailButton != null) layout.addView(detailButton);
+		if (clearButton != null) layout.addView(clearButton);
+	}
+	
+	@Override
+	public void activate() {
+		detailButton.setChecked(false);
+		updateDetailButton();
+		mapView.setDrawViewDetail(false);
+		mapView.setEditViewDetail(false);
+		clearSelection();
+	}
+	
+	@Override
+	public void deactivate() {
+		detailButton.setChecked(false);
+		updateDetailButton();
+		mapView.setDrawViewDetail(false);
+		mapView.setEditViewDetail(false);
+		clearSelection();
+	}
+	
+	@Override
+	public void update() {
+		try {
+			mapView.updateSelection();
+		} catch (Exception e) {
+			FLog.e("error updating selection", e);
+			showError(e.getMessage());
+		}
+	}
+	
+	private MapToggleButton createDetailButton(final Context context) {
+		MapToggleButton button = new MapToggleButton(context);
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				updateDetailButton();
+				mapView.setDrawViewDetail(detailButton.isChecked());
+				mapView.setEditViewDetail(detailButton.isChecked());
+			}
+			
+		});
+		return button;
+	}
+	
+	private MapButton createClearButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Clear");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				clearSelection();
+			}
+			
+		});
+		return button;
+	}
+	
+	protected void clearSelection() {
+		try {
+			mapView.clearSelection();
+		} catch (Exception e) {
+			FLog.e("error clearing selection", e);
+			showError(e.getMessage());
+		}
 	}
 	
 	@Override
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
-		
-		
+		if (element instanceof Geometry) {
+			try {
+				Geometry geom = (Geometry) element;
+				
+				if (mapView.hasSelection(geom)) {
+					mapView.removeSelection(geom);
+				} else {
+					mapView.addSelection(geom);
+				}
+			} catch (Exception e) {
+				FLog.e("error selecting element", e);
+				showError(e.getMessage());
+			}
+		} else {
+			// ignore
+		}
 	}
 	
+	private void updateDetailButton() {
+		detailButton.setText(detailButton.isChecked() ? "Hide Details" : "Show Details");
+	}
+
 	@Override
 	protected MapButton createSettingsButton(final Context context) {
 		MapButton button = new MapButton(context);
@@ -50,11 +152,10 @@ public class SelectTool extends SettingsTool {
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
-				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Size:", getSize());
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", getPickingSize());
-				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
-				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);
+				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
+				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
 				
 				builder.setView(layout);
 				
@@ -64,18 +165,17 @@ public class SelectTool extends SettingsTool {
 					public void onClick(DialogInterface dialog, int which) {
 						try {
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							float strokeSize = parseSize(strokeSizeBar.getProgress());
+							float textSize = parseSize(textSizeBar.getProgress());
+							boolean showDecimal = !decimalBox.isChecked();
 							
-							SelectTool.this.color = color;
-							SelectTool.this.setSize(size);
-							SelectTool.this.setPickingSize(pickingSize);
-							SelectTool.this.width = width;
-							SelectTool.this.pickingWidth = pickingWidth;
+							mapView.setDrawViewColor(color);
+							mapView.setDrawViewStrokeStyle(strokeSize);
+							mapView.setDrawViewTextSize(textSize);
+							mapView.setEditViewTextSize(textSize);
+							mapView.setShowDecimal(showDecimal);
 						} catch (Exception e) {
-							showError(context, e.getMessage());
+							showError(e.getMessage());
 						}
 					}
 				});
@@ -92,48 +192,6 @@ public class SelectTool extends SettingsTool {
 			}
 				
 		});
-		
 		return button;
 	}
-	
-	public int getColor() {
-		return color;
-	}
-
-	public void setColor(int color) {
-		this.color = color;
-	}
-
-	public float getSize() {
-		return size;
-	}
-
-	public void setSize(float size) {
-		this.size = size;
-	}
-
-	public float getPickingSize() {
-		return pickingSize;
-	}
-
-	public void setPickingSize(float pickingSize) {
-		this.pickingSize = pickingSize;
-	}
-	
-	public float getWidth() {
-		return width;
-	}
-
-	public void setWidth(float width) {
-		this.width = width;
-	}
-
-	public float getPickingWidth() {
-		return pickingWidth;
-	}
-
-	public void setPickingWidth(float pickingWidth) {
-		this.pickingWidth = pickingWidth;
-	}
-
 }

@@ -8,49 +8,25 @@ import android.location.Location;
 import com.nutiteq.MapView;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.Line;
-import com.nutiteq.geometry.Point;
-import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 
 public class GeometryUtil {
 
 	public static Geometry fromGeometry(Geometry geom) {
-		if (geom instanceof Point) {
-			Point p = (Point) geom;
-			return new Point(p.getMapPos(), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
-		} else if (geom instanceof Line) {
-			Line l = (Line) geom;
-			return new Line(l.getVertexList(), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
-		} else if (geom instanceof Polygon) {
-			Polygon p = (Polygon) geom;
-			return new Polygon(p.getVertexList(), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
+		if (geom instanceof CustomPoint) {
+			CustomPoint p = (CustomPoint) geom;
+			return new CustomPoint(p.getGeomId(), p.getStyle(), p.getMapPos());
+		} else if (geom instanceof CustomLine) {
+			CustomLine l = (CustomLine) geom;
+			return new CustomLine(l.getGeomId(), l.getStyle(), l.getVertexList());
+		} else if (geom instanceof CustomPolygon) {
+			CustomPolygon p = (CustomPolygon) geom;
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), p.getVertexList());
 		}
 		return null;
 	}
 	
-	public static Geometry cloneGeometry(Geometry geom1, Geometry geom2) {
-		if (geom1 instanceof Point && geom2 instanceof Point) {
-			Point p1 = (Point) geom1;
-			Point p2 = (Point) geom2;
-			return new Point(p2.getMapPos(), null, (StyleSet<PointStyle>) p1.getStyleSet(), null);
-		} else if (geom1 instanceof Line && geom2 instanceof Line) {
-			Line l1 = (Line) geom1;
-			Line l2 = (Line) geom2;
-			return new Line(l2.getVertexList(), null, (StyleSet<LineStyle>) l1.getStyleSet(), null);
-		} else if (geom1 instanceof Polygon && geom2 instanceof Polygon) {
-			Polygon p1 = (Polygon) geom1;
-			Polygon p2 = (Polygon) geom2;
-			return new Polygon(p2.getVertexList(), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p1.getStyleSet(), null);
-		}
-		return null;
-	}
-
 	public static Geometry worldToScreen(Geometry geom, MapView mapView) {
 		return transformGeometry(geom, mapView, true);
 	}
@@ -68,15 +44,15 @@ public class GeometryUtil {
 	}
 	
 	public static Geometry transformGeometry(Geometry geom, MapView mapView, boolean worldToScreen) {
-		if (geom instanceof Point) {
-			Point p = (Point) geom;
-			return new Point(transformVertex(p.getMapPos(), mapView, worldToScreen), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
-		} else if (geom instanceof Line) {
-			Line l = (Line) geom;
-			return new Line(transformVertices(l.getVertexList(), mapView, worldToScreen), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
-		} else if (geom instanceof Polygon) {
-			Polygon p = (Polygon) geom;
-			return new Polygon(transformVertices(p.getVertexList(), mapView, worldToScreen), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
+		if (geom instanceof CustomPoint) {
+			CustomPoint p = (CustomPoint) geom;
+			return new CustomPoint(p.getGeomId(), p.getStyle(), transformVertex(p.getMapPos(), mapView, worldToScreen));
+		} else if (geom instanceof CustomLine) {
+			CustomLine l = (CustomLine) geom;
+			return new CustomLine(l.getGeomId(), l.getStyle(), transformVertices(l.getVertexList(), mapView, worldToScreen));
+		} else if (geom instanceof CustomPolygon) {
+			CustomPolygon p = (CustomPolygon) geom;
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), transformVertices(p.getVertexList(), mapView, worldToScreen));
 		}
 		return null;
 	}
@@ -96,15 +72,15 @@ public class GeometryUtil {
 	}
 	
 	public static Geometry projectGeometry(Projection proj, Geometry geom) {
-		if (geom instanceof Point) {
-			Point p = (Point) geom;
-			return new Point(projectVertex(proj, p.getMapPos()), null, (StyleSet<PointStyle>) p.getStyleSet(), null);
-		} else if (geom instanceof Line) {
-			Line l = (Line) geom;
-			return new Line(projectVertices(proj, l.getVertexList()), null, (StyleSet<LineStyle>) l.getStyleSet(), null);
-		} else if (geom instanceof Polygon) {
-			Polygon p = (Polygon) geom;
-			return new Polygon(projectVertices(proj, p.getVertexList()), new ArrayList<List<MapPos>>(), null, (StyleSet<PolygonStyle>) p.getStyleSet(), null);
+		if (geom instanceof CustomPoint) {
+			CustomPoint p = (CustomPoint) geom;
+			return new CustomPoint(p.getGeomId(), p.getStyle(), projectVertex(proj, p.getMapPos()));
+		} else if (geom instanceof CustomLine) {
+			CustomLine l = (CustomLine) geom;
+			return new CustomLine(l.getGeomId(), l.getStyle(), projectVertices(proj, l.getVertexList()));
+		} else if (geom instanceof CustomPolygon) {
+			CustomPolygon p = (CustomPolygon) geom;
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), projectVertices(proj, p.getVertexList()));
 		}
 		return null;
 	}
@@ -136,6 +112,22 @@ public class GeometryUtil {
 	
 	public static MapPos convertToWgs84(MapPos p) {
 		return (new EPSG3857()).toWgs84(p.x, p.y);
+	}
+	
+	public static String convertToDegrees(double value) {
+		double degrees = value < 0 ? Math.ceil(value) : Math.floor(value);
+		double totalSeconds = Math.floor(Math.abs(value - degrees) * 3600);
+		double minutes = Math.floor((totalSeconds / 60));
+		double seconds = totalSeconds - (minutes * 60);
+		return Integer.toString((int) degrees) + ":" + toFixed((int) minutes, 2) + ":" + toFixed((int) seconds, 2);  
+	}
+	
+	private static String toFixed(int value, int n) {
+		String s = Integer.toString(value);
+		while(s.length() < n) {
+			s = "0" + s;
+		}
+		return s;
 	}
 	
 }

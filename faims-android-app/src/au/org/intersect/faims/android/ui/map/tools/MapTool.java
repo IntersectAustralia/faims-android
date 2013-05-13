@@ -37,7 +37,7 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	// define tool context ui
 	public abstract View getUI();
 	
-	public void showError(Context context, String message) {
+	public void showError(String message) {
 		new ErrorDialog(context, "Tool Error", message).show();
 	}
 	

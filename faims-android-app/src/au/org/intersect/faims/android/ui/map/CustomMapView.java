@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -30,7 +32,9 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
+import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
+import au.org.intersect.faims.android.ui.map.tools.SelectTool;
 import au.org.intersect.faims.android.util.Dip;
 
 import com.nutiteq.MapView;
@@ -79,6 +83,7 @@ public class CustomMapView extends MapView {
 
 		@Override
 		public void onMapMoved() {
+			CustomMapView.this.updateDrawView();
 		}
 
 		@Override
@@ -124,14 +129,14 @@ public class CustomMapView extends MapView {
 	private HashMap<Geometry, Layer> geometryLayerMap;
 	
 	private DrawView drawView;
+
+	private EditView editView;
 	
 	private MapNorthView northView;
 	
 	private ScaleBarView scaleView;
 	
 	private RelativeLayout toolsView;
-
-	private Geometry overlayGeometry;
 	
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
@@ -149,7 +154,13 @@ public class CustomMapView extends MapView {
 
 	private Geometry selectedGeom;
 	
-	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
+	private ArrayList<Geometry> selectedGeometryList;
+
+	private ArrayList<Geometry> transformGeometryList;
+
+	private boolean showDecimal;
+	
+	public CustomMapView(Context context, DrawView drawView, EditView editView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
 		
 		layerIdMap = new SparseArray<Layer>();
@@ -159,11 +170,18 @@ public class CustomMapView extends MapView {
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
+        selectedGeometryList = new ArrayList<Geometry>();
 		
 		this.drawView = drawView;
+		this.editView = editView;
 		this.northView = northView;
 		this.scaleView = scaleView;
 		this.toolsView = toolsView;
+		
+		this.drawView.setMapView(this);
+		this.editView.setMapView(this);
+		
+		this.editView.setColor(Color.GREEN);
 		
 		// TODO make this configurable
 		scaleView.setBarWidthRange(Dip.getDip(context, 40), Dip.getDip(context, 100));
@@ -258,6 +276,14 @@ public class CustomMapView extends MapView {
 		this.layerIdMap.remove(id);
 		this.layerNameMap.remove(name);
 		
+		// remove all geometry in layer if canvas layer
+		if (layer instanceof CanvasLayer) {
+			CanvasLayer canvas = (CanvasLayer) layer;
+			for (Geometry geom : canvas.getGeometryList()) {
+				removeGeometry(geom);
+			}
+		}
+		
 		if (layer == selectedLayer) {
 			this.selectedLayer = null;
 			updateTools();
@@ -313,6 +339,14 @@ public class CustomMapView extends MapView {
 	}
 	
 	public int addGeometry(Layer layer, Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+		
+		if (layer == null) {
+			throw new MapException("Map does not exist");
+		}
+		
 		if (geometryIdMap.get(getGeometryId(geom)) != null) {
 			throw new MapException("Geometry already exists");
 		}
@@ -350,43 +384,6 @@ public class CustomMapView extends MapView {
 
 	public Geometry getGeometry(int geomId) {
 		return geometryIdMap.get(geomId);
-	}
-	
-	public void drawGeometrOverlay(int geomId) throws Exception {
-		Geometry geom = this.getGeometry(geomId);
-		if (geom == null) {
-			throw new MapException("Cannot find geometry to overlay");
-		}
-		this.drawGeometrOverlay(geom);
-	}
-
-	public void drawGeometrOverlay(Geometry geom) {
-		if (geom == null) {
-			this.overlayGeometry = null;
-			drawView.drawGeometry(null);
-		} else {
-			this.overlayGeometry = GeometryUtil.worldToScreen(geom, this);
-			drawView.drawGeometry(overlayGeometry);
-		}
-	}
-	
-	public void replaceGeometryOverlay(int geomId) throws MapException {
-		replaceGeometryOverlay(getGeometry(geomId));
-	}
-	
-	public void replaceGeometryOverlay(Geometry geom) throws MapException {
-		if (geom == null) {
-			throw new MapException("Cannot find geometry overlay");
-		}
-		
-		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
-		if (layer == null) {
-			throw new MapException("Layer does not exist");
-		}
-		
-		layer.removeGeometry(geom);
-		layer.addGeometry(GeometryUtil.screenToWorld(overlayGeometry, this));
-		updateRenderer();
 	}
 	
 	public void setViewLocked(boolean lock) {
@@ -525,84 +522,78 @@ public class CustomMapView extends MapView {
 		return addLayer(layer);
 	}
 
-	public CustomPoint drawPoint(int layerId, MapPos point,
-			StyleSet<PointStyle> styleSet) throws Exception {
-		return drawPoint(getLayer(layerId), point, styleSet);
+	public CustomPoint drawPoint(int layerId, MapPos point, GeometryStyle style) throws Exception {
+		return drawPoint(getLayer(layerId), point, style);
 	}
 	
-	public CustomPoint drawPoint(Layer layer, MapPos point,
-			StyleSet<PointStyle> styleSet)  throws Exception {
+	public CustomPoint drawPoint(Layer layer, MapPos point, GeometryStyle style)  throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomPoint p = canvas.addPoint(nextGeomId(), point, styleSet);
+		CustomPoint p = canvas.addPoint(nextGeomId(), point, style);
 		addGeometry(layer, p);
 		updateRenderer();
 		return p;
 	}
 	
-	public void restylePoint(CustomPoint point, StyleSet<PointStyle> styleSet) throws Exception {
+	public void restylePoint(CustomPoint point, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(point);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(point);
-		canvas.addGeometry(drawPoint(canvas, GeometryUtil.convertToWgs84(point.getMapPos()), styleSet));
+		canvas.addGeometry(drawPoint(canvas, GeometryUtil.convertToWgs84(point.getMapPos()), style));
 		updateRenderer();
 	}
 
-	public CustomLine drawLine(int layerId, List<MapPos> points,
-			StyleSet<LineStyle> styleSet) throws Exception {
-		return drawLine(getLayer(layerId), points, styleSet);
+	public CustomLine drawLine(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
+		return drawLine(getLayer(layerId), points, style);
 	}
 	
-	public CustomLine drawLine(Layer layer, List<MapPos> points,
-			StyleSet<LineStyle> styleSet) throws Exception {
+	public CustomLine drawLine(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomLine l = canvas.addLine(nextGeomId(), points, styleSet);
+		CustomLine l = canvas.addLine(nextGeomId(), points, style);
 		addGeometry(layer, l);
 		updateRenderer();
 		return l;
 	}
 
-	public void restyleLine(CustomLine line, StyleSet<LineStyle> styleSet) throws Exception {
+	public void restyleLine(CustomLine line, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(line);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(line);
-		canvas.addGeometry(drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), styleSet));
+		canvas.addGeometry(drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), style));
 		updateRenderer();
 	}
 
-	public CustomPolygon drawPolygon(int layerId, List<MapPos> points,
-			StyleSet<PolygonStyle> styleSet) throws Exception {
-		return drawPolygon(getLayer(layerId), points, styleSet);
+	public CustomPolygon drawPolygon(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
+		return drawPolygon(getLayer(layerId), points, style);
 	}
 	
-	public CustomPolygon drawPolygon(Layer layer, List<MapPos> points,
-			StyleSet<PolygonStyle> styleSet) throws Exception {
+	public CustomPolygon drawPolygon(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomPolygon p = canvas.addPolygon(nextGeomId(), points, styleSet);
+		CustomPolygon p = canvas.addPolygon(nextGeomId(), points, style);
 		addGeometry(layer, p);
 		updateRenderer();
 		return p;
 	}
 	
-	public void restylePolygon(CustomPolygon polygon, StyleSet<PolygonStyle> styleSet) throws Exception {
+	public void restylePolygon(CustomPolygon polygon, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(polygon);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(polygon);
-		canvas.addGeometry(drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), styleSet));
+		canvas.addGeometry(drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), style));
 		updateRenderer();
 	}
 	
@@ -612,7 +603,7 @@ public class CustomMapView extends MapView {
 	
 	public void clearGeometry(Geometry geom) throws Exception {
 		if (geom == null) {
-			throw new MapException("Cannot find geometry overlay");
+			throw new MapException("Geometry does not exist");
 		}
 		
 		CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
@@ -675,6 +666,8 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void initTools() {
+		tools.add(new SelectTool(this.getContext(), this));
+		tools.add(new EditTool(this.getContext(), this));
 		tools.add(new CreatePointTool(this.getContext(), this));
 		tools.add(new CreateLineTool(this.getContext(), this));
 		tools.add(new CreatePolygonTool(this.getContext(), this));
@@ -745,6 +738,186 @@ public class CustomMapView extends MapView {
 		if (getComponents() != null) {
 			getComponents().mapRenderers.getMapRenderer().frustumChanged();
 		}
+	}
+	
+	public void addSelection(int geomId) throws Exception {
+		addSelection(getGeometry(geomId));
+	}
+
+	public void addSelection(Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+		
+		if (hasSelection(geom)) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
+		
+		selectedGeometryList.add(geom);
+		updateDrawView();
+	}
+
+	public void clearSelection() throws Exception {
+		if (selectedGeometryList.isEmpty()) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
+		
+		selectedGeometryList.clear();
+		updateDrawView();
+	}
+	
+	public void removeSelection(Geometry geom) throws Exception {
+		if (selectedGeometryList.isEmpty()) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
+		
+		selectedGeometryList.remove(geom);
+		updateDrawView();
+	}
+	
+	public boolean hasSelection(Geometry geom) {
+		return selectedGeometryList.contains(geom);
+	}
+
+	public void updateSelection() throws Exception {
+		if (selectedGeometryList.isEmpty()) return;
+		
+		// note: remove geometry from list that no longer exist or are not visible
+		for (Iterator<Geometry> iterator = selectedGeometryList.iterator(); iterator.hasNext();) {
+			Geometry geom = iterator.next();
+			if (getGeometry(getGeometryId(geom)) == null) {
+				iterator.remove();
+			} else {
+				CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(geom);
+				if (!canvas.isVisible()) {
+					iterator.remove();
+				}
+			}
+		}
+		
+		updateDrawView();
+	}
+	
+	public void prepareSelectionTransform() {
+		// keep a copy of the geometry at the current position
+		transformGeometryList = GeometryUtil.transformGeometryList(selectedGeometryList, this, true);
+		
+		updateDrawView();
+	}
+	
+	public void doSelectionTransform() throws Exception {
+		if (transformGeometryList == null) return;
+		
+		ArrayList<Geometry> geomList = GeometryUtil.transformGeometryList(transformGeometryList, this, false);
+		for (int i = 0; i < selectedGeometryList.size(); i++) {
+			Geometry geom = selectedGeometryList.get(i);
+			Geometry transformedGeom = geomList.get(i);
+			CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
+			layer.removeGeometry(geom);
+			removeGeometry(geom);
+			layer.addGeometry(transformedGeom);
+			addGeometry(layer, transformedGeom);
+		}
+		
+		transformGeometryList = null;
+		selectedGeometryList = geomList;
+		
+		updateDrawView();
+	}
+	
+	public void clearSelectionTransform() {
+		transformGeometryList = null;
+		updateRenderer();
+	}
+	
+	private void updateDrawView() {
+		editView.setDrawList(transformGeometryList);
+		drawView.setDrawList(selectedGeometryList);
+	}
+
+	public int getDrawViewColor() {
+		return drawView.getColor();
+	}
+
+	public void setDrawViewColor(int color) {
+		drawView.setColor(color);
+		updateDrawView();
+	}
+	
+	public int getEditViewColor() {
+		return editView.getColor();
+	}
+
+	public void setEditViewColor(int color) {
+		editView.setColor(color);
+		updateDrawView();
+	}
+	
+	public float getDrawViewStrokeStyle() {
+		return drawView.getStrokeSize();
+	}
+	
+	public void setDrawViewStrokeStyle(float strokeSize) {
+		drawView.setStrokeSize(strokeSize);
+		updateDrawView();
+	}
+	
+	public float getEditViewStrokeStyle() {
+		return editView.getStrokeSize();
+	}
+	
+	public void setEditViewStrokeStyle(float strokeSize) {
+		editView.setStrokeSize(strokeSize);
+		updateDrawView();
+	}
+	
+	public float getDrawViewTextSize() {
+		return drawView.getTextSize();
+	}
+	
+	public void setDrawViewTextSize(float value) {
+		drawView.setTextSize(value);
+		updateDrawView();
+	}
+	
+	public float getEditViewTextSize() {
+		return editView.getTextSize();
+	}
+	
+	public void setEditViewTextSize(float value) {
+		editView.setTextSize(value);
+		updateDrawView();
+	}
+
+	public boolean hasTransformGeometry() {
+		return transformGeometryList != null;
+	}
+
+	public void setDrawViewDetail(boolean value) {
+		drawView.setShowDetail(value);
+		updateDrawView();
+	}
+	
+	public void setEditViewDetail(boolean value) {
+		editView.setShowDetail(value);
+		updateDrawView();
+	}
+
+	public boolean showDecimal() {
+		return showDecimal;
+	}
+	
+	public void setShowDecimal(boolean value) {
+		showDecimal = value;
+		drawView.showDecimal(value);
+		editView.showDecimal(value);
+		updateDrawView();
 	}
 	
 }

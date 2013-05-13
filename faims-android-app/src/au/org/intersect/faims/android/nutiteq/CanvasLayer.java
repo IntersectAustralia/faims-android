@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Components;
@@ -11,10 +12,6 @@ import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.Const;
 import com.nutiteq.utils.Quadtree;
 import com.nutiteq.vectorlayers.GeometryLayer;
@@ -77,28 +74,28 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 
-	public CustomPoint addPoint(int geomId, MapPos point, StyleSet<PointStyle> styleSet) {		
-		CustomPoint p = new CustomPoint(geomId, projection.fromWgs84(point.x, point.y), null, styleSet, null);
+	public CustomPoint addPoint(int geomId, MapPos point, GeometryStyle style) {		
+		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y));
 		addGeometry(p);
 		return p;
 	}
 	
-	public CustomLine addLine(int geomId, List<MapPos> points, StyleSet<LineStyle> styleSet) {
+	public CustomLine addLine(int geomId, List<MapPos> points, GeometryStyle style) {
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomLine l = new CustomLine(geomId, vertices, null, styleSet, null);
+		CustomLine l = new CustomLine(geomId, style, vertices);
 		addGeometry(l);
 		return l;
 	}
 	
-	public CustomPolygon addPolygon(int geomId, List<MapPos> points, StyleSet<PolygonStyle> styleSet) {		
+	public CustomPolygon addPolygon(int geomId, List<MapPos> points, GeometryStyle style) {		
 		List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomPolygon p = new CustomPolygon(geomId, vertices, new ArrayList<List<MapPos>>(), null, styleSet, null);
+		CustomPolygon p = new CustomPolygon(geomId, style, vertices);
 		
 		addGeometry(p);
 		return p;
