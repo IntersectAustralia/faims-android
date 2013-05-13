@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.map;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import android.content.Context;
@@ -41,6 +42,8 @@ public class DrawView extends View {
 	protected CustomMapView mapView;
 
 	private boolean showDetail;
+
+	private boolean showDecimal;
 
 	public DrawView(Context context) {
 		super(context);
@@ -141,7 +144,15 @@ public class DrawView extends View {
 	}
 	
 	private String pointToText(MapPos p) {
-		return "(" + GeometryUtil.convertToDegrees(p.x) + ", " + GeometryUtil.convertToDegrees(p.y) + ")";
+		if (showDecimal) {
+			return "(" + formatDecimal(p.x) + ", " + formatDecimal(p.y) + ")";
+		} else {
+			return "(" + GeometryUtil.convertToDegrees(p.x) + ", " + GeometryUtil.convertToDegrees(p.y) + ")";
+		}
+	}
+	
+	private String formatDecimal(double value) {
+		return new DecimalFormat("#.0000").format(value);
 	}
 	
 	private float getPosOffset(GeometryStyle style) {
@@ -206,6 +217,10 @@ public class DrawView extends View {
 
 	public void setShowDetail(boolean value) {
 		showDetail = value;
+	}
+
+	public void showDecimal(boolean value) {
+		showDecimal = value;
 	}
 	
 }

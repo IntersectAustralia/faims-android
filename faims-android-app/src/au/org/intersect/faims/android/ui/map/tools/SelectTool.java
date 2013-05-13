@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -154,6 +155,7 @@ public class SelectTool extends SettingsTool {
 				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
+				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
 				
 				builder.setView(layout);
 				
@@ -165,11 +167,13 @@ public class SelectTool extends SettingsTool {
 							int color = parseColor(colorSetter.getText().toString());
 							float strokeSize = parseSize(strokeSizeBar.getProgress());
 							float textSize = parseSize(textSizeBar.getProgress());
+							boolean showDecimal = !decimalBox.isChecked();
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
 							mapView.setDrawViewTextSize(textSize);
 							mapView.setEditViewTextSize(textSize);
+							mapView.setShowDecimal(showDecimal);
 						} catch (Exception e) {
 							showError(e.getMessage());
 						}

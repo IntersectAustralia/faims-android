@@ -157,6 +157,8 @@ public class CustomMapView extends MapView {
 	private ArrayList<Geometry> selectedGeometryList;
 
 	private ArrayList<Geometry> transformGeometryList;
+
+	private boolean showDecimal;
 	
 	public CustomMapView(Context context, DrawView drawView, EditView editView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
@@ -904,6 +906,17 @@ public class CustomMapView extends MapView {
 	
 	public void setEditViewDetail(boolean value) {
 		editView.setShowDetail(value);
+		updateDrawView();
+	}
+
+	public boolean showDecimal() {
+		return showDecimal;
+	}
+	
+	public void setShowDecimal(boolean value) {
+		showDecimal = value;
+		drawView.showDecimal(value);
+		editView.showDecimal(value);
 		updateDrawView();
 	}
 	
