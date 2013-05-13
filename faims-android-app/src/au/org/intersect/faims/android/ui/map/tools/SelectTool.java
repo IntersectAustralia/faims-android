@@ -49,6 +49,8 @@ public class SelectTool extends SettingsTool {
 	public void activate() {
 		detailButton.setChecked(false);
 		updateDetailButton();
+		mapView.setDrawViewDetail(false);
+		mapView.setEditViewDetail(false);
 		clearSelection();
 	}
 	
@@ -56,6 +58,8 @@ public class SelectTool extends SettingsTool {
 	public void deactivate() {
 		detailButton.setChecked(false);
 		updateDetailButton();
+		mapView.setDrawViewDetail(false);
+		mapView.setEditViewDetail(false);
 		clearSelection();
 	}
 	
