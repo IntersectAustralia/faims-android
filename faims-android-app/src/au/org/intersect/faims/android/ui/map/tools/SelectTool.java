@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
+import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.geometry.Geometry;
@@ -21,6 +22,8 @@ public class SelectTool extends SettingsTool {
 	public static final String NAME = "Select";
 	
 	protected MapButton clearButton;
+
+	private MapToggleButton detailButton;
 	
 	public SelectTool(Context context, CustomMapView mapView) {
 		this(context, mapView, NAME);
@@ -29,6 +32,7 @@ public class SelectTool extends SettingsTool {
 	public SelectTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);
 		
+		detailButton = createDetailButton(context);
 		clearButton = createClearButton(context);
 		
 		updateLayout();
@@ -37,16 +41,21 @@ public class SelectTool extends SettingsTool {
 	@Override
 	protected void updateLayout() {
 		super.updateLayout();
+		if (detailButton != null) layout.addView(detailButton);
 		if (clearButton != null) layout.addView(clearButton);
 	}
 	
 	@Override
 	public void activate() {
+		detailButton.setChecked(false);
+		updateDetailButton();
 		clearSelection();
 	}
 	
 	@Override
 	public void deactivate() {
+		detailButton.setChecked(false);
+		updateDetailButton();
 		clearSelection();
 	}
 	
@@ -58,6 +67,21 @@ public class SelectTool extends SettingsTool {
 			FLog.e("error updating selection", e);
 			showError(e.getMessage());
 		}
+	}
+	
+	private MapToggleButton createDetailButton(final Context context) {
+		MapToggleButton button = new MapToggleButton(context);
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				updateDetailButton();
+				mapView.setDrawViewDetail(detailButton.isChecked());
+				mapView.setEditViewDetail(detailButton.isChecked());
+			}
+			
+		});
+		return button;
 	}
 	
 	private MapButton createClearButton(final Context context) {
@@ -102,6 +126,10 @@ public class SelectTool extends SettingsTool {
 		} else {
 			// ignore
 		}
+	}
+	
+	private void updateDetailButton() {
+		detailButton.setText(detailButton.isChecked() ? "Hide Details" : "Show Details");
 	}
 
 	@Override

@@ -57,7 +57,6 @@ public class EditTool extends SelectTool {
 	
 	private MapToggleButton createLockButton(final Context context) {
 		MapToggleButton button = new MapToggleButton(context);
-		button.setChecked(mapView.hasTransformGeometry());
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

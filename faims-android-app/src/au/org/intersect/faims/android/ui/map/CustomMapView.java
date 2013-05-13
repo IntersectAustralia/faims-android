@@ -896,5 +896,15 @@ public class CustomMapView extends MapView {
 	public boolean hasTransformGeometry() {
 		return transformGeometryList != null;
 	}
+
+	public void setDrawViewDetail(boolean value) {
+		drawView.setShowDetail(value);
+		updateDrawView();
+	}
+	
+	public void setEditViewDetail(boolean value) {
+		editView.setShowDetail(value);
+		updateDrawView();
+	}
 	
 }

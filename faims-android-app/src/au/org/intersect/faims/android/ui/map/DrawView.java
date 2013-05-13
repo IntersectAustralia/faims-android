@@ -40,6 +40,8 @@ public class DrawView extends View {
 	
 	protected CustomMapView mapView;
 
+	private boolean showDetail;
+
 	public DrawView(Context context) {
 		super(context);
 		
@@ -54,8 +56,10 @@ public class DrawView extends View {
 			drawGeometryOverlay(geom, canvas);
 		}
 		
-		for (Geometry geom : geometryList) {
-			drawGeometryInfo(geom, canvas);
+		if (showDetail) {
+			for (Geometry geom : geometryList) {
+				drawGeometryInfo(geom, canvas);
+			}
 		}
 	}
 	
@@ -198,6 +202,10 @@ public class DrawView extends View {
 	public void setTextSize(float value) {
 		textSize = value;
 		updatePaint();
+	}
+
+	public void setShowDetail(boolean value) {
+		showDetail = value;
 	}
 	
 }
