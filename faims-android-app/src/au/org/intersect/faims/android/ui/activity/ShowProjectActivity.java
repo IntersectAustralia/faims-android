@@ -37,6 +37,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -45,6 +46,7 @@ import au.org.intersect.faims.android.data.ShowProjectActivityData;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.managers.LockManager;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
@@ -291,6 +293,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public static final int FILE_BROWSER_REQUEST_CODE = 2;
 	
+	public static final int MAP_FILE_BROWSER_REQUEST_CODE = 3;
+	
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -337,6 +341,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private Timer syncTaskTimer;
 
 	private ShowProjectActivityData activityData;
+	private FileManager fm;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -512,6 +517,18 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					FLog.e("error getting selected filename", e);
 				}
 			}
+		}else if(requestCode == MAP_FILE_BROWSER_REQUEST_CODE){
+			if (resultCode == RESULT_OK) {
+				try {
+					@SuppressWarnings("unchecked")
+					List<LocalFile> files = (List<LocalFile>)
+			                data.getSerializableExtra(FileChooserActivity._Results);
+					fm.setSelectedFile(files.get(0));
+					renderer.getCurrentTabGroup().getCurrentTab().getMapViewList().get(0).onFileChangesListener();
+				} catch (Exception e) {
+					FLog.e("error getting selected filename", e);
+				}
+			}
 		}
 	}
 	
@@ -565,6 +582,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			linker.setBaseDir(projectDir);
 			linker.sourceFromAssets("ui_commands.bsh");
 			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
+			fm = new FileManager();
+			for(View view : renderer.getViewByType(CustomMapView.class)){
+				CustomMapView mapView = (CustomMapView) view;
+				mapView.setFileManager(fm);
+			}
 		} catch (Exception e) {
 			FLog.e("error rendering ui", e);
 			

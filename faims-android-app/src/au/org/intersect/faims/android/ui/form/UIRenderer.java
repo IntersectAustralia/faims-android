@@ -646,6 +646,17 @@ public class UIRenderer implements IRestoreActionListener{
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
+	public List<View> getViewByType(Class type){
+		List<View> result = new ArrayList<View>();
+		for(View view : viewList){
+			if(view.getClass().equals(type)){
+				result.add(view);
+			}
+		}
+		return result;
+	}
+	
 	public void storeBackStack(Bundle savedInstanceState, FragmentManager fragmentManager){
 		indexes = null;
 		for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++){
