@@ -266,6 +266,14 @@ public class CustomMapView extends MapView {
 		this.layerIdMap.remove(id);
 		this.layerNameMap.remove(name);
 		
+		// remove all geometry in layer if canvas layer
+		if (layer instanceof CanvasLayer) {
+			CanvasLayer canvas = (CanvasLayer) layer;
+			for (Geometry geom : canvas.getGeometryList()) {
+				removeGeometry(geom);
+			}
+		}
+		
 		if (layer == selectedLayer) {
 			this.selectedLayer = null;
 			updateTools();
