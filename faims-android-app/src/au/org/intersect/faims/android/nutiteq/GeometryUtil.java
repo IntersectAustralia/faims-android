@@ -114,4 +114,20 @@ public class GeometryUtil {
 		return (new EPSG3857()).toWgs84(p.x, p.y);
 	}
 	
+	public static String convertToDegrees(double value) {
+		double degrees = Math.floor(value);
+		double totalSeconds = Math.floor((value - degrees) * 3600);
+		double minutes = Math.floor((totalSeconds / 60));
+		double seconds = totalSeconds - (minutes * 60);
+		return Integer.toString((int) degrees) + ":" + toFixed((int) minutes, 2) + ":" + toFixed((int) seconds, 2);  
+	}
+	
+	private static String toFixed(int value, int n) {
+		String s = Integer.toString(value);
+		while(s.length() < n) {
+			s = "0" + s;
+		}
+		return s;
+	}
+	
 }

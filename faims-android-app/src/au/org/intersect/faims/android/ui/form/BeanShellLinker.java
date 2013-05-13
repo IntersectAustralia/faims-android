@@ -1721,7 +1721,7 @@ public class BeanShellLinker {
 							}
 							
 						});
-						Thread.sleep(100);
+						Thread.sleep(500);
 					}
 					
 					FLog.d("stopping map overlay thread");

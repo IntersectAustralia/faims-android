@@ -119,8 +119,9 @@ public class SelectTool extends SettingsTool {
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
-				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
 				
 				builder.setView(layout);
 				
@@ -131,9 +132,12 @@ public class SelectTool extends SettingsTool {
 						try {
 							int color = parseColor(colorSetter.getText().toString());
 							float strokeSize = parseSize(strokeSizeBar.getProgress());
+							float textSize = parseSize(textSizeBar.getProgress());
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
+							mapView.setDrawViewTextSize(textSize);
+							mapView.setEditViewTextSize(textSize);
 						} catch (Exception e) {
 							showError(e.getMessage());
 						}

@@ -129,6 +129,8 @@ public class CustomMapView extends MapView {
 	private HashMap<Geometry, Layer> geometryLayerMap;
 	
 	private DrawView drawView;
+
+	private EditView editView;
 	
 	private MapNorthView northView;
 	
@@ -156,7 +158,7 @@ public class CustomMapView extends MapView {
 
 	private ArrayList<Geometry> transformGeometryList;
 	
-	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
+	public CustomMapView(Context context, DrawView drawView, EditView editView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
 		
 		layerIdMap = new SparseArray<Layer>();
@@ -169,9 +171,15 @@ public class CustomMapView extends MapView {
         selectedGeometryList = new ArrayList<Geometry>();
 		
 		this.drawView = drawView;
+		this.editView = editView;
 		this.northView = northView;
 		this.scaleView = scaleView;
 		this.toolsView = toolsView;
+		
+		this.drawView.setMapView(this);
+		this.editView.setMapView(this);
+		
+		this.editView.setColor(Color.GREEN);
 		
 		// TODO make this configurable
 		scaleView.setBarWidthRange(Dip.getDip(context, 40), Dip.getDip(context, 100));
@@ -796,7 +804,9 @@ public class CustomMapView extends MapView {
 	
 	public void prepareSelectionTransform() {
 		// keep a copy of the geometry at the current position
-		transformGeometryList= GeometryUtil.transformGeometryList(selectedGeometryList, this, true);
+		transformGeometryList = GeometryUtil.transformGeometryList(selectedGeometryList, this, true);
+		
+		updateDrawView();
 	}
 	
 	public void doSelectionTransform() throws Exception {
@@ -813,10 +823,10 @@ public class CustomMapView extends MapView {
 			addGeometry(layer, transformedGeom);
 		}
 		
-		updateRenderer();
-		
 		transformGeometryList = null;
 		selectedGeometryList = geomList;
+		
+		updateDrawView();
 	}
 	
 	public void clearSelectionTransform() {
@@ -825,36 +835,66 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void updateDrawView() {
-		if (!drawView.isLocked()) {
-			drawView.setDrawList(GeometryUtil.transformGeometryList(selectedGeometryList, this, true));
-		}
+		editView.setDrawList(transformGeometryList);
+		drawView.setDrawList(selectedGeometryList);
 	}
 
 	public int getDrawViewColor() {
 		return drawView.getColor();
 	}
 
+	public void setDrawViewColor(int color) {
+		drawView.setColor(color);
+		updateDrawView();
+	}
+	
+	public int getEditViewColor() {
+		return editView.getColor();
+	}
+
+	public void setEditViewColor(int color) {
+		editView.setColor(color);
+		updateDrawView();
+	}
+	
 	public float getDrawViewStrokeStyle() {
 		return drawView.getStrokeSize();
 	}
-
-	public void setDrawViewColor(int color) {
-		drawView.setColor(color);
-		updateRenderer();
-	}
-
+	
 	public void setDrawViewStrokeStyle(float strokeSize) {
 		drawView.setStrokeSize(strokeSize);
-		updateRenderer();
+		updateDrawView();
 	}
 	
-	public boolean isDrawViewLocked() {
-		return drawView.isLocked();
+	public float getEditViewStrokeStyle() {
+		return editView.getStrokeSize();
+	}
+	
+	public void setEditViewStrokeStyle(float strokeSize) {
+		editView.setStrokeSize(strokeSize);
+		updateDrawView();
+	}
+	
+	public float getDrawViewTextSize() {
+		return drawView.getTextSize();
+	}
+	
+	public void setDrawViewTextSize(float value) {
+		drawView.setTextSize(value);
+		updateDrawView();
+	}
+	
+	public float getEditViewTextSize() {
+		return editView.getTextSize();
+	}
+	
+	public void setEditViewTextSize(float value) {
+		editView.setTextSize(value);
+		updateDrawView();
 	}
 
-	public void setDrawViewLock(boolean lock) {
-		drawView.setLock(lock);
-		updateRenderer();
+	public boolean hasTransformGeometry() {
+		return transformGeometryList != null;
 	}
 	
 }

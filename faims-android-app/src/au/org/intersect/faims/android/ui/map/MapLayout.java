@@ -12,6 +12,7 @@ public class MapLayout extends RelativeLayout {
 	private ScaleBarView scaleView;
 	private CustomMapView mapView;
 	private RelativeLayout toolsView;
+	private EditView editView;
 
 	public MapLayout(Context context) {
 		super(context);
@@ -20,6 +21,9 @@ public class MapLayout extends RelativeLayout {
 		
 		drawView = new DrawView(context);
 		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		
+		editView = new EditView(context);
+		editView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		
 		northView = new MapNorthView(context);
 		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -34,7 +38,7 @@ public class MapLayout extends RelativeLayout {
 		
 		toolsView = new RelativeLayout(context);
 		
-		mapView = new CustomMapView(context, drawView, northView, scaleView, toolsView);
+		mapView = new CustomMapView(context, drawView, editView, northView, scaleView, toolsView);
 
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		mapView.startMapping();
@@ -69,6 +73,7 @@ public class MapLayout extends RelativeLayout {
 		}
 		if (mapView != null) addView(mapView);
 		if (drawView != null) addView(drawView);
+		if (editView != null) addView(editView);
 		if (northView != null) addView(northView);
 		if (scaleView != null) addView(scaleView);
 		if (toolsView != null) addView(toolsView);
