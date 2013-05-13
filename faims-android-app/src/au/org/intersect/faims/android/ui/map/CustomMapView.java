@@ -778,10 +778,6 @@ public class CustomMapView extends MapView {
 	public void updateSelection() throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
 		
-		if (transformGeometryList != null) {
-			throw new MapException("Geometry selection is locked");
-		}
-		
 		// note: remove geometry from list that no longer exist or are not visible
 		for (Iterator<Geometry> iterator = selectedGeometryList.iterator(); iterator.hasNext();) {
 			Geometry geom = iterator.next();
@@ -794,6 +790,7 @@ public class CustomMapView extends MapView {
 				}
 			}
 		}
+		
 		updateDrawView();
 	}
 	
@@ -824,6 +821,7 @@ public class CustomMapView extends MapView {
 	
 	public void clearSelectionTransform() {
 		transformGeometryList = null;
+		updateRenderer();
 	}
 	
 	private void updateDrawView() {
@@ -842,10 +840,12 @@ public class CustomMapView extends MapView {
 
 	public void setDrawViewColor(int color) {
 		drawView.setColor(color);
+		updateRenderer();
 	}
 
 	public void setDrawViewStrokeStyle(float strokeSize) {
 		drawView.setStrokeSize(strokeSize);
+		updateRenderer();
 	}
 	
 	public boolean isDrawViewLocked() {
@@ -854,6 +854,7 @@ public class CustomMapView extends MapView {
 
 	public void setDrawViewLock(boolean lock) {
 		drawView.setLock(lock);
+		updateRenderer();
 	}
 	
 }

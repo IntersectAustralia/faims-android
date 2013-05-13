@@ -7,6 +7,8 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
+import com.nutiteq.geometry.VectorElement;
+
 public class EditTool extends SelectTool {
 	
 	public static final String NAME = "Edit";
@@ -70,13 +72,13 @@ public class EditTool extends SelectTool {
 		
 		try {
 			if (lockButton.isChecked()) {
-				mapView.prepareSelectionTransform();		
+				mapView.prepareSelectionTransform();
 			} else {
 				mapView.doSelectionTransform();
 			}
 		} catch (Exception e) {
-			FLog.e("error doing seleciton transform", e);
-			showError("Error doing selection transform");
+			FLog.e("error doing selection transform", e);
+			showError(e.getMessage());
 		}
 	}
 	
@@ -85,5 +87,18 @@ public class EditTool extends SelectTool {
 		updateLockButton();
 		mapView.setDrawViewLock(false);
 		mapView.clearSelectionTransform();
+	}
+	
+	@Override
+	public void onVectorElementClicked(VectorElement element, double arg1,
+			double arg2, boolean arg3) {
+		if (!mapView.isDrawViewLocked()) {
+			super.onVectorElementClicked(element, arg1, arg2, arg3);
+		}
+	}
+	
+	protected void clearSelection() {
+		clearLock();
+		super.clearSelection();
 	}
 }

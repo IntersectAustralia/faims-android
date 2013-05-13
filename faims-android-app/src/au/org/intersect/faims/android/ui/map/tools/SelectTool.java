@@ -56,7 +56,7 @@ public class SelectTool extends SettingsTool {
 			mapView.updateSelection();
 		} catch (Exception e) {
 			FLog.e("error updating selection", e);
-			showError("Error updating selection");
+			showError(e.getMessage());
 		}
 	}
 	
@@ -74,12 +74,12 @@ public class SelectTool extends SettingsTool {
 		return button;
 	}
 	
-	private void clearSelection() {
+	protected void clearSelection() {
 		try {
 			mapView.clearSelection();
 		} catch (Exception e) {
 			FLog.e("error clearing selection", e);
-			showError("Error clearing selection");
+			showError(e.getMessage());
 		}
 	}
 	
@@ -97,7 +97,7 @@ public class SelectTool extends SettingsTool {
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
-				showError("Error selecting element");
+				showError(e.getMessage());
 			}
 		} else {
 			// ignore
