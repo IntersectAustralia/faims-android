@@ -2202,20 +2202,37 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void transformSelection(String ref) {
+	public void prepareSelectionTransform(String ref) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.transformSelection();
+				mapView.prepareSelectionTransform();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error transforming selection " + ref,e);
-			showWarning("Logic Error", "Error transforming selection " + ref);
+			FLog.e("error preparing selection transform " + ref,e);
+			showWarning("Logic Error", "Error preparing selection transform " + ref);
+		}
+	}
+	
+	public void doSelectionTransform(String ref) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.doSelectionTransform();
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error do selection transform " + ref,e);
+			showWarning("Logic Error", "Error do selection transform " + ref);
 		}
 	}
 	

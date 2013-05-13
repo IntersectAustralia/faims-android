@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -153,7 +152,9 @@ public class CustomMapView extends MapView {
 
 	private Geometry selectedGeom;
 	
-	private LinkedList<Geometry> selectedGeometryList;
+	private ArrayList<Geometry> selectedGeometryList;
+
+	private ArrayList<Geometry> transformGeometryList;
 	
 	public CustomMapView(Context context, DrawView drawView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 		this(context);
@@ -165,7 +166,7 @@ public class CustomMapView extends MapView {
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
-        selectedGeometryList = new LinkedList<Geometry>();
+        selectedGeometryList = new ArrayList<Geometry>();
 		
 		this.drawView = drawView;
 		this.northView = northView;
@@ -320,6 +321,14 @@ public class CustomMapView extends MapView {
 	}
 	
 	public int addGeometry(Layer layer, Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+		
+		if (layer == null) {
+			throw new MapException("Map does not exist");
+		}
+		
 		if (geometryIdMap.get(getGeometryId(geom)) != null) {
 			throw new MapException("Geometry already exists");
 		}
@@ -724,19 +733,31 @@ public class CustomMapView extends MapView {
 		
 		if (hasSelection(geom)) return;
 		
-		selectedGeometryList.push(geom);
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
+		
+		selectedGeometryList.add(geom);
 		updateDrawView();
 	}
 
-	public void clearSelection() {
+	public void clearSelection() throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
 		
 		selectedGeometryList.clear();
 		updateDrawView();
 	}
 	
-	public void removeSelection(Geometry geom) {
+	public void removeSelection(Geometry geom) throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
 		
 		selectedGeometryList.remove(geom);
 		updateDrawView();
@@ -746,8 +767,12 @@ public class CustomMapView extends MapView {
 		return selectedGeometryList.contains(geom);
 	}
 
-	public void updateSelection() {
+	public void updateSelection() throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
+		
+		if (transformGeometryList != null) {
+			throw new MapException("Geometry selection is locked");
+		}
 		
 		// note: remove geometry from list that no longer exist
 		for (Iterator<Geometry> iterator = selectedGeometryList.iterator(); iterator.hasNext();) {
@@ -759,8 +784,33 @@ public class CustomMapView extends MapView {
 		updateDrawView();
 	}
 	
-	public void transformSelection() {
+	public void prepareSelectionTransform() {
+		// keep a copy of the geometry at the current position
+		transformGeometryList= GeometryUtil.transformGeometryList(selectedGeometryList, this, true);
+	}
+	
+	public void doSelectionTransform() throws Exception {
+		if (transformGeometryList == null) return;
 		
+		ArrayList<Geometry> geomList = GeometryUtil.transformGeometryList(transformGeometryList, this, false);
+		for (int i = 0; i < selectedGeometryList.size(); i++) {
+			Geometry geom = selectedGeometryList.get(i);
+			Geometry transformedGeom = geomList.get(i);
+			CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
+			layer.removeGeometry(geom);
+			removeGeometry(geom);
+			layer.addGeometry(transformedGeom);
+			addGeometry(layer, transformedGeom);
+		}
+		
+		updateRenderer();
+		
+		transformGeometryList = null;
+		selectedGeometryList = geomList;
+	}
+	
+	public void clearSelectionTransform() {
+		transformGeometryList = null;
 	}
 	
 	private void updateDrawView() {

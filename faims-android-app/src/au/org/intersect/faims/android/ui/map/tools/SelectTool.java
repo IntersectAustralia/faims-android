@@ -42,17 +42,22 @@ public class SelectTool extends SettingsTool {
 	
 	@Override
 	public void activate() {
-		mapView.clearSelection();
+		clearSelection();
 	}
 	
 	@Override
 	public void deactivate() {
-		mapView.clearSelection();
+		clearSelection();
 	}
 	
 	@Override
 	public void update() {
-		mapView.updateSelection();
+		try {
+			mapView.updateSelection();
+		} catch (Exception e) {
+			FLog.e("error updating selection", e);
+			showError("Error updating selection");
+		}
 	}
 	
 	private MapButton createClearButton(final Context context) {
@@ -70,7 +75,12 @@ public class SelectTool extends SettingsTool {
 	}
 	
 	private void clearSelection() {
-		mapView.clearSelection();
+		try {
+			mapView.clearSelection();
+		} catch (Exception e) {
+			FLog.e("error clearing selection", e);
+			showError("Error clearing selection");
+		}
 	}
 	
 	@Override

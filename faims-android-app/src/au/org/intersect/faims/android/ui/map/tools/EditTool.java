@@ -7,9 +7,6 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
-import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.VectorElement;
-
 public class EditTool extends SelectTool {
 	
 	public static final String NAME = "Edit";
@@ -20,8 +17,27 @@ public class EditTool extends SelectTool {
 		super(context, mapView, NAME);
 		
 		lockButton = createLockButton(context);
+		updateLockButton();
 		
 		updateLayout();
+	}
+	
+	@Override
+	public void activate() {
+		clearLock();
+		super.activate();
+	}
+	
+	@Override
+	public void deactivate() {
+		clearLock();
+		super.activate();
+	}
+	
+	@Override
+	public void update() {
+		clearLock();
+		super.update();
 	}
 	
 	@Override
@@ -32,8 +48,7 @@ public class EditTool extends SelectTool {
 	
 	private MapToggleButton createLockButton(final Context context) {
 		MapToggleButton button = new MapToggleButton(context);
-		lockButton.setChecked(mapView.isDrawViewLocked());
-		updateLockButton();
+		button.setChecked(mapView.isDrawViewLocked());
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -54,33 +69,21 @@ public class EditTool extends SelectTool {
 		mapView.setDrawViewLock(lockButton.isChecked());
 		
 		try {
-			if (!lockButton.isChecked()) {
-				
+			if (lockButton.isChecked()) {
+				mapView.prepareSelectionTransform();		
+			} else {
+				mapView.doSelectionTransform();
 			}
 		} catch (Exception e) {
-			FLog.e("error replacing geometry overlay", e);
-			showError(e.getMessage());
+			FLog.e("error doing seleciton transform", e);
+			showError("Error doing selection transform");
 		}
 	}
 	
-	public void onMapClicked(double arg0, double arg1, boolean arg2) {
-		mapView.clearSelection();
+	private void clearLock() {
+		lockButton.setChecked(false);
+		updateLockButton();
+		mapView.setDrawViewLock(false);
+		mapView.clearSelectionTransform();
 	}
-
-	public void onVectorElementClicked(VectorElement element, double arg1,
-			double arg2, boolean arg3) {
-		if (element instanceof Geometry) {
-			Geometry geom = (Geometry) element;
-			
-			try {
-				
-			} catch (Exception e) {
-				FLog.e("error drawing geometry overlay", e);
-				showError(e.getMessage());
-			}
-		} else {
-			// ignore
-		}
-	}
-	
 }
