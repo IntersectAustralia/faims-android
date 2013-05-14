@@ -31,12 +31,16 @@ public class EditTool extends SelectTool {
 	private MapToggleButton lockButton;
 
 	private MapButton propertiesButton;
+
+	private MapButton deleteButton;
 	
 	public EditTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
-		propertiesButton = createPropertiesButton(context);
 		lockButton = createLockButton(context);
+		propertiesButton = createPropertiesButton(context);
+		deleteButton = createDeleteButton(context); 
+				
 		updateLockButton();
 		
 		updateLayout();
@@ -65,6 +69,7 @@ public class EditTool extends SelectTool {
 		super.updateLayout();
 		if (lockButton != null) layout.addView(lockButton);
 		if (propertiesButton != null) layout.addView(propertiesButton);
+		if (deleteButton != null) layout.addView(deleteButton);
 	}
 	
 	private MapToggleButton createLockButton(final Context context) {
@@ -115,6 +120,25 @@ public class EditTool extends SelectTool {
 	protected void clearSelection() {
 		clearLock();
 		super.clearSelection();
+	}
+	
+	private MapButton createDeleteButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Delete");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					List<Geometry> selection = EditTool.this.mapView.getSelection();
+					EditTool.this.mapView.clearGeometryList(selection);
+				} catch (Exception e) {
+					showError(e.getMessage());
+				}
+			}
+			
+		});
+		return button;
 	}
 	
 	@Override

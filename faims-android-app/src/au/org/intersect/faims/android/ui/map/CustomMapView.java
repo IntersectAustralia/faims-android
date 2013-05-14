@@ -803,7 +803,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			throw new MapException("Geometry selection is locked");
 		}
 		
-		selectedGeometryList.clear();
+		selectedGeometryList = new ArrayList<Geometry>();
 		updateDrawView();
 	}
 	
