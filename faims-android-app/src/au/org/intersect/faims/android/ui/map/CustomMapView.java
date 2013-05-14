@@ -168,6 +168,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	private boolean showDecimal;
 	private LayerManagerView layerManager;
 	private FileManager fm;
+
+	private boolean showKm;
 	
 	public CustomMapView(Context context, DrawView drawView, EditView editView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 
@@ -965,5 +967,13 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	@Override
 	public void onFileChangesListener() {
 		layerManager.setSelectedFilePath(fm.getSelectedFile().getName());
+	}
+
+	public boolean showKm() {
+		return showKm;
+	}
+
+	public void setShowKm(boolean value) {
+		showKm = value;
 	}
 }

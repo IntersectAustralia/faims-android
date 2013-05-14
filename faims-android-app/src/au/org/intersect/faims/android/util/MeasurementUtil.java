@@ -24,8 +24,12 @@ public class MeasurementUtil {
 		return new DecimalFormat("#.0000").format(value);
 	}
 	
-	public static String displayAsDistance(double value) {
+	public static String displayAsMeters(double value) {
 		return new DecimalFormat("###,###,###,###.0000").format(value) + "m";
+	}
+	
+	public static String displayAsKiloMeters(double value) {
+		return new DecimalFormat("###,###,###,###.0000").format(value) + "km";
 	}
 
 }
