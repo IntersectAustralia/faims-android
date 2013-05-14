@@ -11,6 +11,8 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	private String name;
 	private int layerId;
+	private String dbPath;
+	private String tableName;
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
@@ -21,6 +23,8 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 				pointStyleSet, lineStyleSet, polygonStyleSet);
 		this.name = name;
 		this.layerId = layerId;
+		this.dbPath = dbPath;
+		this.tableName = tableName;
 	}
 	
 	public String getName() {
@@ -33,6 +37,14 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	public int getLayerId() {
 		return layerId;
+	}
+
+	public String getDbPath() {
+		return dbPath;
+	}
+
+	public String getTableName() {
+		return tableName;
 	}
 
 }

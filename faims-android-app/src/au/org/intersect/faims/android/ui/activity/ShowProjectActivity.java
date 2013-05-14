@@ -295,7 +295,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public static final int RASTER_FILE_BROWSER_REQUEST_CODE = 3;
 	
-	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 3;
+	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
 	
 	@Inject
 	ServerDiscovery serverDiscovery;

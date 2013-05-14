@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import group.pals.android.lib.ui.filechooser.FileChooserActivity;
 import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +11,13 @@ import java.util.Locale;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
+
+import org.gdal.gdal.Dataset;
+import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconstConstants;
+import org.gdal.osr.SpatialReference;
+import org.gdal.osr.osr;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -39,6 +47,9 @@ import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
+import au.org.intersect.faims.android.nutiteq.CanvasLayer;
+import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
+import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
@@ -204,8 +215,20 @@ public class LayerManagerView extends LinearLayout {
 					
 				});
 				
+				Button showMetadataButton = new Button(context);
+				showMetadataButton.setText("Show Metadata");
+				showMetadataButton.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						d.dismiss();
+						showMetadata(layer);
+					}
+				});
+
 				layout.addView(removeButton);
 				layout.addView(renameButton);
+				layout.addView(showMetadataButton);
 				
 				d.show();
 				return true;
@@ -930,6 +953,140 @@ public class LayerManagerView extends LinearLayout {
 		builder.create().show();
 	}
 	
+	private void showMetadata(Layer layer) {
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		TextView layerTypeTextView = new TextView(this.getContext());
+		layerTypeTextView.setText("Layer type:");
+		layout.addView(layerTypeTextView);
+
+		EditText layerTypeEditText = new EditText(LayerManagerView.this.getContext());
+		layerTypeEditText.setEnabled(false);
+		if(layer instanceof CustomGdalMapLayer){
+			layerTypeEditText.setText("raster layer");
+		}else if(layer instanceof CustomSpatialiteLayer){
+			layerTypeEditText.setText("spatial layer");
+		}else if(layer instanceof CanvasLayer){
+			layerTypeEditText.setText("canvas layer");
+		}
+		layout.addView(layerTypeEditText);
+		
+		TextView layerNameTextView = new TextView(this.getContext());
+		layerNameTextView.setText("Layer name:");
+		layout.addView(layerNameTextView);
+
+		if(layer instanceof CustomGdalMapLayer){
+			CustomGdalMapLayer gdalMapLayer = (CustomGdalMapLayer) layer;
+
+			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			layerNameEditText.setEnabled(false);
+			layerNameEditText.setText(gdalMapLayer.getName());
+			layout.addView(layerNameEditText);
+
+			TextView fileNameTextView = new TextView(this.getContext());
+			fileNameTextView.setText("File name:");
+			layout.addView(fileNameTextView);
+
+			File file = new File(gdalMapLayer.getGdalSource());
+			EditText fileNameEditText = new EditText(LayerManagerView.this.getContext());
+			fileNameEditText.setEnabled(false);
+			fileNameEditText.setText(file.getName());
+			layout.addView(fileNameEditText);
+
+			TextView fileSizeTextView = new TextView(this.getContext());
+			fileSizeTextView.setText("File size:");
+			layout.addView(fileSizeTextView);
+
+			EditText fileSizeEditText = new EditText(LayerManagerView.this.getContext());
+			fileSizeEditText.setEnabled(false);
+			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
+			layout.addView(fileSizeEditText);
+
+			Dataset originalData = gdal.Open(gdalMapLayer.getGdalSource(), gdalconstConstants.GA_ReadOnly);
+	        // get original bounds in Wgs84
+	        SpatialReference hLatLong = new SpatialReference(osr.SRS_WKT_WGS84);
+	        double[][] originalBounds = gdalMapLayer.boundsWgs84(originalData, hLatLong);
+	        TextView upperLeftTextView = new TextView(this.getContext());
+	        upperLeftTextView.setText("Upper left boundary:");
+			layout.addView(upperLeftTextView);
+
+			EditText upperLeftEditText = new EditText(LayerManagerView.this.getContext());
+			upperLeftEditText.setEnabled(false);
+			upperLeftEditText.setText(originalBounds[0][0] + "," + originalBounds[0][1]);
+			layout.addView(upperLeftEditText);
+
+			TextView bottomRightTextView = new TextView(this.getContext());
+			bottomRightTextView.setText("Bottom right boundary:");
+			layout.addView(bottomRightTextView);
+
+			EditText bottomRightEditText = new EditText(LayerManagerView.this.getContext());
+			bottomRightEditText.setEnabled(false);
+			bottomRightEditText.setText(originalBounds[3][0] + "," + originalBounds[3][1]);
+			layout.addView(bottomRightEditText);
+
+		}else if(layer instanceof CustomSpatialiteLayer){
+			CustomSpatialiteLayer spatialiteLayer = (CustomSpatialiteLayer) layer;
+
+			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			layerNameEditText.setEnabled(false);
+			layerNameEditText.setText(spatialiteLayer.getName());
+			layout.addView(layerNameEditText);
+
+			TextView fileNameTextView = new TextView(this.getContext());
+			fileNameTextView.setText("File name:");
+			layout.addView(fileNameTextView);
+
+			File file = new File(spatialiteLayer.getDbPath());
+			EditText fileNameEditText = new EditText(LayerManagerView.this.getContext());
+			fileNameEditText.setEnabled(false);
+			fileNameEditText.setText(file.getName());
+			layout.addView(fileNameEditText);
+
+			TextView fileSizeTextView = new TextView(this.getContext());
+			fileSizeTextView.setText("File size:");
+			layout.addView(fileSizeTextView);
+
+			EditText fileSizeEditText = new EditText(LayerManagerView.this.getContext());
+			fileSizeEditText.setEnabled(false);
+			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
+			layout.addView(fileSizeEditText);
+
+			TextView tableNameTextView = new TextView(this.getContext());
+			tableNameTextView.setText("Table name:");
+			layout.addView(tableNameTextView);
+
+			EditText tableNameEditText = new EditText(LayerManagerView.this.getContext());
+			tableNameEditText.setEnabled(false);
+			tableNameEditText.setText(spatialiteLayer.getTableName());
+			layout.addView(tableNameEditText);
+
+		}else if(layer instanceof CanvasLayer){
+			CanvasLayer canvasLayer = (CanvasLayer) layer;
+
+			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			layerNameEditText.setEnabled(false);
+			layerNameEditText.setText(canvasLayer.getName());
+			layout.addView(layerNameEditText);
+		}else{
+			showErrorDialog("wrong type of layer");
+		}
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		builder.setTitle("Layer Metadata");
+		builder.setView(layout);
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+
+			}
+	        
+	    });
+		
+		builder.create().show();
+	}
+
 	private void showErrorDialog(String message) {
 		new ErrorDialog(LayerManagerView.this.getContext(), "Layer Manager Error", message).show();
 	}
