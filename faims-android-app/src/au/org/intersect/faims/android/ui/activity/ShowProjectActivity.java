@@ -293,7 +293,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public static final int FILE_BROWSER_REQUEST_CODE = 2;
 	
-	public static final int MAP_FILE_BROWSER_REQUEST_CODE = 3;
+	public static final int RASTER_FILE_BROWSER_REQUEST_CODE = 3;
+	
+	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 3;
 	
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -517,14 +519,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					FLog.e("error getting selected filename", e);
 				}
 			}
-		}else if(requestCode == MAP_FILE_BROWSER_REQUEST_CODE){
+		}else if(requestCode == RASTER_FILE_BROWSER_REQUEST_CODE || requestCode == SPATIAL_FILE_BROWSER_REQUEST_CODE){
 			if (resultCode == RESULT_OK) {
 				try {
 					@SuppressWarnings("unchecked")
 					List<LocalFile> files = (List<LocalFile>)
 			                data.getSerializableExtra(FileChooserActivity._Results);
+					boolean isSpatialFile = requestCode == SPATIAL_FILE_BROWSER_REQUEST_CODE;
 					fm.setSelectedFile(files.get(0));
-					renderer.getCurrentTabGroup().getCurrentTab().getMapViewList().get(0).onFileChangesListener();
+					renderer.getCurrentTabGroup().getCurrentTab().getMapViewList().get(0).onFileChangesListener(isSpatialFile);
 				} catch (Exception e) {
 					FLog.e("error getting selected filename", e);
 				}

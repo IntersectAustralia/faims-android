@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import jsqlite.Database;
+import jsqlite.Stmt;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -18,14 +20,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -88,6 +93,7 @@ public class LayerManagerView extends LinearLayout {
 	private LinearLayout buttonsLayout;
 	private FileManager fm;
 	private TextView selectedFileText;
+	private Spinner tableNameSpinner;
 
 	public LayerManagerView(Context context) {
 		super(context);
@@ -339,7 +345,7 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(View arg0) {
 				d.dismiss();
-				showFileBrowser();
+				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
 		layout.addView(browserButton);
@@ -371,66 +377,66 @@ public class LayerManagerView extends LinearLayout {
 		builder.create().show();
 	}
 	
-	private void addShapeLayer(){
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-		
-		builder.setTitle("Layer Manager");
-		builder.setMessage("Add shape layer:");
-		
-		LinearLayout layout = new LinearLayout(getContext());
-		layout.setOrientation(LinearLayout.VERTICAL);
-		
-		builder.setView(layout);
-		final Dialog d = builder.create();
-		
-		TextView textView = new TextView(this.getContext());
-		textView.setText("Shape layer name:");
-		layout.addView(textView);
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
-		layout.addView(editText);
-		
-		Button browserButton = new Button(getContext());
-		browserButton.setText("browse");
-		browserButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				d.dismiss();
-				showFileBrowser();
-			}
-		});
-		layout.addView(browserButton);
-		selectedFileText = new TextView(this.getContext());
-		layout.addView(selectedFileText);
-
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					if(fm.getSelectedFile() != null){
-						StyleSet<PointStyle> ps = (StyleSet<PointStyle>) createStyleSet(10, createPointStyle(Color.RED, 0.05f, 0.1f));
-						StyleSet<LineStyle> ls = (StyleSet<LineStyle>) createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
-						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
-						mapView.addShapeLayer(editText.getText().toString(), fm.getSelectedFile().getPath(), ps, ls, pos);
-						fm.setSelectedFile(null);
-						redrawLayers();
-					}
-				} catch (Exception e) {
-					showErrorDialog(e.getMessage());
-				}
-			}
-	        
-	    });
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	        public void onClick(DialogInterface dialog, int id) {
-	           // ignore
-	        }
-	    });
-		
-		builder.create().show();
-	}
+//	private void addShapeLayer(){
+//		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+//		
+//		builder.setTitle("Layer Manager");
+//		builder.setMessage("Add shape layer:");
+//		
+//		LinearLayout layout = new LinearLayout(getContext());
+//		layout.setOrientation(LinearLayout.VERTICAL);
+//		
+//		builder.setView(layout);
+//		final Dialog d = builder.create();
+//		
+//		TextView textView = new TextView(this.getContext());
+//		textView.setText("Shape layer name:");
+//		layout.addView(textView);
+//		final EditText editText = new EditText(LayerManagerView.this.getContext());
+//		layout.addView(editText);
+//		
+//		Button browserButton = new Button(getContext());
+//		browserButton.setText("browse");
+//		browserButton.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View arg0) {
+//				d.dismiss();
+//				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
+//			}
+//		});
+//		layout.addView(browserButton);
+//		selectedFileText = new TextView(this.getContext());
+//		layout.addView(selectedFileText);
+//
+//		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//
+//			@SuppressWarnings("unchecked")
+//			@Override
+//			public void onClick(DialogInterface arg0, int arg1) {
+//				try {
+//					if(fm.getSelectedFile() != null){
+//						StyleSet<PointStyle> ps = (StyleSet<PointStyle>) createStyleSet(10, createPointStyle(Color.RED, 0.05f, 0.1f));
+//						StyleSet<LineStyle> ls = (StyleSet<LineStyle>) createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
+//						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
+//						mapView.addShapeLayer(editText.getText().toString(), fm.getSelectedFile().getPath(), ps, ls, pos);
+//						fm.setSelectedFile(null);
+//						redrawLayers();
+//					}
+//				} catch (Exception e) {
+//					showErrorDialog(e.getMessage());
+//				}
+//			}
+//	        
+//	    });
+//		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//	        public void onClick(DialogInterface dialog, int id) {
+//	           // ignore
+//	        }
+//	    });
+//		
+//		builder.create().show();
+//	}
 	
 	private void addSpatialLayer(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
@@ -453,8 +459,8 @@ public class LayerManagerView extends LinearLayout {
 		TextView tableTextView = new TextView(this.getContext());
 		tableTextView.setText("Spatial table name:");
 		layout.addView(tableTextView);
-		final EditText tableEditText = new EditText(LayerManagerView.this.getContext());
-		layout.addView(tableEditText);
+		tableNameSpinner = new Spinner(this.getContext());
+		layout.addView(tableNameSpinner);
 		
 		Button browserButton = new Button(getContext());
 		browserButton.setText("browse");
@@ -463,7 +469,7 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(View arg0) {
 				d.dismiss();
-				showFileBrowser();
+				showFileBrowser(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
 		layout.addView(browserButton);
@@ -479,7 +485,9 @@ public class LayerManagerView extends LinearLayout {
 						StyleSet<PointStyle> ps = (StyleSet<PointStyle>) createStyleSet(10, createPointStyle(Color.RED, 0.05f, 0.1f));
 						StyleSet<LineStyle> ls = (StyleSet<LineStyle>) createStyleSet(10, createLineStyle(Color.GREEN, 0.01f, 0.01f, null));
 						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(Color.BLUE, createLineStyle(Color.BLACK, 0.01f, 0.01f, null)));
-						mapView.addSpatialLayer(editText.getText().toString(), fm.getSelectedFile().getPath(), tableEditText.getText().toString(), null, ps, ls, pos);
+						String layerName = editText.getText() != null ? editText.getText().toString() : null;
+						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
+						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, ps, ls, pos);
 						fm.setSelectedFile(null);
 						redrawLayers();
 					}
@@ -631,10 +639,10 @@ public class LayerManagerView extends LinearLayout {
 		new ErrorDialog(LayerManagerView.this.getContext(), "Layer Manager Error", message).show();
 	}
 	
-	private void showFileBrowser(){
+	private void showFileBrowser(int requestCode){
 		Intent intent = new Intent((ShowProjectActivity)this.getContext(), FileChooserActivity.class);
 		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
-		((ShowProjectActivity) this.getContext()).startActivityForResult(intent, ShowProjectActivity.MAP_FILE_BROWSER_REQUEST_CODE);
+		((ShowProjectActivity) this.getContext()).startActivityForResult(intent, requestCode);
 	}
 
 	public FileManager getFileManager() {
@@ -645,7 +653,69 @@ public class LayerManagerView extends LinearLayout {
 		this.fm = fm;
 	}
 
-	public void setSelectedFilePath(String filename) {
+	public void setSelectedFilePath(String filename, boolean isSpatial) {
+		if(isSpatial){
+			try {
+				setSpinner();
+			} catch (jsqlite.Exception e) {
+				FLog.e("Not a valid spatial layer file");
+				AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+				
+				builder.setTitle("Error");
+				builder.setMessage("Not a valid spatial layer file");
+				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				           public void onClick(DialogInterface dialog, int id) {
+				               // User clicked OK button
+				           }
+				       });
+				builder.create().show();
+			}
+		}
 		this.selectedFileText.setText(filename);
+	}
+	
+	public void setSpinner() throws jsqlite.Exception{
+			synchronized(DatabaseManager.class) {
+				List<String> tableName = new ArrayList<String>();
+				Stmt st = null;
+				Database db = null;
+				try {
+					db = new jsqlite.Database();
+					db.open(this.fm.getSelectedFile().getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+					
+					String query = "select name from sqlite_master where type = 'table' and sql like '%\"Geometry\"%';";
+					st = db.prepare(query);
+					
+					while(st.step()){
+						tableName.add(st.column_string(0));
+					}
+					st.close();
+					st = null;
+				} finally {
+					try {
+						if (st != null) st.close();
+					} catch(Exception e) {
+						FLog.e("error closing statement", e);
+					}
+					try {
+						if (db != null) {
+							db.close();
+							db = null;
+						}
+					} catch (Exception e) {
+						FLog.e("error closing database", e);
+					}
+				}
+				if(tableName.isEmpty()){
+					throw new jsqlite.Exception("Not tables found");
+				}else{
+					ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+							this.getContext(),
+							android.R.layout.simple_spinner_dropdown_item,
+							tableName);
+					tableNameSpinner.setAdapter(arrayAdapter);
+					tableNameSpinner.setSelection(0);
+				}
+			}
 	}
 }

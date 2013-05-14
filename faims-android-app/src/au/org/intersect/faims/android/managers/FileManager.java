@@ -19,6 +19,6 @@ public class FileManager {
 	}
 
 	public interface FileSelectionListener{
-		public void onFileChangesListener();
+		public void onFileChangesListener(boolean isSpatialFile);
 	}
 }

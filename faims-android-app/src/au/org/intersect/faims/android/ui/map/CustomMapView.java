@@ -954,7 +954,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	}
 	
 	@Override
-	public void onFileChangesListener() {
-		layerManager.setSelectedFilePath(fm.getSelectedFile().getName());
+	public void onFileChangesListener(boolean isSpatialFile) {
+		layerManager.setSelectedFilePath(fm.getSelectedFile().getName(),isSpatialFile);
 	}
 }
