@@ -200,12 +200,12 @@ public class CreateLineTool extends BaseGeometryTool {
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
-				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Size:", size);
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", pickingSize);
-				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
-				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);
-				final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points:", showPoints);
+				final EditText colorSetter = addSetter(context, layout, "Line Color:", Integer.toHexString(color));
+				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
+				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
+				final SeekBar widthBar = addSlider(context, layout, "Line Width:", width);
+				final SeekBar pickingWidthBar = addSlider(context, layout, "Line Picking Width:", pickingWidth);
+				final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Line:", showPoints);
 				
 				builder.setView(layout);
 				

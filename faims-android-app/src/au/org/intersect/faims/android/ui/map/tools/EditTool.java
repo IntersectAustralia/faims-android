@@ -217,9 +217,9 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = point.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(style.pointColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", style.pickingSize);
+		final EditText colorSetter = addSetter(context, layout, "Point Color:", Integer.toHexString(style.pointColor));
+		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
+		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
 		
 		builder.setView(layout);
 		
@@ -264,12 +264,12 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = line.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(style.pointColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", style.pickingSize);
-		final SeekBar widthBar = addSlider(context, layout, "Width:", style.width);
-		final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", style.pickingWidth);
-		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points:", style.showPoints);
+		final EditText colorSetter = addSetter(context, layout, "Line Color:", Integer.toHexString(style.pointColor));
+		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
+		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
+		final SeekBar widthBar = addSlider(context, layout, "Line Width:", style.width);
+		final SeekBar pickingWidthBar = addSlider(context, layout, "Line Picking Width:", style.pickingWidth);
+		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Line:", style.showPoints);
 		
 		builder.setView(layout);
 		
@@ -321,13 +321,13 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = polygon.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(style.polygonColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", style.pickingSize);
+		final EditText colorSetter = addSetter(context, layout, "Polygon Color:", Integer.toHexString(style.polygonColor));
+		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
+		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
 		final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(style.lineColor));
-		final SeekBar widthBar = addSlider(context, layout, "Width:", style.width);
-		final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", style.pickingWidth);
-		final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke:", style.showStroke);
+		final SeekBar widthBar = addSlider(context, layout, "Stroke Width:", style.width);
+		final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", style.pickingWidth);
+		final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", style.showStroke);
 		
 		builder.setView(layout);
 		

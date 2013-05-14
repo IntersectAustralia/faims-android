@@ -200,13 +200,13 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
-				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Size:", size);
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", pickingSize);
+				final EditText colorSetter = addSetter(context, layout, "Polygon Color:", Integer.toHexString(color));
+				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
+				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
 				final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(lineColor));
-				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
-				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);
-				final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke:", showStroke);
+				final SeekBar widthBar = addSlider(context, layout, "Stroke Width:", width);
+				final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", pickingWidth);
+				final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", showStroke);
 				
 				builder.setView(layout);
 				

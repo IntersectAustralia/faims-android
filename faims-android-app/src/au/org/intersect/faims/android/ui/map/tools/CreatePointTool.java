@@ -45,9 +45,9 @@ public class CreatePointTool extends BaseGeometryTool {
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
-				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Size:", size);
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", pickingSize);
+				final EditText colorSetter = addSetter(context, layout, "Point Color:", Integer.toHexString(color));
+				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
+				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
 				
 				builder.setView(layout);
 				
