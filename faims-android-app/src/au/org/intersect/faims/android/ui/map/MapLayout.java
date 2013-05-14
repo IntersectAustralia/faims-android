@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.util.Dip;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class MapLayout extends RelativeLayout {
 
@@ -29,8 +29,8 @@ public class MapLayout extends RelativeLayout {
 		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		northLayout.alignWithParent = true;
 		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		northLayout.topMargin = Dip.getDip(context, 10);
-		northLayout.rightMargin = Dip.getDip(context, 10);
+		northLayout.topMargin = (int) ScaleUtil.getDip(context, 10);
+		northLayout.rightMargin = (int) ScaleUtil.getDip(context, 10);
 		northView.setLayoutParams(northLayout);
 		
 		scaleView = new ScaleBarView(context);

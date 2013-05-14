@@ -10,7 +10,7 @@ import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
-import au.org.intersect.faims.android.util.Dip;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.layers.Layer;
 
@@ -23,7 +23,7 @@ public class LayerListItem extends LinearLayout {
 		super(context);
 		setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.WRAP_CONTENT));
 		setOrientation(LinearLayout.HORIZONTAL);
-		int size = Dip.getDip(context, 10);
+		int size = (int) ScaleUtil.getDip(context, 10);
 		setPadding(size, size, size, size);
 	}
 	
@@ -31,7 +31,7 @@ public class LayerListItem extends LinearLayout {
 		text = new TextView(this.getContext());
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 		text.setLayoutParams(params);
-		int size = Dip.getDip(this.getContext(), 5);
+		int size = (int) ScaleUtil.getDip(this.getContext(), 5);
 		text.setPadding(size, size, size, size);
 		text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
 		text.setSingleLine(false);

@@ -371,6 +371,7 @@ public class LayerManagerView extends LinearLayout {
 		builder.create().show();
 	}
 	
+	/*
 	private void addShapeLayer(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 		
@@ -431,6 +432,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		builder.create().show();
 	}
+	*/
 	
 	private void addSpatialLayer(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());

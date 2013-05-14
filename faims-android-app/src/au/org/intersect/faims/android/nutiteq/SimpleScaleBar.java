@@ -165,21 +165,21 @@ public class SimpleScaleBar {
 			if (unitMode == METRIC) {
 				if (scale >= 1.0) {
 					g.drawText(Double.toString(round2Places(scale))
-							+ METRIC_UNIT, sx + BAR_BORDER, sy
+							+ METRIC_UNIT, sx + 2 * BAR_BORDER, sy
 							- BAR_BORDER, white);
 				} else {
 					g.drawText(Double.toString(round2Places(scale * KM_TO_M))
-							+ METRIC_UNIT_SMALL, sx + BAR_BORDER, sy
+							+ METRIC_UNIT_SMALL, sx + 2 * BAR_BORDER, sy
 							- BAR_BORDER, white);
 				}
 			} else if (unitMode == IMPERIAL) {
 				if (scale >= 1.0) {
 					g.drawText(Double.toString(round2Places(scale))
-							+ IMPERIAL_UNIT, sx + BAR_BORDER, sy
+							+ IMPERIAL_UNIT, sx + 2 * BAR_BORDER, sy
 							- BAR_BORDER, white);
 				} else {
 					g.drawText(Double.toString(round2Places(scale * MI_TO_FT))
-							+ IMPERIAL_UNIT_SMALL, sx + BAR_BORDER, sy
+							+ IMPERIAL_UNIT_SMALL, sx + 2 * BAR_BORDER, sy
 							-  BAR_BORDER, white);
 				}
 			}

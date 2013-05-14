@@ -36,7 +36,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import au.org.intersect.faims.android.ui.map.LayerListItem;
-import au.org.intersect.faims.android.util.Dip;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class CustomDragDropListView extends ListView {
 
@@ -67,9 +67,9 @@ public class CustomDragDropListView extends ListView {
 
 	public CustomDragDropListView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		mItemHeightNormal = Dip.getDip(context, 64);
+		mItemHeightNormal = (int) ScaleUtil.getDip(context, 64);
 		mItemHeightHalf = mItemHeightNormal / 2;
-		mItemHeightExpanded = Dip.getDip(context, 128);
+		mItemHeightExpanded = (int) ScaleUtil.getDip(context, 128);
 	}
 
 	@Override

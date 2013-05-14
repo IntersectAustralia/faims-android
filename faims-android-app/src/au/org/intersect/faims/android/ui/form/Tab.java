@@ -46,7 +46,7 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.DateUtil;
-import au.org.intersect.faims.android.util.Dip;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class Tab implements Parcelable{
 
@@ -304,7 +304,7 @@ public class Tab implements Parcelable{
 	private Button createCertaintyButton() {
 		Button button = new Button(this.context);
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = Dip.getDip(context, 30);
+		int size = (int) ScaleUtil.getDip(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -316,7 +316,7 @@ public class Tab implements Parcelable{
 	private Button createAnnotationButton() {
 		Button button = new Button(this.context);
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = Dip.getDip(context, 30);
+		int size = (int) ScaleUtil.getDip(context, 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -548,7 +548,7 @@ public class Tab implements Parcelable{
 				final SeekBar seekBar = new SeekBar(v.getContext());
 				float certainty = 0;
 				seekBar.setMax(100);
-				seekBar.setMinimumWidth(Dip.getDip(Tab.this.context, 400));
+				seekBar.setMinimumWidth((int) ScaleUtil.getDip(Tab.this.context, 400));
 				if (view instanceof CustomEditText){
 	        		CustomEditText customEditText = (CustomEditText) view;
 	        		certainty = customEditText.getCurrentCertainty();
@@ -739,7 +739,7 @@ public class Tab implements Parcelable{
 	        		LinearLayout galleryLayout = new LinearLayout(this.context);
 	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 	        		CustomImageView gallery = new CustomImageView(this.context);
-	        		int size = Dip.getDip(context, 400);
+	        		int size = (int) ScaleUtil.getDip(context, 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(ref+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);

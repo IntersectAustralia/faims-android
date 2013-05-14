@@ -37,7 +37,7 @@ import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.SelectTool;
-import au.org.intersect.faims.android.util.Dip;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
@@ -196,8 +196,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		this.editView.setColor(Color.GREEN);
 		
 		// TODO make this configurable
-		scaleView.setBarWidthRange(Dip.getDip(context, 40),
-				Dip.getDip(context, 100));
+		scaleView.setBarWidthRange((int) ScaleUtil.getDip(context, 40),
+				(int) ScaleUtil.getDip(context, 100));
 
 		initTools();
 
