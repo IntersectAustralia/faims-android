@@ -30,6 +30,7 @@ import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
@@ -386,6 +387,15 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		clearSelection();
 		clearSelectionTransform();
 	}
+	
+	public void removeGeometryWithoutClearing(Geometry geom) throws Exception {
+		if (geom == null) {
+			throw new MapException("Geometry does not exist");
+		}
+
+		geometryIdMap.remove(getGeometryId(geom));
+		geometryLayerMap.remove(geom);
+	}
 
 	public int getGeometryId(Geometry geom) {
 		if (geom instanceof CustomPoint) {
@@ -716,6 +726,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		tools.add(new CreateLineTool(this.getContext(), this));
 		tools.add(new CreatePolygonTool(this.getContext(), this));
 		tools.add(new PointDistanceTool(this.getContext(), this));
+		tools.add(new AzimuthTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -858,12 +869,13 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		if (transformGeometryList == null) return;
 		
 		ArrayList<Geometry> geomList = GeometryUtil.transformGeometryList(transformGeometryList, this, false);
+		
 		for (int i = 0; i < selectedGeometryList.size(); i++) {
 			Geometry geom = selectedGeometryList.get(i);
 			Geometry transformedGeom = geomList.get(i);
 			CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
 			layer.removeGeometry(geom);
-			removeGeometry(geom);
+			removeGeometryWithoutClearing(geom);
 			layer.addGeometry(transformedGeom);
 			addGeometry(layer, transformedGeom);
 		}

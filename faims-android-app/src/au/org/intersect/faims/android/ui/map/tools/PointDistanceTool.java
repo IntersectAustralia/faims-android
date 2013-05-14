@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,13 +26,7 @@ import com.nutiteq.geometry.VectorElement;
 
 public class PointDistanceTool extends SelectTool {
 	
-	private class ToolCanvas extends View {
-		
-		protected static final float STROKE_SCALE = 10.0f;
-		
-		protected static final float TEXT_SCALE = 24.0f;
-		
-		protected static final float DEFAULT_OFFSET = 20.0f;
+	private class PointDistanceToolCanvas extends ToolCanvas {
 		
 		private float textX;
 		private float textY;
@@ -41,20 +34,12 @@ public class PointDistanceTool extends SelectTool {
 		private MapPos tp2;
 		private float distance;
 		
-		private int color;
-		private float strokeSize;
-		protected float textSize;
-		private Paint paint;
-		protected Paint textPaint;
-
 		private boolean showKm;
-
-		public ToolCanvas(Context context) {
-			super(context);
-			paint = new Paint();
-			textPaint = new Paint();
-		}
 		
+		public PointDistanceToolCanvas(Context context) {
+			super(context);
+		}
+
 		@Override
 		public void onDraw(Canvas canvas) {
 			if (tp1 != null && tp2 != null) {
@@ -69,6 +54,7 @@ public class PointDistanceTool extends SelectTool {
 			}
 		}
 		
+		@Override
 		public void clear() {
 			tp1 = tp2 = null;
 			invalidate();
@@ -100,36 +86,9 @@ public class PointDistanceTool extends SelectTool {
 			
 			invalidate();
 		}
-
-		public void setColor(int color) {
-			this.color = color;
-			updatePaint();
-		}
-
-		public void setStrokeSize(float strokeSize) {
-			this.strokeSize = strokeSize;
-			updatePaint();
-		}
-		
-		public void setTextSize(float value) {
-			textSize = value;
-			updatePaint();
-		}
 		
 		public void setShowKm(boolean value) {
 			showKm = value;
-			invalidate();
-		}
-		
-		private void updatePaint() {
-			paint.setColor(color);
-			paint.setStyle(Paint.Style.STROKE);
-			paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), strokeSize * STROKE_SCALE));
-			paint.setAntiAlias(true);
-			
-			textPaint.setColor(color);
-			textPaint.setTextSize(ScaleUtil.getSp(this.getContext(), textSize * TEXT_SCALE));
-			textPaint.setAntiAlias(true);
 			invalidate();
 		}
 		
@@ -137,11 +96,11 @@ public class PointDistanceTool extends SelectTool {
 	
 	public static final String NAME = "Point Distance";
 	
-	private ToolCanvas canvas;
+	private PointDistanceToolCanvas canvas;
 
 	public PointDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
-		canvas = new ToolCanvas(context);
+		canvas = new PointDistanceToolCanvas(context);
 		container.addView(canvas);
 	}
 

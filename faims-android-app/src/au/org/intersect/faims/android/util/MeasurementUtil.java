@@ -32,4 +32,8 @@ public class MeasurementUtil {
 		return new DecimalFormat("###,###,###,###.0000").format(value) + "km";
 	}
 
+	public static String displayAsDegrees(float value) {
+		return new DecimalFormat("###.0000").format(value % 360) + "¡";
+	}
+
 }
