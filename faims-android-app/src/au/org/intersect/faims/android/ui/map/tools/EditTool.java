@@ -45,9 +45,9 @@ public class EditTool extends SelectTool {
 	}
 	
 	@Override
-	public void update() {
+	public void onLayersChanged() {
 		clearLock();
-		super.update();
+		super.onLayersChanged();
 	}
 	
 	@Override

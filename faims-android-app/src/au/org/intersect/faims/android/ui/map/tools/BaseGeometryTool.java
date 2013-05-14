@@ -58,7 +58,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	}
 	
 	@Override 
-	public void update() {
+	public void onLayersChanged() {
 		setSelectedLayer(mapView.getSelectedLayer());
 	}
 	

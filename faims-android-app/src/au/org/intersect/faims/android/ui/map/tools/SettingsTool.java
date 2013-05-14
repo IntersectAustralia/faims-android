@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.text.InputType;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -26,6 +25,7 @@ public abstract class SettingsTool extends MapTool {
 		
 		layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.VERTICAL);
+		container.addView(layout);
 		
 		settingsButton = createSettingsButton(context);
 		
@@ -33,13 +33,10 @@ public abstract class SettingsTool extends MapTool {
 	}
 	
 	protected void updateLayout() {
-		layout.removeAllViews();
-		layout.addView(settingsButton);
-	}
-
-	@Override
-	public View getUI() {
-		return layout;
+		if (layout != null) {
+			layout.removeAllViews();
+			layout.addView(settingsButton);
+		}
 	}
 	
 	protected int parseColor(String value) throws Exception {

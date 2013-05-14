@@ -56,8 +56,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	
 	@Override
 	protected void updateLayout() {
-		layout.removeAllViews();
-		layout.addView(settingsButton);
+		if (layout != null) {
+			layout.removeAllViews();
+			layout.addView(settingsButton);
+		}
 		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (createButton != null) layout.addView(createButton);
 		if (undoButton != null) layout.addView(undoButton);
