@@ -283,7 +283,7 @@ public class CustomDragDropListView extends ListView {
 		Context context = getContext();
 		ImageView v = new ImageView(context);
 		int backGroundColor = context.getResources().getColor(
-				android.R.color.background_dark);
+				android.R.color.holo_blue_light);
 		v.setBackgroundColor(backGroundColor);
 		v.setImageBitmap(bm);
 		mDragBitmap = bm;
