@@ -65,12 +65,6 @@ public class PointDistanceTool extends SelectTool {
 			this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
 			this.distance = PointDistanceTool.this.computeDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2));
 			
-			if (tp1.x > tp2.x) {
-				MapPos t = tp2;
-				tp2 = tp1;
-				tp1 = t;
-			}
-			
 			float midX = (float) (tp1.x + tp2.x) / 2;
 			float midY = (float) (tp1.y + tp2.y) / 2;
 			
@@ -78,7 +72,7 @@ public class PointDistanceTool extends SelectTool {
 			
 			textX = midX + offset;
 			
-			if (tp1.y > tp2.y){
+			if (((tp1.x < tp2.x) && (tp1.y > tp2.y)) || ((tp1.x > tp2.x) && (tp1.y < tp2.y))){
 				textY = midY + offset;
 			} else {
 				textY = midY - offset;
