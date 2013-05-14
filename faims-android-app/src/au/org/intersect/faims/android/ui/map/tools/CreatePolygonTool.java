@@ -201,8 +201,8 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
 				final EditText colorSetter = addSetter(context, layout, "Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Size:", getSize());
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", getPickingSize());
+				final SeekBar sizeBar = addSlider(context, layout, "Size:", size);
+				final SeekBar pickingSizeBar = addSlider(context, layout, "Picking Size:", pickingSize);
 				final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(lineColor));
 				final SeekBar widthBar = addSlider(context, layout, "Width:", width);
 				final SeekBar pickingWidthBar = addSlider(context, layout, "Picking Width:", pickingWidth);

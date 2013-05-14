@@ -3,8 +3,8 @@ package au.org.intersect.faims.android.ui.map;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -158,8 +158,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	private CustomMapListener mapListener;
 
 	private Layer selectedLayer;
-
-	private Geometry selectedGeom;
 	
 	private ArrayList<Geometry> selectedGeometryList;
 
@@ -384,8 +382,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 		geometryIdMap.remove(getGeometryId(geom));
 		geometryLayerMap.remove(geom);
-		if (geom == selectedGeom)
-			selectedGeom = null;
+		
+		clearSelection();
+		clearSelectionTransform();
 	}
 
 	public int getGeometryId(Geometry geom) {
@@ -580,7 +579,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(point);
-		canvas.addGeometry(drawPoint(canvas, GeometryUtil.convertToWgs84(point.getMapPos()), style));
+		removeGeometry(point);
+		drawPoint(canvas, GeometryUtil.convertToWgs84(point.getMapPos()), style);
+		addGeometry(canvas, point);
 		updateRenderer();
 	}
 
@@ -605,7 +606,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(line);
-		canvas.addGeometry(drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), style));
+		removeGeometry(line);
+		drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), style);
+		addGeometry(canvas, line);
 		updateRenderer();
 	}
 
@@ -630,7 +633,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			throw new MapException("Layer does not exist");
 		}
 		canvas.removeGeometry(polygon);
-		canvas.addGeometry(drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), style));
+		removeGeometry(polygon);
+		drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), style);
+		addGeometry(canvas, polygon);
 		updateRenderer();
 	}
 
@@ -766,14 +771,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		return selectedLayer;
 	}
 
-	public void setSelectedGeometry(Geometry geom) {
-		selectedGeom = geom;
-	}
-
-	public Geometry getSelectedGeometry() {
-		return selectedGeom;
-	}
-
 	public void updateRenderer() {
 		if (getComponents() != null) {
 			getComponents().mapRenderers.getMapRenderer().frustumChanged();
@@ -832,15 +829,17 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	public void updateSelection() throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
 		
-		// note: remove geometry from list that no longer exist or are not visible
-		for (Iterator<Geometry> iterator = selectedGeometryList.iterator(); iterator.hasNext();) {
-			Geometry geom = iterator.next();
-			if (getGeometry(getGeometryId(geom)) == null) {
+		// note: remove geometry from list that no longer exist or are not visible and update others
+		for (ListIterator<Geometry> iterator = selectedGeometryList.listIterator(); iterator.hasNext();) {
+			Geometry geom = getGeometry(getGeometryId(iterator.next()));
+			if (geom == null) {
 				iterator.remove();
 			} else {
 				CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(geom);
 				if (!canvas.isVisible()) {
 					iterator.remove();
+				} else {
+					iterator.set(geom);
 				}
 			}
 		}

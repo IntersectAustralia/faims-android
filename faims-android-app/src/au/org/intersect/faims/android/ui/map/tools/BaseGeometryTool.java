@@ -46,15 +46,12 @@ public abstract class BaseGeometryTool extends SettingsTool {
 	}
 	
 	@Override
-	public void activate() {
-		mapView.setSelectedGeometry(null);
-		
+	public void activate() {		
 		setSelectedLayer(mapView.getSelectedLayer());
 	}
 	
 	@Override
 	public void deactivate() {
-		mapView.setSelectedGeometry(null);
 	}
 	
 	@Override 
