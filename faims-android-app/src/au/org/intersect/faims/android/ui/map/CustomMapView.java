@@ -35,6 +35,7 @@ import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
+import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.SelectTool;
@@ -726,6 +727,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		tools.add(new CreateLineTool(this.getContext(), this));
 		tools.add(new CreatePolygonTool(this.getContext(), this));
 		tools.add(new PointDistanceTool(this.getContext(), this));
+		tools.add(new LineDistanceTool(this.getContext(), this));
 		tools.add(new AzimuthTool(this.getContext(), this));
 	}
 
