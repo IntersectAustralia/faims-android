@@ -537,6 +537,9 @@ public class LayerManagerView extends LinearLayout {
 	
 	public Button createPointStyleButton(){
 		Button button = new Button(this.getContext());
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
 		button.setText("Style Point");
 		button.setOnClickListener(new OnClickListener() {
 
@@ -590,6 +593,9 @@ public class LayerManagerView extends LinearLayout {
 	
 	public Button createLineStyleButton(){
 		Button button = new Button(this.getContext());
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
 		button.setText("Style Line");
 		button.setOnClickListener(new OnClickListener() {
 
@@ -652,7 +658,10 @@ public class LayerManagerView extends LinearLayout {
 
 	public Button createPolygonStyle(){
 		Button button = new Button(this.getContext());
-		button.setText("Style Tool");
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
+		button.setText("Style Polygon");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
