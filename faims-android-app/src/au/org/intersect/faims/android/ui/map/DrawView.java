@@ -1,6 +1,5 @@
 package au.org.intersect.faims.android.ui.map;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import android.content.Context;
@@ -14,6 +13,7 @@ import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.util.MeasurementUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -145,14 +145,10 @@ public class DrawView extends View {
 	
 	private String pointToText(MapPos p) {
 		if (showDecimal) {
-			return "(" + formatDecimal(p.x) + ", " + formatDecimal(p.y) + ")";
+			return "(" + MeasurementUtil.displayAsCoord(p.x) + ", " + MeasurementUtil.displayAsCoord(p.y) + ")";
 		} else {
-			return "(" + GeometryUtil.convertToDegrees(p.x) + ", " + GeometryUtil.convertToDegrees(p.y) + ")";
+			return "(" + MeasurementUtil.convertToDegrees(p.x) + ", " + MeasurementUtil.convertToDegrees(p.y) + ")";
 		}
-	}
-	
-	private String formatDecimal(double value) {
-		return new DecimalFormat("#.0000").format(value);
 	}
 	
 	private float getPosOffset(GeometryStyle style) {

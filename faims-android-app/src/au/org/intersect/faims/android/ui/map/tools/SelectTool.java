@@ -65,7 +65,7 @@ public class SelectTool extends SettingsTool {
 	}
 	
 	@Override
-	public void update() {
+	public void onLayersChanged() {
 		try {
 			mapView.updateSelection();
 		} catch (Exception e) {

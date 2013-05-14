@@ -34,6 +34,7 @@ import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
+import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.SelectTool;
 import au.org.intersect.faims.android.util.Dip;
 
@@ -83,6 +84,9 @@ public class CustomMapView extends MapView {
 
 		@Override
 		public void onMapMoved() {
+			if (CustomMapView.this.currentTool != null) {
+				CustomMapView.this.currentTool.onMapChanged();
+			}
 			CustomMapView.this.updateDrawView();
 		}
 
@@ -671,6 +675,7 @@ public class CustomMapView extends MapView {
 		tools.add(new CreatePointTool(this.getContext(), this));
 		tools.add(new CreateLineTool(this.getContext(), this));
 		tools.add(new CreatePolygonTool(this.getContext(), this));
+		tools.add(new PointDistanceTool(this.getContext(), this));
 	}
 	
 	public MapTool getTool(String name) {
@@ -710,7 +715,7 @@ public class CustomMapView extends MapView {
 	
 	public void updateTools() {
 		for (MapTool tool: tools) {
-			tool.update();
+			tool.onLayersChanged();
 		}
 	}
 
@@ -783,6 +788,10 @@ public class CustomMapView extends MapView {
 	
 	public boolean hasSelection(Geometry geom) {
 		return selectedGeometryList.contains(geom);
+	}
+	
+	public List<Geometry> getSelection() {
+		return selectedGeometryList;
 	}
 
 	public void updateSelection() throws Exception {
