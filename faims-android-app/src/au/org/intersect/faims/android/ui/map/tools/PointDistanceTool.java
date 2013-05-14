@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -20,6 +19,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.MeasurementUtil;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -88,12 +88,14 @@ public class PointDistanceTool extends SelectTool {
 			float midX = (float) (tp1.x + tp2.x) / 2;
 			float midY = (float) (tp1.y + tp2.y) / 2;
 			
-			textX = midX + DEFAULT_OFFSET;
+			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+			
+			textX = midX + offset;
 			
 			if (tp1.y > tp2.y){
-				textY = midY + DEFAULT_OFFSET;
+				textY = midY + offset;
 			} else {
-				textY = midY - DEFAULT_OFFSET;
+				textY = midY - offset;
 			}
 			
 			invalidate();
@@ -122,11 +124,11 @@ public class PointDistanceTool extends SelectTool {
 		private void updatePaint() {
 			paint.setColor(color);
 			paint.setStyle(Paint.Style.STROKE);
-			paint.setStrokeWidth(strokeSize * STROKE_SCALE);
+			paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), strokeSize * STROKE_SCALE));
 			paint.setAntiAlias(true);
 			
 			textPaint.setColor(color);
-			textPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, textSize * TEXT_SCALE, this.getContext().getResources().getDisplayMetrics()));
+			textPaint.setTextSize(ScaleUtil.getSp(this.getContext(), textSize * TEXT_SCALE));
 			textPaint.setAntiAlias(true);
 			invalidate();
 		}

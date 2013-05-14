@@ -20,9 +20,9 @@ import com.nutiteq.geometry.Geometry;
 
 public class DrawView extends View {
 	
-	protected static final float SCALE_FACTOR = 50.0f;
+	protected static final float SCALE_FACTOR = 40.0f;
 
-	protected static final float STROKE_SCALE = 10.0f;
+	protected static final float STROKE_SCALE = 8.0f;
 	
 	protected static final float TEXT_SCALE = 24.0f;
 	
@@ -97,10 +97,12 @@ public class DrawView extends View {
 		for (MapPos p : line.getVertexList()) {
 			p = transformPoint(p);
 			if (lp != null) {
+				paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), line.getStyle().width * SCALE_FACTOR));
 				canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
 			}
 			lp = p;
 		}
+		paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), strokeSize * STROKE_SCALE));
 	}
 	
 	private void drawPolygonOverlay(CustomPolygon polygon, Canvas canvas) {
@@ -152,7 +154,7 @@ public class DrawView extends View {
 	}
 	
 	private float getPosOffset(GeometryStyle style) {
-		return style.size == 0 ? DEFAULT_OFFSET : style.size * SCALE_FACTOR * 2;
+		return ScaleUtil.getDip(this.getContext(), style.size == 0 ? DEFAULT_OFFSET : style.size * SCALE_FACTOR * 2);
 	}
 	
 	protected MapPos transformPoint(MapPos p) {
