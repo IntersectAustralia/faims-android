@@ -883,5 +883,9 @@ public class Tab implements Parcelable{
 			mapView.killThreads();
 		}
 	}
+	
+	public List<CustomMapView> getMapViewList(){
+		return mapViewList;
+	}
 
 }
