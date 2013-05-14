@@ -283,7 +283,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		CustomGdalMapLayer baseLayer = (CustomGdalMapLayer) getLayers()
 				.getBaseLayer();
 		if (baseLayer == layer) {
-			throw new MapException("Cannot remove base layer");
+			this.getLayers().setBaseLayer(null);
 		}
 
 		this.getLayers().removeLayer(layer);
@@ -499,6 +499,11 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	public int addRasterMap(String layerName, String file) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error map does not exist " + file);
+		}
+		
+		if (this.getLayers().getBaseLayer() != null) {
+			Layer layer = this.getLayers().getBaseLayer();
+			removeLayer(layer);
 		}
 
 		validateLayerName(layerName);

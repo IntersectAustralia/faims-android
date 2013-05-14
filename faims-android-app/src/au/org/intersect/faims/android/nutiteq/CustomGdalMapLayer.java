@@ -10,6 +10,7 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 
 	private String name;
 	private int layerId;
+	private String gdalSource;
 
 	public CustomGdalMapLayer(int layerId, String name, Projection projection, int minZoom, int maxZoom,
 			int id, String gdalSource, MapView mapView, boolean reproject)
@@ -17,6 +18,7 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 		super(projection, minZoom, maxZoom, id, gdalSource, mapView, reproject);
 		this.name = name;
 		this.layerId = layerId;
+		this.gdalSource = gdalSource;
 	}
 	
 	public String getName() {
@@ -29,6 +31,10 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 
 	public int getLayerId() {
 		return layerId;
+	}
+
+	public String getGdalSource() {
+		return gdalSource;
 	}
 
 }

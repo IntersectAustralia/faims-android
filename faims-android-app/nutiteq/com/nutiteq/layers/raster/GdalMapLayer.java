@@ -381,7 +381,7 @@ public class GdalMapLayer extends RasterLayer {
         return new Envelope(corner[1][0],corner[2][0],corner[1][1],corner[2][1]);
     }
 
-    private double[][] boundsWgs84(Dataset data,SpatialReference layerProjection) {
+    public double[][] boundsWgs84(Dataset data,SpatialReference layerProjection) {
         double[][] corners= new double[4][2];
         
         corners[0] = corner(data, layerProjection, 0.0, 0.0);
