@@ -33,9 +33,6 @@ public class AreaTool extends SelectTool {
 		private float textX;
 		private float textY;
 		
-		private CustomPolygon polygon;
-		private float area;
-		
 		private boolean showKm;
 		
 		public AreaToolCanvas(Context context) {
@@ -44,26 +41,19 @@ public class AreaTool extends SelectTool {
 
 		@Override
 		public void onDraw(Canvas canvas) {
-			if (polygon != null) {
+			if (isDirty) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)) + "\u00B2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(AreaTool.this.area/(1000*1000)) + "\u00B2", textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(area) + "\u00B2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(AreaTool.this.area) + "\u00B2", textX, textY, textPaint);
 				}
 				
 			}
 		}
 		
-		@Override
-		public void clear() {
-			polygon = null;
-			invalidate();
-		}
-
 		public void drawArea(CustomPolygon polygon) {
-			this.polygon = polygon;
-			this.area = AreaTool.this.computeArea(polygon);
+			this.isDirty = true;
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
 			
@@ -85,6 +75,8 @@ public class AreaTool extends SelectTool {
 	public static final String NAME = "Area";
 	
 	private AreaToolCanvas canvas;
+
+	private float area;
 
 	public AreaTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -142,6 +134,7 @@ public class AreaTool extends SelectTool {
 						mapView.addSelection(p);
 					}
 					
+					computeArea();
 					drawArea();
 				}
 			} catch (Exception e) {
@@ -151,6 +144,14 @@ public class AreaTool extends SelectTool {
 		} else {
 			// ignore
 		}
+	}
+	
+	private void computeArea() {
+		if (mapView.getSelection().size() < 1) return;
+		
+		CustomPolygon polygon = (CustomPolygon) mapView.getSelection().get(0);
+		
+		this.area = computePolygonArea(polygon);
 	}
 	
 	private void drawArea() {
@@ -165,7 +166,7 @@ public class AreaTool extends SelectTool {
 		canvas.setShowKm(mapView.showKm());
 	}
 	
-	public float computeArea(CustomPolygon polygon) {
+	public float computePolygonArea(CustomPolygon polygon) {
 		try {
 			polygon = (CustomPolygon) GeometryUtil.projectGeometry(new EPSG4326(), polygon);
 			return (float) SpatialiteUtil.computeArea(polygon);

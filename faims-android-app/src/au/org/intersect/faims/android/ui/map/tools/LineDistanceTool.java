@@ -34,9 +34,6 @@ public class LineDistanceTool extends SelectTool {
 		private float textX;
 		private float textY;
 		
-		private boolean hasDistance;
-		private float distance;
-		
 		private boolean showKm;
 		
 		public LineDistanceToolCanvas(Context context) {
@@ -45,26 +42,19 @@ public class LineDistanceTool extends SelectTool {
 
 		@Override
 		public void onDraw(Canvas canvas) {
-			if (hasDistance) {
+			if (isDirty) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(LineDistanceTool.this.distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(LineDistanceTool.this.distance), textX, textY, textPaint);
 				}
 				
 			}
 		}
-		
-		@Override
-		public void clear() {
-			hasDistance = false;
-			invalidate();
-		}
 
 		public void drawDistance(CustomLine line) {
-			this.hasDistance = true;
-			this.distance = LineDistanceTool.this.computeDistance(line.getVertexList());
+			this.isDirty = true;
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
 			
@@ -86,6 +76,8 @@ public class LineDistanceTool extends SelectTool {
 	public static final String NAME = "Line Distance";
 	
 	private LineDistanceToolCanvas canvas;
+
+	private float distance;
 
 	public LineDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -143,6 +135,7 @@ public class LineDistanceTool extends SelectTool {
 						mapView.addSelection(p);
 					}
 					
+					computeDistance();
 					drawDistance();
 				}
 			} catch (Exception e) {
@@ -152,6 +145,14 @@ public class LineDistanceTool extends SelectTool {
 		} else {
 			// ignore
 		}
+	}
+	
+	private void computeDistance() {
+		if (mapView.getSelection().size() < 1) return;
+		
+		CustomLine line = (CustomLine) mapView.getSelection().get(0);
+		
+		this.distance = computeLineDistance(line.getVertexList());
 	}
 	
 	private void drawDistance() {
@@ -166,7 +167,7 @@ public class LineDistanceTool extends SelectTool {
 		canvas.setShowKm(mapView.showKm());
 	}
 	
-	public float computeDistance(List<MapPos> points) {
+	public float computeLineDistance(List<MapPos> points) {
 		float totalDistance = 0;
 		MapPos lp = null;
 		for (MapPos p : points) {

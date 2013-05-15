@@ -18,6 +18,7 @@ public abstract class ToolCanvas extends View {
 	protected float textSize;
 	protected Paint paint;
 	protected Paint textPaint;
+	protected boolean isDirty;
 
 	public ToolCanvas(Context context) {
 		super(context);
@@ -27,6 +28,8 @@ public abstract class ToolCanvas extends View {
 	
 	
 	public void clear() {
+		isDirty = false;
+		invalidate();
 	}
 
 	public void setColor(int color) {

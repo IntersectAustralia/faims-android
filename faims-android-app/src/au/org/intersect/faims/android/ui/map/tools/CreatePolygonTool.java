@@ -36,7 +36,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	private int lineColor = 0XAA0000FF;
 	private float width = 0.05f;
 	private float pickingWidth = 0.3f;
-	private boolean showStroke;
+	private boolean showStroke = true;
 
 	private MapButton createButton;
 
