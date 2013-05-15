@@ -9,6 +9,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -148,16 +149,18 @@ public class SelectTool extends SettingsTool {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(context);
 				LinearLayout layout = new LinearLayout(context);
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
 				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
