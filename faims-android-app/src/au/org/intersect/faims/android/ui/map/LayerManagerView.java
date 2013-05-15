@@ -170,7 +170,8 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				int last = mapView.getLayers().getAllLayers().size() - 1;
+				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
 				LayerListItem itemView = (LayerListItem) view;
 				itemView.toggle();
 				layer.setVisible(itemView.isChecked());
@@ -184,7 +185,8 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				int last = mapView.getLayers().getAllLayers().size() - 1;
+				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
 				
 				Context context = LayerManagerView.this.getContext();
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -247,10 +249,11 @@ public class LayerManagerView extends LinearLayout {
 	// Drop Listener
 	private CustomDragDropListView.DropListener dropListener = new CustomDragDropListView.DropListener() {
 		public void drop(int from, int to) {
-			if(from != 0 && to != 0){
+			int last = mapView.getLayers().getAllLayers().size() - 1;
+			if(from != last && to != last){
 				List<Layer> unmodifiableLayers = mapView.getLayers().getAllLayers();
 				List<Layer> modifiedLayers = new ArrayList<Layer>(unmodifiableLayers);
-				Collections.swap(modifiedLayers, from, to);
+				Collections.swap(modifiedLayers, last - from, last - to);
 				modifiedLayers.remove(0);
 				mapView.getLayers().setLayers(modifiedLayers);
 				redrawLayers();
@@ -296,7 +299,9 @@ public class LayerManagerView extends LinearLayout {
 	
 	public void redrawLayers() {
 		List<Layer> layers = mapView.getLayers().getAllLayers();
-		LayersAdapter layersAdapter = new LayersAdapter(layers);
+		List<Layer> shownLayer = new ArrayList<Layer>(layers);
+		Collections.reverse(shownLayer);
+		LayersAdapter layersAdapter = new LayersAdapter(shownLayer);
 		listView.setAdapter(layersAdapter);
 	}
 	
@@ -954,6 +959,16 @@ public class LayerManagerView extends LinearLayout {
 		builder.setMessage("Enter layer name:");
 		
 		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		if(layer instanceof CustomGdalMapLayer){
+			CustomGdalMapLayer gdalMapLayer = (CustomGdalMapLayer) layer;
+			editText.setText(gdalMapLayer.getName());
+		}else if(layer instanceof CustomSpatialiteLayer){
+			CustomSpatialiteLayer spatialiteLayer = (CustomSpatialiteLayer) layer;
+			editText.setText(spatialiteLayer.getName());
+		}else if(layer instanceof CanvasLayer){
+			CanvasLayer canvasLayer = (CanvasLayer) layer;
+			editText.setText(canvasLayer.getName());
+		}
 		builder.setView(editText);
 		
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
