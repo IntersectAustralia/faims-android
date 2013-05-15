@@ -706,7 +706,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 		builder.setTitle("Layer Manager");
 		builder.setView(layerManager);
-		builder.setNeutralButton("exit", new DialogInterface.OnClickListener() {
+		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

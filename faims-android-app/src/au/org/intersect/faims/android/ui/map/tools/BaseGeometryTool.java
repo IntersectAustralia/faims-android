@@ -100,7 +100,8 @@ public abstract class BaseGeometryTool extends SettingsTool {
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int position, long arg3) {
 							d.dismiss();
-							setSelectedLayer(filteredLayers.get(position));
+							int realPosition = filteredLayers.size() - 1 - position;
+							setSelectedLayer(filteredLayers.get(realPosition));
 						}
 	
 					});
