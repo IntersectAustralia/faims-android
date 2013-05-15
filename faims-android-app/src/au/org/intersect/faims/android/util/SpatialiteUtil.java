@@ -5,14 +5,22 @@ import java.util.Arrays;
 import jsqlite.Callback;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
+import au.org.intersect.faims.android.nutiteq.WKTUtil;
 
-public class SpatialiteUtil {	
-
+public class SpatialiteUtil {
+	
+private static String dbname;
+	
+	public static void setDatabaseName(String name) {
+		dbname = name;
+	}
+	
 	public static double computeArea(CustomPolygon polygon) throws Exception {
 		jsqlite.Database db = null;
 		try {
 			db = new jsqlite.Database();
-			String sql = "";
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String sql = "select area(transform(GeomFromText(\"" + WKTUtil.geometryToWKT(polygon) + "\", 4326), 28356));";
 			
 			final StringBuilder result = new StringBuilder();
 			db.exec(sql, new Callback() {
@@ -38,7 +46,11 @@ public class SpatialiteUtil {
 			return Float.parseFloat(result.toString());
 		} finally {
 			if (db != null) {
-				db.close();
+				try {
+					db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
 		}
 	}

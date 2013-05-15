@@ -30,6 +30,7 @@ import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
@@ -733,6 +734,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		tools.add(new CreatePolygonTool(this.getContext(), this));
 		tools.add(new PointDistanceTool(this.getContext(), this));
 		tools.add(new LineDistanceTool(this.getContext(), this));
+		tools.add(new AreaTool(this.getContext(), this));
 		tools.add(new AzimuthTool(this.getContext(), this));
 	}
 

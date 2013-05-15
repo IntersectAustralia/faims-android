@@ -72,6 +72,7 @@ import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.google.inject.Inject;
 
@@ -408,6 +409,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		databaseManager.init(projectDir + "/db.sqlite3");
 		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
+		
+		SpatialiteUtil.setDatabaseName(projectDir + "/db.sqlite3");
 		
 		// clear any lock files that may exist
 		String lock = projectDir + "/.lock";

@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.nutiteq.components.MapPos;
@@ -26,7 +27,12 @@ public class WKTUtil {
 			Polygon polygon = (Polygon) geometry;
 			StringBuilder sb = new StringBuilder();
 			sb.append("POLYGON (");
-			sb.append(verticesToWKT(polygon.getVertexList()));
+			ArrayList<MapPos> list = new ArrayList<MapPos>();
+			for (MapPos p : polygon.getVertexList()) {
+				list.add(p);
+			}
+			list.add(polygon.getVertexList().get(0));
+			sb.append(verticesToWKT(list));
 			sb.append(")");
 			return sb.toString();
 		}

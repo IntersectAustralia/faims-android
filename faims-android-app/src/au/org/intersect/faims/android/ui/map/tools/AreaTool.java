@@ -23,6 +23,7 @@ import au.org.intersect.faims.android.util.SpatialiteUtil;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
+import com.nutiteq.projections.EPSG4326;
 
 public class AreaTool extends SelectTool {
 	
@@ -45,9 +46,9 @@ public class AreaTool extends SelectTool {
 			if (polygon != null) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)) + "^2", textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(area), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(area) + "^2", textX, textY, textPaint);
 				}
 				
 			}
@@ -165,6 +166,7 @@ public class AreaTool extends SelectTool {
 	
 	public float computeArea(CustomPolygon polygon) {
 		try {
+			polygon = (CustomPolygon) GeometryUtil.projectGeometry(new EPSG4326(), polygon);
 			return (float) SpatialiteUtil.computeArea(polygon);
 		} catch (Exception e) {
 			FLog.e("error computing area of polygon", e);
