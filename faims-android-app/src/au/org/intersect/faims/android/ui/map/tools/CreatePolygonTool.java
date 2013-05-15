@@ -29,12 +29,12 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Polygon";
 	
-	private int color = 0xFF0000FF;
+	private int color = 0x440000FF;
 	private float size = 0.2f;
-	private float pickingSize = 0.4f;
-	private int lineColor = 0XFF000000;
+	private float pickingSize = 0.6f;
+	private int lineColor = 0XAA0000FF;
 	private float width = 0.05f;
-	private float pickingWidth = 0.1f;
+	private float pickingWidth = 0.3f;
 	private boolean showStroke;
 
 	private MapButton createButton;
@@ -279,7 +279,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	
 	private GeometryStyle createGuidePointStyle() {
 		GeometryStyle style = new GeometryStyle();
-		style.pointColor = color;
+		style.pointColor = color | 0xFF000000;
 		style.size = size;
 		style.pickingSize = pickingSize;
 		return style;

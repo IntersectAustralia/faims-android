@@ -22,9 +22,9 @@ public class CreatePointTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Point";
 	
-	private int color = 0xFFFF0000;
+	private int color = 0xAAFF0000;
 	private float size = 0.2f;
-	private float pickingSize = 0.4f;
+	private float pickingSize = 0.6f;
 
 	public CreatePointTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);

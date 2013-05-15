@@ -25,15 +25,15 @@ public class MeasurementUtil {
 	}
 	
 	public static String displayAsMeters(double value) {
-		return new DecimalFormat("###,###,###,###.0000").format(value) + "m";
+		return new DecimalFormat("###,###,###,###.0000").format(value) + " m";
 	}
 	
 	public static String displayAsKiloMeters(double value) {
-		return new DecimalFormat("###,###,###,###.0000").format(value) + "km";
+		return new DecimalFormat("###,###,###,###.0000").format(value) + " km";
 	}
 
 	public static String displayAsDegrees(float value) {
-		return new DecimalFormat("###.0000").format(value % 360) + "¡";
+		return new DecimalFormat("###.0000").format(value % 360) + "\u00b0";
 	}
 
 }

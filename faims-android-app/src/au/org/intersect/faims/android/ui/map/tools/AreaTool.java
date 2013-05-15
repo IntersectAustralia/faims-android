@@ -46,9 +46,9 @@ public class AreaTool extends SelectTool {
 			if (polygon != null) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)) + "^2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)) + "\u00B2", textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(area) + "^2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(area) + "\u00B2", textX, textY, textPaint);
 				}
 				
 			}

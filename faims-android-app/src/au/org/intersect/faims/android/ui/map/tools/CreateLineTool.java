@@ -29,11 +29,11 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Line";
 	
-	private int color = 0xFF00FF00;
+	private int color = 0xAA00FF00;
 	private float size = 0.2f;
-	private float pickingSize = 0.4f;
+	private float pickingSize = 0.6f;
 	private float width = 0.05f;
-	private float pickingWidth = 0.1f;
+	private float pickingWidth = 0.3f;
 	private boolean showPoints;
 
 	private MapButton createButton;
@@ -280,7 +280,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	private GeometryStyle createGuidePointStyle() {
 		GeometryStyle style = new GeometryStyle();
-		style.pointColor = color;
+		style.pointColor = color | 0xFF000000;
 		style.size = size;
 		style.pickingSize = pickingSize;
 		return style;
