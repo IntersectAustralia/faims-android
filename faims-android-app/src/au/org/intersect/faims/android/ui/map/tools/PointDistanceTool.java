@@ -32,7 +32,6 @@ public class PointDistanceTool extends SelectTool {
 		private float textY;
 		private MapPos tp1;
 		private MapPos tp2;
-		private float distance;
 		
 		private boolean showKm;
 		
@@ -42,28 +41,23 @@ public class PointDistanceTool extends SelectTool {
 
 		@Override
 		public void onDraw(Canvas canvas) {
-			if (tp1 != null && tp2 != null) {
+			if (isDirty) {
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(PointDistanceTool.this.distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(PointDistanceTool.this.distance), textX, textY, textPaint);
 				}
 				
 			}
 		}
-		
-		@Override
-		public void clear() {
-			tp1 = tp2 = null;
-			invalidate();
-		}
 
 		public void drawDistanceBetween(MapPos p1, MapPos p2) {
+			this.isDirty = true;
+			
 			this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
 			this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
-			this.distance = PointDistanceTool.this.computeDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2));
 			
 			float midX = (float) (tp1.x + tp2.x) / 2;
 			float midY = (float) (tp1.y + tp2.y) / 2;
@@ -92,6 +86,8 @@ public class PointDistanceTool extends SelectTool {
 	
 	private PointDistanceToolCanvas canvas;
 
+	private float distance;
+
 	public PointDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		canvas = new PointDistanceToolCanvas(context);
@@ -119,7 +115,7 @@ public class PointDistanceTool extends SelectTool {
 	@Override
 	public void onMapChanged() {
 		super.onMapChanged();
-		drawDistanceTo();
+		drawDistance();
 	}
 	
 	@Override
@@ -148,7 +144,8 @@ public class PointDistanceTool extends SelectTool {
 						mapView.addSelection(p);
 					}
 					
-					drawDistanceTo();
+					computeDistance();
+					drawDistance();
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
@@ -159,7 +156,16 @@ public class PointDistanceTool extends SelectTool {
 		}
 	}
 	
-	private void drawDistanceTo() {
+	private void computeDistance() {
+		if (mapView.getSelection().size() < 2) return;
+		
+		MapPos p1 = ((CustomPoint) mapView.getSelection().get(0)).getMapPos();
+		MapPos p2 = ((CustomPoint) mapView.getSelection().get(1)).getMapPos();
+		
+		this.distance = computePointDistance(p1, p2);
+	}
+	
+	private void drawDistance() {
 		if (mapView.getSelection().size() < 2) return;
 		
 		MapPos p1 = ((CustomPoint) mapView.getSelection().get(0)).getMapPos();
@@ -172,7 +178,9 @@ public class PointDistanceTool extends SelectTool {
 		canvas.setShowKm(mapView.showKm());
 	}
 	
-	public float computeDistance(MapPos p1, MapPos p2) {
+	public float computePointDistance(MapPos p1, MapPos p2) {
+		p1 = GeometryUtil.convertToWgs84(p1);
+		p2 = GeometryUtil.convertToWgs84(p2);
 		float[] results = new float[3];
 		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
 		return results[0];
@@ -219,7 +227,7 @@ public class PointDistanceTool extends SelectTool {
 							mapView.setShowDecimal(showDecimal);
 							mapView.setShowKm(showKm);
 							
-							PointDistanceTool.this.drawDistanceTo();
+							PointDistanceTool.this.drawDistance();
 						} catch (Exception e) {
 							showError(e.getMessage());
 						}
