@@ -892,7 +892,7 @@ public class LayerManagerView extends LinearLayout {
 		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(layout);
-		layout.addView(scrollView);
+		builder.setView(scrollView);
 		
 		final EditText editText = new EditText(LayerManagerView.this.getContext());
 		layout.addView(editText);
