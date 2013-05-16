@@ -12,10 +12,13 @@
     <child>
       Below
     </child>
-     <property type="string" name="name" isIdentifier="true">
+    <property type="string" name="relationship" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="dropdown" name="location" isIdentifier="true">
+     <property type="string" name="name">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location">
       <bundle>DOI</bundle>
       <lookup>
         <term>Location A</term>
@@ -30,19 +33,22 @@
     <description>
       An small entity
     </description>
-    <property type="string" name="name" isIdentifier="true">
+    <property type="string" name="entity" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="integer" name="value" isIdentifier="true">
+    <property type="string" name="name">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="filename" isIdentifier="true">
+    <property type="integer" name="value">
       <bundle>DOI</bundle>
     </property>
-    <property type="timestamp" name="timestamp" isIdentifier="true">
+    <property type="file" name="filename">
       <bundle>DOI</bundle>
     </property>
-    <property type="dropdown" name="location" isIdentifier="true">
+    <property type="timestamp" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location">
       <bundle>DOI</bundle>
       <lookup>
         <term>Location A</term>

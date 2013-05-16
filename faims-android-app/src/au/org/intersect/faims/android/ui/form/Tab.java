@@ -24,8 +24,6 @@ import android.text.format.Time;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -35,7 +33,6 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
@@ -44,7 +41,6 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
-import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
@@ -175,45 +171,11 @@ public class Tab implements Parcelable{
 	                	// check if map type
 	                	if (attribute.map) {
 	                		MapLayout mapLayout = new MapLayout(this.context);
-	                		final CustomMapView mapView = mapLayout.getMapView();
-	                		
-	                		Button layerButton = createLayerButton();
-	                		linearLayout.addView(layerButton);
-	                		
-	                		Spinner toolsDropDown = createToolsDropDown(mapView);
-	                		linearLayout.addView(toolsDropDown);
-	                		
-	                		layerButton.setOnClickListener(new OnClickListener() {
-
-								@Override
-								public void onClick(View arg0) {
-									mapView.showLayersDialog();
-								}
-	                			
-	                		});
-	                		
-	                		toolsDropDown.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-								@Override
-								public void onItemSelected(AdapterView<?> arg0,
-										View arg1, int arg2, long arg3) {
-									mapView.selectToolIndex(arg2);
-								}
-
-								@Override
-								public void onNothingSelected(
-										AdapterView<?> arg0) {
-									// ignore
-								}
-	                			
-	                		});
 	                		
 	                		linearLayout.addView(mapLayout);
 	                		
-	                		mapView.selectDefaultTool();
-	                		
-	                		mapViewList.add(mapView);
-	                		view = mapView;
+	                		mapViewList.add(mapLayout.getMapView());
+	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
 	                		setupView(view, certaintyButton, annotationButton, ref);
@@ -467,24 +429,6 @@ public class Tab implements Parcelable{
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
-	}
-	
-	private Button createLayerButton() {
-		 Button button = new Button(this.context);
-         button.setText("Layers");
-         return button;
-	}
-	
-	private Spinner createToolsDropDown(CustomMapView mapView) {
-		Spinner spinner = new Spinner(this.context);
-		List<MapTool> tools = mapView.getTools();
-		ArrayAdapter<MapTool> arrayAdapter = new ArrayAdapter<MapTool>(
-				this.context,
-				android.R.layout.simple_spinner_dropdown_item,
-				tools);
-		spinner.setAdapter(arrayAdapter);
-		spinner.setSelection(0);
-		return spinner;
 	}
 
 	private void onAnnotationButtonClicked(Button annotationButton, final View view) {

@@ -11,7 +11,7 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
-import com.nutiteq.style.*;
+import au.org.intersect.faims.android.data.GeometryStyle;
 
 startTrackingGPS(String type, int interval){
 	linker.startTrackingGPS(type, interval);
@@ -184,6 +184,14 @@ Collection fetchAll(String query){
     return linker.fetchAll(query);
 }
 
+Collection fetchEntityList(String type){
+    return linker.fetchEntityList(type);
+}
+
+Collection fetchRelationshipList(String type){
+    return linker.fetchRelationshipList(type);
+}
+
 String getListItemValue() {
 	return _list_item_value;
 }
@@ -248,52 +256,52 @@ setMapTilt(String ref, float tilt) {
 	linker.setMapTilt(ref, tilt);
 }
 
-showVectorLayer(String ref, String layerName, String filename, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
-	linker.showVectorLayer(ref, layerName, filename, pointStyleSet, lineStyleSet, polygonStyleSet);
+showShapeLayer(String ref, String layerName, String filename, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
+	linker.showShapeLayer(ref, layerName, filename, pointStyle, lineStyle, polygonStyle);
 }
 
-showSpatialLayer(String ref, String layerName, String filename, String tableName, String labelName, StyleSet pointStyleSet, StyleSet lineStyleSet, StyleSet polygonStyleSet) {
-	linker.showSpatialLayer(ref, layerName, filename, tableName, labelName, pointStyleSet, lineStyleSet, polygonStyleSet);
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String labelName, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
+	linker.showSpatialLayer(ref, layerName, filename, tableName, labelName, pointStyle, lineStyle, polygonStyle);
 }
 
-clearVectorLayer(String ref, int layerId) {
-	linker.clearVectorLayer(ref, layerId);
+removeLayer(String ref, int layerId) {
+	linker.removeLayer(ref, layerId);
 }
 
 centerOnCurrentPosition(String ref){
 	linker.centerOnCurrentPosition(ref);
 }
 
-createVectorLayer(String ref, String layerName) {
-	return linker.createVectorLayer(ref, layerName);
+createCanvasLayer(String ref, String layerName) {
+	return linker.createCanvasLayer(ref, layerName);
 }
 
-setVectorLayerVisible(String ref, int layerId, boolean visible) {
-	linker.setVectorLayerVisible(ref, layerId, visible);
+setLayerVisible(String ref, int layerId, boolean visible) {
+	linker.setLayerVisible(ref, layerId, visible);
 }
 
 getMapPointClicked() {
 	return _map_point_clicked;
 }
 
-drawPoint(String ref, int layerId, MapPos point, StyleSet styleSet) {
-	linker.drawPoint(ref, layerId, point, styleSet);
+drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
+	linker.drawPoint(ref, layerId, point, style);
 }
 
-drawLine(String ref, int layerId, List points, StyleSet styleSet) {
-	linker.drawLine(ref, layerId, points, styleSet);
+drawLine(String ref, int layerId, List points, GeometryStyle style) {
+	linker.drawLine(ref, layerId, points, style);
 }
 
-drawPolygon(String ref, int layerId, List points, StyleSet styleSet) {
-	linker.drawPolygon(ref, layerId, points, styleSet);
+drawPolygon(String ref, int layerId, List points, GeometryStyle style) {
+	linker.drawPolygon(ref, layerId, points, style);
 }
 
-clearGeometry(String ref, int layerId, int geomId) {
-	linker.clearGeometry(ref, layerId, geomId);
+clearGeometry(String ref, int geomId) {
+	linker.clearGeometry(ref, geomId);
 }
 
-clearGeometryList(String ref, int layerId, List geomList) {
-	linker.clearGeometryList(ref, layerId, geomList);
+clearGeometryList(String ref, List geomList) {
+	linker.clearGeometryList(ref, geomList);
 }
 
 createPoint(String lon, String lat) {
@@ -312,17 +320,17 @@ getGeometryList(String ref, int layerId) {
 	return linker.getGeometryList(ref, layerId);
 }
 
-getGeometry(String ref, int layerId, int geomId) {
-	return linker.getGeometry(ref, layerId, geomId);
+getGeometry(String ref, int geomId) {
+	return linker.getGeometry(ref, geomId);
 }
 
-drawGeometry(String ref, int layerId, Geometry geom, StyleSet styleSet) {
+drawGeometry(String ref, int layerId, Geometry geom, GeometryStyle style) {
 	if (geom instanceof Point) {
-		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), styleSet);
+		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), style);
 	} else if (geom instanceof Line) {
-		return drawLine(ref, layerId, ((Line) geom).getVertexList(), styleSet);
+		return drawLine(ref, layerId, ((Line) geom).getVertexList(), style);
 	} else if (geom instanceof Polygon) {
-		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), styleSet);
+		return drawPolygon(ref, layerId, ((Polygon) geom).getVertexList(), style);
 	}
 }
 
@@ -330,40 +338,36 @@ createPointStyle(int color, float size, float pickSize) {
 	return linker.createPointStyle(color, size, pickSize);
 }
 
-createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
-	if (pointStyle == null)
-		return linker.createLineStyle(color, width, pickWidth);
+createLineStyle(int color, float width, float pickWidth, GeometryStyle pointStyle) {
 	return linker.createLineStyle(color, width, pickWidth, pointStyle);
 }
 
-createPolygonStyle(int color, LineStyle lineStyle) {
-	if (lineStyle == null)
-		return linker.createPolygonStyle(color);
+createPolygonStyle(int color, GeometryStyle lineStyle) {
 	return linker.createPolygonStyle(color, lineStyle);
-}
-
-createStyleSet(int minZoom, Style style) {
-	return linker.createStyleSet(minZoom, style);
-}
-
-addStyleToSet(StyleSet styleSet, int minZoom, Style style) {
-	styleSet.setZoomStyle(minZoom, style);
 }
 
 lockMapView(String ref, boolean lock) {
 	linker.lockMapView(ref, lock);
 }
 
-drawGeometryOverlay(String ref, int geomId) {
-	linker.drawGeometryOverlay(ref, geomId);
+addGeometrySelection(String ref, int geomId) {
+	linker.addGeometrySelection(ref, geomId);
 }
 
-replaceGeometryOverlay(String ref, int geomId) {
-	linker.replaceGeometryOverlay(ref, geomId);
+removeGeometrySelection(String ref, int geomId) {
+	linker.removeGeometrySelection(ref, geomId);
 }
 
-clearGeometryOverlay(String ref) {
-	linker.clearGeometryOverlay(ref);
+prepareSelectionTransform(String ref) {
+	linker.prepareSelectionTransform(ref);
+}
+
+doSelectionTransform(String ref) {
+	linker.doSelectionTransform(ref);
+}
+
+clearGeometrySelection(String ref) {
+	linker.clearGeometrySelection(ref);
 }
 
 getMapGeometrySelected() {
@@ -452,4 +456,8 @@ attachFile(String filePath, boolean sync, String dir) {
 
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null);
+}
+
+setToolsEnabled(String ref, boolean enabled) {
+	linker.setToolsEnabled(ref, enabled);
 }

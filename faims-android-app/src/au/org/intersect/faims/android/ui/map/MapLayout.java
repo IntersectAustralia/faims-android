@@ -1,11 +1,20 @@
 package au.org.intersect.faims.android.ui.map;
 
+import java.util.List;
+
 import android.content.Context;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
-public class MapLayout extends RelativeLayout {
+public class MapLayout extends LinearLayout {
 
 	private DrawView drawView;
 	private MapNorthView northView;
@@ -13,17 +22,21 @@ public class MapLayout extends RelativeLayout {
 	private CustomMapView mapView;
 	private RelativeLayout toolsView;
 	private EditView editView;
+	private RelativeLayout container;
+	private Button layerButton;
+	private Spinner toolsDropDown;
 
 	public MapLayout(Context context) {
 		super(context);
 		
-		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
+		this.setOrientation(LinearLayout.VERTICAL);
+		this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
+		
+		container = new RelativeLayout(context);
 		
 		drawView = new DrawView(context);
-		drawView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		
 		editView = new EditView(context);
-		editView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		
 		northView = new MapNorthView(context);
 		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -34,20 +47,61 @@ public class MapLayout extends RelativeLayout {
 		northView.setLayoutParams(northLayout);
 		
 		scaleView = new ScaleBarView(context);
-		scaleView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 		
 		toolsView = new RelativeLayout(context);
 		
-		mapView = new CustomMapView(context, drawView, editView, northView, scaleView, toolsView);
-
+		mapView = new CustomMapView(context, this);
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		mapView.startMapping();
 		
 		indexViews();
+		
+		layerButton = createLayerButton();
+		layerButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				mapView.showLayersDialog();
+			}
+			
+		});
+		
+		toolsDropDown = createToolsDropDown(mapView);
+		toolsDropDown.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0,
+					View arg1, int arg2, long arg3) {
+				mapView.selectToolIndex(arg2);
+			}
+
+			@Override
+			public void onNothingSelected(
+					AdapterView<?> arg0) {
+				// ignore
+			}
+			
+		});
+		
+		addView(layerButton);
+		addView(toolsDropDown);
+		addView(container);
+	}
+	
+	public Button getLayerButton() {
+		return layerButton;
+	}
+	
+	public Spinner getToolsDropDown() {
+		return toolsDropDown;
 	}
 
 	public DrawView getDrawView() {
 		return drawView;
+	}
+	
+	public EditView getEditView() {
+		return editView;
 	}
 
 	public MapNorthView getNorthView() {
@@ -62,21 +116,43 @@ public class MapLayout extends RelativeLayout {
 		return mapView;
 	}
 	
+	public RelativeLayout getToolsView() {
+		return toolsView;
+	}
+	
 	public void setMapView(CustomMapView value) {
 		mapView = value;
 		indexViews();
 	}
 	
 	private void indexViews() {
-		while(this.getChildCount() > 0) {
-			this.removeViewAt(0);
+		while(container.getChildCount() > 0) {
+			container.removeViewAt(0);
 		}
-		if (mapView != null) addView(mapView);
-		if (drawView != null) addView(drawView);
-		if (editView != null) addView(editView);
-		if (northView != null) addView(northView);
-		if (scaleView != null) addView(scaleView);
-		if (toolsView != null) addView(toolsView);
+		if (mapView != null) container.addView(mapView);
+		if (drawView != null) container.addView(drawView);
+		if (editView != null) container.addView(editView);
+		if (northView != null) container.addView(northView);
+		if (scaleView != null) container.addView(scaleView);
+		if (toolsView != null) container.addView(toolsView);
+	}
+	
+	private Button createLayerButton() {
+		 Button button = new Button(this.getContext());
+         button.setText("Layers");
+         return button;
+	}
+	
+	private Spinner createToolsDropDown(CustomMapView mapView) {
+		Spinner spinner = new Spinner(this.getContext());
+		List<MapTool> tools = mapView.getTools();
+		ArrayAdapter<MapTool> arrayAdapter = new ArrayAdapter<MapTool>(
+				this.getContext(),
+				android.R.layout.simple_spinner_dropdown_item,
+				tools);
+		spinner.setAdapter(arrayAdapter);
+		spinner.setSelection(0);
+		return spinner;
 	}
 
 }

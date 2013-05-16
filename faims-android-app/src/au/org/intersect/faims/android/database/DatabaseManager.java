@@ -633,6 +633,108 @@ public class DatabaseManager {
 		}
 	}
 	
+	public Collection<List<String>> fetchEntityList(String type) throws Exception {
+		String query = 
+			"select uuid, group_concat(response, '; ') as response " +
+			"FROM (" +
+				"SELECT uuid, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, max(astamp, tstamp) as stamp, aenttypeid " +
+			    "FROM (" +
+			    	"SELECT uuid, attributeid, valuetimestamp, aenttimestamp " +
+			    	"FROM archentity " +
+			    	"JOIN aentvalue USING (uuid) " +
+			    	"JOIN idealaent using (aenttypeid, attributeid) " +
+			    	"WHERE isIdentifier = 'true' " +
+			    	"AND uuid IN (" +
+			    		"SELECT uuid " +
+			    		"FROM (" +
+			    		"SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel " +
+			    		"FROM archentity JOIN aenttype using (aenttypeid) " +
+			    		"WHERE aenttypename LIKE '%'||'" + (type == null ? "" : type) + "'||'%' " +
+			    		"GROUP BY uuid, aenttypeid " +
+			    		"HAVING max(aenttimestamp)" +
+			    		")" +
+			    	"JOIN (" +
+			    		"SELECT uuid, max(valuetimestamp) as valuetimestamp " +
+			    		"FROM aentvalue " +
+			    		"WHERE deleted is null " +
+			    		"GROUP BY uuid " +
+			    		"HAVING max(valuetimestamp) " +
+			    		")" +
+			    	"USING (uuid) " +
+			    	"WHERE entDel is null " +
+			    	"GROUP BY uuid " +
+			    	"ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid " +
+			    	")" +
+			    "GROUP BY uuid, attributeid " +
+			    "HAVING MAX(ValueTimestamp) " +
+			    "AND MAX(AEntTimestamp) " +
+			    ")" +
+			"JOIN attributekey using (attributeid) " +
+			"JOIN aentvalue using (uuid, attributeid, valuetimestamp) " +
+			"JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid) " +
+			"JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid) " +
+			"JOIN archentity using (uuid, aenttimestamp) " +
+			"LEFT OUTER JOIN vocabulary USING (vocabid, attributeid) " +
+			"WHERE aentvalue.deleted is null " +
+			"group by uuid, attributeid " +
+			"ORDER BY max(tstamp,astamp) desc, uuid, attributename) " +
+			"JOIN aenttype using (aenttypeid) " +
+			"group by uuid " +
+			"order by stamp;";
+		return fetchAll(query);
+	}
+	
+	public Collection<List<String>> fetchRelationshipList(String type) throws Exception {
+		String query = 
+			"select relationshipid, group_concat(response, '; ') as response " +
+			"FROM (" +
+				"SELECT relationshipid, coalesce(vocabname, group_concat(vocabname, ', '), group_concat(freetext, ', ')) AS response, max(astamp, tstamp) as stamp, relntypeid " +
+			    "FROM (" +
+			    	"SELECT relationshipid, attributeid, RelnValueTimestamp, relntimestamp " +
+			    	"FROM relationship " +
+			    	"JOIN relnvalue USING (relationshipid) " +
+			    	"JOIN idealreln using (relntypeid, attributeid) " +
+			    	"WHERE isIdentifier = 'true' " +
+			    	"AND relationshipid IN (" +
+			    		"SELECT relationshipid " +
+			    		"FROM (" +
+			    		"SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted " +
+			    		"FROM relationship JOIN relntype using (relntypeid) " +
+			    		"WHERE relntypename LIKE '%'||'" + (type == null ? "" : type) + "'||'%' " +
+			    		"GROUP BY relationshipid, relntypeid " +
+			    		"HAVING max(relntimestamp)" +
+			    		")" +
+			    	"JOIN (" +
+			    		"SELECT relationshipid, max(RelnValueTimestamp) as RelnValueTimestamp " +
+			    		"FROM relnvalue " +
+			    		"WHERE deleted is null " +
+			    		"GROUP BY relationshipid " +
+			    		"HAVING max(RelnValueTimestamp) " +
+			    		")" +
+			    	"USING (relationshipid) " +
+			    	"WHERE relnDeleted is null " +
+			    	"GROUP BY relationshipid " +
+			    	"ORDER BY max(RelnValueTimestamp, relntimestamp) desc, relationshipid " +
+			    	")" +
+			    "GROUP BY relationshipid, attributeid " +
+			    "HAVING MAX(RelnValueTimestamp) " +
+			    "AND MAX(relntimestamp) " +
+			    ")" +
+			"JOIN attributekey using (attributeid) " +
+			"JOIN relnvalue using (relationshipid, attributeid, RelnValueTimestamp) " +
+			"JOIN (SELECT relationshipid, max(RelnValueTimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid) " +
+			"JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid) " +
+			"JOIN relationship using (relationshipid, relntimestamp) " +
+			"LEFT OUTER JOIN vocabulary USING (vocabid, attributeid) " +
+			"WHERE relnvalue.deleted is null " +
+			"group by relationshipid, attributeid " +
+			"ORDER BY max(tstamp,astamp) desc, relationshipid, attributename) " +
+			"JOIN relntype using (relntypeid) " +
+			"group by relationshipid " +
+			"order by stamp;";
+		return fetchAll(query);
+	}
+	
 	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {
 		Stmt st = null;
 		try {

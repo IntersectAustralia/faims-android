@@ -8,21 +8,24 @@ import android.location.Location;
 import com.nutiteq.MapView;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.projections.Projection;
 
 public class GeometryUtil {
 
 	public static Geometry fromGeometry(Geometry geom) {
-		if (geom instanceof CustomPoint) {
-			CustomPoint p = (CustomPoint) geom;
-			return new CustomPoint(p.getGeomId(), p.getStyle(), p.getMapPos());
-		} else if (geom instanceof CustomLine) {
-			CustomLine l = (CustomLine) geom;
-			return new CustomLine(l.getGeomId(), l.getStyle(), l.getVertexList());
-		} else if (geom instanceof CustomPolygon) {
-			CustomPolygon p = (CustomPolygon) geom;
-			return new CustomPolygon(p.getGeomId(), p.getStyle(), p.getVertexList());
+		if (geom instanceof Point) {
+			Point p = (Point) geom;
+			return new Point(p.getMapPos(), p.getLabel(), p.getStyleSet(), p.userData);
+		} else if (geom instanceof Line) {
+			Line l = (Line) geom;
+			return new Line(l.getVertexList(), l.getLabel(), l.getStyleSet(), l.userData);
+		} else if (geom instanceof Polygon) {
+			Polygon p = (Polygon) geom;
+			return new Polygon(p.getVertexList(), new ArrayList<List<MapPos>>(), p.getLabel(), p.getStyleSet(), p.userData);
 		}
 		return null;
 	}
@@ -108,6 +111,14 @@ public class GeometryUtil {
 		float[] results = new float[3];
 		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
 		return results[0] / 1000;
+	}
+	
+	public static List<MapPos> convertToWgs84(List<MapPos> pts) {
+		ArrayList<MapPos> list = new ArrayList<MapPos>();
+		for (MapPos p : pts) {
+			list.add(convertToWgs84(p));
+		}
+		return list;
 	}
 	
 	public static MapPos convertToWgs84(MapPos p) {

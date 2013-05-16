@@ -49,6 +49,7 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -60,17 +61,11 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Marker;
-import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.projections.EPSG3857;
-import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.Style;
-import com.nutiteq.style.StyleSet;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
@@ -1580,7 +1575,7 @@ public class BeanShellLinker {
 		try {
 			return databaseManager.fetchArchEnt(id);
 		} catch (Exception e) {
-			FLog.e("error fetching arch entity");
+			FLog.e("error fetching arch entity", e);
 			showWarning("Logic Error", "Error fetching arch entity");
 		}
 		return null;
@@ -1590,7 +1585,7 @@ public class BeanShellLinker {
 		try {
 			return databaseManager.fetchRel(id);
 		} catch (Exception e) {
-			FLog.e("error fetching relationship");
+			FLog.e("error fetching relationship", e);
 			showWarning("Logic Error", "Error fetching relationship");
 		}
 		return null;
@@ -1600,7 +1595,7 @@ public class BeanShellLinker {
 		try {
 			return databaseManager.fetchOne(query);
 		} catch (Exception e) {
-			FLog.e("error fetching one");
+			FLog.e("error fetching one", e);
 			showWarning("Logic Error", "Error fetching one");
 		}
 		return null;
@@ -1611,8 +1606,30 @@ public class BeanShellLinker {
 		try {
 			return databaseManager.fetchAll(query);
 		} catch (Exception e) {
-			FLog.e("error fetching all");
+			FLog.e("error fetching all", e);
 			showWarning("Logic Error", "Error fetching all");
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public Collection fetchEntityList(String type){
+		try {
+			return databaseManager.fetchEntityList(type);
+		} catch (Exception e) {
+			FLog.e("error fetching entity list", e);
+			showWarning("Logic Error", "Error fetching entity list");
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public Collection fetchRelationshipList(String type){
+		try {
+			return databaseManager.fetchRelationshipList(type);
+		} catch (Exception e) {
+			FLog.e("error fetching relationship list", e);
+			showWarning("Logic Error", "Error fetching relationship list");
 		}
 		return null;
 	}
@@ -1878,14 +1895,14 @@ public class BeanShellLinker {
 	}
 
 	public int showShapeLayer(String ref, String layerName, String filename, 
-			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addShapeLayer(layerName, filepath, pointStyleSet, lineStyleSet, polygonStyleSet);
+				return mapView.addShapeLayer(layerName, filepath, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1903,14 +1920,14 @@ public class BeanShellLinker {
 	}
 	
 	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String labelColumn, 
-			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumn, pointStyleSet, lineStyleSet, polygonStyleSet);
+				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumn, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2164,7 +2181,7 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void addSelection(String ref, int geomId) {
+	public void addGeometrySelection(String ref, int geomId) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -2185,7 +2202,28 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void clearSelection(String ref) {
+	public void removeGeometrySelection(String ref, int geomId) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.removeSelection(geomId);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(MapException e) {
+			FLog.e("error removing selection", e);
+			showWarning("Logic Error", e.getMessage());
+		}
+		catch(Exception e){
+			FLog.e("error removing selection " + ref,e);
+			showWarning("Logic Error", "Error removing selection " + ref);
+		}
+	}
+	
+	public void clearGeometrySelection(String ref) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
@@ -2357,44 +2395,38 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public PointStyle createPointStyle(int color, float size, float pickSize) {
-		return PointStyle.builder().setColor(color).setSize(size).setPickingSize(pickSize).build();
+	public GeometryStyle createPointStyle(int color, float size, float pickingSize) {
+		GeometryStyle style = new GeometryStyle();
+		style.pointColor = color;
+		style.size = size;
+		style.pickingSize = pickingSize;
+		return style;
 	}
 	
-	public LineStyle createLineStyle(int color, float width, float pickWidth) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).build();
-	}
-	
-	public LineStyle createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).setPointStyle(pointStyle).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color) {
-		return PolygonStyle.builder().setColor(color).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color, LineStyle lineStyle) {
-		return PolygonStyle.builder().setColor(color).setLineStyle(lineStyle).build();
-	}
-	
-	public StyleSet<? extends Style> createStyleSet(int minZoom, Style style) {
-		if (style instanceof PointStyle) {
-			StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-			pointStyleSet.setZoomStyle(minZoom, (PointStyle) style);
-			return pointStyleSet;
-		} else if (style instanceof LineStyle) {
-			StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-			lineStyleSet.setZoomStyle(minZoom, (LineStyle) style);
-			return lineStyleSet;
-		} else if (style instanceof PolygonStyle) {
-			StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
-			return polygonStyleSet;
-		} else {
-			FLog.e("cannot create style set");
-			showWarning("Logic Error", "Error cannot create style set");
-			return null;
+	public GeometryStyle createLineStyle(int color, float width, float pickingWidth, GeometryStyle pointStyle) {
+		GeometryStyle style = new GeometryStyle();
+		style.lineColor = color;
+		style.width = width;
+		style.pickingWidth = pickingWidth;
+		if (pointStyle != null) {
+			style.showPoints = true;
+			style.pointColor = pointStyle.pointColor;
+			style.size = pointStyle.size;
+			style.pickingSize = pointStyle.pickingSize;
 		}
+		return style;
+	}
+	
+	public GeometryStyle createPolygonStyle(int color, GeometryStyle lineStyle) {
+		GeometryStyle style = new GeometryStyle();
+		style.polygonColor = color;
+		if (lineStyle != null) {
+			style.showStroke = true;
+			style.lineColor = lineStyle.lineColor;
+			style.width = lineStyle.width;
+			style.pickingWidth = lineStyle.pickingWidth;
+		}
+		return style;
 	}
 	
 	public void setFileSyncEnabled(boolean enabled) {
@@ -2464,6 +2496,23 @@ public class BeanShellLinker {
 	}
 	
 	public Geometry createGeometryPoint(MapPos point) {
-		return new Point(point, null, createPointStyle(0,0,0), null);
+		return new CustomPoint(0, createPointStyle(0,0,0), point);
+	}
+	
+	public void setToolsEnabled(String ref, boolean enabled) {
+		try{
+			Object obj = renderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.setToolsEnabled(enabled);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error setting tools enabled value " + ref,e);
+			showWarning("Logic Error", "Error setting tools enabled value " + ref);
+		}
 	}
 }

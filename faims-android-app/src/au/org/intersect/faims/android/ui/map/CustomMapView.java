@@ -81,14 +81,14 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			if (CustomMapView.this.mapListener != null) {
 				CustomMapView.this.mapListener.onMapClicked(arg0, arg1, arg2);
 			}
-			if (CustomMapView.this.currentTool != null) {
+			if (CustomMapView.this.toolsEnabled && CustomMapView.this.currentTool != null) {
 				CustomMapView.this.currentTool.onMapClicked(arg0, arg1, arg2);
 			}
 		}
 
 		@Override
 		public void onMapMoved() {
-			if (CustomMapView.this.currentTool != null) {
+			if (CustomMapView.this.toolsEnabled && CustomMapView.this.currentTool != null) {
 				CustomMapView.this.currentTool.onMapChanged();
 			}
 			CustomMapView.this.updateDrawView();
@@ -105,7 +105,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				CustomMapView.this.mapListener.onVectorElementClicked(arg0,
 						arg1, arg2, arg3);
 			}
-			if (CustomMapView.this.currentTool != null) {
+			if (CustomMapView.this.toolsEnabled && CustomMapView.this.currentTool != null) {
 				CustomMapView.this.currentTool.onVectorElementClicked(arg0,
 						arg1, arg2, arg3);
 			}
@@ -171,9 +171,12 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	private FileManager fm;
 
 	private boolean showKm;
-	
-	public CustomMapView(Context context, DrawView drawView, EditView editView, MapNorthView northView, ScaleBarView scaleView, RelativeLayout toolsView) {
 
+	private boolean toolsEnabled = true;
+
+	private MapLayout mapLayout;
+	
+	public CustomMapView(Context context, MapLayout mapLayout) {
 		this(context);
 
 		layerIdMap = new SparseArray<Layer>();
@@ -184,12 +187,13 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
         selectedGeometryList = new ArrayList<Geometry>();
-		
-		this.drawView = drawView;
-		this.editView = editView;
-		this.northView = northView;
-		this.scaleView = scaleView;
-		this.toolsView = toolsView;
+        
+		this.mapLayout = mapLayout;
+		this.drawView = mapLayout.getDrawView();
+		this.editView = mapLayout.getEditView();
+		this.northView = mapLayout.getNorthView();
+		this.scaleView = mapLayout.getScaleView();
+		this.toolsView = mapLayout.getToolsView();
 		
 		this.drawView.setMapView(this);
 		this.editView.setMapView(this);
@@ -460,33 +464,39 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	}
 
 	public void restartThreads() {
-		try {
-			// wait for all threads to finish
-			canRunThreads = false;
-			while (true) {
-				boolean allThreadsTerminated = true;
-				for (Thread t : threadList) {
-					if (t.getState() != Thread.State.TERMINATED) {
-						allThreadsTerminated = false;
-						break;
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					// wait for all threads to finish
+					canRunThreads = false;
+					while (true) {
+						boolean allThreadsTerminated = true;
+						for (Thread t : threadList) {
+							if (t.getState() != Thread.State.TERMINATED) {
+								allThreadsTerminated = false;
+								break;
+							}
+						}
+						if (allThreadsTerminated) {
+							break;
+						}
+						FLog.d("Waiting to start map threads");
+						Thread.sleep(1000);
 					}
+					canRunThreads = true;
+					threadList.clear();
+					for (Runnable r : runnableList) {
+						Thread t = new Thread(r);
+						threadList.add(t);
+						t.start();
+					}
+				} catch (Exception e) {
+					FLog.e("error restarting map threads", e);
 				}
-				if (allThreadsTerminated) {
-					break;
-				}
-				FLog.d("Waiting to start map threads");
-				Thread.sleep(1000);
 			}
-			canRunThreads = true;
-			threadList.clear();
-			for (Runnable r : runnableList) {
-				Thread t = new Thread(r);
-				threadList.add(t);
-				t.start();
-			}
-		} catch (Exception e) {
-			FLog.e("error restarting map threads", e);
-		}
+		}).start();
 	}
 
 	public void killThreads() {
@@ -827,6 +837,10 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		updateDrawView();
 	}
 	
+	public void removeSelection(int geomId) throws Exception {
+		removeSelection(getGeometry(geomId));
+	}
+	
 	public void removeSelection(Geometry geom) throws Exception {
 		if (selectedGeometryList.isEmpty()) return;
 		
@@ -995,5 +1009,19 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	public void setShowKm(boolean value) {
 		showKm = value;
+	}
+	
+	public void setToolsEnabled(boolean value) {
+		toolsEnabled = value;
+		toolsView.setVisibility(value ? View.VISIBLE : View.GONE);
+		mapLayout.getLayerButton().setVisibility(value ? View.VISIBLE : View.GONE);
+		mapLayout.getToolsDropDown().setVisibility(value ? View.VISIBLE : View.GONE);
+		if (currentTool != null) {
+			if (value) {
+				currentTool.activate();
+			} else {
+				currentTool.deactivate();
+			}
+		}
 	}
 }
