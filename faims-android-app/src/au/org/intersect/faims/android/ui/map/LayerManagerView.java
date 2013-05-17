@@ -11,14 +11,6 @@ import java.util.Locale;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
-
-import org.gdal.gdal.Dataset;
-import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconst;
-import org.gdal.gdalconst.gdalconstConstants;
-import org.gdal.osr.SpatialReference;
-import org.gdal.osr.osr;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -126,9 +118,6 @@ public class LayerManagerView extends LinearLayout {
 	private float polygonLineWidth = 0.05f;
 	private float polygonLinePickingWidth = 0.1f;
 	private boolean polygonShowStroke;
-	private static final double VRT_MAXERROR = 0.125;
-    private static final int VRT_RESAMPLER = gdalconst.GRA_NearestNeighbour;
-	private static final String EPSG_3785_WKT = "PROJCS[\"Google Maps Global Mercator\",    GEOGCS[\"WGS 84\",        DATUM[\"WGS_1984\",            SPHEROID[\"WGS 84\",6378137,298.257223563,                AUTHORITY[\"EPSG\",\"7030\"]],            AUTHORITY[\"EPSG\",\"6326\"]],        PRIMEM[\"Greenwich\",0,            AUTHORITY[\"EPSG\",\"8901\"]],        UNIT[\"degree\",0.01745329251994328,            AUTHORITY[\"EPSG\",\"9122\"]],        AUTHORITY[\"EPSG\",\"4326\"]],    PROJECTION[\"Mercator_2SP\"],    PARAMETER[\"standard_parallel_1\",0],    PARAMETER[\"latitude_of_origin\",0],    PARAMETER[\"central_meridian\",0],    PARAMETER[\"false_easting\",0],    PARAMETER[\"false_northing\",0],    UNIT[\"Meter\",1],    EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs\"],    AUTHORITY[\"EPSG\",\"3785\"]]";
 
 	public LayerManagerView(Context context) {
 		super(context);
@@ -415,7 +404,7 @@ public class LayerManagerView extends LinearLayout {
 				try {
 					if(fm.getSelectedFile() != null){
 						mapView.addRasterMap(editText.getText().toString(), fm.getSelectedFile().getPath());
-						double[][] boundaries = getBoundaries((CustomGdalMapLayer) mapView.getLayers().getBaseLayer());
+						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
 						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
 						fm.setSelectedFile(null);
 						redrawLayers();
@@ -1045,7 +1034,7 @@ public class LayerManagerView extends LinearLayout {
 			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
 			layout.addView(fileSizeEditText);
 
-			double[][] originalBounds = getBoundaries(gdalMapLayer);
+			double[][] originalBounds = gdalMapLayer.getBoundaries();
 	        TextView upperLeftTextView = new TextView(this.getContext());
 	        upperLeftTextView.setText("Upper left boundary:");
 			layout.addView(upperLeftTextView);
@@ -1124,16 +1113,6 @@ public class LayerManagerView extends LinearLayout {
 	    });
 		
 		builder.create().show();
-	}
-
-	private double[][] getBoundaries(CustomGdalMapLayer gdalMapLayer) {
-		Dataset originalData = gdal.Open(gdalMapLayer.getGdalSource(), gdalconstConstants.GA_ReadOnly);
-		// get original bounds in Wgs84
-		SpatialReference hLatLong = new SpatialReference(osr.SRS_WKT_WGS84);
-		SpatialReference layerProjection = new SpatialReference(EPSG_3785_WKT);
-		Dataset openData = gdal.AutoCreateWarpedVRT(originalData,null, layerProjection.ExportToWkt(),VRT_RESAMPLER, VRT_MAXERROR);
-		double[][] originalBounds = gdalMapLayer.boundsWgs84(openData, hLatLong);
-		return originalBounds;
 	}
 
 	private void showErrorDialog(String message) {

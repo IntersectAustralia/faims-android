@@ -9,6 +9,7 @@ import java.util.ListIterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import roboguice.RoboGuice;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -49,6 +50,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 import com.nutiteq.MapView;
+import com.nutiteq.components.Bounds;
 import com.nutiteq.components.Components;
 import com.nutiteq.components.Constraints;
 import com.nutiteq.components.MapPos;
@@ -230,6 +232,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 		internalMapListener = new InternalMapListener();
 		getOptions().setMapListener(internalMapListener);
+		
+		RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
 		
 		startMapOverlayThread();
         startGPSLocationThread();
@@ -545,10 +549,24 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
 				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
 				this, true);
-		gdalLayer.setShowAlways(true);
+		//gdalLayer.setShowAlways(true);
 		this.getLayers().setBaseLayer(gdalLayer);
-		
+		//setZoomRange(gdalLayer);
+		//setMapBounds(gdalLayer);
 		return addLayer(gdalLayer);
+	}
+
+	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
+		double bestzoom = gdalLayer.getBestZoom();
+		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
+	}
+	
+	protected void setMapBounds(CustomGdalMapLayer gdalLayer){
+		double[][] bound = gdalLayer.getBoundaries();
+		MapPos p1 = GeometryUtil.convertFromWgs84(new MapPos(bound[0][0], bound[0][1]));
+		MapPos p2 = GeometryUtil.convertFromWgs84(new MapPos(bound[3][0], bound[3][1]));
+		Bounds bounds = new Bounds(p1.x, p1.y, p2.x, p2.y);
+		this.getConstraints().setMapBounds(bounds);
 	}
 
 	public void setMapFocusPoint(float longitude, float latitude)
