@@ -39,6 +39,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
@@ -169,7 +170,8 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				int last = mapView.getLayers().getAllLayers().size() - 1;
+				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
 				LayerListItem itemView = (LayerListItem) view;
 				itemView.toggle();
 				layer.setVisible(itemView.isChecked());
@@ -183,7 +185,8 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				final Layer layer = mapView.getLayers().getAllLayers().get(position);
+				int last = mapView.getLayers().getAllLayers().size() - 1;
+				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
 				
 				Context context = LayerManagerView.this.getContext();
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -246,10 +249,11 @@ public class LayerManagerView extends LinearLayout {
 	// Drop Listener
 	private CustomDragDropListView.DropListener dropListener = new CustomDragDropListView.DropListener() {
 		public void drop(int from, int to) {
-			if(from != 0 && to != 0){
+			int last = mapView.getLayers().getAllLayers().size() - 1;
+			if(from != last && to != last){
 				List<Layer> unmodifiableLayers = mapView.getLayers().getAllLayers();
 				List<Layer> modifiedLayers = new ArrayList<Layer>(unmodifiableLayers);
-				Collections.swap(modifiedLayers, from, to);
+				Collections.swap(modifiedLayers, last - from, last - to);
 				modifiedLayers.remove(0);
 				mapView.getLayers().setLayers(modifiedLayers);
 				redrawLayers();
@@ -295,7 +299,9 @@ public class LayerManagerView extends LinearLayout {
 	
 	public void redrawLayers() {
 		List<Layer> layers = mapView.getLayers().getAllLayers();
-		LayersAdapter layersAdapter = new LayersAdapter(layers);
+		List<Layer> shownLayer = new ArrayList<Layer>(layers);
+		Collections.reverse(shownLayer);
+		LayersAdapter layersAdapter = new LayersAdapter(shownLayer);
 		listView.setAdapter(layersAdapter);
 	}
 	
@@ -303,10 +309,12 @@ public class LayerManagerView extends LinearLayout {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 		builder.setTitle("Add Layer");
 
-		LinearLayout layout = new LinearLayout(getContext());
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		final Dialog d = builder.create();
 		
 		Button loadRasterLayerButton = new Button(getContext());
@@ -372,10 +380,12 @@ public class LayerManagerView extends LinearLayout {
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Add raster layer:");
 		
-		LinearLayout layout = new LinearLayout(getContext());
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
@@ -492,10 +502,12 @@ public class LayerManagerView extends LinearLayout {
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Add spatial layer:");
 		
-		LinearLayout layout = new LinearLayout(getContext());
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
@@ -577,15 +589,17 @@ public class LayerManagerView extends LinearLayout {
 				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
 				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Point Color:", Integer.toHexString(pointColor));
 				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", pointSize);
 				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", pointPickingSize);
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -633,9 +647,11 @@ public class LayerManagerView extends LinearLayout {
 				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
 				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Line Color:", Integer.toHexString(lineColor));
 				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", lineSize);
@@ -644,7 +660,7 @@ public class LayerManagerView extends LinearLayout {
 				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Picking Width:", linePickingWidth);
 				final CheckBox showPointsBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Points on Line:", lineShowPoints);
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -698,9 +714,11 @@ public class LayerManagerView extends LinearLayout {
 				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
 				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Polygon Color:", Integer.toHexString(polygonColor));
 				final EditText strokeColorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Stroke Color:", Integer.toHexString(polygonLineColor));
@@ -708,7 +726,7 @@ public class LayerManagerView extends LinearLayout {
 				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Picking Width:", polygonLinePickingWidth);
 				final CheckBox showStrokeBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Stroke on Polygon:", polygonShowStroke);
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -875,8 +893,14 @@ public class LayerManagerView extends LinearLayout {
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Enter layer name:");
 		
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		builder.setView(scrollView);
+		
 		final EditText editText = new EditText(LayerManagerView.this.getContext());
-		builder.setView(editText);
+		layout.addView(editText);
 		
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
@@ -935,6 +959,16 @@ public class LayerManagerView extends LinearLayout {
 		builder.setMessage("Enter layer name:");
 		
 		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		if(layer instanceof CustomGdalMapLayer){
+			CustomGdalMapLayer gdalMapLayer = (CustomGdalMapLayer) layer;
+			editText.setText(gdalMapLayer.getName());
+		}else if(layer instanceof CustomSpatialiteLayer){
+			CustomSpatialiteLayer spatialiteLayer = (CustomSpatialiteLayer) layer;
+			editText.setText(spatialiteLayer.getName());
+		}else if(layer instanceof CanvasLayer){
+			CanvasLayer canvasLayer = (CanvasLayer) layer;
+			editText.setText(canvasLayer.getName());
+		}
 		builder.setView(editText);
 		
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -960,8 +994,10 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void showMetadata(Layer layer) {
+		ScrollView scrollView = new ScrollView(this.getContext());
 		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 
 		TextView layerTypeTextView = new TextView(this.getContext());
 		layerTypeTextView.setText("Layer type:");
@@ -1077,7 +1113,7 @@ public class LayerManagerView extends LinearLayout {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
 		builder.setTitle("Layer Metadata");
-		builder.setView(layout);
+		builder.setView(scrollView);
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
 			@Override

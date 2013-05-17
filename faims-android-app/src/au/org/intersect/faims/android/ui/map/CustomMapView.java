@@ -12,6 +12,7 @@ import javax.microedition.khronos.opengles.GL10;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -736,6 +737,12 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 		builder.setTitle("Layer Manager");
 		builder.setView(layerManager);
+		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
 		builder.create().show();
 	}
 

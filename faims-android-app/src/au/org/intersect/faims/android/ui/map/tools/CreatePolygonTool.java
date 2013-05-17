@@ -12,6 +12,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
@@ -196,9 +197,11 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(context);
 				LinearLayout layout = new LinearLayout(context);
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(context, layout, "Polygon Color:", Integer.toHexString(color));
 				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
@@ -208,7 +211,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", pickingWidth);
 				final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", showStroke);
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					

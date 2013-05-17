@@ -11,6 +11,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
@@ -152,9 +153,11 @@ public class EditTool extends SelectTool {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(context);
 				LinearLayout layout = new LinearLayout(context);
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final EditText editColorSetter = addSetter(context, layout, "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
@@ -162,7 +165,7 @@ public class EditTool extends SelectTool {
 				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
 				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -235,9 +238,11 @@ public class EditTool extends SelectTool {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("Point Properties");
 		
+		ScrollView scrollView = new ScrollView(context);
 		LinearLayout layout = new LinearLayout(context);
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
 		final GeometryStyle style = point.getStyle();
 		
@@ -245,7 +250,7 @@ public class EditTool extends SelectTool {
 		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
 		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
@@ -282,9 +287,11 @@ public class EditTool extends SelectTool {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("Line Properties");
 		
+		ScrollView scrollView = new ScrollView(context);
 		LinearLayout layout = new LinearLayout(context);
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
 		final GeometryStyle style = line.getStyle();
 		
@@ -295,7 +302,7 @@ public class EditTool extends SelectTool {
 		final SeekBar pickingWidthBar = addSlider(context, layout, "Line Picking Width:", style.pickingWidth);
 		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Line:", style.showPoints);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
@@ -339,9 +346,11 @@ public class EditTool extends SelectTool {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("Line Properties");
 		
+		ScrollView scrollView = new ScrollView(context);
 		LinearLayout layout = new LinearLayout(context);
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		
 		final GeometryStyle style = polygon.getStyle();
 		
@@ -353,7 +362,7 @@ public class EditTool extends SelectTool {
 		final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", style.pickingWidth);
 		final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", style.showStroke);
 		
-		builder.setView(layout);
+		builder.setView(scrollView);
 		
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			

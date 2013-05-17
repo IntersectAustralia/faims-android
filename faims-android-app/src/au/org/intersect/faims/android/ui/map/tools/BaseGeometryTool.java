@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -83,6 +84,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 					AlertDialog.Builder builder = new AlertDialog.Builder(context);
 					builder.setTitle("Select Layer");
 				
+					Collections.reverse(layerNames);
 					ArrayAdapter<String> adapter = new ArrayAdapter<String>(BaseGeometryTool.this.context, android.R.layout.simple_list_item_1, layerNames);
 					
 					ListView listView = new ListView(context);
@@ -98,7 +100,8 @@ public abstract class BaseGeometryTool extends SettingsTool {
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int position, long arg3) {
 							d.dismiss();
-							setSelectedLayer(filteredLayers.get(position));
+							int realPosition = filteredLayers.size() - 1 - position;
+							setSelectedLayer(filteredLayers.get(realPosition));
 						}
 	
 					});

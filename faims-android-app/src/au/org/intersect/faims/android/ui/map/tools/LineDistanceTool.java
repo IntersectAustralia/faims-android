@@ -13,6 +13,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
@@ -192,9 +193,11 @@ public class LineDistanceTool extends SelectTool {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
+				ScrollView scrollView = new ScrollView(context);
 				LinearLayout layout = new LinearLayout(context);
 				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 				layout.setOrientation(LinearLayout.VERTICAL);
+				scrollView.addView(layout);
 				
 				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
@@ -202,7 +205,7 @@ public class LineDistanceTool extends SelectTool {
 				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
 				final CheckBox kmBox = addCheckBox(context, layout, "Show Km:", mapView.showKm());
 				
-				builder.setView(layout);
+				builder.setView(scrollView);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
