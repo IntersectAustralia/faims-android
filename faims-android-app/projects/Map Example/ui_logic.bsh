@@ -97,7 +97,7 @@ showScreen(name) {
 		setupMap(name + "/tab1/map", kazmap, 25.33825f, 42.58401f); // kaz
 		initSpatialMap();
 	} else if ("tabgroup5".equals(name)) {
-		// ignore
+		initUIMap();
 	}
 	
 }
@@ -173,7 +173,7 @@ saveGPSEntity() {
 
 	List attributes = createAttributeList();
 	attributes.add(createEntityAttribute("entity", "GPS " + gpsEntityCount++, null, null, null));
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, null));
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	
 	String id = saveArchEnt(null, "gpsentity", collection, attributes);
 	
@@ -183,11 +183,6 @@ saveGPSEntity() {
 }
 
 setGPSEntity(entity) {
-	for (Object attribute : entity.getAttributes()) {
-		if ("name".equals(attribute.getName())) {
-			setFieldValue("tabgroup1/tab1/name", attribute.getText());
-		}
-	}
 	point = entity.getGeometryList().get(0);
 	
 	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getMapPos().x + ", Latitude = " + point.getMapPos().y);
@@ -203,6 +198,8 @@ loadGPSEntity(id) {
 	if (entityId == null || "".equals(entityId)) return;
 	
 	Object entity = fetchArchEnt(entityId);
+	
+	showTabGroup("tabgroup1", entityId);
 	
 	setGPSEntity(entity);
 	
@@ -235,8 +232,7 @@ redrawGPSEntities() {
 }
 
 clearGPSEntity() {
-	setFieldValue("tabgroup1/tab1/name", "");
-	setFieldValue("tabgroup1/tab1/position", "");
+	newTabGroup("tabgroup1");
 }
 
 clearBluePoint() {
@@ -337,8 +333,8 @@ initDrawMap() {
 	refreshEntities();
 	refreshRelationships();
 	
-	entityCount = fetchEntityList("simpleentity").size();
-	relCount = fetchRelationshipList("abovebelow").size();
+	entityCount = fetchEntityList("simpleentity").size() + 1;
+	relCount = fetchRelationshipList("abovebelow").size() + 1;
 	
 }
 
@@ -607,8 +603,7 @@ refreshEntities() {
 }
 
 clearEntity() {
-	setFieldValue("tabgroup2/tab2/name", "");
-	setFieldValue("tabgroup2/tab2/value", "");
+	newTabGroup("tabgroup2");
 }
 
 saveEntity() {
@@ -623,8 +618,8 @@ updateEntity(String entityId) {
 	if (entityId == null) {
 		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
 	}
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, null));
-	attributes.add(createEntityAttribute("value", null, null, getFieldValue("tabgroup2/tab2/value"), null));
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, getFieldCertainty("tabgroup2/tab2/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup2/tab2/value"), null, getFieldValue("tabgroup2/tab2/value"), getFieldCertainty("tabgroup2/tab2/value")));
 	
 	List collection = null;
 	if (getCurrentLayerId() != 0) {
@@ -649,14 +644,7 @@ loadEntity() {
 	
 	Object entity = fetchArchEnt(entityId);
 	
-	for (Object attribute : entity.getAttributes()) {
-		System.out.println(attribute.toString());
-		if ("name".equals(attribute.getName())) {
-			setFieldValue("tabgroup2/tab2/name", attribute.getText());
-		} else if ("value".equals(attribute.getName())) {
-			setFieldValue("tabgroup2/tab2/value", attribute.getMeasure());
-		}
-	}
+	showTabGroup("tabgroup2", entityId);
 	
 	drawGeometryList(entity.getGeometryList());
 	
@@ -682,6 +670,7 @@ refreshRelationships() {
 
 clearRelationship() {
 	setFieldValue("tabgroup2/tab3/name", "");
+	setFieldCertainty("tabgroup2/tab3/name","1");
 }
 
 saveRelationship() {
@@ -693,8 +682,10 @@ updateRelationship(String relId) {
 	if (relId == null || "".equals(relId)) relId = null;	
 
 	List attributes = createAttributeList();
-	attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
-	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null, null));
+	if (relId == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null, getFieldCertainty("tabgroup2/tab3/name")));
 	
 	List collection = null;
 	if (getCurrentLayerId() != 0) {
@@ -723,6 +714,7 @@ loadRelationship() {
 		System.out.println(attribute.toString());
 		if ("name".equals(attribute.getName())) {
 			setFieldValue("tabgroup2/tab3/name", attribute.getText());
+			setFieldCertainty("tabgroup2/tab3/name", attribute.getCertainty());
 		}
 	}
 	
@@ -793,4 +785,8 @@ initSpatialMap() {
 
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz All Teams", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", null, ps, ls, pos);
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz Site Points", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos); 
+}
+
+private initUIMap() {
+	setMapZoom("tabgroup5/tab1/map", 15.0f);
 }

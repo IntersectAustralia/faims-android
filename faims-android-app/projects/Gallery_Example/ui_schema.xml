@@ -55,7 +55,7 @@
         </select1>
       </group>
     </group>
-    <group ref="tabgroup1" faims_archent_type="simple">
+    <group ref="tabgroup1" faims_archent_type="simpleentity">
       <label>Simple Entity Example</label>
       <group ref="tab1">
         <label>Entity Tab1</label>

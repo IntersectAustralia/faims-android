@@ -120,6 +120,9 @@ updateEntity(entity_id) {
 	if (entity_id == null || "".equals(entity_id)) entity_id = null;
 
 	List attributes = createAttributeList();
+	if (entity_id == null) {
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount++, null, null, null));
+	}
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
@@ -148,12 +151,6 @@ clearEntity() {
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
-}
-
-updateAll() {
-	Object entities = fetchAll("select uuid, uuid from archentity where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);");
-	
-	populateDropDown("tabgroup1/tab2/entities", entities);
 }
 
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
@@ -197,6 +194,9 @@ updateRel(rel_id) {
 	if (rel_id == null || "".equals(rel_id)) rel_id = null;
 
 	List attributes = createAttributeList();
+	if (rel_id == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
 	Object values = getFieldValue("tabgroup2/tab1/location");
 	
@@ -218,8 +218,8 @@ clearRel() {
 }
 
 updateAll() {
-	Object entities = fetchAll("select uuid, uuid from archentity where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);");
-	Object relationships = fetchAll("select relationshipid, relationshipid from relationship where relationshipid || relntimestamp in ( select relationshipid || max(relntimestamp) from relationship group by relationshipid having deleted is null);");
+	Object entities = fetchEntityList("small");
+	Object relationships = fetchRelationshipList("abovebelow");
 	
 	populateDropDown("tabgroup1/tab2/entities", entities);
 	populateDropDown("tabgroup2/tab2/relationships", relationships);
@@ -234,9 +234,14 @@ initRel() {
 	clearRel();
 }
 
+int entityCount;
+int relCount;
+
 init() {
     updateAll();
 	startSync();
+	entityCount = fetchEntityList("small").size() + 1;
+	relCount = fetchRelationshipList("abovebelow").size() + 1;
 }
 
 cleanup() {

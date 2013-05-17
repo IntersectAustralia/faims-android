@@ -12,7 +12,10 @@
     <child>
       Below
     </child>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1">
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -21,7 +24,10 @@
     <description>
       Indicates that one element is next to another element.
     </description>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1">
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -30,46 +36,94 @@
     <description>
       Indicates that one element similar to another element.
     </description>
-     <property type="string" name="name" minCardinality="1" maxCardinality="1">
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
   
-  <ArchaeologicalElement type="Simple">
+  <ArchaeologicalElement type="SimpleEntity">
     <description>
       An simple entity
     </description>
-    <property type="string" name="name" minCardinality="1" maxCardinality="1">
+    <property type="string" name="entity" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="integer" name="value" minCardinality="1" maxCardinality="1">
+    <property type="string" name="name">
       <bundle>DOI</bundle>
     </property>
-    <property type="date" name="date" minCardinality="1" maxCardinality="1">
+    <property type="integer" name="value">
       <bundle>DOI</bundle>
     </property>
-    <property type="time" name="time" minCardinality="1" maxCardinality="1">
+    <property type="date" name="date">
       <bundle>DOI</bundle>
     </property>
-    <property type="checklist" name="type" minCardinality="1" maxCardinality="1">
+    <property type="time" name="time">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="checklist" name="type">
 	  <bundle>DOI</bundle>
       <lookup>
-        <term>{typeA}</term>
-        <term>{typeB}</term>
-        <term>{typeC}</term>
-        <term>{typeD}</term>
+        <term>Type A</term>
+        <term>Type B</term>
+        <term>Type C</term>
+        <term>Type D</term>
       </lookup>
     </property>
-    <property type="dropdown" name="location" minCardinality="1" maxCardinality="1">
+    <property type="dropdown" name="location">
       <bundle>DOI</bundle>
       <lookup>
-        <term>{locationA}</term>
-        <term>{locationB}</term>
-        <term>{locationC}</term>
-        <term>{locationD}</term>
+        <term>Loc A</term>
+        <term>Loc B</term>
+        <term>Loc C</term>
+        <term>Loc D</term>
       </lookup>
     </property>
-    <property type="radiogroup" name="supervisor" minCardinality="1" maxCardinality="1">
+    <property type="radiogroup" name="supervisor">
+      <bundle>DOI</bundle>
+    </property>
+  </ArchaeologicalElement>
+  
+  <ArchaeologicalElement type="GpsEntity">
+    <description>
+      An simple entity
+    </description>
+     <property type="string" name="entity" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="value">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="date" name="date">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="time" name="time">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="checklist" name="type">
+	  <bundle>DOI</bundle>
+      <lookup>
+        <term>Type A</term>
+        <term>Type B</term>
+        <term>Type C</term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="dropdown" name="location">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Loc A</term>
+        <term>Loc B</term>
+        <term>Loc C</term>
+        <term>Loc D</term>
+      </lookup>
+    </property>
+    <property type="radiogroup" name="supervisor">
       <bundle>DOI</bundle>
     </property>
   </ArchaeologicalElement>

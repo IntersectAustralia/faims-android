@@ -1171,8 +1171,8 @@ public class BeanShellLinker {
 					horizontalScrollView.setAnnotation(value);
 					horizontalScrollView.setCurrentAnnotation(value);
 				}else {
-					FLog.w("cannot set field certainty " + ref + " = " + valueObj.toString());
-					showWarning("Logic Error", "Cannot set field certainty " + ref + " = " + valueObj.toString());
+					FLog.w("cannot set field annotation " + ref + " = " + valueObj.toString());
+					showWarning("Logic Error", "Cannot set field annotation " + ref + " = " + valueObj.toString());
 				}
 			} else {
 				FLog.w("cannot find view " + ref);

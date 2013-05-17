@@ -46,9 +46,11 @@ Object locations = fetchAll("select vocabid, vocabname from vocabulary left join
 Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';");
 
 String entity_id;
+int entityCount;
 
 initialise() {
-	updateEntities();
+	entityCount = fetchEntityList("simpleentity").size() + 1;
+	refreshEntities();
 	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
 	populateDropDown("tabgroup1/tab1/type", types);
 	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
@@ -65,6 +67,9 @@ updateEntity(entity_id) {
 	if (entity_id == null || "".equals(entity_id)) entity_id = null;
 	
 	List attributes = createAttributeList();
+	if (entity_id == null) {
+		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+	}
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/time"), null, null, null));
 	attributes.add(createEntityAttribute("type", getFieldAnnotation("tabgroup1/tab1/type"), getFieldValue("tabgroup1/tab1/type"), null, getFieldCertainty("tabgroup1/tab1/type")));
@@ -78,13 +83,13 @@ updateEntity(entity_id) {
 	
 	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, getFieldCertainty("tabgroup1/tab2/supervisor")));
 	
-	String id = saveArchEnt(entity_id, "simple", null, attributes);
-	updateEntities();
+	String id = saveArchEnt(entity_id, "simpleentity", null, attributes);
+	refreshEntities();
 	return id;
 }
 
-updateEntities() {
-	Object entities = fetchAll("select uuid, uuid from archentity group by uuid;");
+refreshEntities() {
+	Object entities = fetchEntityList("simpleentity");
 
 	populateDropDown("tabgroup1/tab3/entity", entities);
 }

@@ -4,11 +4,11 @@
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:jr="http://openrosa.org/javarosa">
   <h:head>
-    <h:title>GPS Example</h:title>
+    <h:title>Map Example</h:title>
 
     <model>
       <instance>
-        <faims id="gps_example">
+        <faims id="map_example">
           <user>
               <tab1>
                   <users></users>
@@ -126,17 +126,17 @@
 	        </select1>
         </group>
     </group>
-    <group ref="tabgroup1">
+    <group ref="tabgroup1" faims_archent_type="gpsentity">
       <label>GPS Plotting</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
-        <input ref="name">
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
             <label>Name:</label>
         </input>
-        <input ref="position" faims_read_only="true">
+        <input ref="position" faims_read_only="true"  faims_certainty="false" faims_annotation="false">
             <label>Position:</label>
         </input>
-        <input ref="map" faims_map="true">
+        <input ref="map" faims_map="true" faims_certainty="false" faims_annotation="false">
             <label>Map:</label>
         </input>
         <trigger ref="show">
@@ -154,7 +154,7 @@
       </group>
       <group ref="tab2">
           <label>Entity</label>
-          <select1 ref="entity">
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
 	          <label>Entity:</label>
 	          <item>
 	            <label>dummy</label>
@@ -166,11 +166,11 @@
 		  </trigger>
       </group>
     </group>
-    <group ref="tabgroup2">
+    <group ref="tabgroup2" faims_archent_type="simpleentity">
       <label>Map Example</label>
       <group ref="tab1"  faims_scrollable="false">
         <label>Map</label>
-        <select1 ref="drawActions">
+        <select1 ref="drawActions"  faims_certainty="false" faims_annotation="false">
             <label>Draw Actions:</label>
             <item>
                 <label>Draw Point</label>
@@ -199,17 +199,17 @@
         <trigger ref="generate">
             <label>Generate grid</label>
         </trigger>
-        <input ref="map" faims_map="true">
+        <input ref="map" faims_map="true"  faims_certainty="false" faims_annotation="false">
             <label>Map:</label>
         </input>
-        <select1 ref="layers">
+        <select1 ref="layers"  faims_certainty="false" faims_annotation="false">
             <label>Layers:</label>
             <item>
                 <label>dummy</label>
                 <value>dummy</value>
             </item>
         </select1>
-        <select1 ref="layerActions">
+        <select1 ref="layerActions"  faims_certainty="false" faims_annotation="false">
             <label>Layers Actions:</label>
             <item>
                 <label>Create Layer</label>
@@ -234,17 +234,17 @@
       </group>
       <group ref="tab2">
           <label>Entity</label>
-          <select1 ref="entity">
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
               <label>Entity</label>
               <item>
                   <label>dummy</label>
                   <value>dummy</value>
               </item>
           </select1>
-          <input ref="name">
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
               <label>Name:</label>
           </input>
-          <input ref="value">
+          <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
               <label>Value:</label>
           </input>
           <trigger ref="clear">
@@ -262,7 +262,7 @@
       </group>
       <group ref="tab3">
           <label>Relationship</label>
-          <select1 ref="relationship">
+          <select1 ref="relationship"  faims_certainty="false" faims_annotation="false">
               <label>Relationship</label>
               <item>
                   <label>dummy</label>
