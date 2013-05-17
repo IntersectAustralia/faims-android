@@ -37,7 +37,7 @@ public class DrawView extends View {
 
 	protected float strokeSize = 0.5f;
 	
-	protected float textSize = 0.5f;
+	protected float textSize = 0.7f;
 	
 	protected CustomMapView mapView;
 

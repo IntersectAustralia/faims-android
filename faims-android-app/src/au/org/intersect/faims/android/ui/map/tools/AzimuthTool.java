@@ -28,6 +28,7 @@ public class AzimuthTool extends SelectTool {
 		private RectF rectF;
 		private MapPos tp3;
 		private float startAngle;
+		private float length;
 
 		public AzimuthToolCanvas(Context context) {
 			super(context);
@@ -37,7 +38,7 @@ public class AzimuthTool extends SelectTool {
 		public void onDraw(Canvas canvas) {
 			if (tp1 != null && tp2 != null) {
 				// north line
-				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp3.x, (float) tp3.y, paint);
+				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp3.x, (float) (tp1.y + Math.signum(tp3.y-tp1.y) * length), paint);
 				// line to point
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				// angle
@@ -68,6 +69,7 @@ public class AzimuthTool extends SelectTool {
 			float dx = (float) (tp2.x - tp1.x);
 			float dy = (float) (tp2.y - tp1.y);
 			float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
+			this.length = d;
 			
 			this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
 			
