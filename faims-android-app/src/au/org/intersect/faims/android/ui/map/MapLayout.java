@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.map;
 
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,28 +30,30 @@ public class MapLayout extends LinearLayout {
 	public MapLayout(Context context) {
 		super(context);
 		
+		Activity activity = (Activity) context;
+		
 		this.setOrientation(LinearLayout.VERTICAL);
 		this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
 		
-		container = new RelativeLayout(context);
+		container = new RelativeLayout(activity);
 		
-		drawView = new DrawView(context);
+		drawView = new DrawView(activity);
 		
-		editView = new EditView(context);
+		editView = new EditView(activity);
 		
-		northView = new MapNorthView(context);
+		northView = new MapNorthView(activity);
 		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		northLayout.alignWithParent = true;
 		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		northLayout.topMargin = (int) ScaleUtil.getDip(context, 10);
-		northLayout.rightMargin = (int) ScaleUtil.getDip(context, 10);
+		northLayout.topMargin = (int) ScaleUtil.getDip(activity, 10);
+		northLayout.rightMargin = (int) ScaleUtil.getDip(activity, 10);
 		northView.setLayoutParams(northLayout);
 		
-		scaleView = new ScaleBarView(context);
+		scaleView = new ScaleBarView(activity);
 		
-		toolsView = new RelativeLayout(context);
+		toolsView = new RelativeLayout(activity);
 		
-		mapView = new CustomMapView(context, this);
+		mapView = new CustomMapView(activity, this);
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		mapView.startMapping();
 		

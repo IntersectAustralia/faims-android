@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +11,8 @@ import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
 
 import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.net.Uri;
@@ -46,7 +47,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class Tab implements Parcelable{
 
-	private Context context;
+	private WeakReference<Activity> activityRef;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
@@ -68,8 +69,8 @@ public class Tab implements Parcelable{
 		reference = source.readString();
 	}
 	
-	public Tab(Context context, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
-		this.context = context;
+	public Tab(Activity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
+		this.activityRef = new WeakReference<Activity>(activity);
 		this.name = name;
 		this.arch16n = arch16n;
 		label = this.arch16n.substituteValue(label);
@@ -78,7 +79,7 @@ public class Tab implements Parcelable{
 		this.reference = reference;
 		//this.scrollable = scrollable;
 		
-		this.linearLayout = new LinearLayout(context);
+		this.linearLayout = new LinearLayout(activity);
 		this.viewReference = new HashMap<String, String>();
 		this.valueReference = new HashMap<String, Object>();
 		this.viewMap = new HashMap<String, List<View>>();
@@ -91,7 +92,7 @@ public class Tab implements Parcelable{
         linearLayout.setBackgroundColor(Color.WHITE);
 		
         if (scrollable) {
-        	this.scrollView = new ScrollView(this.context);
+        	this.scrollView = new ScrollView(this.activityRef.get());
         	scrollView.addView(linearLayout);
         	this.view = scrollView;
         } else {
@@ -114,7 +115,7 @@ public class Tab implements Parcelable{
     	Button annotationButton = null;
     	
 		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
-			LinearLayout fieldLinearLayout = new LinearLayout(this.context);
+			LinearLayout fieldLinearLayout = new LinearLayout(this.activityRef.get());
 	    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 	    	
             TextView textView = createLabel(attribute);
@@ -170,7 +171,7 @@ public class Tab implements Parcelable{
 	                default:
 	                	// check if map type
 	                	if (attribute.map) {
-	                		MapLayout mapLayout = new MapLayout(this.context);
+	                		MapLayout mapLayout = new MapLayout(this.activityRef.get());
 	                		
 	                		linearLayout.addView(mapLayout);
 	                		
@@ -256,7 +257,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private TextView createLabel(FormAttribute attribute) {
-		TextView textView = new TextView(this.context);
+		TextView textView = new TextView(this.activityRef.get());
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
         textView.setText(inputText);
@@ -264,9 +265,9 @@ public class Tab implements Parcelable{
 	}
 	
 	private Button createCertaintyButton() {
-		Button button = new Button(this.context);
+		Button button = new Button(this.activityRef.get());
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = (int) ScaleUtil.getDip(context, 30);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -276,9 +277,9 @@ public class Tab implements Parcelable{
 	}
 	
 	private Button createAnnotationButton() {
-		Button button = new Button(this.context);
+		Button button = new Button(this.activityRef.get());
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = (int) ScaleUtil.getDip(context, 30);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 30);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -299,7 +300,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.context, attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -320,7 +321,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomDatePicker createDatePicker(FormAttribute attribute, String ref) {
-		CustomDatePicker date = new CustomDatePicker(this.context, attribute.name, attribute.type, ref);
+		CustomDatePicker date = new CustomDatePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
     	Time now = new Time();
 		now.setToNow();
 		date.updateDate(now.year, now.month, now.monthDay);
@@ -331,7 +332,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomEditText createTextArea(FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.context, attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -340,7 +341,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomTimePicker createTimePicker(FormAttribute attribute, String ref) {
-		CustomTimePicker time = new CustomTimePicker(this.context, attribute.name, attribute.type, ref);
+		CustomTimePicker time = new CustomTimePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
     	Time timeNow = new Time();
         timeNow.setToNow();
 		time.setCurrentHour(timeNow.hour);
@@ -352,15 +353,15 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomLinearLayout createRadioGroup(FormAttribute attribute, String ref) {
-		CustomLinearLayout selectLayout = new CustomLinearLayout(this.context, attribute.name, attribute.type, ref);
+		CustomLinearLayout selectLayout = new CustomLinearLayout(this.activityRef.get(), attribute.name, attribute.type, ref);
         selectLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
         selectLayout.setOrientation(LinearLayout.VERTICAL);
-        RadioGroup radioGroupLayout = new RadioGroup(this.context);
+        RadioGroup radioGroupLayout = new RadioGroup(this.activityRef.get());
         radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
         for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	CustomRadioButton radioButton = new CustomRadioButton(this.context);
+        	CustomRadioButton radioButton = new CustomRadioButton(this.activityRef.get());
         	String innerText = selectChoice.getLabelInnerText();
         	innerText = arch16n.substituteValue(innerText);
             radioButton.setText(innerText);
@@ -372,7 +373,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomListView createList(FormAttribute attribute) {
-		CustomListView list = new CustomListView(this.context);
+		CustomListView list = new CustomListView(this.activityRef.get());
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -381,7 +382,7 @@ public class Tab implements Parcelable{
             choices.add(pair);
         }
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                this.context,
+                this.activityRef.get(),
                 android.R.layout.simple_list_item_1,
                 choices);
         list.setAdapter(arrayAdapter);
@@ -389,7 +390,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomSpinner createDropDown(FormAttribute attribute, String ref) {
-		CustomSpinner spinner = new CustomSpinner(this.context, attribute.name, attribute.type, ref);
+		CustomSpinner spinner = new CustomSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -398,7 +399,7 @@ public class Tab implements Parcelable{
             choices.add(pair);
         }
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                this.context,
+                this.activityRef.get(),
                 android.R.layout.simple_spinner_dropdown_item,
                 choices);
         spinner.setAdapter(arrayAdapter);
@@ -408,13 +409,13 @@ public class Tab implements Parcelable{
 	
 	private CustomLinearLayout createCheckListGroup(FormAttribute attribute, String ref) {
 		CustomLinearLayout selectLayout = new CustomLinearLayout(
-                this.context, attribute.name, attribute.type, ref);
+                this.activityRef.get(), attribute.name, attribute.type, ref);
         selectLayout.setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
         selectLayout.setOrientation(LinearLayout.VERTICAL);
         for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	CustomCheckBox checkBox = new CustomCheckBox(this.context);
+        	CustomCheckBox checkBox = new CustomCheckBox(this.activityRef.get());
         	String innerText = selectChoice.getLabelInnerText();
         	innerText = arch16n.substituteValue(innerText);
             checkBox.setText(innerText);
@@ -425,7 +426,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private Button createTrigger(FormAttribute attribute) {
-		 Button button = new Button(this.context);
+		 Button button = new Button(this.activityRef.get());
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
@@ -492,7 +493,7 @@ public class Tab implements Parcelable{
 				final SeekBar seekBar = new SeekBar(v.getContext());
 				float certainty = 0;
 				seekBar.setMax(100);
-				seekBar.setMinimumWidth((int) ScaleUtil.getDip(Tab.this.context, 400));
+				seekBar.setMinimumWidth((int) ScaleUtil.getDip(Tab.this.activityRef.get(), 400));
 				if (view instanceof CustomEditText){
 	        		CustomEditText customEditText = (CustomEditText) view;
 	        		certainty = customEditText.getCurrentCertainty();
@@ -671,8 +672,8 @@ public class Tab implements Parcelable{
 	 * @param attributeName 
      */
     private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormAttribute attribute, String directory, String ref) {
-    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.context, attribute.name, attribute.type, ref);
-        LinearLayout galleriesLayout = new LinearLayout(this.context);
+    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.activityRef.get(), attribute.name, attribute.type, ref);
+        LinearLayout galleriesLayout = new LinearLayout(this.activityRef.get());
         galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
         final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
@@ -680,10 +681,10 @@ public class Tab implements Parcelable{
         	File pictureFolder = new File(picturePath);
         	if(pictureFolder.exists()){
 	        	for(final String name : pictureFolder.list()){
-	        		LinearLayout galleryLayout = new LinearLayout(this.context);
+	        		LinearLayout galleryLayout = new LinearLayout(this.activityRef.get());
 	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-	        		CustomImageView gallery = new CustomImageView(this.context);
-	        		int size = (int) ScaleUtil.getDip(context, 400);
+	        		CustomImageView gallery = new CustomImageView(this.activityRef.get());
+	        		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(ref+"/"+name));
 	                gallery.setBackgroundColor(Color.RED);
@@ -705,7 +706,7 @@ public class Tab implements Parcelable{
 	                        }
 	                    }
 	                });
-	                TextView textView = new TextView(this.context);
+	                TextView textView = new TextView(this.activityRef.get());
 	                textView.setText(name);
 	                textView.setGravity(Gravity.CENTER_HORIZONTAL);
 	                textView.setTextSize(20);

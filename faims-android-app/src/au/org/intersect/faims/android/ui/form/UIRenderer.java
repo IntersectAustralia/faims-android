@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,7 +15,7 @@ import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -44,7 +45,7 @@ public class UIRenderer implements IRestoreActionListener{
 
     private FormEntryController fem;
     
-    private Context context;
+    private WeakReference<Activity> activityRef;
     
     private HashMap<String, TabGroup> tabGroupMap;
     private LinkedList<TabGroup> tabGroupList;
@@ -70,10 +71,10 @@ public class UIRenderer implements IRestoreActionListener{
 	private Map<String, Object> viewCertainties;
 	private Map<String, Object> viewAnnotations;
 
-    public UIRenderer(FormEntryController fem, Arch16n arch16n, Context context) {
+    public UIRenderer(FormEntryController fem, Arch16n arch16n, Activity activity) {
         this.fem = fem;
         this.arch16n = arch16n;
-        this.context = context;
+        this.activityRef = new WeakReference<Activity>(activity);
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
         this.viewTabMap = new HashMap<String, Tab>();
@@ -116,7 +117,7 @@ public class UIRenderer implements IRestoreActionListener{
 	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
 	    		
 	    		TabGroup tabGroup = new TabGroup(archEntType,relType, this);
-	    		tabGroup.setContext(context);
+	    		tabGroup.setContext(activityRef.get());
 	    		String tabGroupText = tabGroupCaption.getQuestionText();
 	    		tabGroupText = arch16n.substituteValue(tabGroupText);
 	    		tabGroup.setLabel(tabGroupText);

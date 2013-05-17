@@ -303,6 +303,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	@Inject
 	DatabaseManager databaseManager;
+	
+	@Inject
+	GPSDataManager gpsDataManager;
 
 	private WifiBroadcastReceiver broadcastReceiver;
 	
@@ -311,8 +314,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private UIRenderer renderer;
 
 	private BeanShellLinker linker;
-	
-	private GPSDataManager gpsDataManager;
 
 	private BusyDialog busyDialog;
 	private ChoiceDialog choiceDialog;
@@ -407,7 +408,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
-		gpsDataManager = new GPSDataManager((LocationManager) getSystemService(LOCATION_SERVICE));
+		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE));
 		arch16n = new Arch16n(projectDir, project.name);
 		
 		SpatialiteUtil.setDatabaseName(projectDir + "/db.sqlite3");

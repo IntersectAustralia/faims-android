@@ -1,12 +1,13 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,7 +23,7 @@ import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
-	private Context context;
+	private WeakReference<Activity> activityRef;
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
 	private LinkedList<Tab> tabs;
@@ -131,7 +132,7 @@ public class TabGroup extends Fragment {
 	}
 	
 	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
-		Tab tab = new Tab(context, name, label, hidden, scrollable, arch16n, reference);
+		Tab tab = new Tab(activityRef.get(), name, label, hidden, scrollable, arch16n, reference);
 		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;
@@ -175,8 +176,8 @@ public class TabGroup extends Fragment {
 		return null;
 	}
 
-	public void setContext(Context context) {
-		this.context = context;
+	public void setContext(Activity activity) {
+		this.activityRef = new WeakReference<Activity>(activity);
 	}
 
 	public void setLabel(String label) {

@@ -16,6 +16,9 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
 import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class GPSDataManager implements BluetoothActionListener, LocationListener{
 
 	private static final String EXTERNAL = "external";
@@ -40,9 +43,10 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private boolean isExternalGPSStarted;
 	private boolean isInternalGPSStarted;
 	
-	public GPSDataManager(LocationManager manager){
+	public void init(LocationManager manager){
 		this.locationManager = manager;
 	}
+	
     @Override
 	public void handleGPSUpdates(String GGAMessage, String BODMessage) {
 		setGGAMessage(GGAMessage);

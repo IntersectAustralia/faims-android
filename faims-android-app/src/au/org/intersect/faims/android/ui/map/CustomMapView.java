@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.map;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.ListIterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,6 +22,8 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.exceptions.MapException;
+import au.org.intersect.faims.android.gps.GPSDataManager;
+import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -42,6 +46,7 @@ import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.SelectTool;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.MapView;
 import com.nutiteq.components.Components;
 import com.nutiteq.components.Constraints;
@@ -49,15 +54,19 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Marker;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
+import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
+import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
+import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class CustomMapView extends MapView implements FileManager.FileSelectionListener{
 
@@ -122,6 +131,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				double arg2, boolean arg3) {
 		}
 	}
+	
+	@Inject
+	GPSDataManager gpsDataManager;
 
 	// TODO what is this?
 	private static int cacheId = 9991;
@@ -176,8 +188,15 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	private MapLayout mapLayout;
 	
-	public CustomMapView(Context context, MapLayout mapLayout) {
-		this(context);
+	private MarkerLayer currentPositionLayer;
+	private GPSLocation previousLocation;
+
+	private WeakReference<Activity> activityRef;
+	
+	public CustomMapView(Activity activity, MapLayout mapLayout) {
+		this(activity);
+		
+		this.activityRef = new WeakReference<Activity>(activity);
 
 		layerIdMap = new SparseArray<Layer>();
 		layerNameMap = new HashMap<String, Layer>();
@@ -201,8 +220,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		this.editView.setColor(Color.GREEN);
 		
 		// TODO make this configurable
-		scaleView.setBarWidthRange((int) ScaleUtil.getDip(context, 40),
-				(int) ScaleUtil.getDip(context, 100));
+		scaleView.setBarWidthRange((int) ScaleUtil.getDip(activity, 40),
+				(int) ScaleUtil.getDip(activity, 100));
 
 		initTools();
 
@@ -210,6 +229,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 		internalMapListener = new InternalMapListener();
 		getOptions().setMapListener(internalMapListener);
+		
+		startMapOverlayThread();
+        startGPSLocationThread();
 	}
 
 	public CustomMapView(Context context) {
@@ -524,7 +546,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				this, true);
 		gdalLayer.setShowAlways(true);
 		this.getLayers().setBaseLayer(gdalLayer);
-
+		
 		return addLayer(gdalLayer);
 	}
 
@@ -1022,5 +1044,95 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				currentTool.deactivate();
 			}
 		}
+	}
+	
+	private void startMapOverlayThread() {
+		startThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					FLog.d("starting map overlay thread");
+					
+					Thread.sleep(1000);
+					while(CustomMapView.this.canRunThreads()) {
+						activityRef.get().runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								CustomMapView.this.updateMapOverlay();
+							}
+							
+						});
+						Thread.sleep(500);
+					}
+					
+					FLog.d("stopping map overlay thread");
+				} catch (Exception e) {
+					FLog.e("error on map overlay thread", e);
+				}
+			}
+        	
+        });
+	}
+	
+	private Marker createGPSMarker(GdalMapLayer layer, GPSLocation location) {
+		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
+				this.getContext().getResources(), R.drawable.blue_dot);
+        MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
+                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+        MapPos markerLocation = layer.getProjection().fromWgs84(
+                location.getLongitude(), location.getLatitude());
+        return new Marker(markerLocation, null, markerStyle, null);
+	}
+	
+	private void startGPSLocationThread() {
+		startThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					FLog.d("starting map gps thread");
+					
+					Thread.sleep(1000);
+					while(CustomMapView.this.canRunThreads()) {
+						GdalMapLayer gdalLayer = (GdalMapLayer) CustomMapView.this.getLayers().getBaseLayer();
+						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
+						if(currentLocation != null){
+							GPSLocation location = (GPSLocation) currentLocation;
+							previousLocation = location;
+							Marker gpsMarker = createGPSMarker(gdalLayer, location);
+							if(currentPositionLayer == null){
+		                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+		                    	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
+		                    }
+		                    currentPositionLayer.clear();
+		                    currentPositionLayer.add(gpsMarker);
+		                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+						}else{
+							if(previousLocation != null){
+								// when there is no gps signal for two minutes, change the color of the marker to be grey
+								if(System.currentTimeMillis() - previousLocation.getTimeStamp() > FaimsSettings.GPS_MARKER_TIMEOUT){
+				                    Marker gpsMarker = createGPSMarker(gdalLayer, previousLocation);
+				                    if(currentPositionLayer == null){
+				                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+				                    	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
+				                    }
+				                    currentPositionLayer.clear();
+				                    currentPositionLayer.add(gpsMarker);
+				                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+									previousLocation = null;
+								}
+							}
+						}
+						
+						Thread.sleep(CustomMapView.this.gpsDataManager.getGpsUpdateInterval());
+					}
+					FLog.d("stopping map gps thread");
+				} catch (Exception e) {
+					FLog.e("error on map gps thread", e);
+				}
+			}
+		});
 	}
 }
