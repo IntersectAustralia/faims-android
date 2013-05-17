@@ -23,7 +23,6 @@ import au.org.intersect.faims.android.util.SpatialiteUtil;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.projections.EPSG4326;
 
 public class AreaTool extends SelectTool {
 	
@@ -167,7 +166,7 @@ public class AreaTool extends SelectTool {
 	
 	public float computePolygonArea(CustomPolygon polygon) {
 		try {
-			polygon = (CustomPolygon) GeometryUtil.projectGeometry(new EPSG4326(), polygon);
+			polygon = (CustomPolygon) GeometryUtil.convertGeometryToWgs84(polygon);
 			return (float) SpatialiteUtil.computeArea(polygon);
 		} catch (Exception e) {
 			FLog.e("error computing area of polygon", e);

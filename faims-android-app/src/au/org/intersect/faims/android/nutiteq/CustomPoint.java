@@ -32,9 +32,5 @@ public class CustomPoint extends Point {
 		pointStyleSet.setZoomStyle(0, style);
 		return pointStyleSet;
 	}
-	
-	public MapPos getPos() {
-		return GeometryUtil.convertToWgs84(this.getMapPos());
-	}
 
 }

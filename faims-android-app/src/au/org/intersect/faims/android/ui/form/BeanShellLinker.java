@@ -50,6 +50,7 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -2132,7 +2133,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return mapView.getGeometryList(layerId);
+				return GeometryUtil.convertGeometryListToWgs84(mapView.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2151,7 +2152,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				return mapView.getGeometry(geomId);
+				return GeometryUtil.convertGeometryToWgs84(mapView.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

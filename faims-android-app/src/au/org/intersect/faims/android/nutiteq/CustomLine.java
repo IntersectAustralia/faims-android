@@ -45,8 +45,4 @@ public class CustomLine extends Line {
 		return PointStyle.builder().setColor(style.pointColor).setSize(style.size).setPickingSize(style.pickingSize).build();
 	}
 	
-	public List<MapPos> getPosList() {
-		return GeometryUtil.convertToWgs84(this.getVertexList());
-	}
-
 }

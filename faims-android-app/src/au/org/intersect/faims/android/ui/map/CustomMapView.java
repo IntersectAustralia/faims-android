@@ -634,7 +634,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		}
 		canvas.removeGeometry(line);
 		removeGeometry(line);
-		drawLine(canvas, GeometryUtil.projectVertices(new EPSG3857(), line.getVertexList()), style);
+		drawLine(canvas, GeometryUtil.convertToWgs84(line.getVertexList()), style);
 		addGeometry(canvas, line);
 		updateRenderer();
 	}
@@ -661,7 +661,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		}
 		canvas.removeGeometry(polygon);
 		removeGeometry(polygon);
-		drawPolygon(canvas, GeometryUtil.projectVertices(new EPSG3857(), polygon.getVertexList()), style);
+		drawPolygon(canvas, GeometryUtil.convertToWgs84(polygon.getVertexList()), style);
 		addGeometry(canvas, polygon);
 		updateRenderer();
 	}
@@ -700,8 +700,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	public List<Geometry> getGeometryList(Layer layer) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 
-		return GeometryUtil.projectGeometryList(new EPSG3857(),
-				canvas.getGeometryList());
+		return canvas.getGeometryList();
 	}
 
 	public List<MapTool> getTools() {

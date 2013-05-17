@@ -111,7 +111,7 @@ onEvent("tabgroup1/tab1/show", "click", "snapToGPSPosition()");
 onEvent("tabgroup1/tab1/plot", "click", "plotGPSPoint()");
 onEvent("tabgroup1/tab1/save", "click", "saveGPSEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearGPSEntity()");
-onEvent("tabgroup1/tab2/load", "click", "loadGSPEntity(null)");
+onEvent("tabgroup1/tab2/load", "click", "loadGPSEntity(null)");
 onMapEvent("tabgroup1/tab1/map", "onTabMapClick()", "onTabMapSelect()");
 
 int entityLayerId;
@@ -186,7 +186,7 @@ setGPSEntity(entity) {
 	}
 	point = entity.getGeometryList().get(0);
 	
-	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getPos().x + ", Latitude = " + point.getPos().y);
+	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getMapPos().x + ", Latitude = " + point.getMapPos().y);
 }
 
 loadGPSEntity(id) {
@@ -280,7 +280,7 @@ plotGPSPoint() {
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
 		point = createPoint(longitude, latitude);
-		lastPointId = drawPoint("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.RED));
+		lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
 	}
 }
 
@@ -407,9 +407,6 @@ refreshLayers() {
 }
 
 drawBox(map, layer, p1, p2, color) {
-	System.out.println(layer);
-	System.out.println(p1);
-	System.out.println(p2);
 	List pts = new ArrayList();
 	pts.add(createPoint(p1.x, p1.y));
 	pts.add(createPoint(p2.x, p1.y));
@@ -433,7 +430,7 @@ drawGrid(map, layer, color, cols, rows) {
 	}
 	
 	polygon = getGeometry(map, gridId);
-	pts = polygon.getPosList();
+	pts = polygon.getVertexList();
 	
 	p1 = pts.get(0);
 	p2 = pts.get(2);
@@ -662,7 +659,6 @@ loadEntity() {
 }
 
 drawGeometryList(geometryList) {
-	System.out.println(geometryList);
 	for (Geometry geom : geometryList) {
 		if (geom instanceof Polygon) {
 			drawGeometry("tabgroup2/tab1/map", getCurrentLayerId(), geom, polygonStyle(Color.BLUE, Color.BLACK));
@@ -769,7 +765,7 @@ clearPointLayer() {
 
 onSelectPointLayer() {
 	selectedId = getMapGeometrySelected();
-	point = getGeometry("tabgroup3/tab1/map", selectedId).getPos();
+	point = getGeometry("tabgroup3/tab1/map", selectedId).getMapPos();
 	
 	addGeometrySelection("tabgroup3/tab1/map", selectedId);
 	

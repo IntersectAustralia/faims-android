@@ -12,7 +12,6 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.EPSG3857;
-import com.nutiteq.projections.Projection;
 
 public class GeometryUtil {
 
@@ -74,43 +73,68 @@ public class GeometryUtil {
 		return newVertices;
 	}
 	
-	public static Geometry projectGeometry(Projection proj, Geometry geom) {
+	public static Geometry convertGeometryFromWgs84(Geometry geom) {
 		if (geom instanceof CustomPoint) {
 			CustomPoint p = (CustomPoint) geom;
-			return new CustomPoint(p.getGeomId(), p.getStyle(), projectVertex(proj, p.getMapPos()));
+			return new CustomPoint(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getMapPos()));
 		} else if (geom instanceof CustomLine) {
 			CustomLine l = (CustomLine) geom;
-			return new CustomLine(l.getGeomId(), l.getStyle(), projectVertices(proj, l.getVertexList()));
+			return new CustomLine(l.getGeomId(), l.getStyle(), convertFromWgs84(l.getVertexList()));
 		} else if (geom instanceof CustomPolygon) {
 			CustomPolygon p = (CustomPolygon) geom;
-			return new CustomPolygon(p.getGeomId(), p.getStyle(), projectVertices(proj, p.getVertexList()));
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getVertexList()));
 		}
 		return null;
 	}
-	public static ArrayList<Geometry> projectGeometryList(Projection proj, List<Geometry> geomList) {
+	
+	
+	public static ArrayList<Geometry> convertGeometryListFromWgs84(List<Geometry> geomList) {
 		ArrayList<Geometry> newGeomList = new ArrayList<Geometry>();
 		for (Geometry geom : geomList) {
-			newGeomList.add(projectGeometry(proj, geom));
+			newGeomList.add(convertGeometryFromWgs84(geom));
 		}
 		return newGeomList;
 	}
 	
-	public static MapPos projectVertex(Projection proj, MapPos v) {
-		return proj.toWgs84(v.x, v.y);
+	public static Geometry convertGeometryToWgs84(Geometry geom) {
+		if (geom instanceof CustomPoint) {
+			CustomPoint p = (CustomPoint) geom;
+			return new CustomPoint(p.getGeomId(), p.getStyle(), convertToWgs84(p.getMapPos()));
+		} else if (geom instanceof CustomLine) {
+			CustomLine l = (CustomLine) geom;
+			return new CustomLine(l.getGeomId(), l.getStyle(), convertToWgs84(l.getVertexList()));
+		} else if (geom instanceof CustomPolygon) {
+			CustomPolygon p = (CustomPolygon) geom;
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertToWgs84(p.getVertexList()));
+		}
+		return null;
 	}
 	
-	public static List<MapPos> projectVertices(Projection proj, List<MapPos> vertices) {
-		List<MapPos> newVertices = new ArrayList<MapPos>();
-		for (MapPos v : vertices) {
-			newVertices.add(projectVertex(proj, v));
+	
+	public static ArrayList<Geometry> convertGeometryListToWgs84(List<Geometry> geomList) {
+		ArrayList<Geometry> newGeomList = new ArrayList<Geometry>();
+		for (Geometry geom : geomList) {
+			newGeomList.add(convertGeometryToWgs84(geom));
 		}
-		return newVertices;
+		return newGeomList;
 	}
 	
 	public static double distance(MapPos p1, MapPos p2) {
 		float[] results = new float[3];
 		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
 		return results[0] / 1000;
+	}
+	
+	public static List<MapPos> convertFromWgs84(List<MapPos> pts) {
+		ArrayList<MapPos> list = new ArrayList<MapPos>();
+		for (MapPos p : pts) {
+			list.add(convertToWgs84(p));
+		}
+		return list;
+	}
+	
+	public static MapPos convertFromWgs84(MapPos p) {
+		return (new EPSG3857()).fromWgs84(p.x, p.y);
 	}
 	
 	public static List<MapPos> convertToWgs84(List<MapPos> pts) {

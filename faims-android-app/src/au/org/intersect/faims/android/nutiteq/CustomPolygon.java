@@ -54,9 +54,5 @@ public class CustomPolygon extends Polygon {
 	private static PointStyle createPointStyle(GeometryStyle style) {
 		return PointStyle.builder().setColor(style.pointColor).setSize(style.size).setPickingSize(style.pickingSize).build();
 	}
-	
-	public List<MapPos> getPosList() {
-		return GeometryUtil.convertToWgs84(this.getVertexList());
-	}
 
 }
