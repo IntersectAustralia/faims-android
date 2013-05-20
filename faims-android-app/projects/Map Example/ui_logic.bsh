@@ -78,25 +78,35 @@ onEvent("tabgroup3", "load", "showScreen(\"tabgroup3\")");
 onEvent("tabgroup4", "load", "showScreen(\"tabgroup4\")");
 onEvent("tabgroup5", "load", "showScreen(\"tabgroup5\")");
 
+boolean initTabGroup1 = false;
+boolean initTabGroup2 = false;
+boolean initTabGroup3 = false;
+boolean initTabGroup4 = false;
+boolean initTabGroup5 = false;
 showScreen(name) {
 	setGPSUpdateInterval(4);
 
 	sydneymap = "files/data/maps/sydney_map.tif";
 	kazmap = "files/data/maps/kaz_map.tif";
 	
-	if ("tabgroup1".equals(name)) {
+	if ("tabgroup1".equals(name) && !initTabGroup1) {
+		initTabGroup1 = true;
 		setupMap(name + "/tab1/map", sydneymap, 151.26854f, -33.88190f); // sydney
 		initEntityMap();
-	} else if ("tabgroup2".equals(name)) {
+	} else if ("tabgroup2".equals(name) && !initTabGroup2) {
+		initTabGroup2 = true;
 		setupMap(name + "/tab1/map", sydneymap, 151.26854f, -33.88190f); // sydney
 		initDrawMap();
-	} else if ("tabgroup3".equals(name)) {
+	} else if ("tabgroup3".equals(name) && !initTabGroup3) {
+		initTabGroup3 = true;
 		setupMap(name + "/tab1/map", sydneymap, 151.26854f, -33.88190f); // sydney
 		initPointMap();
-	} else if ("tabgroup4".equals(name)) {
+	} else if ("tabgroup4".equals(name) && !initTabGroup4) {
+		initTabGroup4 = true;
 		setupMap(name + "/tab1/map", kazmap, 25.33825f, 42.58401f); // kaz
 		initSpatialMap();
-	} else if ("tabgroup5".equals(name)) {
+	} else if ("tabgroup5".equals(name) && !initTabGroup5) {
+		initTabGroup5 = true;
 		initUIMap();
 	}
 	
