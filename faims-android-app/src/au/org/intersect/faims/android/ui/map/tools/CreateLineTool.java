@@ -231,8 +231,8 @@ public class CreateLineTool extends BaseGeometryTool {
 							
 							CreateLineTool.this.minZoom = minZoom;
 							CreateLineTool.this.color = color;
-							CreateLineTool.this.setSize(size);
-							CreateLineTool.this.setPickingSize(pickingSize);
+							CreateLineTool.this.size = size;
+							CreateLineTool.this.pickingSize = pickingSize;
 							CreateLineTool.this.width = width;
 							CreateLineTool.this.pickingWidth = pickingWidth;
 							CreateLineTool.this.showPoints = showPoints;

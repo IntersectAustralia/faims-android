@@ -236,8 +236,8 @@ public class CreatePolygonTool extends BaseGeometryTool {
 							
 							CreatePolygonTool.this.minZoom = minZoom;
 							CreatePolygonTool.this.color = color;
-							CreatePolygonTool.this.setSize(size);
-							CreatePolygonTool.this.setPickingSize(pickingSize);
+							CreatePolygonTool.this.size = size;
+							CreatePolygonTool.this.pickingSize = pickingSize;
 							CreatePolygonTool.this.lineColor = lineColor;
 							CreatePolygonTool.this.width = width;
 							CreatePolygonTool.this.pickingWidth = pickingWidth;

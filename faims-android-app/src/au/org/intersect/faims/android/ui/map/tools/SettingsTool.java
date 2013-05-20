@@ -57,7 +57,7 @@ public abstract class SettingsTool extends MapTool {
 	
 	protected int parseRange(int value, int range) throws Exception {
 		if (value < 0 || value > range) {
-			throw new MapException("Invalid size");
+			throw new MapException("Invalid range");
 		}
 		
 		return value;

@@ -260,8 +260,9 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
 	linker.showShapeLayer(ref, layerName, filename, pointStyle, lineStyle, polygonStyle);
 }
 
-showSpatialLayer(String ref, String layerName, String filename, String tableName, String[] labelColumns, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
-	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle);
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String[] labelColumns, 
+	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle) {
+	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
 removeLayer(String ref, int layerId) {
@@ -344,6 +345,10 @@ createLineStyle(int minZoom, int color, float width, float pickWidth, GeometrySt
 
 createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
 	return linker.createPolygonStyle(minZoom, color, lineStyle);
+}
+
+createTextStyle(int minZoom, int color, int size, android.graphics.Typeface font) {
+	return linker.createTextStyle(minZoom, color, size, font);
 }
 
 lockMapView(String ref, boolean lock) {

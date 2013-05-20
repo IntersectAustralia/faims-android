@@ -16,6 +16,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.view.View;
@@ -44,18 +46,17 @@ import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 
 import com.nutiteq.layers.Layer;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.Style;
-import com.nutiteq.style.StyleSet;
 
 public class LayerManagerView extends LinearLayout {
+	
+	private static final int MAX_ZOOM = 18;
 	
 	private class LayersAdapter extends BaseAdapter {
 		
@@ -104,26 +105,47 @@ public class LayerManagerView extends LinearLayout {
 	private FileManager fm;
 	private TextView selectedFileText;
 	private Spinner tableNameSpinner;
-	private int pointColor = 0xAAFF0000;
-	private float pointSize = 0.2f;
-	private float pointPickingSize = 0.6f;
-	private int lineColor = 0xAA00FF00;
-	private float lineSize = 0.2f;
-	private float linePickingSize = 0.6f;
-	private float lineWidth = 0.05f;
-	private float linePickingWidth = 0.3f;
-	private boolean lineShowPoints = false;
-	private int polygonColor = 0x440000FF;
-	private int polygonLineColor = 0XAA0000FF;
-	private float polygonLineWidth = 0.05f;
-	private float polygonLinePickingWidth = 0.3f;
-	private boolean polygonShowStroke = true;
+	private GeometryStyle pointStyle;
+	private GeometryStyle lineStyle;
+	private GeometryStyle polygonStyle;
+	private GeometryTextStyle textStyle;
 
 	public LayerManagerView(Context context) {
 		super(context);
 		
 		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
+		
+		pointStyle = new GeometryStyle(12);
+		lineStyle = new GeometryStyle(12);
+		polygonStyle = new GeometryStyle(12);
+		
+		pointStyle.pointColor = 0xAAFF0000;
+		pointStyle.size = 0.2f;
+		pointStyle.pickingSize = 0.6f;
+		
+		lineStyle.pointColor = 0xAA00FF00;
+		lineStyle.lineColor = 0xAA00FF00;
+		lineStyle.size = 0.2f;
+		lineStyle.pickingSize = 0.6f;
+		lineStyle.width = 0.05f;
+		lineStyle.pickingWidth = 0.3f;
+		lineStyle.showPoints = false;
+		
+		polygonStyle.pointColor = 0xAA0000FF;
+		polygonStyle.lineColor = 0xAA0000FF;
+		polygonStyle.polygonColor = 0x440000FF;
+		polygonStyle.size = 0.2f;
+		polygonStyle.pickingSize = 0.6f;
+		polygonStyle.width = 0.05f;
+		polygonStyle.pickingWidth = 0.3f;
+		polygonStyle.showStroke = true;
+		polygonStyle.showPoints = false;
+		
+		textStyle = new GeometryTextStyle(12);
+		textStyle.color = Color.WHITE;
+		textStyle.size = 10;
+		textStyle.font = Typeface.DEFAULT;
 	}
 	
 	public LayerManagerView(Context context, FileManager fm) {
@@ -534,19 +556,14 @@ public class LayerManagerView extends LinearLayout {
 		layout.addView(styleLayout);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
 					if(fm.getSelectedFile() != null){
-						StyleSet<PointStyle> ps = (StyleSet<PointStyle>) createStyleSet(10, createPointStyle(pointColor, pointSize, pointPickingSize));
-						PointStyle linePointStyle = lineShowPoints ? createPointStyle(lineColor, lineSize, linePickingSize) : null;
-						StyleSet<LineStyle> ls = (StyleSet<LineStyle>) createStyleSet(10, createLineStyle(lineColor, lineWidth, linePickingWidth, linePointStyle));
-						LineStyle polygonLineStyle = polygonShowStroke ? createLineStyle(polygonLineColor, polygonLineWidth, polygonLinePickingWidth, null) : null;
-						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(polygonColor, polygonLineStyle));
 						String layerName = editText.getText() != null ? editText.getText().toString() : null;
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, ps, ls, pos, null);
+						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, 
+								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
 						fm.setSelectedFile(null);
 						redrawLayers();
 					}
@@ -584,9 +601,10 @@ public class LayerManagerView extends LinearLayout {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Point Color:", Integer.toHexString(pointColor));
-				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", pointSize);
-				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", pointPickingSize);
+				final SeekBar zoomBar = addRange(LayerManagerView.this.getContext(), layout, "Min Zoom:", pointStyle.minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(LayerManagerView.this.getContext(), layout, "Point Color:", Integer.toHexString(pointStyle.pointColor));
+				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", pointStyle.size);
+				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", pointStyle.pickingSize);
 				
 				builder.setView(scrollView);
 				
@@ -595,13 +613,15 @@ public class LayerManagerView extends LinearLayout {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
 							
-							LayerManagerView.this.pointColor = color;
-							LayerManagerView.this.pointSize = size;
-							LayerManagerView.this.pointPickingSize = pickingSize;
+							LayerManagerView.this.pointStyle.minZoom = minZoom;
+							LayerManagerView.this.pointStyle.pointColor = color;
+							LayerManagerView.this.pointStyle.size = size;
+							LayerManagerView.this.pointStyle.pickingSize = pickingSize;
 						} catch (Exception e) {
 							showErrorDialog(e.getMessage());
 						}
@@ -642,12 +662,13 @@ public class LayerManagerView extends LinearLayout {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Line Color:", Integer.toHexString(lineColor));
-				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", lineSize);
-				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", linePickingSize);
-				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Width:", lineWidth);
-				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Picking Width:", linePickingWidth);
-				final CheckBox showPointsBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Points on Line:", lineShowPoints);
+				final SeekBar zoomBar = addRange(LayerManagerView.this.getContext(), layout, "Min Zoom:", lineStyle.minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(LayerManagerView.this.getContext(), layout, "Line Color:", Integer.toHexString(lineStyle.lineColor));
+				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", lineStyle.size);
+				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", lineStyle.pickingSize);
+				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Width:", lineStyle.width);
+				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Picking Width:", lineStyle.pickingWidth);
+				final CheckBox showPointsBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Points on Line:", lineStyle.showPoints);
 				
 				builder.setView(scrollView);
 				
@@ -656,19 +677,22 @@ public class LayerManagerView extends LinearLayout {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
+							float width = parseSlider(widthBar.getProgress());
+							float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 							boolean showPoints = showPointsBox.isChecked();
 							
-							LayerManagerView.this.lineColor = color;
-							LayerManagerView.this.lineSize = size;
-							LayerManagerView.this.linePickingSize = pickingSize;
-							LayerManagerView.this.lineWidth = width;
-							LayerManagerView.this.linePickingWidth = pickingWidth;
-							LayerManagerView.this.lineShowPoints = showPoints;
+							LayerManagerView.this.lineStyle.minZoom = minZoom;
+							LayerManagerView.this.lineStyle.pointColor = color;
+							LayerManagerView.this.lineStyle.lineColor = color;
+							LayerManagerView.this.lineStyle.size = size;
+							LayerManagerView.this.lineStyle.pickingSize = pickingSize;
+							LayerManagerView.this.lineStyle.width = width;
+							LayerManagerView.this.lineStyle.pickingWidth = pickingWidth;
+							LayerManagerView.this.lineStyle.showPoints = showPoints;
 						} catch (Exception e) {
 							showErrorDialog(e.getMessage());
 						}
@@ -709,11 +733,15 @@ public class LayerManagerView extends LinearLayout {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Polygon Color:", Integer.toHexString(polygonColor));
-				final EditText strokeColorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Stroke Color:", Integer.toHexString(polygonLineColor));
-				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Width:", polygonLineWidth);
-				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Picking Width:", polygonLinePickingWidth);
-				final CheckBox showStrokeBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Stroke on Polygon:", polygonShowStroke);
+				final SeekBar zoomBar = addRange(LayerManagerView.this.getContext(), layout, "Min Zoom:", polygonStyle.minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(LayerManagerView.this.getContext(), layout, "Polygon Color:", Integer.toHexString(polygonStyle.polygonColor));
+				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", polygonStyle.size);
+				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", polygonStyle.pickingSize);
+				final EditText strokeColorSetter = addEdit(LayerManagerView.this.getContext(), layout, "Stroke Color:", Integer.toHexString(polygonStyle.lineColor));
+				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Width:", polygonStyle.width);
+				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Picking Width:", polygonStyle.pickingWidth);
+				final CheckBox showStrokeBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Stroke on Polygon:", polygonStyle.showStroke);
+				final CheckBox showPointsBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Points on Polygon:", polygonStyle.showPoints);
 				
 				builder.setView(scrollView);
 				
@@ -722,17 +750,26 @@ public class LayerManagerView extends LinearLayout {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
 							int color = parseColor(colorSetter.getText().toString());
 							int lineColor = parseColor(strokeColorSetter.getText().toString());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							float width = parseSlider(widthBar.getProgress());
+							float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 							boolean showStroke = showStrokeBox.isChecked();
+							boolean showPoints = showPointsBox.isChecked();
 							
-							LayerManagerView.this.polygonColor = color;
-							LayerManagerView.this.polygonLineColor = lineColor;
-							LayerManagerView.this.polygonLineWidth = width;
-							LayerManagerView.this.polygonLinePickingWidth = pickingWidth;
-							LayerManagerView.this.polygonShowStroke = showStroke;
+							LayerManagerView.this.polygonStyle.minZoom = minZoom;
+							LayerManagerView.this.polygonStyle.polygonColor = color;
+							LayerManagerView.this.polygonStyle.pointColor = lineColor;
+							LayerManagerView.this.polygonStyle.lineColor = lineColor;
+							LayerManagerView.this.polygonStyle.size = size;
+							LayerManagerView.this.polygonStyle.pickingSize = pickingSize;
+							LayerManagerView.this.polygonStyle.width = width;
+							LayerManagerView.this.polygonStyle.pickingWidth = pickingWidth;
+							LayerManagerView.this.polygonStyle.showStroke = showStroke;
+							LayerManagerView.this.polygonStyle.showPoints = showPoints;
 						} catch (Exception e) {
 							showErrorDialog(e.getMessage());
 						}
@@ -762,12 +799,20 @@ public class LayerManagerView extends LinearLayout {
 		return color;
 	}
 	
-	protected float parseSize(int value) throws Exception {
+	protected float parseSlider(int value) throws Exception {
 		if (value < 0 || value > 100) {
 			throw new MapException("Invalid size");
 		}
 		
 		return ((float) value) / 100;
+	}
+	
+	protected int parseRange(int value, int range) throws Exception {
+		if (value < 0 || value > range) {
+			throw new MapException("Invalid range");
+		}
+		
+		return value;
 	}
 
 	protected CheckBox addCheckBox(Context context, LinearLayout layout, String labelText, boolean defaultValue) {
@@ -783,11 +828,11 @@ public class LayerManagerView extends LinearLayout {
 		return box;
 	}
 
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue) {
-		return addSetter(context, layout, labelText, defaultValue, -1);
+	protected EditText addEdit(Context context, LinearLayout layout, String labelText, String defaultValue) {
+		return addEdit(context, layout, labelText, defaultValue, -1);
 	}
 
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue, int type) {
+	protected EditText addEdit(Context context, LinearLayout layout, String labelText, String defaultValue, int type) {
 		TextView label = new TextView(context);
 		label.setText(labelText);
 		
@@ -837,43 +882,39 @@ public class LayerManagerView extends LinearLayout {
 		return seekBar;
 	}
 	
-	public PointStyle createPointStyle(int color, float size, float pickSize) {
-		return PointStyle.builder().setColor(color).setSize(size).setPickingSize(pickSize).build();
-	}
-	
-	public LineStyle createLineStyle(int color, float width, float pickWidth) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).build();
-	}
-	
-	public LineStyle createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).setPointStyle(pointStyle).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color) {
-		return PolygonStyle.builder().setColor(color).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color, LineStyle lineStyle) {
-		return PolygonStyle.builder().setColor(color).setLineStyle(lineStyle).build();
-	}
-	
-	public StyleSet<? extends Style> createStyleSet(int minZoom, Style style) {
-		if (style instanceof PointStyle) {
-			StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-			pointStyleSet.setZoomStyle(minZoom, (PointStyle) style);
-			return pointStyleSet;
-		} else if (style instanceof LineStyle) {
-			StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-			lineStyleSet.setZoomStyle(minZoom, (LineStyle) style);
-			return lineStyleSet;
-		} else if (style instanceof PolygonStyle) {
-			StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
-			return polygonStyleSet;
-		} else {
-			FLog.e("cannot create style set");
-			return null;
-		}
+	protected SeekBar addRange(Context context, LinearLayout layout, final String labelText, int defaultValue, final int range) {
+		final TextView label = new TextView(context);
+		label.setText(labelText + " " + Float.toString(defaultValue));
+		
+		final SeekBar seekBar = new SeekBar(context);
+		seekBar.setMax(range);
+		seekBar.setProgress(defaultValue);
+		
+		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
+				label.setText(labelText + " " + Integer.toString(seekBar.getProgress()));
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		layout.addView(label);
+		layout.addView(seekBar);
+		
+		return seekBar;
 	}
 	
 	private void createLayer(){

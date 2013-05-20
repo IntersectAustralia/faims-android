@@ -15,6 +15,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -1820,14 +1822,15 @@ public class BeanShellLinker {
 	}
 	
 	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String[] labelColumns, 
-			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumns, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
+				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumns, pointStyle.toPointStyleSet(), 
+						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2326,6 +2329,14 @@ public class BeanShellLinker {
 			style.width = lineStyle.width;
 			style.pickingWidth = lineStyle.pickingWidth;
 		}
+		return style;
+	}
+	
+	public GeometryTextStyle createTextStyle(int minZoom, int color, int size, Typeface font) {
+		GeometryTextStyle style = new GeometryTextStyle(minZoom);
+		style.color = color;
+		style.size = size;
+		style.font = font;
 		return style;
 	}
 	
