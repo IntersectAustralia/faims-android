@@ -155,7 +155,7 @@ public class SelectTool extends SettingsTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				final EditText colorSetter = addEdit(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
 				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
@@ -168,8 +168,8 @@ public class SelectTool extends SettingsTool {
 					public void onClick(DialogInterface dialog, int which) {
 						try {
 							int color = parseColor(colorSetter.getText().toString());
-							float strokeSize = parseSize(strokeSizeBar.getProgress());
-							float textSize = parseSize(textSizeBar.getProgress());
+							float strokeSize = parseSlider(strokeSizeBar.getProgress());
+							float textSize = parseSlider(textSizeBar.getProgress());
 							boolean showDecimal = !decimalBox.isChecked();
 							
 							mapView.setDrawViewColor(color);

@@ -13,11 +13,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -26,6 +26,8 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
 public class EditTool extends SelectTool {
+	
+	private static final int MAX_ZOOM = 18;
 	
 	public static final String NAME = "Edit";
 	
@@ -159,8 +161,8 @@ public class EditTool extends SelectTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				final EditText editColorSetter = addSetter(context, layout, "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
+				final EditText colorSetter = addEdit(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				final EditText editColorSetter = addEdit(context, layout, "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
 				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
 				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
@@ -174,8 +176,8 @@ public class EditTool extends SelectTool {
 						try {
 							int color = parseColor(colorSetter.getText().toString());
 							int editColor = parseColor(editColorSetter.getText().toString());
-							float strokeSize = parseSize(strokeSizeBar.getProgress());
-							float textSize = parseSize(textSizeBar.getProgress());
+							float strokeSize = parseSlider(strokeSizeBar.getProgress());
+							float textSize = parseSlider(textSizeBar.getProgress());
 							boolean showDecimal = !decimalBox.isChecked();
 							
 							mapView.setDrawViewColor(color);
@@ -246,7 +248,8 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = point.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Point Color:", Integer.toHexString(style.pointColor));
+		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
+		final EditText colorSetter = addEdit(context, layout, "Point Color:", Integer.toHexString(style.pointColor));
 		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
 		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
 		
@@ -257,10 +260,12 @@ public class EditTool extends SelectTool {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
+					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSize(sizeBar.getProgress());
-					float pickingSize = parseSize(pickingSizeBar.getProgress());
+					float size = parseSlider(sizeBar.getProgress());
+					float pickingSize = parseSlider(pickingSizeBar.getProgress());
 					
+					style.minZoom = minZoom;
 					style.pointColor = color;
 					style.size = size;
 					style.pickingSize = pickingSize;
@@ -295,7 +300,8 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = line.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Line Color:", Integer.toHexString(style.pointColor));
+		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
+		final EditText colorSetter = addEdit(context, layout, "Line Color:", Integer.toHexString(style.pointColor));
 		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
 		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
 		final SeekBar widthBar = addSlider(context, layout, "Line Width:", style.width);
@@ -309,13 +315,15 @@ public class EditTool extends SelectTool {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
+					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSize(sizeBar.getProgress());
-					float pickingSize = parseSize(pickingSizeBar.getProgress());
-					float width = parseSize(widthBar.getProgress());
-					float pickingWidth = parseSize(pickingWidthBar.getProgress());
+					float size = parseSlider(sizeBar.getProgress());
+					float pickingSize = parseSlider(pickingSizeBar.getProgress());
+					float width = parseSlider(widthBar.getProgress());
+					float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 					boolean showPoints = showPointsBox.isChecked();
 					
+					style.minZoom = minZoom;
 					style.pointColor = color;
 					style.size = size;
 					style.pickingSize = pickingSize;
@@ -354,13 +362,15 @@ public class EditTool extends SelectTool {
 		
 		final GeometryStyle style = polygon.getStyle();
 		
-		final EditText colorSetter = addSetter(context, layout, "Polygon Color:", Integer.toHexString(style.polygonColor));
+		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
+		final EditText colorSetter = addEdit(context, layout, "Polygon Color:", Integer.toHexString(style.polygonColor));
 		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
 		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
-		final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(style.lineColor));
+		final EditText strokeColorSetter = addEdit(context, layout, "Stroke Color:", Integer.toHexString(style.lineColor));
 		final SeekBar widthBar = addSlider(context, layout, "Stroke Width:", style.width);
 		final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", style.pickingWidth);
 		final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", style.showStroke);
+		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Polygon:", style.showPoints);
 		
 		builder.setView(scrollView);
 		
@@ -369,21 +379,26 @@ public class EditTool extends SelectTool {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
+					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSize(sizeBar.getProgress());
-					float pickingSize = parseSize(pickingSizeBar.getProgress());
+					float size = parseSlider(sizeBar.getProgress());
+					float pickingSize = parseSlider(pickingSizeBar.getProgress());
 					int lineColor = parseColor(strokeColorSetter.getText().toString());
-					float width = parseSize(widthBar.getProgress());
-					float pickingWidth = parseSize(pickingWidthBar.getProgress());
+					float width = parseSlider(widthBar.getProgress());
+					float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 					boolean showStroke = showStrokeBox.isChecked();
+					boolean showPoints = showPointsBox.isChecked();
 					
+					style.minZoom = minZoom;
+					style.pointColor = lineColor;
 					style.polygonColor = color;
+					style.lineColor = lineColor;
 					style.size = size;
 					style.pickingSize = pickingSize;
-					style.lineColor = lineColor;
 					style.width = width;
 					style.pickingWidth = pickingWidth;
 					style.showStroke = showStroke;
+					style.showPoints = showPoints;
 					
 					EditTool.this.mapView.restylePolygon(polygon, style);
 				} catch (Exception e) {

@@ -300,19 +300,19 @@ GRID = 4;
 SELECT_SHAPE = 5;
 
 gpsPointStyle(int color) {
-	return createPointStyle(color, 0.2f, 0.5f);
+	return createPointStyle(10, color, 0.2f, 0.5f);
 }
 
 pointStyle(int color) {
-	return createPointStyle(color, 0.2f, 0.5f);
+	return createPointStyle(10, color, 0.2f, 0.5f);
 }
 
 lineStyle(int color) {
-	return createLineStyle(color, 0.05f, 0.3f, null);
+	return createLineStyle(10, color, 0.05f, 0.3f, null);
 }
 
 polygonStyle(int color, int lineColor) {
-	return createPolygonStyle(color, createLineStyle(lineColor, 0.05f, 0.3f, null));
+	return createPolygonStyle(10, color, createLineStyle(10, lineColor, 0.05f, 0.3f, null));
 }
 
 List canvasLayers = new ArrayList();
@@ -779,9 +779,9 @@ onClickPointLayer() {
 // Kaz Test
 
 initSpatialMap() {
-	ps = createPointStyle(Color.BLUE, 0.2f, 0.5f);
-	ls = createLineStyle(Color.GREEN, 0.05f, 0.3f, null);
-	pos = createPolygonStyle(Color.parseColor("#440000FF"), createLineStyle(Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
 
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz All Teams", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", null, ps, ls, pos);
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz Site Points", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos); 

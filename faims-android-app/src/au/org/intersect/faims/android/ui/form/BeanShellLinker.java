@@ -39,7 +39,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -48,6 +47,7 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -1819,7 +1819,7 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String labelColumn, 
+	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String[] labelColumns, 
 			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
 		try{
 			Object obj = renderer.getViewByRef(ref);
@@ -1827,7 +1827,7 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = baseDir + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumn, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
+				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumns, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2295,16 +2295,16 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public GeometryStyle createPointStyle(int color, float size, float pickingSize) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createPointStyle(int minZoom, int color, float size, float pickingSize) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color;
 		style.size = size;
 		style.pickingSize = pickingSize;
 		return style;
 	}
 	
-	public GeometryStyle createLineStyle(int color, float width, float pickingWidth, GeometryStyle pointStyle) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createLineStyle(int minZoom, int color, float width, float pickingWidth, GeometryStyle pointStyle) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.lineColor = color;
 		style.width = width;
 		style.pickingWidth = pickingWidth;
@@ -2317,8 +2317,8 @@ public class BeanShellLinker {
 		return style;
 	}
 	
-	public GeometryStyle createPolygonStyle(int color, GeometryStyle lineStyle) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.polygonColor = color;
 		if (lineStyle != null) {
 			style.showStroke = true;
@@ -2396,7 +2396,7 @@ public class BeanShellLinker {
 	}
 	
 	public Geometry createGeometryPoint(MapPos point) {
-		return new CustomPoint(0, createPointStyle(0,0,0), point);
+		return new CustomPoint(0, createPointStyle(0,0,0,0), point);
 	}
 	
 	public void setToolsEnabled(String ref, boolean enabled) {

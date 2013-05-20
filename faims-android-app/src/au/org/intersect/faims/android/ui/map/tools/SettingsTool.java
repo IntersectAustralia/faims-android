@@ -47,12 +47,20 @@ public abstract class SettingsTool extends MapTool {
 		return color;
 	}
 	
-	protected float parseSize(int value) throws Exception {
+	protected float parseSlider(int value) throws Exception {
 		if (value < 0 || value > 100) {
 			throw new MapException("Invalid size");
 		}
 		
 		return ((float) value) / 100;
+	}
+	
+	protected int parseRange(int value, int range) throws Exception {
+		if (value < 0 || value > range) {
+			throw new MapException("Invalid size");
+		}
+		
+		return value;
 	}
 	
 	protected CheckBox addCheckBox(Context context, LinearLayout layout, String labelText, boolean defaultValue) {
@@ -68,11 +76,11 @@ public abstract class SettingsTool extends MapTool {
 		return box;
 	}
 	
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue) {
-		return addSetter(context, layout, labelText, defaultValue, -1);
+	protected EditText addEdit(Context context, LinearLayout layout, String labelText, String defaultValue) {
+		return addEdit(context, layout, labelText, defaultValue, -1);
 	}
 	
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue, int type) {
+	protected EditText addEdit(Context context, LinearLayout layout, String labelText, String defaultValue, int type) {
 		TextView label = new TextView(context);
 		label.setText(labelText);
 		
@@ -92,7 +100,7 @@ public abstract class SettingsTool extends MapTool {
 		label.setText(labelText + " " + Float.toString(defaultValue));
 		
 		final SeekBar seekBar = new SeekBar(context);
-		seekBar.setMax(100);
+		seekBar.setMax((int) 100);
 		seekBar.setProgress((int) (defaultValue * 100));
 		
 		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
@@ -100,6 +108,41 @@ public abstract class SettingsTool extends MapTool {
 			@Override
 			public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
 				label.setText(labelText + " " + Float.toString(((float) seekBar.getProgress()) / 100));
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		layout.addView(label);
+		layout.addView(seekBar);
+		
+		return seekBar;
+	}
+	
+	protected SeekBar addRange(Context context, LinearLayout layout, final String labelText, int defaultValue, final int range) {
+		final TextView label = new TextView(context);
+		label.setText(labelText + " " + Float.toString(defaultValue));
+		
+		final SeekBar seekBar = new SeekBar(context);
+		seekBar.setMax(range);
+		seekBar.setProgress(defaultValue);
+		
+		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+			@Override
+			public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
+				label.setText(labelText + " " + Integer.toString(seekBar.getProgress()));
 			}
 
 			@Override

@@ -14,10 +14,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -28,6 +28,8 @@ import com.nutiteq.projections.EPSG3857;
 
 public class CreatePolygonTool extends BaseGeometryTool {
 	
+	private static final int MAX_ZOOM = 18;
+	
 	public static final String NAME = "Create Polygon";
 	
 	private int color = 0x440000FF;
@@ -37,6 +39,8 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	private float width = 0.05f;
 	private float pickingWidth = 0.3f;
 	private boolean showStroke = true;
+	private boolean showPoints = false;
+	private int minZoom = 12;
 
 	private MapButton createButton;
 
@@ -203,13 +207,15 @@ public class CreatePolygonTool extends BaseGeometryTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(context, layout, "Polygon Color:", Integer.toHexString(color));
+				final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(context, layout, "Polygon Color:", Integer.toHexString(color));
 				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
 				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
-				final EditText strokeColorSetter = addSetter(context, layout, "Stroke Color:", Integer.toHexString(lineColor));
+				final EditText strokeColorSetter = addEdit(context, layout, "Stroke Color:", Integer.toHexString(lineColor));
 				final SeekBar widthBar = addSlider(context, layout, "Stroke Width:", width);
 				final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", pickingWidth);
 				final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", showStroke);
+				final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Polygon:", showPoints);
 				
 				builder.setView(scrollView);
 				
@@ -218,14 +224,17 @@ public class CreatePolygonTool extends BaseGeometryTool {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
 							int lineColor = parseColor(strokeColorSetter.getText().toString());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							float width = parseSlider(widthBar.getProgress());
+							float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 							boolean showStroke = showStrokeBox.isChecked();
+							boolean showPoints = showPointsBox.isChecked();
 							
+							CreatePolygonTool.this.minZoom = minZoom;
 							CreatePolygonTool.this.color = color;
 							CreatePolygonTool.this.setSize(size);
 							CreatePolygonTool.this.setPickingSize(pickingSize);
@@ -233,6 +242,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 							CreatePolygonTool.this.width = width;
 							CreatePolygonTool.this.pickingWidth = pickingWidth;
 							CreatePolygonTool.this.showStroke = showStroke;
+							CreatePolygonTool.this.showPoints = showPoints;
 						} catch (Exception e) {
 							showError(e.getMessage());
 						}
@@ -271,17 +281,21 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createPolygonStyle() {
-		GeometryStyle style = new GeometryStyle();
+		GeometryStyle style = new GeometryStyle(minZoom);
+		style.pointColor = lineColor;
 		style.polygonColor = color;
 		style.lineColor = lineColor;
+		style.size = size;
+		style.pickingSize = size;
 		style.width = width;
 		style.pickingWidth = pickingWidth;
 		style.showStroke = showStroke;
+		style.showPoints = showPoints;
 		return style;
 	}
 	
 	private GeometryStyle createGuidePointStyle() {
-		GeometryStyle style = new GeometryStyle();
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color | 0xFF000000;
 		style.size = size;
 		style.pickingSize = pickingSize;

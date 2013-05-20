@@ -14,10 +14,10 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -28,6 +28,8 @@ import com.nutiteq.projections.EPSG3857;
 
 public class CreateLineTool extends BaseGeometryTool {
 	
+	private static final int MAX_ZOOM = 18;
+
 	public static final String NAME = "Create Line";
 	
 	private int color = 0xAA00FF00;
@@ -36,6 +38,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	private float width = 0.05f;
 	private float pickingWidth = 0.3f;
 	private boolean showPoints;
+	private int minZoom = 12;
 
 	private MapButton createButton;
 
@@ -203,8 +206,8 @@ public class CreateLineTool extends BaseGeometryTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				
-				final EditText colorSetter = addSetter(context, layout, "Line Color:", Integer.toHexString(color));
+				final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(context, layout, "Line Color:", Integer.toHexString(color));
 				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
 				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
 				final SeekBar widthBar = addSlider(context, layout, "Line Width:", width);
@@ -218,13 +221,15 @@ public class CreateLineTool extends BaseGeometryTool {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
+							float width = parseSlider(widthBar.getProgress());
+							float pickingWidth = parseSlider(pickingWidthBar.getProgress());
 							boolean showPoints = showPointsBox.isChecked();
 							
+							CreateLineTool.this.minZoom = minZoom;
 							CreateLineTool.this.color = color;
 							CreateLineTool.this.setSize(size);
 							CreateLineTool.this.setPickingSize(pickingSize);
@@ -271,11 +276,11 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createLineStyle() {
-		GeometryStyle style = new GeometryStyle();
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color;
+		style.lineColor = color;
 		style.size = size;
 		style.pickingSize = pickingSize;
-		style.lineColor = color;
 		style.width = width;
 		style.pickingWidth = pickingWidth;
 		style.showPoints = showPoints;
@@ -283,7 +288,7 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createGuidePointStyle() {
-		GeometryStyle style = new GeometryStyle();
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color | 0xFF000000;
 		style.size = size;
 		style.pickingSize = pickingSize;

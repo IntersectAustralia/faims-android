@@ -22,7 +22,6 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
@@ -35,6 +34,7 @@ import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
@@ -599,7 +599,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	}
 
 	public int addSpatialLayer(String layerName, String file, String tablename,
-			String labelColumn, StyleSet<PointStyle> pointStyleSet,
+			String[] labelColumns, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
 		if (!new File(file).exists()) {
@@ -607,10 +607,14 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		}
 
 		validateLayerName(layerName);
-
+		
+		if (labelColumns == null) {
+			labelColumns = new String[] { null }; // nutiteq layer has a bug when null or 0 length array is supplied 
+		}
+		
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(
 				nextLayerId(), layerName, new EPSG3857(), file, tablename,
-				"Geometry", new String[] { labelColumn },
+				"Geometry", labelColumns,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet,
 				polygonStyleSet);
 		this.getLayers().addLayer(spatialLayer);

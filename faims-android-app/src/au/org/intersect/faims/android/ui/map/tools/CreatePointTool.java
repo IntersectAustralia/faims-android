@@ -10,9 +10,9 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -21,11 +21,14 @@ import com.nutiteq.projections.EPSG3857;
 
 public class CreatePointTool extends BaseGeometryTool {
 	
+	private static final int MAX_ZOOM = 18;
+	
 	public static final String NAME = "Create Point";
 	
 	private int color = 0xAAFF0000;
 	private float size = 0.2f;
 	private float pickingSize = 0.6f;
+	private int minZoom = 12;
 
 	public CreatePointTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -48,7 +51,8 @@ public class CreatePointTool extends BaseGeometryTool {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				scrollView.addView(layout);
 				
-				final EditText colorSetter = addSetter(context, layout, "Point Color:", Integer.toHexString(color));
+				final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", minZoom, MAX_ZOOM);
+				final EditText colorSetter = addEdit(context, layout, "Point Color:", Integer.toHexString(color));
 				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
 				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
 				
@@ -59,10 +63,12 @@ public class CreatePointTool extends BaseGeometryTool {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
+							int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
 							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
+							float size = parseSlider(sizeBar.getProgress());
+							float pickingSize = parseSlider(pickingSizeBar.getProgress());
 							
+							CreatePointTool.this.minZoom = minZoom;
 							CreatePointTool.this.color = color;
 							CreatePointTool.this.size = size;
 							CreatePointTool.this.pickingSize = pickingSize;
@@ -106,7 +112,7 @@ public class CreatePointTool extends BaseGeometryTool {
 	}
 
 	private GeometryStyle createPointStyle() {
-		GeometryStyle style = new GeometryStyle();
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color;
 		style.size = size;
 		style.pickingSize = pickingSize;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Components;
@@ -62,7 +61,7 @@ public class CanvasLayer extends GeometryLayer {
 		newVisibleElementsList.add(geom);
 		
 		for (Geometry g : newVisibleElementsList) {
-			g.setActiveStyle(0);
+			g.setActiveStyle(g.getStyleSet().getFirstNonNullZoomStyleZoom());
 		}
 		
 		setVisibleElementsList(newVisibleElementsList); 
