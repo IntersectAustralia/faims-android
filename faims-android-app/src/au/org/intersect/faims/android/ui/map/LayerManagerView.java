@@ -239,11 +239,15 @@ public class LayerManagerView extends LinearLayout {
 	private CustomDragDropListView.DropListener dropListener = new CustomDragDropListView.DropListener() {
 		public void drop(int from, int to) {
 			int last = mapView.getLayers().getAllLayers().size() - 1;
-			if(from != last && to != last){
+			boolean isFromBaseLayer = mapView.getLayers().getAllLayers().get(last - from) == mapView.getLayers().getBaseLayer();
+			boolean isToBaseLayer = mapView.getLayers().getAllLayers().get(last - to) == mapView.getLayers().getBaseLayer();
+			if(!(isFromBaseLayer || isToBaseLayer)){
 				List<Layer> unmodifiableLayers = mapView.getLayers().getAllLayers();
 				List<Layer> modifiedLayers = new ArrayList<Layer>(unmodifiableLayers);
 				Collections.swap(modifiedLayers, last - from, last - to);
-				modifiedLayers.remove(0);
+				if (mapView.getLayers().getBaseLayer() != null) {
+					modifiedLayers.remove(0);
+				}
 				mapView.getLayers().setLayers(modifiedLayers);
 				redrawLayers();
 			}
