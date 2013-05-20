@@ -104,20 +104,20 @@ public class LayerManagerView extends LinearLayout {
 	private FileManager fm;
 	private TextView selectedFileText;
 	private Spinner tableNameSpinner;
-	private int pointColor = 0xFFFF0000;
+	private int pointColor = 0xAAFF0000;
 	private float pointSize = 0.2f;
-	private float pointPickingSize = 0.4f;
-	private int lineColor = 0xFF00FF00;
+	private float pointPickingSize = 0.6f;
+	private int lineColor = 0xAA00FF00;
 	private float lineSize = 0.2f;
-	private float linePickingSize = 0.4f;
+	private float linePickingSize = 0.6f;
 	private float lineWidth = 0.05f;
-	private float linePickingWidth = 0.1f;
-	private boolean lineShowPoints;
-	private int polygonColor = 0xFF0000FF;
-	private int polygonLineColor = 0XFF000000;
+	private float linePickingWidth = 0.3f;
+	private boolean lineShowPoints = false;
+	private int polygonColor = 0x440000FF;
+	private int polygonLineColor = 0XAA0000FF;
 	private float polygonLineWidth = 0.05f;
-	private float polygonLinePickingWidth = 0.1f;
-	private boolean polygonShowStroke;
+	private float polygonLinePickingWidth = 0.3f;
+	private boolean polygonShowStroke = true;
 
 	public LayerManagerView(Context context) {
 		super(context);
