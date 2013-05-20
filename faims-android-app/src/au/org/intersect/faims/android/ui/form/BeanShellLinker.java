@@ -4,15 +4,19 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -25,6 +29,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -95,7 +100,7 @@ public class BeanShellLinker {
 	private Runnable trackingTask;
 	private Double prevLong;
 	private Double prevLat;
-
+	
 	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
 			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
 		this.activity = activity;
@@ -2369,6 +2374,104 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error attaching file " + filePath, e);
 			return null;
+		}
+	}
+
+	public void viewArchEntAttachedFiles(String uuid){
+		if(uuid == null){
+			showWarning("Attached Files", "Please load/save a record to see attached files");
+		}else{
+			ArchEntity fetchedArchEntity = (ArchEntity) fetchArchEnt(uuid);
+			List<String> attachedFiles = new ArrayList<String>();
+			for(EntityAttribute attribute : fetchedArchEntity.getAttributes()){
+				if("file".equalsIgnoreCase(attribute.getType())){
+					attachedFiles.add(attribute.getText());
+				}
+			}
+			viewAttachedFiles(attachedFiles);
+		}
+	}
+	
+	public void viewRelAttachedFiles(String relId){
+		if(relId == null){
+			showWarning("Attached Files", "Please load/save a record to see attached files");
+		}else{
+			Relationship fetchedRelationship = (Relationship) fetchRel(relId);
+			List<String> attachedFiles = new ArrayList<String>();
+			for(RelationshipAttribute attribute : fetchedRelationship.getAttributes()){
+				if("file".equalsIgnoreCase(attribute.getType())){
+					attachedFiles.add(attribute.getText());
+				}
+			}
+			viewAttachedFiles(attachedFiles);
+		}
+	}
+	
+	private void viewAttachedFiles(List<String> files){
+		if(files.isEmpty()){
+			showWarning("Attached Files", "There is no attached file for the record");
+		}else{
+			final ListView listView = new ListView(activity);
+			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
+			Map<String, Integer> count = new HashMap<String, Integer>();
+			for(String attachedFile : files){
+				String filename = (new File(baseDir + "/" + attachedFile)).getName();
+				filename = filename.substring(filename.lastIndexOf("_")+1);
+				if(count.get(filename) != null){
+					int fileCount = count.get(filename);
+					count.put(filename, fileCount + 1);
+					int index = filename.indexOf(".");
+					filename = filename.substring(0,index) + "(" + fileCount + ")" + filename.substring(index);
+				}else{
+					count.put(filename, 1);
+				}
+				NameValuePair file = new NameValuePair(filename, baseDir + "/" + attachedFile);
+				attachedFiles.add(file);
+			}
+			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+                    activity,
+                    android.R.layout.simple_list_item_1,
+                    attachedFiles);
+			listView.setAdapter(arrayAdapter);
+			listView.setOnItemClickListener(new ListView.OnItemClickListener() {
+
+				@SuppressLint("DefaultLocale")
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1,
+						int index, long arg3) {
+					NameValuePair pair = (NameValuePair) listView.getItemAtPosition(index);
+					File file = new File(pair.getValue());
+					if(file.exists()){
+					    MimeTypeMap map = MimeTypeMap.getSingleton();
+					    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+					    String type = map.getMimeTypeFromExtension(ext.toLowerCase());
+	
+					    if (type == null)
+					        type = "*/*";
+	
+					    Intent intent = new Intent(Intent.ACTION_VIEW);
+					    Uri data = Uri.fromFile(file);
+	
+					    intent.setDataAndType(data, type);
+	
+					    activity.startActivity(intent);
+					}else{
+						showWarning("Attached File", "File does not exist in the tablet, it might exist only in the server");
+					}
+				}
+
+			});
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+
+			builder.setTitle("Attached Files");
+			builder.setView(listView);
+			builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+			builder.create().show();
 		}
 	}
 

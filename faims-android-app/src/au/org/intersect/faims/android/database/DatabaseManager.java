@@ -429,7 +429,7 @@ public class DatabaseManager {
 					return null;
 				}
 	
-				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
+				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
 								    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
 								        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid having deleted is null) ) " +
 								"JOIN attributekey USING (attributeid) " +
@@ -447,6 +447,7 @@ public class DatabaseManager {
 					archAttribute.setMeasure(Double.toString(stmt.column_double(3)));
 					archAttribute.setText(stmt.column_string(4));
 					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
+					archAttribute.setType(stmt.column_string(6));
 					attributes.add(archAttribute);
 				}
 				stmt.close();
@@ -501,7 +502,7 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, relntypeid FROM " +
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relntypeid FROM " +
 								    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
 								        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
 								"JOIN attributekey USING (attributeid) " +
@@ -518,6 +519,7 @@ public class DatabaseManager {
 					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 					relAttribute.setText(stmt.column_string(3));
 					relAttribute.setCertainty(stmt.column_string(4));
+					relAttribute.setType(stmt.column_string(5));
 					attributes.add(relAttribute);
 				}
 				stmt.close();

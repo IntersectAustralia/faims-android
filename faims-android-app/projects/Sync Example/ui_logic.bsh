@@ -167,6 +167,7 @@ attachFile() {
 }
 
 onEvent("tabgroup1/tab1/attach", "click", "attachFile()");
+onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity_id)");
 
 initEntity() {
 	clearEntity();
