@@ -1175,4 +1175,30 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			}
 		});
 	}
+
+	public List<Layer> getAllLayers() {
+		List<Layer> layers = getLayers().getAllLayers();
+		List<Layer> tempLayers = new ArrayList<Layer>();
+		for (Layer layer : layers) {
+			if (layer instanceof SpatialiteTextLayer) {
+				
+			} else {
+				tempLayers.add(layer);
+			}
+		}
+		return tempLayers;
+	}
+	
+	public void setAllLayers(List<Layer> layers) {
+		List<Layer> tempLayers = new ArrayList<Layer>();
+		for (Layer layer : layers) {
+			if (layer instanceof CustomSpatialiteLayer) {
+				tempLayers.add(layer);
+				tempLayers.add(((CustomSpatialiteLayer) layer).getTextLayer());
+			} else {
+				tempLayers.add(layer);
+			}
+		}
+		this.getLayers().setLayers(tempLayers);
+	}
 }

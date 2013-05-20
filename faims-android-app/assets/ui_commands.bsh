@@ -12,6 +12,8 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import android.graphics.Typeface;
 
 startTrackingGPS(String type, int interval){
 	linker.startTrackingGPS(type, interval);
@@ -261,7 +263,7 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
 }
 
 showSpatialLayer(String ref, String layerName, String filename, String tableName, String[] labelColumns, 
-	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle) {
+	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
