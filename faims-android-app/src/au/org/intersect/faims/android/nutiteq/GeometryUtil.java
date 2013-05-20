@@ -48,13 +48,13 @@ public class GeometryUtil {
 	public static Geometry transformGeometry(Geometry geom, MapView mapView, boolean worldToScreen) {
 		if (geom instanceof CustomPoint) {
 			CustomPoint p = (CustomPoint) geom;
-			return new CustomPoint(p.getGeomId(), p.getStyle(), transformVertex(p.getMapPos(), mapView, worldToScreen));
+			return new CustomPoint(p.getGeomId(), p.getStyle(), transformVertex(p.getMapPos(), mapView, worldToScreen), (String) p.userData);
 		} else if (geom instanceof CustomLine) {
 			CustomLine l = (CustomLine) geom;
-			return new CustomLine(l.getGeomId(), l.getStyle(), transformVertices(l.getVertexList(), mapView, worldToScreen));
+			return new CustomLine(l.getGeomId(), l.getStyle(), transformVertices(l.getVertexList(), mapView, worldToScreen), (String) l.userData);
 		} else if (geom instanceof CustomPolygon) {
 			CustomPolygon p = (CustomPolygon) geom;
-			return new CustomPolygon(p.getGeomId(), p.getStyle(), transformVertices(p.getVertexList(), mapView, worldToScreen));
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), transformVertices(p.getVertexList(), mapView, worldToScreen), (String) p.userData);
 		}
 		return null;
 	}
@@ -76,13 +76,13 @@ public class GeometryUtil {
 	public static Geometry convertGeometryFromWgs84(Geometry geom) {
 		if (geom instanceof CustomPoint) {
 			CustomPoint p = (CustomPoint) geom;
-			return new CustomPoint(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getMapPos()));
+			return new CustomPoint(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getMapPos()), (String) p.userData);
 		} else if (geom instanceof CustomLine) {
 			CustomLine l = (CustomLine) geom;
-			return new CustomLine(l.getGeomId(), l.getStyle(), convertFromWgs84(l.getVertexList()));
+			return new CustomLine(l.getGeomId(), l.getStyle(), convertFromWgs84(l.getVertexList()), (String) l.userData);
 		} else if (geom instanceof CustomPolygon) {
 			CustomPolygon p = (CustomPolygon) geom;
-			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getVertexList()));
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertFromWgs84(p.getVertexList()), (String) p.userData);
 		}
 		return null;
 	}
@@ -99,13 +99,13 @@ public class GeometryUtil {
 	public static Geometry convertGeometryToWgs84(Geometry geom) {
 		if (geom instanceof CustomPoint) {
 			CustomPoint p = (CustomPoint) geom;
-			return new CustomPoint(p.getGeomId(), p.getStyle(), convertToWgs84(p.getMapPos()));
+			return new CustomPoint(p.getGeomId(), p.getStyle(), convertToWgs84(p.getMapPos()), (String) p.userData);
 		} else if (geom instanceof CustomLine) {
 			CustomLine l = (CustomLine) geom;
-			return new CustomLine(l.getGeomId(), l.getStyle(), convertToWgs84(l.getVertexList()));
+			return new CustomLine(l.getGeomId(), l.getStyle(), convertToWgs84(l.getVertexList()), (String) l.userData);
 		} else if (geom instanceof CustomPolygon) {
 			CustomPolygon p = (CustomPolygon) geom;
-			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertToWgs84(p.getVertexList()));
+			return new CustomPolygon(p.getGeomId(), p.getStyle(), convertToWgs84(p.getVertexList()), (String) p.userData);
 		}
 		return null;
 	}

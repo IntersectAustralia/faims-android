@@ -10,8 +10,8 @@ public class CustomLine extends Line {
 	private int geomId;
 	private GeometryStyle style;
 
-	public CustomLine(int geomId, GeometryStyle style, List<MapPos> vertices) {
-		super(vertices, null, style.toLineStyleSet(), null);
+	public CustomLine(int geomId, GeometryStyle style, List<MapPos> vertices, String uuid) {
+		super(vertices, null, style.toLineStyleSet(), uuid);
 		this.geomId = geomId;
 		this.style = style;
 	}

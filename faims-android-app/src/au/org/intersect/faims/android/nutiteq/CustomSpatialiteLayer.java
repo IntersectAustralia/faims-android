@@ -13,6 +13,7 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 	private int layerId;
 	private String dbPath;
 	private String tableName;
+	private SpatialiteTextLayer textLayer;
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
@@ -45,6 +46,14 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	public String getTableName() {
 		return tableName;
+	}
+	
+	public SpatialiteTextLayer getTextLayer() {
+		return textLayer;
+	}
+
+	public void setTextLayer(SpatialiteTextLayer textLayer) {
+		this.textLayer = textLayer;
 	}
 
 }

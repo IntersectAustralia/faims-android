@@ -793,7 +793,7 @@ initSpatialMap() {
 	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
 	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
 
-	showSpatialLayer("tabgroup4/tab1/map", "Kaz All Teams", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", null, ps, ls, pos);
+	showSpatialLayer("tabgroup4/tab1/map", "Kaz All Teams", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", new String[] { "SU_LU_DESC" }, ps, ls, pos);
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz Site Points", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos); 
 }
 

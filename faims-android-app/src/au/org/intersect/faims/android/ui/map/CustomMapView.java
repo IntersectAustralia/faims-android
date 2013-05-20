@@ -36,6 +36,7 @@ import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -67,6 +68,7 @@ import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
+import com.nutiteq.style.TextStyle;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
@@ -601,7 +603,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	public int addSpatialLayer(String layerName, String file, String tablename,
 			String[] labelColumns, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
+			StyleSet<PolygonStyle> polygonStyleSet,
+			StyleSet<TextStyle> textStyleSet) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error file does not exist " + file);
 		}
@@ -618,6 +621,14 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet,
 				polygonStyleSet);
 		this.getLayers().addLayer(spatialLayer);
+		
+		if (textStyleSet != null) {
+			// add text layer
+			SpatialiteTextLayer textLayer = new SpatialiteTextLayer(new EPSG3857(), spatialLayer, labelColumns, textStyleSet);
+			spatialLayer.setTextLayer(textLayer);
+			this.getLayers().addLayer(textLayer);
+		}
+		
 		return addLayer(spatialLayer);
 	}
 

@@ -74,7 +74,7 @@ public class CanvasLayer extends GeometryLayer {
 	}
 
 	public CustomPoint addPoint(int geomId, MapPos point, GeometryStyle style) {		
-		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y));
+		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y), null);
 		addGeometry(p);
 		return p;
 	}
@@ -84,7 +84,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomLine l = new CustomLine(geomId, style, vertices);
+		CustomLine l = new CustomLine(geomId, style, vertices, null);
 		addGeometry(l);
 		return l;
 	}
@@ -94,7 +94,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomPolygon p = new CustomPolygon(geomId, style, vertices);
+		CustomPolygon p = new CustomPolygon(geomId, style, vertices, null);
 		
 		addGeometry(p);
 		return p;

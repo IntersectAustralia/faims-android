@@ -546,7 +546,7 @@ public class LayerManagerView extends LinearLayout {
 						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(polygonColor, polygonLineStyle));
 						String layerName = editText.getText() != null ? editText.getText().toString() : null;
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, ps, ls, pos);
+						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, ps, ls, pos, null);
 						fm.setSelectedFile(null);
 						redrawLayers();
 					}

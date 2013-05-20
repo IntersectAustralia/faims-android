@@ -2396,7 +2396,7 @@ public class BeanShellLinker {
 	}
 	
 	public Geometry createGeometryPoint(MapPos point) {
-		return new CustomPoint(0, createPointStyle(0,0,0,0), point);
+		return new CustomPoint(0, createPointStyle(0,0,0,0), point, null);
 	}
 	
 	public void setToolsEnabled(String ref, boolean enabled) {

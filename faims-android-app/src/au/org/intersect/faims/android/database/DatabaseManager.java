@@ -457,12 +457,14 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] g1 = WkbRead.readWkb(
+					Geometry[] gs = WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
 		                            .hexStringToByteArray(stmt.column_string(1))), null);
-					if (g1 != null) {
-			            for (int i = 0; i < g1.length; i++) {
-			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = id;
+			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
 				}
@@ -528,12 +530,14 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] g1 = WkbRead.readWkb(
+					Geometry[] gs = WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
 		                            .hexStringToByteArray(stmt.column_string(1))), null);
-					if (g1 != null) {
-			            for (int i = 0; i < g1.length; i++) {
-			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = id;
+			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
 				}
