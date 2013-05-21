@@ -376,7 +376,7 @@ public class LayerManagerView extends LinearLayout {
 //		});
 		
 		Button loadSpatialLayerButton = new Button(getContext());
-		loadSpatialLayerButton.setText("Load Spatial Layer");
+		loadSpatialLayerButton.setText("Load Vector Layer");
 		loadSpatialLayerButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -388,7 +388,7 @@ public class LayerManagerView extends LinearLayout {
 		});
 		
 		Button createLayerButton = new Button(getContext());
-		createLayerButton.setText("Create Layer");
+		createLayerButton.setText("Create Canvas Layer");
 		createLayerButton.setOnClickListener(new OnClickListener() {
 
 			@Override
