@@ -338,6 +338,12 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			this.selectedLayer = null;
 			updateTools();
 		}
+		
+		// remove associated spatialite text layer
+		if (layer instanceof CustomSpatialiteLayer) {
+			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
+		}
+		
 	}
 
 	public Layer getLayer(int layerId) {
@@ -1200,5 +1206,24 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			}
 		}
 		this.getLayers().setLayers(tempLayers);
+	}
+	
+	public void debugAllLayers() {
+		for (Layer layer : this.getLayers().getAllLayers()) {
+			FLog.d("layer is " + layer.getClass() + " and visiblility is " + layer.isVisible());
+		}
+	}
+	
+	public void setLayerVisible(int layerId, boolean value) throws Exception {
+		setLayerVisible(getLayer(layerId), value);
+	}
+	
+	public void setLayerVisible(Layer layer, boolean value) throws Exception {
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		
+		layer.setVisible(value);
+		updateTools();
 	}
 }

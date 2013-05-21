@@ -62,7 +62,6 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
@@ -1898,9 +1897,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				Layer layer = mapView.getLayer(layerId);
-				layer.setVisible(visible);
-				mapView.updateTools();
+				mapView.setLayerVisible(layerId, visible);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

@@ -182,13 +182,17 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				List<Layer> layers = mapView.getAllLayers();
-				int last = layers.size() - 1;
-				final Layer layer = layers.get(last - position);
-				LayerListItem itemView = (LayerListItem) view;
-				itemView.toggle();
-				layer.setVisible(itemView.isChecked());
-				mapView.updateTools();
+				try {
+					List<Layer> layers = mapView.getAllLayers();
+					int last = layers.size() - 1;
+					final Layer layer = layers.get(last - position);
+					LayerListItem itemView = (LayerListItem) view;
+					itemView.toggle();
+					mapView.setLayerVisible(layer, itemView.isChecked());
+					mapView.updateTools();
+				} catch (Exception e) {
+					showErrorDialog("Error setting layer visibility");
+				}
 			}
 			
 		});
@@ -246,10 +250,25 @@ public class LayerManagerView extends LinearLayout {
 						showMetadata(layer);
 					}
 				});
-
+				
 				layout.addView(removeButton);
 				layout.addView(renameButton);
 				layout.addView(showMetadataButton);
+				
+				if (layer instanceof CustomSpatialiteLayer) {
+					final ToggleButton showLabelsButton = new ToggleButton(context);
+					showLabelsButton.setTextOn("Hide Labels");
+					showLabelsButton.setTextOff("Show Labels");
+					showLabelsButton.setChecked(((CustomSpatialiteLayer) layer).getTextVisible());
+					showLabelsButton.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							((CustomSpatialiteLayer) layer).setTextVisible(showLabelsButton.isChecked());
+						}
+					});
+					layout.addView(showLabelsButton);
+				}
 				
 				d.show();
 				return true;

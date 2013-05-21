@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
@@ -63,7 +64,14 @@ public class SpatialiteTextLayer extends TextLayer {
 	        } else if (geom instanceof Line) {
 	        	topRight = ((Line) geom).getVertexList().get(0);
 	        } else if (geom instanceof Polygon) {
-	        	topRight = ((Polygon) geom).getVertexList().get(0);
+	        	try {
+	        		MapPos center = SpatialiteUtil.computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
+	        		FLog.d("center: " + center);
+	        		topRight = GeometryUtil.convertFromWgs84(center);
+	        	} catch (Exception e) {
+	        		topRight = new MapPos(0, 0);
+	        		FLog.e("error computing centroid of polygon", e);
+	        	}
 	        } else {
 	        	FLog.e("invalid geometry type");
 	        }
