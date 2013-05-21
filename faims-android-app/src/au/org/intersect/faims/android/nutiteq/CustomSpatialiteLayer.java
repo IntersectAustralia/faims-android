@@ -14,7 +14,7 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 	private String dbPath;
 	private String tableName;
 	private SpatialiteTextLayer textLayer;
-	private boolean textVisible = true;
+	private boolean textVisible;
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
@@ -55,6 +55,7 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 
 	public void setTextLayer(SpatialiteTextLayer textLayer) {
 		this.textLayer = textLayer;
+		this.textVisible = textLayer.isVisible();
 	}
 
 	public boolean getTextVisible() {
@@ -79,6 +80,5 @@ public class CustomSpatialiteLayer extends SpatialiteLayer {
 			this.textLayer.setVisible(false);
 		}
 	}
-
 
 }

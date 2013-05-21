@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
@@ -34,6 +35,8 @@ import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
@@ -139,6 +142,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	// TODO what is this?
 	private static int cacheId = 9991;
@@ -339,9 +345,11 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			updateTools();
 		}
 		
-		// remove associated spatialite text layer
+		// remove associated text layer
 		if (layer instanceof CustomSpatialiteLayer) {
 			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
+		} else if (layer instanceof DatabaseLayer) {
+			removeLayer(((DatabaseLayer) layer).getTextLayer());
 		}
 		
 	}
@@ -644,6 +652,27 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName,
 				new EPSG3857());
 		this.getLayers().addLayer(layer);
+		return addLayer(layer);
+	}
+	
+	public int addDatabaseLayer(String layerName, String query, 
+			StyleSet<PointStyle> pointStyleSet,
+			StyleSet<LineStyle> lineStyleSet,
+			StyleSet<PolygonStyle> polygonStyleSet,
+			StyleSet<TextStyle> textStyleSet) throws Exception {
+		validateLayerName(layerName);
+		
+		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), query, databaseManager,
+				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+		this.getLayers().addLayer(layer);
+		
+		if (textStyleSet != null) {
+			// add text layer
+			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyleSet);
+			layer.setTextLayer(textLayer);
+			this.getLayers().addLayer(textLayer);
+		}
+		
 		return addLayer(layer);
 	}
 
@@ -1186,8 +1215,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		List<Layer> layers = getLayers().getAllLayers();
 		List<Layer> tempLayers = new ArrayList<Layer>();
 		for (Layer layer : layers) {
-			if (layer instanceof SpatialiteTextLayer) {
-				
+			if ((layer instanceof SpatialiteTextLayer) || (layer instanceof DatabaseTextLayer)) {
+				// ignore
 			} else {
 				tempLayers.add(layer);
 			}
@@ -1201,6 +1230,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			if (layer instanceof CustomSpatialiteLayer) {
 				tempLayers.add(layer);
 				tempLayers.add(((CustomSpatialiteLayer) layer).getTextLayer());
+			} else if (layer instanceof DatabaseLayer) {
+				tempLayers.add(layer);
+				tempLayers.add(((DatabaseLayer) layer).getTextLayer());
 			} else {
 				tempLayers.add(layer);
 			}

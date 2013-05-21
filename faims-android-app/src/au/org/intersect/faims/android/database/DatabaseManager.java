@@ -463,7 +463,7 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = id;
+			            	g.userData = new String[] { "entity", id, id };
 			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
@@ -536,7 +536,7 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = id;
+			            	g.userData = new String[] { "relationship", id, id };
 			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}

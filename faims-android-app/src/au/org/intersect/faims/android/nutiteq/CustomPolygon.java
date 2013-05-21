@@ -11,8 +11,12 @@ public class CustomPolygon extends Polygon {
 	private int geomId;
 	private GeometryStyle style;
 
-	public CustomPolygon(int geomId, GeometryStyle style, List<MapPos> vertices, String uuid) {
-		super(vertices, new ArrayList<List<MapPos>>(), null, style.toPolygonStyleSet(), uuid);
+	public CustomPolygon(int geomId, GeometryStyle style, List<MapPos> vertices, String type, String uuid, String label) {
+		this(geomId, style, vertices, new String[] { type, uuid, label });
+	}
+	
+	public CustomPolygon(int geomId, GeometryStyle style, List<MapPos> vertices, String[] userData) {
+		super(vertices, new ArrayList<List<MapPos>>(), null, style.toPolygonStyleSet(), userData);
 		this.geomId = geomId;
 		this.style = style;
 	}

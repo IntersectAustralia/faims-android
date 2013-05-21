@@ -387,6 +387,18 @@ public class LayerManagerView extends LinearLayout {
 			
 		});
 		
+		Button loadDatabaseLayerButton = new Button(getContext());
+		loadDatabaseLayerButton.setText("Load Database Layer");
+		loadDatabaseLayerButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				d.dismiss();
+				addDatabaseLayer();
+			}
+			
+		});
+		
 		Button createLayerButton = new Button(getContext());
 		createLayerButton.setText("Create Canvas Layer");
 		createLayerButton.setOnClickListener(new OnClickListener() {
@@ -402,6 +414,7 @@ public class LayerManagerView extends LinearLayout {
 		layout.addView(loadRasterLayerButton);
 //		layout.addView(loadShapeLayerButton);
 		layout.addView(loadSpatialLayerButton);
+		layout.addView(loadDatabaseLayerButton);
 		layout.addView(createLayerButton);
 		
 		d.show();
@@ -616,6 +629,89 @@ public class LayerManagerView extends LinearLayout {
 						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
 						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, new String[] { labelName }, 
 								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+						fm.setSelectedFile(null);
+						redrawLayers();
+					}
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
+	}
+	
+	private void addDatabaseLayer(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Add database layer:");
+		
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		builder.setView(scrollView);
+		final Dialog d = builder.create();
+		
+		TextView textView = new TextView(this.getContext());
+		textView.setText("Database layer name:");
+		layout.addView(textView);
+		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		layout.addView(editText);
+		
+		TextView tableTextView = new TextView(this.getContext());
+		tableTextView.setText("Database query:");
+		layout.addView(tableTextView);
+		tableNameSpinner = new Spinner(this.getContext());
+		tableNameSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1, int index,
+					long arg3) {
+				try {
+					String tableName = (String) tableNameSpinner.getAdapter().getItem(index);
+					setLabelSpinner(tableName);
+				} catch (Exception e) {
+					FLog.e("error getting table columns", e);
+					showErrorDialog("Error getting table columns");
+				}
+			}
+			
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		layout.addView(tableNameSpinner);
+		
+		LinearLayout styleLayout = new LinearLayout(this.getContext());
+		styleLayout.setOrientation(LinearLayout.HORIZONTAL);
+		styleLayout.addView(createPointStyleButton());
+		styleLayout.addView(createLineStyleButton());
+		styleLayout.addView(createPolygonStyleButton());
+		styleLayout.addView(createTextStyleButton());
+		
+		layout.addView(styleLayout);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					if(fm.getSelectedFile() != null){
+						String layerName = editText.getText() != null ? editText.getText().toString() : null;
+						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
+						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
+						
 						fm.setSelectedFile(null);
 						redrawLayers();
 					}

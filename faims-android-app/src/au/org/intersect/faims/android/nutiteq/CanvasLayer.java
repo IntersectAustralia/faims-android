@@ -17,10 +17,10 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CanvasLayer extends GeometryLayer {
 
-	private String name;
+	protected String name;
 	private Quadtree<Geometry> objects;
 	private Stack<Geometry> geomBuffer;
-	private int layerId;
+	protected int layerId;
 	
 	public CanvasLayer(int layerId, String name, Projection projection) {
 		super(projection);

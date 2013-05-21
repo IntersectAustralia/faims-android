@@ -9,8 +9,12 @@ public class CustomPoint extends Point {
 	private int geomId;
 	private GeometryStyle style;
 
-	public CustomPoint(int geomId, GeometryStyle style, MapPos mapPos, String uuid) {
-		super(mapPos, null, style.toPointStyleSet(), uuid);
+	public CustomPoint(int geomId, GeometryStyle style, MapPos mapPos, String type, String uuid, String label) {
+		this(geomId, style, mapPos, new String[] { type, uuid, label });
+	}
+	
+	public CustomPoint(int geomId, GeometryStyle style, MapPos mapPos, String[] userData) {
+		super(mapPos, null, style.toPointStyleSet(), userData);
 		this.geomId = geomId;
 		this.style = style;
 	}
