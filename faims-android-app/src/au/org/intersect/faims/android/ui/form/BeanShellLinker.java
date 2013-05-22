@@ -1840,6 +1840,31 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
+	public int showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				return mapView.addDatabaseLayer(layerName, isEntity, queryName, querySql, pointStyle.toPointStyleSet(), 
+						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(MapException e) {
+			FLog.w("error showing database layer", e);
+			showWarning("Logic Error", e.getMessage());
+		}
+		catch(Exception e){
+			FLog.e("error showing database layer" + ref,e);
+			showWarning("Logic Error", "Error showing database layer " + ref);
+		}
+		return 0;
+	}
+	
 	public void removeLayer(String ref, int layerId) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
@@ -2505,6 +2530,23 @@ public class BeanShellLinker {
 		catch(Exception e){
 			FLog.e("error setting tools enabled value " + ref,e);
 			showWarning("Logic Error", "Error setting tools enabled value " + ref);
+		}
+	}
+	
+	public void addDatabaseLayerQuery(String ref, String name, String sql) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.addDatabaseLayerQuery(name, sql);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding database layer query " + ref,e);
+			showWarning("Logic Error", "Error adding database layer query " + ref);
 		}
 	}
 }

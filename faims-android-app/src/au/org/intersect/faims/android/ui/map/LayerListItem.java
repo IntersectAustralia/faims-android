@@ -10,6 +10,7 @@ import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.layers.Layer;
@@ -56,6 +57,8 @@ public class LayerListItem extends LinearLayout {
 			layerName = ((CustomSpatialiteLayer) layer).getName();
 		} else if (layer instanceof CanvasLayer) {
 			layerName = ((CanvasLayer) layer).getName();
+		} else if (layer instanceof DatabaseLayer) {
+			layerName = ((DatabaseLayer) layer).getName();
 		}
 		return layerName;
 	}

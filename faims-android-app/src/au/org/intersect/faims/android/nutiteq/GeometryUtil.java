@@ -155,7 +155,7 @@ public class GeometryUtil {
 	public static List<MapPos> convertFromWgs84(List<MapPos> pts) {
 		ArrayList<MapPos> list = new ArrayList<MapPos>();
 		for (MapPos p : pts) {
-			list.add(convertToWgs84(p));
+			list.add(convertFromWgs84(p));
 		}
 		return list;
 	}

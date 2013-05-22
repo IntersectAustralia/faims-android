@@ -42,6 +42,7 @@ import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -279,6 +280,19 @@ public class LayerManagerView extends LinearLayout {
 						@Override
 						public void onClick(View arg0) {
 							((CustomSpatialiteLayer) layer).setTextVisible(showLabelsButton.isChecked());
+						}
+					});
+					layout.addView(showLabelsButton);
+				} else if (layer instanceof DatabaseLayer) {
+					final ToggleButton showLabelsButton = new ToggleButton(context);
+					showLabelsButton.setTextOn("Hide Labels");
+					showLabelsButton.setTextOff("Show Labels");
+					showLabelsButton.setChecked(((DatabaseLayer) layer).getTextVisible());
+					showLabelsButton.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							((DatabaseLayer) layer).setTextVisible(showLabelsButton.isChecked());
 						}
 					});
 					layout.addView(showLabelsButton);
@@ -683,6 +697,8 @@ public class LayerManagerView extends LinearLayout {
 		queryTextView.setText("Database query:");
 		layout.addView(queryTextView);
 		final Spinner querySpinner = new Spinner(this.getContext());
+		List<String> queryNames = mapView.getDatabaseLayerQueryNames();
+		querySpinner.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, queryNames));
 		layout.addView(querySpinner);
 		
 		LinearLayout styleLayout = new LinearLayout(this.getContext());
@@ -701,7 +717,7 @@ public class LayerManagerView extends LinearLayout {
 					String layerName = editText.getText() != null ? editText.getText().toString() : null;
 					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
 					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
-					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
 					redrawLayers();
 				} catch (Exception e) {
 					showErrorDialog(e.getMessage());
@@ -1192,6 +1208,9 @@ public class LayerManagerView extends LinearLayout {
 		}else if(layer instanceof CanvasLayer){
 			CanvasLayer canvasLayer = (CanvasLayer) layer;
 			editText.setText(canvasLayer.getName());
+		}else if (layer instanceof DatabaseLayer) {
+			DatabaseLayer databaseLayer = (DatabaseLayer) layer;
+			editText.setText(databaseLayer.getName());
 		}
 		builder.setView(editText);
 		
@@ -1235,6 +1254,8 @@ public class LayerManagerView extends LinearLayout {
 			layerTypeEditText.setText("spatial layer");
 		}else if(layer instanceof CanvasLayer){
 			layerTypeEditText.setText("canvas layer");
+		}else if (layer instanceof DatabaseLayer) {
+			layerTypeEditText.setText("database layer");
 		}
 		layout.addView(layerTypeEditText);
 		
@@ -1331,6 +1352,22 @@ public class LayerManagerView extends LinearLayout {
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(canvasLayer.getName());
 			layout.addView(layerNameEditText);
+		}else if(layer instanceof DatabaseLayer){
+			DatabaseLayer databaseLayer = (DatabaseLayer) layer;
+
+			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			layerNameEditText.setEnabled(false);
+			layerNameEditText.setText(databaseLayer.getName());
+			layout.addView(layerNameEditText);
+			
+			TextView tableNameTextView = new TextView(this.getContext());
+			tableNameTextView.setText("Query name:");
+			layout.addView(tableNameTextView);
+
+			EditText tableNameEditText = new EditText(LayerManagerView.this.getContext());
+			tableNameEditText.setEnabled(false);
+			tableNameEditText.setText(databaseLayer.getQueryName());
+			layout.addView(tableNameEditText);
 		}else{
 			showErrorDialog("wrong type of layer");
 		}

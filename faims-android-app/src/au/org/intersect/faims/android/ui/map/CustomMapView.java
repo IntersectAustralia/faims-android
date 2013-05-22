@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -202,6 +203,8 @@ public class CustomMapView extends MapView {
 
 	private WeakReference<Activity> activityRef;
 	
+	private HashMap<String, String> databaseLayerQueryMap;
+	
 	public CustomMapView(Activity activity, MapLayout mapLayout) {
 		this(activity);
 		
@@ -215,6 +218,7 @@ public class CustomMapView extends MapView {
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
         selectedGeometryList = new ArrayList<Geometry>();
+        databaseLayerQueryMap = new HashMap<String, String>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -370,6 +374,8 @@ public class CustomMapView extends MapView {
 			layerName = ((CustomSpatialiteLayer) layer).getName();
 		} else if (layer instanceof CanvasLayer) {
 			layerName = ((CanvasLayer) layer).getName();
+		} else if (layer instanceof DatabaseLayer) {
+			layerName = ((DatabaseLayer) layer).getName();
 		}
 		return layerName;
 	}
@@ -383,6 +389,8 @@ public class CustomMapView extends MapView {
 			((CustomSpatialiteLayer) layer).setName(layerName);
 		} else if (layer instanceof CanvasLayer) {
 			((CanvasLayer) layer).setName(layerName);
+		} else if (layer instanceof DatabaseLayer) {
+			((DatabaseLayer) layer).setName(layerName);
 		}
 	}
 
@@ -396,6 +404,8 @@ public class CustomMapView extends MapView {
 			layerId = ((CustomSpatialiteLayer) layer).getLayerId();
 		} else if (layer instanceof CanvasLayer) {
 			layerId = ((CanvasLayer) layer).getLayerId();
+		} else if (layer instanceof DatabaseLayer) {
+			layerId = ((DatabaseLayer) layer).getLayerId();
 		}
 		return layerId;
 	}
@@ -645,7 +655,7 @@ public class CustomMapView extends MapView {
 		return addLayer(layer);
 	}
 	
-	public int addDatabaseLayer(String layerName, boolean isEntity, String query, 
+	public int addDatabaseLayer(String layerName, boolean isEntity, String queryName, String querySql, 
 			StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet,
@@ -653,7 +663,7 @@ public class CustomMapView extends MapView {
 		validateLayerName(layerName);
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), 
-				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, query, databaseManager,
+				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
 		this.getLayers().addLayer(layer);
 		
@@ -1245,5 +1255,17 @@ public class CustomMapView extends MapView {
 		
 		layer.setVisible(value);
 		updateTools();
+	}
+	
+	public void addDatabaseLayerQuery(String name, String sql) {
+		databaseLayerQueryMap.put(name, sql);
+	}
+	
+	public String getDatabaseLayerQuery(String name) {
+		return databaseLayerQueryMap.get(name);
+	}
+	
+	public List<String> getDatabaseLayerQueryNames() {
+		return new ArrayList<String>(databaseLayerQueryMap.keySet());
 	}
 }

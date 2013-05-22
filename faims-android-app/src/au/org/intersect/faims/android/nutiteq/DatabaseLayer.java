@@ -19,8 +19,9 @@ import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
+import com.nutiteq.vectorlayers.GeometryLayer;
 
-public class DatabaseLayer extends CanvasLayer {
+public class DatabaseLayer extends GeometryLayer {
 	
 	public enum Type {
 		ENTITY,
@@ -29,26 +30,32 @@ public class DatabaseLayer extends CanvasLayer {
 
 	private DatabaseTextLayer textLayer;
 	private boolean textVisible;
-	private String query;
 	private DatabaseManager dbmgr;
 	private StyleSet<PointStyle> pointStyleSet;
 	private StyleSet<LineStyle> lineStyleSet;
-	private StyleSet<PolygonStyle> polygonStyle;
+	private StyleSet<PolygonStyle> polygonStyleSet;
 	private int maxObjects;
 	private int minZoom;
 	private Type type;
+	private String name;
+	private int layerId;
+	private String queryName;
+	private String querySql;
 
-	public DatabaseLayer(int layerId, String name, Projection projection, Type type, String query, DatabaseManager dbmgr,
+	public DatabaseLayer(int layerId, String name, Projection projection, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet) {
-		super(layerId, name, projection);
-		this.query = query;
+		super(projection);
+		this.name = name;
+		this.layerId = layerId;
+		this.queryName = queryName;
+		this.querySql = querySql;
 		this.type = type;
 		this.dbmgr = dbmgr;
 		this.pointStyleSet = pointStyleSet;
 	    this.lineStyleSet = lineStyleSet;
-	    this.polygonStyle = polygonStyleSet;
+	    this.polygonStyleSet = polygonStyleSet;
 	    this.maxObjects = maxObjects;
 		if (pointStyleSet != null) {
 	      minZoom = pointStyleSet.getFirstNonNullZoomStyleZoom();
@@ -59,6 +66,26 @@ public class DatabaseLayer extends CanvasLayer {
 	    if (polygonStyleSet != null) {
 	      minZoom = polygonStyleSet.getFirstNonNullZoomStyleZoom();
 	    }
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String layerName) {
+		this.name = layerName;
+	}
+
+	public int getLayerId() {
+		return this.layerId;
+	}
+	
+	public String getQueryName() {
+		return queryName;
+	}
+	
+	public String getQuerySQL() {
+		return querySql;
 	}
 	
 	public DatabaseTextLayer getTextLayer() {
@@ -105,7 +132,7 @@ public class DatabaseLayer extends CanvasLayer {
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
 			if (type == Type.ENTITY) {
-				Collection<List<String>> results = dbmgr.fetchEntityList(null);
+				Collection<List<String>> results = dbmgr.fetchEntityList("simpleentity");
 				for (List<String> r : results) {
 					String uuid = r.get(0);
 					ArchEntity entity = (ArchEntity) dbmgr.fetchArchEnt(uuid);
@@ -132,13 +159,15 @@ public class DatabaseLayer extends CanvasLayer {
 		        }else if(object instanceof Line){
 		            newObject = new Line(((Line) object).getVertexList(), null, lineStyleSet, object.userData);
 		        }else if(object instanceof Polygon){
-		            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, polygonStyle, object.userData);
+		            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, polygonStyleSet, object.userData);
 		        }
 		        
-		        newObject.attachToLayer(this);
-		        newObject.setActiveStyle(zoom);
+		        Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
 		        
-		        objects.add(newObject);
+		        transformedObject.attachToLayer(this);
+		        transformedObject.setActiveStyle(zoom);
+		        
+		        objects.add(transformedObject);
 		    }
 		    
 		    setVisibleElementsList(objects);
