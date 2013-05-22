@@ -2526,10 +2526,15 @@ public class BeanShellLinker {
 						    activity.startActivity(intent);
 					    }catch(Exception e){
 					    	FLog.e("Can not open file with the extension",e);
-					    	showWarning("Attached File", "No application to open the file");
+					    	Intent intent = new Intent(Intent.ACTION_VIEW);
+						    Uri data = Uri.fromFile(file);
+		
+						    intent.setDataAndType(data, "*/*");
+		
+						    activity.startActivity(intent);
 					    }
 					}else{
-						showWarning("Attached File", "File does not exist in the faims folder");
+						showWarning("Attached File", "The file does not currently exist in the FAIMS folder. If the file is still uploading or syncing please wait and try again when the process has finished");
 					}
 				}
 
