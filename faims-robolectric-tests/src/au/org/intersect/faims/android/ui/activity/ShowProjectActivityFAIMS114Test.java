@@ -76,7 +76,7 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		// Test we can set Field Two via the button
 		
-		Button button = (Button) activity.getBeanShellLinker().getUIRenderer().getViewByRef(buttonRef);
+		Button button = (Button) activity.getUIRenderer().getViewByRef(buttonRef);
 		button.performClick();
 		
 		actualValue = (String) activity.getBeanShellLinker().getFieldValue(field2Ref);
