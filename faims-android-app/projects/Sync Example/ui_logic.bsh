@@ -138,6 +138,15 @@ updateEntity(entity_id) {
 		attributes.add(createEntityAttribute("filename", filename, null, null, null));
 	}
 	
+	Object values = getFieldValue("tabgroup1/tab1/gallery");
+	if (!"".equals(values)){
+		for(Object values : values){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(values, "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}
+	}
+	
 	String id = saveArchEnt(entity_id, "small", null, attributes);
 	
 	updateAll();
@@ -153,6 +162,19 @@ clearEntity() {
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
 
+ArrayList pictures = new ArrayList();
+
+takePicture() {
+	openCamera("OnPictureTaken()");
+}
+
+OnPictureTaken() {
+	pictureFilepath = getLastPictureFilepath();
+	pictures.add(pictureFilepath);
+	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
+}
+
+onEvent("tabgroup1/tab1/camera", "click", "takePicture()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");

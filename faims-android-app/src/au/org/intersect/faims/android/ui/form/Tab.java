@@ -114,7 +114,8 @@ public class Tab implements Parcelable{
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	
-		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
+		if (attribute.controlType != Constants.CONTROL_TRIGGER &&
+				!(attribute.controlType == Constants.CONTROL_SELECT_MULTI && "image".equalsIgnoreCase(attribute.questionType))) {
 			LinearLayout fieldLinearLayout = new LinearLayout(this.activityRef.get());
 	    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 	    	
@@ -238,8 +239,13 @@ public class Tab implements Parcelable{
             case Constants.CONTROL_SELECT_MULTI:
                 switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
-                    	view = createCheckListGroup(attribute, ref);
-                    	setupView(view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
+                    	if ("image".equalsIgnoreCase(attribute.questionType)) {
+                            view = renderImageSliderForMultiSelection(attribute, directory, ref);
+                            setupView(view, certaintyButton, annotationButton, ref);
+                        }else{
+	                    	view = createCheckListGroup(attribute, ref);
+	                    	setupView(view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
+                        }
                 }
                 break;
             // create control for trigger showing as a button
@@ -672,7 +678,15 @@ public class Tab implements Parcelable{
 	 * @param attributeName 
      */
     private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormAttribute attribute, String directory, String ref) {
-    	final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.activityRef.get(), attribute.name, attribute.type, ref);
+    	return renderImageSlider(attribute, directory, ref, false);
+    }
+
+    private View renderImageSliderForMultiSelection(FormAttribute attribute, String directory, String ref) {
+    	return renderImageSlider(attribute, directory, ref, true);
+	}
+
+    private CustomHorizontalScrollView renderImageSlider(final FormAttribute attribute, String directory, String ref, final boolean isMulti) {
+		final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.activityRef.get(), attribute.name, attribute.type, ref, isMulti);
         LinearLayout galleriesLayout = new LinearLayout(this.activityRef.get());
         galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
         final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
@@ -687,7 +701,7 @@ public class Tab implements Parcelable{
 	        		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 400);
 	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
 	                gallery.setImageURI(Uri.parse(ref+"/"+name));
-	                gallery.setBackgroundColor(Color.RED);
+	                gallery.setBackgroundColor(Color.LTGRAY);
 	                gallery.setPadding(10, 10, 10, 10);
 	                gallery.setLayoutParams(layoutParams);
 	                gallery.setPicture(null);
@@ -695,15 +709,31 @@ public class Tab implements Parcelable{
 	
 	                    @Override
 	                    public void onClick(View v) {
-	                    	CustomImageView selectedImageView = (CustomImageView) v;
-	                        horizontalScrollView.setSelectedImageView(selectedImageView);
-	                        for (CustomImageView view : galleryImages) {
-	                            if (view.equals(selectedImageView)) {
-	                                view.setBackgroundColor(Color.GREEN);
-	                            } else {
-	                                view.setBackgroundColor(Color.RED);
-	                            }
-	                        }
+	                    	if(isMulti){
+	                    		CustomImageView selectedImageView = (CustomImageView) v;
+	                    		if(horizontalScrollView.getSelectedImageViews() != null){
+	                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+	                    				view.setBackgroundColor(Color.LTGRAY);
+	                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+	                    			}else{
+	                    				view.setBackgroundColor(Color.BLUE);
+	                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+	                    			}
+	                    		}else{
+	                    			view.setBackgroundColor(Color.BLUE);
+                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+	                    		}
+	                    	}else{
+	                    		CustomImageView selectedImageView = (CustomImageView) v;
+		                        horizontalScrollView.setSelectedImageView(selectedImageView);
+		                        for (CustomImageView view : galleryImages) {
+		                            if (view.equals(selectedImageView)) {
+		                                view.setBackgroundColor(Color.BLUE);
+		                            } else {
+		                                view.setBackgroundColor(Color.LTGRAY);
+		                            }
+		                        }
+	                    	}
 	                    }
 	                });
 	                TextView textView = new TextView(this.activityRef.get());
@@ -720,7 +750,7 @@ public class Tab implements Parcelable{
         }
         horizontalScrollView.addView(galleriesLayout);
         return horizontalScrollView;
-    }
+	}
 
 	/*
     public ImageView getCurrentImageView() {

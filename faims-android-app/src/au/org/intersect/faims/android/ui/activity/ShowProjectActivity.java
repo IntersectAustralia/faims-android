@@ -297,7 +297,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	public static final int RASTER_FILE_BROWSER_REQUEST_CODE = 3;
 	
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
-	
+
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -506,12 +506,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		
 		// after taking picture using camera
-		/*if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-			Bitmap photo = (Bitmap) data.getExtras().get("data");
-			this.renderer.getCurrentImageView().setImageBitmap(photo);
-			this.renderer.clearCurrentImageView();
-		}*/
-		if (requestCode == FILE_BROWSER_REQUEST_CODE) {
+		if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+			this.linker.executeCameraCallBack();
+		}else if (requestCode == FILE_BROWSER_REQUEST_CODE) {
 			if (resultCode == RESULT_OK) {
 				try {
 					@SuppressWarnings("unchecked")
@@ -1075,7 +1072,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public void showFileBrowser() {
 		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
+		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile(Environment.getExternalStorageDirectory()));
 		startActivityForResult(intent, FILE_BROWSER_REQUEST_CODE);
 	}
 	

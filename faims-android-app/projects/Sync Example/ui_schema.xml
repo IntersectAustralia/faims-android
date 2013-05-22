@@ -28,6 +28,8 @@
                   <filename></filename>
                   <file></file>
                   <sync></sync>
+                  <gallery></gallery>
+                  <camera></camera>
                   <attach></attach>
                   <viewattached></viewattached>
                   <save></save>
@@ -133,6 +135,16 @@
                 <value>0</value>
             </item>
         </select1>
+        <select ref="gallery" type="image">
+            <label>Gallery:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <trigger ref="camera">
+            <label>Take picture</label>
+        </trigger>
         <trigger ref="attach">
             <label>Attach</label>
         </trigger>

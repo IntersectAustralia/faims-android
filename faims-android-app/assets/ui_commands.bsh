@@ -462,11 +462,18 @@ viewRelAttachedFiles(String id){
 	linker.viewRelAttachedFiles(id);
 }
 
-
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null);
 }
 
 setToolsEnabled(String ref, boolean enabled) {
 	linker.setToolsEnabled(ref, enabled);
+}
+
+openCamera(String callback){
+	linker.openCamera(callback);
+}
+
+String getLastPictureFilepath(){
+	return linker.getLastPictureFilePath();
 }
