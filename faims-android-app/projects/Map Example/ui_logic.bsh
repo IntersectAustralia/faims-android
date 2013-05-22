@@ -129,6 +129,7 @@ onEvent("tabgroup1/tab2/load", "click", "loadGPSEntity(null)");
 onMapEvent("tabgroup1/tab1/map", "onTabMapClick()", "onTabMapSelect()");
 
 int entityLayerId;
+int pointLayerId;
 int bluePointId;
 int lastPointId;
 ArrayList loadedEntities;
@@ -137,6 +138,7 @@ int gpsEntityCount = 0;
 
 initEntityMap() {
 	entityLayerId = createCanvasLayer("tabgroup1/tab1/map", "Entity Layer");
+	pointLayerId = createCanvasLayer("tabgroup1/tab1/map", "Point Layer");
 	
 	bluePointId = 0;
 	lastPointId = 0;
@@ -194,6 +196,12 @@ saveGPSEntity() {
 
 setGPSEntity(entity) {
 	point = entity.getGeometryList().get(0);
+	
+	for (EntityAttribute attribute : entity.getAttributes()) {
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab1/name", attribute.getText());
+		}
+	}
 	
 	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getMapPos().x + ", Latitude = " + point.getMapPos().y);
 }
@@ -268,7 +276,7 @@ onTabMapSelect() {
 			// load entity name
 			Object entity = loadedEntities.get(i);
 		
-			setEntity(entity);
+			setGPSEntity(entity);
 			
 			point = getGeometry("tabgroup1/tab1/map", id);
 			bluePointId = drawGeometry("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.BLUE));

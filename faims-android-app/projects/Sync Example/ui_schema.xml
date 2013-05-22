@@ -29,6 +29,7 @@
                   <file></file>
                   <sync></sync>
                   <attach></attach>
+                  <viewattached></viewattached>
                   <save></save>
                   <update></update>
                   <clear></clear>
@@ -134,6 +135,9 @@
         </select1>
         <trigger ref="attach">
             <label>Attach</label>
+        </trigger>
+        <trigger ref="viewattached">
+            <label>View Attached Files</label>
         </trigger>
         <trigger ref="save">
             <label>Save</label>

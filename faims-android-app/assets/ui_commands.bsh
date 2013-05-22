@@ -461,6 +461,15 @@ attachFile(String filePath, boolean sync, String dir) {
 	return linker.attachFile(filePath, sync, dir);
 }
 
+viewArchEntAttachedFiles(String id){
+	linker.viewArchEntAttachedFiles(id);
+}
+
+viewRelAttachedFiles(String id){
+	linker.viewRelAttachedFiles(id);
+}
+
+
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null);
 }

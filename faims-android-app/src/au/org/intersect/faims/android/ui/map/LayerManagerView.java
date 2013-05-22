@@ -1,8 +1,5 @@
 package au.org.intersect.faims.android.ui.map;
 
-import group.pals.android.lib.ui.filechooser.FileChooserActivity;
-import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,10 +12,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Parcelable;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
@@ -97,19 +92,19 @@ public class LayerManagerView extends LinearLayout {
 		
 	}
 
-	private Button addButton;
-	private ToggleButton orderButton;
 	private CustomMapView mapView;
-	private CustomDragDropListView listView;
 	private LinearLayout layout;
-	private LinearLayout buttonsLayout;
-	private FileManager fm;
-	private TextView selectedFileText;
-	private Spinner tableNameSpinner;
 	private GeometryStyle pointStyle;
 	private GeometryStyle lineStyle;
 	private GeometryStyle polygonStyle;
 	private GeometryTextStyle textStyle;
+	private LinearLayout buttonsLayout;
+	private CustomDragDropListView listView;
+	private TextView selectedFileText;
+	private Spinner tableNameSpinner;
+	private Spinner labelColumnSpinner;
+	protected File rasterFile;
+	protected File spatialFile;
 
 	public LayerManagerView(Context context) {
 		super(context);
@@ -147,11 +142,29 @@ public class LayerManagerView extends LinearLayout {
 		textStyle.color = Color.WHITE;
 		textStyle.size = 40;
 		textStyle.font = Typeface.DEFAULT;
-	}
-	
-	public LayerManagerView(Context context, FileManager fm) {
-		this(context);
-		this.fm = fm;
+		
+		ShowProjectActivity activity = (ShowProjectActivity) this.getContext();
+		activity.getFileManager().addListener(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+			
+			@Override
+			public void onFileSelected(File file) {
+				LayerManagerView.this.rasterFile = file;
+			}
+		});
+		activity.getFileManager().addListener(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+			
+			@Override
+			public void onFileSelected(File file) {
+				try {
+					LayerManagerView.this.spatialFile = file;
+					setTableSpinner();
+				} catch (jsqlite.Exception e) {
+					FLog.e("Not a valid spatial layer file", e);
+					showErrorDialog("Not a valid spatial layer file");
+				}
+				LayerManagerView.this.selectedFileText.setText(file.getName());
+			}
+		});
 	}
 	
 	public void attachToMap(CustomMapView mapView) {
@@ -278,24 +291,9 @@ public class LayerManagerView extends LinearLayout {
 
 		layout.addView(listView);
 	}
-	
-	// Drop Listener
-	private CustomDragDropListView.DropListener dropListener = new CustomDragDropListView.DropListener() {
-		public void drop(int from, int to) {
-			List<Layer> layers = mapView.getAllLayers();
-			int last = layers.size() - 1;
-			if(from != last && to != last){
-				Collections.swap(layers, last - from, last - to);
-				layers.remove(0);
-				mapView.setAllLayers(layers);
-				redrawLayers();
-			}
-		}
-	};
-	private Spinner labelColumnSpinner;
 
 	private void createAddButton() {
-		addButton = new Button(this.getContext());
+		Button addButton = new Button(this.getContext());
 		addButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		addButton.setText("Add");
 		addButton.setOnClickListener(new OnClickListener() {
@@ -311,7 +309,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void createOrderButton(){
-		orderButton = new ToggleButton(this.getContext());
+		ToggleButton orderButton = new ToggleButton(this.getContext());
 		orderButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		orderButton.setTextOn("Order ON");
 		orderButton.setTextOff("Order OFF");
@@ -321,7 +319,22 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked){
-					listView.setDropListener(dropListener);
+					listView.setDropListener(new CustomDragDropListView.DropListener() {
+						public void drop(int from, int to) {
+							List<Layer> layers = mapView.getAllLayers();
+							int last = layers.size() - 1;
+							boolean isFromBaseLayer = layers.get(last - from) == mapView.getLayers().getBaseLayer();
+							boolean isToBaseLayer = layers.get(last - to) == mapView.getLayers().getBaseLayer();
+							if(!(isFromBaseLayer || isToBaseLayer)){
+								Collections.swap(layers, last - from, last - to);
+								if (mapView.getLayers().getBaseLayer() != null) {
+									layers.remove(0);
+								}
+								mapView.getLayers().setLayers(layers);
+								redrawLayers();
+							}
+						}
+					});
 				}else{
 					listView.removeDropListener();
 				}
@@ -459,11 +472,10 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
-					if(fm.getSelectedFile() != null){
-						mapView.addRasterMap(editText.getText().toString(), fm.getSelectedFile().getPath());
+					if(rasterFile != null){
+						mapView.addRasterMap(editText.getText().toString(), rasterFile.getPath());
 						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
 						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
-						fm.setSelectedFile(null);
 						redrawLayers();
 					}
 				} catch (Exception e) {
@@ -478,7 +490,7 @@ public class LayerManagerView extends LinearLayout {
 	        }
 	    });
 		
-		builder.create().show();
+		d.show();
 	}
 	
 //	private void addShapeLayer(){
@@ -539,7 +551,7 @@ public class LayerManagerView extends LinearLayout {
 //	        }
 //	    });
 //		
-//		builder.create().show();
+//		d.show();
 //	}
 	
 	private void addSpatialLayer(){
@@ -623,13 +635,12 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
-					if(fm.getSelectedFile() != null){
+					if(spatialFile != null){
 						String layerName = editText.getText() != null ? editText.getText().toString() : null;
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
 						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, new String[] { labelName }, 
+						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, new String[] { labelName }, 
 								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
-						fm.setSelectedFile(null);
 						redrawLayers();
 					}
 				} catch (Exception e) {
@@ -644,7 +655,7 @@ public class LayerManagerView extends LinearLayout {
 	        }
 	    });
 		
-		builder.create().show();
+		d.show();
 	}
 	
 	private void addDatabaseLayer(){
@@ -659,7 +670,6 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		
 		builder.setView(scrollView);
-		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Database layer name:");
@@ -667,32 +677,21 @@ public class LayerManagerView extends LinearLayout {
 		final EditText editText = new EditText(LayerManagerView.this.getContext());
 		layout.addView(editText);
 		
-		TextView tableTextView = new TextView(this.getContext());
-		tableTextView.setText("Database query:");
-		layout.addView(tableTextView);
-		tableNameSpinner = new Spinner(this.getContext());
-		tableNameSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int index,
-					long arg3) {
-				try {
-					String tableName = (String) tableNameSpinner.getAdapter().getItem(index);
-					setLabelSpinner(tableName);
-				} catch (Exception e) {
-					FLog.e("error getting table columns", e);
-					showErrorDialog("Error getting table columns");
-				}
-			}
-			
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		});
-		layout.addView(tableNameSpinner);
+		TextView typeTextView = new TextView(this.getContext());
+		typeTextView.setText("Database layer type:");
+		layout.addView(typeTextView);
+		final Spinner typeSpinner = new Spinner(this.getContext());
+		ArrayList<String> types = new ArrayList<String>();
+		types.add("Entity");
+		types.add("Relationship");
+		typeSpinner.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, types));
+		layout.addView(typeSpinner);
+		
+		TextView queryTextView = new TextView(this.getContext());
+		queryTextView.setText("Database query:");
+		layout.addView(queryTextView);
+		final Spinner querySpinner = new Spinner(this.getContext());
+		layout.addView(querySpinner);
 		
 		LinearLayout styleLayout = new LinearLayout(this.getContext());
 		styleLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -707,14 +706,11 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
-					if(fm.getSelectedFile() != null){
-						String layerName = editText.getText() != null ? editText.getText().toString() : null;
-						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
-						
-						fm.setSelectedFile(null);
-						redrawLayers();
-					}
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
+					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
+					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+					redrawLayers();
 				} catch (Exception e) {
 					showErrorDialog(e.getMessage());
 				}
@@ -1367,38 +1363,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void showFileBrowser(int requestCode){
-		Intent intent = new Intent((ShowProjectActivity)this.getContext(), FileChooserActivity.class);
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
-		((ShowProjectActivity) this.getContext()).startActivityForResult(intent, requestCode);
-	}
-
-	public FileManager getFileManager() {
-		return fm;
-	}
-
-	public void setFileManager(FileManager fm) {
-		this.fm = fm;
-	}
-
-	public void setSelectedFilePath(String filename, boolean isSpatial) {
-		if(isSpatial){
-			try {
-				setTableSpinner();
-			} catch (jsqlite.Exception e) {
-				FLog.e("Not a valid spatial layer file");
-				AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-				
-				builder.setTitle("Error");
-				builder.setMessage("Not a valid spatial layer file");
-				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User clicked OK button
-				           }
-				       });
-				builder.create().show();
-			}
-		}
-		this.selectedFileText.setText(filename);
+		((ShowProjectActivity) this.getContext()).showFileBrowser(requestCode);
 	}
 	
 	public void setTableSpinner() throws jsqlite.Exception{
@@ -1408,7 +1373,7 @@ public class LayerManagerView extends LinearLayout {
 				Database db = null;
 				try {
 					db = new jsqlite.Database();
-					db.open(this.fm.getSelectedFile().getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+					db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
 					
 					String query = "select name from sqlite_master where type = 'table' and sql like '%\"Geometry\"%';";
 					st = db.prepare(query);
@@ -1453,7 +1418,7 @@ public class LayerManagerView extends LinearLayout {
 			Database db = null;
 			try {
 				db = new jsqlite.Database();
-				db.open(this.fm.getSelectedFile().getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				String query = "pragma table_info(" + tableName + ")";
 				st = db.prepare(query);

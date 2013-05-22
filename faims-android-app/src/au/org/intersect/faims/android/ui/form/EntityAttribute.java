@@ -7,6 +7,7 @@ public class EntityAttribute {
 	private String measure;
 	private String certainty;
 	private String vocab;
+	private String type;
 
 	public String getName() {
 		return name;
@@ -66,5 +67,13 @@ public class EntityAttribute {
 
 	public boolean hasVocab(){
 		return this.vocab != null;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

@@ -6,6 +6,7 @@ public class RelationshipAttribute {
 	private String text;
 	private String vocab;
 	private String certainty;
+	private String type;
 
 	public String getName() {
 		return name;
@@ -39,6 +40,14 @@ public class RelationshipAttribute {
 		certainty = value;
 	}
 	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	public String toString() {
 		return "(" + name + "," + text + "," + vocab + "," + certainty + ")";
 	}

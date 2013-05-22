@@ -27,7 +27,6 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
@@ -76,7 +75,7 @@ import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
-public class CustomMapView extends MapView implements FileManager.FileSelectionListener{
+public class CustomMapView extends MapView {
 
 	public class InternalMapListener extends MapListener {
 
@@ -191,7 +190,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	private boolean showDecimal;
 	private LayerManagerView layerManager;
-	private FileManager fm;
 
 	private boolean showKm;
 
@@ -489,14 +487,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 						.screenToWorld(width, height, 0))));
 	}
 
-	public FileManager getFileManager() {
-		return fm;
-	}
-
-	public void setFileManager(FileManager fm) {
-		this.fm = fm;
-	}
-
 	public void startThread(Runnable runnable) {
 		runnableList.add(runnable);
 
@@ -655,14 +645,15 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		return addLayer(layer);
 	}
 	
-	public int addDatabaseLayer(String layerName, String query, 
+	public int addDatabaseLayer(String layerName, boolean isEntity, String query, 
 			StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		validateLayerName(layerName);
 		
-		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), query, databaseManager,
+		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), 
+				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, query, databaseManager,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
 		this.getLayers().addLayer(layer);
 		
@@ -800,7 +791,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	public void showLayersDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-		layerManager = new LayerManagerView(this.getContext(),fm);
+		layerManager = new LayerManagerView(this.getContext());
 		layerManager.attachToMap(this);
 
 		builder.setTitle("Layer Manager");
@@ -1092,11 +1083,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		drawView.showDecimal(value);
 		editView.showDecimal(value);
 		updateDrawView();
-	}
-	
-	@Override
-	public void onFileChangesListener(boolean isSpatialFile) {
-		layerManager.setSelectedFilePath(fm.getSelectedFile().getName(),isSpatialFile);
 	}
 
 	public boolean showKm() {
