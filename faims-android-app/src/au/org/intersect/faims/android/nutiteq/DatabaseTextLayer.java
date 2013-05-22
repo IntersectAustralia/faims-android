@@ -58,7 +58,6 @@ public class DatabaseTextLayer extends TextLayer {
 	        } else if (geom instanceof Polygon) {
 	        	try {
 	        		MapPos center = SpatialiteUtil.computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
-	        		FLog.d("center: " + center);
 	        		topRight = GeometryUtil.convertFromWgs84(center);
 	        	} catch (Exception e) {
 	        		topRight = new MapPos(0, 0);

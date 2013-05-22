@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.ui.map;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -662,7 +661,7 @@ public class CustomMapView extends MapView {
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		validateLayerName(layerName);
 		
-		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), 
+		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
 		this.getLayers().addLayer(layer);

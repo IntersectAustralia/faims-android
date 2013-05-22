@@ -1,15 +1,13 @@
 package au.org.intersect.faims.android.nutiteq;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.form.ArchEntity;
-import au.org.intersect.faims.android.ui.form.Relationship;
+import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.components.Envelope;
+import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
@@ -22,6 +20,8 @@ import com.nutiteq.style.StyleSet;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
+	
+	private static final int BOUNDARY_PADDING = 20;
 	
 	public enum Type {
 		ENTITY,
@@ -41,14 +41,16 @@ public class DatabaseLayer extends GeometryLayer {
 	private int layerId;
 	private String queryName;
 	private String querySql;
+	private CustomMapView mapView;
 
-	public DatabaseLayer(int layerId, String name, Projection projection, Type type, String queryName, String querySql, DatabaseManager dbmgr,
+	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet) {
 		super(projection);
 		this.name = name;
 		this.layerId = layerId;
+		this.mapView = mapView;
 		this.queryName = queryName;
 		this.querySql = querySql;
 		this.type = type;
@@ -128,23 +130,15 @@ public class DatabaseLayer extends GeometryLayer {
 	    }
 		
 		try {
-			Vector<Geometry> objectTemp = new Vector<Geometry>();
+			MapPos min = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
+			MapPos max = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
+			Vector<Geometry> objectTemp = null;
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
 			if (type == Type.ENTITY) {
-				Collection<List<String>> results = dbmgr.fetchEntityList("simpleentity");
-				for (List<String> r : results) {
-					String uuid = r.get(0);
-					ArchEntity entity = (ArchEntity) dbmgr.fetchArchEnt(uuid);
-					objectTemp.addAll(entity.getGeometryList());
-				}
+				 objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
-				Collection<List<String>> results = dbmgr.fetchRelationshipList(null);
-				for (List<String> r : results) {
-					String relationshipid = r.get(0);
-					Relationship rel = (Relationship) dbmgr.fetchRel(relationshipid);
-					objectTemp.addAll(rel.getGeometryList());
-				}
+				// TODO
 			} else {
 				throw new Exception("database layer has no type");
 			}
@@ -169,6 +163,8 @@ public class DatabaseLayer extends GeometryLayer {
 		        
 		        objects.add(transformedObject);
 		    }
+		    
+		    FLog.d("visible objects " + objects.size());
 		    
 		    setVisibleElementsList(objects);
 		} catch (Exception e) {
