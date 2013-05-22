@@ -149,20 +149,21 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onFileSelected(File file) {
 				LayerManagerView.this.rasterFile = file;
+				LayerManagerView.this.selectedFileText.setText(file.getName());
 			}
 		});
 		activity.getFileManager().addListener(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			
 			@Override
 			public void onFileSelected(File file) {
+				LayerManagerView.this.spatialFile = file;
+				LayerManagerView.this.selectedFileText.setText(file.getName());
 				try {
-					LayerManagerView.this.spatialFile = file;
 					setTableSpinner();
 				} catch (jsqlite.Exception e) {
 					FLog.e("Not a valid spatial layer file", e);
 					showErrorDialog("Not a valid spatial layer file");
 				}
-				LayerManagerView.this.selectedFileText.setText(file.getName());
 			}
 		});
 	}
@@ -327,10 +328,7 @@ public class LayerManagerView extends LinearLayout {
 							boolean isToBaseLayer = layers.get(last - to) == mapView.getLayers().getBaseLayer();
 							if(!(isFromBaseLayer || isToBaseLayer)){
 								Collections.swap(layers, last - from, last - to);
-								if (mapView.getLayers().getBaseLayer() != null) {
-									layers.remove(0);
-								}
-								mapView.getLayers().setLayers(layers);
+								mapView.setAllLayers(layers);
 								redrawLayers();
 							}
 						}
@@ -445,7 +443,6 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		
 		builder.setView(scrollView);
-		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Raster layer name:");
@@ -459,7 +456,6 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				d.dismiss();
 				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
@@ -490,7 +486,7 @@ public class LayerManagerView extends LinearLayout {
 	        }
 	    });
 		
-		d.show();
+		builder.create().show();
 	}
 	
 //	private void addShapeLayer(){
@@ -503,7 +499,6 @@ public class LayerManagerView extends LinearLayout {
 //		layout.setOrientation(LinearLayout.VERTICAL);
 //		
 //		builder.setView(layout);
-//		final Dialog d = builder.create();
 //		
 //		TextView textView = new TextView(this.getContext());
 //		textView.setText("Shape layer name:");
@@ -517,7 +512,6 @@ public class LayerManagerView extends LinearLayout {
 //
 //			@Override
 //			public void onClick(View arg0) {
-//				d.dismiss();
 //				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 //			}
 //		});
@@ -551,7 +545,7 @@ public class LayerManagerView extends LinearLayout {
 //	        }
 //	    });
 //		
-//		d.show();
+//		builder.create().show();
 //	}
 	
 	private void addSpatialLayer(){
@@ -566,7 +560,6 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		
 		builder.setView(scrollView);
-		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Spatial layer name:");
@@ -614,7 +607,6 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				d.dismiss();
 				showFileBrowser(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
@@ -655,7 +647,7 @@ public class LayerManagerView extends LinearLayout {
 	        }
 	    });
 		
-		d.show();
+		builder.create().show();
 	}
 	
 	private void addDatabaseLayer(){

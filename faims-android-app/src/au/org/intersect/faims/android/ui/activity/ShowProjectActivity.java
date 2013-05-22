@@ -538,15 +538,18 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			this.renderer.clearCurrentImageView();
 		}*/
 		switch(requestCode) {
-		case FILE_BROWSER_REQUEST_CODE:
-		case RASTER_FILE_BROWSER_REQUEST_CODE:
-		case SPATIAL_FILE_BROWSER_REQUEST_CODE:
-
-			@SuppressWarnings("unchecked")
-			List<LocalFile> files = (List<LocalFile>)
-	                data.getSerializableExtra(FileChooserActivity._Results);
-			fm.selectFile(requestCode, files.get(0));
-			break;
+			case FILE_BROWSER_REQUEST_CODE:
+			case RASTER_FILE_BROWSER_REQUEST_CODE:
+			case SPATIAL_FILE_BROWSER_REQUEST_CODE:
+				if (data != null) {
+					@SuppressWarnings("unchecked")
+					List<LocalFile> files = (List<LocalFile>)
+			                data.getSerializableExtra(FileChooserActivity._Results);
+					if (files != null && files.size() > 0) {
+						fm.selectFile(requestCode, files.get(0));
+					}
+				}
+				break;
 		}
 	}
 	

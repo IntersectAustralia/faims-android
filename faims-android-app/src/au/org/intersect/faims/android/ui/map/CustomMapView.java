@@ -1219,10 +1219,13 @@ public class CustomMapView extends MapView {
 			} else if (layer instanceof DatabaseLayer) {
 				tempLayers.add(layer);
 				tempLayers.add(((DatabaseLayer) layer).getTextLayer());
+			} else if (layer == this.getLayers().getBaseLayer()) {
+				// ignore
 			} else {
 				tempLayers.add(layer);
 			}
 		}
+		debugAllLayers();
 		this.getLayers().setLayers(tempLayers);
 	}
 	
