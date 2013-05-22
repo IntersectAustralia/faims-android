@@ -267,6 +267,11 @@ showSpatialLayer(String ref, String layerName, String filename, String tableName
 	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
+showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
+	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+	linker.showDatabaseLayer(ref, layerName, isEntity, queryName, querySql, pointStyle, lineStyle, polygonStyle, textStyle);
+}
+
 removeLayer(String ref, int layerId) {
 	linker.removeLayer(ref, layerId);
 }
@@ -476,4 +481,8 @@ attachFile(String filePath, boolean sync) {
 
 setToolsEnabled(String ref, boolean enabled) {
 	linker.setToolsEnabled(ref, enabled);
+}
+
+addDatabaseLayerQuery(String ref, String name, String sql) {
+	linker.addDatabaseLayerQuery(ref, name, sql);
 }

@@ -807,4 +807,6 @@ initSpatialMap() {
 
 private initUIMap() {
 	setMapZoom("tabgroup5/tab1/map", 15.0f);
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all", "select uuid from archentity");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "test", "select uuid from archentity");
 }
