@@ -1225,7 +1225,6 @@ public class CustomMapView extends MapView {
 				tempLayers.add(layer);
 			}
 		}
-		debugAllLayers();
 		this.getLayers().setLayers(tempLayers);
 	}
 	
