@@ -2159,6 +2159,24 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public List<Geometry> getGeometrySelection(String ref) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				return GeometryUtil.convertGeometryListToWgs84(mapView.getSelection());
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error clearing selection " + ref,e);
+			showWarning("Logic Error", "Error clearing selection " + ref);
+		}
+		return null;
+	}
+	
 	public void prepareSelectionTransform(String ref) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);

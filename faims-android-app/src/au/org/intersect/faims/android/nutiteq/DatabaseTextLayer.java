@@ -42,6 +42,7 @@ public class DatabaseTextLayer extends TextLayer {
 	    }
 
 	    List<Geometry> geometries = databaseLayer.getVisibleElements();
+	    if (geometries == null || geometries.size() == 0) return;
 	    
 	    Vector<Text> objects = new Vector<Text>();
 	    

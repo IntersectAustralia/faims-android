@@ -382,6 +382,10 @@ clearGeometrySelection(String ref) {
 	linker.clearGeometrySelection(ref);
 }
 
+getGeometrySelection(String ref) {
+	return linker.getGeometrySelection(ref);
+}
+
 getMapGeometrySelected() {
 	return _map_geometry_selected;
 }

@@ -84,6 +84,23 @@
               <tab1>
                   <map></map>
               </tab1>
+              <tab2>
+                  <entity></entity>
+                  <name></name>
+                  <value></value>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab2>
+              <tab3>
+                  <relationship></relationship>
+                  <name></name>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab3>
           </tabgroup5>
         </faims>
       </instance>
@@ -316,13 +333,66 @@
         </input>
       </group>
     </group>
-    <group ref="tabgroup5">
+    <group ref="tabgroup5" faims_archent_type="simpleentity">
       <label>Map UI</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="map" faims_map="true">
             <label>Map:</label>
         </input>
+      </group>
+      <group ref="tab2">
+          <label>Entity</label>
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
+              <label>Entity</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+              <label>Name:</label>
+          </input>
+          <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+              <label>Value:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+      <group ref="tab3">
+          <label>Relationship</label>
+          <select1 ref="relationship"  faims_certainty="false" faims_annotation="false">
+              <label>Relationship</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name">
+              <label>Name:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
       </group>
     </group>
   </h:body>

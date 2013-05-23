@@ -138,7 +138,7 @@ public class DatabaseLayer extends GeometryLayer {
 			if (type == Type.ENTITY) {
 				 objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
-				// TODO
+				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(min, max, querySql, maxObjects);
 			} else {
 				throw new Exception("database layer has no type");
 			}
@@ -164,7 +164,7 @@ public class DatabaseLayer extends GeometryLayer {
 		        objects.add(transformedObject);
 		    }
 		    
-		    FLog.d("visible objects " + objects.size());
+		    //FLog.d("visible objects " + objects.size());
 		    
 		    setVisibleElementsList(objects);
 		} catch (Exception e) {

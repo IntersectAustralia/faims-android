@@ -6,7 +6,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="faims-android-app/libs/armeabi"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="au/org/intersect/faims/android/ui/map/LayerManagerDialog.java|au/org/intersect/faims/android/ui/map/SelectGroupDialog.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="nutiteq"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin/classes"/>

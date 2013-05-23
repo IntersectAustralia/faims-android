@@ -83,11 +83,17 @@ boolean initTabGroup2 = false;
 boolean initTabGroup3 = false;
 boolean initTabGroup4 = false;
 boolean initTabGroup5 = false;
+
+int entityCount = 0;
+int relCount = 0;
 showScreen(name) {
 	setGPSUpdateInterval(4);
 
 	sydneymap = "files/data/maps/sydney_map.tif";
 	kazmap = "files/data/maps/kaz_map.tif";
+	
+	entityCount = fetchEntityList("simpleentity").size() + 1;
+	relCount = fetchRelationshipList("abovebelow").size() + 1;
 	
 	if ("tabgroup1".equals(name) && !initTabGroup1) {
 		initTabGroup1 = true;
@@ -341,8 +347,6 @@ int gridId = 0;
 int tool = POINT;
 int currentGeometryId = 0;
 int layerCount = 1;
-int entityCount = 0;
-int relCount = 0;
 
 initDrawMap() {
 	
@@ -805,8 +809,181 @@ initSpatialMap() {
 	showSpatialLayer("tabgroup4/tab1/map", "Kaz Site Points", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", null, ps, ls, pos, ts); 
 }
 
+// Map UI Test
+
 private initUIMap() {
 	setMapZoom("tabgroup5/tab1/map", 15.0f);
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all", "select uuid from archentity");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "test", "select uuid from archentity");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "no query", null);
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+					"                                                 FROM archentity\n" + 
+					"                                                 JOIN aenttype using (aenttypeid)\n" + 
+					"                                                 where archentity.deleted is null\n" + 
+					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
+					"                                                 group by uuid");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value pond", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+					"                                                 FROM archentity\n" +
+					"                                                 JOIN aenttype using (aenttypeid)\n" +
+					"                                                 JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+					"                                                 where archentity.deleted is null\n" + 
+					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
+					"                                                   and aentvalue.deleted is null\n" + 
+					"                                                   and (freetext LIKE '%'||'pond'||'%'\n" + 
+					"                                                        OR measure LIKE '%'||'pond'||'%'\n" + 
+					"                                                        OR vocabname LIKE '%'||'pond'||'%')\n" + 
+					"                                                 group by uuid, attributeid");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forrest", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+					"                                                 FROM archentity\n" +
+					"                                                 JOIN aenttype using (aenttypeid)\n" +
+					"                                                 JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+					"                                                 where archentity.deleted is null\n" + 
+					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
+					"                                                   and aentvalue.deleted is null\n" + 
+					"                                                   and (freetext LIKE '%'||'forrest'||'%'\n" + 
+					"                                                        OR measure LIKE '%'||'forrest'||'%'\n" + 
+					"                                                        OR vocabname LIKE '%'||'forrest'||'%')\n" + 
+					"                                                 group by uuid, attributeid");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships", "SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+					"                                                 FROM relationship\n" + 
+					"                                                 JOIN relntype using (relntypeid)\n" + 
+					"                                                 where relationship.deleted is null\n" + 
+					"                                                 and relntypename LIKE '%'||'abovebelow'||'%'\n" + 
+					"                                                 group by relationshipid");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships with value test", "SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+					"                                                 FROM relationship\n" +
+					"                                                 JOIN relntype using (relntypeid)\n" +
+					"                                                 JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+					"                                                 where relationship.deleted is null\n" + 
+					"                                                 and relntypename LIKE '%'||'abovebelow'||'%'\n" + 
+					"                                                   and relationship.deleted is null\n" + 
+					"                                                   and (freetext LIKE '%'||'test'||'%'\n" +
+					"                                                        OR vocabname LIKE '%'||'test'||'%')\n" + 
+					"                                                 group by relationshipid, attributeid");
+					
+	refreshUIEntities();
+	refreshUIRelationships();
+	
+}
+
+onEvent("tabgroup5/tab2/clear", "click", "clearUIEntity()");
+onEvent("tabgroup5/tab2/save", "click", "saveUIEntity()");
+onEvent("tabgroup5/tab2/update", "click", "updateUIEntity(getFieldValue(\"tabgroup5/tab2/entity\"))");
+onEvent("tabgroup5/tab2/load", "click", "loadUIEntity()");
+
+onEvent("tabgroup5/tab3/clear", "click", "clearUIRelationship()");
+onEvent("tabgroup5/tab3/save", "click", "saveUIRelationship()");
+onEvent("tabgroup5/tab3/update", "click", "updateUIRelationship(getFieldValue(\"tabgroup5/tab3/relationship\"))");
+onEvent("tabgroup5/tab3/load", "click", "loadUIRelationship()");
+
+refreshUIEntities() {
+	Object entities = fetchEntityList("simpleentity");
+	
+	populateDropDown("tabgroup5/tab2/entity", entities);
+}
+
+clearUIEntity() {
+	newTabGroup("tabgroup5");
+}
+
+saveUIEntity() {
+	updateUIEntity(null);
+}
+
+updateUIEntity(String entityId) {
+	
+	if (entityId == null || "".equals(entityId)) entityId = null;
+	
+	if (getGeometrySelection("tabgroup5/tab1/map") == null || getGeometrySelection("tabgroup5/tab1/map").size() == 0) {
+		showWarning("Logic Error", "Please select geometry to save to entity");
+		return;
+	}
+
+	List attributes = createAttributeList();
+	if (entityId == null) {
+		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+	}
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
+	
+	List collection = getGeometrySelection("tabgroup5/tab1/map");
+	if (collection != null) {
+		System.out.println(collection);
+	}
+	
+	String id = saveArchEnt(entityId, "simpleentity", collection, attributes);
+	
+	refreshUIEntities();
+	
+	return id;
+}
+
+loadUIEntity() {
+	
+	entityId = getFieldValue("tabgroup5/tab2/entity");
+	
+	if (entityId == null || "".equals(entityId)) return;
+	
+	Object entity = fetchArchEnt(entityId);
+	
+	showTabGroup("tabgroup5", entityId);
+	
+}
+
+refreshUIRelationships() {
+	Object relationships = fetchRelationshipList("abovebelow");
+	
+	populateDropDown("tabgroup5/tab3/relationship", relationships);
+}
+
+clearUIRelationship() {
+	setFieldValue("tabgroup5/tab3/name", "");
+	setFieldCertainty("tabgroup5/tab3/name","1");
+}
+
+saveUIRelationship() {
+	updateUIRelationship(null);
+}
+
+updateUIRelationship(String relId) {
+	
+	if (relId == null || "".equals(relId)) relId = null;
+	
+	if (getGeometrySelection("tabgroup5/tab1/map") == null || getGeometrySelection("tabgroup5/tab1/map").size() == 0) {
+		showWarning("Logic Error", "Please select geometry to save to relationship");
+		return;
+	}	
+
+	List attributes = createAttributeList();
+	if (relId == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
+	
+	List collection = getGeometrySelection("tabgroup5/tab1/map"); 
+	if (collection != null) {
+		System.out.println(collection);
+	}
+	
+	String id = saveRel(relId, "abovebelow", collection, attributes);
+	
+	refreshUIRelationships();
+	
+	return id;
+}
+
+loadUIRelationship() {
+	
+	relId = getFieldValue("tabgroup5/tab3/relationship");
+	
+	if (relId == null || "".equals(relId)) return;
+	
+	Object relationship = fetchRel(relId);
+	
+	for (Object attribute : relationship.getAttributes()) {
+		System.out.println(attribute.toString());
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup5/tab3/name", attribute.getText());
+			setFieldCertainty("tabgroup5/tab3/name", attribute.getCertainty());
+		}
+	}
+	
 }
