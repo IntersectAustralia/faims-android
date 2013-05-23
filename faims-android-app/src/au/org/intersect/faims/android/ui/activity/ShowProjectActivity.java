@@ -296,7 +296,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	public static final int RASTER_FILE_BROWSER_REQUEST_CODE = 3;
 	
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
-	
+
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -548,6 +548,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					if (files != null && files.size() > 0) {
 						fm.selectFile(requestCode, files.get(0));
 					}
+				}
+				break;
+			case CAMERA_REQUEST_CODE:
+				if (resultCode == RESULT_OK) {
+					this.linker.executeCameraCallBack();
 				}
 				break;
 		}
@@ -1079,7 +1084,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public void showFileBrowser(int requestCode) {
 		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
+		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile(Environment.getExternalStorageDirectory()));
 		startActivityForResult(intent, requestCode);
 	}
 	

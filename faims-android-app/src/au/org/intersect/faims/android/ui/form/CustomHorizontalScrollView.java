@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -11,21 +12,24 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	private String attributeType;
 	private String ref;
 	private CustomImageView selectedImageView;
+	private List<CustomImageView> selectedImageViews;
 	private List<CustomImageView> imageViews;
 	private float certainty = 1;
 	private float currentCertainty = 1;
 	private String annotation = "";
 	private String currentAnnotation = "";
+	private boolean isMulti;
 
 	public CustomHorizontalScrollView(Context context) {
 		super(context);
 	}
 
-	public CustomHorizontalScrollView(Context context, String attributeName, String attributeType, String ref) {
+	public CustomHorizontalScrollView(Context context, String attributeName, String attributeType, String ref, boolean isMulti) {
 		super(context);
 		this.attributeName = attributeName;
 		this.attributeType = attributeType;
 		this.ref = ref;
+		this.isMulti = isMulti;
 	}
 	
 	public String getAttributeName() {
@@ -102,5 +106,33 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 
 	public void setCurrentAnnotation(String currentAnnotation) {
 		this.currentAnnotation = currentAnnotation;
+	}
+
+	public List<CustomImageView> getSelectedImageViews() {
+		return selectedImageViews;
+	}
+	
+	public void addSelectedImageView(CustomImageView imageView){
+		if(this.selectedImageViews == null){
+			this.selectedImageViews = new ArrayList<CustomImageView>();
+		}
+		this.selectedImageViews.add(imageView);
+	}
+	
+	public void removeSelectedImageView(CustomImageView imageView){
+		if(this.selectedImageViews != null){
+			this.selectedImageViews.remove(imageView);
+		}
+	}
+	
+	public void removeSelectedImageViews(){
+		if(this.selectedImageViews != null){
+			this.selectedImageViews.clear();
+		}
+		this.selectedImageViews = null;
+	}
+
+	public boolean isMulti() {
+		return isMulti;
 	}
 }

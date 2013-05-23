@@ -478,7 +478,6 @@ viewRelAttachedFiles(String id){
 	linker.viewRelAttachedFiles(id);
 }
 
-
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null);
 }
@@ -489,4 +488,12 @@ setToolsEnabled(String ref, boolean enabled) {
 
 addDatabaseLayerQuery(String ref, String name, String sql) {
 	linker.addDatabaseLayerQuery(ref, name, sql);
+}
+
+openCamera(String callback){
+	linker.openCamera(callback);
+}
+
+String getLastPictureFilepath(){
+	return linker.getLastPictureFilePath();
 }

@@ -22,8 +22,10 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.text.format.Time;
 import android.view.Gravity;
 import android.view.View;
@@ -86,6 +88,9 @@ public class BeanShellLinker {
 	private Runnable trackingTask;
 	private Double prevLong;
 	private Double prevLat;
+	
+	private String cameraPicturepath;
+	private String cameraCallBack;
 
 	private Project project;
 	
@@ -1027,7 +1032,7 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
 						if(customImageView.getPicture().getId().equals(value)){
-							customImageView.setBackgroundColor(Color.GREEN);
+							customImageView.setBackgroundColor(Color.BLUE);
 							horizontalScrollView.setSelectedImageView(customImageView);
 							break;
 						}
@@ -1239,6 +1244,15 @@ public class BeanShellLinker {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if(horizontalScrollView.getSelectedImageView() != null){
 					return horizontalScrollView.getSelectedImageView().getPicture().getId();
+				} else if(horizontalScrollView.getSelectedImageViews() != null){
+					if(!horizontalScrollView.getSelectedImageViews().isEmpty()){
+						List<String> selectedPictures = new ArrayList<String>();
+						for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+							selectedPictures.add(imageView.getPicture().getUrl());
+						}
+						return selectedPictures;
+					}
+					return "";
 				}else{
 					return "";
 				}
@@ -1498,27 +1512,37 @@ public class BeanShellLinker {
 			
 			List<Picture> pictures = new ArrayList<Picture>();
 			if(valuesObj instanceof ArrayList<?>){
-				ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
-				for(List<String> pictureList : arrayList){
-					Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
-					pictures.add(picture);
+				try{
+					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
+					for(List<String> pictureList : arrayList){
+						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+						pictures.add(picture);
+					}
+				}catch(Exception e){
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					for(String value : values){
+						Picture picture = new Picture(null,null,value);
+						pictures.add(picture);
+					}
 				}
 			}
 			
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();
 		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
 		        for (Picture picture : pictures) {
-		        	File pictureFile = new File(activity.getProjectDir() + "/" + picture.getUrl());
+		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+		        	File pictureFile = new File(path);
 		        	if(pictureFile.exists()){
 		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
 		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
 		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-		                gallery.setImageURI(Uri.parse(activity.getProjectDir() + "/" + picture.getUrl()));
-		                gallery.setBackgroundColor(Color.RED);
+		                gallery.setImageURI(Uri.parse(path));
+		                gallery.setBackgroundColor(Color.LTGRAY);
 		                gallery.setPadding(10, 10, 10, 10);
 		                gallery.setLayoutParams(layoutParams);
 		                gallery.setPicture(picture);
@@ -1527,18 +1551,38 @@ public class BeanShellLinker {
 		                    @Override
 		                    public void onClick(View v) {
 		                    	CustomImageView selectedImageView = (CustomImageView) v;
-		                        horizontalScrollView.setSelectedImageView(selectedImageView);
-		                        for (ImageView view : galleryImages) {
-		                            if (view.equals(selectedImageView)) {
-		                                view.setBackgroundColor(Color.GREEN);
-		                            } else {
-		                                view.setBackgroundColor(Color.RED);
-		                            }
-		                        }
+		                    	if(horizontalScrollView.isMulti()){
+		                    		for (ImageView view : galleryImages) {
+			                        	if (view.equals(selectedImageView)) {
+				                        	if(horizontalScrollView.getSelectedImageViews() != null){
+				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+				                    				view.setBackgroundColor(Color.LTGRAY);
+				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+				                    			}else{
+				                    				view.setBackgroundColor(Color.BLUE);
+				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    			}
+				                    		}else{
+				                    			view.setBackgroundColor(Color.BLUE);
+				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    		}
+			                        	}
+			                        }
+		                    	}else{
+			                        horizontalScrollView.setSelectedImageView(selectedImageView);
+			                        for (ImageView view : galleryImages) {
+			                            if (view.equals(selectedImageView)) {
+			                                view.setBackgroundColor(Color.BLUE);
+			                            } else {
+			                                view.setBackgroundColor(Color.LTGRAY);
+			                            }
+			                        }
+		                    	}
 		                    }
 		                });
 		                TextView textView = new TextView(galleriesLayout.getContext());
-		                textView.setText(picture.getName());
+		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                textView.setText(name);
 		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		                textView.setTextSize(20);
 		                galleryLayout.addView(textView);
@@ -2247,6 +2291,29 @@ public class BeanShellLinker {
 		});
 	}
 	
+	public void openCamera(String callback){
+		cameraCallBack = callback;
+		Intent cameraIntent = new Intent(
+                MediaStore.ACTION_IMAGE_CAPTURE);
+		cameraPicturepath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/image-"+ System.currentTimeMillis() +".jpg";
+		File file = new File(cameraPicturepath);
+		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(file));
+		this.activity.startActivityForResult(cameraIntent,
+                        ShowProjectActivity.CAMERA_REQUEST_CODE);
+	}
+
+	public void executeCameraCallBack(){
+		try {
+			this.interpreter.eval(cameraCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for the camera",e);
+		}
+	}
+
+	public String getLastPictureFilePath(){
+		return cameraPicturepath;
+	}
+
 	public String getProjectName(){
 		return this.project.getName();
 	}
@@ -2481,14 +2548,24 @@ public class BeanShellLinker {
 					    if (type == null)
 					        type = "*/*";
 	
-					    Intent intent = new Intent(Intent.ACTION_VIEW);
-					    Uri data = Uri.fromFile(file);
-	
-					    intent.setDataAndType(data, type);
-	
-					    activity.startActivity(intent);
+					    try{
+						    Intent intent = new Intent(Intent.ACTION_VIEW);
+						    Uri data = Uri.fromFile(file);
+		
+						    intent.setDataAndType(data, type);
+		
+						    activity.startActivity(intent);
+					    }catch(Exception e){
+					    	FLog.e("Can not open file with the extension",e);
+					    	Intent intent = new Intent(Intent.ACTION_VIEW);
+						    Uri data = Uri.fromFile(file);
+		
+						    intent.setDataAndType(data, "*/*");
+		
+						    activity.startActivity(intent);
+					    }
 					}else{
-						showWarning("Attached File", "File does not exist in the tablet, it might exist only in the server");
+						showWarning("Attached File", "The file does not currently exist in the FAIMS folder. If the file is still uploading or syncing please wait and try again when the process has finished");
 					}
 				}
 
@@ -2529,7 +2606,7 @@ public class BeanShellLinker {
 			}
 		}
 	}
-	
+
 	public Geometry createGeometryPoint(MapPos point) {
 		return new CustomPoint(0, createPointStyle(0,0,0,0), point, null);
 	}

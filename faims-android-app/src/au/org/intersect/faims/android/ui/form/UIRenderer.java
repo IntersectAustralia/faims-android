@@ -342,6 +342,15 @@ public class UIRenderer implements IRestoreActionListener{
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if(horizontalScrollView.getSelectedImageView() != null){
 					return horizontalScrollView.getSelectedImageView().getPicture().getId();
+				} else if(horizontalScrollView.getSelectedImageViews() != null){
+					if(!horizontalScrollView.getSelectedImageViews().isEmpty()){
+						List<String> selectedPictures = new ArrayList<String>();
+						for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+							selectedPictures.add(imageView.getPicture().getUrl());
+						}
+						return selectedPictures;
+					}
+					return "";
 				}else{
 					return "";
 				}
@@ -510,7 +519,7 @@ public class UIRenderer implements IRestoreActionListener{
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
 						if(customImageView.getPicture().getId().equals(value)){
-							customImageView.setBackgroundColor(Color.GREEN);
+							customImageView.setBackgroundColor(Color.BLUE);
 							horizontalScrollView.setSelectedImageView(customImageView);
 							break;
 						}
@@ -524,12 +533,10 @@ public class UIRenderer implements IRestoreActionListener{
 			
 			else if (valueObj instanceof List<?>){
 				
-				@SuppressWarnings("unchecked")
-				List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
-				
 				if (obj instanceof LinearLayout){
 					LinearLayout ll = (LinearLayout) obj;
-					
+					@SuppressWarnings("unchecked")
+					List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
 					for(NameValuePair pair : valueList){
 						for(int i = 0; i < ll.getChildCount(); ++i){
 							View view = ll.getChildAt(i);
@@ -542,6 +549,19 @@ public class UIRenderer implements IRestoreActionListener{
 							}
 						}
 					}
+				}else if(obj instanceof CustomHorizontalScrollView){
+					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					@SuppressWarnings("unchecked")
+					List<String> values = (List<String>) valueObj;
+					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
+						for(String value : values){
+							if(customImageView.getPicture().getUrl().equals(value)){
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView.addSelectedImageView(customImageView);
+								break;
+							}
+						}
+					};
 				}
 				else
 				{
