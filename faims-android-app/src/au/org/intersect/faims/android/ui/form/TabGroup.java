@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -23,7 +22,7 @@ import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
-	private WeakReference<Activity> activityRef;
+	private WeakReference<ShowProjectActivity> activityRef;
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
 	private LinkedList<Tab> tabs;
@@ -176,8 +175,8 @@ public class TabGroup extends Fragment {
 		return null;
 	}
 
-	public void setContext(Activity activity) {
-		this.activityRef = new WeakReference<Activity>(activity);
+	public void setActivity(WeakReference<ShowProjectActivity> activityRef) {
+		this.activityRef = activityRef;
 	}
 
 	public void setLabel(String label) {

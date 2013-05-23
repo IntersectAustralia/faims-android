@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -47,7 +48,7 @@ import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 
 import com.nutiteq.layers.Layer;
 
-public class LayerManagerView extends LinearLayout {
+public class LayerManagerDialog extends AlertDialog {
 	
 	private class LayersAdapter extends BaseAdapter {
 		
@@ -59,8 +60,8 @@ public class LayerManagerView extends LinearLayout {
 			this.itemViews = new ArrayList<View>();
 			
 			for (Layer layer : layers) {
-				LayerListItem item = new LayerListItem(LayerManagerView.this.getContext());
-				item.init(layer, LayerManagerView.this);
+				LayerListItem item = new LayerListItem(LayerManagerDialog.this.getContext());
+				item.init(layer, LayerManagerDialog.this);
 				itemViews.add(item);
 			} 
 		}
@@ -105,32 +106,32 @@ public class LayerManagerView extends LinearLayout {
 	protected PointStyleDialog pointStyleDialog;
 	protected TextStyleDialog textStyleDialog;
 
-	public LayerManagerView(Context context) {
+	public LayerManagerDialog(Context context) {
 		super(context);
 		
 		pointStyle = GeometryStyle.defaultPointStyle();
 		lineStyle = GeometryStyle.defaultLineStyle();
 		polygonStyle = GeometryStyle.defaultPolygonStyle();
 		textStyle = GeometryTextStyle.defaultStyle();
+	}
+	
+	public void attachToMap(CustomMapView mapView) {
+		this.mapView = mapView;
 		
-		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		setOrientation(LinearLayout.VERTICAL);
-		
-		ShowProjectActivity activity = (ShowProjectActivity) this.getContext();
+		ShowProjectActivity activity = mapView.getActivity();
 		activity.getFileManager().addListener(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
-			
 			@Override
-			public void onFileSelected(File file) {
-				LayerManagerView.this.rasterFile = file;
-				LayerManagerView.this.selectedFileText.setText(file.getName());
-			}
+	           public void onFileSelected(File file) {
+					LayerManagerDialog.this.rasterFile = file;
+					LayerManagerDialog.this.selectedFileText.setText(file.getName());
+	           }
 		});
 		activity.getFileManager().addListener(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			
 			@Override
 			public void onFileSelected(File file) {
-				LayerManagerView.this.spatialFile = file;
-				LayerManagerView.this.selectedFileText.setText(file.getName());
+				LayerManagerDialog.this.spatialFile = file;
+				LayerManagerDialog.this.selectedFileText.setText(file.getName());
 				try {
 					setTableSpinner();
 				} catch (jsqlite.Exception e) {
@@ -139,15 +140,11 @@ public class LayerManagerView extends LinearLayout {
 				}
 			}
 		});
-	}
-	
-	public void attachToMap(CustomMapView mapView) {
-		this.mapView = mapView;
 		
 		layout = new LinearLayout(this.getContext());
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
-		addView(layout);
+		this.setView(layout);
 		
 		buttonsLayout = new LinearLayout(this.getContext());
 		buttonsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
@@ -193,7 +190,7 @@ public class LayerManagerView extends LinearLayout {
 				int last = layers.size() - 1;
 				final Layer layer = layers.get(last - position);
 				
-				Context context = LayerManagerView.this.getContext();
+				Context context = LayerManagerDialog.this.getContext();
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setTitle("Layer Options");
 
@@ -205,7 +202,7 @@ public class LayerManagerView extends LinearLayout {
 				
 				Button removeButton = new Button(context);
 				removeButton.setText("Remove");
-				removeButton.setOnClickListener(new OnClickListener() {
+				removeButton.setOnClickListener(new View.OnClickListener() {
 
 					@Override
 					public void onClick(View arg0) {
@@ -217,7 +214,7 @@ public class LayerManagerView extends LinearLayout {
 				
 				Button renameButton = new Button(context);
 				renameButton.setText("Rename");
-				renameButton.setOnClickListener(new OnClickListener() {
+				renameButton.setOnClickListener(new View.OnClickListener() {
 
 					@Override
 					public void onClick(View arg0) {
@@ -229,7 +226,7 @@ public class LayerManagerView extends LinearLayout {
 				
 				Button showMetadataButton = new Button(context);
 				showMetadataButton.setText("Show Metadata");
-				showMetadataButton.setOnClickListener(new OnClickListener() {
+				showMetadataButton.setOnClickListener(new View.OnClickListener() {
 
 					@Override
 					public void onClick(View arg0) {
@@ -247,7 +244,7 @@ public class LayerManagerView extends LinearLayout {
 					showLabelsButton.setTextOn("Hide Labels");
 					showLabelsButton.setTextOff("Show Labels");
 					showLabelsButton.setChecked(((CustomSpatialiteLayer) layer).getTextVisible());
-					showLabelsButton.setOnClickListener(new OnClickListener() {
+					showLabelsButton.setOnClickListener(new View.OnClickListener() {
 
 						@Override
 						public void onClick(View arg0) {
@@ -260,7 +257,7 @@ public class LayerManagerView extends LinearLayout {
 					showLabelsButton.setTextOn("Hide Labels");
 					showLabelsButton.setTextOff("Show Labels");
 					showLabelsButton.setChecked(((DatabaseLayer) layer).getTextVisible());
-					showLabelsButton.setOnClickListener(new OnClickListener() {
+					showLabelsButton.setOnClickListener(new View.OnClickListener() {
 
 						@Override
 						public void onClick(View arg0) {
@@ -283,7 +280,7 @@ public class LayerManagerView extends LinearLayout {
 		Button addButton = new Button(this.getContext());
 		addButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		addButton.setText("Add");
-		addButton.setOnClickListener(new OnClickListener() {
+		addButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -349,7 +346,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		Button loadRasterLayerButton = new Button(getContext());
 		loadRasterLayerButton.setText("Load Raster Layer");
-		loadRasterLayerButton.setOnClickListener(new OnClickListener() {
+		loadRasterLayerButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -362,7 +359,7 @@ public class LayerManagerView extends LinearLayout {
 		// TODO Fix the bug with loading shape layer
 //		Button loadShapeLayerButton = new Button(getContext());
 //		loadShapeLayerButton.setText("Load Shape Layer");
-//		loadShapeLayerButton.setOnClickListener(new OnClickListener() {
+//		loadShapeLayerButton.setOnClickListener(new View.OnClickListener() {
 //
 //			@Override
 //			public void onClick(View arg0) {
@@ -374,7 +371,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		Button loadSpatialLayerButton = new Button(getContext());
 		loadSpatialLayerButton.setText("Load Vector Layer");
-		loadSpatialLayerButton.setOnClickListener(new OnClickListener() {
+		loadSpatialLayerButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -386,7 +383,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		Button loadDatabaseLayerButton = new Button(getContext());
 		loadDatabaseLayerButton.setText("Load Database Layer");
-		loadDatabaseLayerButton.setOnClickListener(new OnClickListener() {
+		loadDatabaseLayerButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -398,7 +395,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		Button createLayerButton = new Button(getContext());
 		createLayerButton.setText("Create Canvas Layer");
-		createLayerButton.setOnClickListener(new OnClickListener() {
+		createLayerButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -418,7 +415,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void addRasterLayer(){
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Add raster layer:");
@@ -433,12 +430,12 @@ public class LayerManagerView extends LinearLayout {
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Raster layer name:");
 		layout.addView(textView);
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		layout.addView(editText);
 		
 		Button browserButton = new Button(getContext());
 		browserButton.setText("browse");
-		browserButton.setOnClickListener(new OnClickListener() {
+		browserButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -494,7 +491,7 @@ public class LayerManagerView extends LinearLayout {
 //		
 //		Button browserButton = new Button(getContext());
 //		browserButton.setText("browse");
-//		browserButton.setOnClickListener(new OnClickListener() {
+//		browserButton.setOnClickListener(new View.OnClickListener() {
 //
 //			@Override
 //			public void onClick(View arg0) {
@@ -535,7 +532,7 @@ public class LayerManagerView extends LinearLayout {
 //	}
 	
 	private void addSpatialLayer(){
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Add spatial layer:");
@@ -550,7 +547,7 @@ public class LayerManagerView extends LinearLayout {
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Spatial layer name:");
 		layout.addView(textView);
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		layout.addView(editText);
 		
 		TextView tableTextView = new TextView(this.getContext());
@@ -589,7 +586,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		Button browserButton = new Button(getContext());
 		browserButton.setText("browse");
-		browserButton.setOnClickListener(new OnClickListener() {
+		browserButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
@@ -638,7 +635,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void addDatabaseLayer(){
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Add database layer:");
@@ -653,7 +650,7 @@ public class LayerManagerView extends LinearLayout {
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Database layer name:");
 		layout.addView(textView);
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		layout.addView(editText);
 		
 		TextView typeTextView = new TextView(this.getContext());
@@ -711,15 +708,15 @@ public class LayerManagerView extends LinearLayout {
 	
 	public Button createPointStyleButton(){
 		Button button = new Button(this.getContext());
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
 		button.setLayoutParams(layoutParams);
 		button.setText("Style Point");
-		button.setOnClickListener(new OnClickListener() {
+		button.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(LayerManagerView.this.getContext(), pointStyle);
+				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(LayerManagerDialog.this.getContext(), pointStyle);
 				pointStyleDialog = (PointStyleDialog) builder.create();
 				pointStyleDialog.show();
 			}
@@ -730,15 +727,15 @@ public class LayerManagerView extends LinearLayout {
 	
 	public Button createLineStyleButton(){
 		Button button = new Button(this.getContext());
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
 		button.setLayoutParams(layoutParams);
 		button.setText("Style Line");
-		button.setOnClickListener(new OnClickListener() {
+		button.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(LayerManagerView.this.getContext(), lineStyle);
+				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(LayerManagerDialog.this.getContext(), lineStyle);
 				lineStyleDialog = (LineStyleDialog) builder.create();
 				lineStyleDialog.show();
 			}
@@ -749,15 +746,15 @@ public class LayerManagerView extends LinearLayout {
 
 	public Button createPolygonStyleButton(){
 		Button button = new Button(this.getContext());
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
 		button.setLayoutParams(layoutParams);
 		button.setText("Style Polygon");
-		button.setOnClickListener(new OnClickListener() {
+		button.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(LayerManagerView.this.getContext(), polygonStyle);
+				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(LayerManagerDialog.this.getContext(), polygonStyle);
 				polygonStyleDialog = (PolygonStyleDialog) builder.create();
 				polygonStyleDialog.show();
 			}
@@ -768,15 +765,15 @@ public class LayerManagerView extends LinearLayout {
 	
 	public Button createTextStyleButton(){
 		Button button = new Button(this.getContext());
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
 		button.setLayoutParams(layoutParams);
 		button.setText("Style Text");
-		button.setOnClickListener(new OnClickListener() {
+		button.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				TextStyleDialog.Builder builder = new TextStyleDialog.Builder(LayerManagerView.this.getContext(), textStyle);
+				TextStyleDialog.Builder builder = new TextStyleDialog.Builder(LayerManagerDialog.this.getContext(), textStyle);
 				textStyleDialog = (TextStyleDialog) builder.create();
 				textStyleDialog.show();
 			}
@@ -786,7 +783,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void createLayer(){
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Enter layer name:");
@@ -797,7 +794,7 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		builder.setView(scrollView);
 		
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		layout.addView(editText);
 		
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -823,7 +820,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 
 	private void removeLayer(final Layer layer) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Do you want to delete layer?");
@@ -851,12 +848,12 @@ public class LayerManagerView extends LinearLayout {
 	}
 
 	private void renameLayer(final Layer layer) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
 		builder.setMessage("Enter layer name:");
 		
-		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		if(layer instanceof CustomGdalMapLayer){
 			CustomGdalMapLayer gdalMapLayer = (CustomGdalMapLayer) layer;
 			editText.setText(gdalMapLayer.getName());
@@ -904,7 +901,7 @@ public class LayerManagerView extends LinearLayout {
 		layerTypeTextView.setText("Layer type:");
 		layout.addView(layerTypeTextView);
 
-		EditText layerTypeEditText = new EditText(LayerManagerView.this.getContext());
+		EditText layerTypeEditText = new EditText(LayerManagerDialog.this.getContext());
 		layerTypeEditText.setEnabled(false);
 		if(layer instanceof CustomGdalMapLayer){
 			layerTypeEditText.setText("raster layer");
@@ -924,7 +921,7 @@ public class LayerManagerView extends LinearLayout {
 		if(layer instanceof CustomGdalMapLayer){
 			CustomGdalMapLayer gdalMapLayer = (CustomGdalMapLayer) layer;
 
-			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText layerNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(gdalMapLayer.getName());
 			layout.addView(layerNameEditText);
@@ -934,7 +931,7 @@ public class LayerManagerView extends LinearLayout {
 			layout.addView(fileNameTextView);
 
 			File file = new File(gdalMapLayer.getGdalSource());
-			EditText fileNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText fileNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			fileNameEditText.setEnabled(false);
 			fileNameEditText.setText(file.getName());
 			layout.addView(fileNameEditText);
@@ -943,7 +940,7 @@ public class LayerManagerView extends LinearLayout {
 			fileSizeTextView.setText("File size:");
 			layout.addView(fileSizeTextView);
 
-			EditText fileSizeEditText = new EditText(LayerManagerView.this.getContext());
+			EditText fileSizeEditText = new EditText(LayerManagerDialog.this.getContext());
 			fileSizeEditText.setEnabled(false);
 			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
 			layout.addView(fileSizeEditText);
@@ -953,7 +950,7 @@ public class LayerManagerView extends LinearLayout {
 	        upperLeftTextView.setText("Upper left boundary:");
 			layout.addView(upperLeftTextView);
 
-			EditText upperLeftEditText = new EditText(LayerManagerView.this.getContext());
+			EditText upperLeftEditText = new EditText(LayerManagerDialog.this.getContext());
 			upperLeftEditText.setEnabled(false);
 			upperLeftEditText.setText(originalBounds[0][0] + "," + originalBounds[0][1]);
 			layout.addView(upperLeftEditText);
@@ -962,7 +959,7 @@ public class LayerManagerView extends LinearLayout {
 			bottomRightTextView.setText("Bottom right boundary:");
 			layout.addView(bottomRightTextView);
 
-			EditText bottomRightEditText = new EditText(LayerManagerView.this.getContext());
+			EditText bottomRightEditText = new EditText(LayerManagerDialog.this.getContext());
 			bottomRightEditText.setEnabled(false);
 			bottomRightEditText.setText(originalBounds[3][0] + "," + originalBounds[3][1]);
 			layout.addView(bottomRightEditText);
@@ -970,7 +967,7 @@ public class LayerManagerView extends LinearLayout {
 		}else if(layer instanceof CustomSpatialiteLayer){
 			CustomSpatialiteLayer spatialiteLayer = (CustomSpatialiteLayer) layer;
 
-			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText layerNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(spatialiteLayer.getName());
 			layout.addView(layerNameEditText);
@@ -980,7 +977,7 @@ public class LayerManagerView extends LinearLayout {
 			layout.addView(fileNameTextView);
 
 			File file = new File(spatialiteLayer.getDbPath());
-			EditText fileNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText fileNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			fileNameEditText.setEnabled(false);
 			fileNameEditText.setText(file.getName());
 			layout.addView(fileNameEditText);
@@ -989,7 +986,7 @@ public class LayerManagerView extends LinearLayout {
 			fileSizeTextView.setText("File size:");
 			layout.addView(fileSizeTextView);
 
-			EditText fileSizeEditText = new EditText(LayerManagerView.this.getContext());
+			EditText fileSizeEditText = new EditText(LayerManagerDialog.this.getContext());
 			fileSizeEditText.setEnabled(false);
 			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
 			layout.addView(fileSizeEditText);
@@ -998,7 +995,7 @@ public class LayerManagerView extends LinearLayout {
 			tableNameTextView.setText("Table name:");
 			layout.addView(tableNameTextView);
 
-			EditText tableNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText tableNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			tableNameEditText.setEnabled(false);
 			tableNameEditText.setText(spatialiteLayer.getTableName());
 			layout.addView(tableNameEditText);
@@ -1006,14 +1003,14 @@ public class LayerManagerView extends LinearLayout {
 		}else if(layer instanceof CanvasLayer){
 			CanvasLayer canvasLayer = (CanvasLayer) layer;
 
-			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText layerNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(canvasLayer.getName());
 			layout.addView(layerNameEditText);
 		}else if(layer instanceof DatabaseLayer){
 			DatabaseLayer databaseLayer = (DatabaseLayer) layer;
 
-			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText layerNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(databaseLayer.getName());
 			layout.addView(layerNameEditText);
@@ -1022,7 +1019,7 @@ public class LayerManagerView extends LinearLayout {
 			tableNameTextView.setText("Query name:");
 			layout.addView(tableNameTextView);
 
-			EditText tableNameEditText = new EditText(LayerManagerView.this.getContext());
+			EditText tableNameEditText = new EditText(LayerManagerDialog.this.getContext());
 			tableNameEditText.setEnabled(false);
 			tableNameEditText.setText(databaseLayer.getQueryName());
 			layout.addView(tableNameEditText);
@@ -1030,7 +1027,7 @@ public class LayerManagerView extends LinearLayout {
 			showErrorDialog("wrong type of layer");
 		}
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		builder.setTitle("Layer Metadata");
 		builder.setView(scrollView);
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -1046,11 +1043,11 @@ public class LayerManagerView extends LinearLayout {
 	}
 
 	private void showErrorDialog(String message) {
-		new ErrorDialog(LayerManagerView.this.getContext(), "Layer Manager Error", message).show();
+		new ErrorDialog(LayerManagerDialog.this.getContext(), "Layer Manager Error", message).show();
 	}
 	
 	private void showFileBrowser(int requestCode){
-		((ShowProjectActivity) this.getContext()).showFileBrowser(requestCode);
+		mapView.getActivity().showFileBrowser(requestCode);
 	}
 	
 	public void setTableSpinner() throws jsqlite.Exception{

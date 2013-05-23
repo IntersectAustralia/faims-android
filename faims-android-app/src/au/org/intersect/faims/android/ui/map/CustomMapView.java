@@ -10,8 +10,6 @@ import java.util.ListIterator;
 import javax.microedition.khronos.opengles.GL10;
 
 import roboguice.RoboGuice;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -39,6 +37,7 @@ import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -189,7 +188,7 @@ public class CustomMapView extends MapView {
 	private ArrayList<Geometry> transformGeometryList;
 
 	private boolean showDecimal;
-	private LayerManagerView layerManager;
+	private LayerManagerDialog layerManagerDialog;
 
 	private boolean showKm;
 
@@ -200,14 +199,16 @@ public class CustomMapView extends MapView {
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
 
-	private WeakReference<Activity> activityRef;
+	private WeakReference<ShowProjectActivity> activityRef;
 	
 	private HashMap<String, String> databaseLayerQueryMap;
+
+	private SelectGroupDialog selectGroupDailog;
 	
-	public CustomMapView(Activity activity, MapLayout mapLayout) {
+	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
 		
-		this.activityRef = new WeakReference<Activity>(activity);
+		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
 
 		layerIdMap = new SparseArray<Layer>();
 		layerNameMap = new HashMap<String, Layer>();
@@ -798,20 +799,17 @@ public class CustomMapView extends MapView {
 		return tools;
 	}
 
-	public void showLayersDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-		layerManager = new LayerManagerView(this.getContext());
-		layerManager.attachToMap(this);
-
-		builder.setTitle("Layer Manager");
-		builder.setView(layerManager);
-		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
-			
+	public void showLayerManagerDialog() {
+		layerManagerDialog = new LayerManagerDialog(this.activityRef.get());
+		layerManagerDialog.setTitle("Layer Manager");
+		layerManagerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				// ignore
 			}
 		});
-		builder.create().show();
+		layerManagerDialog.attachToMap(this);
+		layerManagerDialog.show();
 	}
 
 	private void validateLayerName(String name) throws Exception {
@@ -1266,5 +1264,22 @@ public class CustomMapView extends MapView {
 	
 	public List<String> getDatabaseLayerQueryNames() {
 		return new ArrayList<String>(databaseLayerQueryMap.keySet());
+	}
+
+	public void showSelectGroupDialog() {
+		selectGroupDailog = new SelectGroupDialog(this.activityRef.get());
+		selectGroupDailog.setTitle("Select Group");
+		selectGroupDailog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// ignore
+			}
+		});
+		selectGroupDailog.attachToMap(this);
+		selectGroupDailog.show();
+	}
+
+	public ShowProjectActivity getActivity() {
+		return activityRef.get();
 	}
 }

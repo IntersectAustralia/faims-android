@@ -11,7 +11,6 @@ import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
 
 import android.app.ActionBar.LayoutParams;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -40,6 +39,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -47,7 +47,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class Tab implements Parcelable{
 
-	private WeakReference<Activity> activityRef;
+	private WeakReference<ShowProjectActivity> activityRef;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
@@ -69,8 +69,8 @@ public class Tab implements Parcelable{
 		reference = source.readString();
 	}
 	
-	public Tab(Activity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
-		this.activityRef = new WeakReference<Activity>(activity);
+	public Tab(ShowProjectActivity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
+		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
 		this.name = name;
 		this.arch16n = arch16n;
 		label = this.arch16n.substituteValue(label);

@@ -2,7 +2,6 @@ package au.org.intersect.faims.android.ui.map;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +11,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
@@ -26,11 +26,12 @@ public class MapLayout extends LinearLayout {
 	private RelativeLayout container;
 	private Button layerButton;
 	private Spinner toolsDropDown;
+	private Button selectionButton;
 
 	public MapLayout(Context context) {
 		super(context);
 		
-		Activity activity = (Activity) context;
+		ShowProjectActivity activity = (ShowProjectActivity) context;
 		
 		this.setOrientation(LinearLayout.VERTICAL);
 		this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));
@@ -64,7 +65,17 @@ public class MapLayout extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				mapView.showLayersDialog();
+				mapView.showLayerManagerDialog();
+			}
+			
+		});
+		
+		selectionButton = createSelectionButton();
+		selectionButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				mapView.showSelectGroupDialog();
 			}
 			
 		});
@@ -87,6 +98,7 @@ public class MapLayout extends LinearLayout {
 		});
 		
 		addView(layerButton);
+		addView(selectionButton);
 		addView(toolsDropDown);
 		addView(container);
 	}
@@ -142,8 +154,14 @@ public class MapLayout extends LinearLayout {
 	
 	private Button createLayerButton() {
 		 Button button = new Button(this.getContext());
-         button.setText("Layers");
+         button.setText("Layer Manger Dialog");
          return button;
+	}
+	
+	private Button createSelectionButton() {
+		 Button button = new Button(this.getContext());
+        button.setText("Selection Group Dialog");
+        return button;
 	}
 	
 	private Spinner createToolsDropDown(CustomMapView mapView) {

@@ -15,7 +15,6 @@ import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -33,6 +32,7 @@ import android.widget.TimePicker;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.util.DateUtil;
 
 /**
@@ -45,7 +45,7 @@ public class UIRenderer implements IRestoreActionListener{
 
     private FormEntryController fem;
     
-    private WeakReference<Activity> activityRef;
+    private WeakReference<ShowProjectActivity> activityRef;
     
     private HashMap<String, TabGroup> tabGroupMap;
     private LinkedList<TabGroup> tabGroupList;
@@ -71,10 +71,10 @@ public class UIRenderer implements IRestoreActionListener{
 	private Map<String, Object> viewCertainties;
 	private Map<String, Object> viewAnnotations;
 
-    public UIRenderer(FormEntryController fem, Arch16n arch16n, Activity activity) {
+    public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowProjectActivity activity) {
         this.fem = fem;
         this.arch16n = arch16n;
-        this.activityRef = new WeakReference<Activity>(activity);
+        this.activityRef = new WeakReference<ShowProjectActivity>(activity);
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
         this.viewTabMap = new HashMap<String, Tab>();
@@ -117,7 +117,7 @@ public class UIRenderer implements IRestoreActionListener{
 	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
 	    		
 	    		TabGroup tabGroup = new TabGroup(archEntType,relType, this);
-	    		tabGroup.setContext(activityRef.get());
+	    		tabGroup.setActivity(activityRef);
 	    		String tabGroupText = tabGroupCaption.getQuestionText();
 	    		tabGroupText = arch16n.substituteValue(tabGroupText);
 	    		tabGroup.setLabel(tabGroupText);
