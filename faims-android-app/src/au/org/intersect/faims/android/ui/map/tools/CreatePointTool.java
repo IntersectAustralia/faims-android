@@ -17,10 +17,14 @@ public class CreatePointTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Point";
 	
+	private GeometryStyle style;
+	
 	private PointStyleDialog styleDialog;
 	
 	public CreatePointTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
+		
+		style = GeometryStyle.defaultPointStyle();
 	}
 
 	@Override
@@ -31,7 +35,7 @@ public class CreatePointTool extends BaseGeometryTool {
 
 			@Override
 			public void onClick(View arg0) {
-				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(context);
+				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(context, style);
 				styleDialog = (PointStyleDialog) builder.create();
 				styleDialog.show();
 			}
@@ -59,7 +63,7 @@ public class CreatePointTool extends BaseGeometryTool {
 	}
 
 	private GeometryStyle createPointStyle() {
-		return styleDialog.getStyle().cloneStyle();
+		return style.cloneStyle();
 	}
 
 	@Override

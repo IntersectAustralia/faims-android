@@ -9,14 +9,17 @@ public class TextStyleDialog extends SettingsDialog {
 	
 	public static class Builder extends SettingsDialog.Builder {
 
-		public Builder(Context context) {
+		private GeometryTextStyle style;
+
+		public Builder(Context context, GeometryTextStyle style) {
 			super(context);
+			this.style = style;
 		}
 		
 		@Override
 		public SettingsDialog createDialog() {
 			final TextStyleDialog d = new TextStyleDialog(context);
-			final GeometryTextStyle style = GeometryTextStyle.defaultStyle();
+			final GeometryTextStyle style = this.style;
 			d.setStyle(style);
 			
 			setTitle("Style Settings");

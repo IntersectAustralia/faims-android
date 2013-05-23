@@ -94,7 +94,7 @@ public class GeometryStyle {
 		return style;
 	}
 	
-	public static GeometryStyle defualtPolygonStyle() {
+	public static GeometryStyle defaultPolygonStyle() {
 		GeometryStyle style = new GeometryStyle(12);
 		style.pointColor = 0XAA0000FF;
 		style.lineColor = 0XAA0000FF;

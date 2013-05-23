@@ -29,10 +29,14 @@ public class CreateLineTool extends BaseGeometryTool {
 
 	private MapButton undoButton;
 	
+	private GeometryStyle style;
+	
 	private LineStyleDialog styleDialog;
 
 	public CreateLineTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
+		
+		style = GeometryStyle.defaultLineStyle();
 		
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
@@ -182,7 +186,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			
 			@Override
 			public void onClick(View arg0) {
-				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(context);
+				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(context, style);
 				styleDialog = (LineStyleDialog) builder.create();
 				styleDialog.show();
 			}
@@ -210,11 +214,10 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createLineStyle() {
-		return styleDialog.getStyle().cloneStyle();
+		return style.cloneStyle();
 	}
 	
 	private GeometryStyle createGuidePointStyle() {
-		GeometryStyle style = styleDialog.getStyle();
 		GeometryStyle s = new GeometryStyle(style.minZoom);
 		s.pointColor = style.pointColor | 0xFF000000;
 		s.size = style.size;

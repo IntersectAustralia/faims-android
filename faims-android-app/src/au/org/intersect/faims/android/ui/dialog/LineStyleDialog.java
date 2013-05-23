@@ -8,10 +8,6 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 public class LineStyleDialog extends StyleDialog {
 
 	public static class Builder extends StyleDialog.Builder {
-
-		public Builder(Context context) {
-			this(context, GeometryStyle.defaultLineStyle());
-		}
 		
 		public Builder(Context context, GeometryStyle style) {
 			super(context, style);

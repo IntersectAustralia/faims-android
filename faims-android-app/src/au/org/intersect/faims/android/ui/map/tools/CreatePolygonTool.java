@@ -29,10 +29,14 @@ public class CreatePolygonTool extends BaseGeometryTool {
 
 	private MapButton undoButton;
 	
+	private GeometryStyle style;
+	
 	private PolygonStyleDialog styleDialog;
 
 	public CreatePolygonTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
+		
+		style = GeometryStyle.defaultPolygonStyle();
 		
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
@@ -180,7 +184,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		button.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context);
+				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context, style);
 				styleDialog = (PolygonStyleDialog) builder.create();
 				styleDialog.show();
 			}
@@ -206,11 +210,10 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createPolygonStyle() {
-		return styleDialog.getStyle().cloneStyle();
+		return style.cloneStyle();
 	}
 	
 	private GeometryStyle createGuidePointStyle() {
-		GeometryStyle style = styleDialog.getStyle();
 		GeometryStyle s = new GeometryStyle(style.minZoom);
 		s.pointColor = style.pointColor | 0xFF000000;
 		s.size = style.size;

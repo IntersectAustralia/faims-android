@@ -63,6 +63,8 @@ public class SettingsDialog extends AlertDialog {
 			layout.addView(labelView);
 			layout.addView(text);
 			
+			fields.put(name, text);
+			
 			return this;
 		}
 		
@@ -82,7 +84,7 @@ public class SettingsDialog extends AlertDialog {
 		}
 		
 		public Builder addSlider(String name, final String label, float defaultValue) {
-			return addSlider(name, label, defaultValue, 0, 100);
+			return addSlider(name, label, defaultValue, 0, 1);
 		}
 		
 		public Builder addSlider(String name, final String label, float defaultValue, final float minRange, final float maxRange) {
@@ -117,6 +119,8 @@ public class SettingsDialog extends AlertDialog {
 			layout.addView(labelView);
 			layout.addView(seekBar);
 			
+			fields.put(name, seekBar);
+			
 			return this;
 		}
 		
@@ -125,8 +129,8 @@ public class SettingsDialog extends AlertDialog {
 			labelView.setText(label + " " + Integer.toString(defaultValue));
 			
 			final SeekBar seekBar = new SeekBar(context);
-			seekBar.setMax(maxRange);
-			seekBar.setProgress((int) (100 * (defaultValue / (maxRange - minRange))));
+			seekBar.setMax(maxRange - minRange);
+			seekBar.setProgress(defaultValue - minRange);
 			
 			seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
@@ -151,6 +155,8 @@ public class SettingsDialog extends AlertDialog {
 			
 			layout.addView(labelView);
 			layout.addView(seekBar);
+			
+			fields.put(name, seekBar);
 			
 			return this;
 		}
@@ -226,7 +232,7 @@ public class SettingsDialog extends AlertDialog {
 	}
 	
 	public float parseSlider(String name) throws Exception {
-		return parseSlider(name, 0, 100);
+		return parseSlider(name, 0, 1);
 	}
 	
 	public float parseSlider(String name, float minRange, float maxRange) throws Exception {
@@ -258,7 +264,7 @@ public class SettingsDialog extends AlertDialog {
 	}
 	
 	protected static int getRangeValue(int progress, int minRange, int maxRange) {
-		return (int) getSliderValue(progress, minRange, maxRange);
+		return progress + minRange;
 	}
 	
 	public void showError(String message) {

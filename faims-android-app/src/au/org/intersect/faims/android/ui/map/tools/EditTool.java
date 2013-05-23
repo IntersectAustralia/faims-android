@@ -314,7 +314,7 @@ public class EditTool extends SelectTool {
 	
 	private void showPolygonProperties(final CustomPolygon polygon) {
 		final GeometryStyle style = polygon.getStyle();
-		PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context);
+		PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
 			@Override

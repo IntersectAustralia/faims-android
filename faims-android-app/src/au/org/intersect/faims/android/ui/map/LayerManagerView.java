@@ -35,6 +35,8 @@ import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
@@ -94,6 +96,10 @@ public class LayerManagerView extends LinearLayout {
 	private Spinner labelColumnSpinner;
 	protected File rasterFile;
 	protected File spatialFile;
+	protected GeometryStyle pointStyle;
+	protected GeometryStyle lineStyle;
+	protected GeometryStyle polygonStyle;
+	protected GeometryTextStyle textStyle;
 	protected PolygonStyleDialog polygonStyleDialog;
 	protected LineStyleDialog lineStyleDialog;
 	protected PointStyleDialog pointStyleDialog;
@@ -101,6 +107,11 @@ public class LayerManagerView extends LinearLayout {
 
 	public LayerManagerView(Context context) {
 		super(context);
+		
+		pointStyle = GeometryStyle.defaultPointStyle();
+		lineStyle = GeometryStyle.defaultLineStyle();
+		polygonStyle = GeometryStyle.defaultPolygonStyle();
+		textStyle = GeometryTextStyle.defaultStyle();
 		
 		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
@@ -607,8 +618,8 @@ public class LayerManagerView extends LinearLayout {
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
 						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
 						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, new String[] { labelName }, 
-								pointStyleDialog.getStyle().toPointStyleSet(), lineStyleDialog.getStyle().toLineStyleSet(), polygonStyleDialog.getStyle().toPolygonStyleSet(), 
-								textStyleDialog.getStyle().toStyleSet());
+								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+								textStyle.toStyleSet());
 						redrawLayers();
 					}
 				} catch (Exception e) {
@@ -680,8 +691,8 @@ public class LayerManagerView extends LinearLayout {
 					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
 					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
 					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
-							pointStyleDialog.getStyle().toPointStyleSet(), lineStyleDialog.getStyle().toLineStyleSet(), polygonStyleDialog.getStyle().toPolygonStyleSet(), 
-							textStyleDialog.getStyle().toStyleSet());
+							pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+							textStyle.toStyleSet());
 					redrawLayers();
 				} catch (Exception e) {
 					showErrorDialog(e.getMessage());
@@ -708,7 +719,7 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(LayerManagerView.this.getContext());
+				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(LayerManagerView.this.getContext(), pointStyle);
 				pointStyleDialog = (PointStyleDialog) builder.create();
 				pointStyleDialog.show();
 			}
@@ -727,7 +738,7 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(LayerManagerView.this.getContext());
+				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(LayerManagerView.this.getContext(), lineStyle);
 				lineStyleDialog = (LineStyleDialog) builder.create();
 				lineStyleDialog.show();
 			}
@@ -746,7 +757,7 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(LayerManagerView.this.getContext());
+				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(LayerManagerView.this.getContext(), polygonStyle);
 				polygonStyleDialog = (PolygonStyleDialog) builder.create();
 				polygonStyleDialog.show();
 			}
@@ -765,7 +776,7 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				TextStyleDialog.Builder builder = new TextStyleDialog.Builder(LayerManagerView.this.getContext());
+				TextStyleDialog.Builder builder = new TextStyleDialog.Builder(LayerManagerView.this.getContext(), textStyle);
 				textStyleDialog = (TextStyleDialog) builder.create();
 				textStyleDialog.show();
 			}
