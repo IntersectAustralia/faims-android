@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import android.graphics.Color;
 import android.graphics.Typeface;
 
 import com.nutiteq.style.StyleSet;
@@ -24,6 +25,14 @@ public class GeometryTextStyle {
 		StyleSet<TextStyle> styleSet = new StyleSet<TextStyle>();
 		styleSet.setZoomStyle(minZoom, toStyle());
 		return styleSet;
+	}
+
+	public static GeometryTextStyle defaultStyle() {
+		GeometryTextStyle textStyle = new GeometryTextStyle(12);
+		textStyle.color = Color.WHITE;
+		textStyle.size = 40;
+		textStyle.font = Typeface.DEFAULT;
+		return textStyle;
 	}
 
 }
