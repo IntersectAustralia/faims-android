@@ -11,7 +11,9 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
-import au.org.intersect.faims.android.data.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import android.graphics.Typeface;
 
 startTrackingGPS(String type, int interval){
 	linker.startTrackingGPS(type, interval);
@@ -260,8 +262,14 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
 	linker.showShapeLayer(ref, layerName, filename, pointStyle, lineStyle, polygonStyle);
 }
 
-showSpatialLayer(String ref, String layerName, String filename, String tableName, String labelName, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
-	linker.showSpatialLayer(ref, layerName, filename, tableName, labelName, pointStyle, lineStyle, polygonStyle);
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String[] labelColumns, 
+	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle, textStyle);
+}
+
+showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
+	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+	linker.showDatabaseLayer(ref, layerName, isEntity, queryName, querySql, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
 removeLayer(String ref, int layerId) {
@@ -334,16 +342,20 @@ drawGeometry(String ref, int layerId, Geometry geom, GeometryStyle style) {
 	}
 }
 
-createPointStyle(int color, float size, float pickSize) {
-	return linker.createPointStyle(color, size, pickSize);
+createPointStyle(int minZoom, int color, float size, float pickSize) {
+	return linker.createPointStyle(minZoom, color, size, pickSize);
 }
 
-createLineStyle(int color, float width, float pickWidth, GeometryStyle pointStyle) {
-	return linker.createLineStyle(color, width, pickWidth, pointStyle);
+createLineStyle(int minZoom, int color, float width, float pickWidth, GeometryStyle pointStyle) {
+	return linker.createLineStyle(minZoom, color, width, pickWidth, pointStyle);
 }
 
-createPolygonStyle(int color, GeometryStyle lineStyle) {
-	return linker.createPolygonStyle(color, lineStyle);
+createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
+	return linker.createPolygonStyle(minZoom, color, lineStyle);
+}
+
+createTextStyle(int minZoom, int color, int size, android.graphics.Typeface font) {
+	return linker.createTextStyle(minZoom, color, size, font);
 }
 
 lockMapView(String ref, boolean lock) {
@@ -368,6 +380,10 @@ doSelectionTransform(String ref) {
 
 clearGeometrySelection(String ref) {
 	linker.clearGeometrySelection(ref);
+}
+
+getGeometrySelection(String ref) {
+	return linker.getGeometrySelection(ref);
 }
 
 getMapGeometrySelected() {
@@ -469,4 +485,8 @@ attachFile(String filePath, boolean sync) {
 
 setToolsEnabled(String ref, boolean enabled) {
 	linker.setToolsEnabled(ref, enabled);
+}
+
+addDatabaseLayerQuery(String ref, String name, String sql) {
+	linker.addDatabaseLayerQuery(ref, name, sql);
 }

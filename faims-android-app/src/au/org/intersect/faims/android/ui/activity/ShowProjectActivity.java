@@ -37,7 +37,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -347,6 +346,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private ShowProjectActivityData activityData;
 	private FileManager fm;
 
+	private String projectDir;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -372,6 +373,30 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		setupProject();
 		
 		renderUI(savedInstanceState);
+	}
+	
+	public GPSDataManager getGPSDataManager() {
+		return gpsDataManager;
+	}
+	
+	public DatabaseManager getDatabaseManager() {
+		return databaseManager;
+	}
+	
+	public UIRenderer getUIRenderer() {
+		return renderer;
+	}
+	
+	public Arch16n getArch16n() {
+		return arch16n;
+	}
+	
+	public String getProjectDir() {
+		return projectDir;
+	}
+	
+	public FileManager getFileManager() {
+		return fm;
 	}
 	
 	private void setupSync() {
@@ -404,8 +429,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		setTitle(project.name);
 		
 		this.projectKey = project.key;
-		
-		String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+		this.projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE));
@@ -416,6 +440,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		// clear any lock files that may exist
 		String lock = projectDir + "/.lock";
 		LockManager.clearLock(lock);
+		
+		fm = new FileManager();
 	}
 	
 	@Override
@@ -511,31 +537,19 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			this.renderer.getCurrentImageView().setImageBitmap(photo);
 			this.renderer.clearCurrentImageView();
 		}*/
-		if (requestCode == FILE_BROWSER_REQUEST_CODE) {
-			if (resultCode == RESULT_OK) {
-				try {
+		switch(requestCode) {
+			case FILE_BROWSER_REQUEST_CODE:
+			case RASTER_FILE_BROWSER_REQUEST_CODE:
+			case SPATIAL_FILE_BROWSER_REQUEST_CODE:
+				if (data != null) {
 					@SuppressWarnings("unchecked")
 					List<LocalFile> files = (List<LocalFile>)
 			                data.getSerializableExtra(FileChooserActivity._Results);
-					
-		            linker.setLastSelectedFile(files.get(0));
-				} catch (Exception e) {
-					FLog.e("error getting selected filename", e);
+					if (files != null && files.size() > 0) {
+						fm.selectFile(requestCode, files.get(0));
+					}
 				}
-			}
-		}else if(requestCode == RASTER_FILE_BROWSER_REQUEST_CODE || requestCode == SPATIAL_FILE_BROWSER_REQUEST_CODE){
-			if (resultCode == RESULT_OK) {
-				try {
-					@SuppressWarnings("unchecked")
-					List<LocalFile> files = (List<LocalFile>)
-			                data.getSerializableExtra(FileChooserActivity._Results);
-					boolean isSpatialFile = requestCode == SPATIAL_FILE_BROWSER_REQUEST_CODE;
-					fm.setSelectedFile(files.get(0));
-					renderer.getCurrentTabGroup().getCurrentTab().getMapViewList().get(0).onFileChangesListener(isSpatialFile);
-				} catch (Exception e) {
-					FLog.e("error getting selected filename", e);
-				}
-			}
+				break;
 		}
 	}
 	
@@ -565,8 +579,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	protected void renderUI(Bundle savedInstanceState) {
 		try {
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
-			
 			FLog.d("loading schema: " + projectDir + "/ui_schema.xml");
 			
 			// Read, validate and parse the xforms
@@ -581,19 +593,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 			}
 			
-			Project project = ProjectUtil.getProject(projectKey);
-			
 			// bind the logic to the ui
 			FLog.d("Binding logic to the UI");
-			linker = new BeanShellLinker(ShowProjectActivity.this, ShowProjectActivity.this.arch16n, getAssets(), renderer, databaseManager, gpsDataManager, project);
-			linker.setBaseDir(projectDir);
+			linker = new BeanShellLinker(ShowProjectActivity.this, ProjectUtil.getProject(projectKey));
 			linker.sourceFromAssets("ui_commands.bsh");
 			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
-			fm = new FileManager();
-			for(View view : renderer.getViewByType(CustomMapView.class)){
-				CustomMapView mapView = (CustomMapView) view;
-				mapView.setFileManager(fm);
-			}
 		} catch (Exception e) {
 			FLog.e("error rendering ui", e);
 			
@@ -1073,10 +1077,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		return activityData.getSyncDelay();
 	}
 	
-	public void showFileBrowser() {
+	public void showFileBrowser(int requestCode) {
 		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
 		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
-		startActivityForResult(intent, FILE_BROWSER_REQUEST_CODE);
+		startActivityForResult(intent, requestCode);
 	}
 	
 	/*
@@ -1188,7 +1192,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 			@Override
 			public void run() {
-				final String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + projectKey;
 				final String lock = projectDir + "/.lock";
 				
 				try {

@@ -3,21 +3,14 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -29,22 +22,21 @@ import com.nutiteq.projections.EPSG3857;
 public class CreateLineTool extends BaseGeometryTool {
 	
 	public static final String NAME = "Create Line";
-	
-	private int color = 0xAA00FF00;
-	private float size = 0.2f;
-	private float pickingSize = 0.6f;
-	private float width = 0.05f;
-	private float pickingWidth = 0.3f;
-	private boolean showPoints;
 
 	private MapButton createButton;
 
 	private LinkedList<CustomPoint> pointsList;
 
 	private MapButton undoButton;
+	
+	private GeometryStyle style;
+	
+	private LineStyleDialog styleDialog;
 
 	public CreateLineTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
+		
+		style = GeometryStyle.defaultLineStyle();
 		
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
@@ -191,61 +183,12 @@ public class CreateLineTool extends BaseGeometryTool {
 		MapButton button = new MapButton(context);
 		button.setText("Style Tool");
 		button.setOnClickListener(new OnClickListener() {
-
+			
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle("Style Settings");
-				
-				ScrollView scrollView = new ScrollView(context);
-				LinearLayout layout = new LinearLayout(context);
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				
-				final EditText colorSetter = addSetter(context, layout, "Line Color:", Integer.toHexString(color));
-				final SeekBar sizeBar = addSlider(context, layout, "Point Size:", size);
-				final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", pickingSize);
-				final SeekBar widthBar = addSlider(context, layout, "Line Width:", width);
-				final SeekBar pickingWidthBar = addSlider(context, layout, "Line Picking Width:", pickingWidth);
-				final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Line:", showPoints);
-				
-				builder.setView(scrollView);
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
-							boolean showPoints = showPointsBox.isChecked();
-							
-							CreateLineTool.this.color = color;
-							CreateLineTool.this.setSize(size);
-							CreateLineTool.this.setPickingSize(pickingSize);
-							CreateLineTool.this.width = width;
-							CreateLineTool.this.pickingWidth = pickingWidth;
-							CreateLineTool.this.showPoints = showPoints;
-						} catch (Exception e) {
-							showError(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				builder.create().show();
+				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(context, style);
+				styleDialog = (LineStyleDialog) builder.create();
+				styleDialog.show();
 			}
 				
 		});
@@ -271,68 +214,19 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private GeometryStyle createLineStyle() {
-		GeometryStyle style = new GeometryStyle();
-		style.pointColor = color;
-		style.size = size;
-		style.pickingSize = pickingSize;
-		style.lineColor = color;
-		style.width = width;
-		style.pickingWidth = pickingWidth;
-		style.showPoints = showPoints;
-		return style;
+		return style.cloneStyle();
 	}
 	
 	private GeometryStyle createGuidePointStyle() {
-		GeometryStyle style = new GeometryStyle();
-		style.pointColor = color | 0xFF000000;
-		style.size = size;
-		style.pickingSize = pickingSize;
-		return style;
+		GeometryStyle s = new GeometryStyle(style.minZoom);
+		s.pointColor = style.pointColor | 0xFF000000;
+		s.size = style.size;
+		s.pickingSize = style.pickingSize;
+		return s;
 	}
 
 	@Override
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
 	}
-
-	public int getColor() {
-		return color;
-	}
-
-	public void setColor(int color) {
-		this.color = color;
-	}
-
-	public float getSize() {
-		return size;
-	}
-
-	public void setSize(float size) {
-		this.size = size;
-	}
-
-	public float getPickingSize() {
-		return pickingSize;
-	}
-
-	public void setPickingSize(float pickingSize) {
-		this.pickingSize = pickingSize;
-	}
-	
-	public float getWidth() {
-		return width;
-	}
-
-	public void setWidth(float width) {
-		this.width = width;
-	}
-
-	public float getPickingWidth() {
-		return pickingWidth;
-	}
-
-	public void setPickingWidth(float pickingWidth) {
-		this.pickingWidth = pickingWidth;
-	}
-	
 }

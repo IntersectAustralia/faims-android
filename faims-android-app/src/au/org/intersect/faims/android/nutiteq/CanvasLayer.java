@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Components;
@@ -18,10 +17,10 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CanvasLayer extends GeometryLayer {
 
-	private String name;
+	protected String name;
 	private Quadtree<Geometry> objects;
 	private Stack<Geometry> geomBuffer;
-	private int layerId;
+	protected int layerId;
 	
 	public CanvasLayer(int layerId, String name, Projection projection) {
 		super(projection);
@@ -62,7 +61,7 @@ public class CanvasLayer extends GeometryLayer {
 		newVisibleElementsList.add(geom);
 		
 		for (Geometry g : newVisibleElementsList) {
-			g.setActiveStyle(0);
+			g.setActiveStyle(g.getStyleSet().getFirstNonNullZoomStyleZoom());
 		}
 		
 		setVisibleElementsList(newVisibleElementsList); 
@@ -75,7 +74,7 @@ public class CanvasLayer extends GeometryLayer {
 	}
 
 	public CustomPoint addPoint(int geomId, MapPos point, GeometryStyle style) {		
-		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y));
+		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y), null);
 		addGeometry(p);
 		return p;
 	}
@@ -85,7 +84,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomLine l = new CustomLine(geomId, style, vertices);
+		CustomLine l = new CustomLine(geomId, style, vertices, null);
 		addGeometry(l);
 		return l;
 	}
@@ -95,7 +94,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomPolygon p = new CustomPolygon(geomId, style, vertices);
+		CustomPolygon p = new CustomPolygon(geomId, style, vertices, null);
 		
 		addGeometry(p);
 		return p;

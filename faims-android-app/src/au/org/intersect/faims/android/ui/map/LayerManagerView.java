@@ -1,13 +1,9 @@
 package au.org.intersect.faims.android.ui.map;
 
-import group.pals.android.lib.ui.filechooser.FileChooserActivity;
-import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
@@ -15,45 +11,41 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Parcelable;
-import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.database.DatabaseManager;
-import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
+import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.TextStyleDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 
 import com.nutiteq.layers.Layer;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.Style;
-import com.nutiteq.style.StyleSet;
 
 public class LayerManagerView extends LinearLayout {
 	
@@ -95,40 +87,58 @@ public class LayerManagerView extends LinearLayout {
 		
 	}
 
-	private Button addButton;
-	private ToggleButton orderButton;
 	private CustomMapView mapView;
-	private CustomDragDropListView listView;
 	private LinearLayout layout;
 	private LinearLayout buttonsLayout;
-	private FileManager fm;
+	private CustomDragDropListView listView;
 	private TextView selectedFileText;
 	private Spinner tableNameSpinner;
-	private int pointColor = 0xAAFF0000;
-	private float pointSize = 0.2f;
-	private float pointPickingSize = 0.6f;
-	private int lineColor = 0xAA00FF00;
-	private float lineSize = 0.2f;
-	private float linePickingSize = 0.6f;
-	private float lineWidth = 0.05f;
-	private float linePickingWidth = 0.3f;
-	private boolean lineShowPoints = false;
-	private int polygonColor = 0x440000FF;
-	private int polygonLineColor = 0XAA0000FF;
-	private float polygonLineWidth = 0.05f;
-	private float polygonLinePickingWidth = 0.3f;
-	private boolean polygonShowStroke = true;
+	private Spinner labelColumnSpinner;
+	protected File rasterFile;
+	protected File spatialFile;
+	protected GeometryStyle pointStyle;
+	protected GeometryStyle lineStyle;
+	protected GeometryStyle polygonStyle;
+	protected GeometryTextStyle textStyle;
+	protected PolygonStyleDialog polygonStyleDialog;
+	protected LineStyleDialog lineStyleDialog;
+	protected PointStyleDialog pointStyleDialog;
+	protected TextStyleDialog textStyleDialog;
 
 	public LayerManagerView(Context context) {
 		super(context);
 		
+		pointStyle = GeometryStyle.defaultPointStyle();
+		lineStyle = GeometryStyle.defaultLineStyle();
+		polygonStyle = GeometryStyle.defaultPolygonStyle();
+		textStyle = GeometryTextStyle.defaultStyle();
+		
 		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
-	}
-	
-	public LayerManagerView(Context context, FileManager fm) {
-		this(context);
-		this.fm = fm;
+		
+		ShowProjectActivity activity = (ShowProjectActivity) this.getContext();
+		activity.getFileManager().addListener(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+			
+			@Override
+			public void onFileSelected(File file) {
+				LayerManagerView.this.rasterFile = file;
+				LayerManagerView.this.selectedFileText.setText(file.getName());
+			}
+		});
+		activity.getFileManager().addListener(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+			
+			@Override
+			public void onFileSelected(File file) {
+				LayerManagerView.this.spatialFile = file;
+				LayerManagerView.this.selectedFileText.setText(file.getName());
+				try {
+					setTableSpinner();
+				} catch (jsqlite.Exception e) {
+					FLog.e("Not a valid spatial layer file", e);
+					showErrorDialog("Not a valid spatial layer file");
+				}
+			}
+		});
 	}
 	
 	public void attachToMap(CustomMapView mapView) {
@@ -159,12 +169,17 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				int last = mapView.getLayers().getAllLayers().size() - 1;
-				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
-				LayerListItem itemView = (LayerListItem) view;
-				itemView.toggle();
-				layer.setVisible(itemView.isChecked());
-				mapView.updateTools();
+				try {
+					List<Layer> layers = mapView.getAllLayers();
+					int last = layers.size() - 1;
+					final Layer layer = layers.get(last - position);
+					LayerListItem itemView = (LayerListItem) view;
+					itemView.toggle();
+					mapView.setLayerVisible(layer, itemView.isChecked());
+					mapView.updateTools();
+				} catch (Exception e) {
+					showErrorDialog("Error setting layer visibility");
+				}
 			}
 			
 		});
@@ -174,8 +189,9 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				int last = mapView.getLayers().getAllLayers().size() - 1;
-				final Layer layer = mapView.getLayers().getAllLayers().get(last - position);
+				List<Layer> layers = mapView.getAllLayers();
+				int last = layers.size() - 1;
+				final Layer layer = layers.get(last - position);
 				
 				Context context = LayerManagerView.this.getContext();
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -221,10 +237,38 @@ public class LayerManagerView extends LinearLayout {
 						showMetadata(layer);
 					}
 				});
-
+				
 				layout.addView(removeButton);
 				layout.addView(renameButton);
 				layout.addView(showMetadataButton);
+				
+				if (layer instanceof CustomSpatialiteLayer) {
+					final ToggleButton showLabelsButton = new ToggleButton(context);
+					showLabelsButton.setTextOn("Hide Labels");
+					showLabelsButton.setTextOff("Show Labels");
+					showLabelsButton.setChecked(((CustomSpatialiteLayer) layer).getTextVisible());
+					showLabelsButton.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							((CustomSpatialiteLayer) layer).setTextVisible(showLabelsButton.isChecked());
+						}
+					});
+					layout.addView(showLabelsButton);
+				} else if (layer instanceof DatabaseLayer) {
+					final ToggleButton showLabelsButton = new ToggleButton(context);
+					showLabelsButton.setTextOn("Hide Labels");
+					showLabelsButton.setTextOff("Show Labels");
+					showLabelsButton.setChecked(((DatabaseLayer) layer).getTextVisible());
+					showLabelsButton.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							((DatabaseLayer) layer).setTextVisible(showLabelsButton.isChecked());
+						}
+					});
+					layout.addView(showLabelsButton);
+				}
 				
 				d.show();
 				return true;
@@ -234,28 +278,9 @@ public class LayerManagerView extends LinearLayout {
 
 		layout.addView(listView);
 	}
-	
-	// Drop Listener
-	private CustomDragDropListView.DropListener dropListener = new CustomDragDropListView.DropListener() {
-		public void drop(int from, int to) {
-			int last = mapView.getLayers().getAllLayers().size() - 1;
-			boolean isFromBaseLayer = mapView.getLayers().getAllLayers().get(last - from) == mapView.getLayers().getBaseLayer();
-			boolean isToBaseLayer = mapView.getLayers().getAllLayers().get(last - to) == mapView.getLayers().getBaseLayer();
-			if(!(isFromBaseLayer || isToBaseLayer)){
-				List<Layer> unmodifiableLayers = mapView.getLayers().getAllLayers();
-				List<Layer> modifiedLayers = new ArrayList<Layer>(unmodifiableLayers);
-				Collections.swap(modifiedLayers, last - from, last - to);
-				if (mapView.getLayers().getBaseLayer() != null) {
-					modifiedLayers.remove(0);
-				}
-				mapView.getLayers().setLayers(modifiedLayers);
-				redrawLayers();
-			}
-		}
-	};
 
 	private void createAddButton() {
-		addButton = new Button(this.getContext());
+		Button addButton = new Button(this.getContext());
 		addButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		addButton.setText("Add");
 		addButton.setOnClickListener(new OnClickListener() {
@@ -271,7 +296,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void createOrderButton(){
-		orderButton = new ToggleButton(this.getContext());
+		ToggleButton orderButton = new ToggleButton(this.getContext());
 		orderButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		orderButton.setTextOn("Order ON");
 		orderButton.setTextOff("Order OFF");
@@ -281,7 +306,19 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if(isChecked){
-					listView.setDropListener(dropListener);
+					listView.setDropListener(new CustomDragDropListView.DropListener() {
+						public void drop(int from, int to) {
+							List<Layer> layers = mapView.getAllLayers();
+							int last = layers.size() - 1;
+							boolean isFromBaseLayer = layers.get(last - from) == mapView.getLayers().getBaseLayer();
+							boolean isToBaseLayer = layers.get(last - to) == mapView.getLayers().getBaseLayer();
+							if(!(isFromBaseLayer || isToBaseLayer)){
+								Collections.swap(layers, last - from, last - to);
+								mapView.setAllLayers(layers);
+								redrawLayers();
+							}
+						}
+					});
 				}else{
 					listView.removeDropListener();
 				}
@@ -291,7 +328,7 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	public void redrawLayers() {
-		List<Layer> layers = mapView.getLayers().getAllLayers();
+		List<Layer> layers = mapView.getAllLayers();
 		List<Layer> shownLayer = new ArrayList<Layer>(layers);
 		Collections.reverse(shownLayer);
 		LayersAdapter layersAdapter = new LayersAdapter(shownLayer);
@@ -336,7 +373,7 @@ public class LayerManagerView extends LinearLayout {
 //		});
 		
 		Button loadSpatialLayerButton = new Button(getContext());
-		loadSpatialLayerButton.setText("Load Spatial Layer");
+		loadSpatialLayerButton.setText("Load Vector Layer");
 		loadSpatialLayerButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -347,8 +384,20 @@ public class LayerManagerView extends LinearLayout {
 			
 		});
 		
+		Button loadDatabaseLayerButton = new Button(getContext());
+		loadDatabaseLayerButton.setText("Load Database Layer");
+		loadDatabaseLayerButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				d.dismiss();
+				addDatabaseLayer();
+			}
+			
+		});
+		
 		Button createLayerButton = new Button(getContext());
-		createLayerButton.setText("Create Layer");
+		createLayerButton.setText("Create Canvas Layer");
 		createLayerButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -362,6 +411,7 @@ public class LayerManagerView extends LinearLayout {
 		layout.addView(loadRasterLayerButton);
 //		layout.addView(loadShapeLayerButton);
 		layout.addView(loadSpatialLayerButton);
+		layout.addView(loadDatabaseLayerButton);
 		layout.addView(createLayerButton);
 		
 		d.show();
@@ -379,7 +429,6 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		
 		builder.setView(scrollView);
-		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Raster layer name:");
@@ -393,7 +442,6 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				d.dismiss();
 				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
@@ -406,11 +454,10 @@ public class LayerManagerView extends LinearLayout {
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
-					if(fm.getSelectedFile() != null){
-						mapView.addRasterMap(editText.getText().toString(), fm.getSelectedFile().getPath());
+					if(rasterFile != null){
+						mapView.addRasterMap(editText.getText().toString(), rasterFile.getPath());
 						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
 						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
-						fm.setSelectedFile(null);
 						redrawLayers();
 					}
 				} catch (Exception e) {
@@ -438,7 +485,6 @@ public class LayerManagerView extends LinearLayout {
 //		layout.setOrientation(LinearLayout.VERTICAL);
 //		
 //		builder.setView(layout);
-//		final Dialog d = builder.create();
 //		
 //		TextView textView = new TextView(this.getContext());
 //		textView.setText("Shape layer name:");
@@ -452,7 +498,6 @@ public class LayerManagerView extends LinearLayout {
 //
 //			@Override
 //			public void onClick(View arg0) {
-//				d.dismiss();
 //				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 //			}
 //		});
@@ -501,7 +546,6 @@ public class LayerManagerView extends LinearLayout {
 		scrollView.addView(layout);
 		
 		builder.setView(scrollView);
-		final Dialog d = builder.create();
 		
 		TextView textView = new TextView(this.getContext());
 		textView.setText("Spatial layer name:");
@@ -513,7 +557,35 @@ public class LayerManagerView extends LinearLayout {
 		tableTextView.setText("Spatial table name:");
 		layout.addView(tableTextView);
 		tableNameSpinner = new Spinner(this.getContext());
+		tableNameSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1, int index,
+					long arg3) {
+				try {
+					String tableName = (String) tableNameSpinner.getAdapter().getItem(index);
+					setLabelSpinner(tableName);
+				} catch (Exception e) {
+					FLog.e("error getting table columns", e);
+					showErrorDialog("Error getting table columns");
+				}
+			}
+			
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		layout.addView(tableNameSpinner);
+		
+		TextView labelTextView = new TextView(this.getContext());
+		labelTextView.setText("Spatial label column:");
+		layout.addView(labelTextView);
+		labelColumnSpinner = new Spinner(this.getContext());
+		
+		layout.addView(labelColumnSpinner);
 		
 		Button browserButton = new Button(getContext());
 		browserButton.setText("browse");
@@ -521,7 +593,6 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				d.dismiss();
 				showFileBrowser(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
@@ -533,27 +604,96 @@ public class LayerManagerView extends LinearLayout {
 		styleLayout.setOrientation(LinearLayout.HORIZONTAL);
 		styleLayout.addView(createPointStyleButton());
 		styleLayout.addView(createLineStyleButton());
-		styleLayout.addView(createPolygonStyle());
+		styleLayout.addView(createPolygonStyleButton());
+		styleLayout.addView(createTextStyleButton());
 		
 		layout.addView(styleLayout);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
-					if(fm.getSelectedFile() != null){
-						StyleSet<PointStyle> ps = (StyleSet<PointStyle>) createStyleSet(10, createPointStyle(pointColor, pointSize, pointPickingSize));
-						PointStyle linePointStyle = lineShowPoints ? createPointStyle(lineColor, lineSize, linePickingSize) : null;
-						StyleSet<LineStyle> ls = (StyleSet<LineStyle>) createStyleSet(10, createLineStyle(lineColor, lineWidth, linePickingWidth, linePointStyle));
-						LineStyle polygonLineStyle = polygonShowStroke ? createLineStyle(polygonLineColor, polygonLineWidth, polygonLinePickingWidth, null) : null;
-						StyleSet<PolygonStyle> pos = (StyleSet<PolygonStyle>) createStyleSet(10, createPolygonStyle(polygonColor, polygonLineStyle));
+					if(spatialFile != null){
 						String layerName = editText.getText() != null ? editText.getText().toString() : null;
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, fm.getSelectedFile().getPath(), tableName, null, ps, ls, pos);
-						fm.setSelectedFile(null);
+						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
+						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, new String[] { labelName }, 
+								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+								textStyle.toStyleSet());
 						redrawLayers();
 					}
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
+	}
+	
+	private void addDatabaseLayer(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Add database layer:");
+		
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		builder.setView(scrollView);
+		
+		TextView textView = new TextView(this.getContext());
+		textView.setText("Database layer name:");
+		layout.addView(textView);
+		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		layout.addView(editText);
+		
+		TextView typeTextView = new TextView(this.getContext());
+		typeTextView.setText("Database layer type:");
+		layout.addView(typeTextView);
+		final Spinner typeSpinner = new Spinner(this.getContext());
+		ArrayList<String> types = new ArrayList<String>();
+		types.add("Entity");
+		types.add("Relationship");
+		typeSpinner.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, types));
+		layout.addView(typeSpinner);
+		
+		TextView queryTextView = new TextView(this.getContext());
+		queryTextView.setText("Database query:");
+		layout.addView(queryTextView);
+		final Spinner querySpinner = new Spinner(this.getContext());
+		List<String> queryNames = mapView.getDatabaseLayerQueryNames();
+		querySpinner.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, queryNames));
+		layout.addView(querySpinner);
+		
+		LinearLayout styleLayout = new LinearLayout(this.getContext());
+		styleLayout.setOrientation(LinearLayout.HORIZONTAL);
+		styleLayout.addView(createPointStyleButton());
+		styleLayout.addView(createLineStyleButton());
+		styleLayout.addView(createPolygonStyleButton());
+		styleLayout.addView(createTextStyleButton());
+		
+		layout.addView(styleLayout);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
+					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
+					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
+							pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+							textStyle.toStyleSet());
+					redrawLayers();
 				} catch (Exception e) {
 					showErrorDialog(e.getMessage());
 				}
@@ -579,48 +719,9 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-				builder.setTitle("Style Settings");
-				
-				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
-				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Point Color:", Integer.toHexString(pointColor));
-				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", pointSize);
-				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", pointPickingSize);
-				
-				builder.setView(scrollView);
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							
-							LayerManagerView.this.pointColor = color;
-							LayerManagerView.this.pointSize = size;
-							LayerManagerView.this.pointPickingSize = pickingSize;
-						} catch (Exception e) {
-							showErrorDialog(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				builder.create().show();
+				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(LayerManagerView.this.getContext(), pointStyle);
+				pointStyleDialog = (PointStyleDialog) builder.create();
+				pointStyleDialog.show();
 			}
 				
 		});
@@ -637,64 +738,16 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-				builder.setTitle("Style Settings");
-				
-				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
-				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Line Color:", Integer.toHexString(lineColor));
-				final SeekBar sizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Size:", lineSize);
-				final SeekBar pickingSizeBar = addSlider(LayerManagerView.this.getContext(), layout, "Point Picking Size:", linePickingSize);
-				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Width:", lineWidth);
-				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Line Picking Width:", linePickingWidth);
-				final CheckBox showPointsBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Points on Line:", lineShowPoints);
-				
-				builder.setView(scrollView);
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = parseColor(colorSetter.getText().toString());
-							float size = parseSize(sizeBar.getProgress());
-							float pickingSize = parseSize(pickingSizeBar.getProgress());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
-							boolean showPoints = showPointsBox.isChecked();
-							
-							LayerManagerView.this.lineColor = color;
-							LayerManagerView.this.lineSize = size;
-							LayerManagerView.this.linePickingSize = pickingSize;
-							LayerManagerView.this.lineWidth = width;
-							LayerManagerView.this.linePickingWidth = pickingWidth;
-							LayerManagerView.this.lineShowPoints = showPoints;
-						} catch (Exception e) {
-							showErrorDialog(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				builder.create().show();
+				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(LayerManagerView.this.getContext(), lineStyle);
+				lineStyleDialog = (LineStyleDialog) builder.create();
+				lineStyleDialog.show();
 			}
 				
 		});
 		return button;
 	}
 
-	public Button createPolygonStyle(){
+	public Button createPolygonStyleButton(){
 		Button button = new Button(this.getContext());
 		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
@@ -704,180 +757,32 @@ public class LayerManagerView extends LinearLayout {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
-				builder.setTitle("Style Settings");
-				
-				ScrollView scrollView = new ScrollView(LayerManagerView.this.getContext());
-				LinearLayout layout = new LinearLayout(LayerManagerView.this.getContext());
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Polygon Color:", Integer.toHexString(polygonColor));
-				final EditText strokeColorSetter = addSetter(LayerManagerView.this.getContext(), layout, "Stroke Color:", Integer.toHexString(polygonLineColor));
-				final SeekBar widthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Width:", polygonLineWidth);
-				final SeekBar pickingWidthBar = addSlider(LayerManagerView.this.getContext(), layout, "Stroke Picking Width:", polygonLinePickingWidth);
-				final CheckBox showStrokeBox = addCheckBox(LayerManagerView.this.getContext(), layout, "Show Stroke on Polygon:", polygonShowStroke);
-				
-				builder.setView(scrollView);
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = parseColor(colorSetter.getText().toString());
-							int lineColor = parseColor(strokeColorSetter.getText().toString());
-							float width = parseSize(widthBar.getProgress());
-							float pickingWidth = parseSize(pickingWidthBar.getProgress());
-							boolean showStroke = showStrokeBox.isChecked();
-							
-							LayerManagerView.this.polygonColor = color;
-							LayerManagerView.this.polygonLineColor = lineColor;
-							LayerManagerView.this.polygonLineWidth = width;
-							LayerManagerView.this.polygonLinePickingWidth = pickingWidth;
-							LayerManagerView.this.polygonShowStroke = showStroke;
-						} catch (Exception e) {
-							showErrorDialog(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				builder.create().show();
+				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(LayerManagerView.this.getContext(), polygonStyle);
+				polygonStyleDialog = (PolygonStyleDialog) builder.create();
+				polygonStyleDialog.show();
 			}
 				
 		});
 		return button;
 	}
-
-	protected int parseColor(String value) throws Exception {
-		Integer color = (int) Long.parseLong(value, 16);
-		if (color == null) {
-			throw new MapException("Invalid color specified");
-		}
-		return color;
-	}
 	
-	protected float parseSize(int value) throws Exception {
-		if (value < 0 || value > 100) {
-			throw new MapException("Invalid size");
-		}
-		
-		return ((float) value) / 100;
-	}
-
-	protected CheckBox addCheckBox(Context context, LinearLayout layout, String labelText, boolean defaultValue) {
-		TextView label = new TextView(context);
-		label.setText(labelText);
-		
-		CheckBox box = new CheckBox(context);
-		box.setChecked(defaultValue);
-		
-		layout.addView(label);
-		layout.addView(box);
-		
-		return box;
-	}
-
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue) {
-		return addSetter(context, layout, labelText, defaultValue, -1);
-	}
-
-	protected EditText addSetter(Context context, LinearLayout layout, String labelText, String defaultValue, int type) {
-		TextView label = new TextView(context);
-		label.setText(labelText);
-		
-		EditText text = new EditText(context);
-		text.setText(defaultValue.toUpperCase(Locale.ENGLISH));
-		
-		if (type >= 0) text.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		
-		layout.addView(label);
-		layout.addView(text);
-		
-		return text;
-	}
-
-	protected SeekBar addSlider(Context context, LinearLayout layout, final String labelText, float defaultValue) {
-		final TextView label = new TextView(context);
-		label.setText(labelText + " " + Float.toString(defaultValue));
-		
-		final SeekBar seekBar = new SeekBar(context);
-		seekBar.setMax(100);
-		seekBar.setProgress((int) (defaultValue * 100));
-		
-		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+	public Button createTextStyleButton(){
+		Button button = new Button(this.getContext());
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
+		button.setText("Style Text");
+		button.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-				label.setText(labelText + " " + Float.toString(((float) seekBar.getProgress()) / 100));
+			public void onClick(View arg0) {
+				TextStyleDialog.Builder builder = new TextStyleDialog.Builder(LayerManagerView.this.getContext(), textStyle);
+				textStyleDialog = (TextStyleDialog) builder.create();
+				textStyleDialog.show();
 			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar arg0) {
-				// TODO Auto-generated method stub
 				
-			}
-
-			@Override
-			public void onStopTrackingTouch(SeekBar arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
 		});
-		
-		layout.addView(label);
-		layout.addView(seekBar);
-		
-		return seekBar;
-	}
-	
-	public PointStyle createPointStyle(int color, float size, float pickSize) {
-		return PointStyle.builder().setColor(color).setSize(size).setPickingSize(pickSize).build();
-	}
-	
-	public LineStyle createLineStyle(int color, float width, float pickWidth) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).build();
-	}
-	
-	public LineStyle createLineStyle(int color, float width, float pickWidth, PointStyle pointStyle) {
-		return LineStyle.builder().setColor(color).setWidth(width).setPickingWidth(pickWidth).setPointStyle(pointStyle).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color) {
-		return PolygonStyle.builder().setColor(color).build();
-	}
-	
-	public PolygonStyle createPolygonStyle(int color, LineStyle lineStyle) {
-		return PolygonStyle.builder().setColor(color).setLineStyle(lineStyle).build();
-	}
-	
-	public StyleSet<? extends Style> createStyleSet(int minZoom, Style style) {
-		if (style instanceof PointStyle) {
-			StyleSet<PointStyle> pointStyleSet = new StyleSet<PointStyle>();
-			pointStyleSet.setZoomStyle(minZoom, (PointStyle) style);
-			return pointStyleSet;
-		} else if (style instanceof LineStyle) {
-			StyleSet<LineStyle> lineStyleSet = new StyleSet<LineStyle>();
-			lineStyleSet.setZoomStyle(minZoom, (LineStyle) style);
-			return lineStyleSet;
-		} else if (style instanceof PolygonStyle) {
-			StyleSet<PolygonStyle> polygonStyleSet = new StyleSet<PolygonStyle>();
-			polygonStyleSet.setZoomStyle(minZoom, (PolygonStyle) style);
-			return polygonStyleSet;
-		} else {
-			FLog.e("cannot create style set");
-			return null;
-		}
+		return button;
 	}
 	
 	private void createLayer(){
@@ -961,6 +866,9 @@ public class LayerManagerView extends LinearLayout {
 		}else if(layer instanceof CanvasLayer){
 			CanvasLayer canvasLayer = (CanvasLayer) layer;
 			editText.setText(canvasLayer.getName());
+		}else if (layer instanceof DatabaseLayer) {
+			DatabaseLayer databaseLayer = (DatabaseLayer) layer;
+			editText.setText(databaseLayer.getName());
 		}
 		builder.setView(editText);
 		
@@ -1004,6 +912,8 @@ public class LayerManagerView extends LinearLayout {
 			layerTypeEditText.setText("spatial layer");
 		}else if(layer instanceof CanvasLayer){
 			layerTypeEditText.setText("canvas layer");
+		}else if (layer instanceof DatabaseLayer) {
+			layerTypeEditText.setText("database layer");
 		}
 		layout.addView(layerTypeEditText);
 		
@@ -1100,6 +1010,22 @@ public class LayerManagerView extends LinearLayout {
 			layerNameEditText.setEnabled(false);
 			layerNameEditText.setText(canvasLayer.getName());
 			layout.addView(layerNameEditText);
+		}else if(layer instanceof DatabaseLayer){
+			DatabaseLayer databaseLayer = (DatabaseLayer) layer;
+
+			EditText layerNameEditText = new EditText(LayerManagerView.this.getContext());
+			layerNameEditText.setEnabled(false);
+			layerNameEditText.setText(databaseLayer.getName());
+			layout.addView(layerNameEditText);
+			
+			TextView tableNameTextView = new TextView(this.getContext());
+			tableNameTextView.setText("Query name:");
+			layout.addView(tableNameTextView);
+
+			EditText tableNameEditText = new EditText(LayerManagerView.this.getContext());
+			tableNameEditText.setEnabled(false);
+			tableNameEditText.setText(databaseLayer.getQueryName());
+			layout.addView(tableNameEditText);
 		}else{
 			showErrorDialog("wrong type of layer");
 		}
@@ -1124,48 +1050,17 @@ public class LayerManagerView extends LinearLayout {
 	}
 	
 	private void showFileBrowser(int requestCode){
-		Intent intent = new Intent((ShowProjectActivity)this.getContext(), FileChooserActivity.class);
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile("/"));
-		((ShowProjectActivity) this.getContext()).startActivityForResult(intent, requestCode);
-	}
-
-	public FileManager getFileManager() {
-		return fm;
-	}
-
-	public void setFileManager(FileManager fm) {
-		this.fm = fm;
-	}
-
-	public void setSelectedFilePath(String filename, boolean isSpatial) {
-		if(isSpatial){
-			try {
-				setSpinner();
-			} catch (jsqlite.Exception e) {
-				FLog.e("Not a valid spatial layer file");
-				AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-				
-				builder.setTitle("Error");
-				builder.setMessage("Not a valid spatial layer file");
-				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-				           public void onClick(DialogInterface dialog, int id) {
-				               // User clicked OK button
-				           }
-				       });
-				builder.create().show();
-			}
-		}
-		this.selectedFileText.setText(filename);
+		((ShowProjectActivity) this.getContext()).showFileBrowser(requestCode);
 	}
 	
-	public void setSpinner() throws jsqlite.Exception{
+	public void setTableSpinner() throws jsqlite.Exception{
 			synchronized(DatabaseManager.class) {
 				List<String> tableName = new ArrayList<String>();
 				Stmt st = null;
 				Database db = null;
 				try {
 					db = new jsqlite.Database();
-					db.open(this.fm.getSelectedFile().getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+					db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
 					
 					String query = "select name from sqlite_master where type = 'table' and sql like '%\"Geometry\"%';";
 					st = db.prepare(query);
@@ -1202,4 +1097,50 @@ public class LayerManagerView extends LinearLayout {
 				}
 			}
 	}
+	
+	public void setLabelSpinner(String tableName) throws jsqlite.Exception{
+		synchronized(DatabaseManager.class) {
+			List<String> columnNames = new ArrayList<String>();
+			Stmt st = null;
+			Database db = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				String query = "pragma table_info(" + tableName + ")";
+				st = db.prepare(query);
+				
+				while(st.step()){
+					columnNames.add(st.column_string(1));
+				}
+				
+				st.close();
+				st = null;
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+			if(columnNames.isEmpty()){
+				throw new jsqlite.Exception("Not labels found");
+			}else{
+				ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+						this.getContext(),
+						android.R.layout.simple_spinner_dropdown_item,
+						columnNames);
+				labelColumnSpinner.setAdapter(arrayAdapter);
+				labelColumnSpinner.setSelection(0);
+			}
+		}
+}
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Vector;
 
 import jsqlite.Callback;
 import jsqlite.Stmt;
@@ -19,7 +20,11 @@ import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
 import au.org.intersect.faims.android.util.DateUtil;
 
 import com.google.inject.Singleton;
+import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Polygon;
+import com.nutiteq.style.PolygonStyle;
+import com.nutiteq.ui.Label;
 import com.nutiteq.utils.Utils;
 import com.nutiteq.utils.WkbRead;
 
@@ -458,12 +463,14 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] g1 = WkbRead.readWkb(
+					Geometry[] gs = WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
 		                            .hexStringToByteArray(stmt.column_string(1))), null);
-					if (g1 != null) {
-			            for (int i = 0; i < g1.length; i++) {
-			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = new String[] { "entity", id, id };
+			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
 				}
@@ -530,12 +537,14 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] g1 = WkbRead.readWkb(
+					Geometry[] gs = WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
 		                            .hexStringToByteArray(stmt.column_string(1))), null);
-					if (g1 != null) {
-			            for (int i = 0; i < g1.length; i++) {
-			                geomList.add(GeometryUtil.fromGeometry(g1[i]));
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = new String[] { "relationship", id, id };
+			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
 				}
@@ -735,6 +744,199 @@ public class DatabaseManager {
 			"group by relationshipid " +
 			"order by stamp;";
 		return fetchAll(query);
+	}
+	
+	public Vector<Geometry> fetchAllVisibleEntityGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (uuid, aenttimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = "SELECT uuid, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, Hex(AsBinary(geospatialcolumn))\n" + 
+						"    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp\n" + 
+						"            FROM archentity\n" + 
+						"            JOIN aentvalue USING (uuid)\n" + 
+						"            JOIN idealaent using (aenttypeid, attributeid)\n" + 
+						"           WHERE isIdentifier = 'true'\n" + 
+						"             AND uuid IN (SELECT uuid\n" + 
+						"                            FROM (SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel\n" + 
+						"                                    FROM archentity\n" + 
+						"                                   where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
+						"                                GROUP BY uuid, aenttypeid\n" + 
+						"                                  HAVING max(aenttimestamp)\n" + 
+						"                                     )\n" + 
+						"                            JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp\n" + 
+						"                                    FROM aentvalue --this gives us a temporal ordering...\n" + 
+						"                                  WHERE deleted is null\n" + 
+						"                                GROUP BY uuid\n" + 
+						"                                  HAVING max(valuetimestamp)\n" + 
+						"                                    )\n" + 
+						"                            USING (uuid)\n" +
+															userQuery +
+						"                           WHERE entDel is null\n" + 
+						"                           GROUP BY uuid\n" + 
+						"                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid\n" + 
+						"                        LIMIT ?\n" + 
+						"                        -- OFFSET ?\n" + 
+						"                      )\n" + 
+						"        GROUP BY uuid, attributeid\n" + 
+						"          HAVING MAX(ValueTimestamp)\n" + 
+						"             AND MAX(AEntTimestamp)\n" + 
+						"             )\n" + 
+						"    JOIN attributekey using (attributeid)\n" + 
+						"    JOIN aentvalue using (uuid, attributeid, valuetimestamp)\n" + 
+						"    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)\n" + 
+						"    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)\n" + 
+						"    JOIN archentity using (uuid, aenttimestamp)\n" + 
+						"    JOIN aenttype using (aenttypeid)\n" + 
+						"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
+						"WHERE aentvalue.deleted is null\n" + 
+						"group by uuid\n" + 
+						"ORDER BY max(tstamp,astamp) desc, uuid, attributename;";
+				stmt = db.prepare(query);
+				ArrayList<MapPos> list = new ArrayList<MapPos>();
+				list.add(new MapPos(min.x, min.y));
+				list.add(new MapPos(max.x, min.y));
+				list.add(new MapPos(max.x, max.y));
+				list.add(new MapPos(min.x, max.y));
+				list.add(new MapPos(min.x, min.y));
+				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
+				stmt.bind(2, maxObjects);
+				Vector<Geometry> results = new Vector<Geometry>();
+				while(stmt.step()){
+					String uuid = stmt.column_string(0);
+					String response = stmt.column_string(1);
+					Geometry[] gs = WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(2))), null);
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = new String[] { "entity", uuid, response };
+			                results.add(GeometryUtil.fromGeometry(g));
+			            }
+					}
+				}
+				stmt.close();
+				stmt = null;
+	
+				return results;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (relationshipid, relntimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = "SELECT relationshipid, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, Hex(AsBinary(geospatialcolumn))\n" + 
+						"   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp\n" + 
+						"            FROM relationship\n" + 
+						"            JOIN relnvalue USING (relationshipid)\n" + 
+						"            JOIN idealreln using (relntypeid, attributeid)\n" + 
+						"           WHERE isIdentifier = 'true'\n" + 
+						"             AND relationshipid in (SELECT distinct relationshipid\n" + 
+						"                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted\n" + 
+						"                                              FROM relationship\n" + 
+						"                                              where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
+						"                                          GROUP BY relationshipid\n" + 
+						"                                            HAVING max(relntimestamp))\n" + 
+						"                                      JOIN (SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp\n" + 
+						"                                              FROM relnvalue\n" + 
+						"                                             WHERE deleted is null\n" + 
+						"                                          GROUP BY relationshipid, attributeid, vocabid\n" + 
+						"                                            HAVING max(relnvaluetimestamp)\n" + 
+						"                                        ) USING (relationshipid)\n" + 
+																	userQuery +
+						"                                     WHERE relnDeleted is null\n" + 
+						"                                  GROUP BY relationshipid\n" + 
+						"                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid\n" + 
+						"                                  LIMIT ?\n" + 
+						"                                  --OFFSET ?\n" + 
+						"                                    )\n" + 
+						"        GROUP BY relationshipid, attributeid\n" + 
+						"          HAVING MAX(relntimestamp)\n" + 
+						"             AND MAX(relnvaluetimestamp))\n" + 
+						"   JOIN relationship using (relationshipid, relntimestamp)\n" + 
+						"   JOIN relntype using (relntypeid)\n" + 
+						"   JOIN attributekey using (attributeid)\n" + 
+						"   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)\n" + 
+						"   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+						"   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)\n" + 
+						"   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)\n" + 
+						"  WHERE relnvalue.deleted is NULL\n" + 
+						"GROUP BY relationshipid, attributeid, relnvaluetimestamp\n" + 
+						"ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;";
+				stmt = db.prepare(query);
+				ArrayList<MapPos> list = new ArrayList<MapPos>();
+				list.add(new MapPos(min.x, min.y));
+				list.add(new MapPos(max.x, min.y));
+				list.add(new MapPos(max.x, max.y));
+				list.add(new MapPos(min.x, max.y));
+				list.add(new MapPos(min.x, min.y));
+				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
+				stmt.bind(2, maxObjects);
+				Vector<Geometry> results = new Vector<Geometry>();
+				while(stmt.step()){
+					String uuid = stmt.column_string(0);
+					String response = stmt.column_string(1);
+					Geometry[] gs = WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(2))), null);
+					if (gs != null) {
+			            for (int i = 0; i < gs.length; i++) {
+			            	Geometry g = gs[i];
+			            	g.userData = new String[] { "entity", uuid, response };
+			                results.add(GeometryUtil.fromGeometry(g));
+			            }
+					}
+				}
+				stmt.close();
+				stmt = null;
+	
+				return results;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
 	}
 	
 	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {

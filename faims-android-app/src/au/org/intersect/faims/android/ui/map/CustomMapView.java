@@ -22,12 +22,11 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.GeometryStyle;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
@@ -35,7 +34,11 @@ import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
+import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -67,11 +70,12 @@ import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
+import com.nutiteq.style.TextStyle;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
-public class CustomMapView extends MapView implements FileManager.FileSelectionListener{
+public class CustomMapView extends MapView {
 
 	public class InternalMapListener extends MapListener {
 
@@ -137,6 +141,9 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	// TODO what is this?
 	private static int cacheId = 9991;
@@ -183,7 +190,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	private boolean showDecimal;
 	private LayerManagerView layerManager;
-	private FileManager fm;
 
 	private boolean showKm;
 
@@ -195,6 +201,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	private GPSLocation previousLocation;
 
 	private WeakReference<Activity> activityRef;
+	
+	private HashMap<String, String> databaseLayerQueryMap;
 	
 	public CustomMapView(Activity activity, MapLayout mapLayout) {
 		this(activity);
@@ -209,6 +217,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
         selectedGeometryList = new ArrayList<Geometry>();
+        databaseLayerQueryMap = new HashMap<String, String>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -336,6 +345,14 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			this.selectedLayer = null;
 			updateTools();
 		}
+		
+		// remove associated text layer
+		if (layer instanceof CustomSpatialiteLayer) {
+			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
+		} else if (layer instanceof DatabaseLayer) {
+			removeLayer(((DatabaseLayer) layer).getTextLayer());
+		}
+		
 	}
 
 	public Layer getLayer(int layerId) {
@@ -356,6 +373,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			layerName = ((CustomSpatialiteLayer) layer).getName();
 		} else if (layer instanceof CanvasLayer) {
 			layerName = ((CanvasLayer) layer).getName();
+		} else if (layer instanceof DatabaseLayer) {
+			layerName = ((DatabaseLayer) layer).getName();
 		}
 		return layerName;
 	}
@@ -369,6 +388,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			((CustomSpatialiteLayer) layer).setName(layerName);
 		} else if (layer instanceof CanvasLayer) {
 			((CanvasLayer) layer).setName(layerName);
+		} else if (layer instanceof DatabaseLayer) {
+			((DatabaseLayer) layer).setName(layerName);
 		}
 	}
 
@@ -382,6 +403,8 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 			layerId = ((CustomSpatialiteLayer) layer).getLayerId();
 		} else if (layer instanceof CanvasLayer) {
 			layerId = ((CanvasLayer) layer).getLayerId();
+		} else if (layer instanceof DatabaseLayer) {
+			layerId = ((DatabaseLayer) layer).getLayerId();
 		}
 		return layerId;
 	}
@@ -471,14 +494,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				.distance(GeometryUtil.convertToWgs84(this.screenToWorld(0,
 						height, 0)), GeometryUtil.convertToWgs84(this
 						.screenToWorld(width, height, 0))));
-	}
-
-	public FileManager getFileManager() {
-		return fm;
-	}
-
-	public void setFileManager(FileManager fm) {
-		this.fm = fm;
 	}
 
 	public void startThread(Runnable runnable) {
@@ -599,21 +614,34 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 	}
 
 	public int addSpatialLayer(String layerName, String file, String tablename,
-			String labelColumn, StyleSet<PointStyle> pointStyleSet,
+			String[] labelColumns, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
+			StyleSet<PolygonStyle> polygonStyleSet,
+			StyleSet<TextStyle> textStyleSet) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error file does not exist " + file);
 		}
 
 		validateLayerName(layerName);
-
+		
+		if (labelColumns == null) {
+			labelColumns = new String[] { null }; // nutiteq layer has a bug when null or 0 length array is supplied 
+		}
+		
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(
 				nextLayerId(), layerName, new EPSG3857(), file, tablename,
-				"Geometry", new String[] { labelColumn },
+				"Geometry", labelColumns,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet,
 				polygonStyleSet);
 		this.getLayers().addLayer(spatialLayer);
+		
+		if (textStyleSet != null) {
+			// add text layer
+			SpatialiteTextLayer textLayer = new SpatialiteTextLayer(new EPSG3857(), spatialLayer, labelColumns, textStyleSet);
+			spatialLayer.setTextLayer(textLayer);
+			this.getLayers().addLayer(textLayer);
+		}
+		
 		return addLayer(spatialLayer);
 	}
 
@@ -623,6 +651,28 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName,
 				new EPSG3857());
 		this.getLayers().addLayer(layer);
+		return addLayer(layer);
+	}
+	
+	public int addDatabaseLayer(String layerName, boolean isEntity, String queryName, String querySql, 
+			StyleSet<PointStyle> pointStyleSet,
+			StyleSet<LineStyle> lineStyleSet,
+			StyleSet<PolygonStyle> polygonStyleSet,
+			StyleSet<TextStyle> textStyleSet) throws Exception {
+		validateLayerName(layerName);
+		
+		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
+				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
+				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+		this.getLayers().addLayer(layer);
+		
+		if (textStyleSet != null) {
+			// add text layer
+			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyleSet);
+			layer.setTextLayer(textLayer);
+			this.getLayers().addLayer(textLayer);
+		}
+		
 		return addLayer(layer);
 	}
 
@@ -750,7 +800,7 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 
 	public void showLayersDialog() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
-		layerManager = new LayerManagerView(this.getContext(),fm);
+		layerManager = new LayerManagerView(this.getContext());
 		layerManager.attachToMap(this);
 
 		builder.setTitle("Layer Manager");
@@ -1043,11 +1093,6 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 		editView.showDecimal(value);
 		updateDrawView();
 	}
-	
-	@Override
-	public void onFileChangesListener(boolean isSpatialFile) {
-		layerManager.setSelectedFilePath(fm.getSelectedFile().getName(),isSpatialFile);
-	}
 
 	public boolean showKm() {
 		return showKm;
@@ -1159,5 +1204,67 @@ public class CustomMapView extends MapView implements FileManager.FileSelectionL
 				}
 			}
 		});
+	}
+
+	public List<Layer> getAllLayers() {
+		List<Layer> layers = getLayers().getAllLayers();
+		List<Layer> tempLayers = new ArrayList<Layer>();
+		for (Layer layer : layers) {
+			if ((layer instanceof SpatialiteTextLayer) || (layer instanceof DatabaseTextLayer)) {
+				// ignore
+			} else {
+				tempLayers.add(layer);
+			}
+		}
+		return tempLayers;
+	}
+	
+	public void setAllLayers(List<Layer> layers) {
+		List<Layer> tempLayers = new ArrayList<Layer>();
+		for (Layer layer : layers) {
+			if (layer instanceof CustomSpatialiteLayer) {
+				tempLayers.add(layer);
+				tempLayers.add(((CustomSpatialiteLayer) layer).getTextLayer());
+			} else if (layer instanceof DatabaseLayer) {
+				tempLayers.add(layer);
+				tempLayers.add(((DatabaseLayer) layer).getTextLayer());
+			} else if (layer == this.getLayers().getBaseLayer()) {
+				// ignore
+			} else {
+				tempLayers.add(layer);
+			}
+		}
+		this.getLayers().setLayers(tempLayers);
+	}
+	
+	public void debugAllLayers() {
+		for (Layer layer : this.getLayers().getAllLayers()) {
+			FLog.d("layer is " + layer.getClass() + " and visiblility is " + layer.isVisible());
+		}
+	}
+	
+	public void setLayerVisible(int layerId, boolean value) throws Exception {
+		setLayerVisible(getLayer(layerId), value);
+	}
+	
+	public void setLayerVisible(Layer layer, boolean value) throws Exception {
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
+		
+		layer.setVisible(value);
+		updateTools();
+	}
+	
+	public void addDatabaseLayerQuery(String name, String sql) {
+		databaseLayerQueryMap.put(name, sql);
+	}
+	
+	public String getDatabaseLayerQuery(String name) {
+		return databaseLayerQueryMap.get(name);
+	}
+	
+	public List<String> getDatabaseLayerQueryNames() {
+		return new ArrayList<String>(databaseLayerQueryMap.keySet());
 	}
 }

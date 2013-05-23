@@ -1,17 +1,11 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -26,6 +20,8 @@ public class SelectTool extends SettingsTool {
 	protected MapButton clearButton;
 
 	private MapToggleButton detailButton;
+
+	protected SettingsDialog settingsDialog;
 	
 	public SelectTool(Context context, CustomMapView mapView) {
 		this(context, mapView, NAME);
@@ -146,31 +142,23 @@ public class SelectTool extends SettingsTool {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
-				ScrollView scrollView = new ScrollView(context);
-				LinearLayout layout = new LinearLayout(context);
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addSetter(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
-				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
-				
-				builder.setView(scrollView);
+				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
+				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
-							int color = parseColor(colorSetter.getText().toString());
-							float strokeSize = parseSize(strokeSizeBar.getProgress());
-							float textSize = parseSize(textSizeBar.getProgress());
-							boolean showDecimal = !decimalBox.isChecked();
+							int color = settingsDialog.parseColor("color");
+							float strokeSize = settingsDialog.parseSlider("strokeSize");
+							float textSize = settingsDialog.parseSlider("textSize");
+							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
@@ -191,7 +179,8 @@ public class SelectTool extends SettingsTool {
 					}
 				});
 				
-				builder.create().show();
+				settingsDialog = builder.create();
+				settingsDialog.show();
 			}
 				
 		});

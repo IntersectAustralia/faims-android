@@ -17,8 +17,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,15 +44,15 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.data.GeometryStyle;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
-import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
-import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -65,31 +65,17 @@ import bsh.Interpreter;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
 	
 	private Interpreter interpreter;
 
-	private UIRenderer renderer;
-
-	private AssetManager assets;
-	
 	private ShowProjectActivity activity;
 	
-	private DatabaseManager databaseManager;
-
-	private GPSDataManager gpsDataManager;
-
-	private String baseDir;
-
 	private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
 	private static final String VOCAB = "vocab";
-	
-	private Arch16n arch16n;
-	private Project project;
 	
 	private String persistedObjectName;
 
@@ -100,27 +86,31 @@ public class BeanShellLinker {
 	private Runnable trackingTask;
 	private Double prevLong;
 	private Double prevLat;
+
+	private Project project;
 	
-	public BeanShellLinker(ShowProjectActivity activity, Arch16n arch16n, AssetManager assets, UIRenderer renderer, 
-			DatabaseManager databaseManager, GPSDataManager gpsDataManager, Project project) {
+	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
-		this.assets = assets;
-		this.renderer = renderer;
-		this.databaseManager = databaseManager;
-		this.gpsDataManager = gpsDataManager;
-		this.interpreter = new Interpreter();
-		this.arch16n = arch16n;
 		this.project = project;
+		this.interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
 		} catch (EvalError e) {
 			FLog.e("error setting linker", e);
 		}
+		this.activity.getFileManager().addListener(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+
+			@Override
+			public void onFileSelected(File file) {
+				BeanShellLinker.this.setLastSelectedFile(file);
+			}
+			
+		});
 	}
 	
 	public void sourceFromAssets(String filename) {
 		try {
-    		interpreter.eval(FileUtil.convertStreamToString(assets.open(filename)));
+    		interpreter.eval(FileUtil.convertStreamToString(this.activity.getAssets().open(filename)));
     	} catch(Exception e) {
     		FLog.w("error sourcing script from assets", e);
     		showWarning("Logic Error", "Error encountered in logic commands");
@@ -151,8 +141,8 @@ public class BeanShellLinker {
 	public void startTrackingGPS(final String type, final int value){
 		
 		if (trackingHandlerThread == null && trackingHandler == null) {
-			if (!gpsDataManager.isExternalGPSStarted()
-					&& !gpsDataManager.isInternalGPSStarted()) {
+			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
+					&& !this.activity.getGPSDataManager().isInternalGPSStarted()) {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
@@ -175,7 +165,7 @@ public class BeanShellLinker {
 								List<Geometry> geo_data = new ArrayList<Geometry>();
 								geo_data.add(createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
 										Float.parseFloat(Double.toString(latitude)))));
-								databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
+								activity.getDatabaseManager().saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
 										Double.toString(currentLocation.getLatitude()), Float.toString(heading),
 										Float.toString(accuracy),type);
 							}
@@ -208,7 +198,7 @@ public class BeanShellLinker {
 										Geometry point = createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
 												Float.parseFloat(Double.toString(latitude))));
 										geo_data.add(point);
-										databaseManager.saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
+										activity.getDatabaseManager().saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
 												Double.toString(currentLocation.getLatitude()), Float.toString(heading),
 												Float.toString(accuracy),type);
 										prevLong = longitude;
@@ -249,7 +239,7 @@ public class BeanShellLinker {
 		try{
 			
 			if ("click".equals(type.toLowerCase(Locale.ENGLISH))) {
-				View view = renderer.getViewByRef(ref);
+				View view = activity.getUIRenderer().getViewByRef(ref);
 				if (view ==  null) {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Error cannot find view " + ref);
@@ -304,7 +294,7 @@ public class BeanShellLinker {
 				}
 			}
 			else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
-				TabGroup tg = renderer.getTabGroupByLabel(ref);
+				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
 				if (tg == null){
 					FLog.w("cannot find tabgroup " + ref);
 					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
@@ -315,7 +305,7 @@ public class BeanShellLinker {
 				}
 			} 
 			else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
-				TabGroup tg = renderer.getTabGroupByLabel(ref);
+				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
 				if (tg == null){
 					FLog.w("cannot find tabgroup " + ref);
 					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
@@ -338,7 +328,7 @@ public class BeanShellLinker {
 
 	public void bindFocusAndBlurEvent(String ref, final String focusCallback, final String blurCallBack){
 		try {
-			View view = renderer.getViewByRef(ref);
+			View view = activity.getUIRenderer().getViewByRef(ref);
 			if (view ==  null) {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Error cannot find view " + ref);
@@ -369,7 +359,7 @@ public class BeanShellLinker {
 	
 	public void bindMapEvent(String ref, final String clickCallback, final String selectCallback) {
 		try{
-			View view = renderer.getViewByRef(ref);
+			View view = activity.getUIRenderer().getViewByRef(ref);
 			if (view instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) view;
 				mapView.setMapListener(new CustomMapView.CustomMapListener() {
@@ -444,7 +434,7 @@ public class BeanShellLinker {
 
 	public TabGroup showTabGroup(String label){
 		try{
-			TabGroup tabGroup = renderer.showTabGroup(this.activity, label);
+			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(this.activity, label);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tabgroup " + label);
 				return null;
@@ -460,7 +450,7 @@ public class BeanShellLinker {
 	
 	public Tab showTab(String label) {
 		try{
-			Tab tab = renderer.showTab(label);
+			Tab tab = activity.getUIRenderer().showTab(label);
 			if (tab == null) {
 				showWarning("Logic Error", "Error showing tab " + label);
 				return null;
@@ -476,7 +466,7 @@ public class BeanShellLinker {
 
 	public void showTabGroup(String id, String uuid){
 		try {
-			TabGroup tabGroup = renderer.showTabGroup(activity, id);
+			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity, id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab group " + id);
 				return ;
@@ -507,7 +497,7 @@ public class BeanShellLinker {
 			}
 			String groupId = ids[0];
 			String tabId = ids[1];
-			TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
+			TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
 				return ;
@@ -536,7 +526,7 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
 				return ;
 			}
-			final TabGroup tabGroup = renderer.getTabGroupByLabel(id);
+			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
 				return ;
@@ -593,7 +583,7 @@ public class BeanShellLinker {
 			}
 			String groupId = ids[0];
 			final String tabId = ids[1];
-			final TabGroup tabGroup = renderer.getTabGroupByLabel(groupId);
+			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab " + id);
 				return ;
@@ -721,11 +711,11 @@ public class BeanShellLinker {
 	}
 
 	public int getGpsUpdateInterval(){
-		return this.gpsDataManager.getGpsUpdateInterval();
+		return this.activity.getGPSDataManager().getGpsUpdateInterval();
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		this.gpsDataManager.setGpsUpdateInterval(gpsUpdateInterval);
+		this.activity.getGPSDataManager().setGpsUpdateInterval(gpsUpdateInterval);
 	}
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
@@ -958,7 +948,7 @@ public class BeanShellLinker {
 	
 	public void setFieldValue(String ref, Object valueObj) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (valueObj instanceof Number) {
 				valueObj = valueObj.toString();
@@ -967,7 +957,7 @@ public class BeanShellLinker {
 			if (valueObj instanceof String){
 				
 				String value = (String) valueObj;
-				value = arch16n.substituteValue(value);
+				value = activity.getArch16n().substituteValue(value);
 				
 				if (obj instanceof TextView){
 					TextView tv = (TextView) obj;
@@ -1061,7 +1051,7 @@ public class BeanShellLinker {
 							View view = ll.getChildAt(i);
 							if (view instanceof CustomCheckBox){
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(arch16n.substituteValue(pair.getName()))){
+								if (cb.getValue().toString().equalsIgnoreCase(activity.getArch16n().substituteValue(pair.getName()))){
 									cb.setChecked("true".equals(pair.getValue()));
 									break;
 								}
@@ -1086,7 +1076,7 @@ public class BeanShellLinker {
 
 	public void setFieldCertainty(String ref, Object valueObj) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (valueObj instanceof Number) {
 				valueObj = valueObj.toString();
@@ -1141,7 +1131,7 @@ public class BeanShellLinker {
 
 	public void setFieldAnnotation(String ref, Object valueObj) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (valueObj instanceof String){
 				
@@ -1183,7 +1173,7 @@ public class BeanShellLinker {
 	public Object getFieldValue(String ref){
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (obj instanceof TextView){
 				TextView tv = (TextView) obj;
@@ -1269,7 +1259,7 @@ public class BeanShellLinker {
 	public Object getFieldCertainty(String ref){
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (obj instanceof CustomEditText){
 				CustomEditText tv = (CustomEditText) obj;
@@ -1311,7 +1301,7 @@ public class BeanShellLinker {
 	public Object getFieldAnnotation(String ref){
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (obj instanceof CustomEditText){
 				CustomEditText tv = (CustomEditText) obj;
@@ -1350,7 +1340,7 @@ public class BeanShellLinker {
 
 	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		try {
-			return databaseManager.saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
+			return activity.getDatabaseManager().saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
 			
 		} catch (Exception e) {
 			FLog.e("error saving arch entity");
@@ -1362,7 +1352,7 @@ public class BeanShellLinker {
 	public String saveRel(String rel_id, String rel_type, List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
 		try {
 			
-			return databaseManager.saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
+			return activity.getDatabaseManager().saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
 
 		} catch (Exception e) {
 			FLog.e("error saving relationship");
@@ -1373,7 +1363,7 @@ public class BeanShellLinker {
 	
 	public boolean addReln(String entity_id, String rel_id, String verb) {
 		try {
-			return databaseManager.addReln(entity_id, rel_id, verb);
+			return activity.getDatabaseManager().addReln(entity_id, rel_id, verb);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity relationship");
 			showWarning("Logic Error", "Error saving arch entity relationship");
@@ -1385,7 +1375,7 @@ public class BeanShellLinker {
 	public void populateDropDown(String ref, Collection valuesObj){
 		
 		try {
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 	
 			if (obj instanceof Spinner && valuesObj instanceof ArrayList){
 				Spinner spinner = (Spinner) obj;
@@ -1409,7 +1399,7 @@ public class BeanShellLinker {
 					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 					pairs = new ArrayList<NameValuePair>();
 					for (List<String> list : values) {
-						pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
+						pairs.add(new NameValuePair(activity.getArch16n().substituteValue(list.get(1)), list.get(0)));
 					}
 				}
 				
@@ -1418,7 +1408,7 @@ public class BeanShellLinker {
 	                    android.R.layout.simple_spinner_dropdown_item,
 	                    pairs);
 	            spinner.setAdapter(arrayAdapter);
-	            renderer.getTabForView(ref).setValueReference(ref, getFieldValue(ref));
+	            activity.getUIRenderer().getTabForView(ref).setValueReference(ref, getFieldValue(ref));
 			}
 			else {
 				showWarning("Logic Error", "Cannot populate drop down " + ref);
@@ -1432,7 +1422,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public void populateList(String ref, Collection valuesObj){
 		try {
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 	
 			if (valuesObj instanceof ArrayList){
 				ArrayList<NameValuePair> pairs = null;
@@ -1453,7 +1443,7 @@ public class BeanShellLinker {
 					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 					pairs = new ArrayList<NameValuePair>();
 					for (List<String> list : values) {
-						pairs.add(new NameValuePair(arch16n.substituteValue(list.get(1)), list.get(0)));
+						pairs.add(new NameValuePair(activity.getArch16n().substituteValue(list.get(1)), list.get(0)));
 					}
 				}
 				if(obj instanceof LinearLayout){
@@ -1504,7 +1494,7 @@ public class BeanShellLinker {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populatePictureGallery(String ref, Collection valuesObj){
 		try {
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			List<Picture> pictures = new ArrayList<Picture>();
 			if(valuesObj instanceof ArrayList<?>){
@@ -1521,13 +1511,13 @@ public class BeanShellLinker {
 		        galleriesLayout.removeAllViews();
 		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
 		        for (Picture picture : pictures) {
-		        	File pictureFile = new File(baseDir + "/" + picture.getUrl());
+		        	File pictureFile = new File(activity.getProjectDir() + "/" + picture.getUrl());
 		        	if(pictureFile.exists()){
 		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
 		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
 		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
 		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-		                gallery.setImageURI(Uri.parse(baseDir + "/" + picture.getUrl()));
+		                gallery.setImageURI(Uri.parse(activity.getProjectDir() + "/" + picture.getUrl()));
 		                gallery.setBackgroundColor(Color.RED);
 		                gallery.setPadding(10, 10, 10, 10);
 		                gallery.setLayoutParams(layoutParams);
@@ -1569,7 +1559,7 @@ public class BeanShellLinker {
 
 	public Object fetchArchEnt(String id){
 		try {
-			return databaseManager.fetchArchEnt(id);
+			return activity.getDatabaseManager().fetchArchEnt(id);
 		} catch (Exception e) {
 			FLog.e("error fetching arch entity", e);
 			showWarning("Logic Error", "Error fetching arch entity");
@@ -1579,7 +1569,7 @@ public class BeanShellLinker {
 
 	public Object fetchRel(String id){
 		try {
-			return databaseManager.fetchRel(id);
+			return activity.getDatabaseManager().fetchRel(id);
 		} catch (Exception e) {
 			FLog.e("error fetching relationship", e);
 			showWarning("Logic Error", "Error fetching relationship");
@@ -1589,7 +1579,7 @@ public class BeanShellLinker {
 
 	public Object fetchOne(String query){
 		try {
-			return databaseManager.fetchOne(query);
+			return activity.getDatabaseManager().fetchOne(query);
 		} catch (Exception e) {
 			FLog.e("error fetching one", e);
 			showWarning("Logic Error", "Error fetching one");
@@ -1600,7 +1590,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchAll(String query){
 		try {
-			return databaseManager.fetchAll(query);
+			return activity.getDatabaseManager().fetchAll(query);
 		} catch (Exception e) {
 			FLog.e("error fetching all", e);
 			showWarning("Logic Error", "Error fetching all");
@@ -1611,7 +1601,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchEntityList(String type){
 		try {
-			return databaseManager.fetchEntityList(type);
+			return activity.getDatabaseManager().fetchEntityList(type);
 		} catch (Exception e) {
 			FLog.e("error fetching entity list", e);
 			showWarning("Logic Error", "Error fetching entity list");
@@ -1622,7 +1612,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchRelationshipList(String type){
 		try {
-			return databaseManager.fetchRelationshipList(type);
+			return activity.getDatabaseManager().fetchRelationshipList(type);
 		} catch (Exception e) {
 			FLog.e("error fetching relationship list", e);
 			showWarning("Logic Error", "Error fetching relationship list");
@@ -1644,8 +1634,8 @@ public class BeanShellLinker {
             	    public void onClick(DialogInterface dialog, int item) {
             	    	for (BluetoothDevice bluetoothDevice : pairedDevices) {
 	                		if(bluetoothDevice.getName().equals(sequences.get(item))){
-	                			gpsDataManager.setGpsDevice(bluetoothDevice);
-	                			gpsDataManager.startExternalGPSListener();
+	                			BeanShellLinker.this.activity.getGPSDataManager().setGpsDevice(bluetoothDevice);
+	                			BeanShellLinker.this.activity.getGPSDataManager().startExternalGPSListener();
 	                			break;
 	                		}
 	                    }
@@ -1662,40 +1652,40 @@ public class BeanShellLinker {
 	}
 	
 	public void startInternalGPS(){
-		gpsDataManager.startInternalGPSListener();
+		this.activity.getGPSDataManager().startInternalGPSListener();
 	}
 	
 	public Object getGPSPosition(){
-		return this.gpsDataManager.getGPSPosition();
+		return this.activity.getGPSDataManager().getGPSPosition();
 	}
 
 	public Object getGPSEstimatedAccuracy(){
-		return this.gpsDataManager.getGPSEstimatedAccuracy();
+		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy();
 	}
 
 	public Object getGPSHeading(){
-		return this.gpsDataManager.getGPSHeading();
+		return this.activity.getGPSDataManager().getGPSHeading();
 	}
 
 	public Object getGPSPosition(String gps){
-		return this.gpsDataManager.getGPSPosition(gps);
+		return this.activity.getGPSDataManager().getGPSPosition(gps);
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps){
-		return this.gpsDataManager.getGPSEstimatedAccuracy(gps);
+		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy(gps);
 	}
 
 	public Object getGPSHeading(String gps){
-		return this.gpsDataManager.getGPSHeading(gps);
+		return this.activity.getGPSDataManager().getGPSHeading(gps);
 	}
 
 	public void showRasterMap(final String ref, String layerName, String filename) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 				
-				String filepath = baseDir + "/" + filename;
+				String filepath = activity.getProjectDir() + "/" + filename;
 				mapView.addRasterMap(layerName, filepath);
 	            
 			} else {
@@ -1717,7 +1707,7 @@ public class BeanShellLinker {
 	
 	public void setMapFocusPoint(String ref, float longitude, float latitude) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1739,7 +1729,7 @@ public class BeanShellLinker {
 	
 	public void setMapRotation(String ref, float rotation) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// rotation - 0 = north-up
@@ -1757,7 +1747,7 @@ public class BeanShellLinker {
 	
 	public void setMapZoom(String ref, float zoom) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// zoom - 0 = world, like on most web maps
@@ -1775,7 +1765,7 @@ public class BeanShellLinker {
 	
 	public void setMapTilt(String ref, float tilt) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// tilt means perspective view. Default is 90 degrees for "normal" 2D map view, minimum allowed is 30 degrees.
@@ -1802,11 +1792,11 @@ public class BeanShellLinker {
 	public int showShapeLayer(String ref, String layerName, String filename, 
 			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				String filepath = baseDir + "/" + filename;
+				String filepath = activity.getProjectDir() + "/" + filename;
 				return mapView.addShapeLayer(layerName, filepath, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -1824,15 +1814,16 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String labelColumn, 
-			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
+	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String[] labelColumns, 
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				String filepath = baseDir + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumn, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
+				String filepath = activity.getProjectDir() + "/" + filename;
+				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumns, pointStyle.toPointStyleSet(), 
+						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1849,9 +1840,34 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
+	public int showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
+			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				
+				return mapView.addDatabaseLayer(layerName, isEntity, queryName, querySql, pointStyle.toPointStyleSet(), 
+						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(MapException e) {
+			FLog.w("error showing database layer", e);
+			showWarning("Logic Error", e.getMessage());
+		}
+		catch(Exception e){
+			FLog.e("error showing database layer" + ref,e);
+			showWarning("Logic Error", "Error showing database layer " + ref);
+		}
+		return 0;
+	}
+	
 	public void removeLayer(String ref, int layerId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1873,7 +1889,7 @@ public class BeanShellLinker {
 	
 	public int createCanvasLayer(String ref, String layerName) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1896,13 +1912,11 @@ public class BeanShellLinker {
 	
 	public void setLayerVisible(String ref, int layerId, boolean visible) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
-				Layer layer = mapView.getLayer(layerId);
-				layer.setVisible(visible);
-				mapView.updateTools();
+				mapView.setLayerVisible(layerId, visible);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -1917,7 +1931,7 @@ public class BeanShellLinker {
 	public int drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1941,7 +1955,7 @@ public class BeanShellLinker {
 	public int drawLine(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1965,7 +1979,7 @@ public class BeanShellLinker {
 	public int drawPolygon(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
 		
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -1988,7 +2002,7 @@ public class BeanShellLinker {
 	
 	public void clearGeometry(String ref, int geomId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -2010,7 +2024,7 @@ public class BeanShellLinker {
 	
 	public void clearGeometryList(String ref, List<Integer> geomList) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -2033,7 +2047,7 @@ public class BeanShellLinker {
 	
 	public List<Geometry> getGeometryList(String ref, int layerId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2052,7 +2066,7 @@ public class BeanShellLinker {
 	
 	public Geometry getGeometry(String ref, int geomId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -2071,7 +2085,7 @@ public class BeanShellLinker {
 	
 	public void lockMapView(String ref, boolean lock) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.setViewLocked(lock);
@@ -2088,7 +2102,7 @@ public class BeanShellLinker {
 	
 	public void addGeometrySelection(String ref, int geomId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addSelection(geomId);
@@ -2109,7 +2123,7 @@ public class BeanShellLinker {
 	
 	public void removeGeometrySelection(String ref, int geomId) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.removeSelection(geomId);
@@ -2130,7 +2144,7 @@ public class BeanShellLinker {
 	
 	public void clearGeometrySelection(String ref) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.clearSelection();
@@ -2145,9 +2159,27 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public List<Geometry> getGeometrySelection(String ref) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				return GeometryUtil.convertGeometryListToWgs84(mapView.getSelection());
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error clearing selection " + ref,e);
+			showWarning("Logic Error", "Error clearing selection " + ref);
+		}
+		return null;
+	}
+	
 	public void prepareSelectionTransform(String ref) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.prepareSelectionTransform();
@@ -2164,7 +2196,7 @@ public class BeanShellLinker {
 	
 	public void doSelectionTransform(String ref) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.doSelectionTransform();
@@ -2246,14 +2278,6 @@ public class BeanShellLinker {
 	public String getParticipants(){
 		return this.project.getParticipants();
 	}
-
-	public UIRenderer getUIRenderer(){
-		return this.renderer;
-	}
-
-	public void setBaseDir(String dir) {
-		this.baseDir = dir;
-	}
 	
 	public void setSyncMinInterval(float value) {
 		if (value < 0) {
@@ -2282,12 +2306,12 @@ public class BeanShellLinker {
 	}
 	
 	public void setUser(User user) {
-		this.databaseManager.setUserId(user.getUserId());
+		this.activity.getDatabaseManager().setUserId(user.getUserId());
 	}
 	
 	public void showFileBrowser(String callback) {
 		this.lastFileBrowserCallback = callback;
-		this.activity.showFileBrowser();
+		this.activity.showFileBrowser(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE);
 	}
 
 	public void setLastSelectedFile(File file) {
@@ -2300,16 +2324,16 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public GeometryStyle createPointStyle(int color, float size, float pickingSize) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createPointStyle(int minZoom, int color, float size, float pickingSize) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color;
 		style.size = size;
 		style.pickingSize = pickingSize;
 		return style;
 	}
 	
-	public GeometryStyle createLineStyle(int color, float width, float pickingWidth, GeometryStyle pointStyle) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createLineStyle(int minZoom, int color, float width, float pickingWidth, GeometryStyle pointStyle) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.lineColor = color;
 		style.width = width;
 		style.pickingWidth = pickingWidth;
@@ -2322,8 +2346,8 @@ public class BeanShellLinker {
 		return style;
 	}
 	
-	public GeometryStyle createPolygonStyle(int color, GeometryStyle lineStyle) {
-		GeometryStyle style = new GeometryStyle();
+	public GeometryStyle createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
+		GeometryStyle style = new GeometryStyle(minZoom);
 		style.polygonColor = color;
 		if (lineStyle != null) {
 			style.showStroke = true;
@@ -2331,6 +2355,14 @@ public class BeanShellLinker {
 			style.width = lineStyle.width;
 			style.pickingWidth = lineStyle.pickingWidth;
 		}
+		return style;
+	}
+	
+	public GeometryTextStyle createTextStyle(int minZoom, int color, int size, Typeface font) {
+		GeometryTextStyle style = new GeometryTextStyle(minZoom);
+		style.color = color;
+		style.size = size;
+		style.font = font;
 		return style;
 	}
 	
@@ -2363,12 +2395,12 @@ public class BeanShellLinker {
 			}
 			
 			// create directories
-			FileUtil.makeDirs(baseDir + "/" + attachFile);
+			FileUtil.makeDirs(activity.getProjectDir() + "/" + attachFile);
 			
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + file.getName();
 			
-			activity.copyFile(filePath, baseDir + "/" + attachFile);
+			activity.copyFile(filePath, activity.getProjectDir() + "/" + attachFile);
 			
 			return attachFile;
 		} catch (Exception e) {
@@ -2415,7 +2447,7 @@ public class BeanShellLinker {
 			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
 			Map<String, Integer> count = new HashMap<String, Integer>();
 			for(String attachedFile : files){
-				String filename = (new File(baseDir + "/" + attachedFile)).getName();
+				String filename = (new File(activity.getProjectDir() + "/" + attachedFile)).getName();
 				filename = filename.substring(filename.lastIndexOf("_")+1);
 				if(count.get(filename) != null){
 					int fileCount = count.get(filename);
@@ -2425,7 +2457,7 @@ public class BeanShellLinker {
 				}else{
 					count.put(filename, 1);
 				}
-				NameValuePair file = new NameValuePair(filename, baseDir + "/" + attachedFile);
+				NameValuePair file = new NameValuePair(filename, activity.getProjectDir() + "/" + attachedFile);
 				attachedFiles.add(file);
 			}
 			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -2499,12 +2531,12 @@ public class BeanShellLinker {
 	}
 	
 	public Geometry createGeometryPoint(MapPos point) {
-		return new CustomPoint(0, createPointStyle(0,0,0), point);
+		return new CustomPoint(0, createPointStyle(0,0,0,0), point, null);
 	}
 	
 	public void setToolsEnabled(String ref, boolean enabled) {
 		try{
-			Object obj = renderer.getViewByRef(ref);
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.setToolsEnabled(enabled);
@@ -2516,6 +2548,23 @@ public class BeanShellLinker {
 		catch(Exception e){
 			FLog.e("error setting tools enabled value " + ref,e);
 			showWarning("Logic Error", "Error setting tools enabled value " + ref);
+		}
+	}
+	
+	public void addDatabaseLayerQuery(String ref, String name, String sql) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.addDatabaseLayerQuery(name, sql);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding database layer query " + ref,e);
+			showWarning("Logic Error", "Error adding database layer query " + ref);
 		}
 	}
 }
