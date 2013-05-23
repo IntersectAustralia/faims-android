@@ -2,22 +2,20 @@ package au.org.intersect.faims.android.ui.map.tools;
 
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
+import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -27,8 +25,6 @@ import com.nutiteq.geometry.VectorElement;
 
 public class EditTool extends SelectTool {
 	
-	private static final int MAX_ZOOM = 18;
-	
 	public static final String NAME = "Edit";
 	
 	private MapToggleButton lockButton;
@@ -36,6 +32,12 @@ public class EditTool extends SelectTool {
 	private MapButton propertiesButton;
 
 	private MapButton deleteButton;
+
+	private PointStyleDialog pointStyleDialog;
+
+	private LineStyleDialog lineStyleDialog;
+
+	private PolygonStyleDialog polygonStyleDialog;
 	
 	public EditTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -152,33 +154,25 @@ public class EditTool extends SelectTool {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
-				ScrollView scrollView = new ScrollView(context);
-				LinearLayout layout = new LinearLayout(context);
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addEdit(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				final EditText editColorSetter = addEdit(context, layout, "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
-				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
-				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
-				
-				builder.setView(scrollView);
+				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				builder.addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
+				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
+				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
-							int color = parseColor(colorSetter.getText().toString());
-							int editColor = parseColor(editColorSetter.getText().toString());
-							float strokeSize = parseSlider(strokeSizeBar.getProgress());
-							float textSize = parseSlider(textSizeBar.getProgress());
-							boolean showDecimal = !decimalBox.isChecked();
+							int color = settingsDialog.parseColor("color");
+							int editColor = settingsDialog.parseColor("editColor");
+							float strokeSize = settingsDialog.parseSlider("strokeSize");
+							float textSize = settingsDialog.parseSlider("textSize");
+							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
 							
 							mapView.setDrawViewColor(color);
 							mapView.setEditViewColor(editColor);
@@ -200,7 +194,8 @@ public class EditTool extends SelectTool {
 					}
 				});
 				
-				builder.create().show();
+				settingsDialog = builder.create();
+				settingsDialog.show();
 			}
 				
 		});
@@ -237,33 +232,17 @@ public class EditTool extends SelectTool {
 	}
 	
 	private void showPointProperties(final CustomPoint point) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("Point Properties");
-		
-		ScrollView scrollView = new ScrollView(context);
-		LinearLayout layout = new LinearLayout(context);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		layout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(layout);
-		
 		final GeometryStyle style = point.getStyle();
-		
-		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
-		final EditText colorSetter = addEdit(context, layout, "Point Color:", Integer.toHexString(style.pointColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
-		
-		builder.setView(scrollView);
-		
+		PointStyleDialog.Builder builder = new PointStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
-					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
-					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSlider(sizeBar.getProgress());
-					float pickingSize = parseSlider(pickingSizeBar.getProgress());
+					int minZoom = pointStyleDialog.parseRange("minZoom", 0, FaimsSettings.MAX_ZOOM);
+					int color = pointStyleDialog.parseColor("color");
+					float size = pointStyleDialog.parseSlider("size");
+					float pickingSize = pointStyleDialog.parseSlider("pickingSize");
 					
 					style.minZoom = minZoom;
 					style.pointColor = color;
@@ -285,49 +264,31 @@ public class EditTool extends SelectTool {
 			}
 		});
 		
-		builder.create().show();
+		pointStyleDialog = (PointStyleDialog) builder.create();
+		pointStyleDialog.show();
 	}
 	
 	private void showLineProperties(final CustomLine line) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("Line Properties");
-		
-		ScrollView scrollView = new ScrollView(context);
-		LinearLayout layout = new LinearLayout(context);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		layout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(layout);
-		
 		final GeometryStyle style = line.getStyle();
-		
-		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
-		final EditText colorSetter = addEdit(context, layout, "Line Color:", Integer.toHexString(style.pointColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
-		final SeekBar widthBar = addSlider(context, layout, "Line Width:", style.width);
-		final SeekBar pickingWidthBar = addSlider(context, layout, "Line Picking Width:", style.pickingWidth);
-		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Line:", style.showPoints);
-		
-		builder.setView(scrollView);
-		
+		LineStyleDialog.Builder builder = new LineStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
-					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
-					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSlider(sizeBar.getProgress());
-					float pickingSize = parseSlider(pickingSizeBar.getProgress());
-					float width = parseSlider(widthBar.getProgress());
-					float pickingWidth = parseSlider(pickingWidthBar.getProgress());
-					boolean showPoints = showPointsBox.isChecked();
+					int minZoom = lineStyleDialog.parseRange("minZoom", 0, FaimsSettings.MAX_ZOOM);
+					int color = lineStyleDialog.parseColor("color");
+					float size = lineStyleDialog.parseSlider("size");
+					float pickingSize = lineStyleDialog.parseSlider("pickingSize");
+					float width = lineStyleDialog.parseSlider("width");
+					float pickingWidth = lineStyleDialog.parseSlider("pickingWidth");
+					boolean showPoints = lineStyleDialog.parseCheckBox("showPoints");
 					
 					style.minZoom = minZoom;
 					style.pointColor = color;
+					style.lineColor = color;
 					style.size = size;
 					style.pickingSize = pickingSize;
-					style.lineColor = color;
 					style.width = width;
 					style.pickingWidth = pickingWidth;
 					style.showPoints = showPoints;
@@ -347,52 +308,32 @@ public class EditTool extends SelectTool {
 			}
 		});
 		
-		builder.create().show();
+		lineStyleDialog = (LineStyleDialog) builder.create();
+		lineStyleDialog.show();
 	}
 	
 	private void showPolygonProperties(final CustomPolygon polygon) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle("Line Properties");
-		
-		ScrollView scrollView = new ScrollView(context);
-		LinearLayout layout = new LinearLayout(context);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-		layout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(layout);
-		
 		final GeometryStyle style = polygon.getStyle();
-		
-		final SeekBar zoomBar = addRange(context, layout, "Min Zoom:", style.minZoom, MAX_ZOOM);
-		final EditText colorSetter = addEdit(context, layout, "Polygon Color:", Integer.toHexString(style.polygonColor));
-		final SeekBar sizeBar = addSlider(context, layout, "Point Size:", style.size);
-		final SeekBar pickingSizeBar = addSlider(context, layout, "Point Picking Size:", style.pickingSize);
-		final EditText strokeColorSetter = addEdit(context, layout, "Stroke Color:", Integer.toHexString(style.lineColor));
-		final SeekBar widthBar = addSlider(context, layout, "Stroke Width:", style.width);
-		final SeekBar pickingWidthBar = addSlider(context, layout, "Stroke Picking Width:", style.pickingWidth);
-		final CheckBox showStrokeBox = addCheckBox(context, layout, "Show Stroke on Polygon:", style.showStroke);
-		final CheckBox showPointsBox = addCheckBox(context, layout, "Show Points on Polygon:", style.showPoints);
-		
-		builder.setView(scrollView);
-		
+		PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				try {
-					int minZoom = parseRange(zoomBar.getProgress(), MAX_ZOOM);
-					int color = parseColor(colorSetter.getText().toString());
-					float size = parseSlider(sizeBar.getProgress());
-					float pickingSize = parseSlider(pickingSizeBar.getProgress());
-					int lineColor = parseColor(strokeColorSetter.getText().toString());
-					float width = parseSlider(widthBar.getProgress());
-					float pickingWidth = parseSlider(pickingWidthBar.getProgress());
-					boolean showStroke = showStrokeBox.isChecked();
-					boolean showPoints = showPointsBox.isChecked();
+					int minZoom = polygonStyleDialog.parseRange("minZoom", 0, FaimsSettings.MAX_ZOOM);
+					int color = polygonStyleDialog.parseColor("color");
+					float size = polygonStyleDialog.parseSlider("size");
+					float pickingSize = polygonStyleDialog.parseSlider("pickingSize");
+					int lineColor = polygonStyleDialog.parseColor("strokeColor");
+					float width = polygonStyleDialog.parseSlider("width");
+					float pickingWidth = polygonStyleDialog.parseSlider("pickingWidth");
+					boolean showStroke = polygonStyleDialog.parseCheckBox("showStroke");
+					boolean showPoints = polygonStyleDialog.parseCheckBox("showPoints");
 					
 					style.minZoom = minZoom;
 					style.pointColor = lineColor;
-					style.polygonColor = color;
 					style.lineColor = lineColor;
+					style.polygonColor = color;
 					style.size = size;
 					style.pickingSize = pickingSize;
 					style.width = width;
@@ -415,6 +356,7 @@ public class EditTool extends SelectTool {
 			}
 		});
 		
-		builder.create().show();
+		polygonStyleDialog = (PolygonStyleDialog) builder.create();
+		polygonStyleDialog.show();
 	}
 }

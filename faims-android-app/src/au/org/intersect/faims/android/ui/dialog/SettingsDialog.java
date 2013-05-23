@@ -20,18 +20,18 @@ import au.org.intersect.faims.android.exceptions.MapException;
 
 public class SettingsDialog extends AlertDialog {
 	
-	public class Builder {
+	public static class Builder {
 		
-		private Context context;
-		private HashMap<String, View> fields;
-		private ScrollView scrollView;
-		private LinearLayout layout;
-		private String title;
-		private String message;
-		private String positiveLabel;
-		private OnClickListener positiveListener;
-		private String negativeLabel;
-		private OnClickListener negativeListener;
+		protected Context context;
+		protected HashMap<String, View> fields;
+		protected ScrollView scrollView;
+		protected LinearLayout layout;
+		protected String title;
+		protected String message;
+		protected String positiveLabel;
+		protected OnClickListener positiveListener;
+		protected String negativeLabel;
+		protected OnClickListener negativeListener;
 
 		public Builder(Context context) {
 			this.context = context;
@@ -66,7 +66,7 @@ public class SettingsDialog extends AlertDialog {
 			return this;
 		}
 		
-		public Builder addCheckbox(String name, String label, boolean defaultValue) {
+		public Builder addCheckBox(String name, String label, boolean defaultValue) {
 			TextView labelView = new TextView(context);
 			labelView.setText(name);
 			
@@ -177,14 +177,18 @@ public class SettingsDialog extends AlertDialog {
 			return this;
 		}
 		
+		public SettingsDialog createDialog() {
+			return new SettingsDialog(context);
+		}
+		
 		public SettingsDialog create() {
-			SettingsDialog d = new SettingsDialog(context);
+			SettingsDialog d = createDialog();
 			if (title != null) d.setTitle(title);
 			if (message != null) d.setMessage(message);
-			if (positiveLabel != null) {
+			if (positiveListener != null) {
 				d.setButton(DialogInterface.BUTTON_POSITIVE, positiveLabel, positiveListener);
 			}
-			if (negativeLabel != null) {
+			if (negativeListener != null) {
 				d.setButton(DialogInterface.BUTTON_NEGATIVE, negativeLabel, negativeListener);
 			}
 			d.setView(scrollView);
@@ -208,7 +212,7 @@ public class SettingsDialog extends AlertDialog {
 		return fields.get(name);
 	}
 
-	protected int parseColor(String name) throws Exception {
+	public int parseColor(String name) throws Exception {
 		EditText text = (EditText) getField(name);
 		if (text == null) {
 			throw new MapException("Cannot find setting " + name);
@@ -221,11 +225,11 @@ public class SettingsDialog extends AlertDialog {
 		return color;
 	}
 	
-	protected float parseSlider(String name) throws Exception {
+	public float parseSlider(String name) throws Exception {
 		return parseSlider(name, 0, 100);
 	}
 	
-	protected float parseSlider(String name, float minRange, float maxRange) throws Exception {
+	public float parseSlider(String name, float minRange, float maxRange) throws Exception {
 		SeekBar slider = (SeekBar) getField(name);
 		if (slider == null) {
 			throw new MapException("Cannot find setting " + name);
@@ -233,7 +237,7 @@ public class SettingsDialog extends AlertDialog {
 		return getSliderValue(slider.getProgress(), minRange, maxRange);
 	}
 	
-	protected int parseRange(String name, int minRange, int maxRange) throws Exception {
+	public int parseRange(String name, int minRange, int maxRange) throws Exception {
 		SeekBar slider = (SeekBar) getField(name);
 		if (slider == null) {
 			throw new MapException("Cannot find setting " + name);
@@ -241,12 +245,24 @@ public class SettingsDialog extends AlertDialog {
 		return getRangeValue(slider.getProgress(), minRange, maxRange);
 	}
 	
-	protected float getSliderValue(int progress, float minRange, float maxRange) {
+	public boolean parseCheckBox(String name) throws Exception {
+		CheckBox checkBox = (CheckBox) getField(name);
+		if (checkBox == null) {
+			throw new MapException("Cannot find setting " + name);
+		}
+		return checkBox.isChecked();
+	}
+	
+	protected static float getSliderValue(int progress, float minRange, float maxRange) {
 		return (((float) progress) / 100) * (maxRange - minRange);
 	}
 	
-	protected int getRangeValue(int progress, int minRange, int maxRange) {
+	protected static int getRangeValue(int progress, int minRange, int maxRange) {
 		return (int) getSliderValue(progress, minRange, maxRange);
+	}
+	
+	public void showError(String message) {
+		new ErrorDialog(this.getContext(), "Tool Error", message).show();
 	}
 
 }

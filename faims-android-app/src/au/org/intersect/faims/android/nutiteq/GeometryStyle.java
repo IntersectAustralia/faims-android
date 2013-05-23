@@ -59,5 +59,53 @@ public class GeometryStyle {
 		styleSet.setZoomStyle(minZoom, toPolygonStyle());
 		return styleSet;
 	}
+
+	public GeometryStyle cloneStyle() {
+		GeometryStyle g = new GeometryStyle(minZoom);
+		g.pointColor = pointColor;
+		g.lineColor = lineColor;
+		g.polygonColor = polygonColor;
+		g.size = size;
+		g.pickingSize = pickingSize;
+		g.width = width;
+		g.pickingWidth = pickingWidth;
+		g.showPoints = showPoints;
+		g.showStroke = showStroke;
+		return g;
+	}
+	
+	public static GeometryStyle defaultPointStyle() {
+		GeometryStyle style = new GeometryStyle(12);
+		style.pointColor = 0xAAFF0000;
+		style.size = 0.2f;
+		style.pickingSize = 0.6f;
+		return style;
+	}
+	
+	public static GeometryStyle defaultLineStyle() {
+		GeometryStyle style = new GeometryStyle(12);
+		style.pointColor = 0xAA00FF00;
+		style.lineColor = 0xAA00FF00;
+		style.size = 0.2f;
+		style.pickingSize = 0.6f;
+		style.width = 0.05f;
+		style.pickingWidth = 0.3f;
+		style.showPoints = false;
+		return style;
+	}
+	
+	public static GeometryStyle defualtPolygonStyle() {
+		GeometryStyle style = new GeometryStyle(12);
+		style.pointColor = 0XAA0000FF;
+		style.lineColor = 0XAA0000FF;
+		style.polygonColor = 0x440000FF;
+		style.size = 0.2f;
+		style.pickingSize = 0.6f;
+		style.width = 0.05f;
+		style.pickingWidth = 0.3f;
+		style.showPoints = false;
+		style.showStroke = true;
+		return style;
+	}
 	
 }

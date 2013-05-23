@@ -2,22 +2,16 @@ package au.org.intersect.faims.android.ui.map.tools;
 
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.MeasurementUtil;
@@ -78,6 +72,8 @@ public class LineDistanceTool extends SelectTool {
 	private LineDistanceToolCanvas canvas;
 
 	private float distance;
+
+	protected SettingsDialog settingsDialog;
 
 	public LineDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -190,33 +186,25 @@ public class LineDistanceTool extends SelectTool {
 
 			@Override
 			public void onClick(View arg0) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
-				ScrollView scrollView = new ScrollView(context);
-				LinearLayout layout = new LinearLayout(context);
-				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-				layout.setOrientation(LinearLayout.VERTICAL);
-				scrollView.addView(layout);
-				
-				final EditText colorSetter = addEdit(context, layout, "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				final SeekBar strokeSizeBar = addSlider(context, layout, "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				final SeekBar textSizeBar = addSlider(context, layout, "Text Size:", mapView.getDrawViewTextSize());
-				final CheckBox decimalBox = addCheckBox(context, layout, "Show Degrees:", !mapView.showDecimal());
-				final CheckBox kmBox = addCheckBox(context, layout, "Show Km:", mapView.showKm());
-				
-				builder.setView(scrollView);
+				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
+				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
+				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						try {
-							int color = parseColor(colorSetter.getText().toString());
-							float strokeSize = parseSlider(strokeSizeBar.getProgress());
-							float textSize = parseSlider(textSizeBar.getProgress());
-							boolean showDecimal = !decimalBox.isChecked();
-							boolean showKm = kmBox.isChecked();
+							int color = settingsDialog.parseColor("color");
+							float strokeSize = settingsDialog.parseSlider("strokeSize");
+							float textSize = settingsDialog.parseSlider("textSize");
+							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
@@ -240,7 +228,8 @@ public class LineDistanceTool extends SelectTool {
 					}
 				});
 				
-				builder.create().show();
+				settingsDialog = builder.create();
+				settingsDialog.show();
 			}
 				
 		});
