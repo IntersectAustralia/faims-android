@@ -21,9 +21,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
@@ -297,6 +300,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
 
+	public static final int VIDEO_REQUEST_CODE = 5;
+
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -555,7 +560,25 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					this.linker.executeCameraCallBack();
 				}
 				break;
+			case VIDEO_REQUEST_CODE:
+				if(resultCode == RESULT_OK){
+					Uri uri = data.getData();
+					this.linker.setLastVideoFilePath(getRealPathFromURI(uri));
+					this.linker.executeVideoCallBack();
+				}
 		}
+	}
+	
+	public String getRealPathFromURI(Uri contentUri) {
+	    String res = null;
+	    String[] proj = { MediaStore.Images.Media.DATA };
+	    Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+	    if(cursor.moveToFirst()){;
+	       int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	       res = cursor.getString(column_index);
+	    }
+	    cursor.close();
+	    return res;
 	}
 	
 	@Override

@@ -30,6 +30,8 @@
                   <sync></sync>
                   <gallery></gallery>
                   <camera></camera>
+                  <videogallery></videogallery>
+                  <video></video>
                   <attach></attach>
                   <viewattached></viewattached>
                   <save></save>
@@ -144,6 +146,16 @@
         </select>
         <trigger ref="camera">
             <label>Take picture</label>
+        </trigger>
+        <select ref="videogallery" type="image">
+            <label>Video Gallery:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <trigger ref="video">
+            <label>Take video</label>
         </trigger>
         <trigger ref="attach">
             <label>Attach</label>

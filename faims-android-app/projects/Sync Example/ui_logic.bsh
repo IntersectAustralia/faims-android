@@ -169,12 +169,25 @@ takePicture() {
 }
 
 OnPictureTaken() {
-	pictureFilepath = getLastPictureFilepath();
+	pictureFilepath = getLastPictureFilePath();
 	pictures.add(pictureFilepath);
 	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
 }
 
+ArrayList videos = new ArrayList();
+
+takeVideo() {
+	openVideo("OnVideoTaken()");
+}
+
+OnVideoTaken() {
+	videoFilepath = getLastVideoFilePath();
+	videos.add(videoFilepath);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+}
+
 onEvent("tabgroup1/tab1/camera", "click", "takePicture()");
+onEvent("tabgroup1/tab1/video", "click", "takeVideo()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");

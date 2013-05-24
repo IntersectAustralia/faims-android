@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -18,11 +19,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -44,12 +47,14 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.MediaController;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.VideoView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
@@ -97,8 +102,11 @@ public class BeanShellLinker {
 	private String cameraPicturepath;
 	private String cameraCallBack;
 
+	private String videoCallBack;
+	private String cameraVideoPath;
+
 	private Project project;
-	
+
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
 		this.project = project;
@@ -1630,6 +1638,13 @@ public class BeanShellLinker {
 			
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				List<String> selectedPicturePath = new ArrayList<String>();
+				if(horizontalScrollView.getSelectedImageViews() != null){
+					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+						selectedPicturePath.add(imageView.getPicture().getUrl());
+					}
+				}
+				selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();
@@ -1643,7 +1658,11 @@ public class BeanShellLinker {
 		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
 		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
 		                gallery.setImageBitmap(decodeFile(new File(path), 400, 400));
-		                gallery.setBackgroundColor(Color.BLUE);
+		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
+		                	gallery.setBackgroundColor(Color.BLUE);
+		                }else{
+		                	gallery.setBackgroundColor(Color.LTGRAY);
+		                }
 		                gallery.setPadding(10, 10, 10, 10);
 		                gallery.setLayoutParams(layoutParams);
 		                gallery.setPicture(picture);
@@ -1711,9 +1730,15 @@ public class BeanShellLinker {
 		                galleryImages.add(gallery);
 		                galleryLayout.addView(gallery);
 		                galleriesLayout.addView(galleryLayout);
+		                if(!selectedPicturePath.isEmpty()){
+		                	if(selectedPicturePath.contains(path)){
+			                	horizontalScrollView.addSelectedImageView(gallery);
+			                }
+		                }else{
+		                	horizontalScrollView.addSelectedImageView(gallery);
+		                }
 		        	}
 		        }
-		        horizontalScrollView.setSelectedImageViews(galleryImages);
 		        horizontalScrollView.setImageViews(galleryImages);
 			} else {
 				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
@@ -1722,6 +1747,154 @@ public class BeanShellLinker {
 			FLog.e("error populate picture gallery " + ref , e);
 			showWarning("Logic Error", "Error populate picture gallery " + ref);
 		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateVideoGallery(String ref, Collection valuesObj){
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			List<Picture> pictures = new ArrayList<Picture>();
+			if(valuesObj instanceof ArrayList<?>){
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				for (String value : values) {
+					Picture picture = new Picture(null, null, value);
+					pictures.add(picture);
+				}
+			}
+			
+			if(obj instanceof HorizontalScrollView){
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				horizontalScrollView.removeSelectedImageViews();
+		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+		        galleriesLayout.removeAllViews();
+		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+		        for (Picture picture : pictures) {
+		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+		        	File videoFile = new File(path);
+		        	if(videoFile.exists()){
+		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+		        		Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path,
+		        		        MediaStore.Images.Thumbnails.MINI_KIND);
+		                gallery.setImageBitmap(thumbnail);
+		                gallery.setBackgroundColor(Color.BLUE);
+		                gallery.setPadding(10, 10, 10, 10);
+		                gallery.setLayoutParams(layoutParams);
+		                gallery.setPicture(picture);
+		                gallery.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								CustomImageView selectedImageView = (CustomImageView) v;
+		                    	if(horizontalScrollView.isMulti()){
+		                    		for (ImageView view : galleryImages) {
+			                        	if (view.equals(selectedImageView)) {
+				                        	if(horizontalScrollView.getSelectedImageViews() != null){
+				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+				                    				view.setBackgroundColor(Color.LTGRAY);
+				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+				                    			}else{
+				                    				view.setBackgroundColor(Color.BLUE);
+				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    			}
+				                    		}else{
+				                    			view.setBackgroundColor(Color.BLUE);
+				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    		}
+			                        	}
+			                        }
+		                    	}
+								return true;
+							}
+						});
+		                gallery.setOnClickListener(new OnClickListener() {
+		
+		                    @Override
+		                    public void onClick(View v) {
+		                    	CustomImageView selectedImageView = (CustomImageView) v;
+		                    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		                		
+		                		builder.setTitle("Image Preview");
+		                		
+		                		ScrollView scrollView = new ScrollView(activity);
+		                		LinearLayout layout = new LinearLayout(activity);
+		                		layout.setOrientation(LinearLayout.VERTICAL);
+		                		scrollView.addView(layout);
+		                		
+		                		builder.setView(scrollView);
+		                		VideoView videoView = new VideoView(activity);
+		                        MediaController mc = new MediaController(activity); 
+		                        mc.setMediaPlayer(videoView); 
+		                		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
+		                		videoView.setMediaController(mc);
+		                		videoView.requestFocus();
+		                		videoView.start();
+		                		layout.addView(videoView);
+		                		
+		                		TextView text = new TextView(activity);
+		                		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
+		                		layout.addView(text);
+		                		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+
+		                			@Override
+		                			public void onClick(DialogInterface arg0, int arg1) {
+		                				// Nothing
+		                			}
+		                	        
+		                	    });
+		                		builder.create().show();
+		                    }
+		                });
+		                TextView textView = new TextView(galleriesLayout.getContext());
+		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                textView.setText(name);
+		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		                textView.setTextSize(20);
+		                galleryLayout.addView(textView);
+		                galleryImages.add(gallery);
+		                galleryLayout.addView(gallery);
+		                galleriesLayout.addView(galleryLayout);
+		        	}
+		        }
+		        horizontalScrollView.setSelectedImageViews(galleryImages);
+		        horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate video gallery " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate video gallery " + ref , e);
+			showWarning("Logic Error", "Error populate video gallery " + ref);
+		}
+	}
+
+	private String getVideoMetaData(String path){
+		File videoFile = new File(path);
+		
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Metadata:");
+		stringBuilder.append("\n");
+		stringBuilder.append("File name: " + videoFile.getName());
+		stringBuilder.append("\n");
+		stringBuilder.append("File size: " + videoFile.length());
+		stringBuilder.append("\n");
+//		stringBuilder.append("Video duration: " + getVideoDuration(videoFile));
+//		stringBuilder.append("\n");
+		Date lastModifiedDate = new Date(videoFile.lastModified());
+		stringBuilder.append("Video date: " + lastModifiedDate.toString());
+		return stringBuilder.toString();
+	}
+
+	private String getVideoDuration(File videoFile){
+		Uri uri = Uri.fromFile(videoFile);
+		Cursor cursor = MediaStore.Video.query(activity.getContentResolver(), uri, new String[]{MediaStore.Video.VideoColumns.DURATION});
+		if(cursor.moveToFirst()) {
+		    String duration = cursor.getString(0);
+		    return duration;
+		}
+		return null;
 	}
 
 	public static Bitmap decodeFile(File f,int WIDTH,int HIGHT){
@@ -2458,6 +2631,27 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void openVideo(String callback){
+		videoCallBack = callback;
+		Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+		activity.startActivityForResult(videoIntent, ShowProjectActivity.VIDEO_REQUEST_CODE);
+	}
+
+	public void executeVideoCallBack(){
+		try {
+			this.interpreter.eval(videoCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for the camera",e);
+		}
+	}
+
+	public void setLastVideoFilePath(String path){
+		cameraVideoPath = path;
+	}
+
+	public String getLastVideoFilePath(){
+		return cameraVideoPath;
+	}
 	public String getLastPictureFilePath(){
 		return cameraPicturepath;
 	}

@@ -170,6 +170,10 @@ populateCameraPictureGallery(String ref, Collection values){
 	linker.populateCameraPictureGallery(ref, values);
 }
 
+populateVideoGallery(String ref, Collection values){
+	linker.populateVideoGallery(ref, values);
+}
+
 populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
@@ -498,6 +502,14 @@ openCamera(String callback){
 	linker.openCamera(callback);
 }
 
-String getLastPictureFilepath(){
+openVideo(String callback){
+	linker.openVideo(callback);
+}
+
+String getLastPictureFilePath(){
 	return linker.getLastPictureFilePath();
+}
+
+String getLastVideoFilePath(){
+	return linker.getLastVideoFilePath();
 }
