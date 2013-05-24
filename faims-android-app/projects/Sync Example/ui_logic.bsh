@@ -140,9 +140,18 @@ updateEntity(entity_id) {
 	
 	Object values = getFieldValue("tabgroup1/tab1/gallery");
 	if (!"".equals(values)){
-		for(Object values : values){
+		for(Object value : values){
 			sync = getFieldValue("tabgroup1/tab1/sync");
-			filename = attachFile(values, "1".equals(sync));
+			filename = attachFile(value, "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}
+	}
+	
+	values = getFieldValue("tabgroup1/tab1/videogallery");
+	if (!"".equals(values)){
+		for(Object value : values){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(value, "1".equals(sync));
 			attributes.add(createEntityAttribute("filename", filename, null, null, null));
 		}
 	}

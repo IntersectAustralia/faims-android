@@ -19,7 +19,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -46,6 +45,7 @@ import android.widget.DatePicker;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.RadioGroup;
@@ -1765,6 +1765,13 @@ public class BeanShellLinker {
 			
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				List<String> selectedPicturePath = new ArrayList<String>();
+				if(horizontalScrollView.getSelectedImageViews() != null){
+					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+						selectedPicturePath.add(imageView.getPicture().getUrl());
+					}
+				}
+				selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();
@@ -1780,7 +1787,11 @@ public class BeanShellLinker {
 		        		Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path,
 		        		        MediaStore.Images.Thumbnails.MINI_KIND);
 		                gallery.setImageBitmap(thumbnail);
-		                gallery.setBackgroundColor(Color.BLUE);
+		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
+		                	gallery.setBackgroundColor(Color.BLUE);
+		                }else{
+		                	gallery.setBackgroundColor(Color.LTGRAY);
+		                }
 		                gallery.setPadding(10, 10, 10, 10);
 		                gallery.setLayoutParams(layoutParams);
 		                gallery.setPicture(picture);
@@ -1817,22 +1828,19 @@ public class BeanShellLinker {
 		                    	CustomImageView selectedImageView = (CustomImageView) v;
 		                    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		                		
-		                		builder.setTitle("Image Preview");
+		                		builder.setTitle("Video Preview");
 		                		
-		                		ScrollView scrollView = new ScrollView(activity);
 		                		LinearLayout layout = new LinearLayout(activity);
+		                		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
 		                		layout.setOrientation(LinearLayout.VERTICAL);
-		                		scrollView.addView(layout);
 		                		
-		                		builder.setView(scrollView);
+		                		builder.setView(layout);
 		                		VideoView videoView = new VideoView(activity);
-		                        MediaController mc = new MediaController(activity); 
-		                        mc.setMediaPlayer(videoView); 
 		                		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
-		                		videoView.setMediaController(mc);
+		                		videoView.setMediaController(new MediaController(activity));
 		                		videoView.requestFocus();
 		                		videoView.start();
-		                		layout.addView(videoView);
+		                		layout.addView(videoView,new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
 		                		
 		                		TextView text = new TextView(activity);
 		                		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
@@ -1857,9 +1865,15 @@ public class BeanShellLinker {
 		                galleryImages.add(gallery);
 		                galleryLayout.addView(gallery);
 		                galleriesLayout.addView(galleryLayout);
+		                if(!selectedPicturePath.isEmpty()){
+		                	if(selectedPicturePath.contains(path)){
+			                	horizontalScrollView.addSelectedImageView(gallery);
+			                }
+		                }else{
+		                	horizontalScrollView.addSelectedImageView(gallery);
+		                }
 		        	}
 		        }
-		        horizontalScrollView.setSelectedImageViews(galleryImages);
 		        horizontalScrollView.setImageViews(galleryImages);
 			} else {
 				showWarning("Logic Error", "Cannot populate video gallery " + ref);
@@ -1880,21 +1894,9 @@ public class BeanShellLinker {
 		stringBuilder.append("\n");
 		stringBuilder.append("File size: " + videoFile.length());
 		stringBuilder.append("\n");
-//		stringBuilder.append("Video duration: " + getVideoDuration(videoFile));
-//		stringBuilder.append("\n");
 		Date lastModifiedDate = new Date(videoFile.lastModified());
 		stringBuilder.append("Video date: " + lastModifiedDate.toString());
 		return stringBuilder.toString();
-	}
-
-	private String getVideoDuration(File videoFile){
-		Uri uri = Uri.fromFile(videoFile);
-		Cursor cursor = MediaStore.Video.query(activity.getContentResolver(), uri, new String[]{MediaStore.Video.VideoColumns.DURATION});
-		if(cursor.moveToFirst()) {
-		    String duration = cursor.getString(0);
-		    return duration;
-		}
-		return null;
 	}
 
 	public static Bitmap decodeFile(File f,int WIDTH,int HIGHT){
