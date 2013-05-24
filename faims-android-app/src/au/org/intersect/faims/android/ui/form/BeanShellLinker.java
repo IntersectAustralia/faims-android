@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +18,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
@@ -31,6 +34,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLongClickListener;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,6 +45,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -1600,6 +1605,149 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error populate picture gallery " + ref);
 		}
 	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateCameraPictureGallery(String ref, Collection valuesObj){
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			List<Picture> pictures = new ArrayList<Picture>();
+			if(valuesObj instanceof ArrayList<?>){
+				try{
+					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
+					for(List<String> pictureList : arrayList){
+						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+						pictures.add(picture);
+					}
+				}catch(Exception e){
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					for(String value : values){
+						Picture picture = new Picture(null,null,value);
+						pictures.add(picture);
+					}
+				}
+			}
+			
+			if(obj instanceof HorizontalScrollView){
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				horizontalScrollView.removeSelectedImageViews();
+		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+		        galleriesLayout.removeAllViews();
+		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+		        for (Picture picture : pictures) {
+		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+		        	File pictureFile = new File(path);
+		        	if(pictureFile.exists()){
+		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+		                gallery.setImageBitmap(decodeFile(new File(path), 400, 400));
+		                gallery.setBackgroundColor(Color.BLUE);
+		                gallery.setPadding(10, 10, 10, 10);
+		                gallery.setLayoutParams(layoutParams);
+		                gallery.setPicture(picture);
+		                gallery.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								CustomImageView selectedImageView = (CustomImageView) v;
+		                    	if(horizontalScrollView.isMulti()){
+		                    		for (ImageView view : galleryImages) {
+			                        	if (view.equals(selectedImageView)) {
+				                        	if(horizontalScrollView.getSelectedImageViews() != null){
+				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+				                    				view.setBackgroundColor(Color.LTGRAY);
+				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+				                    			}else{
+				                    				view.setBackgroundColor(Color.BLUE);
+				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    			}
+				                    		}else{
+				                    			view.setBackgroundColor(Color.BLUE);
+				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    		}
+			                        	}
+			                        }
+		                    	}
+								return true;
+							}
+						});
+		                gallery.setOnClickListener(new OnClickListener() {
+		
+		                    @Override
+		                    public void onClick(View v) {
+		                    	CustomImageView selectedImageView = (CustomImageView) v;
+		                    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		                		
+		                		builder.setTitle("Image Preview");
+		                		
+		                		ScrollView scrollView = new ScrollView(activity);
+		                		LinearLayout layout = new LinearLayout(activity);
+		                		layout.setOrientation(LinearLayout.VERTICAL);
+		                		scrollView.addView(layout);
+		                		
+		                		builder.setView(scrollView);
+		                		ImageView view = new ImageView(activity);
+		                		view.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
+		                		layout.addView(view);
+		                		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+
+		                			@Override
+		                			public void onClick(DialogInterface arg0, int arg1) {
+		                				// Nothing
+		                			}
+		                	        
+		                	    });
+		                		builder.create().show();
+		                    }
+		                });
+		                TextView textView = new TextView(galleriesLayout.getContext());
+		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                textView.setText(name);
+		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		                textView.setTextSize(20);
+		                galleryLayout.addView(textView);
+		                galleryImages.add(gallery);
+		                galleryLayout.addView(gallery);
+		                galleriesLayout.addView(galleryLayout);
+		        	}
+		        }
+		        horizontalScrollView.setSelectedImageViews(galleryImages);
+		        horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate picture gallery " + ref , e);
+			showWarning("Logic Error", "Error populate picture gallery " + ref);
+		}
+	}
+
+	public static Bitmap decodeFile(File f,int WIDTH,int HIGHT){
+        try {
+            //Decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
+
+            //The new size we want to scale to
+            final int REQUIRED_WIDTH=WIDTH;
+            final int REQUIRED_HIGHT=HIGHT;
+            //Find the correct scale value. It should be the power of 2.
+            int scale=1;
+            while(o.outWidth/scale/2>=REQUIRED_WIDTH && o.outHeight/scale/2>=REQUIRED_HIGHT)
+                scale*=2;
+
+            //Decode with inSampleSize
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize=scale;
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        }catch (Exception e) {
+        	FLog.e("error when decode the bitmap",e);
+        }
+        return null;
+    }
 
 	public Object fetchArchEnt(String id){
 		try {

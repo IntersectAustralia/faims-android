@@ -171,7 +171,7 @@ takePicture() {
 OnPictureTaken() {
 	pictureFilepath = getLastPictureFilepath();
 	pictures.add(pictureFilepath);
-	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
 }
 
 onEvent("tabgroup1/tab1/camera", "click", "takePicture()");
