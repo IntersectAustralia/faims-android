@@ -49,7 +49,10 @@ public class SpatialiteTextLayer extends TextLayer {
 	    if (userColumns[0] == null) return;
 
 	    List<Geometry> geometries = spatialiteLayer.getVisibleElements();
-	    if (geometries == null || geometries.size() == 0) return;
+	    if (geometries == null || geometries.size() == 0) {
+	    	setVisibleElementsList(null);
+	    	return;
+	    }
 	    
 	    Vector<Text> objects = new Vector<Text>();
 	    

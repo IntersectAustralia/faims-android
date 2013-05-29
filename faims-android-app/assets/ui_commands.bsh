@@ -502,6 +502,10 @@ addDatabaseLayerQuery(String ref, String name, String sql) {
 	linker.addDatabaseLayerQuery(ref, name, sql);
 }
 
+addTrackLogLayerQuery(String ref, String name, String sql) {
+	linker.addTrackLogLayerQuery(ref, name, sql);
+}
+
 openCamera(String callback){
 	linker.openCamera(callback);
 }

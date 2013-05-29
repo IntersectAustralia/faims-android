@@ -21,27 +21,29 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
 	
-	private static final int BOUNDARY_PADDING = 20;
+	protected static final int BOUNDARY_PADDING = 20;
 	
 	public enum Type {
 		ENTITY,
-		RELATIONSHIP
+		RELATIONSHIP,
+		GPS_TRACK
 	}
 
-	private DatabaseTextLayer textLayer;
-	private boolean textVisible;
-	private DatabaseManager dbmgr;
-	private StyleSet<PointStyle> pointStyleSet;
-	private StyleSet<LineStyle> lineStyleSet;
-	private StyleSet<PolygonStyle> polygonStyleSet;
-	private int maxObjects;
-	private int minZoom;
-	private Type type;
-	private String name;
-	private int layerId;
-	private String queryName;
-	private String querySql;
-	private CustomMapView mapView;
+	protected DatabaseTextLayer textLayer;
+	protected boolean textVisible;
+	protected DatabaseManager dbmgr;
+	protected StyleSet<PointStyle> pointStyleSet;
+	protected StyleSet<LineStyle> lineStyleSet;
+	protected StyleSet<PolygonStyle> polygonStyleSet;
+	protected int maxObjects;
+	protected int minZoom;
+	protected Type type;
+	protected String name;
+	protected int layerId;
+	protected String queryName;
+	protected String querySql;
+	protected CustomMapView mapView;
+	protected String userid;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, StyleSet<PointStyle> pointStyleSet,
@@ -69,7 +71,7 @@ public class DatabaseLayer extends GeometryLayer {
 	      minZoom = polygonStyleSet.getFirstNonNullZoomStyleZoom();
 	    }
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -114,6 +116,14 @@ public class DatabaseLayer extends GeometryLayer {
 		updateTextLayer();
 	}
 	
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
 	private void updateTextLayer() {
 		if (this.isVisible() && this.textVisible) {
 			this.textLayer.setVisible(true);
@@ -139,36 +149,41 @@ public class DatabaseLayer extends GeometryLayer {
 				 objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
 				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(min, max, querySql, maxObjects);
-			} else {
+			}else {
 				throw new Exception("database layer has no type");
 			}
 			
-		    // apply styles, create new objects for these
-		    for(Geometry object: objectTemp){
-		        
-		        Geometry newObject = null;
-		        
-		        if(object instanceof Point){
-		            newObject = new Point(((Point) object).getMapPos(), null, pointStyleSet, object.userData);
-		        }else if(object instanceof Line){
-		            newObject = new Line(((Line) object).getVertexList(), null, lineStyleSet, object.userData);
-		        }else if(object instanceof Polygon){
-		            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, polygonStyleSet, object.userData);
-		        }
-		        
-		        Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
-		        
-		        transformedObject.attachToLayer(this);
-		        transformedObject.setActiveStyle(zoom);
-		        
-		        objects.add(transformedObject);
-		    }
+		    createElementsInLayer(zoom, objectTemp, objects);
 		    
 		    //FLog.d("visible objects " + objects.size());
 		    
 		    setVisibleElementsList(objects);
 		} catch (Exception e) {
 			FLog.e("error rendering database layer", e);
+		}
+	}
+
+	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
+			Vector<Geometry> objects) {
+		// apply styles, create new objects for these
+		for(Geometry object: objectTemp){
+		    
+		    Geometry newObject = null;
+		    
+		    if(object instanceof Point){
+		        newObject = new Point(((Point) object).getMapPos(), null, pointStyleSet, object.userData);
+		    }else if(object instanceof Line){
+		        newObject = new Line(((Line) object).getVertexList(), null, lineStyleSet, object.userData);
+		    }else if(object instanceof Polygon){
+		        newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, polygonStyleSet, object.userData);
+		    }
+		    
+		    Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
+		    
+		    transformedObject.attachToLayer(this);
+		    transformedObject.setActiveStyle(zoom);
+		    
+		    objects.add(transformedObject);
 		}
 	}
 

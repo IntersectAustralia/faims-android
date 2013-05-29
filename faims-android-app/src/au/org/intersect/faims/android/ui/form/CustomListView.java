@@ -57,4 +57,10 @@ public class CustomListView extends ListView {
 			selectedItems.remove(item);
 		}
 	}
+
+	public void removeSelectedItems(){
+		if(selectedItems != null){
+			selectedItems.clear();
+		}
+	}
 }

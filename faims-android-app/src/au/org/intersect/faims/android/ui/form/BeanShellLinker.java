@@ -1814,7 +1814,7 @@ public class BeanShellLinker {
 		ImageView view = new ImageView(activity);
 		view.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
 		layout.addView(view);
-		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -1955,7 +1955,7 @@ public class BeanShellLinker {
 		TextView text = new TextView(activity);
 		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
 		layout.addView(text);
-		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -2120,7 +2120,7 @@ public class BeanShellLinker {
 		TextView text = new TextView(activity);
 		text.setText(getAudioMetaData(path));
 		layout.addView(text);
-		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -2922,7 +2922,7 @@ public class BeanShellLinker {
 		button.setTextOff("Start Recording");
 		button.setChecked(false);
 		layout.addView(button);
-		builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -3255,7 +3255,7 @@ public class BeanShellLinker {
 
 			builder.setTitle("Attached Files");
 			builder.setView(listView);
-			builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+			builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -3315,6 +3315,23 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addDatabaseLayerQuery(name, sql);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding database layer query " + ref,e);
+			showWarning("Logic Error", "Error adding database layer query " + ref);
+		}
+	}
+
+	public void addTrackLogLayerQuery(String ref, String name, String sql){
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.addTrackLogLayerQuery(name, sql);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

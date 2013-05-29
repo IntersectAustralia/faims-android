@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
+import roboguice.RoboGuice;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -28,6 +32,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
@@ -37,6 +42,7 @@ import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
@@ -44,7 +50,9 @@ import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.TextStyleDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
+import au.org.intersect.faims.android.ui.form.CustomListView;
 
+import com.google.inject.Inject;
 import com.nutiteq.layers.Layer;
 
 public class LayerManagerView extends LinearLayout {
@@ -86,6 +94,47 @@ public class LayerManagerView extends LinearLayout {
 		}
 		
 	}
+
+	private class UsersListAdapter extends BaseAdapter {
+		
+		private Map<User, Boolean> users;
+		private ArrayList<View> itemViews;
+
+		public UsersListAdapter(Map<User, Boolean> users) {
+			this.users = users;
+			this.itemViews = new ArrayList<View>();
+			
+			for (Entry<User, Boolean> user : users.entrySet()) {
+				UserListItem item = new UserListItem(LayerManagerView.this.getContext());
+				item.init(user.getKey(), user.getValue());
+				itemViews.add(item);
+			} 
+		}
+		
+		@Override
+		public int getCount() {
+			return users.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return users.keySet().toArray()[position];
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View arg1, ViewGroup arg2) {
+			return itemViews.get(position);
+		}
+		
+	}
+
+	@Inject
+	DatabaseManager databaseManager;
 
 	private CustomMapView mapView;
 	private LinearLayout layout;
@@ -139,6 +188,7 @@ public class LayerManagerView extends LinearLayout {
 				}
 			}
 		});
+		RoboGuice.getBaseApplicationInjector(((Activity)context).getApplication()).injectMembers(this);
 	}
 	
 	public void attachToMap(CustomMapView mapView) {
@@ -156,6 +206,7 @@ public class LayerManagerView extends LinearLayout {
 		
 		createAddButton();
 		createOrderButton();
+		createViewTrackLogButton();
 		createListView();
 		
 		redrawLayers();
@@ -268,6 +319,23 @@ public class LayerManagerView extends LinearLayout {
 						}
 					});
 					layout.addView(showLabelsButton);
+					if(layer instanceof TrackLogDatabaseLayer){
+						Button userTrackLogButton = new Button(context);
+						userTrackLogButton.setText("Show/hide user's track log");
+						userTrackLogButton.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View arg0) {
+								try {
+									showOrHideUserListView();
+								} catch (Exception e) {
+									FLog.e("error creating user list view", e);
+								}
+							}
+
+						});
+						layout.addView(userTrackLogButton);
+					}
 				}
 				
 				d.show();
@@ -327,6 +395,29 @@ public class LayerManagerView extends LinearLayout {
 		buttonsLayout.addView(orderButton);
 	}
 	
+	private void createViewTrackLogButton() {
+		Button viewTrackLogButton = new Button(this.getContext());
+		viewTrackLogButton.setText("View Track Log");
+		viewTrackLogButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					if(mapView.getUserTrackLogLayer() == null){
+						addViewTrackLogLayer();
+					}else{
+						mapView.setLayerVisible(mapView.getUserTrackLogLayer(), true);
+						redrawLayers();
+					}
+				} catch (Exception e) {
+					FLog.e("can not view track log layer",e);
+				}
+			}
+			
+		});
+		buttonsLayout.addView(viewTrackLogButton);
+	}
+
 	public void redrawLayers() {
 		List<Layer> layers = mapView.getAllLayers();
 		List<Layer> shownLayer = new ArrayList<Layer>(layers);
@@ -709,6 +800,153 @@ public class LayerManagerView extends LinearLayout {
 		builder.create().show();
 	}
 	
+	protected void addViewTrackLogLayer() throws Exception {
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Add track log layer:");
+		
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		builder.setView(scrollView);
+		
+		TextView textView = new TextView(this.getContext());
+		textView.setText("Track log layer name:");
+		layout.addView(textView);
+		final EditText editText = new EditText(LayerManagerView.this.getContext());
+		layout.addView(editText);
+		layout.addView(createUserSelectionButton());
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					createUsersTrackLogLayer(layerName);
+					redrawLayers();
+				} catch (Exception e) {
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
+	}
+
+	private void createUsersTrackLogLayer(String layerName) throws Exception {
+		mapView.setUserTrackLogLayer(mapView.addDataBaseLayerForTrackLog(layerName, pointStyle.toPointStyleSet(), mapView.getUserCheckedList(), mapView.getTrackLogQueryName(), mapView.getTrackLogQuerySql(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet()));
+	}
+
+	private View createUserSelectionButton() throws Exception {
+		Button button = new Button(this.getContext());
+		button.setText("Show/hide user's track log");
+		List<User> users = databaseManager.fetchAllUser();
+		if(mapView.getUserCheckedList().isEmpty()){
+			for(User user : users){
+				mapView.putUserCheckList(user, true);
+			}
+		}
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				try {
+					createUserListView();
+				} catch (Exception e) {
+					FLog.e("error creating user list view", e);
+				}
+			}
+				
+		});
+		return button;
+	}
+
+	private void createUserListView(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Show/hide user track log:");
+		
+		CustomListView listView = new CustomListView(this.getContext());
+		UsersListAdapter adapter = new UsersListAdapter(mapView.getUserCheckedList());
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int arg2,
+					long arg3) {
+				UserListItem itemView = (UserListItem) view;
+				itemView.toggle();
+				if(itemView.isChecked()){
+					mapView.putUserCheckList(itemView.getUser(),true);
+				}else{
+					mapView.putUserCheckList(itemView.getUser(),false);
+				}
+			}
+		});
+
+		builder.setView(listView);
+		
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				// ignore
+			}
+	        
+	    });
+		builder.create().show();
+	}
+	
+	private void showOrHideUserListView() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerView.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Show/hide user track log:");
+		
+		CustomListView listView = new CustomListView(this.getContext());
+		UsersListAdapter adapter = new UsersListAdapter(mapView.getUserCheckedList());
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int arg2,
+					long arg3) {
+				UserListItem itemView = (UserListItem) view;
+				itemView.toggle();
+				TrackLogDatabaseLayer trackLogDatabaseLayer = (TrackLogDatabaseLayer) mapView.getLayer(mapView.getUserTrackLogLayer());
+				if(itemView.isChecked()){
+					mapView.putUserCheckList(itemView.getUser(),true);
+					trackLogDatabaseLayer.toggleUser(itemView.getUser(), true);
+				}else{
+					mapView.putUserCheckList(itemView.getUser(),false);
+					trackLogDatabaseLayer.toggleUser(itemView.getUser(), false);
+				}
+				mapView.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+			}
+		});
+
+		builder.setView(listView);
+		
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+			}
+	        
+	    });
+		builder.create().show();
+	}
+
 	public Button createPointStyleButton(){
 		Button button = new Button(this.getContext());
 		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -834,6 +1072,10 @@ public class LayerManagerView extends LinearLayout {
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
 					mapView.removeLayer(layer);
+					if(layer instanceof TrackLogDatabaseLayer){
+						mapView.setUserTrackLogLayer(null);
+						mapView.clearUserCheckedList();
+					}
 					redrawLayers();
 				} catch (Exception e) {
 					showErrorDialog(e.getMessage());
