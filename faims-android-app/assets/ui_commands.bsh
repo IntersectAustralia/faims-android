@@ -262,9 +262,9 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
 	linker.showShapeLayer(ref, layerName, filename, pointStyle, lineStyle, polygonStyle);
 }
 
-showSpatialLayer(String ref, String layerName, String filename, String tableName, String[] labelColumns, 
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String idColumn, String labelColumn, 
 	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
-	linker.showSpatialLayer(ref, layerName, filename, tableName, labelColumns, pointStyle, lineStyle, polygonStyle, textStyle);
+	linker.showSpatialLayer(ref, layerName, filename, tableName, idColumn, labelColumn, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
 showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,

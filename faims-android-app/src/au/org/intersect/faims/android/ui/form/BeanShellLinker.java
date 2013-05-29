@@ -1858,7 +1858,7 @@ public class BeanShellLinker {
 		return 0;
 	}
 	
-	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String[] labelColumns, 
+	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String idColumn, String labelColumn, 
 			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
@@ -1866,7 +1866,7 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 				
 				String filepath = activity.getProjectDir() + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, labelColumns, pointStyle.toPointStyleSet(), 
+				return mapView.addSpatialLayer(layerName, filepath, tablename, idColumn, labelColumn, pointStyle.toPointStyleSet(), 
 						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);

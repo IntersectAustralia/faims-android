@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.log.FLog;
@@ -14,7 +13,6 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.Text;
-import com.nutiteq.layers.vector.SpatialiteLayer;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.style.TextStyle;
@@ -24,10 +22,10 @@ public class SpatialiteTextLayer extends TextLayer {
 
 	private StyleSet<TextStyle> styleSet;
 	private int minZoom;
-	private SpatialiteLayer spatialiteLayer;
+	private CustomSpatialiteLayer spatialiteLayer;
 	private String[] userColumns;
 
-	public SpatialiteTextLayer(Projection projection, SpatialiteLayer layer, String[] userColumns, StyleSet<TextStyle> styleSet) {
+	public SpatialiteTextLayer(Projection projection, CustomSpatialiteLayer layer, String[] userColumns, StyleSet<TextStyle> styleSet) {
 		super(projection);
 		this.spatialiteLayer = layer;
 		this.userColumns = userColumns;
@@ -55,9 +53,8 @@ public class SpatialiteTextLayer extends TextLayer {
 	    
 	    for(Geometry geom: geometries){
 	        
-	        @SuppressWarnings("unchecked")
-			final Map<String, String> userData = (Map<String, String>) geom.userData;
-	        String name = userData.get(userColumns[0]);
+			String[] userData = (String[]) geom.userData;
+	        String name = userData[1];
 	        
 	        MapPos topRight = null;
 	        if (geom instanceof Point) {

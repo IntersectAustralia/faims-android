@@ -621,7 +621,7 @@ public class CustomMapView extends MapView {
 	}
 
 	public int addSpatialLayer(String layerName, String file, String tablename,
-			String[] labelColumns, StyleSet<PointStyle> pointStyleSet,
+			String idColumn, String labelColumn, StyleSet<PointStyle> pointStyleSet,
 			StyleSet<LineStyle> lineStyleSet,
 			StyleSet<PolygonStyle> polygonStyleSet,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
@@ -631,12 +631,18 @@ public class CustomMapView extends MapView {
 
 		validateLayerName(layerName);
 		
-		if (labelColumns == null) {
-			labelColumns = new String[] { null }; // nutiteq layer has a bug when null or 0 length array is supplied 
+		if (idColumn == null || "".equals(idColumn)) {
+			throw new MapException("Invalid id column");
 		}
 		
+		if (labelColumn == null || "".equals(labelColumn)) {
+			throw new MapException("Invalid label column");
+		}
+		
+		String[] labelColumns = new String[] { idColumn, labelColumn };
+		
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(
-				nextLayerId(), layerName, new EPSG3857(), file, tablename,
+				nextLayerId(), layerName, new EPSG3857(), this, file, tablename,
 				"Geometry", labelColumns,
 				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet,
 				polygonStyleSet);

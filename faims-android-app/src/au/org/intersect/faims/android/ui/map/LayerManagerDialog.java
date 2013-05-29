@@ -105,6 +105,7 @@ public class LayerManagerDialog extends AlertDialog {
 	protected LineStyleDialog lineStyleDialog;
 	protected PointStyleDialog pointStyleDialog;
 	protected TextStyleDialog textStyleDialog;
+	private Spinner idColumnSpinner;
 
 	public LayerManagerDialog(Context context) {
 		super(context);
@@ -561,7 +562,7 @@ public class LayerManagerDialog extends AlertDialog {
 					long arg3) {
 				try {
 					String tableName = (String) tableNameSpinner.getAdapter().getItem(index);
-					setLabelSpinner(tableName);
+					setTableColumnSpinners(tableName);
 				} catch (Exception e) {
 					FLog.e("error getting table columns", e);
 					showErrorDialog("Error getting table columns");
@@ -576,6 +577,13 @@ public class LayerManagerDialog extends AlertDialog {
 			
 		});
 		layout.addView(tableNameSpinner);
+		
+		TextView idTextView = new TextView(this.getContext());
+		idTextView.setText("Spatial id column:");
+		layout.addView(idTextView);
+		idColumnSpinner = new Spinner(this.getContext());
+		
+		layout.addView(idColumnSpinner);
 		
 		TextView labelTextView = new TextView(this.getContext());
 		labelTextView.setText("Spatial label column:");
@@ -613,8 +621,9 @@ public class LayerManagerDialog extends AlertDialog {
 					if(spatialFile != null){
 						String layerName = editText.getText() != null ? editText.getText().toString() : null;
 						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						String labelName = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, new String[] { labelName }, 
+						String idColumn = idColumnSpinner.getSelectedItem() != null ? (String) idColumnSpinner.getSelectedItem() : null;
+						String labelColumn = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
+						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, idColumn, labelColumn, 
 								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
 								textStyle.toStyleSet());
 						redrawLayers();
@@ -1095,7 +1104,7 @@ public class LayerManagerDialog extends AlertDialog {
 			}
 	}
 	
-	public void setLabelSpinner(String tableName) throws jsqlite.Exception{
+	public void setTableColumnSpinners(String tableName) throws jsqlite.Exception{
 		synchronized(DatabaseManager.class) {
 			List<String> columnNames = new ArrayList<String>();
 			Stmt st = null;
@@ -1137,7 +1146,9 @@ public class LayerManagerDialog extends AlertDialog {
 						columnNames);
 				labelColumnSpinner.setAdapter(arrayAdapter);
 				labelColumnSpinner.setSelection(0);
+				idColumnSpinner.setAdapter(arrayAdapter);
+				idColumnSpinner.setSelection(0);
 			}
 		}
-}
+	}
 }
