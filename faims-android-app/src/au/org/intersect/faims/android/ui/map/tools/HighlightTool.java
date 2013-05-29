@@ -13,9 +13,9 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class SelectTool extends SettingsTool {
+public class HighlightTool extends SettingsTool {
 	
-	public static final String NAME = "Select";
+	public static final String NAME = "Highlight";
 	
 	protected MapButton clearButton;
 
@@ -23,11 +23,11 @@ public class SelectTool extends SettingsTool {
 
 	protected SettingsDialog settingsDialog;
 	
-	public SelectTool(Context context, CustomMapView mapView) {
+	public HighlightTool(Context context, CustomMapView mapView) {
 		this(context, mapView, NAME);
 	}
 	
-	public SelectTool(Context context, CustomMapView mapView, String name) {
+	public HighlightTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);
 		
 		detailButton = createDetailButton(context);

@@ -16,7 +16,7 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
 
-public class AzimuthTool extends SelectTool {
+public class AzimuthTool extends HighlightTool {
 	
 	private class AzimuthToolCanvas extends ToolCanvas {
 

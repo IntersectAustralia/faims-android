@@ -19,7 +19,7 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class AreaTool extends SelectTool {
+public class AreaTool extends HighlightTool {
 	
 	private class AreaToolCanvas extends ToolCanvas {
 		

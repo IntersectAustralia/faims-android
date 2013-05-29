@@ -23,7 +23,7 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class EditTool extends SelectTool {
+public class EditTool extends HighlightTool {
 	
 	public static final String NAME = "Edit";
 	

@@ -21,7 +21,7 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class LineDistanceTool extends SelectTool {
+public class LineDistanceTool extends HighlightTool {
 	
 	private class LineDistanceToolCanvas extends ToolCanvas {
 		

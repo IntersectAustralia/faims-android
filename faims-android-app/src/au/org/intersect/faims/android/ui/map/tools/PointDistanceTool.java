@@ -19,7 +19,7 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
 
-public class PointDistanceTool extends SelectTool {
+public class PointDistanceTool extends HighlightTool {
 	
 	private class PointDistanceToolCanvas extends ToolCanvas {
 		
