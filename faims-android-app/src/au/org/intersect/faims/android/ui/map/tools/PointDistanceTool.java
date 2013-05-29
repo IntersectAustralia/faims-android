@@ -132,13 +132,13 @@ public class PointDistanceTool extends SelectTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomPoint) && (mapView.getSelection().size() < 2)) {
+				if ((element instanceof CustomPoint) && (mapView.getHighlights().size() < 2)) {
 					CustomPoint p = (CustomPoint) element;
 					
-					if (mapView.hasSelection(p)) {
-						mapView.removeSelection(p);
+					if (mapView.hasHighlight(p)) {
+						mapView.removeHighlight(p);
 					} else {
-						mapView.addSelection(p);
+						mapView.addHighlight(p);
 					}
 					
 					computeDistance();
@@ -154,19 +154,19 @@ public class PointDistanceTool extends SelectTool {
 	}
 	
 	private void computeDistance() {
-		if (mapView.getSelection().size() < 2) return;
+		if (mapView.getHighlights().size() < 2) return;
 		
-		MapPos p1 = ((CustomPoint) mapView.getSelection().get(0)).getMapPos();
-		MapPos p2 = ((CustomPoint) mapView.getSelection().get(1)).getMapPos();
+		MapPos p1 = ((CustomPoint) mapView.getHighlights().get(0)).getMapPos();
+		MapPos p2 = ((CustomPoint) mapView.getHighlights().get(1)).getMapPos();
 		
 		this.distance = computePointDistance(p1, p2);
 	}
 	
 	private void drawDistance() {
-		if (mapView.getSelection().size() < 2) return;
+		if (mapView.getHighlights().size() < 2) return;
 		
-		MapPos p1 = ((CustomPoint) mapView.getSelection().get(0)).getMapPos();
-		MapPos p2 = ((CustomPoint) mapView.getSelection().get(1)).getMapPos();
+		MapPos p1 = ((CustomPoint) mapView.getHighlights().get(0)).getMapPos();
+		MapPos p2 = ((CustomPoint) mapView.getHighlights().get(1)).getMapPos();
 		
 		canvas.drawDistanceBetween(p1, p2);
 		canvas.setColor(mapView.getDrawViewColor());

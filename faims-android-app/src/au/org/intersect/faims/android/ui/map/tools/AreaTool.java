@@ -120,13 +120,13 @@ public class AreaTool extends SelectTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomPolygon) && (mapView.getSelection().size() < 1)) {
+				if ((element instanceof CustomPolygon) && (mapView.getHighlights().size() < 1)) {
 					CustomPolygon p = (CustomPolygon) element;
 					
-					if (mapView.hasSelection(p)) {
-						mapView.removeSelection(p);
+					if (mapView.hasHighlight(p)) {
+						mapView.removeHighlight(p);
 					} else {
-						mapView.addSelection(p);
+						mapView.addHighlight(p);
 					}
 					
 					computeArea();
@@ -142,17 +142,17 @@ public class AreaTool extends SelectTool {
 	}
 	
 	private void computeArea() {
-		if (mapView.getSelection().size() < 1) return;
+		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomPolygon polygon = (CustomPolygon) mapView.getSelection().get(0);
+		CustomPolygon polygon = (CustomPolygon) mapView.getHighlights().get(0);
 		
 		this.area = computePolygonArea(polygon);
 	}
 	
 	private void drawArea() {
-		if (mapView.getSelection().size() < 1) return;
+		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomPolygon polygon = (CustomPolygon) mapView.getSelection().get(0);
+		CustomPolygon polygon = (CustomPolygon) mapView.getHighlights().get(0);
 		
 		canvas.drawArea(polygon);
 		canvas.setColor(mapView.getDrawViewColor());

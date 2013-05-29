@@ -362,28 +362,28 @@ lockMapView(String ref, boolean lock) {
 	linker.lockMapView(ref, lock);
 }
 
-addGeometrySelection(String ref, int geomId) {
-	linker.addGeometrySelection(ref, geomId);
+addGeometryHighlight(String ref, int geomId) {
+	linker.addGeometryHighlight(ref, geomId);
 }
 
-removeGeometrySelection(String ref, int geomId) {
-	linker.removeGeometrySelection(ref, geomId);
+removeGeometryHighlight(String ref, int geomId) {
+	linker.removeGeometryHighlight(ref, geomId);
 }
 
-prepareSelectionTransform(String ref) {
-	linker.prepareSelectionTransform(ref);
+prepareHighlightTransform(String ref) {
+	linker.prepareHighlightTransform(ref);
 }
 
-doSelectionTransform(String ref) {
-	linker.doSelectionTransform(ref);
+doHighlightTransform(String ref) {
+	linker.doHighlightTransform(ref);
 }
 
-clearGeometrySelection(String ref) {
-	linker.clearGeometrySelection(ref);
+clearGeometryHighlights(String ref) {
+	linker.clearGeometryHighlights(ref);
 }
 
-getGeometrySelection(String ref) {
-	return linker.getGeometrySelection(ref);
+getGeometryHighlights(String ref) {
+	return linker.getGeometryHighlights(ref);
 }
 
 getMapGeometrySelected() {

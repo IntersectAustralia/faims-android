@@ -183,7 +183,7 @@ public class CustomMapView extends MapView {
 
 	private Layer selectedLayer;
 	
-	private ArrayList<Geometry> selectedGeometryList;
+	private ArrayList<Geometry> highlightGeometryList;
 
 	private ArrayList<Geometry> transformGeometryList;
 
@@ -203,7 +203,9 @@ public class CustomMapView extends MapView {
 	
 	private HashMap<String, String> databaseLayerQueryMap;
 
-	private SelectGroupDialog selectGroupDailog;
+	private SelectionDialog selectionDialog;
+	
+	private HashMap<String, GeometrySelection> selectionMap;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -217,8 +219,9 @@ public class CustomMapView extends MapView {
         runnableList = new ArrayList<Runnable>();
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
-        selectedGeometryList = new ArrayList<Geometry>();
+        highlightGeometryList = new ArrayList<Geometry>();
         databaseLayerQueryMap = new HashMap<String, String>();
+        selectionMap = new HashMap<String, GeometrySelection>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -441,8 +444,8 @@ public class CustomMapView extends MapView {
 		geometryIdMap.remove(getGeometryId(geom));
 		geometryLayerMap.remove(geom);
 		
-		clearSelection();
-		clearSelectionTransform();
+		clearHighlights();
+		clearHighlightTransform();
 	}
 	
 	public void removeGeometryWithoutClearing(Geometry geom) throws Exception {
@@ -901,64 +904,64 @@ public class CustomMapView extends MapView {
 		}
 	}
 
-	public void addSelection(int geomId) throws Exception {
-		addSelection(getGeometry(geomId));
+	public void addHighlight(int geomId) throws Exception {
+		addHighlight(getGeometry(geomId));
 	}
 
-	public void addSelection(Geometry geom) throws Exception {
+	public void addHighlight(Geometry geom) throws Exception {
 		if (geom == null) {
 			throw new MapException("Geometry does not exist");
 		}
 		
-		if (hasSelection(geom)) return;
+		if (hasHighlight(geom)) return;
 		
 		if (transformGeometryList != null) {
-			throw new MapException("Geometry selection is locked");
+			throw new MapException("Geometry highlight is locked");
 		}
 		
-		selectedGeometryList.add(geom);
+		highlightGeometryList.add(geom);
 		updateDrawView();
 	}
 
-	public void clearSelection() throws Exception {
-		if (selectedGeometryList.isEmpty()) return;
+	public void clearHighlights() throws Exception {
+		if (highlightGeometryList.isEmpty()) return;
 		
 		if (transformGeometryList != null) {
-			throw new MapException("Geometry selection is locked");
+			throw new MapException("Geometry highlight is locked");
 		}
 		
-		selectedGeometryList = new ArrayList<Geometry>();
+		highlightGeometryList = new ArrayList<Geometry>();
 		updateDrawView();
 	}
 	
-	public void removeSelection(int geomId) throws Exception {
-		removeSelection(getGeometry(geomId));
+	public void removeHighlight(int geomId) throws Exception {
+		removeHighlight(getGeometry(geomId));
 	}
 	
-	public void removeSelection(Geometry geom) throws Exception {
-		if (selectedGeometryList.isEmpty()) return;
+	public void removeHighlight(Geometry geom) throws Exception {
+		if (highlightGeometryList.isEmpty()) return;
 		
 		if (transformGeometryList != null) {
-			throw new MapException("Geometry selection is locked");
+			throw new MapException("Geometry highlight is locked");
 		}
 		
-		selectedGeometryList.remove(geom);
+		highlightGeometryList.remove(geom);
 		updateDrawView();
 	}
 	
-	public boolean hasSelection(Geometry geom) {
-		return selectedGeometryList.contains(geom);
+	public boolean hasHighlight(Geometry geom) {
+		return highlightGeometryList.contains(geom);
 	}
 	
-	public List<Geometry> getSelection() {
-		return selectedGeometryList;
+	public List<Geometry> getHighlights() {
+		return highlightGeometryList;
 	}
 
 	public void updateSelection() throws Exception {
-		if (selectedGeometryList.isEmpty()) return;
+		if (highlightGeometryList.isEmpty()) return;
 		
 		// note: remove geometry from list that no longer exist or are not visible and update others
-		for (ListIterator<Geometry> iterator = selectedGeometryList.listIterator(); iterator.hasNext();) {
+		for (ListIterator<Geometry> iterator = highlightGeometryList.listIterator(); iterator.hasNext();) {
 			Geometry geom = getGeometry(getGeometryId(iterator.next()));
 			if (geom == null) {
 				iterator.remove();
@@ -975,20 +978,20 @@ public class CustomMapView extends MapView {
 		updateDrawView();
 	}
 	
-	public void prepareSelectionTransform() {
+	public void prepareHighlightTransform() {
 		// keep a copy of the geometry at the current position
-		transformGeometryList = GeometryUtil.transformGeometryList(selectedGeometryList, this, true);
+		transformGeometryList = GeometryUtil.transformGeometryList(highlightGeometryList, this, true);
 		
 		updateDrawView();
 	}
 	
-	public void doSelectionTransform() throws Exception {
+	public void doHighlightTransform() throws Exception {
 		if (transformGeometryList == null) return;
 		
 		ArrayList<Geometry> geomList = GeometryUtil.transformGeometryList(transformGeometryList, this, false);
 		
-		for (int i = 0; i < selectedGeometryList.size(); i++) {
-			Geometry geom = selectedGeometryList.get(i);
+		for (int i = 0; i < highlightGeometryList.size(); i++) {
+			Geometry geom = highlightGeometryList.get(i);
 			Geometry transformedGeom = geomList.get(i);
 			CanvasLayer layer = (CanvasLayer) geometryLayerMap.get(geom);
 			layer.removeGeometry(geom);
@@ -998,19 +1001,19 @@ public class CustomMapView extends MapView {
 		}
 		
 		transformGeometryList = null;
-		selectedGeometryList = geomList;
+		highlightGeometryList = geomList;
 		
 		updateDrawView();
 	}
 	
-	public void clearSelectionTransform() {
+	public void clearHighlightTransform() {
 		transformGeometryList = null;
 		updateRenderer();
 	}
 	
 	private void updateDrawView() {
 		editView.setDrawList(transformGeometryList);
-		drawView.setDrawList(selectedGeometryList);
+		drawView.setDrawList(highlightGeometryList);
 	}
 
 	public int getDrawViewColor() {
@@ -1266,20 +1269,52 @@ public class CustomMapView extends MapView {
 		return new ArrayList<String>(databaseLayerQueryMap.keySet());
 	}
 
-	public void showSelectGroupDialog() {
-		selectGroupDailog = new SelectGroupDialog(this.activityRef.get());
-		selectGroupDailog.setTitle("Select Group");
-		selectGroupDailog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
+	public void showSelectionDialog() {
+		selectionDialog = new SelectionDialog(this.activityRef.get());
+		selectionDialog.setTitle("Selection Manager");
+		selectionDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// ignore
 			}
 		});
-		selectGroupDailog.attachToMap(this);
-		selectGroupDailog.show();
+		selectionDialog.attachToMap(this);
+		selectionDialog.show();
 	}
 
 	public ShowProjectActivity getActivity() {
 		return activityRef.get();
+	}
+	
+	public void validateSelectionName(String name) throws MapException {
+		if (name == null || "".equals(name)) {
+			throw new MapException("Please specify a name for the selection");
+		} else if (selectionMap.containsKey(name)) {
+			throw new MapException("Selection already exists");
+		}
+	}
+	
+	public void addSelection(String name) throws MapException {
+		addSelection(name, new GeometrySelection(name));
+	}
+	
+	public void addSelection(String name, GeometrySelection set) throws MapException {
+		validateSelectionName(name);
+		selectionMap.put(name, set);
+	}
+	
+	public void removeSelection(String name) {
+		selectionMap.remove(name);
+	}
+	
+	public List<GeometrySelection> getDataSets() {
+		return new ArrayList<GeometrySelection>(selectionMap.values());
+	}
+
+	public void renameSelection(String name, GeometrySelection set) throws MapException {
+		validateSelectionName(name);
+		removeSelection(name);
+		set.setName(name);
+		addSelection(name, set);
 	}
 }

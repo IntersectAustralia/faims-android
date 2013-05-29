@@ -102,7 +102,7 @@ public class SelectTool extends SettingsTool {
 	
 	protected void clearSelection() {
 		try {
-			mapView.clearSelection();
+			mapView.clearHighlights();
 		} catch (Exception e) {
 			FLog.e("error clearing selection", e);
 			showError(e.getMessage());
@@ -116,10 +116,10 @@ public class SelectTool extends SettingsTool {
 			try {
 				Geometry geom = (Geometry) element;
 				
-				if (mapView.hasSelection(geom)) {
-					mapView.removeSelection(geom);
+				if (mapView.hasHighlight(geom)) {
+					mapView.removeHighlight(geom);
 				} else {
-					mapView.addSelection(geom);
+					mapView.addHighlight(geom);
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);

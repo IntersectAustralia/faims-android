@@ -26,7 +26,7 @@ public class MapLayout extends LinearLayout {
 	private RelativeLayout container;
 	private Button layerButton;
 	private Spinner toolsDropDown;
-	private Button selectionButton;
+	private Button setButton;
 
 	public MapLayout(Context context) {
 		super(context);
@@ -70,12 +70,12 @@ public class MapLayout extends LinearLayout {
 			
 		});
 		
-		selectionButton = createSelectionButton();
-		selectionButton.setOnClickListener(new OnClickListener() {
+		setButton = createSetButton();
+		setButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
-				mapView.showSelectGroupDialog();
+				mapView.showSelectionDialog();
 			}
 			
 		});
@@ -98,7 +98,7 @@ public class MapLayout extends LinearLayout {
 		});
 		
 		addView(layerButton);
-		addView(selectionButton);
+		addView(setButton);
 		addView(toolsDropDown);
 		addView(container);
 	}
@@ -158,7 +158,7 @@ public class MapLayout extends LinearLayout {
          return button;
 	}
 	
-	private Button createSelectionButton() {
+	private Button createSetButton() {
 		 Button button = new Button(this.getContext());
         button.setText("Selection Group Dialog");
         return button;

@@ -122,13 +122,13 @@ public class LineDistanceTool extends SelectTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomLine) && (mapView.getSelection().size() < 1)) {
+				if ((element instanceof CustomLine) && (mapView.getHighlights().size() < 1)) {
 					CustomLine p = (CustomLine) element;
 					
-					if (mapView.hasSelection(p)) {
-						mapView.removeSelection(p);
+					if (mapView.hasHighlight(p)) {
+						mapView.removeHighlight(p);
 					} else {
-						mapView.addSelection(p);
+						mapView.addHighlight(p);
 					}
 					
 					computeDistance();
@@ -144,17 +144,17 @@ public class LineDistanceTool extends SelectTool {
 	}
 	
 	private void computeDistance() {
-		if (mapView.getSelection().size() < 1) return;
+		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomLine line = (CustomLine) mapView.getSelection().get(0);
+		CustomLine line = (CustomLine) mapView.getHighlights().get(0);
 		
 		this.distance = computeLineDistance(line.getVertexList());
 	}
 	
 	private void drawDistance() {
-		if (mapView.getSelection().size() < 1) return;
+		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomLine line = (CustomLine) mapView.getSelection().get(0);
+		CustomLine line = (CustomLine) mapView.getHighlights().get(0);
 		
 		canvas.drawDistance(line);
 		canvas.setColor(mapView.getDrawViewColor());

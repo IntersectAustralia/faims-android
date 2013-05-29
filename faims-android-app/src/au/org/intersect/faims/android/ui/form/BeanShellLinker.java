@@ -2144,114 +2144,114 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void addGeometrySelection(String ref, int geomId) {
+	public void addGeometryHighlight(String ref, int geomId) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.addSelection(geomId);
+				mapView.addHighlight(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(MapException e) {
-			FLog.e("error adding selection", e);
+			FLog.e("error adding highlight", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
-			FLog.e("error adding selection " + ref,e);
-			showWarning("Logic Error", "Error adding selection " + ref);
+			FLog.e("error adding highlight " + ref,e);
+			showWarning("Logic Error", "Error adding highlight " + ref);
 		}
 	}
 	
-	public void removeGeometrySelection(String ref, int geomId) {
+	public void removeGeometryHighlight(String ref, int geomId) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.removeSelection(geomId);
+				mapView.removeHighlight(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(MapException e) {
-			FLog.e("error removing selection", e);
+			FLog.e("error removing highlight", e);
 			showWarning("Logic Error", e.getMessage());
 		}
 		catch(Exception e){
-			FLog.e("error removing selection " + ref,e);
-			showWarning("Logic Error", "Error removing selection " + ref);
+			FLog.e("error removing highlight " + ref,e);
+			showWarning("Logic Error", "Error removing highlight " + ref);
 		}
 	}
 	
-	public void clearGeometrySelection(String ref) {
+	public void clearGeometryHighlights(String ref) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.clearSelection();
+				mapView.clearHighlights();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error clearing selection " + ref,e);
-			showWarning("Logic Error", "Error clearing selection " + ref);
+			FLog.e("error clearing higlights " + ref,e);
+			showWarning("Logic Error", "Error clearing higlights " + ref);
 		}
 	}
 	
-	public List<Geometry> getGeometrySelection(String ref) {
+	public List<Geometry> getGeometryHighlights(String ref) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryListToWgs84(mapView.getSelection());
+				return GeometryUtil.convertGeometryListToWgs84(mapView.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error clearing selection " + ref,e);
-			showWarning("Logic Error", "Error clearing selection " + ref);
+			FLog.e("error getting highlights " + ref,e);
+			showWarning("Logic Error", "Error getting highlights " + ref);
 		}
 		return null;
 	}
 	
-	public void prepareSelectionTransform(String ref) {
+	public void prepareHighlightTransform(String ref) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.prepareSelectionTransform();
+				mapView.prepareHighlightTransform();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error preparing selection transform " + ref,e);
-			showWarning("Logic Error", "Error preparing selection transform " + ref);
+			FLog.e("error preparing highlight transform " + ref,e);
+			showWarning("Logic Error", "Error preparing highlight transform " + ref);
 		}
 	}
 	
-	public void doSelectionTransform(String ref) {
+	public void doHighlightTransform(String ref) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.doSelectionTransform();
+				mapView.doHighlightTransform();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		}
 		catch(Exception e){
-			FLog.e("error do selection transform " + ref,e);
-			showWarning("Logic Error", "Error do selection transform " + ref);
+			FLog.e("error do highlight transform " + ref,e);
+			showWarning("Logic Error", "Error do highlight transform " + ref);
 		}
 	}
 	

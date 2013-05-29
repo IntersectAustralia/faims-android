@@ -98,9 +98,9 @@ public class EditTool extends SelectTool {
 		updateLockButton();
 		try {
 			if (lockButton.isChecked()) {
-				mapView.prepareSelectionTransform();
+				mapView.prepareHighlightTransform();
 			} else {
-				mapView.doSelectionTransform();
+				mapView.doHighlightTransform();
 			}
 		} catch (Exception e) {
 			FLog.e("error doing selection transform", e);
@@ -111,7 +111,7 @@ public class EditTool extends SelectTool {
 	private void clearLock() {
 		lockButton.setChecked(false);
 		updateLockButton();
-		mapView.clearSelectionTransform();
+		mapView.clearHighlightTransform();
 	}
 	
 	@Override
@@ -135,7 +135,7 @@ public class EditTool extends SelectTool {
 			@Override
 			public void onClick(View v) {
 				try {
-					List<Geometry> selection = EditTool.this.mapView.getSelection();
+					List<Geometry> selection = EditTool.this.mapView.getHighlights();
 					EditTool.this.mapView.clearGeometryList(selection);
 				} catch (Exception e) {
 					showError(e.getMessage());
@@ -210,7 +210,7 @@ public class EditTool extends SelectTool {
 			@Override
 			public void onClick(View arg0) {
 				// get selected geometry
-				List<Geometry> selection = mapView.getSelection();
+				List<Geometry> selection = mapView.getHighlights();
 				if (selection.size() != 1) {
 					showError("Please select only one geometry to edit");
 					return;

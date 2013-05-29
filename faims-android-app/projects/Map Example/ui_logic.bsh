@@ -372,15 +372,15 @@ onMapSelect() {
 	if (currentGeometryId == geomId) return;
 	currentGeometryId = geomId;
 	
-	addGeometrySelection("tabgroup2/tab1/map", currentGeometryId);
-	prepareSelectionTransform("tabgroup2/tab1/map");
+	addGeometryHighlight("tabgroup2/tab1/map", currentGeometryId);
+	prepareHighlightTransform("tabgroup2/tab1/map");
 }
 
 onMapClick() {
 
 	if (currentGeometryId != 0){
-		doSelectionTransform("tabgroup2/tab1/map");
-		clearGeometrySelection("tabgroup2/tab1/map");
+		doHighlightTransform("tabgroup2/tab1/map");
+		clearGeometryHighlights("tabgroup2/tab1/map");
 		currentGeometryId = 0;
 	}
 
@@ -785,13 +785,13 @@ onSelectPointLayer() {
 	selectedId = getMapGeometrySelected();
 	point = getGeometry("tabgroup3/tab1/map", selectedId).getMapPos();
 	
-	addGeometrySelection("tabgroup3/tab1/map", selectedId);
+	addGeometryHighlight("tabgroup3/tab1/map", selectedId);
 	
 	showToast("selected point at (" + point.x + ", " + point.y + ")");
 }
 
 onClickPointLayer() {
-	clearGeometrySelection("tabgroup3/tab1/map");
+	clearGeometryHighlights("tabgroup3/tab1/map");
 
 	p = getMapPointClicked();
 	setFieldValue("tabgroup3/tab1/longitude", p.x);
@@ -892,7 +892,7 @@ updateUIEntity(String entityId) {
 	
 	if (entityId == null || "".equals(entityId)) entityId = null;
 	
-	if (getGeometrySelection("tabgroup5/tab1/map") == null || getGeometrySelection("tabgroup5/tab1/map").size() == 0) {
+	if (getGeometryHighlights("tabgroup5/tab1/map") == null || getGeometryHighlights("tabgroup5/tab1/map").size() == 0) {
 		showWarning("Logic Error", "Please select geometry to save to entity");
 		return;
 	}
@@ -904,7 +904,7 @@ updateUIEntity(String entityId) {
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
 	
-	List collection = getGeometrySelection("tabgroup5/tab1/map");
+	List collection = getGeometryHighlights("tabgroup5/tab1/map");
 	if (collection != null) {
 		System.out.println(collection);
 	}
@@ -947,7 +947,7 @@ updateUIRelationship(String relId) {
 	
 	if (relId == null || "".equals(relId)) relId = null;
 	
-	if (getGeometrySelection("tabgroup5/tab1/map") == null || getGeometrySelection("tabgroup5/tab1/map").size() == 0) {
+	if (getGeometryHighlights("tabgroup5/tab1/map") == null || getGeometryHighlights("tabgroup5/tab1/map").size() == 0) {
 		showWarning("Logic Error", "Please select geometry to save to relationship");
 		return;
 	}	
@@ -958,7 +958,7 @@ updateUIRelationship(String relId) {
 	}
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
 	
-	List collection = getGeometrySelection("tabgroup5/tab1/map"); 
+	List collection = getGeometryHighlights("tabgroup5/tab1/map"); 
 	if (collection != null) {
 		System.out.println(collection);
 	}
