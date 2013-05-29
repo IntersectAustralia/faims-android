@@ -41,6 +41,9 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	public void onLayersChanged() {
 	}
 	
+	public void onSelectionChanged() {
+	}
+	
 	public void onMapChanged() {
 		
 	}

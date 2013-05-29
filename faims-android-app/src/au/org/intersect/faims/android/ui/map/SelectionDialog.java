@@ -7,7 +7,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -73,23 +72,9 @@ public class SelectionDialog extends AlertDialog {
 	protected PointStyleDialog pointStyleDialog;
 	protected LineStyleDialog lineStyleDialog;
 	protected PolygonStyleDialog polygonStyleDialog;
-	private GeometryStyle pointStyle;
-	private GeometryStyle lineStyle;
-	private GeometryStyle polygonStyle;
 
 	protected SelectionDialog(Context context) {
 		super(context);
-		
-		pointStyle = GeometryStyle.defaultPointStyle();
-		lineStyle = GeometryStyle.defaultLineStyle();
-		polygonStyle = GeometryStyle.defaultPolygonStyle();
-		
-		pointStyle.pointColor = Color.CYAN;
-		lineStyle.pointColor = Color.CYAN;
-		lineStyle.lineColor = Color.CYAN;
-		polygonStyle.pointColor = Color.CYAN;
-		polygonStyle.lineColor = Color.CYAN;
-		polygonStyle.polygonColor = Color.CYAN;
 	}
 
 	public void attachToMap(CustomMapView mapView) {
@@ -168,9 +153,9 @@ public class SelectionDialog extends AlertDialog {
 					
 				});
 				
-				Button pointStyleButton = createPointStyleButton();
-				Button lineStyleButton = createLineStyleButton();
-				Button polygonStyleButton = createPolygonStyleButton();
+				Button pointStyleButton = createPointStyleButton(set.getPointStyle());
+				Button lineStyleButton = createLineStyleButton(set.getLineStyle());
+				Button polygonStyleButton = createPolygonStyleButton(set.getLineStyle());
 				
 				layout.addView(removeButton);
 				layout.addView(renameButton);
@@ -300,7 +285,7 @@ public class SelectionDialog extends AlertDialog {
 		new ErrorDialog(SelectionDialog.this.getContext(), "Selection Manager Error", message).show();
 	}
 	
-	public Button createPointStyleButton(){
+	public Button createPointStyleButton(final GeometryStyle pointStyle){
 		Button button = new Button(this.getContext());
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
@@ -319,7 +304,7 @@ public class SelectionDialog extends AlertDialog {
 		return button;
 	}
 	
-	public Button createLineStyleButton(){
+	public Button createLineStyleButton(final GeometryStyle lineStyle){
 		Button button = new Button(this.getContext());
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;
@@ -338,7 +323,7 @@ public class SelectionDialog extends AlertDialog {
 		return button;
 	}
 
-	public Button createPolygonStyleButton(){
+	public Button createPolygonStyleButton(final GeometryStyle polygonStyle){
 		Button button = new Button(this.getContext());
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		layoutParams.weight = 1;

@@ -173,7 +173,7 @@ public class LayerManagerDialog extends AlertDialog {
 					LayerListItem itemView = (LayerListItem) view;
 					itemView.toggle();
 					mapView.setLayerVisible(layer, itemView.isChecked());
-					mapView.updateTools();
+					mapView.updateLayers();
 				} catch (Exception e) {
 					showErrorDialog("Error setting layer visibility");
 				}

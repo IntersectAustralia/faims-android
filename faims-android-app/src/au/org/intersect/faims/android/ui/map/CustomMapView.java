@@ -44,10 +44,11 @@ import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
+import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
-import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
+import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
@@ -206,6 +207,8 @@ public class CustomMapView extends MapView {
 	private SelectionDialog selectionDialog;
 	
 	private HashMap<String, GeometrySelection> selectionMap;
+
+	private GeometrySelection selectedSelection;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -347,7 +350,7 @@ public class CustomMapView extends MapView {
 		
 		if (layer == selectedLayer) {
 			this.selectedLayer = null;
-			updateTools();
+			updateLayers();
 		}
 		
 		// remove associated text layer
@@ -843,6 +846,7 @@ public class CustomMapView extends MapView {
 		tools.add(new LineDistanceTool(this.getContext(), this));
 		tools.add(new AreaTool(this.getContext(), this));
 		tools.add(new AzimuthTool(this.getContext(), this));
+		tools.add(new TouchSelectionTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -880,7 +884,7 @@ public class CustomMapView extends MapView {
 		selectTool(CreatePointTool.NAME);
 	}
 
-	public void updateTools() {
+	public void updateLayers() {
 		for (MapTool tool: tools) {
 			tool.onLayersChanged();
 		}
@@ -1255,7 +1259,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		layer.setVisible(value);
-		updateTools();
+		updateLayers();
 	}
 	
 	public void addDatabaseLayerQuery(String name, String sql) {
@@ -1312,6 +1316,8 @@ public class CustomMapView extends MapView {
 	
 	public void removeSelection(String name) {
 		selectionMap.remove(name);
+		
+		updateSelections();
 	}
 	
 	public List<GeometrySelection> getSelections() {
@@ -1328,6 +1334,20 @@ public class CustomMapView extends MapView {
 	public void setSelectionActive(GeometrySelection selection,
 			boolean active) {
 		selection.setActive(active);
-		
+		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+	}
+	
+	public GeometrySelection getSelectedSelection() {
+		return selectedSelection;
+	}
+
+	public void setSelectedSelection(GeometrySelection set) {
+		this.selectedSelection = set;
+	}
+	
+	public void updateSelections() {
+		for (MapTool tool: tools) {
+			tool.onSelectionChanged();
+		}
 	}
 }

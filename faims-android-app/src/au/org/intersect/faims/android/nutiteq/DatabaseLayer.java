@@ -1,10 +1,12 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import java.util.List;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.GeometrySelection;
 
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
@@ -136,7 +138,7 @@ public class DatabaseLayer extends GeometryLayer {
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
 			if (type == Type.ENTITY) {
-				 objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
+				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
 				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(min, max, querySql, maxObjects);
 			} else {
@@ -149,11 +151,11 @@ public class DatabaseLayer extends GeometryLayer {
 		        Geometry newObject = null;
 		        
 		        if(object instanceof Point){
-		            newObject = new Point(((Point) object).getMapPos(), null, pointStyleSet, object.userData);
+		            newObject = new Point(((Point) object).getMapPos(), null, getPointStyleSet(object.userData), object.userData);
 		        }else if(object instanceof Line){
-		            newObject = new Line(((Line) object).getVertexList(), null, lineStyleSet, object.userData);
+		            newObject = new Line(((Line) object).getVertexList(), null, getLineStyleSet(object.userData), object.userData);
 		        }else if(object instanceof Polygon){
-		            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, polygonStyleSet, object.userData);
+		            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, getPolygonStyleSet(object.userData), object.userData);
 		        }
 		        
 		        Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
@@ -170,6 +172,45 @@ public class DatabaseLayer extends GeometryLayer {
 		} catch (Exception e) {
 			FLog.e("error rendering database layer", e);
 		}
+	}
+	
+	protected StyleSet<PointStyle> getPointStyleSet(Object o) {
+		if (o instanceof String[]) {
+			String[] userData = (String[]) o;
+			List<GeometrySelection> selections = mapView.getSelections();
+			for (GeometrySelection set : selections) {
+				if (set.isActive() && set.hasData(userData)) {
+					return set.getPointStyle().toPointStyleSet();
+				}
+			}
+		}
+		return pointStyleSet;
+	}
+	
+	protected StyleSet<LineStyle> getLineStyleSet(Object o) {
+		if (o instanceof String[]) {
+			String[] userData = (String[]) o;
+			List<GeometrySelection> selections = mapView.getSelections();
+			for (GeometrySelection set : selections) {
+				if (set.isActive() && set.hasData(userData)) {
+					return set.getLineStyle().toLineStyleSet();
+				}
+			}
+		}
+		return lineStyleSet;
+	}
+	
+	protected StyleSet<PolygonStyle> getPolygonStyleSet(Object o) {
+		if (o instanceof String[]) {
+			String[] userData = (String[]) o;
+			List<GeometrySelection> selections = mapView.getSelections();
+			for (GeometrySelection set : selections) {
+				if (set.isActive() && set.hasData(userData)) {
+					return set.getPolygonStyle().toPolygonStyleSet();
+				}
+			}
+		}
+		return polygonStyleSet;
 	}
 
 }
