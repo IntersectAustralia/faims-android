@@ -1714,7 +1714,9 @@ public class BeanShellLinker {
 						selectedPicturePath.add(imageView.getPicture().getUrl());
 					}
 				}
-				selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				if(!pictures.isEmpty()){
+					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				}
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();
@@ -1845,7 +1847,9 @@ public class BeanShellLinker {
 						selectedPicturePath.add(imageView.getPicture().getUrl());
 					}
 				}
-				selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				if(!pictures.isEmpty()){
+					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				}
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();

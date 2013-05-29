@@ -108,6 +108,7 @@ saveEntity() {
 
 loadEntity() {
 
+	clearEntity();
 	entity_id = getFieldValue("tabgroup1/tab3/entities");
 	
 	if (entity_id == null || "".equals(entity_id)) return;
@@ -174,8 +175,13 @@ updateEntity(entity_id) {
 
 clearEntity() {
 	newTab("tabgroup1/tab1");
-	
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
 	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
