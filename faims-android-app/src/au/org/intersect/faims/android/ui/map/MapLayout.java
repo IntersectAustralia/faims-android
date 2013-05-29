@@ -158,7 +158,7 @@ public class MapLayout extends LinearLayout {
 	
 	private Button createLayerButton() {
 		 Button button = new Button(this.getContext());
-         button.setText("Layer Manger Dialog");
+         button.setText("Layer Manager Dialog");
          return button;
 	}
 	

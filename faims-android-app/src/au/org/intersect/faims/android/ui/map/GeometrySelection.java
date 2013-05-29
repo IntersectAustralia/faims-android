@@ -31,7 +31,7 @@ public class GeometrySelection {
 		getLineStyle().lineColor = Color.CYAN;
 		getPolygonStyle().pointColor = Color.CYAN;
 		getPolygonStyle().lineColor = Color.CYAN;
-		getPolygonStyle().polygonColor = Color.CYAN;
+		getPolygonStyle().polygonColor = Color.CYAN & 0x44FFFFFF;
 	}
 	
 	public String getName() {
