@@ -1317,7 +1317,10 @@ public class CustomMapView extends MapView {
 	public void removeSelection(String name) {
 		selectionMap.remove(name);
 		
-		updateSelections();
+		if (selectedSelection != null && selectedSelection.getName().equals(name)) {
+			selectedSelection = null;
+			updateSelections();
+		}
 	}
 	
 	public List<GeometrySelection> getSelections() {
@@ -1349,5 +1352,6 @@ public class CustomMapView extends MapView {
 		for (MapTool tool: tools) {
 			tool.onSelectionChanged();
 		}
+		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
 	}
 }
