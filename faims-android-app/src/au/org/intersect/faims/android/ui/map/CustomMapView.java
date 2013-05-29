@@ -1304,18 +1304,30 @@ public class CustomMapView extends MapView {
 		selectionMap.put(name, set);
 	}
 	
+	public void removeSelection(GeometrySelection set) {
+		if (set != null) {
+			selectionMap.remove(set.getName());
+		}
+	}
+	
 	public void removeSelection(String name) {
 		selectionMap.remove(name);
 	}
 	
-	public List<GeometrySelection> getDataSets() {
+	public List<GeometrySelection> getSelections() {
 		return new ArrayList<GeometrySelection>(selectionMap.values());
 	}
 
 	public void renameSelection(String name, GeometrySelection set) throws MapException {
 		validateSelectionName(name);
-		removeSelection(name);
+		removeSelection(set);
 		set.setName(name);
 		addSelection(name, set);
+	}
+
+	public void setSelectionActive(GeometrySelection selection,
+			boolean active) {
+		selection.setActive(active);
+		
 	}
 }

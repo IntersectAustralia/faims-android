@@ -11,9 +11,11 @@ public class GeometrySelection {
 	
 	private ArrayList<String[]> dataList;
 	private String name;
+	private boolean active;
 	
 	public GeometrySelection(String name) {
 		this.name = name;
+		this.active = true;
 		dataList = new ArrayList<String[]>();
 	}
 	
@@ -53,6 +55,15 @@ public class GeometrySelection {
 			return;
 		}
 		dataList.remove((String[]) geom.userData);
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+	
+	public void setActive(boolean value) {
+		this.active = value;
+		FLog.d("active: " + value);
 	}
 
 }

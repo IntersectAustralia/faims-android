@@ -28,7 +28,7 @@ public class LayerListItem extends LinearLayout {
 		setPadding(size, size, size, size);
 	}
 	
-	public void init(final Layer layer, final LayerManagerDialog layerManagerView) {
+	public void init(final Layer layer) {
 		text = new TextView(this.getContext());
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 		text.setLayoutParams(params);

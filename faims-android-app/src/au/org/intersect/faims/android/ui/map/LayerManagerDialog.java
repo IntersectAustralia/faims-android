@@ -61,7 +61,7 @@ public class LayerManagerDialog extends AlertDialog {
 			
 			for (Layer layer : layers) {
 				LayerListItem item = new LayerListItem(LayerManagerDialog.this.getContext());
-				item.init(layer, LayerManagerDialog.this);
+				item.init(layer);
 				itemViews.add(item);
 			} 
 		}

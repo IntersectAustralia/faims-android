@@ -9,11 +9,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -27,6 +28,44 @@ import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
 
 public class SelectionDialog extends AlertDialog {
+	
+	private class SelectionAdapter extends BaseAdapter {
+		
+		private List<GeometrySelection> selections;
+		private ArrayList<View> itemViews;
+
+		public SelectionAdapter(List<GeometrySelection> selections) {
+			this.selections = selections;
+			this.itemViews = new ArrayList<View>();
+			
+			for (GeometrySelection set : selections) {
+				SelectionListItem item = new SelectionListItem(SelectionDialog.this.getContext());
+				item.init(set);
+				itemViews.add(item);
+			} 
+		}
+		
+		@Override
+		public int getCount() {
+			return selections.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return selections.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View arg1, ViewGroup arg2) {
+			return itemViews.get(position);
+		}
+		
+	}
 
 	private LinearLayout layout;
 	private ListView listView;
@@ -76,9 +115,12 @@ public class SelectionDialog extends AlertDialog {
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
 				try {
-					
+					List<GeometrySelection> selections = mapView.getSelections();
+					SelectionListItem itemView = (SelectionListItem) view;
+					itemView.toggle();
+					mapView.setSelectionActive(selections.get(position), itemView.isChecked());
 				} catch (Exception e) {
-					
+					showErrorDialog(e.getMessage());
 				}
 			}
 			
@@ -89,7 +131,7 @@ public class SelectionDialog extends AlertDialog {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int position, long arg3) {
-				List<GeometrySelection> dataSets = mapView.getDataSets();
+				List<GeometrySelection> dataSets = mapView.getSelections();
 				final GeometrySelection set = dataSets.get(position);
 				
 				Context context = SelectionDialog.this.getContext();
@@ -147,7 +189,7 @@ public class SelectionDialog extends AlertDialog {
 
 	private void createAddButton() {
 		Button addButton = new Button(this.getContext());
-		addButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+		addButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
 		addButton.setText("Add");
 		addButton.setOnClickListener(new View.OnClickListener() {
 
@@ -162,13 +204,8 @@ public class SelectionDialog extends AlertDialog {
 	}
 	
 	public void redrawSelection() {
-		List<GeometrySelection> dataSets = mapView.getDataSets();
-		ArrayList<String> names = new ArrayList<String>();
-		for (GeometrySelection d : dataSets) {
-			names.add(d.getName());
-		}
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, names);
-		listView.setAdapter(adapter);
+		List<GeometrySelection> selections = mapView.getSelections();
+		listView.setAdapter(new SelectionAdapter(selections));
 	}
 	
 	public void addSelection() {
