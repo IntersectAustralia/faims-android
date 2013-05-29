@@ -107,6 +107,10 @@ public class MapLayout extends LinearLayout {
 		return layerButton;
 	}
 	
+	public Button getSetButton() {
+		return setButton;
+	}
+	
 	public Spinner getToolsDropDown() {
 		return toolsDropDown;
 	}
@@ -160,7 +164,7 @@ public class MapLayout extends LinearLayout {
 	
 	private Button createSetButton() {
 		 Button button = new Button(this.getContext());
-        button.setText("Selection Group Dialog");
+        button.setText("Selection Manager Dialog");
         return button;
 	}
 	

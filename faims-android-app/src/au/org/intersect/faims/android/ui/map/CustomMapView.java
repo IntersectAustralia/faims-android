@@ -1107,6 +1107,7 @@ public class CustomMapView extends MapView {
 		toolsEnabled = value;
 		toolsView.setVisibility(value ? View.VISIBLE : View.GONE);
 		mapLayout.getLayerButton().setVisibility(value ? View.VISIBLE : View.GONE);
+		mapLayout.getSetButton().setVisibility(value ? View.VISIBLE : View.GONE);
 		mapLayout.getToolsDropDown().setVisibility(value ? View.VISIBLE : View.GONE);
 		if (currentTool != null) {
 			if (value) {
