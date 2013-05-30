@@ -15,6 +15,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import android.graphics.Typeface;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
+import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 
 startTrackingGPS(String type, int interval){
 	linker.startTrackingGPS(type, interval);
@@ -505,4 +506,12 @@ addSelectQueryBuilder(String ref, String name, QueryBuilder builder) {
 
 createQueryBuilder(String sql) {
 	return new QueryBuilder(sql);
+}
+
+addLegacySelectQueryBuilder(String ref, String name, String dbPath, String tableName, QueryBuilder builder) {
+	linker.addLegacySelectQueryBuilder(ref, name, dbPath, tableName, builder);
+}
+
+createLegacyQueryBuilder(String sql) {
+	return new LegacyQueryBuilder(sql);
 }

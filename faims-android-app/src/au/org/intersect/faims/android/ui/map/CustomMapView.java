@@ -46,6 +46,7 @@ import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.DatabaseSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
+import au.org.intersect.faims.android.ui.map.tools.LegacySelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
@@ -213,6 +214,8 @@ public class CustomMapView extends MapView {
 
 	private HashMap<String, QueryBuilder> selectQueryMap;
 
+	private HashMap<String, LegacyQueryBuilder> legacySelectQueryMap;
+
 	private String lastSelectionQuery;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
@@ -231,6 +234,7 @@ public class CustomMapView extends MapView {
         databaseLayerQueryMap = new HashMap<String, String>();
         selectionMap = new HashMap<String, GeometrySelection>();
         selectQueryMap = new HashMap<String, QueryBuilder>();
+        legacySelectQueryMap = new HashMap<String, LegacyQueryBuilder>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -860,6 +864,7 @@ public class CustomMapView extends MapView {
 		tools.add(new AzimuthTool(this.getContext(), this));
 		tools.add(new TouchSelectionTool(this.getContext(), this));
 		tools.add(new DatabaseSelectionTool(this.getContext(), this));
+		tools.add(new LegacySelectionTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -1410,5 +1415,47 @@ public class CustomMapView extends MapView {
 	
 	public String getLastSelectionQuery() {
 		return lastSelectionQuery;
+	}
+
+	public void addLegacySelectQueryBuilder(String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
+		builder.setName(name);
+		builder.setDbPath(dbPath);
+		builder.setTableName(tableName);
+		legacySelectQueryMap.put(name, builder);
+	}
+	
+	public List<LegacyQueryBuilder> getLegacySelectQueryBuilders() {
+		return new ArrayList<LegacyQueryBuilder>(legacySelectQueryMap.values());
+	}
+	
+	public void runLegacySelectionQuery(String name, ArrayList<String> values,
+			boolean remove) throws Exception {
+		if (selectedSelection == null) {
+			throw new MapException("Please select a selection");
+		}
+		
+		LegacyQueryBuilder qb = legacySelectQueryMap.get(name);
+		this.lastSelectionQuery = name;
+		if (qb == null) {
+			throw new MapException("Query does not exist");
+		}
+		List<String> uuids = null;
+		try {
+			uuids = databaseManager.runLegacySelectionQuery(qb.getDbPath(), qb.getTableName(), qb.getSql(), values);
+		} catch (Exception e) {
+			FLog.e("error running legacy selection query", e);
+			throw new MapException("Exception raised while trying to run query");
+		}
+		
+		if (remove) {
+			for (String uuid : uuids) {
+				selectedSelection.removeData(uuid);
+			}
+		} else {
+			for (String uuid : uuids) {
+				selectedSelection.addData(uuid);
+			}
+		}
+		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
 	}
 }

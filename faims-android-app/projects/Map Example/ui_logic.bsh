@@ -898,6 +898,11 @@ private initUIMap() {
 					addParameter("freetext", "AboveBelow 1").
 					addParameter("vocabname", null));
 					
+	addLegacySelectQueryBuilder("tabgroup5/tab1/map", "select from kaz all teams by id", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", 
+		createLegacyQueryBuilder("Select PK_UID from KAZ_ALLTeams where PK_UID = ?").addParameter("ID", null));
+	addLegacySelectQueryBuilder("tabgroup5/tab1/map", "select from kaz site points by id", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", 
+		createLegacyQueryBuilder("Select PK_UID from KAZ_SitePoints where PK_UID = ?").addParameter("ID", null));
+					
 	refreshUIEntities();
 	refreshUIRelationships();
 	

@@ -59,6 +59,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -2660,6 +2661,24 @@ public class BeanShellLinker {
 		catch(Exception e){
 			FLog.e("error adding select query builder " + ref,e);
 			showWarning("Logic Error", "Error adding select query builder " + ref);
+		}
+	}
+	
+	public void addLegacySelectQueryBuilder(String ref, String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				String filepath = activity.getProjectDir() + "/" + dbPath;
+				mapView.addLegacySelectQueryBuilder(name, filepath, tableName, builder);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding legacy select query builder " + ref,e);
+			showWarning("Logic Error", "Error adding legacy select query builder " + ref);
 		}
 	}
 }

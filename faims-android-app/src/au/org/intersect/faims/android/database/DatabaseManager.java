@@ -1235,4 +1235,36 @@ public class DatabaseManager {
 			}
 		}
 	}
+
+	public List<String> runLegacySelectionQuery(String dbPath,
+			String tableName, String sql, ArrayList<String> values) throws Exception {
+		FLog.d("run legacy selection query");
+		Stmt stmt = null;
+		try {
+			db = new jsqlite.Database();
+			db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			
+			stmt = db.prepare(sql);
+			for (int i = 0; i < values.size(); i++) {
+				stmt.bind(i+1, "".equals(values.get(i)) ? null : values.get(i));
+			}
+			ArrayList<String> result = new ArrayList<String>();
+			while(stmt.step()) {
+				result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
+			}
+			return result;
+		} finally {
+			if (stmt != null) {
+				stmt.close();
+			}
+			try {
+				if (db != null) {
+					db.close();
+					db = null;
+				}
+			} catch (Exception e) {
+				FLog.e("error closing database", e);
+			}
+		}
+	}
 }
