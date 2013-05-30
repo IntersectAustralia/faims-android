@@ -205,6 +205,8 @@ public class CustomMapView extends MapView {
 	private WeakReference<ShowProjectActivity> activityRef;
 	
 	private HashMap<String, String> databaseLayerQueryMap;
+	
+	private ArrayList<String> databaseLayerQueryList;
 
 	private SelectionDialog selectionDialog;
 	
@@ -215,6 +217,10 @@ public class CustomMapView extends MapView {
 	private HashMap<String, QueryBuilder> selectQueryMap;
 
 	private HashMap<String, LegacyQueryBuilder> legacySelectQueryMap;
+	
+	private ArrayList<QueryBuilder> selectQueryList;
+	
+	private ArrayList<LegacyQueryBuilder> legacySelectQueryList;
 
 	private String lastSelectionQuery;
 	
@@ -232,9 +238,12 @@ public class CustomMapView extends MapView {
         tools = new ArrayList<MapTool>();
         highlightGeometryList = new ArrayList<Geometry>();
         databaseLayerQueryMap = new HashMap<String, String>();
+        databaseLayerQueryList = new ArrayList<String>();
         selectionMap = new HashMap<String, GeometrySelection>();
         selectQueryMap = new HashMap<String, QueryBuilder>();
         legacySelectQueryMap = new HashMap<String, LegacyQueryBuilder>();
+        selectQueryList = new ArrayList<QueryBuilder>();
+        legacySelectQueryList = new ArrayList<LegacyQueryBuilder>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -1282,6 +1291,7 @@ public class CustomMapView extends MapView {
 	
 	public void addDatabaseLayerQuery(String name, String sql) {
 		databaseLayerQueryMap.put(name, sql);
+		databaseLayerQueryList.add(name);
 	}
 	
 	public String getDatabaseLayerQuery(String name) {
@@ -1289,7 +1299,7 @@ public class CustomMapView extends MapView {
 	}
 	
 	public List<String> getDatabaseLayerQueryNames() {
-		return new ArrayList<String>(databaseLayerQueryMap.keySet());
+		return databaseLayerQueryList;
 	}
 
 	public void showSelectionDialog() {
@@ -1376,10 +1386,11 @@ public class CustomMapView extends MapView {
 	public void addSelectQueryBuilder(String name, QueryBuilder builder) {
 		builder.setName(name);
 		selectQueryMap.put(name, builder);
+		selectQueryList.add(builder);
 	}
 
 	public List<QueryBuilder> getSelectQueryBuilders() {
-		return new ArrayList<QueryBuilder>(selectQueryMap.values());
+		return selectQueryList;
 	}
 
 	public void runSelectionQuery(String name, ArrayList<String> values,
@@ -1422,10 +1433,11 @@ public class CustomMapView extends MapView {
 		builder.setDbPath(dbPath);
 		builder.setTableName(tableName);
 		legacySelectQueryMap.put(name, builder);
+		legacySelectQueryList.add(builder);
 	}
 	
 	public List<LegacyQueryBuilder> getLegacySelectQueryBuilders() {
-		return new ArrayList<LegacyQueryBuilder>(legacySelectQueryMap.values());
+		return legacySelectQueryList;
 	}
 	
 	public void runLegacySelectionQuery(String name, ArrayList<String> values,
