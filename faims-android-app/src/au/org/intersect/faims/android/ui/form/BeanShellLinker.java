@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -1693,32 +1694,36 @@ public class BeanShellLinker {
 			
 			List<Picture> pictures = new ArrayList<Picture>();
 			if(valuesObj instanceof ArrayList<?>){
-				try{
-					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
-					for(List<String> pictureList : arrayList){
-						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
-						pictures.add(picture);
-					}
-				}catch(Exception e){
-					ArrayList<String> values = (ArrayList<String>) valuesObj;
-					for(String value : values){
-						Picture picture = new Picture(null,null,value);
-						pictures.add(picture);
-					}
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				for (String value : values) {
+					Picture picture = new Picture(null, null, value);
+					pictures.add(picture);
 				}
 			}
 			
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null){
+				if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
 					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-						selectedPicturePath.add(imageView.getPicture().getUrl());
+						String path = imageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+								imageView.getPicture().getUrl() :
+									activity.getProjectDir() + "/" + imageView.getPicture().getUrl();
+						selectedPicturePath.add(path);
+					}
+					if(!pictures.isEmpty()){
+						String path = pictures.get(pictures.size()-1).getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+								pictures.get(pictures.size()-1).getUrl() : 
+									activity.getProjectDir() + "/" + pictures.get(pictures.size()-1).getUrl();
+						selectedPicturePath.add(path);
+					}
+				}else{
+					for(Picture picture : pictures){
+						String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+						selectedPicturePath.add(path);
 					}
 				}
-				if(!pictures.isEmpty()){
-					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
-				}
+				
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
 		        galleriesLayout.removeAllViews();
@@ -1774,7 +1779,11 @@ public class BeanShellLinker {
 		                    }
 		                });
 		                TextView textView = new TextView(galleriesLayout.getContext());
-		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                String filePath = new File(path).getName();
+		                if(filePath.indexOf("_") > 0){
+		                	filePath = filePath.substring(filePath.indexOf("_")+1);
+		                }
+		                String name = picture.getName() != null ? picture.getName() : filePath;
 		                textView.setText(name);
 		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		                textView.setTextSize(20);
@@ -1844,13 +1853,24 @@ public class BeanShellLinker {
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null){
+				if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
 					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-						selectedPicturePath.add(imageView.getPicture().getUrl());
+						String path = imageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+								imageView.getPicture().getUrl() :
+									activity.getProjectDir() + "/" + imageView.getPicture().getUrl();
+						selectedPicturePath.add(path);
 					}
-				}
-				if(!pictures.isEmpty()){
-					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+					if(!pictures.isEmpty()){
+						String path = pictures.get(pictures.size()-1).getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+								pictures.get(pictures.size()-1).getUrl() : 
+									activity.getProjectDir() + "/" + pictures.get(pictures.size()-1).getUrl();
+						selectedPicturePath.add(path);
+					}
+				}else{
+					for(Picture picture : pictures){
+						String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+						selectedPicturePath.add(path);
+					}
 				}
 				horizontalScrollView.removeSelectedImageViews();
 		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
@@ -1909,7 +1929,11 @@ public class BeanShellLinker {
 		                    }
 		                });
 		                TextView textView = new TextView(galleriesLayout.getContext());
-		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                String filePath = new File(path).getName();
+		                if(filePath.indexOf("_") > 0){
+		                	filePath = filePath.substring(filePath.indexOf("_")+1);
+		                }
+		                String name = picture.getName() != null ? picture.getName() : filePath;
 		                textView.setText(name);
 		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		                textView.setTextSize(20);
@@ -2031,7 +2055,11 @@ public class BeanShellLinker {
 					ArrayList<String> values = (ArrayList<String>) valuesObj;
 					for (String s : values) {
 						File file = new File(s);
-						pairs.add(new NameValuePair(file.getName(), s));
+						String filePath = file.getName();
+		                if(filePath.indexOf("_") > 0){
+		                	filePath = filePath.substring(filePath.indexOf("_")+1);
+		                }
+						pairs.add(new NameValuePair(filePath, s));
 					}
 				} catch (Exception e) {
 					FLog.e("error passing collections type",e);
@@ -2041,7 +2069,7 @@ public class BeanShellLinker {
 					final CustomListView list = (CustomListView) obj;
 					Map<NameValuePair, Boolean> audios = new HashMap<NameValuePair, Boolean>();
 					for(NameValuePair audio : pairs){
-						if(list.getSelectedItems() != null){
+						if(list.getSelectedItems() != null && !list.getSelectedItems().isEmpty()){
 							if(list.getSelectedItems().contains(audio)){
 								audios.put(audio, true);
 							}else{
@@ -2054,7 +2082,11 @@ public class BeanShellLinker {
 					if(!pairs.isEmpty()){
 						list.addSelectedItem(pairs.get(pairs.size()-1));
 						audios.put(pairs.get(pairs.size()-1),true);
+					}else{
+						list.removeSelectedItems();
+						audios.clear();
 					}
+					
 					AudioListAdapter adapter = new AudioListAdapter(audios);
 	                list.setAdapter(adapter);
 	                list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -2063,7 +2095,7 @@ public class BeanShellLinker {
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int arg2, long arg3) {
 							NameValuePair audioPair = pairs.get(arg2);
-							String path = audioPair.getValue();
+							String path = audioPair.getValue().contains(Environment.getExternalStorageDirectory().getPath()) ? audioPair.getValue() : activity.getProjectDir() + "/" + audioPair.getValue();
 							previewAudio(path);
 						}
 	                });
@@ -2949,6 +2981,16 @@ public class BeanShellLinker {
 				}
 			}
 		});
+		dialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if(recorder != null){
+					stopRecording();
+					executeAudioCallBack();
+				}
+			}
+		});
 		dialog.show();
 	}
 	
@@ -3167,7 +3209,9 @@ public class BeanShellLinker {
 			List<String> attachedFiles = new ArrayList<String>();
 			for(EntityAttribute attribute : fetchedArchEntity.getAttributes()){
 				if("file".equalsIgnoreCase(attribute.getType())){
-					attachedFiles.add(attribute.getText());
+					if(!attribute.isDeleted()){
+						attachedFiles.add(attribute.getText());
+					}
 				}
 			}
 			viewAttachedFiles(attachedFiles);
@@ -3182,7 +3226,9 @@ public class BeanShellLinker {
 			List<String> attachedFiles = new ArrayList<String>();
 			for(RelationshipAttribute attribute : fetchedRelationship.getAttributes()){
 				if("file".equalsIgnoreCase(attribute.getType())){
-					attachedFiles.add(attribute.getText());
+					if(!attribute.isDeleted()){
+						attachedFiles.add(attribute.getText());
+					}
 				}
 			}
 			viewAttachedFiles(attachedFiles);
@@ -3198,7 +3244,7 @@ public class BeanShellLinker {
 			Map<String, Integer> count = new HashMap<String, Integer>();
 			for(String attachedFile : files){
 				String filename = (new File(activity.getProjectDir() + "/" + attachedFile)).getName();
-				filename = filename.substring(filename.lastIndexOf("_")+1);
+				filename = filename.substring(filename.indexOf("_")+1);
 				if(count.get(filename) != null){
 					int fileCount = count.get(filename);
 					count.put(filename, fileCount + 1);

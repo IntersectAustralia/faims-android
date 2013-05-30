@@ -8,6 +8,7 @@ public class EntityAttribute {
 	private String certainty;
 	private String vocab;
 	private String type;
+	private boolean isDeleted;
 
 	public String getName() {
 		return name;
@@ -50,7 +51,7 @@ public class EntityAttribute {
 	}
 	
 	public String toString() {
-		return "(" + name + "," + text + "," + vocab + "," + measure + "," + certainty +")";
+		return "(" + name + "," + text + "," + vocab + "," + measure + "," + certainty + "," + isDeleted + ")";
 	}
 
 	public boolean hasFreeText(){
@@ -75,5 +76,13 @@ public class EntityAttribute {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 }

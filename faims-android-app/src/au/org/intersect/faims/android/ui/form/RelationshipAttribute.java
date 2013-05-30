@@ -7,6 +7,7 @@ public class RelationshipAttribute {
 	private String vocab;
 	private String certainty;
 	private String type;
+	private boolean isDeleted;
 
 	public String getName() {
 		return name;
@@ -48,8 +49,16 @@ public class RelationshipAttribute {
 		this.type = type;
 	}
 
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
 	public String toString() {
-		return "(" + name + "," + text + "," + vocab + "," + certainty + ")";
+		return "(" + name + "," + text + "," + vocab + "," + certainty + "," + isDeleted + ")";
 	}
 
 }
