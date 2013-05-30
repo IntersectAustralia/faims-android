@@ -98,11 +98,11 @@ onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 
-String entity_id;
+String entity_id = null;
 
 saveEntity() {
-	
-	entity_id = updateEntity(null);
+	entity_id = null;
+	entity_id = updateEntity();
 	pictures.clear();
 	videos.clear();
 	audios.clear();
@@ -148,7 +148,7 @@ loadFileAttributes(id){
 	populateAudioList("tabgroup1/tab2/audiolist",audios);
 }
 
-updateEntity(entity_id) {
+updateEntity() {
 	if (entity_id == null || "".equals(entity_id)) entity_id = null;
 
 	ArrayList loadedFiles = new ArrayList();
@@ -336,7 +336,7 @@ onEvent("tabgroup1/tab1/audio", "click", "recordAudio()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab3/entities\"))");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity();
 
 setFilename() {
 	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
