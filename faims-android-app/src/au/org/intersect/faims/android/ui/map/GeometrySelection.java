@@ -25,12 +25,12 @@ public class GeometrySelection {
 		setLineStyle(GeometryStyle.defaultLineStyle());
 		setPolygonStyle(GeometryStyle.defaultPolygonStyle());
 		
-		getPointStyle().pointColor = Color.CYAN;
-		getLineStyle().pointColor = Color.CYAN;
-		getLineStyle().lineColor = Color.CYAN;
-		getPolygonStyle().pointColor = Color.CYAN;
-		getPolygonStyle().lineColor = Color.CYAN;
-		getPolygonStyle().polygonColor = Color.CYAN & 0x44FFFFFF;
+		pointStyle.pointColor = Color.CYAN;
+		lineStyle.pointColor = Color.CYAN;
+		lineStyle.lineColor = Color.CYAN;
+		polygonStyle.pointColor = Color.CYAN;
+		polygonStyle.lineColor = Color.CYAN;
+		polygonStyle.polygonColor = 0x4400FFFF;
 	}
 	
 	public String getName() {

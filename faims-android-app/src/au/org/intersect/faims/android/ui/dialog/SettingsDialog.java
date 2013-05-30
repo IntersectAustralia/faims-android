@@ -32,6 +32,7 @@ public class SettingsDialog extends AlertDialog {
 		protected OnClickListener positiveListener;
 		protected String negativeLabel;
 		protected OnClickListener negativeListener;
+		private OnDismissListener dismissListener;
 
 		public Builder(Context context) {
 			this.context = context;
@@ -183,6 +184,11 @@ public class SettingsDialog extends AlertDialog {
 			return this;
 		}
 		
+		public Builder setDismissListener(DialogInterface.OnDismissListener listener) {
+			this.dismissListener = listener;
+			return this;
+		}
+		
 		public SettingsDialog createDialog() {
 			return new SettingsDialog(context);
 		}
@@ -196,6 +202,9 @@ public class SettingsDialog extends AlertDialog {
 			}
 			if (negativeListener != null) {
 				d.setButton(DialogInterface.BUTTON_NEGATIVE, negativeLabel, negativeListener);
+			}
+			if (dismissListener != null) {
+				d.setOnDismissListener(dismissListener);
 			}
 			d.setView(scrollView);
 			d.setFields(fields);

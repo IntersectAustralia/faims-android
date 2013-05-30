@@ -155,7 +155,7 @@ public class SelectionDialog extends AlertDialog {
 				
 				Button pointStyleButton = createPointStyleButton(set.getPointStyle());
 				Button lineStyleButton = createLineStyleButton(set.getLineStyle());
-				Button polygonStyleButton = createPolygonStyleButton(set.getLineStyle());
+				Button polygonStyleButton = createPolygonStyleButton(set.getPolygonStyle());
 				
 				layout.addView(removeButton);
 				layout.addView(renameButton);
@@ -296,6 +296,13 @@ public class SelectionDialog extends AlertDialog {
 			@Override
 			public void onClick(View arg0) {
 				PointStyleDialog.Builder builder = new PointStyleDialog.Builder(SelectionDialog.this.getContext(), pointStyle);
+				builder.setDismissListener(new DialogInterface.OnDismissListener() {
+					
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						mapView.updateSelections();
+					}
+				});
 				pointStyleDialog = (PointStyleDialog) builder.create();
 				pointStyleDialog.show();
 			}
@@ -315,6 +322,13 @@ public class SelectionDialog extends AlertDialog {
 			@Override
 			public void onClick(View arg0) {
 				LineStyleDialog.Builder builder = new LineStyleDialog.Builder(SelectionDialog.this.getContext(), lineStyle);
+				builder.setDismissListener(new DialogInterface.OnDismissListener() {
+					
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						mapView.updateSelections();
+					}
+				});
 				lineStyleDialog = (LineStyleDialog) builder.create();
 				lineStyleDialog.show();
 			}
@@ -334,6 +348,13 @@ public class SelectionDialog extends AlertDialog {
 			@Override
 			public void onClick(View arg0) {
 				PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(SelectionDialog.this.getContext(), polygonStyle);
+				builder.setDismissListener(new DialogInterface.OnDismissListener() {
+					
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						mapView.updateSelections();
+					}
+				});
 				polygonStyleDialog = (PolygonStyleDialog) builder.create();
 				polygonStyleDialog.show();
 			}
