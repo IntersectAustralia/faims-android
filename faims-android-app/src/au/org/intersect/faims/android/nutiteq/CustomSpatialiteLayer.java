@@ -171,9 +171,8 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		        @SuppressWarnings("unchecked")
 				final Map<String, String> oldUserData = (Map<String, String>) object.userData;
 		        userData = new String[userColumns.length];
-		        for (int i = 0; i < userColumns.length; i++) {
-		        	userData[i] = oldUserData.get(userColumns[i]);
-		        }
+		        userData[0] = dbPath + ":" + tableName + ":" + oldUserData.get(userColumns[0]); // note: the id column is not unique so adding prepending db path + table name
+		        userData[1] = oldUserData.get(userColumns[1]);
 		    }
 	        
 	        Geometry newObject = null;
@@ -201,7 +200,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 				String[] userData = (String[]) o;
 				List<GeometrySelection> selections = mapView.getSelections();
 				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData)) {
+					if (set.isActive() && set.hasData(userData[0])) {
 						return set.getPointStyle().toPointStyleSet();
 					}
 				}
@@ -214,7 +213,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 				String[] userData = (String[]) o;
 				List<GeometrySelection> selections = mapView.getSelections();
 				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData)) {
+					if (set.isActive() && set.hasData(userData[0])) {
 						return set.getLineStyle().toLineStyleSet();
 					}
 				}
@@ -227,7 +226,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 				String[] userData = (String[]) o;
 				List<GeometrySelection> selections = mapView.getSelections();
 				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData)) {
+					if (set.isActive() && set.hasData(userData[0])) {
 						return set.getPolygonStyle().toPolygonStyleSet();
 					}
 				}

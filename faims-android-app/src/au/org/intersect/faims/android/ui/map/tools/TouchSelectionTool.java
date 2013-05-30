@@ -33,10 +33,11 @@ public class TouchSelectionTool extends SelectionTool {
 			showError("No selection selected");
 			return;
 		}
-		if (selection.hasData((String[]) element.userData)) {
-			selection.removeData((String[]) element.userData);
+		String data = ((String[]) element.userData)[0];
+		if (selection.hasData(data)) {
+			selection.removeData(data);
 		} else {
-			selection.addData((String[]) element.userData);
+			selection.addData(data);
 		}
 		
 		mapView.getComponents().mapRenderers.getMapRenderer().frustumChanged();

@@ -21,9 +21,9 @@ import au.org.intersect.faims.android.ui.map.GeometrySelection;
 
 public class SelectionTool extends MapTool {
 
-	private LinearLayout layout;
-	private MapButton selectSelection;
-	private MapText selectedSelection;
+	protected LinearLayout layout;
+	protected MapButton selectSelection;
+	protected MapText selectedSelection;
 
 	public SelectionTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);

@@ -59,6 +59,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.QueryBuilder;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import bsh.EvalError;
@@ -2642,6 +2643,23 @@ public class BeanShellLinker {
 		catch(Exception e){
 			FLog.e("error adding database layer query " + ref,e);
 			showWarning("Logic Error", "Error adding database layer query " + ref);
+		}
+	}
+	
+	public void addSelectQueryBuilder(String ref, String name, QueryBuilder builder) {
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.addSelectQueryBuilder(name, builder);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding select query builder " + ref,e);
+			showWarning("Logic Error", "Error adding select query builder " + ref);
 		}
 	}
 }

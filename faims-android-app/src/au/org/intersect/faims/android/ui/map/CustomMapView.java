@@ -43,6 +43,7 @@ import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
+import au.org.intersect.faims.android.ui.map.tools.DatabaseSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
@@ -209,6 +210,10 @@ public class CustomMapView extends MapView {
 	private HashMap<String, GeometrySelection> selectionMap;
 
 	private GeometrySelection selectedSelection;
+
+	private HashMap<String, QueryBuilder> selectQueryMap;
+
+	private String lastSelectionQuery;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -225,6 +230,7 @@ public class CustomMapView extends MapView {
         highlightGeometryList = new ArrayList<Geometry>();
         databaseLayerQueryMap = new HashMap<String, String>();
         selectionMap = new HashMap<String, GeometrySelection>();
+        selectQueryMap = new HashMap<String, QueryBuilder>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -853,6 +859,7 @@ public class CustomMapView extends MapView {
 		tools.add(new AreaTool(this.getContext(), this));
 		tools.add(new AzimuthTool(this.getContext(), this));
 		tools.add(new TouchSelectionTool(this.getContext(), this));
+		tools.add(new DatabaseSelectionTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -1359,5 +1366,49 @@ public class CustomMapView extends MapView {
 			tool.onSelectionChanged();
 		}
 		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+	}
+
+	public void addSelectQueryBuilder(String name, QueryBuilder builder) {
+		builder.setName(name);
+		selectQueryMap.put(name, builder);
+	}
+
+	public List<QueryBuilder> getSelectQueryBuilders() {
+		return new ArrayList<QueryBuilder>(selectQueryMap.values());
+	}
+
+	public void runSelectionQuery(String name, ArrayList<String> values,
+			boolean remove) throws Exception {
+		if (selectedSelection == null) {
+			throw new MapException("Please select a selection");
+		}
+		
+		QueryBuilder qb = selectQueryMap.get(name);
+		this.lastSelectionQuery = name;
+		if (qb == null) {
+			throw new MapException("Query does not exist");
+		}
+		List<String> uuids = null;
+		try {
+			uuids = databaseManager.runSelectionQuery(qb.getSql(), values);
+		} catch (Exception e) {
+			FLog.e("error running selection query", e);
+			throw new MapException("Exception raised while trying to run query");
+		}
+		
+		if (remove) {
+			for (String uuid : uuids) {
+				selectedSelection.removeData(uuid);
+			}
+		} else {
+			for (String uuid : uuids) {
+				selectedSelection.addData(uuid);
+			}
+		}
+		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+	}
+	
+	public String getLastSelectionQuery() {
+		return lastSelectionQuery;
 	}
 }

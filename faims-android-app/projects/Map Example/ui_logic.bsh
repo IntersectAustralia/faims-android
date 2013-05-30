@@ -814,50 +814,89 @@ initSpatialMap() {
 private initUIMap() {
 	setMapZoom("tabgroup5/tab1/map", 15.0f);
 	addDatabaseLayerQuery("tabgroup5/tab1/map", "no query", null);
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-					"                                                 FROM archentity\n" + 
-					"                                                 JOIN aenttype using (aenttypeid)\n" + 
-					"                                                 where archentity.deleted is null\n" + 
-					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
-					"                                                 group by uuid");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value pond", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-					"                                                 FROM archentity\n" +
-					"                                                 JOIN aenttype using (aenttypeid)\n" +
-					"                                                 JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-					"                                                 where archentity.deleted is null\n" + 
-					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
-					"                                                   and aentvalue.deleted is null\n" + 
-					"                                                   and (freetext LIKE '%'||'pond'||'%'\n" + 
-					"                                                        OR measure LIKE '%'||'pond'||'%'\n" + 
-					"                                                        OR vocabname LIKE '%'||'pond'||'%')\n" + 
-					"                                                 group by uuid, attributeid");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forrest", "SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-					"                                                 FROM archentity\n" +
-					"                                                 JOIN aenttype using (aenttypeid)\n" +
-					"                                                 JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-					"                                                 where archentity.deleted is null\n" + 
-					"                                                 and aenttypename LIKE '%'||'simpleentity'||'%'\n" + 
-					"                                                   and aentvalue.deleted is null\n" + 
-					"                                                   and (freetext LIKE '%'||'forrest'||'%'\n" + 
-					"                                                        OR measure LIKE '%'||'forrest'||'%'\n" + 
-					"                                                        OR vocabname LIKE '%'||'forrest'||'%')\n" + 
-					"                                                 group by uuid, attributeid");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships", "SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
-					"                                                 FROM relationship\n" + 
-					"                                                 JOIN relntype using (relntypeid)\n" + 
-					"                                                 where relationship.deleted is null\n" + 
-					"                                                 and relntypename LIKE '%'||'abovebelow'||'%'\n" + 
-					"                                                 group by relationshipid");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships with value test", "SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
-					"                                                 FROM relationship\n" +
-					"                                                 JOIN relntype using (relntypeid)\n" +
-					"                                                 JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-					"                                                 where relationship.deleted is null\n" + 
-					"                                                 and relntypename LIKE '%'||'abovebelow'||'%'\n" + 
-					"                                                   and relationship.deleted is null\n" + 
-					"                                                   and (freetext LIKE '%'||'test'||'%'\n" +
-					"                                                        OR vocabname LIKE '%'||'test'||'%')\n" + 
-					"                                                 group by relationshipid, attributeid");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities",
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value pond", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" + 
+		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		"   and aentvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'pond'||'%'\n" + 
+		"        OR measure LIKE '%'||null||'%'\n" + 
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by uuid, attributeid\n" + 
+		" having max(valuetimestamp)\n" + 
+		"    and max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forrest", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" + 
+		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		"   and aentvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'forrest'||'%'\n" + 
+		"        OR measure LIKE '%'||null||'%'\n" + 
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by uuid, attributeid\n" + 
+		" having max(valuetimestamp)\n" + 
+		"    and max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships", 
+		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+		" FROM relationship join relntype using (relntypeid)\n" +
+		" where relationship.deleted is null\n" + 
+		"   and lower(relntypename) = lower('abovebelow')\n" + 
+		" group by relationshipid\n" + 
+		" having max(relntimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships with value area", 
+		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+		" FROM relationship join relntype using (relntypeid)\n" + 
+		" JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where relationship.deleted is null\n" + 
+		"   and lower(relntypename) = lower('abovebelow')\n" + 
+		"   and relnvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'area'||'%'\n" +
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by relationshipid, attributeid\n" + 
+		" having max(relnvaluetimestamp)\n" + 
+		"    and max(relntimestamp)");
+					
+	addSelectQueryBuilder("tabgroup5/tab1/map", "select entity based on type", createQueryBuilder(
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" + 
+		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		"   and aentvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||?||'%'\n" + 
+		"        OR measure LIKE '%'||?||'%'\n" + 
+		"        OR vocabname LIKE '%'||?||'%')\n" + 
+		" group by uuid, attributeid\n" + 
+		" having max(valuetimestamp)\n" + 
+		"    and max(aenttimestamp)").
+					addParameter("freetext", "Simple 1").
+					addParameter("measure", null).
+					addParameter("vocabname", null));
+	addSelectQueryBuilder("tabgroup5/tab1/map", "select relationship based on type", createQueryBuilder(
+		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+		" FROM relationship join relntype using (relntypeid)\n" + 
+		" JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where relationship.deleted is null\n" + 
+		"   and lower(relntypename) = lower('abovebelow')\n" + 
+		"   and relnvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||?||'%'\n" +
+		"        OR vocabname LIKE '%'||?||'%')\n" + 
+		" group by relationshipid, attributeid\n" + 
+		" having max(relnvaluetimestamp)\n" + 
+		"    and max(relntimestamp)").
+					addParameter("freetext", "AboveBelow 1").
+					addParameter("vocabname", null));
 					
 	refreshUIEntities();
 	refreshUIRelationships();

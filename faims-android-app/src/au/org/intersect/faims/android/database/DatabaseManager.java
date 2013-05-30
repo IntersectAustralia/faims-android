@@ -469,7 +469,6 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = new String[] { "entity", id, id };
 			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
@@ -543,7 +542,6 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = new String[] { "relationship", id, id };
 			                geomList.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
@@ -817,7 +815,7 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = new String[] { "entity", uuid, response };
+			            	g.userData = new String[] { uuid, response };
 			                results.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
@@ -912,7 +910,7 @@ public class DatabaseManager {
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
-			            	g.userData = new String[] { "entity", uuid, response };
+			            	g.userData = new String[] { uuid, response };
 			                results.add(GeometryUtil.fromGeometry(g));
 			            }
 					}
@@ -1193,6 +1191,39 @@ public class DatabaseManager {
 						"detach database import;";
 				db.exec(query, createCallback());
 			} finally {
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public List<String> runSelectionQuery(String sql, ArrayList<String> values) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run selection query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				stmt = db.prepare(sql);
+				for (int i = 0; i < values.size(); i++) {
+					stmt.bind(i+1, "".equals(values.get(i)) ? null : values.get(i));
+				}
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				if (stmt != null) {
+					stmt.close();
+				}
 				try {
 					if (db != null) {
 						db.close();

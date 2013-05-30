@@ -179,7 +179,7 @@ public class DatabaseLayer extends GeometryLayer {
 			String[] userData = (String[]) o;
 			List<GeometrySelection> selections = mapView.getSelections();
 			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData)) {
+				if (set.isActive() && set.hasData(userData[0])) {
 					return set.getPointStyle().toPointStyleSet();
 				}
 			}
@@ -192,7 +192,7 @@ public class DatabaseLayer extends GeometryLayer {
 			String[] userData = (String[]) o;
 			List<GeometrySelection> selections = mapView.getSelections();
 			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData)) {
+				if (set.isActive() && set.hasData(userData[0])) {
 					return set.getLineStyle().toLineStyleSet();
 				}
 			}
@@ -205,7 +205,7 @@ public class DatabaseLayer extends GeometryLayer {
 			String[] userData = (String[]) o;
 			List<GeometrySelection> selections = mapView.getSelections();
 			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData)) {
+				if (set.isActive() && set.hasData(userData[0])) {
 					return set.getPolygonStyle().toPolygonStyleSet();
 				}
 			}

@@ -49,7 +49,7 @@ public class DatabaseTextLayer extends TextLayer {
 	    for(Geometry geom: geometries){
 	        
 			final String[] userData = (String[]) geom.userData;
-	        String label = userData[2]; // note: userData for geometry is set in fetchEntity or fetchRelationship
+	        String label = userData[1]; // note: userData for geometry is set in fetchEntity or fetchRelationship
 	        
 	        MapPos topRight = null;
 	        if (geom instanceof Point) {
