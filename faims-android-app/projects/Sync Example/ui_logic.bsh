@@ -336,7 +336,7 @@ onEvent("tabgroup1/tab1/audio", "click", "recordAudio()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab1/update", "click", "updateEntity();
+onEvent("tabgroup1/tab1/update", "click", "updateEntity()");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
