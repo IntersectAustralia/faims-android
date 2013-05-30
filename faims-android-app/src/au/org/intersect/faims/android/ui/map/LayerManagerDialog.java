@@ -937,7 +937,7 @@ public class LayerManagerDialog extends AlertDialog {
 					mapView.putUserCheckList(itemView.getUser(),false);
 					trackLogDatabaseLayer.toggleUser(itemView.getUser(), false);
 				}
-				mapView.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+				mapView.updateRenderer();
 			}
 		});
 

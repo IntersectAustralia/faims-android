@@ -40,7 +40,7 @@ public class TouchSelectionTool extends SelectionTool {
 			selection.addData(data);
 		}
 		
-		mapView.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		mapView.updateSelections();
 	}
 
 }

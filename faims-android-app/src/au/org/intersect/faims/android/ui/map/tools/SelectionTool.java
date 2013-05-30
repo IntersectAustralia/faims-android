@@ -24,6 +24,7 @@ public class SelectionTool extends MapTool {
 	protected LinearLayout layout;
 	protected MapButton selectSelection;
 	protected MapText selectedSelection;
+	protected MapText selectionCount;
 
 	public SelectionTool(Context context, CustomMapView mapView, String name) {
 		super(context, mapView, name);
@@ -35,6 +36,9 @@ public class SelectionTool extends MapTool {
 		selectedSelection = new MapText(context);
 		selectedSelection.setBackgroundColor(Color.WHITE);
 		
+		selectionCount = new MapText(context);
+		selectionCount.setBackgroundColor(Color.WHITE);
+		
 		selectSelection = createSelectButton(context);
 		
 		updateLayout();
@@ -45,6 +49,7 @@ public class SelectionTool extends MapTool {
 			layout.removeAllViews();
 			layout.addView(selectSelection);
 			layout.addView(selectedSelection);
+			layout.addView(selectionCount);
 		}
 	}
 	
@@ -114,9 +119,12 @@ public class SelectionTool extends MapTool {
 	protected void setSelectedSelection(GeometrySelection set) {
 		if (set == null) {
 			selectedSelection.setText("No selection selected");
+			selectionCount.setVisibility(View.GONE);
 		} else {
 			mapView.setSelectedSelection(set);
 			selectedSelection.setText("Current Selection: " + set.getName());
+			selectionCount.setVisibility(View.VISIBLE);
+			selectionCount.setText("Selection Count: " + set.getDataList().size());
 		}
 	}
 
