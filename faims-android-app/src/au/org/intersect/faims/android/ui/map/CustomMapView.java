@@ -862,7 +862,7 @@ public class CustomMapView extends MapView {
 	public void showLayerManagerDialog() {
 		layerManagerDialog = new LayerManagerDialog(this.activityRef.get());
 		layerManagerDialog.setTitle("Layer Manager");
-		layerManagerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
+		layerManagerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Done", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// ignore
@@ -1359,7 +1359,7 @@ public class CustomMapView extends MapView {
 	public void showSelectionDialog() {
 		selectionDialog = new SelectionDialog(this.activityRef.get());
 		selectionDialog.setTitle("Selection Manager");
-		selectionDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "done", new DialogInterface.OnClickListener() {
+		selectionDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Done", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// ignore
