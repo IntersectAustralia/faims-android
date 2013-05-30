@@ -108,7 +108,8 @@ saveEntity() {
 
 loadEntity() {
 
-	entity_id = getFieldValue("tabgroup1/tab2/entities");
+	clearEntity();
+	entity_id = getFieldValue("tabgroup1/tab3/entities");
 	
 	if (entity_id == null || "".equals(entity_id)) return;
 	
@@ -140,13 +141,31 @@ updateEntity(entity_id) {
 	
 	Object values = getFieldValue("tabgroup1/tab1/gallery");
 	if (!"".equals(values)){
-		for(Object values : values){
+		for(Object value : values){
 			sync = getFieldValue("tabgroup1/tab1/sync");
-			filename = attachFile(values, "1".equals(sync));
+			filename = attachFile(value, "1".equals(sync));
 			attributes.add(createEntityAttribute("filename", filename, null, null, null));
 		}
 	}
 	
+	values = getFieldValue("tabgroup1/tab1/videogallery");
+	if (!"".equals(values)){
+		for(Object value : values){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(value, "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}
+	}
+	
+	values = getFieldValue("tabgroup1/tab2/audiolist");
+	if (!"".equals(values)){
+		for(Object value : values){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(value, "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}
+	}
+
 	String id = saveArchEnt(entity_id, "small", null, attributes);
 	
 	updateAll();
@@ -156,8 +175,13 @@ updateEntity(entity_id) {
 
 clearEntity() {
 	newTab("tabgroup1/tab1");
-	
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
 	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
@@ -169,16 +193,43 @@ takePicture() {
 }
 
 OnPictureTaken() {
-	pictureFilepath = getLastPictureFilepath();
+	pictureFilepath = getLastPictureFilePath();
 	pictures.add(pictureFilepath);
-	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
 }
 
+ArrayList videos = new ArrayList();
+
+takeVideo() {
+	openVideo("OnVideoTaken()");
+}
+
+OnVideoTaken() {
+	videoFilepath = getLastVideoFilePath();
+	videos.add(videoFilepath);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+}
+
+ArrayList audios = new ArrayList();
+
+recordAudio(){
+	recordAudio("OnAudioRecorded()");
+}
+
+OnAudioRecorded(){
+	audioFilePath = getLastAudioFilePath();
+	audios.add(audioFilePath);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+}
+
+onEvent("tabgroup1", "load", "populateAudioList(\"tabgroup1/tab2/audiolist\",audios)");
 onEvent("tabgroup1/tab1/camera", "click", "takePicture()");
+onEvent("tabgroup1/tab1/video", "click", "takeVideo()");
+onEvent("tabgroup1/tab1/audio", "click", "recordAudio()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
-onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab2/entities\"))");
+onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab3/entities\"))");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
@@ -244,7 +295,7 @@ updateAll() {
 	Object entities = fetchEntityList("small");
 	Object relationships = fetchRelationshipList("abovebelow");
 	
-	populateDropDown("tabgroup1/tab2/entities", entities);
+	populateDropDown("tabgroup1/tab3/entities", entities);
 	populateDropDown("tabgroup2/tab2/relationships", relationships);
 }
 

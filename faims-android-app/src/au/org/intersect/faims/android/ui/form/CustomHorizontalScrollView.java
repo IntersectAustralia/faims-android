@@ -111,7 +111,13 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	public List<CustomImageView> getSelectedImageViews() {
 		return selectedImageViews;
 	}
-	
+
+	public void setSelectedImageViews(List<CustomImageView> imageViews){
+		for(CustomImageView customImageView : imageViews){
+			addSelectedImageView(customImageView);
+		}
+	}
+
 	public void addSelectedImageView(CustomImageView imageView){
 		if(this.selectedImageViews == null){
 			this.selectedImageViews = new ArrayList<CustomImageView>();

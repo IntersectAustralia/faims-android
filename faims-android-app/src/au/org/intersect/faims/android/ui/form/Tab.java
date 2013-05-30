@@ -827,9 +827,10 @@ public class Tab implements Parcelable{
 				horizontalScrollView.setCurrentCertainty(1);
 				horizontalScrollView.setCurrentAnnotation("");
 				for(CustomImageView customImageView : horizontalScrollView.getImageViews()){
-					customImageView.setBackgroundColor(Color.RED);
+					customImageView.setBackgroundColor(Color.LTGRAY);
 				}
 				horizontalScrollView.setSelectedImageView(null);
+				horizontalScrollView.removeSelectedImageViews();
 			}
 		}
 	}

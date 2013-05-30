@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import jsqlite.Callback;
 import jsqlite.Stmt;
+import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
@@ -575,7 +576,7 @@ public class DatabaseManager {
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
-				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				stmt = db.prepare(query);
 				Collection<String> results = new ArrayList<String>();
 				if(stmt.step()){
@@ -641,7 +642,38 @@ public class DatabaseManager {
 			}
 		}
 	}
-	
+
+	public Vector<Geometry> fetchVisibleGPSTrackingForUser(MapPos min, MapPos max, int maxObjects, String querySql, String userid) throws Exception{
+		if(querySql == null){
+			return null;
+		}
+
+		String s = userid;
+		while (s.length() < 5) {
+			s = "0" + s;
+		}
+		String uuidForUser = "1" + s;
+		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
+		Vector<Geometry> userGeometries = new Vector<Geometry>();
+		for (Geometry geometry : geometries) {
+			String[] userData = (String[]) geometry.userData;
+			if(userData[1].startsWith(uuidForUser)){
+				userGeometries.add(geometry);
+			}
+		}
+		return userGeometries;
+	}
+
+	public List<User> fetchAllUser() throws Exception{
+		Collection<List<String>> users = fetchAll("select userid, fname, lname from user");
+		List<User> userList = new ArrayList<User>();
+		for(List<String> userData : users){
+			User user = new User(userData.get(0), userData.get(1), userData.get(2));
+			userList.add(user);
+		}
+		return userList;
+	}
+
 	public Collection<List<String>> fetchEntityList(String type) throws Exception {
 		String query = 
 			"select uuid, group_concat(response, '; ') as response " +

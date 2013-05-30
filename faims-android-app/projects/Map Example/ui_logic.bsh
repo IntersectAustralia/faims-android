@@ -1,38 +1,25 @@
-createUser(id, firstname, lastname) {
-	user = new User(id, firstname, lastname);
-	return user;
-}
-
-toUsersList(users) {
-	users_array = new ArrayList();
-	for (User user : users) {
-		ua = new ArrayList();
-		ua.add(user.getUserId());
-		ua.add(user.getFirstName() + " " + user.getLastName());
-		users_array.add(ua);
-	}
-	return users_array;
-}
-
 getDefaultUsersList() {
-	users = new ArrayList();
-	users.add(createUser("1", "Test", "User 1"));
-	users.add(createUser("2", "Test", "User 2"));
-	users.add(createUser("3", "Test", "User 3"));
-	users.add(createUser("4", "Test", "User 4"));
-	users.add(createUser("5", "Test", "User 5"));
+	fetchOne("delete from user;");
+	fetchOne("insert into user values(1, 'Adela', 'Sobotkova');");
+	fetchOne("insert into user values(2, 'Brian', 'Ballsun-Stanton');");
+	fetchOne("insert into user values(3, 'Chris', 'Kenward');");
+	fetchOne("insert into user values(4, 'Daniel', 'Theodosius');");
+	fetchOne("insert into user values(5, 'Penny', 'Crook');");
+	fetchOne("insert into user values(6, 'Shawn', 'Ross');");
+	fetchOne("insert into user values(7, 'Theeban', 'Soundararajan');");
+	users = fetchAll("select userid, fname ||' ' || lname from user");
 	return users;
 }
 
 usersList = getDefaultUsersList();
 
 populateListForUsers(){
-	populateList("user/tab1/users", toUsersList(usersList));
+	populateList("user/tab1/users", usersList);
 }
 
 login(){
-	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
-	
+	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
 	setUser(user);
 	showTabGroup("controls");
 }
@@ -814,6 +801,13 @@ initSpatialMap() {
 private initUIMap() {
 	setMapZoom("tabgroup5/tab1/map", 15.0f);
 	addDatabaseLayerQuery("tabgroup5/tab1/map", "no query", null);
+	addTrackLogLayerQuery("tabgroup5/tab1/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
 	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities",
 		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
 		" FROM archentity join aenttype using (aenttypeid)\n" +

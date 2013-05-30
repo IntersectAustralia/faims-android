@@ -1,13 +1,17 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,9 +21,15 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaRecorder;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -31,20 +41,30 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.MediaController;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+import android.widget.VideoView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
@@ -73,6 +93,45 @@ import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
 	
+	private class AudioListAdapter extends BaseAdapter {
+		
+		private List<NameValuePair> audioLists;
+		private ArrayList<View> audioViews;
+
+		public AudioListAdapter(Map<NameValuePair, Boolean> audioList) {
+			this.audioLists = new ArrayList<NameValuePair>();
+			this.audioLists.addAll(audioList.keySet());
+			this.audioViews = new ArrayList<View>();
+			
+			for (Entry<NameValuePair, Boolean> audio : audioList.entrySet()) {
+				AudioListItem item = new AudioListItem(activity);
+				item.init(audio.getKey(),audio.getValue());
+				audioViews.add(item);
+			} 
+		}
+		
+		@Override
+		public int getCount() {
+			return audioLists.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return audioLists.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View arg1, ViewGroup arg2) {
+			return audioViews.get(position);
+		}
+		
+	}
+
 	private Interpreter interpreter;
 
 	private ShowProjectActivity activity;
@@ -94,8 +153,19 @@ public class BeanShellLinker {
 	private String cameraPicturepath;
 	private String cameraCallBack;
 
+	private String videoCallBack;
+	private String cameraVideoPath;
+
 	private Project project;
-	
+
+	private String audioFileNamePath;
+
+	private MediaRecorder recorder;
+
+	private String audioCallBack;
+
+	private MediaPlayer mediaPlayer;
+
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
 		this.project = project;
@@ -1259,6 +1329,19 @@ public class BeanShellLinker {
 					return "";
 				}
 			}
+			else if(obj instanceof CustomListView){
+				CustomListView listView = (CustomListView) obj;
+				if(listView.getSelectedItems() != null){
+					List<String> audios = new ArrayList<String>();
+					for(Object item : listView.getSelectedItems()){
+						NameValuePair pair = (NameValuePair) item;
+						audios.add(pair.getValue());
+					}
+					return audios;
+				}else{
+					return "";
+				}
+			}
 			else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
@@ -1603,7 +1686,506 @@ public class BeanShellLinker {
 		}
 	}
 
-	public Object fetchArchEnt(String id){
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateCameraPictureGallery(String ref, Collection valuesObj){
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			List<Picture> pictures = new ArrayList<Picture>();
+			if(valuesObj instanceof ArrayList<?>){
+				try{
+					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
+					for(List<String> pictureList : arrayList){
+						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+						pictures.add(picture);
+					}
+				}catch(Exception e){
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					for(String value : values){
+						Picture picture = new Picture(null,null,value);
+						pictures.add(picture);
+					}
+				}
+			}
+			
+			if(obj instanceof HorizontalScrollView){
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				List<String> selectedPicturePath = new ArrayList<String>();
+				if(horizontalScrollView.getSelectedImageViews() != null){
+					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+						selectedPicturePath.add(imageView.getPicture().getUrl());
+					}
+				}
+				if(!pictures.isEmpty()){
+					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				}
+				horizontalScrollView.removeSelectedImageViews();
+		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+		        galleriesLayout.removeAllViews();
+		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+		        for (Picture picture : pictures) {
+		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+		        	File pictureFile = new File(path);
+		        	if(pictureFile.exists()){
+		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+		                gallery.setImageBitmap(decodeFile(new File(path), 400, 400));
+		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
+		                	gallery.setBackgroundColor(Color.BLUE);
+		                }else{
+		                	gallery.setBackgroundColor(Color.LTGRAY);
+		                }
+		                gallery.setPadding(10, 10, 10, 10);
+		                gallery.setLayoutParams(layoutParams);
+		                gallery.setPicture(picture);
+		                gallery.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								CustomImageView selectedImageView = (CustomImageView) v;
+		                    	if(horizontalScrollView.isMulti()){
+		                    		for (ImageView view : galleryImages) {
+			                        	if (view.equals(selectedImageView)) {
+				                        	if(horizontalScrollView.getSelectedImageViews() != null){
+				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+				                    				view.setBackgroundColor(Color.LTGRAY);
+				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+				                    			}else{
+				                    				view.setBackgroundColor(Color.BLUE);
+				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    			}
+				                    		}else{
+				                    			view.setBackgroundColor(Color.BLUE);
+				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    		}
+			                        	}
+			                        }
+		                    	}
+								return true;
+							}
+						});
+		                gallery.setOnClickListener(new OnClickListener() {
+		
+		                    @Override
+		                    public void onClick(View v) {
+		                    	previewCameraPicture(v);
+		                    }
+		                });
+		                TextView textView = new TextView(galleriesLayout.getContext());
+		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                textView.setText(name);
+		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		                textView.setTextSize(20);
+		                galleryLayout.addView(textView);
+		                galleryImages.add(gallery);
+		                galleryLayout.addView(gallery);
+		                galleriesLayout.addView(galleryLayout);
+		                if(!selectedPicturePath.isEmpty()){
+		                	if(selectedPicturePath.contains(path)){
+			                	horizontalScrollView.addSelectedImageView(gallery);
+			                }
+		                }else{
+		                	horizontalScrollView.addSelectedImageView(gallery);
+		                }
+		        	}
+		        }
+		        horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate picture gallery " + ref , e);
+			showWarning("Logic Error", "Error populate picture gallery " + ref);
+		}
+	}
+
+	private void previewCameraPicture(View v) {
+		CustomImageView selectedImageView = (CustomImageView) v;
+    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		
+		builder.setTitle("Image Preview");
+		
+		ScrollView scrollView = new ScrollView(activity);
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		builder.setView(scrollView);
+		ImageView view = new ImageView(activity);
+		view.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
+		layout.addView(view);
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				// Nothing
+			}
+	        
+	    });
+		builder.create().show();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateVideoGallery(String ref, Collection valuesObj){
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			List<Picture> pictures = new ArrayList<Picture>();
+			if(valuesObj instanceof ArrayList<?>){
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				for (String value : values) {
+					Picture picture = new Picture(null, null, value);
+					pictures.add(picture);
+				}
+			}
+			
+			if(obj instanceof HorizontalScrollView){
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				List<String> selectedPicturePath = new ArrayList<String>();
+				if(horizontalScrollView.getSelectedImageViews() != null){
+					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
+						selectedPicturePath.add(imageView.getPicture().getUrl());
+					}
+				}
+				if(!pictures.isEmpty()){
+					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
+				}
+				horizontalScrollView.removeSelectedImageViews();
+		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
+		        galleriesLayout.removeAllViews();
+		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+		        for (Picture picture : pictures) {
+		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
+		        	File videoFile = new File(path);
+		        	if(videoFile.exists()){
+		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
+		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
+		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
+		        		Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path,
+		        		        MediaStore.Images.Thumbnails.MINI_KIND);
+		                gallery.setImageBitmap(thumbnail);
+		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
+		                	gallery.setBackgroundColor(Color.BLUE);
+		                }else{
+		                	gallery.setBackgroundColor(Color.LTGRAY);
+		                }
+		                gallery.setPadding(10, 10, 10, 10);
+		                gallery.setLayoutParams(layoutParams);
+		                gallery.setPicture(picture);
+		                gallery.setOnLongClickListener(new OnLongClickListener() {
+							
+							@Override
+							public boolean onLongClick(View v) {
+								CustomImageView selectedImageView = (CustomImageView) v;
+		                    	if(horizontalScrollView.isMulti()){
+		                    		for (ImageView view : galleryImages) {
+			                        	if (view.equals(selectedImageView)) {
+				                        	if(horizontalScrollView.getSelectedImageViews() != null){
+				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
+				                    				view.setBackgroundColor(Color.LTGRAY);
+				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
+				                    			}else{
+				                    				view.setBackgroundColor(Color.BLUE);
+				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    			}
+				                    		}else{
+				                    			view.setBackgroundColor(Color.BLUE);
+				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
+				                    		}
+			                        	}
+			                        }
+		                    	}
+								return true;
+							}
+						});
+		                gallery.setOnClickListener(new OnClickListener() {
+		
+		                    @Override
+		                    public void onClick(View v) {
+		                    	previewVideo(v);
+		                    }
+		                });
+		                TextView textView = new TextView(galleriesLayout.getContext());
+		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
+		                textView.setText(name);
+		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		                textView.setTextSize(20);
+		                galleryLayout.addView(textView);
+		                galleryImages.add(gallery);
+		                galleryLayout.addView(gallery);
+		                galleriesLayout.addView(galleryLayout);
+		                if(!selectedPicturePath.isEmpty()){
+		                	if(selectedPicturePath.contains(path)){
+			                	horizontalScrollView.addSelectedImageView(gallery);
+			                }
+		                }else{
+		                	horizontalScrollView.addSelectedImageView(gallery);
+		                }
+		        	}
+		        }
+		        horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate video gallery " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate video gallery " + ref , e);
+			showWarning("Logic Error", "Error populate video gallery " + ref);
+		}
+	}
+
+	private void previewVideo(View v) {
+		CustomImageView selectedImageView = (CustomImageView) v;
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		
+		builder.setTitle("Video Preview");
+		
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		layout.setOrientation(LinearLayout.VERTICAL);
+		
+		builder.setView(layout);
+		VideoView videoView = new VideoView(activity);
+		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
+		videoView.setMediaController(new MediaController(activity));
+		videoView.requestFocus();
+		videoView.start();
+		layout.addView(videoView,new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		
+		TextView text = new TextView(activity);
+		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
+		layout.addView(text);
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				// Nothing
+			}
+		    
+		});
+		builder.create().show();
+	}
+
+	private String getVideoMetaData(String path){
+		File videoFile = new File(path);
+		
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Video Metadata:");
+		stringBuilder.append("\n");
+		stringBuilder.append("File name: " + videoFile.getName());
+		stringBuilder.append("\n");
+		stringBuilder.append("File size: " + videoFile.length() + " bytes");
+		stringBuilder.append("\n");
+		Date lastModifiedDate = new Date(videoFile.lastModified());
+		stringBuilder.append("Video date: " + lastModifiedDate.toString());
+		MediaPlayer player = new MediaPlayer();
+		try {
+			player.setDataSource(path);
+			player.prepare();
+			long duration = player.getDuration();
+			stringBuilder.append("\n");
+			stringBuilder.append("Video duration: " + duration/1000 + " seconds");
+			player.release();
+		} catch (Exception e) {
+			FLog.e("error obtaining video file duration",e);
+		}
+		return stringBuilder.toString();
+	}
+
+	public static Bitmap decodeFile(File f,int WIDTH,int HIGHT){
+        try {
+            //Decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
+
+            //The new size we want to scale to
+            final int REQUIRED_WIDTH=WIDTH;
+            final int REQUIRED_HIGHT=HIGHT;
+            //Find the correct scale value. It should be the power of 2.
+            int scale=1;
+            while(o.outWidth/scale/2>=REQUIRED_WIDTH && o.outHeight/scale/2>=REQUIRED_HIGHT)
+                scale*=2;
+
+            //Decode with inSampleSize
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize=scale;
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        }catch (Exception e) {
+        	FLog.e("error when decode the bitmap",e);
+        }
+        return null;
+    }
+
+	@SuppressWarnings("rawtypes")
+	public void populateAudioList(String ref, Collection valuesObj){
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+	
+			if (valuesObj instanceof ArrayList){
+				final ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
+				try {
+					@SuppressWarnings("unchecked")
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					for (String s : values) {
+						File file = new File(s);
+						pairs.add(new NameValuePair(file.getName(), s));
+					}
+				} catch (Exception e) {
+					FLog.e("error passing collections type",e);
+				}
+				
+				if(obj instanceof CustomListView){
+					final CustomListView list = (CustomListView) obj;
+					Map<NameValuePair, Boolean> audios = new HashMap<NameValuePair, Boolean>();
+					for(NameValuePair audio : pairs){
+						if(list.getSelectedItems() != null){
+							if(list.getSelectedItems().contains(audio)){
+								audios.put(audio, true);
+							}else{
+								audios.put(audio, false);
+							}
+						}else{
+							audios.put(audio, true);
+						}
+					}
+					if(!pairs.isEmpty()){
+						list.addSelectedItem(pairs.get(pairs.size()-1));
+						audios.put(pairs.get(pairs.size()-1),true);
+					}
+					AudioListAdapter adapter = new AudioListAdapter(audios);
+	                list.setAdapter(adapter);
+	                list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+						@Override
+						public void onItemClick(AdapterView<?> arg0, View arg1,
+								int arg2, long arg3) {
+							NameValuePair audioPair = pairs.get(arg2);
+							String path = audioPair.getValue();
+							previewAudio(path);
+						}
+	                });
+	                list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+						@Override
+						public boolean onItemLongClick(AdapterView<?> arg0,
+								View view, int arg2, long arg3) {
+							AudioListItem item = (AudioListItem) view;
+							item.toggle();
+							if(item.isChecked()){
+								list.addSelectedItem(item.getAudioPair());
+							}else{
+								list.removeSelectedItem(item.getAudioPair());
+							}
+							return true;
+						}
+					});
+				} else {
+					showWarning("Logic Error", "Cannot populate list " + ref);
+				}
+			}
+		} catch (Exception e) {
+			FLog.e("error populate list " + ref,e);
+			showWarning("Logic Error", "Error populate list " + ref);
+		}
+	}
+
+	private void previewAudio(final String path) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		
+		builder.setTitle("Audio Preview");
+		
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		layout.setOrientation(LinearLayout.VERTICAL);
+		
+		builder.setView(layout);
+		
+		ToggleButton playButton = new ToggleButton(activity);
+		playButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if(isChecked){
+					startPlaying(buttonView,path);
+				}else{
+					stopPlaying();
+				}
+			}
+		});
+		playButton.setTextOn("Stop Audio");
+		playButton.setTextOff("Play Audio");
+		playButton.setChecked(false);
+		layout.addView(playButton);
+		TextView text = new TextView(activity);
+		text.setText(getAudioMetaData(path));
+		layout.addView(text);
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				if(mediaPlayer != null){
+					stopPlaying();
+				}
+			}
+		    
+		});
+		builder.create().show();
+	}
+
+	private String getAudioMetaData(String path){
+		File audioFile = new File(path);
+		
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Audio Metadata:");
+		stringBuilder.append("\n");
+		stringBuilder.append("File name: " + audioFile.getName());
+		stringBuilder.append("\n");
+		stringBuilder.append("File size: " + audioFile.length() + " bytes");
+		stringBuilder.append("\n");
+		Date lastModifiedDate = new Date(audioFile.lastModified());
+		stringBuilder.append("Audio date: " + lastModifiedDate.toString());
+		MediaPlayer player = new MediaPlayer();
+		try {
+			player.setDataSource(path);
+			player.prepare();
+			long duration = player.getDuration();
+			stringBuilder.append("\n");
+			stringBuilder.append("Audio duration: " + duration/1000 + " seconds");
+			player.release();
+		} catch (Exception e) {
+			FLog.e("error obtaining audio file duration",e);
+		}
+		
+		return stringBuilder.toString();
+	}
+
+	private void startPlaying(final CompoundButton buttonView, String path) {
+        mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+				
+				@Override
+				public void onCompletion(MediaPlayer arg0) {
+					buttonView.setChecked(false);
+				}
+			});
+            mediaPlayer.start();
+        } catch (IOException e) {
+            FLog.e("prepare() failed",e);
+        }
+    }
+
+    private void stopPlaying() {
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+
+    public Object fetchArchEnt(String id){
 		try {
 			return activity.getDatabaseManager().fetchArchEnt(id);
 		} catch (Exception e) {
@@ -2312,6 +2894,105 @@ public class BeanShellLinker {
 		}
 	}
 
+	public void openVideo(String callback){
+		videoCallBack = callback;
+		Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+		activity.startActivityForResult(videoIntent, ShowProjectActivity.VIDEO_REQUEST_CODE);
+	}
+
+	public void executeVideoCallBack(){
+		try {
+			this.interpreter.eval(videoCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for the video",e);
+		}
+	}
+
+	public void recordAudio(String callback){
+		audioCallBack = callback;
+		audioFileNamePath = Environment.getExternalStorageDirectory() + "/audio-"+ System.currentTimeMillis() +".mp4";
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		
+		builder.setTitle("FAIMS recording");
+		
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		
+		builder.setView(layout);
+		ToggleButton button = new ToggleButton(activity);
+		button.setTextOn("Stop Recording");
+		button.setTextOff("Start Recording");
+		button.setChecked(false);
+		layout.addView(button);
+		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				if(recorder != null){
+					stopRecording();
+					executeAudioCallBack();
+				}
+			}
+
+	    });
+		final AlertDialog dialog = builder.create();
+		button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if(isChecked){
+					startRecording();
+				}else{
+					stopRecording();
+					executeAudioCallBack();
+					dialog.dismiss();
+				}
+			}
+		});
+		dialog.show();
+	}
+	
+	private void startRecording() {
+		recorder = new MediaRecorder();
+		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        recorder.setOutputFile(audioFileNamePath);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            recorder.prepare();
+        } catch (IOException e) {
+            FLog.e("prepare() failed", e);
+        }
+
+        recorder.start();
+    }
+
+    private void stopRecording() {
+        recorder.stop();
+        recorder.release();
+        recorder = null;
+    }
+
+	public void executeAudioCallBack() {
+		try {
+			this.interpreter.eval(audioCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for the audio",e);
+		}
+	}
+
+	public void setLastVideoFilePath(String path){
+		cameraVideoPath = path;
+	}
+
+	public String getLastAudioFilePath(){
+		return audioFileNamePath;
+	}
+
+	public String getLastVideoFilePath(){
+		return cameraVideoPath;
+	}
 	public String getLastPictureFilePath(){
 		return cameraPicturepath;
 	}
@@ -2576,7 +3257,7 @@ public class BeanShellLinker {
 
 			builder.setTitle("Attached Files");
 			builder.setView(listView);
-			builder.setNeutralButton("done", new DialogInterface.OnClickListener() {
+			builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -2646,7 +3327,7 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error adding database layer query " + ref);
 		}
 	}
-	
+
 	public void addSelectQueryBuilder(String ref, String name, QueryBuilder builder) {
 		try{
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
@@ -2679,6 +3360,23 @@ public class BeanShellLinker {
 		catch(Exception e){
 			FLog.e("error adding legacy select query builder " + ref,e);
 			showWarning("Logic Error", "Error adding legacy select query builder " + ref);
+		}
+	}
+	
+	public void addTrackLogLayerQuery(String ref, String name, String sql){
+		try{
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.addTrackLogLayerQuery(name, sql);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		}
+		catch(Exception e){
+			FLog.e("error adding track log query " + ref,e);
+			showWarning("Logic Error", "Error adding track log query " + ref);
 		}
 	}
 }

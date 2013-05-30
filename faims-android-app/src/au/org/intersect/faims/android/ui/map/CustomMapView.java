@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -20,6 +21,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
@@ -38,6 +40,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -205,6 +208,10 @@ public class CustomMapView extends MapView {
 	private WeakReference<ShowProjectActivity> activityRef;
 	
 	private HashMap<String, String> databaseLayerQueryMap;
+	private String trackLogQueryName;
+	private String trackLogQuerySql;
+	private Map<User, Boolean> userCheckedList;
+	private Integer userTrackLogLayer;
 	
 	private ArrayList<String> databaseLayerQueryList;
 
@@ -707,6 +714,27 @@ public class CustomMapView extends MapView {
 		
 		return addLayer(layer);
 	}
+	
+	public int addDataBaseLayerForTrackLog(String layerName, StyleSet<PointStyle> pointStyleSet, Map<User, Boolean> users,
+			String queryName, String querySql,
+			StyleSet<LineStyle> lineStyleSet,
+			StyleSet<PolygonStyle> polygonStyleSet,
+			StyleSet<TextStyle> textStyleSet) throws Exception {
+		validateLayerName(layerName);
+		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
+				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,  databaseManager,
+				FaimsSettings.MAX_VECTOR_OBJECTS, users, pointStyleSet, lineStyleSet, polygonStyleSet);
+		this.getLayers().addLayer(layer);
+		
+		if (textStyleSet != null) {
+			// add text layer
+			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyleSet);
+			layer.setTextLayer(textLayer);
+			this.getLayers().addLayer(textLayer);
+		}
+		
+		return addLayer(layer);
+	}
 
 	public CustomPoint drawPoint(int layerId, MapPos point, GeometryStyle style) throws Exception {
 		return drawPoint(getLayer(layerId), point, style);
@@ -841,6 +869,26 @@ public class CustomMapView extends MapView {
 		});
 		layerManagerDialog.attachToMap(this);
 		layerManagerDialog.show();
+	}
+
+	public Map<User, Boolean> getUserCheckedList() {
+		return userCheckedList;
+	}
+
+	public void putUserCheckList(User user, boolean value){
+		userCheckedList.put(user, value);
+	}
+	
+	public void clearUserCheckedList(){
+		userCheckedList.clear();
+	}
+
+	public Integer getUserTrackLogLayer() {
+		return userTrackLogLayer;
+	}
+
+	public void setUserTrackLogLayer(Integer userTrackLogLayer) {
+		this.userTrackLogLayer = userTrackLogLayer;
 	}
 
 	private void validateLayerName(String name) throws Exception {
@@ -1293,7 +1341,12 @@ public class CustomMapView extends MapView {
 		databaseLayerQueryMap.put(name, sql);
 		databaseLayerQueryList.add(name);
 	}
-	
+
+	public void addTrackLogLayerQuery(String name, String sql){
+		trackLogQueryName = name;
+		trackLogQuerySql = sql;
+	}
+
 	public String getDatabaseLayerQuery(String name) {
 		return databaseLayerQueryMap.get(name);
 	}
@@ -1470,4 +1523,13 @@ public class CustomMapView extends MapView {
 		}
 		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
 	}
+
+	public String getTrackLogQueryName() {
+		return trackLogQueryName;
+	}
+
+	public String getTrackLogQuerySql() {
+		return trackLogQuerySql;
+	}
+
 }

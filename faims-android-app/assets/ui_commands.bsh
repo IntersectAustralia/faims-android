@@ -168,6 +168,18 @@ populatePictureGallery(String ref, Collection values){
 	linker.populatePictureGallery(ref, values);
 }
 
+populateCameraPictureGallery(String ref, Collection values){
+	linker.populateCameraPictureGallery(ref, values);
+}
+
+populateVideoGallery(String ref, Collection values){
+	linker.populateVideoGallery(ref, values);
+}
+
+populateAudioList(String ref, Collection values){
+	linker.populateAudioList(ref, values);
+}
+
 populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
@@ -492,11 +504,23 @@ addDatabaseLayerQuery(String ref, String name, String sql) {
 	linker.addDatabaseLayerQuery(ref, name, sql);
 }
 
+addTrackLogLayerQuery(String ref, String name, String sql) {
+	linker.addTrackLogLayerQuery(ref, name, sql);
+}
+
 openCamera(String callback){
 	linker.openCamera(callback);
 }
 
-String getLastPictureFilepath(){
+openVideo(String callback){
+	linker.openVideo(callback);
+}
+
+recordAudio(String callback){
+	linker.recordAudio(callback);
+}
+
+String getLastPictureFilePath(){
 	return linker.getLastPictureFilePath();
 }
 
@@ -514,4 +538,12 @@ addLegacySelectQueryBuilder(String ref, String name, String dbPath, String table
 
 createLegacyQueryBuilder(String sql) {
 	return new LegacyQueryBuilder(sql);
+}
+
+String getLastVideoFilePath(){
+	return linker.getLastVideoFilePath();
+}
+
+String getLastAudioFilePath(){
+	return linker.getLastAudioFilePath();
 }
