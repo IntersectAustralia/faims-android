@@ -1037,7 +1037,7 @@ public class CustomMapView extends MapView {
 		return highlightGeometryList;
 	}
 
-	public void updateSelection() throws Exception {
+	public void updateHighlights() throws Exception {
 		if (highlightGeometryList.isEmpty()) return;
 		
 		// note: remove geometry from list that no longer exist or are not visible and update others
@@ -1419,7 +1419,7 @@ public class CustomMapView extends MapView {
 	public void setSelectionActive(GeometrySelection selection,
 			boolean active) {
 		selection.setActive(active);
-		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		updateSelections();
 	}
 	
 	public GeometrySelection getSelectedSelection() {
@@ -1434,7 +1434,7 @@ public class CustomMapView extends MapView {
 		for (MapTool tool: tools) {
 			tool.onSelectionChanged();
 		}
-		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		updateRenderer();
 	}
 
 	public void addSelectQueryBuilder(String name, QueryBuilder builder) {
@@ -1475,7 +1475,7 @@ public class CustomMapView extends MapView {
 				selectedSelection.addData(uuid);
 			}
 		}
-		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		updateSelections();
 	}
 	
 	public String getLastSelectionQuery() {
@@ -1522,7 +1522,7 @@ public class CustomMapView extends MapView {
 				selectedSelection.addData(uuid);
 			}
 		}
-		this.getComponents().mapRenderers.getMapRenderer().frustumChanged();
+		updateSelections();
 	}
 
 	public String getTrackLogQueryName() {

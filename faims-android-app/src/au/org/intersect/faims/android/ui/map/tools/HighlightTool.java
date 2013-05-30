@@ -64,7 +64,7 @@ public class HighlightTool extends SettingsTool {
 	@Override
 	public void onLayersChanged() {
 		try {
-			mapView.updateSelection();
+			mapView.updateHighlights();
 		} catch (Exception e) {
 			FLog.e("error updating selection", e);
 			showError(e.getMessage());

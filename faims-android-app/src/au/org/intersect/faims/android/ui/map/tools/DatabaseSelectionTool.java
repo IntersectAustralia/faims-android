@@ -43,6 +43,7 @@ public class DatabaseSelectionTool extends SelectionTool {
 			layout.addView(queryButton);
 			layout.addView(selectSelection);
 			layout.addView(selectedSelection);
+			layout.addView(selectionCount);
 		}
 	}
 	
