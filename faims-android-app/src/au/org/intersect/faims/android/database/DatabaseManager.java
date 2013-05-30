@@ -657,7 +657,7 @@ public class DatabaseManager {
 		Vector<Geometry> userGeometries = new Vector<Geometry>();
 		for (Geometry geometry : geometries) {
 			String[] userData = (String[]) geometry.userData;
-			if(userData[1].startsWith(uuidForUser)){
+			if(userData[0].startsWith(uuidForUser)){
 				userGeometries.add(geometry);
 			}
 		}

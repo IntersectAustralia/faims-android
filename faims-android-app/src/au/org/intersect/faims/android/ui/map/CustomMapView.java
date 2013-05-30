@@ -39,8 +39,8 @@ import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -251,6 +251,7 @@ public class CustomMapView extends MapView {
         legacySelectQueryMap = new HashMap<String, LegacyQueryBuilder>();
         selectQueryList = new ArrayList<QueryBuilder>();
         legacySelectQueryList = new ArrayList<LegacyQueryBuilder>();
+        userCheckedList = new HashMap<User, Boolean>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
