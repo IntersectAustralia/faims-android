@@ -11,10 +11,13 @@ import java.util.Map;
 import org.javarosa.core.model.FormIndex;
 import org.javarosa.core.model.GroupDef;
 import org.javarosa.core.model.IFormElement;
+import org.javarosa.core.model.QuestionDef;
 import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -71,7 +74,9 @@ public class UIRenderer implements IRestoreActionListener{
 	private Map<String, Object> viewCertainties;
 	private Map<String, Object> viewAnnotations;
 
-    public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowProjectActivity activity) {
+	private Map<String,Map<String,String>> styles;
+
+	public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowProjectActivity activity) {
         this.fem = fem;
         this.arch16n = arch16n;
         this.activityRef = new WeakReference<ShowProjectActivity>(activity);
@@ -85,6 +90,7 @@ public class UIRenderer implements IRestoreActionListener{
         this.viewValues = new HashMap<String, Object>();
         this.viewCertainties = new HashMap<String, Object>();
         this.viewAnnotations = new HashMap<String, Object>();
+        this.styles = new HashMap<String, Map<String,String>>();
     }
 
     /**
@@ -113,67 +119,158 @@ public class UIRenderer implements IRestoreActionListener{
 	    		GroupDef tabGroupElement = (GroupDef) element;
 	    		FormEntryCaption tabGroupCaption = this.fem.getModel().getCaptionPrompt(groupIndex);
 	    		
-	    		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
-	    		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
-	    		
-	    		TabGroup tabGroup = new TabGroup(archEntType,relType, this);
-	    		tabGroup.setActivity(activityRef);
-	    		String tabGroupText = tabGroupCaption.getQuestionText();
-	    		tabGroupText = arch16n.substituteValue(tabGroupText);
-	    		tabGroup.setLabel(tabGroupText);
-	    		
 	    		String tabGroupName = tabGroupCaption.getIndex().getReference().getNameLast();
 
-	    		tabGroupMap.put(tabGroupName, tabGroup);
-	    		tabGroupList.add(tabGroup);
-	    		
-	            // descend into group
-	            FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex, true);
-	
-	            int tabs = tabGroupElement.getChildren().size();
-	            for (int j = 0; j < tabs; j++) {  
-	            	
-	                element = this.fem.getModel().getForm().getChild(tabIndex);
-	                
-	                if (element instanceof GroupDef) {
-	                	
-	                	GroupDef tabElement = (GroupDef) element;
-	                	FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
-	                    
-	                	String tabName = tabCaption.getIndex().getReference().getNameLast();
-	                	Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText(), "true".equals(tabElement
-                                .getAdditionalAttribute(null, "faims_hidden")), !"false".equals(tabElement
-                                        .getAdditionalAttribute(null, "faims_scrollable")), arch16n, tabGroupName + "/" + tabName);	                 
-	                	
-	                    tabMap.put(tabGroupName + "/" + tabName, tab);
-	                    tabList.add(tab);
-	                    
-	                    FormIndex inputIndex = this.fem.getModel().incrementIndex(tabIndex, true);
-	                    
-	                    for (int k = 0; k < tabElement.getChildren().size(); k++) {	
-	                        FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
-	                        String viewName = input.getIndex().getReference().getNameLast();
-	                        View view = tab.addInput(FormAttribute.parseFromInput(input),
-	                        		tabGroupName + "/" + tabName + "/" + viewName,viewName, directory, tabGroup.isArchEnt(), tabGroup.isRelationship());
-	                        
-	                        viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
-	                        viewTabMap.put(tabGroupName + "/" + tabName + "/" + viewName, tab);
-	                        viewList.add(view);
-	                        
-	                        inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
-	                    }
-	                    
-	                }
-	                
-	                tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
-	            }
-	    	}
+	    		if("style".equals(tabGroupName)){
+	    			parseStyle(tabGroupElement,groupIndex);
+	    		}else{
+	    			parseTabGroups(directory, groupIndex, tabGroupElement, tabGroupCaption, tabGroupName);
+	    		}
 	    	
 	    	groupIndex = this.fem.getModel().incrementIndex(groupIndex, false);
+	    	}
     	}
     	
     }
-    
+
+	private void parseTabGroups(String directory, FormIndex groupIndex, GroupDef tabGroupElement, FormEntryCaption tabGroupCaption, String tabGroupName) {
+		IFormElement element;
+		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
+		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
+
+		TabGroup tabGroup = new TabGroup(archEntType, relType, this);
+		tabGroup.setActivity(activityRef);
+		String tabGroupText = tabGroupCaption.getQuestionText();
+		tabGroupText = arch16n.substituteValue(tabGroupText);
+		tabGroup.setLabel(tabGroupText);
+
+		tabGroupMap.put(tabGroupName, tabGroup);
+		tabGroupList.add(tabGroup);
+
+		// descend into group
+		FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex,true);
+
+		int tabs = tabGroupElement.getChildren().size();
+		for (int i = 0; i < tabs; i++) {
+			element = this.fem.getModel().getForm().getChild(tabIndex);
+
+			if (element instanceof GroupDef) {
+				parseTab(directory, tabGroupName, element, tabGroup, tabIndex);
+			}
+
+			tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
+		}
+	}
+
+	private void parseTab(String directory, String tabGroupName, IFormElement element, TabGroup tabGroup, FormIndex tabIndex) {
+		GroupDef tabElement = (GroupDef) element;
+		FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
+
+		String tabName = tabCaption.getIndex().getReference().getNameLast();
+		Tab tab = tabGroup.createTab(tabName, tabCaption.getQuestionText(),"true".equals(tabElement.getAdditionalAttribute(null,
+						"faims_hidden")), !"false".equals(tabElement.getAdditionalAttribute(null, "faims_scrollable")), arch16n, tabGroupName + "/" + tabName);
+
+		tabMap.put(tabGroupName + "/" + tabName, tab);
+		tabList.add(tab);
+
+		FormIndex containerIndex = this.fem.getModel().incrementIndex(tabIndex, true);
+
+		for (int i = 0; i < tabElement.getChildren().size(); i++) {
+			element = this.fem.getModel().getForm().getChild(containerIndex);
+
+			if (element instanceof GroupDef) {
+				parseContainer(null, directory, tabGroupName, tabName, element,tabGroup, containerIndex, tab, 1);
+			} else {
+				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, containerIndex, null);
+			}
+			containerIndex = this.fem.getModel().incrementIndex(containerIndex, false);
+		}
+	}
+
+	private void parseContainer(LinearLayout containerLayout, String directory, String tabGroupName, String tabName, IFormElement element,
+			TabGroup tabGroup, FormIndex childIndex, Tab tab, int depth) {
+		if (depth > 5) {
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
+			builder.setTitle("Parsing Error");
+			builder.setMessage("Child depth can not be more than 5");
+			builder.setNeutralButton("OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							// User clicked OK button
+						}
+					});
+			builder.create().show();
+
+			return;
+		}
+		GroupDef childContainerElement = (GroupDef) element;
+		FormIndex inputIndex = this.fem.getModel().incrementIndex(childIndex,true);
+		String style = childContainerElement.getAdditionalAttribute(null,"faims_style");
+		LinearLayout childContainerLayout = tab.addChildContainer(containerLayout, getStyleMappings(style));
+
+		for (int i = 0; i < childContainerElement.getChildren().size(); i++) {
+			element = this.fem.getModel().getForm().getChild(inputIndex);
+			if (element instanceof GroupDef) {
+				parseContainer(childContainerLayout, directory, tabGroupName,tabName, element, tabGroup, inputIndex, tab, ++depth);
+			} else {
+				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, inputIndex, childContainerLayout);
+			}
+			inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
+		}
+	}
+
+	private List<Map<String, String>> getStyleMappings(String style) {
+		List<Map<String, String>> styleMappings = new ArrayList<Map<String, String>>();
+		if (style != null) {
+			String[] styles = style.split(" ");
+			for (String s : styles) {
+				styleMappings.add(this.styles.get(s));
+			}
+		}
+		return styleMappings;
+	}
+
+	private void parseInput(String directory, String tabGroupName, String tabName, IFormElement element, TabGroup tabGroup, Tab tab,
+			FormIndex childIndex, LinearLayout containerLayout) {
+		QuestionDef questionElement = (QuestionDef) element;
+		String style = questionElement.getAdditionalAttribute(null,"faims_style");
+		FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(childIndex);
+		String viewName = input.getIndex().getReference().getNameLast();
+		View view = tab.addInput(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName, directory,
+				tabGroup.isArchEnt(), tabGroup.isRelationship(),getStyleMappings(style));
+
+		viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
+		viewTabMap.put(tabGroupName + "/" + tabName + "/" + viewName, tab);
+		viewList.add(view);
+	}
+
+	private void parseStyle(GroupDef tabGroupElement, FormIndex groupIndex) {
+		FormIndex tabIndex = this.fem.getModel().incrementIndex(groupIndex,true);
+
+		int tabs = tabGroupElement.getChildren().size();
+		for (int i = 0; i < tabs; i++) {
+			IFormElement element = this.fem.getModel().getForm().getChild(tabIndex);
+			if (element instanceof GroupDef) {
+				GroupDef tabElement = (GroupDef) element;
+				FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
+				String styleName = tabCaption.getIndex().getReference().getNameLast();
+				FormIndex inputIndex = this.fem.getModel().incrementIndex(tabIndex, true);
+				Map<String, String> attributes = new HashMap<String, String>();
+				for (int j = 0; j < tabElement.getChildren().size(); j++) {
+					FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(inputIndex);
+					String attributeName = input.getIndex().getReference().getNameLast();
+					String attributeValue = input.getQuestionText();
+					attributes.put(attributeName, attributeValue);
+					inputIndex = this.fem.getModel().incrementIndex(inputIndex,false);
+				}
+				styles.put(styleName, attributes);
+			}
+
+			tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
+		}
+	}
+
     public TabGroup showTabGroup(FragmentActivity activity, int index) {
     	FragmentManager fm = activity.getSupportFragmentManager();
     	

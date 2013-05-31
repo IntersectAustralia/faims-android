@@ -110,9 +110,24 @@ public class Tab implements Parcelable{
 		}
 	};
 
-	public View addInput(FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship) {
+	public LinearLayout addChildContainer(LinearLayout containerLayout,
+			List<Map<String, String>> styleMappings) {
+		CustomLinearLayout linearLayout = new CustomLinearLayout(this.activityRef.get(), styleMappings);
+		if (containerLayout == null) {
+			this.linearLayout.addView(linearLayout);
+		} else {
+			containerLayout.addView(linearLayout);
+		}
+
+		return linearLayout;
+	}
+
+	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
     	Button certaintyButton = null;
     	Button annotationButton = null;
+		if (linearLayout == null) {
+			linearLayout = this.linearLayout;
+		}
     	
 		if (attribute.controlType != Constants.CONTROL_TRIGGER &&
 				!(attribute.controlType == Constants.CONTROL_SELECT_MULTI && "image".equalsIgnoreCase(attribute.questionType))) {
@@ -143,30 +158,30 @@ public class Tab implements Parcelable{
             	switch (attribute.dataType) {
 	                case Constants.DATATYPE_INTEGER:
 	                	view = createIntegerTextField(attribute, ref);
-	                	setupView(view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
 	                    break;
 	                case Constants.DATATYPE_DECIMAL:
 	                	view = createDecimalTextField(attribute, ref);
-	                	setupView(view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
 	                    break;
 	                case Constants.DATATYPE_LONG:
 	                	view = createLongTextField(attribute, ref);
-	                	setupView(view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
 	                    break;
 	                // set input type as date picker
 	                case Constants.DATATYPE_DATE:
 	                	view = createDatePicker(attribute, ref);
-	                	setupView(view, certaintyButton, annotationButton, ref, DateUtil.getDate((CustomDatePicker) view));
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref, DateUtil.getDate((CustomDatePicker) view));
 	                    break;
 	                // get the text area
 	                case Constants.DATATYPE_TEXT:
 	                	view = createTextArea(attribute, ref);
-	                	setupView(view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
 	                    break;
 	                // set input type as time picker
 	                case Constants.DATATYPE_TIME:
 	                	view = createTimePicker(attribute, ref);
-	    				setupView(view, certaintyButton, annotationButton, ref, DateUtil.getTime((CustomTimePicker) view));
+	    				setupView(linearLayout, view, certaintyButton, annotationButton, ref, DateUtil.getTime((CustomTimePicker) view));
 	                    break;
 	                // default is edit text
 	                default:
@@ -180,7 +195,7 @@ public class Tab implements Parcelable{
 	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
-	                		setupView(view, certaintyButton, annotationButton, ref);
+	                		setupView(linearLayout, view, certaintyButton, annotationButton, ref);
 	                	}
 	                    break;
             	}
@@ -216,12 +231,12 @@ public class Tab implements Parcelable{
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForSingleSelection(attribute, directory, ref);
-                            setupView(view, certaintyButton, annotationButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, ref);
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(attribute.questionAppearance)) {
                         	view = createRadioGroup(attribute, ref);
-                        	setupView(view, certaintyButton, annotationButton, ref);
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
                         // List
                         } else if ("compact".equalsIgnoreCase(attribute.questionAppearance) ) {
                         	view = createList(attribute);
@@ -230,7 +245,7 @@ public class Tab implements Parcelable{
                         } else {
                         	view = createDropDown(attribute, ref);
                         	NameValuePair pair = (NameValuePair) ((CustomSpinner) view).getSelectedItem();
-                        	setupView(view, certaintyButton, annotationButton, ref, pair.getValue());
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, ref, pair.getValue());
                         }
                         break;
                 }
@@ -241,10 +256,10 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForMultiSelection(attribute, directory, ref);
-                            setupView(view, certaintyButton, annotationButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, ref);
                         }else{
 	                    	view = createCheckListGroup(attribute, ref);
-	                    	setupView(view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
+	                    	setupView(linearLayout, view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
                         }
                 }
                 break;
@@ -294,11 +309,11 @@ public class Tab implements Parcelable{
 		return button;
 	}
 	
-	private void setupView(View view, Button certaintyButton, Button annotationButton, String ref) {
-		setupView(view, certaintyButton, annotationButton, ref, "");
+	private void setupView(LinearLayout linearLayout, View view, Button certaintyButton, Button annotationButton, String ref) {
+		setupView(linearLayout, view, certaintyButton, annotationButton, ref, "");
 	}
 	
-	private void setupView(View view, Button certaintyButton, Button annotationButton, String ref, Object value) {
+	private void setupView(LinearLayout linearLayout,View view, Button certaintyButton, Button annotationButton, String ref, Object value) {
 		if (certaintyButton != null) onCertaintyButtonClicked(certaintyButton, view);
         if (annotationButton != null) onAnnotationButtonClicked(annotationButton, view);
         linearLayout.addView(view);
