@@ -2340,6 +2340,7 @@ public class BeanShellLinker {
 								audios.put(audio, false);
 							}
 						} else {
+							list.addSelectedItem(audio);
 							audios.put(audio, true);
 						}
 					}
@@ -3462,6 +3463,11 @@ public class BeanShellLinker {
 
 	public String attachFile(String filePath, boolean sync, String dir) {
 		try {
+			filePath = filePath
+					.contains(
+							Environment.getExternalStorageDirectory()
+									.getPath()) ? filePath
+					: activity.getProjectDir() + "/" + filePath;
 			File file = new File(filePath);
 			if (!file.exists()) {
 				showWarning("Logic Error", "Attach file cannot find file.");
@@ -3484,7 +3490,8 @@ public class BeanShellLinker {
 
 			// create directories
 			FileUtil.makeDirs(activity.getProjectDir() + "/" + attachFile);
-
+			String name= file.getName();
+			name = name.indexOf("_") > 0 ? name.substring(name.indexOf("_") + 1) : name;
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + file.getName();
 
