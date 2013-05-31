@@ -1704,7 +1704,7 @@ public class BeanShellLinker {
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
+				if(horizontalScrollView.getSelectedImageViews() != null){
 					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
 						String path = imageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
 								imageView.getPicture().getUrl() :
@@ -1823,8 +1823,14 @@ public class BeanShellLinker {
 		
 		builder.setView(scrollView);
 		ImageView view = new ImageView(activity);
-		view.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
+		String path = selectedImageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+				selectedImageView.getPicture().getUrl() :
+					activity.getProjectDir() + "/" + selectedImageView.getPicture().getUrl();
+		view.setImageBitmap(decodeFile(new File(path), 500, 500));
 		layout.addView(view);
+		TextView text = new TextView(activity);
+		text.setText(getCameraMetaData(path));
+		layout.addView(text);
 		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
 			@Override
@@ -1834,6 +1840,21 @@ public class BeanShellLinker {
 	        
 	    });
 		builder.create().show();
+	}
+
+	private String getCameraMetaData(String path){
+		File videoFile = new File(path);
+		
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Picture Metadata:");
+		stringBuilder.append("\n");
+		stringBuilder.append("File name: " + videoFile.getName());
+		stringBuilder.append("\n");
+		stringBuilder.append("File size: " + videoFile.length() + " bytes");
+		stringBuilder.append("\n");
+		Date lastModifiedDate = new Date(videoFile.lastModified());
+		stringBuilder.append("Picture date: " + lastModifiedDate.toString());
+		return stringBuilder.toString();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1853,7 +1874,7 @@ public class BeanShellLinker {
 			if(obj instanceof HorizontalScrollView){
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
+				if(horizontalScrollView.getSelectedImageViews() != null){
 					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
 						String path = imageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
 								imageView.getPicture().getUrl() :
@@ -1972,20 +1993,49 @@ public class BeanShellLinker {
 		
 		builder.setView(layout);
 		VideoView videoView = new VideoView(activity);
-		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
+		final String path = selectedImageView.getPicture().getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ?
+				selectedImageView.getPicture().getUrl() :
+					activity.getProjectDir() + "/" + selectedImageView.getPicture().getUrl();
+		videoView.setVideoPath(path);
 		videoView.setMediaController(new MediaController(activity));
 		videoView.requestFocus();
 		videoView.start();
 		layout.addView(videoView,new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
 		
-		TextView text = new TextView(activity);
-		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
-		layout.addView(text);
-		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton("Done", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		builder.setPositiveButton("View Metadata", new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				// Nothing
+				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+				
+				builder.setTitle("Video Preview");
+				
+				LinearLayout layout = new LinearLayout(activity);
+				layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+				layout.setOrientation(LinearLayout.VERTICAL);
+				
+				builder.setView(layout);
+				TextView text = new TextView(activity);
+				text.setText(getVideoMetaData(path));
+				layout.addView(text);
+				builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				builder.create().show();
+				
 			}
 		    
 		});
@@ -2080,8 +2130,16 @@ public class BeanShellLinker {
 						}
 					}
 					if(!pairs.isEmpty()){
-						list.addSelectedItem(pairs.get(pairs.size()-1));
-						audios.put(pairs.get(pairs.size()-1),true);
+						NameValuePair pair = pairs.get(pairs.size()-1);
+						if(list.getSelectedItems() != null){
+							if(!list.getSelectedItems().contains(pair)){
+								list.addSelectedItem(pair);
+								audios.put(pairs.get(pairs.size()-1),true);
+							}
+						}else{
+							list.addSelectedItem(pair);
+							audios.put(pairs.get(pairs.size()-1),true);
+						}
 					}else{
 						list.removeSelectedItems();
 						audios.clear();
