@@ -223,6 +223,7 @@ updateEntity() {
 	String id = saveArchEnt(entity_id, "small", null, attributes);
 	
 	updateAll();
+	pictures.clear();
 	videos.clear();
 	audios.clear();
 	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
