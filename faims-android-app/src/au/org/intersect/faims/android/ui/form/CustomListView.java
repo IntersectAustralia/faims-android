@@ -62,5 +62,6 @@ public class CustomListView extends ListView {
 		if(selectedItems != null){
 			selectedItems.clear();
 		}
+		selectedItems = null;
 	}
 }
