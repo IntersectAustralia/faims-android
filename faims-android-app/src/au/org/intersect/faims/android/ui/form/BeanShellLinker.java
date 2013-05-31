@@ -36,7 +36,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.format.Time;
 import android.view.Gravity;
@@ -391,9 +390,9 @@ public class BeanShellLinker {
 
 								@Override
 								public void onClick(View v) {
-									if(SystemClock.elapsedRealtime() - mLastClickTime > 1000){
+									if(System.currentTimeMillis() - mLastClickTime > 1000){
 										execute(code);
-										mLastClickTime = SystemClock.elapsedRealtime();
+										mLastClickTime = System.currentTimeMillis();
 									}
 								}
 							});
