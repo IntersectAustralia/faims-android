@@ -133,22 +133,32 @@ createAttributeList() {
 	return new ArrayList();
 }
 
-createEntityAttribute(String name, String text, String vocab, String measure, String certainty) {
+createEntityAttribute(String name, String text, String vocab, String measure, String certainty){
+	createEntityAttribute(name, text, vocab, measure, certainty, false);
+}
+
+createEntityAttribute(String name, String text, String vocab, String measure, String certainty, boolean isDeleted) {
 	EntityAttribute attribute = new EntityAttribute();
 	attribute.setName(name);
 	attribute.setText(text);
 	attribute.setVocab(vocab);
 	attribute.setMeasure(measure);
 	attribute.setCertainty(certainty);
+	attribute.setDeleted(isDeleted);
 	return attribute;
 }
 
-createRelationshipAttribute(String name, String text, String vocab, String certainty) {
+createRelationshipAttribute(String name, String text, String vocab, String certainty){
+	createRelationshipAttribute(name, text, vocab, certainty, false);
+}
+
+createRelationshipAttribute(String name, String text, String vocab, String certainty, boolean isDeleted) {
 	RelationshipAttribute attribute = new RelationshipAttribute();
 	attribute.setName(name);
 	attribute.setText(text);
 	attribute.setVocab(vocab);
 	attribute.setCertainty(certainty);
+	attribute.setDeleted(isDeleted);
 	return attribute;
 }
 

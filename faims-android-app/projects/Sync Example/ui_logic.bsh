@@ -98,32 +98,84 @@ onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 
-String entity_id;
+String entity_id = null;
 
 saveEntity() {
-	
-	entity_id = updateEntity(null);
-	
+	entity_id = null;
+	entity_id = updateEntity();
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+	loadFileAttributes(entity_id);
 }
 
 loadEntity() {
 
 	clearEntity();
+
 	entity_id = getFieldValue("tabgroup1/tab3/entities");
 	
 	if (entity_id == null || "".equals(entity_id)) return;
 	
 	showTab("tabgroup1/tab1", entity_id);
-	
+	loadFileAttributes(entity_id);
 }
 
-updateEntity(entity_id) {
+loadFileAttributes(id){
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("picture".equals(attr.getName())){
+					pictures.add(attr.getText());
+				}else if("video".equals(attr.getName())){
+					videos.add(attr.getText());
+				}else if("audio".equals(attr.getName())){
+					audios.add(attr.getText());
+				}
+			}
+		}
+	}
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+}
+
+updateEntity() {
 	if (entity_id == null || "".equals(entity_id)) entity_id = null;
 
+	ArrayList loadedFiles = new ArrayList();
+	ArrayList loadedPictures = new ArrayList();
+	ArrayList loadedVideos = new ArrayList();
+	ArrayList loadedAudios = new ArrayList();
 	List attributes = createAttributeList();
 	if (entity_id == null) {
 		attributes.add(createEntityAttribute("entity", "Small " + entityCount++, null, null, null));
+	}else{
+		archEntity = fetchArchEnt(entity_id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if("picture".equals(attr.getName())){
+					loadedPictures.add(attr.getText());
+				}else if("video".equals(attr.getName())){
+					loadedVideos.add(attr.getText());
+				}else if("audio".equals(attr.getName())){
+					loadedAudios.add(attr.getText());
+				}else{
+					loadedFiles.add(attr.getText());
+				}
+			}
+		}
 	}
+	
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
@@ -133,44 +185,105 @@ updateEntity(entity_id) {
 		attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), value.getName(), null, getFieldCertainty("tabgroup1/tab1/location")));
 	}
 	
-	if (!"".equals(getFieldValue("tabgroup1/tab1/file"))) {
-		sync = getFieldValue("tabgroup1/tab1/sync");
-		filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
-		attributes.add(createEntityAttribute("filename", filename, null, null, null));
+	Object value = getFieldValue("tabgroup1/tab1/file");
+	if (!"".equals(value)) {
+		if(loadedFiles.isEmpty()){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}else{
+			File file = new File(getLastSelectedFilepath());
+			for(String loadedFile : loadedFiles){
+				if(loadedFile.contains(file.getName())){
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
+					attributes.add(createEntityAttribute("filename", filename, null, null, null));
+				}else{
+					attributes.add(createEntityAttribute("filename", loadedFile, null, null, null));
+				}
+			}
+		}
+	}else{
+		if(!loadedFiles.isEmpty()){
+			for(String loadedFile : loadedFiles){
+				attributes.add(createEntityAttribute("filename", loadedFile, null, null, null));
+			}
+		}
 	}
 	
 	Object values = getFieldValue("tabgroup1/tab1/gallery");
-	if (!"".equals(values)){
-		for(Object value : values){
-			sync = getFieldValue("tabgroup1/tab1/sync");
-			filename = attachFile(value, "1".equals(sync));
-			attributes.add(createEntityAttribute("filename", filename, null, null, null));
-		}
-	}
+	saveFiles(values, loadedPictures, pictures, "picture", attributes);
 	
 	values = getFieldValue("tabgroup1/tab1/videogallery");
-	if (!"".equals(values)){
-		for(Object value : values){
-			sync = getFieldValue("tabgroup1/tab1/sync");
-			filename = attachFile(value, "1".equals(sync));
-			attributes.add(createEntityAttribute("filename", filename, null, null, null));
-		}
-	}
+	saveFiles(values, loadedVideos, videos, "video", attributes);
 	
 	values = getFieldValue("tabgroup1/tab2/audiolist");
-	if (!"".equals(values)){
-		for(Object value : values){
-			sync = getFieldValue("tabgroup1/tab1/sync");
-			filename = attachFile(value, "1".equals(sync));
-			attributes.add(createEntityAttribute("filename", filename, null, null, null));
-		}
-	}
+	saveFiles(values, loadedAudios, audios, "audio", attributes);
 
 	String id = saveArchEnt(entity_id, "small", null, attributes);
 	
 	updateAll();
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+	loadFileAttributes(id);
 	
 	return id;
+}
+
+saveFiles(values, loadedfiles, files, type, attributes){
+	if (!"".equals(values)){
+		if(loadedfiles.isEmpty()){
+			for(String file : files){
+				sync = getFieldValue("tabgroup1/tab1/sync");
+				filename = attachFile(file, "1".equals(sync));
+				if(values.contains(file)){
+					attributes.add(createEntityAttribute(type, filename, null, null, null));
+				}else{
+					attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+				}
+			}
+		}else{
+			for(String file : files){
+				if(loadedfiles.contains(file)){
+					if(values.contains(file)){
+						attributes.add(createEntityAttribute(type, file, null, null, null));
+					}else{
+						attributes.add(createEntityAttribute(type, file, null, null, null,true));
+					}
+				}else{
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(file, "1".equals(sync));
+					if(values.contains(file)){
+						attributes.add(createEntityAttribute(type, filename, null, null, null));
+					}else{
+						attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+					}
+				}
+			}
+		}
+	}else{
+		if(loadedfiles.isEmpty()){
+			for(String file : files){
+				sync = getFieldValue("tabgroup1/tab1/sync");
+				filename = attachFile(file, "1".equals(sync));
+				attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+			}
+		}else{
+			for(String file : files){
+				if(loadedfiles.contains(file)){
+					attributes.add(createEntityAttribute(type, file, null, null, null,true));
+				}else{
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(file, "1".equals(sync));
+					attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+				}
+			}
+		}
+	}
 }
 
 clearEntity() {
@@ -229,7 +342,7 @@ onEvent("tabgroup1/tab1/audio", "click", "recordAudio()");
 onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
-onEvent("tabgroup1/tab1/update", "click", "updateEntity(getFieldValue(\"tabgroup1/tab3/entities\"))");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity()");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());

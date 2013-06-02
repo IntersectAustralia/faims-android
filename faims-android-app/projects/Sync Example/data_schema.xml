@@ -45,6 +45,15 @@
     <property type="file" name="filename">
       <bundle>DOI</bundle>
     </property>
+    <property type="file" name="picture">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="video">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="audio">
+      <bundle>DOI</bundle>
+    </property>
     <property type="timestamp" name="timestamp">
       <bundle>DOI</bundle>
     </property>

@@ -182,7 +182,7 @@
       </group>
       <group ref="tab2" faims_scrollable="false">
         <label>Audio List</label>
-        <select1 ref="audiolist" appearance="compact">
+        <select1 ref="audiolist" appearance="compact" faims_certainty="false">
           <label>Audio List:</label>
           <item>
             <label>dummy</label>

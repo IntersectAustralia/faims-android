@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -92,9 +93,9 @@ import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
-	
+
 	private class AudioListAdapter extends BaseAdapter {
-		
+
 		private List<NameValuePair> audioLists;
 		private ArrayList<View> audioViews;
 
@@ -102,14 +103,14 @@ public class BeanShellLinker {
 			this.audioLists = new ArrayList<NameValuePair>();
 			this.audioLists.addAll(audioList.keySet());
 			this.audioViews = new ArrayList<View>();
-			
+
 			for (Entry<NameValuePair, Boolean> audio : audioList.entrySet()) {
 				AudioListItem item = new AudioListItem(activity);
-				item.init(audio.getKey(),audio.getValue());
+				item.init(audio.getKey(), audio.getValue());
 				audioViews.add(item);
-			} 
+			}
 		}
-		
+
 		@Override
 		public int getCount() {
 			return audioLists.size();
@@ -129,17 +130,17 @@ public class BeanShellLinker {
 		public View getView(int position, View arg1, ViewGroup arg2) {
 			return audioViews.get(position);
 		}
-		
+
 	}
 
 	private Interpreter interpreter;
 
 	private ShowProjectActivity activity;
-	
+
 	private static final String FREETEXT = "freetext";
 	private static final String MEASURE = "measure";
 	private static final String VOCAB = "vocab";
-	
+
 	private String persistedObjectName;
 
 	private String lastFileBrowserCallback;
@@ -149,7 +150,7 @@ public class BeanShellLinker {
 	private Runnable trackingTask;
 	private Double prevLong;
 	private Double prevLat;
-	
+
 	private String cameraPicturepath;
 	private String cameraCallBack;
 
@@ -165,6 +166,7 @@ public class BeanShellLinker {
 	private String audioCallBack;
 
 	private MediaPlayer mediaPlayer;
+	private long mLastClickTime = 0;
 
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
@@ -175,29 +177,32 @@ public class BeanShellLinker {
 		} catch (EvalError e) {
 			FLog.e("error setting linker", e);
 		}
-		this.activity.getFileManager().addListener(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+		this.activity.getFileManager().addListener(
+				ShowProjectActivity.FILE_BROWSER_REQUEST_CODE,
+				new FileManager.FileManagerListener() {
 
-			@Override
-			public void onFileSelected(File file) {
-				BeanShellLinker.this.setLastSelectedFile(file);
-			}
-			
-		});
+					@Override
+					public void onFileSelected(File file) {
+						BeanShellLinker.this.setLastSelectedFile(file);
+					}
+
+				});
 	}
-	
+
 	public void sourceFromAssets(String filename) {
 		try {
-    		interpreter.eval(FileUtil.convertStreamToString(this.activity.getAssets().open(filename)));
-    	} catch(Exception e) {
-    		FLog.w("error sourcing script from assets", e);
-    		showWarning("Logic Error", "Error encountered in logic commands");
-    	}
+			interpreter.eval(FileUtil.convertStreamToString(this.activity
+					.getAssets().open(filename)));
+		} catch (Exception e) {
+			FLog.w("error sourcing script from assets", e);
+			showWarning("Logic Error", "Error encountered in logic commands");
+		}
 	}
 
-	public void persistObject(String name){
+	public void persistObject(String name) {
 		setPersistedObjectName(name);
 	}
-	
+
 	public String getPersistedObjectName() {
 		return persistedObjectName;
 	}
@@ -208,27 +213,28 @@ public class BeanShellLinker {
 
 	public void execute(String code) {
 		try {
-    		interpreter.eval(code);
-    	} catch (EvalError e) {
-    		FLog.i("error executing code", e);
-    		showWarning("Logic Error", "Error encountered in logic script");
-    	}
+			interpreter.eval(code);
+		} catch (EvalError e) {
+			FLog.i("error executing code", e);
+			showWarning("Logic Error", "Error encountered in logic script");
+		}
 	}
-	
-	public void startTrackingGPS(final String type, final int value){
-		
+
+	public void startTrackingGPS(final String type, final int value) {
+
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
-					&& !this.activity.getGPSDataManager().isInternalGPSStarted()) {
+					&& !this.activity.getGPSDataManager()
+							.isInternalGPSStarted()) {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
-			if("time".equals(type)){
+			if ("time".equals(type)) {
 				trackingTask = new Runnable() {
-	
+
 					@Override
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
@@ -240,11 +246,19 @@ public class BeanShellLinker {
 							Double latitude = currentLocation.getLatitude();
 							if (longitude != null && latitude != null) {
 								List<Geometry> geo_data = new ArrayList<Geometry>();
-								geo_data.add(createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
-										Float.parseFloat(Double.toString(latitude)))));
-								activity.getDatabaseManager().saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
-										Double.toString(currentLocation.getLatitude()), Float.toString(heading),
-										Float.toString(accuracy),type);
+								geo_data.add(createGeometryPoint(new MapPos(
+										Float.parseFloat(Double
+												.toString(longitude)), Float
+												.parseFloat(Double
+														.toString(latitude)))));
+								activity.getDatabaseManager().saveGPSTrack(
+										geo_data,
+										Double.toString(currentLocation
+												.getLongitude()),
+										Double.toString(currentLocation
+												.getLatitude()),
+										Float.toString(heading),
+										Float.toString(accuracy), type);
 							}
 						} else {
 							showToast("no gps signal at the moment");
@@ -252,9 +266,9 @@ public class BeanShellLinker {
 					}
 				};
 				trackingHandler.postDelayed(trackingTask, value * 1000);
-			}else if("distance".equals(type)){
+			} else if ("distance".equals(type)) {
 				trackingTask = new Runnable() {
-					
+
 					@Override
 					public void run() {
 						trackingHandler.postDelayed(this, 1000);
@@ -266,22 +280,33 @@ public class BeanShellLinker {
 							Double latitude = currentLocation.getLatitude();
 							if (longitude != null && latitude != null) {
 								double distance = 0;
-								if(prevLong != null && prevLat != null){
+								if (prevLong != null && prevLat != null) {
 									float[] results = new float[1];
-									Location.distanceBetween(prevLat, prevLong, latitude, longitude, results);
+									Location.distanceBetween(prevLat, prevLong,
+											latitude, longitude, results);
 									distance = results[0];
-									if(distance > value){
+									if (distance > value) {
 										List<Geometry> geo_data = new ArrayList<Geometry>();
-										Geometry point = createGeometryPoint(new MapPos(Float.parseFloat(Double.toString(longitude)),
-												Float.parseFloat(Double.toString(latitude))));
+										Geometry point = createGeometryPoint(new MapPos(
+												Float.parseFloat(Double
+														.toString(longitude)),
+												Float.parseFloat(Double
+														.toString(latitude))));
 										geo_data.add(point);
-										activity.getDatabaseManager().saveGPSTrack(geo_data, Double.toString(currentLocation.getLongitude()),
-												Double.toString(currentLocation.getLatitude()), Float.toString(heading),
-												Float.toString(accuracy),type);
+										activity.getDatabaseManager()
+												.saveGPSTrack(
+														geo_data,
+														Double.toString(currentLocation
+																.getLongitude()),
+														Double.toString(currentLocation
+																.getLatitude()),
+														Float.toString(heading),
+														Float.toString(accuracy),
+														type);
 										prevLong = longitude;
 										prevLat = latitude;
 									}
-								}else{
+								} else {
 									prevLong = longitude;
 									prevLat = latitude;
 								}
@@ -292,37 +317,36 @@ public class BeanShellLinker {
 					}
 				};
 				trackingHandler.postDelayed(trackingTask, 1000);
-			}else{
+			} else {
 				FLog.e("wrong type format is used");
 			}
 			FLog.d("gps tracking is started");
-		}else{
+		} else {
 			showToast("gps tracking has been started, please stop it before starting");
 		}
 	}
-	
-	public void stopTrackingGPS(){
-		if(trackingHandler !=  null){
+
+	public void stopTrackingGPS() {
+		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;
 		}
-		if(trackingHandlerThread != null){
+		if (trackingHandlerThread != null) {
 			trackingHandlerThread.quit();
 			trackingHandlerThread = null;
 		}
 	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
-		try{
-			
+		try {
+
 			if ("click".equals(type.toLowerCase(Locale.ENGLISH))) {
 				View view = activity.getUIRenderer().getViewByRef(ref);
-				if (view ==  null) {
+				if (view == null) {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Error cannot find view " + ref);
 					return;
-				}
-				else {
+				} else {
 					if (view instanceof CustomListView) {
 						final CustomListView listView = (CustomListView) view;
 						listView.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -331,97 +355,100 @@ public class BeanShellLinker {
 							public void onItemClick(AdapterView<?> arg0,
 									View arg1, int index, long arg3) {
 								try {
-									NameValuePair pair = (NameValuePair) listView.getItemAtPosition(index);
-									interpreter.set("_list_item_value", pair.getValue());
+									NameValuePair pair = (NameValuePair) listView
+											.getItemAtPosition(index);
+									interpreter.set("_list_item_value",
+											pair.getValue());
 									execute(code);
 								} catch (Exception e) {
 									FLog.e("error setting list item value", e);
 								}
 							}
-							
+
 						});
 					} else {
 						if (view instanceof Spinner) {
-							((Spinner) view).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+							((Spinner) view)
+									.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-								@Override
-								public void onItemSelected(AdapterView<?> arg0,
-										View arg1, int arg2, long arg3) {
-									execute(code);
-								}
+										@Override
+										public void onItemSelected(
+												AdapterView<?> arg0, View arg1,
+												int arg2, long arg3) {
+											execute(code);
+										}
 
-								@Override
-								public void onNothingSelected(
-										AdapterView<?> arg0) {
-									execute(code);
-								}
+										@Override
+										public void onNothingSelected(
+												AdapterView<?> arg0) {
+											execute(code);
+										}
 
-								
-							});
+									});
 						} else {
 							view.setOnClickListener(new OnClickListener() {
-								
+
 								@Override
 								public void onClick(View v) {
-									execute(code);
+									if(System.currentTimeMillis() - mLastClickTime > 1000){
+										execute(code);
+										mLastClickTime = System.currentTimeMillis();
+									}
 								}
 							});
 						}
 					}
 				}
-			}
-			else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
+			} else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
-				if (tg == null){
+				if (tg == null) {
 					FLog.w("cannot find tabgroup " + ref);
-					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
+					showWarning("Logic Error", "Error cannot find tabgroup "
+							+ tg);
 					return;
-				}
-				else{
+				} else {
 					tg.addOnLoadCommand(code);
 				}
-			} 
-			else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
+			} else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
-				if (tg == null){
+				if (tg == null) {
 					FLog.w("cannot find tabgroup " + ref);
-					showWarning("Logic Error", "Error cannot find tabgroup " + tg);
+					showWarning("Logic Error", "Error cannot find tabgroup "
+							+ tg);
 					return;
-				}
-				else{
+				} else {
 					tg.addOnShowCommand(code);
 				}
-			}
-			else {
+			} else {
 				FLog.w("cannot find event type " + type);
 				showWarning("Logic Error", "Error bind event type " + type);
 			}
-		}
-		catch(Exception e){
-			FLog.e("exception binding event to view " + ref,e);
+		} catch (Exception e) {
+			FLog.e("exception binding event to view " + ref, e);
 			showWarning("Logic Error", "Error binding event to view " + ref);
 		}
 	}
 
-	public void bindFocusAndBlurEvent(String ref, final String focusCallback, final String blurCallBack){
+	public void bindFocusAndBlurEvent(String ref, final String focusCallback,
+			final String blurCallBack) {
 		try {
 			View view = activity.getUIRenderer().getViewByRef(ref);
-			if (view ==  null) {
+			if (view == null) {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Error cannot find view " + ref);
 				return;
-			}
-			else {
+			} else {
 				view.setOnFocusChangeListener(new OnFocusChangeListener() {
-					
+
 					@Override
 					public void onFocusChange(View v, boolean hasFocus) {
-						if(hasFocus){
-							if(focusCallback != null && !focusCallback.isEmpty()){
+						if (hasFocus) {
+							if (focusCallback != null
+									&& !focusCallback.isEmpty()) {
 								execute(focusCallback);
 							}
-						}else{
-							if(blurCallBack != null && !blurCallBack.isEmpty()){
+						} else {
+							if (blurCallBack != null && !blurCallBack.isEmpty()) {
 								execute(blurCallBack);
 							}
 						}
@@ -429,23 +456,25 @@ public class BeanShellLinker {
 				});
 			}
 		} catch (Exception e) {
-			FLog.e("exception binding focus and blur event to view " + ref,e);
-			showWarning("Logic Error", "Error cannot bind focus and blur event to view " + ref);
+			FLog.e("exception binding focus and blur event to view " + ref, e);
+			showWarning("Logic Error",
+					"Error cannot bind focus and blur event to view " + ref);
 		}
 	}
-	
-	public void bindMapEvent(String ref, final String clickCallback, final String selectCallback) {
-		try{
+
+	public void bindMapEvent(String ref, final String clickCallback,
+			final String selectCallback) {
+		try {
 			View view = activity.getUIRenderer().getViewByRef(ref);
 			if (view instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) view;
 				mapView.setMapListener(new CustomMapView.CustomMapListener() {
 
 					@Override
-					public void onMapClicked(double x, double y,
-							boolean arg2) {
+					public void onMapClicked(double x, double y, boolean arg2) {
 						try {
-							interpreter.set("_map_point_clicked", (new EPSG3857()).toWgs84(x, y));
+							interpreter.set("_map_point_clicked",
+									(new EPSG3857()).toWgs84(x, y));
 							execute(clickCallback);
 						} catch (Exception e) {
 							FLog.e("error setting map point clicked", e);
@@ -453,106 +482,107 @@ public class BeanShellLinker {
 					}
 
 					@Override
-					public void onVectorElementClicked(
-							VectorElement element, double arg1,
-							double arg2, boolean arg3) {
+					public void onVectorElementClicked(VectorElement element,
+							double arg1, double arg2, boolean arg3) {
 						try {
-							int geomId = mapView.getGeometryId((Geometry) element);
+							int geomId = mapView
+									.getGeometryId((Geometry) element);
 							interpreter.set("_map_geometry_selected", geomId);
 							execute(selectCallback);
 						} catch (Exception e) {
 							FLog.e("error setting map geometry selected", e);
 						}
 					}
-					
+
 				});
-			}
-			else {
+			} else {
 				FLog.w("cannot bind map event to view " + ref);
-				showWarning("Logic Error", "Error cannot bind map event to view " + ref);
+				showWarning("Logic Error",
+						"Error cannot bind map event to view " + ref);
 			}
-		}catch(Exception e){
-			FLog.e("exception binding map event to view " + ref,e);
-			showWarning("Logic Error", "Error cannot bind map event to view " + ref);
+		} catch (Exception e) {
+			FLog.e("exception binding map event to view " + ref, e);
+			showWarning("Logic Error", "Error cannot bind map event to view "
+					+ ref);
 		}
 	}
-	
+
 	public void newTabGroup(String label) {
-		try{
+		try {
 			TabGroup tabGroup = showTabGroup(label);
 			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing new tab group " + label);
+				showWarning("Logic Error", "Error showing new tab group "
+						+ label);
 				return;
 			}
-			
+
 			tabGroup.clearTabs();
-		}
-		catch(Exception e){
-			FLog.e("error showing new tabgroup " + label,e);
+		} catch (Exception e) {
+			FLog.e("error showing new tabgroup " + label, e);
 			showWarning("Logic Error", "Error showing new tab group " + label);
 		}
 	}
-	
+
 	public void newTab(String label) {
 		try {
 			Tab tab = showTab(label);
 			if (tab == null) {
-				showWarning("Logic Error", "Error showing new tab group " + label);
+				showWarning("Logic Error", "Error showing new tab group "
+						+ label);
 				return;
 			}
-			
+
 			tab.clearViews();
-		}
-		catch(Exception e) {
-			FLog.e("error showing new tab " + label,e);
+		} catch (Exception e) {
+			FLog.e("error showing new tab " + label, e);
 			showWarning("Logic Error", "Error showing new tab " + label);
 		}
 	}
 
-	public TabGroup showTabGroup(String label){
-		try{
-			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(this.activity, label);
+	public TabGroup showTabGroup(String label) {
+		try {
+			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(
+					this.activity, label);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tabgroup " + label);
 				return null;
 			}
 			return tabGroup;
-		}
-		catch(Exception e){
-			FLog.e("error showing tabgroup " + label,e);
+		} catch (Exception e) {
+			FLog.e("error showing tabgroup " + label, e);
 			showWarning("Logic Error", "Error showing tab group " + label);
 		}
 		return null;
 	}
-	
+
 	public Tab showTab(String label) {
-		try{
+		try {
 			Tab tab = activity.getUIRenderer().showTab(label);
 			if (tab == null) {
 				showWarning("Logic Error", "Error showing tab " + label);
 				return null;
 			}
 			return tab;
-		}
-		catch(Exception e){
-			FLog.e("error showing tab " + label,e);
+		} catch (Exception e) {
+			FLog.e("error showing tab " + label, e);
 			showWarning("Logic Error", "Error showing tab " + label);
 		}
 		return null;
 	}
 
-	public void showTabGroup(String id, String uuid){
+	public void showTabGroup(String id, String uuid) {
 		try {
-			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity, id);
+			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity,
+					id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab group " + id);
-				return ;
+				return;
 			}
-			if(tabGroup.getArchEntType() != null){
+			if (tabGroup.getArchEntType() != null) {
 				showArchEntityTabGroup(uuid, tabGroup);
-			}else if(tabGroup.getRelType() != null){
+			} else if (tabGroup.getRelType() != null) {
 				showRelationshipTabGroup(uuid, tabGroup);
-			}else{
+			} else {
 				showTabGroup(id);
 			}
 		} catch (Exception e) {
@@ -560,35 +590,36 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error showing tab group " + id);
 		}
 	}
-	
+
 	public void showTab(String id, String uuid) {
 		try {
 			if (id == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return ;
+				return;
 			}
 			String[] ids = id.split("/");
 			if (ids.length < 2) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return ;
+				return;
 			}
 			String groupId = ids[0];
 			String tabId = ids[1];
-			TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
+			TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(
+					groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return ;
+				return;
 			}
 			Tab tab = tabGroup.showTab(tabId);
 			if (tab == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return ;
+				return;
 			}
-			if(tabGroup.getArchEntType() != null){
+			if (tabGroup.getArchEntType() != null) {
 				showArchEntityTab(uuid, tab);
-			}else if(tabGroup.getRelType() != null){
+			} else if (tabGroup.getRelType() != null) {
 				showRelationshipTab(uuid, tab);
-			}else{
+			} else {
 				showTab(id);
 			}
 		} catch (Exception e) {
@@ -597,49 +628,56 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void cancelTabGroup(String id, boolean warn){
+	public void cancelTabGroup(String id, boolean warn) {
 		try {
 			if (id == null) {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return ;
+				return;
 			}
-			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(id);
+			final TabGroup tabGroup = activity.getUIRenderer()
+					.getTabGroupByLabel(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return ;
+				return;
 			}
-			if(warn){
+			if (warn) {
 				boolean hasChanges = false;
-				if(tabGroup.getArchEntType() != null || tabGroup.getRelType() != null){
-					for(Tab tab : tabGroup.getTabs()){
-						if(hasChanges(tab)){
+				if (tabGroup.getArchEntType() != null
+						|| tabGroup.getRelType() != null) {
+					for (Tab tab : tabGroup.getTabs()) {
+						if (hasChanges(tab)) {
 							hasChanges = true;
 						}
 					}
 				}
-				if(hasChanges){
-					AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-					
+				if (hasChanges) {
+					AlertDialog.Builder builder = new AlertDialog.Builder(
+							this.activity);
+
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab group? You have unsaved changes there.");
-					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					               // User clicked OK button
-					        	   goBack();
-					           }
-					       });
-					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					               // User cancelled the dialog
-					           }
-					       });
-					
+					builder.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// User clicked OK button
+									goBack();
+								}
+							});
+					builder.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// User cancelled the dialog
+								}
+							});
+
 					builder.create().show();
-				}else{
+				} else {
 					goBack();
 				}
-			}else{
-	     		goBack();
+			} else {
+				goBack();
 			}
 		} catch (Exception e) {
 			FLog.e("error cancelling tab group " + id);
@@ -647,135 +685,159 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void cancelTab(String id, boolean warn){
+	public void cancelTab(String id, boolean warn) {
 		try {
 			if (id == null) {
 				showWarning("Logic Error", "Error cancelling tab " + id);
-				return ;
+				return;
 			}
 			String[] ids = id.split("/");
 			if (ids.length < 2) {
 				showWarning("Logic Error", "Error cancelling tab " + id);
-				return ;
+				return;
 			}
 			String groupId = ids[0];
 			final String tabId = ids[1];
-			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
+			final TabGroup tabGroup = activity.getUIRenderer()
+					.getTabGroupByLabel(groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab " + id);
-				return ;
+				return;
 			}
 			Tab tab = tabGroup.getTab(tabId);
-			if(warn){
-				if(hasChanges(tab) && (tabGroup.getArchEntType() != null || tabGroup.getRelType() != null)){
-					AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-					
+			if (warn) {
+				if (hasChanges(tab)
+						&& (tabGroup.getArchEntType() != null || tabGroup
+								.getRelType() != null)) {
+					AlertDialog.Builder builder = new AlertDialog.Builder(
+							this.activity);
+
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
-					builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					               // User clicked OK button
-					        	   if(tabGroup.getTabs().size() == 1){
-					        		   goBack();
-					        	   }else{
-					        		   tabGroup.hideTab(tabId);
-					        	   }
-					           }
-					       });
-					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					           public void onClick(DialogInterface dialog, int id) {
-					               // User cancelled the dialog
-					        	   tabGroup.showTab(tabId);
-					           }
-					       });
-					
+					builder.setPositiveButton("OK",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// User clicked OK button
+									if (tabGroup.getTabs().size() == 1) {
+										goBack();
+									} else {
+										tabGroup.hideTab(tabId);
+									}
+								}
+							});
+					builder.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// User cancelled the dialog
+									tabGroup.showTab(tabId);
+								}
+							});
+
 					builder.create().show();
-				}else{
-					if(tabGroup.getTabs().size() == 1){
-		        	   goBack();
-		        	}else{
-		        	   tabGroup.hideTab(tabId);
-		           }
+				} else {
+					if (tabGroup.getTabs().size() == 1) {
+						goBack();
+					} else {
+						tabGroup.hideTab(tabId);
+					}
 				}
-			}else{
-				if(tabGroup.getTabs().size() == 1){
-	     		   goBack();
-	     	   }else{
-	     		   tabGroup.hideTab(tabId);
-	     	   }
+			} else {
+				if (tabGroup.getTabs().size() == 1) {
+					goBack();
+				} else {
+					tabGroup.hideTab(tabId);
+				}
 			}
 		} catch (Exception e) {
 			FLog.e("error cancelling tab " + id);
 			showWarning("Logic Error", "Error cancelling tab " + id);
 		}
 	}
-	
+
 	private boolean hasChanges(Tab tab) {
 		List<View> views = tab.getAllViews();
 		for (View v : views) {
 			if (v instanceof CustomEditText) {
 				CustomEditText customEditText = (CustomEditText) v;
-				if(!getFieldValue(customEditText.getRef()).equals(tab.getStoredValue(customEditText.getRef()))){
+				if (!getFieldValue(customEditText.getRef()).equals(
+						tab.getStoredValue(customEditText.getRef()))) {
 					return true;
 				}
-				if(customEditText.getCertainty() != customEditText.getCurrentCertainty()){
+				if (customEditText.getCertainty() != customEditText
+						.getCurrentCertainty()) {
 					return true;
 				}
-				if(!customEditText.getAnnotation().equals(customEditText.getCurrentAnnotation())){
+				if (!customEditText.getAnnotation().equals(
+						customEditText.getCurrentAnnotation())) {
 					return true;
 				}
-				
+
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
-				if(!getFieldValue(customDatePicker.getRef()).equals(tab.getStoredValue(customDatePicker.getRef()))){
+				if (!getFieldValue(customDatePicker.getRef()).equals(
+						tab.getStoredValue(customDatePicker.getRef()))) {
 					return true;
 				}
-				if(customDatePicker.getCertainty() != customDatePicker.getCurrentCertainty()){
+				if (customDatePicker.getCertainty() != customDatePicker
+						.getCurrentCertainty()) {
 					return true;
 				}
-				
+
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker customTimePicker = (CustomTimePicker) v;
-				if(!getFieldValue(customTimePicker.getRef()).equals(tab.getStoredValue(customTimePicker.getRef()))){
+				if (!getFieldValue(customTimePicker.getRef()).equals(
+						tab.getStoredValue(customTimePicker.getRef()))) {
 					return true;
 				}
-				if(customTimePicker.getCertainty() != customTimePicker.getCurrentCertainty()){
+				if (customTimePicker.getCertainty() != customTimePicker
+						.getCurrentCertainty()) {
 					return true;
 				}
-				
+
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
-				if(!getFieldValue(customLinearLayout.getRef()).equals(tab.getStoredValue(customLinearLayout.getRef()))){
+				if (!getFieldValue(customLinearLayout.getRef()).equals(
+						tab.getStoredValue(customLinearLayout.getRef()))) {
 					return true;
 				}
-				if(customLinearLayout.getCertainty() != customLinearLayout.getCurrentCertainty()){
+				if (customLinearLayout.getCertainty() != customLinearLayout
+						.getCurrentCertainty()) {
 					return true;
 				}
-				if(!customLinearLayout.getAnnotation().equals(customLinearLayout.getCurrentAnnotation())){
+				if (!customLinearLayout.getAnnotation().equals(
+						customLinearLayout.getCurrentAnnotation())) {
 					return true;
 				}
-				
+
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
-				if(!getFieldValue(customSpinner.getRef()).equals(tab.getStoredValue(customSpinner.getRef()))){
+				if (!getFieldValue(customSpinner.getRef()).equals(
+						tab.getStoredValue(customSpinner.getRef()))) {
 					return true;
 				}
-				if(customSpinner.getCertainty() != customSpinner.getCurrentCertainty()){
+				if (customSpinner.getCertainty() != customSpinner
+						.getCurrentCertainty()) {
 					return true;
 				}
-				if(!customSpinner.getAnnotation().equals(customSpinner.getCurrentAnnotation())){
+				if (!customSpinner.getAnnotation().equals(
+						customSpinner.getCurrentAnnotation())) {
 					return true;
 				}
-				
+
 			} else if (v instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
-				if(!getFieldValue(horizontalScrollView.getRef()).equals(tab.getStoredValue(horizontalScrollView.getRef()))){
+				if (!getFieldValue(horizontalScrollView.getRef()).equals(
+						tab.getStoredValue(horizontalScrollView.getRef()))) {
 					return true;
 				}
-				if(horizontalScrollView.getCertainty() != horizontalScrollView.getCurrentCertainty()){
+				if (horizontalScrollView.getCertainty() != horizontalScrollView
+						.getCurrentCertainty()) {
 					return true;
 				}
-				if(!horizontalScrollView.getAnnotation().equals(horizontalScrollView.getCurrentAnnotation())){
+				if (!horizontalScrollView.getAnnotation().equals(
+						horizontalScrollView.getCurrentAnnotation())) {
 					return true;
 				}
 			}
@@ -783,34 +845,38 @@ public class BeanShellLinker {
 		return false;
 	}
 
-	public void goBack(){
+	public void goBack() {
 		this.activity.onBackPressed();
 	}
 
-	public int getGpsUpdateInterval(){
+	public int getGpsUpdateInterval() {
 		return this.activity.getGPSDataManager().getGpsUpdateInterval();
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		this.activity.getGPSDataManager().setGpsUpdateInterval(gpsUpdateInterval);
+		this.activity.getGPSDataManager().setGpsUpdateInterval(
+				gpsUpdateInterval);
 	}
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
 			FLog.d("cannot find arch entity " + tabGroup.getLabel());
-			showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
-			return ;
+			showWarning("Logic Error",
+					"Error showing tab group " + tabGroup.getLabel());
+			return;
 		}
-		if(archEntityObj instanceof ArchEntity){
+		if (archEntityObj instanceof ArchEntity) {
 			ArchEntity archEntity = (ArchEntity) archEntityObj;
 			try {
-				for(Tab tab : tabGroup.getTabs()){
+				for (Tab tab : tabGroup.getTabs()) {
 					reinitiateArchEntFieldsValue(tab, archEntity);
-			    }
+				}
 			} catch (Exception e) {
-				FLog.e("error showing arch entity tab group " + tabGroup.getLabel(),e);
-				showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
+				FLog.e("error showing arch entity tab group "
+						+ tabGroup.getLabel(), e);
+				showWarning("Logic Error", "Error showing tab group "
+						+ tabGroup.getLabel());
 			}
 		}
 	}
@@ -819,35 +885,39 @@ public class BeanShellLinker {
 		Object relationshipObj = fetchRel(uuid);
 		if (relationshipObj == null) {
 			FLog.d("cannot find relationship " + tabGroup.getLabel());
-			showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
-			return ;
+			showWarning("Logic Error",
+					"Error showing tab group " + tabGroup.getLabel());
+			return;
 		}
-		if(relationshipObj instanceof Relationship){
+		if (relationshipObj instanceof Relationship) {
 			Relationship relationship = (Relationship) relationshipObj;
 			try {
-				for(Tab tab : tabGroup.getTabs()){
+				for (Tab tab : tabGroup.getTabs()) {
 					reinitiateRelationshipFieldsValue(tab, relationship);
-			    }
+				}
 			} catch (Exception e) {
-				FLog.e("error showing relationship tab group " + tabGroup.getLabel(),e);
-				showWarning("Logic Error", "Error showing tab group " + tabGroup.getLabel());
+				FLog.e("error showing relationship tab group "
+						+ tabGroup.getLabel(), e);
+				showWarning("Logic Error", "Error showing tab group "
+						+ tabGroup.getLabel());
 			}
 		}
 	}
-	
+
 	private void showArchEntityTab(String uuid, Tab tab) {
 		Object archEntityObj = fetchArchEnt(uuid);
 		if (archEntityObj == null) {
 			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
-			return ;
+			return;
 		}
-		if(archEntityObj instanceof ArchEntity){
+		if (archEntityObj instanceof ArchEntity) {
 			ArchEntity archEntity = (ArchEntity) archEntityObj;
 			try {
 				reinitiateArchEntFieldsValue(tab, archEntity);
 			} catch (Exception e) {
-				FLog.e("error showing arch entity tab " + tab.getLabel(),e);
-				showWarning("Logic Error", "Error showing tab " + tab.getLabel());
+				FLog.e("error showing arch entity tab " + tab.getLabel(), e);
+				showWarning("Logic Error",
+						"Error showing tab " + tab.getLabel());
 			}
 		}
 	}
@@ -855,7 +925,7 @@ public class BeanShellLinker {
 	private void reinitiateArchEntFieldsValue(Tab tab, ArchEntity archEntity) {
 		tab.clearViews();
 		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
-			if(tab.hasView(entityAttribute.getName())){
+			if (tab.hasView(entityAttribute.getName())) {
 				List<View> views = tab.getViews(entityAttribute.getName());
 				if (views != null)
 					loadArchEntFieldsValue(tab, entityAttribute, views);
@@ -867,15 +937,16 @@ public class BeanShellLinker {
 		Object relationshipObj = fetchRel(uuid);
 		if (relationshipObj == null) {
 			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
-			return ;
+			return;
 		}
-		if(relationshipObj instanceof Relationship){
+		if (relationshipObj instanceof Relationship) {
 			Relationship relationship = (Relationship) relationshipObj;
 			try {
 				reinitiateRelationshipFieldsValue(tab, relationship);
 			} catch (Exception e) {
-				FLog.e("error showing relationship tab " + tab.getLabel(),e);
-				showWarning("Logic Error", "Error showing tab " + tab.getLabel());
+				FLog.e("error showing relationship tab " + tab.getLabel(), e);
+				showWarning("Logic Error",
+						"Error showing tab " + tab.getLabel());
 			}
 		}
 	}
@@ -883,206 +954,241 @@ public class BeanShellLinker {
 	private void reinitiateRelationshipFieldsValue(Tab tab,
 			Relationship relationship) {
 		tab.clearViews();
-		for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
-			if(tab.hasView(relationshipAttribute.getName())){
-				List<View> views = tab.getViews(relationshipAttribute.getName());
+		for (RelationshipAttribute relationshipAttribute : relationship
+				.getAttributes()) {
+			if (tab.hasView(relationshipAttribute.getName())) {
+				List<View> views = tab
+						.getViews(relationshipAttribute.getName());
 				if (views != null)
-					loadRelationshipFieldsValue(tab, relationshipAttribute, views);
+					loadRelationshipFieldsValue(tab, relationshipAttribute,
+							views);
 			}
 		}
 	}
 
-	private void loadArchEntFieldsValue(Tab tab, EntityAttribute entityAttribute, List<View> views) {
+	private void loadArchEntFieldsValue(Tab tab,
+			EntityAttribute entityAttribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof CustomEditText) {
 				CustomEditText customEditText = (CustomEditText) v;
-				setArchEntityFieldValueForType(tab, customEditText.getAttributeType(), customEditText.getRef(), entityAttribute);
-				
+				setArchEntityFieldValueForType(tab,
+						customEditText.getAttributeType(),
+						customEditText.getRef(), entityAttribute);
+
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
-				setArchEntityFieldValueForType(tab, customDatePicker.getAttributeType(), customDatePicker.getRef(), entityAttribute);
-				
+				setArchEntityFieldValueForType(tab,
+						customDatePicker.getAttributeType(),
+						customDatePicker.getRef(), entityAttribute);
+
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker customTimePicker = (CustomTimePicker) v;
-				setArchEntityFieldValueForType(tab, customTimePicker.getAttributeType(), customTimePicker.getRef(), entityAttribute);
-				
+				setArchEntityFieldValueForType(tab,
+						customTimePicker.getAttributeType(),
+						customTimePicker.getRef(), entityAttribute);
+
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
-				setArchEntityFieldValueForType(tab, customLinearLayout.getAttributeType(), customLinearLayout.getRef(), entityAttribute);
-				
+				setArchEntityFieldValueForType(tab,
+						customLinearLayout.getAttributeType(),
+						customLinearLayout.getRef(), entityAttribute);
+
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
-				setArchEntityFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab,
+						customSpinner.getAttributeType(),
+						customSpinner.getRef(), entityAttribute);
 			} else if (v instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
-				setArchEntityFieldValueForType(tab, horizontalScrollView.getAttributeType(), horizontalScrollView.getRef(), entityAttribute);
+				setArchEntityFieldValueForType(tab,
+						horizontalScrollView.getAttributeType(),
+						horizontalScrollView.getRef(), entityAttribute);
 			}
 		}
 	}
 
-	private void loadRelationshipFieldsValue(Tab tab, RelationshipAttribute relationshipAttribute, List<View> views) {
+	private void loadRelationshipFieldsValue(Tab tab,
+			RelationshipAttribute relationshipAttribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof CustomEditText) {
 				CustomEditText customEditText = (CustomEditText) v;
-				setRelationshipFieldValueForType(tab, customEditText.getAttributeType(), customEditText.getRef(), relationshipAttribute);
-				
+				setRelationshipFieldValueForType(tab,
+						customEditText.getAttributeType(),
+						customEditText.getRef(), relationshipAttribute);
+
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker customDatePicker = (CustomDatePicker) v;
-				setRelationshipFieldValueForType(tab, customDatePicker.getAttributeType(), customDatePicker.getRef(), relationshipAttribute);
-				
+				setRelationshipFieldValueForType(tab,
+						customDatePicker.getAttributeType(),
+						customDatePicker.getRef(), relationshipAttribute);
+
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker customTimePicker = (CustomTimePicker) v;
-				setRelationshipFieldValueForType(tab, customTimePicker.getAttributeType(), customTimePicker.getRef(), relationshipAttribute);
-				
+				setRelationshipFieldValueForType(tab,
+						customTimePicker.getAttributeType(),
+						customTimePicker.getRef(), relationshipAttribute);
+
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout customLinearLayout = (CustomLinearLayout) v;
-				setRelationshipFieldValueForType(tab, customLinearLayout.getAttributeType(), customLinearLayout.getRef(), relationshipAttribute);
-				
+				setRelationshipFieldValueForType(tab,
+						customLinearLayout.getAttributeType(),
+						customLinearLayout.getRef(), relationshipAttribute);
+
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner customSpinner = (CustomSpinner) v;
-				setRelationshipFieldValueForType(tab, customSpinner.getAttributeType(), customSpinner.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab,
+						customSpinner.getAttributeType(),
+						customSpinner.getRef(), relationshipAttribute);
 			} else if (v instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
-				setRelationshipFieldValueForType(tab, horizontalScrollView.getAttributeType(), horizontalScrollView.getRef(), relationshipAttribute);
+				setRelationshipFieldValueForType(tab,
+						horizontalScrollView.getAttributeType(),
+						horizontalScrollView.getRef(), relationshipAttribute);
 			}
 		}
 	}
 
-	private void setArchEntityFieldValueForType(Tab tab, String type, String ref, EntityAttribute attribute){
-		if(FREETEXT.equals(type)){
-			setFieldValue(ref,attribute.getText());
-		}else if(MEASURE.equals(type)){
-			setFieldValue(ref,attribute.getMeasure());
+	private void setArchEntityFieldValueForType(Tab tab, String type,
+			String ref, EntityAttribute attribute) {
+		if (FREETEXT.equals(type)) {
+			setFieldValue(ref, attribute.getText());
+		} else if (MEASURE.equals(type)) {
+			setFieldValue(ref, attribute.getMeasure());
 			setFieldAnnotation(ref, attribute.getText());
-		}else if(VOCAB.equals(type)){
-			setFieldValue(ref,attribute.getVocab());
+		} else if (VOCAB.equals(type)) {
+			setFieldValue(ref, attribute.getVocab());
 			setFieldAnnotation(ref, attribute.getText());
 		}
-		setFieldCertainty(ref,attribute.getCertainty());
+		setFieldCertainty(ref, attribute.getCertainty());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
-	
-	private void setRelationshipFieldValueForType(Tab tab, String type, String ref, RelationshipAttribute relationshipAttribute){
-		if(FREETEXT.equals(type)){
-			setFieldValue(ref,relationshipAttribute.getText());
-		}else if(VOCAB.equals(type)){
-			setFieldValue(ref,relationshipAttribute.getVocab());
+
+	private void setRelationshipFieldValueForType(Tab tab, String type,
+			String ref, RelationshipAttribute relationshipAttribute) {
+		if (FREETEXT.equals(type)) {
+			setFieldValue(ref, relationshipAttribute.getText());
+		} else if (VOCAB.equals(type)) {
+			setFieldValue(ref, relationshipAttribute.getVocab());
 			setFieldAnnotation(ref, relationshipAttribute.getText());
 		}
-		setFieldCertainty(ref,relationshipAttribute.getCertainty());
+		setFieldCertainty(ref, relationshipAttribute.getCertainty());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
 
-	public void showToast(String message){
+	public void showToast(String message) {
 		try {
 			int duration = Toast.LENGTH_SHORT;
-			Toast toast = Toast.makeText(activity.getApplicationContext(), message, duration);
+			Toast toast = Toast.makeText(activity.getApplicationContext(),
+					message, duration);
 			toast.show();
-		}
-		catch(Exception e){
-			FLog.e("error showing toast",e);
+		} catch (Exception e) {
+			FLog.e("error showing toast", e);
 			showWarning("Logic Error", "Error showing toast");
 		}
 	}
-	
-	public void showAlert(final String title, final String message, final String okCallback, final String cancelCallback){
-		
+
+	public void showAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-		
+
 		builder.setTitle(title);
 		builder.setMessage(message);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		               // User clicked OK button
-		        	   execute(okCallback);
-		           }
-		       });
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		               // User cancelled the dialog
-		        	   execute(cancelCallback);
-		           }
-		       });
-		
+			public void onClick(DialogInterface dialog, int id) {
+				// User clicked OK button
+				execute(okCallback);
+			}
+		});
+		builder.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						// User cancelled the dialog
+						execute(cancelCallback);
+					}
+				});
+
 		builder.create().show();
-		
+
 	}
-	
-	public void showWarning(final String title, final String message){
-		
+
+	public void showWarning(final String title, final String message) {
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-		
+
 		builder.setTitle(title);
 		builder.setMessage(message);
 		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		               // User clicked OK button
-		           }
-		       });
+			public void onClick(DialogInterface dialog, int id) {
+				// User clicked OK button
+			}
+		});
 		builder.create().show();
-		
+
 	}
-	
+
 	public void setFieldValue(String ref, Object valueObj) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
+
 			if (valueObj instanceof Number) {
 				valueObj = valueObj.toString();
 			}
-			
-			if (valueObj instanceof String){
-				
+
+			if (valueObj instanceof String) {
+
 				String value = (String) valueObj;
 				value = activity.getArch16n().substituteValue(value);
-				
-				if (obj instanceof TextView){
+
+				if (obj instanceof TextView) {
 					TextView tv = (TextView) obj;
 					tv.setText(value);
-				}
-				else if (obj instanceof Spinner){
+				} else if (obj instanceof Spinner) {
 					Spinner spinner = (Spinner) obj;
-					
-					for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
-						NameValuePair pair = (NameValuePair) spinner.getItemAtPosition(i);
-						if (value.equalsIgnoreCase(pair.getValue())){
+
+					for (int i = 0; i < spinner.getAdapter().getCount(); ++i) {
+						NameValuePair pair = (NameValuePair) spinner
+								.getItemAtPosition(i);
+						if (value.equalsIgnoreCase(pair.getValue())) {
 							spinner.setSelection(i);
 							break;
 						}
 					}
-				}
-				else if (obj instanceof LinearLayout){
+				} else if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
-					
+
 					View child0 = ll.getChildAt(0);
-					
-					if (child0 instanceof RadioGroup){
+
+					if (child0 instanceof RadioGroup) {
 						RadioGroup rg = (RadioGroup) child0;
 						List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
-						for(int i = 0; i < rg.getChildCount(); ++i){
+						for (int i = 0; i < rg.getChildCount(); ++i) {
 							View view = rg.getChildAt(i);
-							if (view instanceof CustomRadioButton){
+							if (view instanceof CustomRadioButton) {
 								buttons.add((CustomRadioButton) view);
 							}
 						}
 						rg.removeAllViews();
 						for (CustomRadioButton rb : buttons) {
-							CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
-                            radioButton.setText(rb.getText());
-                            radioButton.setValue(rb.getValue());
-                            if (rb.getValue().toString().equalsIgnoreCase(value)){
-                            	radioButton.setChecked(true);
+							CustomRadioButton radioButton = new CustomRadioButton(
+									rg.getContext());
+							radioButton.setText(rb.getText());
+							radioButton.setValue(rb.getValue());
+							if (rb.getValue().toString()
+									.equalsIgnoreCase(value)) {
+								radioButton.setChecked(true);
 							}
-                            rg.addView(radioButton);
-                        	
-                        }
-						
-					}else if (child0 instanceof CheckBox){
-						for(int i = 0; i < ll.getChildCount(); ++i){
+							rg.addView(radioButton);
+
+						}
+
+					} else if (child0 instanceof CheckBox) {
+						for (int i = 0; i < ll.getChildCount(); ++i) {
 							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox){
+							if (view instanceof CustomCheckBox) {
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(value)){
+								if (cb.getValue().toString()
+										.equalsIgnoreCase(value)) {
 									cb.setChecked(true);
 									break;
 								}
@@ -1092,43 +1198,49 @@ public class BeanShellLinker {
 						FLog.w("cannot find view " + ref);
 						showWarning("Logic Error", "Cannot find view " + ref);
 					}
-				}
-				else if (obj instanceof DatePicker) {
+				} else if (obj instanceof DatePicker) {
 					DatePicker date = (DatePicker) obj;
 					DateUtil.setDatePicker(date, value);
-				} 
-				else if (obj instanceof TimePicker) {
+				} else if (obj instanceof TimePicker) {
 					TimePicker time = (TimePicker) obj;
 					DateUtil.setTimePicker(time, value);
-				}else if (obj instanceof CustomHorizontalScrollView){
+				} else if (obj instanceof CustomHorizontalScrollView) {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-						if(customImageView.getPicture().getId().equals(value)){
+					for (CustomImageView customImageView : horizontalScrollView
+							.getImageViews()) {
+						if (customImageView.getPicture().getId().equals(value)) {
 							customImageView.setBackgroundColor(Color.BLUE);
-							horizontalScrollView.setSelectedImageView(customImageView);
+							horizontalScrollView
+									.setSelectedImageView(customImageView);
 							break;
 						}
-					};
+					}
+					;
 				} else {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
 				}
 			}
-			
-			else if (valueObj instanceof List<?>){
-				
+
+			else if (valueObj instanceof List<?>) {
+
 				@SuppressWarnings("unchecked")
 				List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
-				
-				if (obj instanceof LinearLayout){
+
+				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
-					
-					for(NameValuePair pair : valueList){
-						for(int i = 0; i < ll.getChildCount(); ++i){
+
+					for (NameValuePair pair : valueList) {
+						for (int i = 0; i < ll.getChildCount(); ++i) {
 							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox){
+							if (view instanceof CustomCheckBox) {
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(activity.getArch16n().substituteValue(pair.getName()))){
+								if (cb.getValue()
+										.toString()
+										.equalsIgnoreCase(
+												activity.getArch16n()
+														.substituteValue(
+																pair.getName()))) {
 									cb.setChecked("true".equals(pair.getValue()));
 									break;
 								}
@@ -1139,319 +1251,303 @@ public class BeanShellLinker {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
 				}
+			} else {
+				FLog.w("cannot set field value " + ref + " = "
+						+ valueObj.toString());
+				showWarning("Logic Error", "Cannot set field value " + ref
+						+ " = " + valueObj.toString());
 			}
-			else {
-				FLog.w("cannot set field value " + ref + " = " + valueObj.toString());
-				showWarning("Logic Error", "Cannot set field value " + ref + " = " + valueObj.toString());
-			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field value " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting field value " + ref, e);
 			showWarning("Logic Error", "Error setting field value " + ref);
 		}
 	}
 
 	public void setFieldCertainty(String ref, Object valueObj) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
+
 			if (valueObj instanceof Number) {
 				valueObj = valueObj.toString();
 			}
-			
-			if (valueObj instanceof String){
-				
+
+			if (valueObj instanceof String) {
+
 				float value = Float.valueOf((String) valueObj);
-				
-				if (obj instanceof CustomEditText){
+
+				if (obj instanceof CustomEditText) {
 					CustomEditText tv = (CustomEditText) obj;
 					tv.setCertainty(value);
 					tv.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomSpinner){
+				} else if (obj instanceof CustomSpinner) {
 					CustomSpinner spinner = (CustomSpinner) obj;
 					spinner.setCertainty(value);
 					spinner.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomLinearLayout){
+				} else if (obj instanceof CustomLinearLayout) {
 					CustomLinearLayout layout = (CustomLinearLayout) obj;
 					layout.setCertainty(value);
 					layout.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomDatePicker) {
+				} else if (obj instanceof CustomDatePicker) {
 					CustomDatePicker date = (CustomDatePicker) obj;
 					date.setCertainty(value);
 					date.setCurrentCertainty(value);
-				} 
-				else if (obj instanceof CustomTimePicker) {
+				} else if (obj instanceof CustomTimePicker) {
 					CustomTimePicker time = (CustomTimePicker) obj;
 					time.setCertainty(value);
 					time.setCurrentCertainty(value);
-				}else if (obj instanceof CustomHorizontalScrollView){
+				} else if (obj instanceof CustomHorizontalScrollView) {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setCertainty(value);
 					horizontalScrollView.setCurrentCertainty(value);
-				}else {
-					FLog.w("cannot set field certainty " + ref + " = " + valueObj.toString());
-					showWarning("Logic Error", "Cannot set field certainty " + ref + " = " + valueObj.toString());
+				} else {
+					FLog.w("cannot set field certainty " + ref + " = "
+							+ valueObj.toString());
+					showWarning("Logic Error", "Cannot set field certainty "
+							+ ref + " = " + valueObj.toString());
 				}
 			} else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field certainty " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting field certainty " + ref, e);
 			showWarning("Logic Error", "Error setting field certainty " + ref);
 		}
 	}
 
 	public void setFieldAnnotation(String ref, Object valueObj) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
-			if (valueObj instanceof String){
-				
+
+			if (valueObj instanceof String) {
+
 				String value = (String) valueObj;
-				
-				if (obj instanceof CustomEditText){
+
+				if (obj instanceof CustomEditText) {
 					CustomEditText tv = (CustomEditText) obj;
 					tv.setAnnotation(value);
 					tv.setCurrentAnnotation(value);
-				}
-				else if (obj instanceof CustomSpinner){
+				} else if (obj instanceof CustomSpinner) {
 					CustomSpinner spinner = (CustomSpinner) obj;
 					spinner.setAnnotation(value);
 					spinner.setCurrentAnnotation(value);
-				}
-				else if (obj instanceof CustomLinearLayout){
+				} else if (obj instanceof CustomLinearLayout) {
 					CustomLinearLayout layout = (CustomLinearLayout) obj;
 					layout.setAnnotation(value);
 					layout.setCurrentAnnotation(value);
-				}else if (obj instanceof CustomHorizontalScrollView){
+				} else if (obj instanceof CustomHorizontalScrollView) {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					horizontalScrollView.setAnnotation(value);
 					horizontalScrollView.setCurrentAnnotation(value);
-				}else {
-					FLog.w("cannot set field annotation " + ref + " = " + valueObj.toString());
-					showWarning("Logic Error", "Cannot set field annotation " + ref + " = " + valueObj.toString());
+				} else {
+					FLog.w("cannot set field annotation " + ref + " = "
+							+ valueObj.toString());
+					showWarning("Logic Error", "Cannot set field annotation "
+							+ ref + " = " + valueObj.toString());
 				}
 			} else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field annotation " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting field annotation " + ref, e);
 			showWarning("Logic Error", "Error setting field annotation " + ref);
 		}
 	}
 
-	public Object getFieldValue(String ref){
-		
-		try{
+	public Object getFieldValue(String ref) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
-			if (obj instanceof TextView){
+
+			if (obj instanceof TextView) {
 				TextView tv = (TextView) obj;
 				return tv.getText().toString();
-			}
-			else if (obj instanceof Spinner){
+			} else if (obj instanceof Spinner) {
 				Spinner spinner = (Spinner) obj;
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-				if (pair == null) return "";
+				if (pair == null)
+					return "";
 				return pair.getValue();
-			}
-			else if (obj instanceof LinearLayout){
+			} else if (obj instanceof LinearLayout) {
 				LinearLayout ll = (LinearLayout) obj;
-				
+
 				View child0 = ll.getChildAt(0);
-				
-				if( child0 instanceof CheckBox){
+
+				if (child0 instanceof CheckBox) {
 					List<NameValuePair> valueList = new ArrayList<NameValuePair>();
-					
-					for(int i = 0; i < ll.getChildCount(); ++i){
+
+					for (int i = 0; i < ll.getChildCount(); ++i) {
 						View view = ll.getChildAt(i);
-						
-						if (view instanceof CustomCheckBox){
+
+						if (view instanceof CustomCheckBox) {
 							CustomCheckBox cb = (CustomCheckBox) view;
 							if (cb.isChecked()) {
-								valueList.add(new NameValuePair(cb.getValue(), "true"));
+								valueList.add(new NameValuePair(cb.getValue(),
+										"true"));
 							}
 						}
 					}
 					return valueList;
-				}
-				else if (child0 instanceof RadioGroup){
+				} else if (child0 instanceof RadioGroup) {
 					RadioGroup rg = (RadioGroup) child0;
 					String value = "";
-					for(int i = 0; i < rg.getChildCount(); ++i){
+					for (int i = 0; i < rg.getChildCount(); ++i) {
 						View view = rg.getChildAt(i);
-						
-						if (view instanceof CustomRadioButton){
+
+						if (view instanceof CustomRadioButton) {
 							CustomRadioButton rb = (CustomRadioButton) view;
-							if (rb.isChecked()){
+							if (rb.isChecked()) {
 								value = rb.getValue();
 								break;
 							}
 						}
 					}
 					return value;
-				}
-				else{
+				} else {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
 					return null;
 				}
-			}
-			else if (obj instanceof DatePicker) {
+			} else if (obj instanceof DatePicker) {
 				DatePicker date = (DatePicker) obj;
 				return DateUtil.getDate(date);
-			} 
-			else if (obj instanceof TimePicker) {
+			} else if (obj instanceof TimePicker) {
 				TimePicker time = (TimePicker) obj;
 				return DateUtil.getTime(time);
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
+			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				if(horizontalScrollView.getSelectedImageView() != null){
-					return horizontalScrollView.getSelectedImageView().getPicture().getId();
-				} else if(horizontalScrollView.getSelectedImageViews() != null){
-					if(!horizontalScrollView.getSelectedImageViews().isEmpty()){
+				if (horizontalScrollView.getSelectedImageView() != null) {
+					return horizontalScrollView.getSelectedImageView()
+							.getPicture().getId();
+				} else if (horizontalScrollView.getSelectedImageViews() != null) {
+					if (!horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
-						for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-							selectedPictures.add(imageView.getPicture().getUrl());
+						for (CustomImageView imageView : horizontalScrollView
+								.getSelectedImageViews()) {
+							selectedPictures.add(imageView.getPicture()
+									.getUrl());
 						}
 						return selectedPictures;
 					}
 					return "";
-				}else{
+				} else {
 					return "";
 				}
-			}
-			else if(obj instanceof CustomListView){
+			} else if (obj instanceof CustomListView) {
 				CustomListView listView = (CustomListView) obj;
-				if(listView.getSelectedItems() != null){
+				if (listView.getSelectedItems() != null) {
 					List<String> audios = new ArrayList<String>();
-					for(Object item : listView.getSelectedItems()){
+					for (Object item : listView.getSelectedItems()) {
 						NameValuePair pair = (NameValuePair) item;
 						audios.add(pair.getValue());
 					}
 					return audios;
-				}else{
+				} else {
 					return "";
 				}
-			}
-			else {
+			} else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
 				return null;
 			}
-		}
-		catch(Exception e){
-			FLog.e("error getting field value " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error getting field value " + ref, e);
 			showWarning("Logic Error", "Error getting field value " + ref);
 		}
 		return null;
 	}
 
-	public Object getFieldCertainty(String ref){
-		
-		try{
+	public Object getFieldCertainty(String ref) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
-			if (obj instanceof CustomEditText){
+
+			if (obj instanceof CustomEditText) {
 				CustomEditText tv = (CustomEditText) obj;
 				return String.valueOf(tv.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomSpinner){
+			} else if (obj instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) obj;
 				return String.valueOf(spinner.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomLinearLayout){
+			} else if (obj instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) obj;
 				return String.valueOf(layout.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomDatePicker) {
+			} else if (obj instanceof CustomDatePicker) {
 				CustomDatePicker date = (CustomDatePicker) obj;
 				return String.valueOf(date.getCurrentCertainty());
-			} 
-			else if (obj instanceof CustomTimePicker) {
+			} else if (obj instanceof CustomTimePicker) {
 				CustomTimePicker time = (CustomTimePicker) obj;
 				return String.valueOf(time.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
+			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				return String.valueOf(horizontalScrollView.getCurrentCertainty());
-			}
-			else {
+				return String.valueOf(horizontalScrollView
+						.getCurrentCertainty());
+			} else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
 				return null;
 			}
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			FLog.e("error getting field certainty " + ref, e);
 			showWarning("Logic Error", "Error getting field certainty " + ref);
 		}
 		return null;
 	}
 
-	public Object getFieldAnnotation(String ref){
-		
-		try{
+	public Object getFieldAnnotation(String ref) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
-			if (obj instanceof CustomEditText){
+
+			if (obj instanceof CustomEditText) {
 				CustomEditText tv = (CustomEditText) obj;
 				return tv.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomSpinner){
+			} else if (obj instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) obj;
 				return spinner.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomLinearLayout){
+			} else if (obj instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) obj;
 				return layout.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
+			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				return horizontalScrollView.getCurrentAnnotation();
-			}
-			else {
+			} else {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Cannot find view " + ref);
 				return null;
 			}
-		}
-		catch(Exception e){
-			FLog.e("error getting field annotation " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error getting field annotation " + ref, e);
 			showWarning("Logic Error", "Error getting field annotation " + ref);
 		}
 		return null;
 	}
 
-	public String getCurrentTime(){
+	public String getCurrentTime() {
 		Time timeNow = new Time();
-        timeNow.setToNow();
-        return timeNow.format("%Y-%m-%d %H:%M:%S");
+		timeNow.setToNow();
+		return timeNow.format("%Y-%m-%d %H:%M:%S");
 	}
 
-	public String saveArchEnt(String entity_id, String entity_type, List<Geometry> geo_data, List<EntityAttribute> attributes) {
+	public String saveArchEnt(String entity_id, String entity_type,
+			List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		try {
-			return activity.getDatabaseManager().saveArchEnt(entity_id, entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
-			
+			return activity.getDatabaseManager().saveArchEnt(entity_id,
+					entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
+
 		} catch (Exception e) {
 			FLog.e("error saving arch entity");
 			showWarning("Logic Error", "Error saving arch entity");
 		}
 		return null;
 	}
-	
-	public String saveRel(String rel_id, String rel_type, List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
+
+	public String saveRel(String rel_id, String rel_type,
+			List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
 		try {
-			
-			return activity.getDatabaseManager().saveRel(rel_id, rel_type, WKTUtil.collectionToWKT(geo_data), attributes);
+
+			return activity.getDatabaseManager().saveRel(rel_id, rel_type,
+					WKTUtil.collectionToWKT(geo_data), attributes);
 
 		} catch (Exception e) {
 			FLog.e("error saving relationship");
@@ -1459,27 +1555,27 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
-	
+
 	public boolean addReln(String entity_id, String rel_id, String verb) {
 		try {
-			return activity.getDatabaseManager().addReln(entity_id, rel_id, verb);
+			return activity.getDatabaseManager().addReln(entity_id, rel_id,
+					verb);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity relationship");
 			showWarning("Logic Error", "Error saving arch entity relationship");
 		}
 		return false;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public void populateDropDown(String ref, Collection valuesObj){
-		
+	public void populateDropDown(String ref, Collection valuesObj) {
+
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-	
-			if (obj instanceof Spinner && valuesObj instanceof ArrayList){
+
+			if (obj instanceof Spinner && valuesObj instanceof ArrayList) {
 				Spinner spinner = (Spinner) obj;
-				
-				
+
 				ArrayList<NameValuePair> pairs = null;
 				boolean isList = false;
 				try {
@@ -1492,24 +1588,24 @@ public class BeanShellLinker {
 				} catch (Exception e) {
 					isList = true;
 				}
-				
+
 				if (isList) {
 					@SuppressWarnings("unchecked")
 					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 					pairs = new ArrayList<NameValuePair>();
 					for (List<String> list : values) {
-						pairs.add(new NameValuePair(activity.getArch16n().substituteValue(list.get(1)), list.get(0)));
+						pairs.add(new NameValuePair(activity.getArch16n()
+								.substituteValue(list.get(1)), list.get(0)));
 					}
 				}
-				
+
 				ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-	                    this.activity,
-	                    android.R.layout.simple_spinner_dropdown_item,
-	                    pairs);
-	            spinner.setAdapter(arrayAdapter);
-	            activity.getUIRenderer().getTabForView(ref).setValueReference(ref, getFieldValue(ref));
-			}
-			else {
+						this.activity,
+						android.R.layout.simple_spinner_dropdown_item, pairs);
+				spinner.setAdapter(arrayAdapter);
+				activity.getUIRenderer().getTabForView(ref)
+						.setValueReference(ref, getFieldValue(ref));
+			} else {
 				showWarning("Logic Error", "Cannot populate drop down " + ref);
 			}
 		} catch (Exception e) {
@@ -1517,13 +1613,13 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error populate drop down " + ref);
 		}
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public void populateList(String ref, Collection valuesObj){
+	public void populateList(String ref, Collection valuesObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-	
-			if (valuesObj instanceof ArrayList){
+
+			if (valuesObj instanceof ArrayList) {
 				ArrayList<NameValuePair> pairs = null;
 				boolean isList = false;
 				try {
@@ -1536,49 +1632,49 @@ public class BeanShellLinker {
 				} catch (Exception e) {
 					isList = true;
 				}
-				
+
 				if (isList) {
 					@SuppressWarnings("unchecked")
 					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
 					pairs = new ArrayList<NameValuePair>();
 					for (List<String> list : values) {
-						pairs.add(new NameValuePair(activity.getArch16n().substituteValue(list.get(1)), list.get(0)));
+						pairs.add(new NameValuePair(activity.getArch16n()
+								.substituteValue(list.get(1)), list.get(0)));
 					}
 				}
-				if(obj instanceof LinearLayout){
+				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
-					
+
 					View child0 = ll.getChildAt(0);
-					
-					
-					if( child0 instanceof CheckBox){
+
+					if (child0 instanceof CheckBox) {
 						ll.removeAllViews();
-						
+
 						for (NameValuePair pair : pairs) {
-							CustomCheckBox checkBox = new CustomCheckBox(ll.getContext());
-		                    checkBox.setText(pair.getName());
-		                    checkBox.setValue(pair.getValue());
-		                    ll.addView(checkBox);
+							CustomCheckBox checkBox = new CustomCheckBox(
+									ll.getContext());
+							checkBox.setText(pair.getName());
+							checkBox.setValue(pair.getValue());
+							ll.addView(checkBox);
 						}
-					}
-					else if (child0 instanceof RadioGroup){
+					} else if (child0 instanceof RadioGroup) {
 						RadioGroup rg = (RadioGroup) child0;
 						rg.removeAllViews();
-						
+
 						for (NameValuePair pair : pairs) {
-							CustomRadioButton radioButton = new CustomRadioButton(ll.getContext());
-		                    radioButton.setText(pair.getName());
-		                    radioButton.setValue(pair.getValue());
-		                    rg.addView(radioButton);
+							CustomRadioButton radioButton = new CustomRadioButton(
+									ll.getContext());
+							radioButton.setText(pair.getName());
+							radioButton.setValue(pair.getValue());
+							rg.addView(radioButton);
 						}
 					}
-				}else if(obj instanceof CustomListView){
+				} else if (obj instanceof CustomListView) {
 					CustomListView list = (CustomListView) obj;
-	                ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-	                        list.getContext(),
-	                        android.R.layout.simple_list_item_1,
-	                        pairs);
-	                list.setAdapter(arrayAdapter);
+					ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+							list.getContext(),
+							android.R.layout.simple_list_item_1, pairs);
+					list.setAdapter(arrayAdapter);
 				} else {
 					showWarning("Logic Error", "Cannot populate list " + ref);
 				}
@@ -1588,374 +1684,310 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error populate list " + ref);
 		}
 	}
-	
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void populatePictureGallery(String ref, Collection valuesObj){
-		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
-			List<Picture> pictures = new ArrayList<Picture>();
-			if(valuesObj instanceof ArrayList<?>){
-				try{
-					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
-					for(List<String> pictureList : arrayList){
-						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
-						pictures.add(picture);
-					}
-				}catch(Exception e){
-					ArrayList<String> values = (ArrayList<String>) valuesObj;
-					for(String value : values){
-						Picture picture = new Picture(null,null,value);
-						pictures.add(picture);
-					}
-				}
-			}
-			
-			if(obj instanceof HorizontalScrollView){
-				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				horizontalScrollView.removeSelectedImageViews();
-		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
-		        galleriesLayout.removeAllViews();
-		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-		        for (Picture picture : pictures) {
-		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
-		        	File pictureFile = new File(path);
-		        	if(pictureFile.exists()){
-		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
-		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
-		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-		                gallery.setImageURI(Uri.parse(path));
-		                gallery.setBackgroundColor(Color.LTGRAY);
-		                gallery.setPadding(10, 10, 10, 10);
-		                gallery.setLayoutParams(layoutParams);
-		                gallery.setPicture(picture);
-		                gallery.setOnClickListener(new OnClickListener() {
-		
-		                    @Override
-		                    public void onClick(View v) {
-		                    	CustomImageView selectedImageView = (CustomImageView) v;
-		                    	if(horizontalScrollView.isMulti()){
-		                    		for (ImageView view : galleryImages) {
-			                        	if (view.equals(selectedImageView)) {
-				                        	if(horizontalScrollView.getSelectedImageViews() != null){
-				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
-				                    				view.setBackgroundColor(Color.LTGRAY);
-				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
-				                    			}else{
-				                    				view.setBackgroundColor(Color.BLUE);
-				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    			}
-				                    		}else{
-				                    			view.setBackgroundColor(Color.BLUE);
-				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    		}
-			                        	}
-			                        }
-		                    	}else{
-			                        horizontalScrollView.setSelectedImageView(selectedImageView);
-			                        for (ImageView view : galleryImages) {
-			                            if (view.equals(selectedImageView)) {
-			                                view.setBackgroundColor(Color.BLUE);
-			                            } else {
-			                                view.setBackgroundColor(Color.LTGRAY);
-			                            }
-			                        }
-		                    	}
-		                    }
-		                });
-		                TextView textView = new TextView(galleriesLayout.getContext());
-		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
-		                textView.setText(name);
-		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-		                textView.setTextSize(20);
-		                galleryLayout.addView(textView);
-		                galleryImages.add(gallery);
-		                galleryLayout.addView(gallery);
-		                galleriesLayout.addView(galleryLayout);
-		        	}
-		        }
-		        horizontalScrollView.setImageViews(galleryImages);
-			} else {
-				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
-			}
-		} catch (Exception e) {
-			FLog.e("error populate picture gallery " + ref , e);
-			showWarning("Logic Error", "Error populate picture gallery " + ref);
-		}
-	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void populateCameraPictureGallery(String ref, Collection valuesObj){
+	public void populatePictureGallery(String ref, Collection valuesObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
+
 			List<Picture> pictures = new ArrayList<Picture>();
-			if(valuesObj instanceof ArrayList<?>){
-				try{
+			if (valuesObj instanceof ArrayList<?>) {
+				try {
 					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
-					for(List<String> pictureList : arrayList){
-						Picture picture = new Picture(pictureList.get(0), pictureList.get(1), pictureList.get(2));
+					for (List<String> pictureList : arrayList) {
+						Picture picture = new Picture(pictureList.get(0),
+								pictureList.get(1), pictureList.get(2));
 						pictures.add(picture);
 					}
-				}catch(Exception e){
+				} catch (Exception e) {
 					ArrayList<String> values = (ArrayList<String>) valuesObj;
-					for(String value : values){
-						Picture picture = new Picture(null,null,value);
+					for (String value : values) {
+						Picture picture = new Picture(null, null, value);
 						pictures.add(picture);
 					}
 				}
 			}
-			
-			if(obj instanceof HorizontalScrollView){
+
+			if (obj instanceof HorizontalScrollView) {
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null){
-					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-						selectedPicturePath.add(imageView.getPicture().getUrl());
-					}
-				}
-				if(!pictures.isEmpty()){
-					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
-				}
 				horizontalScrollView.removeSelectedImageViews();
-		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
-		        galleriesLayout.removeAllViews();
-		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-		        for (Picture picture : pictures) {
-		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
-		        	File pictureFile = new File(path);
-		        	if(pictureFile.exists()){
-		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
-		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
-		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-		                gallery.setImageBitmap(decodeFile(new File(path), 400, 400));
-		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
-		                	gallery.setBackgroundColor(Color.BLUE);
-		                }else{
-		                	gallery.setBackgroundColor(Color.LTGRAY);
-		                }
-		                gallery.setPadding(10, 10, 10, 10);
-		                gallery.setLayoutParams(layoutParams);
-		                gallery.setPicture(picture);
-		                gallery.setOnLongClickListener(new OnLongClickListener() {
-							
+				LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView
+						.getChildAt(0);
+				galleriesLayout.removeAllViews();
+				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+				for (Picture picture : pictures) {
+					String path = picture.getUrl()
+							.contains(
+									Environment.getExternalStorageDirectory()
+											.getPath()) ? picture.getUrl()
+							: activity.getProjectDir() + "/" + picture.getUrl();
+					File pictureFile = new File(path);
+					if (pictureFile.exists()) {
+						LinearLayout galleryLayout = new LinearLayout(
+								galleriesLayout.getContext());
+						galleryLayout.setOrientation(LinearLayout.VERTICAL);
+						final CustomImageView gallery = new CustomImageView(
+								galleriesLayout.getContext());
+						LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+								400, 400);
+						gallery.setImageURI(Uri.parse(path));
+						gallery.setBackgroundColor(Color.LTGRAY);
+						gallery.setPadding(10, 10, 10, 10);
+						gallery.setLayoutParams(layoutParams);
+						gallery.setPicture(picture);
+						gallery.setOnClickListener(new OnClickListener() {
+
 							@Override
-							public boolean onLongClick(View v) {
+							public void onClick(View v) {
 								CustomImageView selectedImageView = (CustomImageView) v;
-		                    	if(horizontalScrollView.isMulti()){
-		                    		for (ImageView view : galleryImages) {
-			                        	if (view.equals(selectedImageView)) {
-				                        	if(horizontalScrollView.getSelectedImageViews() != null){
-				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
-				                    				view.setBackgroundColor(Color.LTGRAY);
-				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
-				                    			}else{
-				                    				view.setBackgroundColor(Color.BLUE);
-				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    			}
-				                    		}else{
-				                    			view.setBackgroundColor(Color.BLUE);
-				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    		}
-			                        	}
-			                        }
-		                    	}
-								return true;
+								if (horizontalScrollView.isMulti()) {
+									for (ImageView view : galleryImages) {
+										if (view.equals(selectedImageView)) {
+											if (horizontalScrollView
+													.getSelectedImageViews() != null) {
+												if (horizontalScrollView
+														.getSelectedImageViews()
+														.contains(
+																selectedImageView)) {
+													view.setBackgroundColor(Color.LTGRAY);
+													horizontalScrollView
+															.removeSelectedImageView(selectedImageView);
+												} else {
+													view.setBackgroundColor(Color.BLUE);
+													horizontalScrollView
+															.addSelectedImageView(selectedImageView);
+												}
+											} else {
+												view.setBackgroundColor(Color.BLUE);
+												horizontalScrollView
+														.addSelectedImageView(selectedImageView);
+											}
+										}
+									}
+								} else {
+									horizontalScrollView
+											.setSelectedImageView(selectedImageView);
+									for (ImageView view : galleryImages) {
+										if (view.equals(selectedImageView)) {
+											view.setBackgroundColor(Color.BLUE);
+										} else {
+											view.setBackgroundColor(Color.LTGRAY);
+										}
+									}
+								}
 							}
 						});
-		                gallery.setOnClickListener(new OnClickListener() {
-		
-		                    @Override
-		                    public void onClick(View v) {
-		                    	previewCameraPicture(v);
-		                    }
-		                });
-		                TextView textView = new TextView(galleriesLayout.getContext());
-		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
-		                textView.setText(name);
-		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-		                textView.setTextSize(20);
-		                galleryLayout.addView(textView);
-		                galleryImages.add(gallery);
-		                galleryLayout.addView(gallery);
-		                galleriesLayout.addView(galleryLayout);
-		                if(!selectedPicturePath.isEmpty()){
-		                	if(selectedPicturePath.contains(path)){
-			                	horizontalScrollView.addSelectedImageView(gallery);
-			                }
-		                }else{
-		                	horizontalScrollView.addSelectedImageView(gallery);
-		                }
-		        	}
-		        }
-		        horizontalScrollView.setImageViews(galleryImages);
+						TextView textView = new TextView(
+								galleriesLayout.getContext());
+						String name = picture.getName() != null ? picture
+								.getName() : new File(path).getName();
+						textView.setText(name);
+						textView.setGravity(Gravity.CENTER_HORIZONTAL);
+						textView.setTextSize(20);
+						galleryLayout.addView(textView);
+						galleryImages.add(gallery);
+						galleryLayout.addView(gallery);
+						galleriesLayout.addView(galleryLayout);
+					}
+				}
+				horizontalScrollView.setImageViews(galleryImages);
 			} else {
-				showWarning("Logic Error", "Cannot populate picture gallery " + ref);
+				showWarning("Logic Error", "Cannot populate picture gallery "
+						+ ref);
 			}
 		} catch (Exception e) {
-			FLog.e("error populate picture gallery " + ref , e);
+			FLog.e("error populate picture gallery " + ref, e);
 			showWarning("Logic Error", "Error populate picture gallery " + ref);
 		}
 	}
 
-	private void previewCameraPicture(View v) {
-		CustomImageView selectedImageView = (CustomImageView) v;
-    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		
-		builder.setTitle("Image Preview");
-		
-		ScrollView scrollView = new ScrollView(activity);
-		LinearLayout layout = new LinearLayout(activity);
-		layout.setOrientation(LinearLayout.VERTICAL);
-		scrollView.addView(layout);
-		
-		builder.setView(scrollView);
-		ImageView view = new ImageView(activity);
-		view.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
-		layout.addView(view);
-		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-				// Nothing
-			}
-	        
-	    });
-		builder.create().show();
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void populateVideoGallery(String ref, Collection valuesObj){
+	public void populateCameraPictureGallery(String ref, Collection valuesObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
+
 			List<Picture> pictures = new ArrayList<Picture>();
-			if(valuesObj instanceof ArrayList<?>){
+			if (valuesObj instanceof ArrayList<?>) {
 				ArrayList<String> values = (ArrayList<String>) valuesObj;
 				for (String value : values) {
 					Picture picture = new Picture(null, null, value);
 					pictures.add(picture);
 				}
 			}
-			
-			if(obj instanceof HorizontalScrollView){
+
+			if (obj instanceof HorizontalScrollView) {
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				List<String> selectedPicturePath = new ArrayList<String>();
-				if(horizontalScrollView.getSelectedImageViews() != null){
-					for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-						selectedPicturePath.add(imageView.getPicture().getUrl());
+				if (horizontalScrollView.getSelectedImageViews() != null) {
+					for (CustomImageView imageView : horizontalScrollView
+							.getSelectedImageViews()) {
+						String path = imageView
+								.getPicture()
+								.getUrl()
+								.contains(
+										Environment
+												.getExternalStorageDirectory()
+												.getPath()) ? imageView
+								.getPicture().getUrl() : activity
+								.getProjectDir()
+								+ "/"
+								+ imageView.getPicture().getUrl();
+						selectedPicturePath.add(path);
+					}
+					if (!pictures.isEmpty()) {
+						String path = pictures
+								.get(pictures.size() - 1)
+								.getUrl()
+								.contains(
+										Environment
+												.getExternalStorageDirectory()
+												.getPath()) ? pictures.get(
+								pictures.size() - 1).getUrl() : activity
+								.getProjectDir()
+								+ "/"
+								+ pictures.get(pictures.size() - 1).getUrl();
+						selectedPicturePath.add(path);
+					}
+				} else {
+					for (Picture picture : pictures) {
+						String path = picture.getUrl().contains(
+								Environment.getExternalStorageDirectory()
+										.getPath()) ? picture.getUrl()
+								: activity.getProjectDir() + "/"
+										+ picture.getUrl();
+						selectedPicturePath.add(path);
 					}
 				}
-				if(!pictures.isEmpty()){
-					selectedPicturePath.add(pictures.get(pictures.size()-1).getUrl());
-				}
+
 				horizontalScrollView.removeSelectedImageViews();
-		        LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView.getChildAt(0);
-		        galleriesLayout.removeAllViews();
-		        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-		        for (Picture picture : pictures) {
-		        	String path = picture.getUrl().contains(Environment.getExternalStorageDirectory().getPath()) ? picture.getUrl() : activity.getProjectDir() + "/" + picture.getUrl();
-		        	File videoFile = new File(path);
-		        	if(videoFile.exists()){
-		        		LinearLayout galleryLayout = new LinearLayout(galleriesLayout.getContext());
-		        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-		        		final CustomImageView gallery = new CustomImageView(galleriesLayout.getContext());
-		        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 400);
-		        		Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(path,
-		        		        MediaStore.Images.Thumbnails.MINI_KIND);
-		                gallery.setImageBitmap(thumbnail);
-		                if(!selectedPicturePath.isEmpty() && selectedPicturePath.contains(path)){
-		                	gallery.setBackgroundColor(Color.BLUE);
-		                }else{
-		                	gallery.setBackgroundColor(Color.LTGRAY);
-		                }
-		                gallery.setPadding(10, 10, 10, 10);
-		                gallery.setLayoutParams(layoutParams);
-		                gallery.setPicture(picture);
-		                gallery.setOnLongClickListener(new OnLongClickListener() {
-							
+				LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView
+						.getChildAt(0);
+				galleriesLayout.removeAllViews();
+				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+				for (Picture picture : pictures) {
+					String path = picture.getUrl()
+							.contains(
+									Environment.getExternalStorageDirectory()
+											.getPath()) ? picture.getUrl()
+							: activity.getProjectDir() + "/" + picture.getUrl();
+					File pictureFile = new File(path);
+					if (pictureFile.exists()) {
+						LinearLayout galleryLayout = new LinearLayout(
+								galleriesLayout.getContext());
+						galleryLayout.setOrientation(LinearLayout.VERTICAL);
+						final CustomImageView gallery = new CustomImageView(
+								galleriesLayout.getContext());
+						LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+								400, 400);
+						gallery.setImageBitmap(decodeFile(new File(path), 400,
+								400));
+						if (!selectedPicturePath.isEmpty()
+								&& selectedPicturePath.contains(path)) {
+							gallery.setBackgroundColor(Color.BLUE);
+						} else {
+							gallery.setBackgroundColor(Color.LTGRAY);
+						}
+						gallery.setPadding(10, 10, 10, 10);
+						gallery.setLayoutParams(layoutParams);
+						gallery.setPicture(picture);
+						gallery.setOnLongClickListener(new OnLongClickListener() {
+
 							@Override
 							public boolean onLongClick(View v) {
 								CustomImageView selectedImageView = (CustomImageView) v;
-		                    	if(horizontalScrollView.isMulti()){
-		                    		for (ImageView view : galleryImages) {
-			                        	if (view.equals(selectedImageView)) {
-				                        	if(horizontalScrollView.getSelectedImageViews() != null){
-				                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
-				                    				view.setBackgroundColor(Color.LTGRAY);
-				                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
-				                    			}else{
-				                    				view.setBackgroundColor(Color.BLUE);
-				                    				horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    			}
-				                    		}else{
-				                    			view.setBackgroundColor(Color.BLUE);
-				                    			horizontalScrollView.addSelectedImageView(selectedImageView);
-				                    		}
-			                        	}
-			                        }
-		                    	}
+								if (horizontalScrollView.isMulti()) {
+									for (ImageView view : galleryImages) {
+										if (view.equals(selectedImageView)) {
+											if (horizontalScrollView
+													.getSelectedImageViews() != null) {
+												if (horizontalScrollView
+														.getSelectedImageViews()
+														.contains(
+																selectedImageView)) {
+													view.setBackgroundColor(Color.LTGRAY);
+													horizontalScrollView
+															.removeSelectedImageView(selectedImageView);
+												} else {
+													view.setBackgroundColor(Color.BLUE);
+													horizontalScrollView
+															.addSelectedImageView(selectedImageView);
+												}
+											} else {
+												view.setBackgroundColor(Color.BLUE);
+												horizontalScrollView
+														.addSelectedImageView(selectedImageView);
+											}
+										}
+									}
+								}
 								return true;
 							}
 						});
-		                gallery.setOnClickListener(new OnClickListener() {
-		
-		                    @Override
-		                    public void onClick(View v) {
-		                    	previewVideo(v);
-		                    }
-		                });
-		                TextView textView = new TextView(galleriesLayout.getContext());
-		                String name = picture.getName() != null ? picture.getName() : new File(path).getName();
-		                textView.setText(name);
-		                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-		                textView.setTextSize(20);
-		                galleryLayout.addView(textView);
-		                galleryImages.add(gallery);
-		                galleryLayout.addView(gallery);
-		                galleriesLayout.addView(galleryLayout);
-		                if(!selectedPicturePath.isEmpty()){
-		                	if(selectedPicturePath.contains(path)){
-			                	horizontalScrollView.addSelectedImageView(gallery);
-			                }
-		                }else{
-		                	horizontalScrollView.addSelectedImageView(gallery);
-		                }
-		        	}
-		        }
-		        horizontalScrollView.setImageViews(galleryImages);
+						gallery.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								previewCameraPicture(v);
+							}
+						});
+						TextView textView = new TextView(
+								galleriesLayout.getContext());
+						String filePath = new File(path).getName();
+						if (filePath.indexOf("_") > 0) {
+							filePath = filePath
+									.substring(filePath.indexOf("_") + 1);
+						}
+						String name = picture.getName() != null ? picture
+								.getName() : filePath;
+						textView.setText(name);
+						textView.setGravity(Gravity.CENTER_HORIZONTAL);
+						textView.setTextSize(20);
+						galleryLayout.addView(textView);
+						galleryImages.add(gallery);
+						galleryLayout.addView(gallery);
+						galleriesLayout.addView(galleryLayout);
+						if (!selectedPicturePath.isEmpty()) {
+							if (selectedPicturePath.contains(path)) {
+								horizontalScrollView
+										.addSelectedImageView(gallery);
+							}
+						} else {
+							horizontalScrollView.addSelectedImageView(gallery);
+						}
+					}
+				}
+				horizontalScrollView.setImageViews(galleryImages);
 			} else {
-				showWarning("Logic Error", "Cannot populate video gallery " + ref);
+				showWarning("Logic Error", "Cannot populate picture gallery "
+						+ ref);
 			}
 		} catch (Exception e) {
-			FLog.e("error populate video gallery " + ref , e);
-			showWarning("Logic Error", "Error populate video gallery " + ref);
+			FLog.e("error populate picture gallery " + ref, e);
+			showWarning("Logic Error", "Error populate picture gallery " + ref);
 		}
 	}
 
-	private void previewVideo(View v) {
+	private void previewCameraPicture(View v) {
 		CustomImageView selectedImageView = (CustomImageView) v;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		
-		builder.setTitle("Video Preview");
-		
+
+		builder.setTitle("Image Preview");
+
+		ScrollView scrollView = new ScrollView(activity);
 		LinearLayout layout = new LinearLayout(activity);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
-		
-		builder.setView(layout);
-		VideoView videoView = new VideoView(activity);
-		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
-		videoView.setMediaController(new MediaController(activity));
-		videoView.requestFocus();
-		videoView.start();
-		layout.addView(videoView,new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
-		
+		scrollView.addView(layout);
+
+		builder.setView(scrollView);
+		ImageView view = new ImageView(activity);
+		String path = selectedImageView.getPicture().getUrl()
+				.contains(Environment.getExternalStorageDirectory().getPath()) ? selectedImageView
+				.getPicture().getUrl() : activity.getProjectDir() + "/"
+				+ selectedImageView.getPicture().getUrl();
+		view.setImageBitmap(decodeFile(new File(path), 500, 500));
+		layout.addView(view);
 		TextView text = new TextView(activity);
-		text.setText(getVideoMetaData(selectedImageView.getPicture().getUrl()));
+		text.setText(getCameraMetaData(path));
 		layout.addView(text);
 		builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
 
@@ -1963,14 +1995,266 @@ public class BeanShellLinker {
 			public void onClick(DialogInterface arg0, int arg1) {
 				// Nothing
 			}
-		    
+
 		});
 		builder.create().show();
 	}
 
-	private String getVideoMetaData(String path){
+	private String getCameraMetaData(String path) {
 		File videoFile = new File(path);
-		
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Picture Metadata:");
+		stringBuilder.append("\n");
+		stringBuilder.append("File name: " + videoFile.getName());
+		stringBuilder.append("\n");
+		stringBuilder.append("File size: " + videoFile.length() + " bytes");
+		stringBuilder.append("\n");
+		Date lastModifiedDate = new Date(videoFile.lastModified());
+		stringBuilder.append("Picture date: " + lastModifiedDate.toString());
+		return stringBuilder.toString();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateVideoGallery(String ref, Collection valuesObj) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			List<Picture> pictures = new ArrayList<Picture>();
+			if (valuesObj instanceof ArrayList<?>) {
+				ArrayList<String> values = (ArrayList<String>) valuesObj;
+				for (String value : values) {
+					Picture picture = new Picture(null, null, value);
+					pictures.add(picture);
+				}
+			}
+
+			if (obj instanceof HorizontalScrollView) {
+				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				List<String> selectedPicturePath = new ArrayList<String>();
+				if (horizontalScrollView.getSelectedImageViews() != null) {
+					for (CustomImageView imageView : horizontalScrollView
+							.getSelectedImageViews()) {
+						String path = imageView
+								.getPicture()
+								.getUrl()
+								.contains(
+										Environment
+												.getExternalStorageDirectory()
+												.getPath()) ? imageView
+								.getPicture().getUrl() : activity
+								.getProjectDir()
+								+ "/"
+								+ imageView.getPicture().getUrl();
+						selectedPicturePath.add(path);
+					}
+					if (!pictures.isEmpty()) {
+						String path = pictures
+								.get(pictures.size() - 1)
+								.getUrl()
+								.contains(
+										Environment
+												.getExternalStorageDirectory()
+												.getPath()) ? pictures.get(
+								pictures.size() - 1).getUrl() : activity
+								.getProjectDir()
+								+ "/"
+								+ pictures.get(pictures.size() - 1).getUrl();
+						selectedPicturePath.add(path);
+					}
+				} else {
+					for (Picture picture : pictures) {
+						String path = picture.getUrl().contains(
+								Environment.getExternalStorageDirectory()
+										.getPath()) ? picture.getUrl()
+								: activity.getProjectDir() + "/"
+										+ picture.getUrl();
+						selectedPicturePath.add(path);
+					}
+				}
+				horizontalScrollView.removeSelectedImageViews();
+				LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView
+						.getChildAt(0);
+				galleriesLayout.removeAllViews();
+				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
+				for (Picture picture : pictures) {
+					String path = picture.getUrl()
+							.contains(
+									Environment.getExternalStorageDirectory()
+											.getPath()) ? picture.getUrl()
+							: activity.getProjectDir() + "/" + picture.getUrl();
+					File videoFile = new File(path);
+					if (videoFile.exists()) {
+						LinearLayout galleryLayout = new LinearLayout(
+								galleriesLayout.getContext());
+						galleryLayout.setOrientation(LinearLayout.VERTICAL);
+						final CustomImageView gallery = new CustomImageView(
+								galleriesLayout.getContext());
+						LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+								400, 400);
+						Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
+								path, MediaStore.Images.Thumbnails.MINI_KIND);
+						gallery.setImageBitmap(thumbnail);
+						if (!selectedPicturePath.isEmpty()
+								&& selectedPicturePath.contains(path)) {
+							gallery.setBackgroundColor(Color.BLUE);
+						} else {
+							gallery.setBackgroundColor(Color.LTGRAY);
+						}
+						gallery.setPadding(10, 10, 10, 10);
+						gallery.setLayoutParams(layoutParams);
+						gallery.setPicture(picture);
+						gallery.setOnLongClickListener(new OnLongClickListener() {
+
+							@Override
+							public boolean onLongClick(View v) {
+								CustomImageView selectedImageView = (CustomImageView) v;
+								if (horizontalScrollView.isMulti()) {
+									for (ImageView view : galleryImages) {
+										if (view.equals(selectedImageView)) {
+											if (horizontalScrollView
+													.getSelectedImageViews() != null) {
+												if (horizontalScrollView
+														.getSelectedImageViews()
+														.contains(
+																selectedImageView)) {
+													view.setBackgroundColor(Color.LTGRAY);
+													horizontalScrollView
+															.removeSelectedImageView(selectedImageView);
+												} else {
+													view.setBackgroundColor(Color.BLUE);
+													horizontalScrollView
+															.addSelectedImageView(selectedImageView);
+												}
+											} else {
+												view.setBackgroundColor(Color.BLUE);
+												horizontalScrollView
+														.addSelectedImageView(selectedImageView);
+											}
+										}
+									}
+								}
+								return true;
+							}
+						});
+						gallery.setOnClickListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v) {
+								previewVideo(v);
+							}
+						});
+						TextView textView = new TextView(
+								galleriesLayout.getContext());
+						String filePath = new File(path).getName();
+						if (filePath.indexOf("_") > 0) {
+							filePath = filePath
+									.substring(filePath.indexOf("_") + 1);
+						}
+						String name = picture.getName() != null ? picture
+								.getName() : filePath;
+						textView.setText(name);
+						textView.setGravity(Gravity.CENTER_HORIZONTAL);
+						textView.setTextSize(20);
+						galleryLayout.addView(textView);
+						galleryImages.add(gallery);
+						galleryLayout.addView(gallery);
+						galleriesLayout.addView(galleryLayout);
+						if (!selectedPicturePath.isEmpty()) {
+							if (selectedPicturePath.contains(path)) {
+								horizontalScrollView
+										.addSelectedImageView(gallery);
+							}
+						} else {
+							horizontalScrollView.addSelectedImageView(gallery);
+						}
+					}
+				}
+				horizontalScrollView.setImageViews(galleryImages);
+			} else {
+				showWarning("Logic Error", "Cannot populate video gallery "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate video gallery " + ref, e);
+			showWarning("Logic Error", "Error populate video gallery " + ref);
+		}
+	}
+
+	private void previewVideo(View v) {
+		CustomImageView selectedImageView = (CustomImageView) v;
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+		builder.setTitle("Video Preview");
+
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		builder.setView(layout);
+		VideoView videoView = new VideoView(activity);
+		final String path = selectedImageView.getPicture().getUrl()
+				.contains(Environment.getExternalStorageDirectory().getPath()) ? selectedImageView
+				.getPicture().getUrl() : activity.getProjectDir() + "/"
+				+ selectedImageView.getPicture().getUrl();
+		videoView.setVideoPath(path);
+		videoView.setMediaController(new MediaController(activity));
+		videoView.requestFocus();
+		videoView.start();
+		layout.addView(videoView, new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
+
+		builder.setNegativeButton("Done",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+		builder.setPositiveButton("View Metadata",
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								activity);
+
+						builder.setTitle("Video Preview");
+
+						LinearLayout layout = new LinearLayout(activity);
+						layout.setLayoutParams(new LayoutParams(
+								LayoutParams.MATCH_PARENT,
+								LayoutParams.MATCH_PARENT));
+						layout.setOrientation(LinearLayout.VERTICAL);
+
+						builder.setView(layout);
+						TextView text = new TextView(activity);
+						text.setText(getVideoMetaData(path));
+						layout.addView(text);
+						builder.setPositiveButton("Done",
+								new DialogInterface.OnClickListener() {
+
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										// TODO Auto-generated method stub
+
+									}
+								});
+						builder.create().show();
+
+					}
+
+				});
+		builder.create().show();
+	}
+
+	private String getVideoMetaData(String path) {
+		File videoFile = new File(path);
+
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Video Metadata:");
 		stringBuilder.append("\n");
@@ -1986,97 +2270,124 @@ public class BeanShellLinker {
 			player.prepare();
 			long duration = player.getDuration();
 			stringBuilder.append("\n");
-			stringBuilder.append("Video duration: " + duration/1000 + " seconds");
+			stringBuilder.append("Video duration: " + duration / 1000
+					+ " seconds");
 			player.release();
 		} catch (Exception e) {
-			FLog.e("error obtaining video file duration",e);
+			FLog.e("error obtaining video file duration", e);
 		}
 		return stringBuilder.toString();
 	}
 
-	public static Bitmap decodeFile(File f,int WIDTH,int HIGHT){
-        try {
-            //Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f),null,o);
+	public static Bitmap decodeFile(File f, int WIDTH, int HIGHT) {
+		try {
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
 
-            //The new size we want to scale to
-            final int REQUIRED_WIDTH=WIDTH;
-            final int REQUIRED_HIGHT=HIGHT;
-            //Find the correct scale value. It should be the power of 2.
-            int scale=1;
-            while(o.outWidth/scale/2>=REQUIRED_WIDTH && o.outHeight/scale/2>=REQUIRED_HIGHT)
-                scale*=2;
+			// The new size we want to scale to
+			final int REQUIRED_WIDTH = WIDTH;
+			final int REQUIRED_HIGHT = HIGHT;
+			// Find the correct scale value. It should be the power of 2.
+			int scale = 1;
+			while (o.outWidth / scale / 2 >= REQUIRED_WIDTH
+					&& o.outHeight / scale / 2 >= REQUIRED_HIGHT)
+				scale *= 2;
 
-            //Decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize=scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        }catch (Exception e) {
-        	FLog.e("error when decode the bitmap",e);
-        }
-        return null;
-    }
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+		} catch (Exception e) {
+			FLog.e("error when decode the bitmap", e);
+		}
+		return null;
+	}
 
 	@SuppressWarnings("rawtypes")
-	public void populateAudioList(String ref, Collection valuesObj){
+	public void populateAudioList(String ref, Collection valuesObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-	
-			if (valuesObj instanceof ArrayList){
+
+			if (valuesObj instanceof ArrayList) {
 				final ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>();
 				try {
 					@SuppressWarnings("unchecked")
 					ArrayList<String> values = (ArrayList<String>) valuesObj;
 					for (String s : values) {
 						File file = new File(s);
-						pairs.add(new NameValuePair(file.getName(), s));
+						String filePath = file.getName();
+						if (filePath.indexOf("_") > 0) {
+							filePath = filePath
+									.substring(filePath.indexOf("_") + 1);
+						}
+						pairs.add(new NameValuePair(filePath, s));
 					}
 				} catch (Exception e) {
-					FLog.e("error passing collections type",e);
+					FLog.e("error passing collections type", e);
 				}
-				
-				if(obj instanceof CustomListView){
+
+				if (obj instanceof CustomListView) {
 					final CustomListView list = (CustomListView) obj;
 					Map<NameValuePair, Boolean> audios = new HashMap<NameValuePair, Boolean>();
-					for(NameValuePair audio : pairs){
-						if(list.getSelectedItems() != null){
-							if(list.getSelectedItems().contains(audio)){
+					for (NameValuePair audio : pairs) {
+						if (list.getSelectedItems() != null
+								&& !list.getSelectedItems().isEmpty()) {
+							if(containsAudio(audio, list.getSelectedItems())){
 								audios.put(audio, true);
 							}else{
 								audios.put(audio, false);
 							}
-						}else{
+						} else {
+							list.addSelectedItem(audio);
 							audios.put(audio, true);
 						}
 					}
-					if(!pairs.isEmpty()){
-						list.addSelectedItem(pairs.get(pairs.size()-1));
-						audios.put(pairs.get(pairs.size()-1),true);
+					if (!pairs.isEmpty()) {
+						NameValuePair pair = pairs.get(pairs.size() - 1);
+						if (list.getSelectedItems() != null) {
+							List<Object> selectedItems = new ArrayList<Object>();
+							selectedItems.addAll(list.getSelectedItems());
+							if(!containsAudio(pair, selectedItems)){
+								list.addSelectedItem(pair);
+								audios.put(pair,true);
+							}
+						} else {
+							list.addSelectedItem(pair);
+							audios.put(pair, true);
+						}
+					} else {
+						list.removeSelectedItems();
+						audios.clear();
 					}
+
 					AudioListAdapter adapter = new AudioListAdapter(audios);
-	                list.setAdapter(adapter);
-	                list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+					list.setAdapter(adapter);
+					list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 						@Override
 						public void onItemClick(AdapterView<?> arg0, View arg1,
 								int arg2, long arg3) {
 							NameValuePair audioPair = pairs.get(arg2);
-							String path = audioPair.getValue();
+							String path = audioPair.getValue().contains(
+									Environment.getExternalStorageDirectory()
+											.getPath()) ? audioPair.getValue()
+									: activity.getProjectDir() + "/"
+											+ audioPair.getValue();
 							previewAudio(path);
 						}
-	                });
-	                list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+					});
+					list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
 						@Override
 						public boolean onItemLongClick(AdapterView<?> arg0,
 								View view, int arg2, long arg3) {
 							AudioListItem item = (AudioListItem) view;
 							item.toggle();
-							if(item.isChecked()){
+							if (item.isChecked()) {
 								list.addSelectedItem(item.getAudioPair());
-							}else{
+							} else {
 								list.removeSelectedItem(item.getAudioPair());
 							}
 							return true;
@@ -2087,30 +2398,41 @@ public class BeanShellLinker {
 				}
 			}
 		} catch (Exception e) {
-			FLog.e("error populate list " + ref,e);
+			FLog.e("error populate list " + ref, e);
 			showWarning("Logic Error", "Error populate list " + ref);
 		}
 	}
 
+	private boolean containsAudio(NameValuePair audio, List<Object> selectedAudios){
+		for (Object object : selectedAudios) {
+			NameValuePair nameValuePair = (NameValuePair) object;
+			if (nameValuePair.getName().equals(audio.getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	private void previewAudio(final String path) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		
+
 		builder.setTitle("Audio Preview");
-		
+
 		LinearLayout layout = new LinearLayout(activity);
-		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT));
+		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
-		
+
 		builder.setView(layout);
-		
+
 		ToggleButton playButton = new ToggleButton(activity);
 		playButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
+
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if(isChecked){
-					startPlaying(buttonView,path);
-				}else{
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
+					startPlaying(buttonView, path);
+				} else {
 					stopPlaying();
 				}
 			}
@@ -2126,18 +2448,18 @@ public class BeanShellLinker {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				if(mediaPlayer != null){
+				if (mediaPlayer != null) {
 					stopPlaying();
 				}
 			}
-		    
+
 		});
 		builder.create().show();
 	}
 
-	private String getAudioMetaData(String path){
+	private String getAudioMetaData(String path) {
 		File audioFile = new File(path);
-		
+
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Audio Metadata:");
 		stringBuilder.append("\n");
@@ -2153,39 +2475,40 @@ public class BeanShellLinker {
 			player.prepare();
 			long duration = player.getDuration();
 			stringBuilder.append("\n");
-			stringBuilder.append("Audio duration: " + duration/1000 + " seconds");
+			stringBuilder.append("Audio duration: " + duration / 1000
+					+ " seconds");
 			player.release();
 		} catch (Exception e) {
-			FLog.e("error obtaining audio file duration",e);
+			FLog.e("error obtaining audio file duration", e);
 		}
-		
+
 		return stringBuilder.toString();
 	}
 
 	private void startPlaying(final CompoundButton buttonView, String path) {
-        mediaPlayer = new MediaPlayer();
-        try {
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-				
+		mediaPlayer = new MediaPlayer();
+		try {
+			mediaPlayer.setDataSource(path);
+			mediaPlayer.prepare();
+			mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+
 				@Override
 				public void onCompletion(MediaPlayer arg0) {
 					buttonView.setChecked(false);
 				}
 			});
-            mediaPlayer.start();
-        } catch (IOException e) {
-            FLog.e("prepare() failed",e);
-        }
-    }
+			mediaPlayer.start();
+		} catch (IOException e) {
+			FLog.e("prepare() failed", e);
+		}
+	}
 
-    private void stopPlaying() {
-        mediaPlayer.release();
-        mediaPlayer = null;
-    }
+	private void stopPlaying() {
+		mediaPlayer.release();
+		mediaPlayer = null;
+	}
 
-    public Object fetchArchEnt(String id){
+	public Object fetchArchEnt(String id) {
 		try {
 			return activity.getDatabaseManager().fetchArchEnt(id);
 		} catch (Exception e) {
@@ -2195,7 +2518,7 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	public Object fetchRel(String id){
+	public Object fetchRel(String id) {
 		try {
 			return activity.getDatabaseManager().fetchRel(id);
 		} catch (Exception e) {
@@ -2205,7 +2528,7 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	public Object fetchOne(String query){
+	public Object fetchOne(String query) {
 		try {
 			return activity.getDatabaseManager().fetchOne(query);
 		} catch (Exception e) {
@@ -2216,7 +2539,7 @@ public class BeanShellLinker {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public Collection fetchAll(String query){
+	public Collection fetchAll(String query) {
 		try {
 			return activity.getDatabaseManager().fetchAll(query);
 		} catch (Exception e) {
@@ -2225,9 +2548,9 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public Collection fetchEntityList(String type){
+	public Collection fetchEntityList(String type) {
 		try {
 			return activity.getDatabaseManager().fetchEntityList(type);
 		} catch (Exception e) {
@@ -2236,9 +2559,9 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
-	public Collection fetchRelationshipList(String type){
+	public Collection fetchRelationshipList(String type) {
 		try {
 			return activity.getDatabaseManager().fetchRelationshipList(type);
 		} catch (Exception e) {
@@ -2247,472 +2570,472 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
-	
+
 	private void initialiseBluetoohConnection(BluetoothAdapter adapter) {
-        if (adapter != null && adapter.isEnabled()) {
-            final Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-            if (pairedDevices.size() > 0) {
-                final List<CharSequence> sequences = new ArrayList<CharSequence>();
-            	for (BluetoothDevice bluetoothDevice : pairedDevices) {
-            		sequences.add(bluetoothDevice.getName());
-                }
-            	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            	builder.setTitle("Select bluetooth to connect");
-            	builder.setItems(sequences.toArray(new CharSequence[sequences.size()]), new DialogInterface.OnClickListener() {
-            	    public void onClick(DialogInterface dialog, int item) {
-            	    	for (BluetoothDevice bluetoothDevice : pairedDevices) {
-	                		if(bluetoothDevice.getName().equals(sequences.get(item))){
-	                			BeanShellLinker.this.activity.getGPSDataManager().setGpsDevice(bluetoothDevice);
-	                			BeanShellLinker.this.activity.getGPSDataManager().startExternalGPSListener();
-	                			break;
-	                		}
-	                    }
-            	    }
-            	});
-            	AlertDialog alert = builder.create();
-            	alert.show();
-            }
-        }
-    }
-	
-	public void startExternalGPS(){
+		if (adapter != null && adapter.isEnabled()) {
+			final Set<BluetoothDevice> pairedDevices = adapter
+					.getBondedDevices();
+			if (pairedDevices.size() > 0) {
+				final List<CharSequence> sequences = new ArrayList<CharSequence>();
+				for (BluetoothDevice bluetoothDevice : pairedDevices) {
+					sequences.add(bluetoothDevice.getName());
+				}
+				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+				builder.setTitle("Select bluetooth to connect");
+				builder.setItems(
+						sequences.toArray(new CharSequence[sequences.size()]),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int item) {
+								for (BluetoothDevice bluetoothDevice : pairedDevices) {
+									if (bluetoothDevice.getName().equals(
+											sequences.get(item))) {
+										BeanShellLinker.this.activity
+												.getGPSDataManager()
+												.setGpsDevice(bluetoothDevice);
+										BeanShellLinker.this.activity
+												.getGPSDataManager()
+												.startExternalGPSListener();
+										break;
+									}
+								}
+							}
+						});
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+		}
+	}
+
+	public void startExternalGPS() {
 		initialiseBluetoohConnection(BluetoothAdapter.getDefaultAdapter());
 	}
-	
-	public void startInternalGPS(){
+
+	public void startInternalGPS() {
 		this.activity.getGPSDataManager().startInternalGPSListener();
 	}
-	
-	public Object getGPSPosition(){
+
+	public Object getGPSPosition() {
 		return this.activity.getGPSDataManager().getGPSPosition();
 	}
 
-	public Object getGPSEstimatedAccuracy(){
+	public Object getGPSEstimatedAccuracy() {
 		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy();
 	}
 
-	public Object getGPSHeading(){
+	public Object getGPSHeading() {
 		return this.activity.getGPSDataManager().getGPSHeading();
 	}
 
-	public Object getGPSPosition(String gps){
+	public Object getGPSPosition(String gps) {
 		return this.activity.getGPSDataManager().getGPSPosition(gps);
 	}
 
-	public Object getGPSEstimatedAccuracy(String gps){
+	public Object getGPSEstimatedAccuracy(String gps) {
 		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy(gps);
 	}
 
-	public Object getGPSHeading(String gps){
+	public Object getGPSHeading(String gps) {
 		return this.activity.getGPSDataManager().getGPSHeading(gps);
 	}
 
-	public void showRasterMap(final String ref, String layerName, String filename) {
-		try{
+	public void showRasterMap(final String ref, String layerName,
+			String filename) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
-				
+
 				String filepath = activity.getProjectDir() + "/" + filename;
 				mapView.addRasterMap(layerName, filepath);
-	            
+
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error showing raster map", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error rendering raster map",e);
+		} catch (Exception e) {
+			FLog.e("error rendering raster map", e);
 			showWarning("Logic Error", "Error cannot render raster map " + ref);
 		}
 	}
-	
-	
-	
+
 	public void setMapFocusPoint(String ref, float longitude, float latitude) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				mapView.setMapFocusPoint(longitude, latitude);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error setting map focus point", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error setting map focus point " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting map focus point " + ref, e);
 			showWarning("Logic Error", "Error setting map focus point " + ref);
 		}
 	}
-	
+
 	public void setMapRotation(String ref, float rotation) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// rotation - 0 = north-up
-                mapView.setRotation(rotation);
+				mapView.setRotation(rotation);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting map rotation " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting map rotation " + ref, e);
 			showWarning("Logic Error", "Error setting map rotation " + ref);
 		}
 	}
-	
+
 	public void setMapZoom(String ref, float zoom) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// zoom - 0 = world, like on most web maps
-                mapView.setZoom(zoom);
+				mapView.setZoom(zoom);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting map zoom " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting map zoom " + ref, e);
 			showWarning("Logic Error", "Error setting map zoom " + ref);
 		}
 	}
-	
+
 	public void setMapTilt(String ref, float tilt) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				// tilt means perspective view. Default is 90 degrees for "normal" 2D map view, minimum allowed is 30 degrees.
-                mapView.setTilt(tilt);
+				// tilt means perspective view. Default is 90 degrees for
+				// "normal" 2D map view, minimum allowed is 30 degrees.
+				mapView.setTilt(tilt);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting map tilt " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error setting map tilt " + ref, e);
 			showWarning("Logic Error", "Error setting map tilt " + ref);
 		}
 	}
-	
-	public void centerOnCurrentPosition(String ref){
+
+	public void centerOnCurrentPosition(String ref) {
 		Object currentLocation = getGPSPosition();
-		if(currentLocation != null){
+		if (currentLocation != null) {
 			GPSLocation location = (GPSLocation) currentLocation;
-			setMapFocusPoint(ref, (float) location.getLongitude(), (float) location.getLatitude());
+			setMapFocusPoint(ref, (float) location.getLongitude(),
+					(float) location.getLatitude());
 		}
 	}
 
-	public int showShapeLayer(String ref, String layerName, String filename, 
-			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle) {
-		try{
+	public int showShapeLayer(String ref, String layerName, String filename,
+			GeometryStyle pointStyle, GeometryStyle lineStyle,
+			GeometryStyle polygonStyle) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				String filepath = activity.getProjectDir() + "/" + filename;
-				return mapView.addShapeLayer(layerName, filepath, pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet());
+				return mapView.addShapeLayer(layerName, filepath,
+						pointStyle.toPointStyleSet(),
+						lineStyle.toLineStyleSet(),
+						polygonStyle.toPolygonStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.w("error showing shape layer", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error showing shape layer" + ref,e);
+		} catch (Exception e) {
+			FLog.e("error showing shape layer" + ref, e);
 			showWarning("Logic Error", "Error showing shape layer " + ref);
 		}
 		return 0;
 	}
-	
-	public int showSpatialLayer(String ref, String layerName, String filename, String tablename, String idColumn, String labelColumn, 
-			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
-		try{
+
+	public int showSpatialLayer(String ref, String layerName, String filename,
+			String tablename, String idColumn, String labelColumn,
+			GeometryStyle pointStyle, GeometryStyle lineStyle,
+			GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				String filepath = activity.getProjectDir() + "/" + filename;
-				return mapView.addSpatialLayer(layerName, filepath, tablename, idColumn, labelColumn, pointStyle.toPointStyleSet(), 
-						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+				return mapView.addSpatialLayer(layerName, filepath, tablename,
+						idColumn, labelColumn, pointStyle.toPointStyleSet(),
+						lineStyle.toLineStyleSet(),
+						polygonStyle.toPolygonStyleSet(),
+						textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.w("error showing spatial layer", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error showing spatial layer" + ref,e);
+		} catch (Exception e) {
+			FLog.e("error showing spatial layer" + ref, e);
 			showWarning("Logic Error", "Error showing spatial layer " + ref);
 		}
 		return 0;
 	}
-	
-	public int showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
-			GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
-		try{
+
+	public int showDatabaseLayer(String ref, String layerName,
+			boolean isEntity, String queryName, String querySql,
+			GeometryStyle pointStyle, GeometryStyle lineStyle,
+			GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
-				return mapView.addDatabaseLayer(layerName, isEntity, queryName, querySql, pointStyle.toPointStyleSet(), 
-						lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet());
+
+				return mapView.addDatabaseLayer(layerName, isEntity, queryName,
+						querySql, pointStyle.toPointStyleSet(),
+						lineStyle.toLineStyleSet(),
+						polygonStyle.toPolygonStyleSet(),
+						textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.w("error showing database layer", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error showing database layer" + ref,e);
+		} catch (Exception e) {
+			FLog.e("error showing database layer" + ref, e);
 			showWarning("Logic Error", "Error showing database layer " + ref);
 		}
 		return 0;
 	}
-	
+
 	public void removeLayer(String ref, int layerId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				mapView.removeLayer(layerId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error removing layer", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error removing layer " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error removing layer " + ref, e);
 			showWarning("Logic Error", "Error removing layer " + ref);
 		}
 	}
-	
+
 	public int createCanvasLayer(String ref, String layerName) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				return mapView.addCanvasLayer(layerName);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error creating canvas layer", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error creating canvas layer " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error creating canvas layer " + ref, e);
 			showWarning("Logic Error", "Error creating canvas layer " + ref);
 		}
 		return 0;
 	}
-	
+
 	public void setLayerVisible(String ref, int layerId, boolean visible) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				mapView.setLayerVisible(layerId, visible);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting vector layer visiblity " + ref,e);
-			showWarning("Logic Error", "Error setting vector layer visibility " + ref);
+		} catch (Exception e) {
+			FLog.e("error setting vector layer visiblity " + ref, e);
+			showWarning("Logic Error", "Error setting vector layer visibility "
+					+ ref);
 		}
 	}
-	
-	public int drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
-		
-		try{
+
+	public int drawPoint(String ref, int layerId, MapPos point,
+			GeometryStyle style) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				return mapView.drawPoint(layerId, point, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error drawing point", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error drawing point " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error drawing point " + ref, e);
 			showWarning("Logic Error", "Error drawing point " + ref);
 		}
 		return 0;
 	}
-	
-	public int drawLine(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
-		
-		try{
+
+	public int drawLine(String ref, int layerId, List<MapPos> points,
+			GeometryStyle style) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				return mapView.drawLine(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error drawing line", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error drawing line " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error drawing line " + ref, e);
 			showWarning("Logic Error", "Error drawing line " + ref);
 		}
 		return 0;
 	}
-	
-	public int drawPolygon(String ref, int layerId, List<MapPos> points, GeometryStyle style) {
-		
-		try{
+
+	public int drawPolygon(String ref, int layerId, List<MapPos> points,
+			GeometryStyle style) {
+
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				return mapView.drawPolygon(layerId, points, style).getGeomId();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error drawing polygon", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error drawing polygon " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error drawing polygon " + ref, e);
 			showWarning("Logic Error", "Error drawing polygon " + ref);
 		}
 		return 0;
 	}
-	
+
 	public void clearGeometry(String ref, int geomId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				mapView.clearGeometry(geomId);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error clearing geometry", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error clearing geometry " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error clearing geometry " + ref, e);
 			showWarning("Logic Error", "Error clearing geometry " + ref);
 		}
 	}
-	
+
 	public void clearGeometryList(String ref, List<Integer> geomList) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
+
 				ArrayList<Geometry> gl = new ArrayList<Geometry>();
 				for (Integer id : geomList) {
 					gl.add(mapView.getGeometry(id));
 				}
-				
+
 				mapView.clearGeometryList(gl);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error clearing geometry list " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error clearing geometry list " + ref, e);
 			showWarning("Logic Error", "Error clearing geometry list " + ref);
 		}
 	}
-	
+
 	public List<Geometry> getGeometryList(String ref, int layerId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryListToWgs84(mapView.getGeometryList(layerId));
+				return GeometryUtil.convertGeometryListToWgs84(mapView
+						.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error getting geometry list " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error getting geometry list " + ref, e);
 			showWarning("Logic Error", "Error getting geometry list " + ref);
 		}
 		return null;
 	}
-	
+
 	public Geometry getGeometry(String ref, int geomId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				
-				return GeometryUtil.convertGeometryToWgs84(mapView.getGeometry(geomId));
+
+				return GeometryUtil.convertGeometryToWgs84(mapView
+						.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error getting geomtry " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error getting geomtry " + ref, e);
 			showWarning("Logic Error", "Error getting geometry " + ref);
 		}
 		return null;
 	}
-	
+
 	public void lockMapView(String ref, boolean lock) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2721,15 +3044,14 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error locking map view " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error locking map view " + ref, e);
 			showWarning("Logic Error", "Error locking map view " + ref);
 		}
 	}
-	
+
 	public void addGeometryHighlight(String ref, int geomId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2738,19 +3060,17 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error adding highlight", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error adding highlight " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error adding highlight " + ref, e);
 			showWarning("Logic Error", "Error adding highlight " + ref);
 		}
 	}
-	
+
 	public void removeGeometryHighlight(String ref, int geomId) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2759,19 +3079,17 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(MapException e) {
+		} catch (MapException e) {
 			FLog.e("error removing highlight", e);
 			showWarning("Logic Error", e.getMessage());
-		}
-		catch(Exception e){
-			FLog.e("error removing highlight " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error removing highlight " + ref, e);
 			showWarning("Logic Error", "Error removing highlight " + ref);
 		}
 	}
-	
+
 	public void clearGeometryHighlights(String ref) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2780,33 +3098,32 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error clearing higlights " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error clearing higlights " + ref, e);
 			showWarning("Logic Error", "Error clearing higlights " + ref);
 		}
 	}
-	
+
 	public List<Geometry> getGeometryHighlights(String ref) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryListToWgs84(mapView.getHighlights());
+				return GeometryUtil.convertGeometryListToWgs84(mapView
+						.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error getting highlights " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error getting highlights " + ref, e);
 			showWarning("Logic Error", "Error getting highlights " + ref);
 		}
 		return null;
 	}
-	
+
 	public void prepareHighlightTransform(String ref) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2815,15 +3132,15 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error preparing highlight transform " + ref,e);
-			showWarning("Logic Error", "Error preparing highlight transform " + ref);
+		} catch (Exception e) {
+			FLog.e("error preparing highlight transform " + ref, e);
+			showWarning("Logic Error", "Error preparing highlight transform "
+					+ ref);
 		}
 	}
-	
+
 	public void doHighlightTransform(String ref) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -2832,17 +3149,16 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error do highlight transform " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error do highlight transform " + ref, e);
 			showWarning("Logic Error", "Error do highlight transform " + ref);
 		}
 	}
-	
+
 	public void pushDatabaseToServer(final String callback) {
 		this.activity.uploadDatabaseToServer(callback);
 	}
-	
+
 	public void pullDatabaseFromServer(final String callback) {
 		this.activity.downloadDatabaseFromServer(callback);
 	}
@@ -2854,70 +3170,74 @@ public class BeanShellLinker {
 			this.activity.disableSync();
 		}
 	}
-	
-	public void addSyncListener(final String startCallback, final String successCallback, final String failureCallback) {
+
+	public void addSyncListener(final String startCallback,
+			final String successCallback, final String failureCallback) {
 		this.activity.addSyncListener(new ShowProjectActivity.SyncListener() {
-			
+
 			@Override
 			public void handleStart() {
 				execute(startCallback);
 			}
-			
+
 			@Override
 			public void handleSuccess() {
 				execute(successCallback);
 			}
-			
+
 			@Override
 			public void handleFailure() {
 				execute(failureCallback);
 			}
 		});
 	}
-	
-	public void openCamera(String callback){
+
+	public void openCamera(String callback) {
 		cameraCallBack = callback;
-		Intent cameraIntent = new Intent(
-                MediaStore.ACTION_IMAGE_CAPTURE);
-		cameraPicturepath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/image-"+ System.currentTimeMillis() +".jpg";
+		Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+		cameraPicturepath = Environment.getExternalStorageDirectory() + "/"
+				+ Environment.DIRECTORY_DCIM + "/image-"
+				+ System.currentTimeMillis() + ".jpg";
 		File file = new File(cameraPicturepath);
-		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(file));
+		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 		this.activity.startActivityForResult(cameraIntent,
-                        ShowProjectActivity.CAMERA_REQUEST_CODE);
+				ShowProjectActivity.CAMERA_REQUEST_CODE);
 	}
 
-	public void executeCameraCallBack(){
+	public void executeCameraCallBack() {
 		try {
 			this.interpreter.eval(cameraCallBack);
 		} catch (EvalError e) {
-			FLog.e("error when executing the callback for the camera",e);
+			FLog.e("error when executing the callback for the camera", e);
 		}
 	}
 
-	public void openVideo(String callback){
+	public void openVideo(String callback) {
 		videoCallBack = callback;
 		Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-		activity.startActivityForResult(videoIntent, ShowProjectActivity.VIDEO_REQUEST_CODE);
+		activity.startActivityForResult(videoIntent,
+				ShowProjectActivity.VIDEO_REQUEST_CODE);
 	}
 
-	public void executeVideoCallBack(){
+	public void executeVideoCallBack() {
 		try {
 			this.interpreter.eval(videoCallBack);
 		} catch (EvalError e) {
-			FLog.e("error when executing the callback for the video",e);
+			FLog.e("error when executing the callback for the video", e);
 		}
 	}
 
-	public void recordAudio(String callback){
+	public void recordAudio(String callback) {
 		audioCallBack = callback;
-		audioFileNamePath = Environment.getExternalStorageDirectory() + "/audio-"+ System.currentTimeMillis() +".mp4";
+		audioFileNamePath = Environment.getExternalStorageDirectory()
+				+ "/audio-" + System.currentTimeMillis() + ".mp4";
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		
+
 		builder.setTitle("FAIMS recording");
-		
+
 		LinearLayout layout = new LinearLayout(activity);
 		layout.setOrientation(LinearLayout.VERTICAL);
-		
+
 		builder.setView(layout);
 		ToggleButton button = new ToggleButton(activity);
 		button.setTextOn("Stop Recording");
@@ -2928,125 +3248,137 @@ public class BeanShellLinker {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				if(recorder != null){
+				if (recorder != null) {
 					stopRecording();
 					executeAudioCallBack();
 				}
 			}
 
-	    });
+		});
 		final AlertDialog dialog = builder.create();
 		button.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
+
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				if(isChecked){
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
 					startRecording();
-				}else{
+				} else {
 					stopRecording();
 					executeAudioCallBack();
 					dialog.dismiss();
 				}
 			}
 		});
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (recorder != null) {
+					stopRecording();
+					executeAudioCallBack();
+				}
+			}
+		});
 		dialog.show();
 	}
-	
+
 	private void startRecording() {
 		recorder = new MediaRecorder();
 		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        recorder.setOutputFile(audioFileNamePath);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+		recorder.setOutputFile(audioFileNamePath);
+		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
-        try {
-            recorder.prepare();
-        } catch (IOException e) {
-            FLog.e("prepare() failed", e);
-        }
+		try {
+			recorder.prepare();
+		} catch (IOException e) {
+			FLog.e("prepare() failed", e);
+		}
 
-        recorder.start();
-    }
+		recorder.start();
+	}
 
-    private void stopRecording() {
-        recorder.stop();
-        recorder.release();
-        recorder = null;
-    }
+	private void stopRecording() {
+		recorder.stop();
+		recorder.release();
+		recorder = null;
+	}
 
 	public void executeAudioCallBack() {
 		try {
 			this.interpreter.eval(audioCallBack);
 		} catch (EvalError e) {
-			FLog.e("error when executing the callback for the audio",e);
+			FLog.e("error when executing the callback for the audio", e);
 		}
 	}
 
-	public void setLastVideoFilePath(String path){
+	public void setLastVideoFilePath(String path) {
 		cameraVideoPath = path;
 	}
 
-	public String getLastAudioFilePath(){
+	public String getLastAudioFilePath() {
 		return audioFileNamePath;
 	}
 
-	public String getLastVideoFilePath(){
+	public String getLastVideoFilePath() {
 		return cameraVideoPath;
 	}
-	public String getLastPictureFilePath(){
+
+	public String getLastPictureFilePath() {
 		return cameraPicturepath;
 	}
 
-	public String getProjectName(){
+	public String getProjectName() {
 		return this.project.getName();
 	}
-	
-	public String getProjectId(){
+
+	public String getProjectId() {
 		return this.project.getKey();
 	}
-	
-	public String getProjectSeason(){
+
+	public String getProjectSeason() {
 		return this.project.getSeason();
 	}
-	
-	public String getProjectDescription(){
+
+	public String getProjectDescription() {
 		return this.project.getDescription();
 	}
-	
-	public String getPermitNo(){
+
+	public String getPermitNo() {
 		return this.project.getPermitNo();
 	}
-	
-	public String getPermitHolder(){
+
+	public String getPermitHolder() {
 		return this.project.getPermitHolder();
 	}
-	
-	public String getContactAndAddress(){
+
+	public String getContactAndAddress() {
 		return this.project.getContactAndAddress();
 	}
-	
-	public String getParticipants(){
+
+	public String getParticipants() {
 		return this.project.getParticipants();
 	}
-	
+
 	public void setSyncMinInterval(float value) {
 		if (value < 0) {
 			showWarning("Logic Error", "Invalid sync min interval " + value);
 			return;
 		}
-		
+
 		this.activity.setSyncMinInterval(value);
 	}
-	
+
 	public void setSyncMaxInterval(float value) {
 		if (value < 0 || value < this.activity.getSyncMinInterval()) {
 			showWarning("Logic Error", "Invalid sync max interval " + value);
 			return;
 		}
-		
+
 		this.activity.setSyncMaxInterval(value);
 	}
-	
+
 	public void setSyncDelay(float value) {
 		if (value < 0) {
 			showWarning("Logic Error", "Invalid sync delay " + value);
@@ -3054,14 +3386,15 @@ public class BeanShellLinker {
 		}
 		this.activity.setSyncDelay(value);
 	}
-	
+
 	public void setUser(User user) {
 		this.activity.getDatabaseManager().setUserId(user.getUserId());
 	}
-	
+
 	public void showFileBrowser(String callback) {
 		this.lastFileBrowserCallback = callback;
-		this.activity.showFileBrowser(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE);
+		this.activity
+				.showFileBrowser(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE);
 	}
 
 	public void setLastSelectedFile(File file) {
@@ -3073,16 +3406,18 @@ public class BeanShellLinker {
 			FLog.e("error setting last selected file", e);
 		}
 	}
-	
-	public GeometryStyle createPointStyle(int minZoom, int color, float size, float pickingSize) {
+
+	public GeometryStyle createPointStyle(int minZoom, int color, float size,
+			float pickingSize) {
 		GeometryStyle style = new GeometryStyle(minZoom);
 		style.pointColor = color;
 		style.size = size;
 		style.pickingSize = pickingSize;
 		return style;
 	}
-	
-	public GeometryStyle createLineStyle(int minZoom, int color, float width, float pickingWidth, GeometryStyle pointStyle) {
+
+	public GeometryStyle createLineStyle(int minZoom, int color, float width,
+			float pickingWidth, GeometryStyle pointStyle) {
 		GeometryStyle style = new GeometryStyle(minZoom);
 		style.lineColor = color;
 		style.width = width;
@@ -3095,8 +3430,9 @@ public class BeanShellLinker {
 		}
 		return style;
 	}
-	
-	public GeometryStyle createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
+
+	public GeometryStyle createPolygonStyle(int minZoom, int color,
+			GeometryStyle lineStyle) {
 		GeometryStyle style = new GeometryStyle(minZoom);
 		style.polygonColor = color;
 		if (lineStyle != null) {
@@ -3107,15 +3443,16 @@ public class BeanShellLinker {
 		}
 		return style;
 	}
-	
-	public GeometryTextStyle createTextStyle(int minZoom, int color, int size, Typeface font) {
+
+	public GeometryTextStyle createTextStyle(int minZoom, int color, int size,
+			Typeface font) {
 		GeometryTextStyle style = new GeometryTextStyle(minZoom);
 		style.color = color;
 		style.size = size;
 		style.font = font;
 		return style;
 	}
-	
+
 	public void setFileSyncEnabled(boolean enabled) {
 		if (enabled) {
 			activity.enableFileSync();
@@ -3123,35 +3460,44 @@ public class BeanShellLinker {
 			activity.disableFileSync();
 		}
 	}
-	
+
 	public String attachFile(String filePath, boolean sync, String dir) {
 		try {
+			filePath = filePath
+					.contains(
+							Environment.getExternalStorageDirectory()
+									.getPath()) ? filePath
+					: activity.getProjectDir() + "/" + filePath;
 			File file = new File(filePath);
 			if (!file.exists()) {
 				showWarning("Logic Error", "Attach file cannot find file.");
 				return null;
 			}
-			
+
 			String attachFile = "";
-			
+
 			if (sync) {
-				attachFile += activity.getResources().getString(R.string.app_dir);
+				attachFile += activity.getResources().getString(
+						R.string.app_dir);
 			} else {
-				attachFile += activity.getResources().getString(R.string.server_dir);
+				attachFile += activity.getResources().getString(
+						R.string.server_dir);
 			}
-			
+
 			if (dir != null && !"".equals(dir)) {
 				attachFile += "/" + dir;
 			}
-			
+
 			// create directories
 			FileUtil.makeDirs(activity.getProjectDir() + "/" + attachFile);
-			
+			String name= file.getName();
+			name = name.indexOf("_") > 0 ? name.substring(name.indexOf("_") + 1) : name;
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + file.getName();
-			
-			activity.copyFile(filePath, activity.getProjectDir() + "/" + attachFile);
-			
+
+			activity.copyFile(filePath, activity.getProjectDir() + "/"
+					+ attachFile);
+
 			return attachFile;
 		} catch (Exception e) {
 			FLog.e("error attaching file " + filePath, e);
@@ -3159,61 +3505,71 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void viewArchEntAttachedFiles(String uuid){
-		if(uuid == null){
-			showWarning("Attached Files", "Please load/save a record to see attached files");
-		}else{
+	public void viewArchEntAttachedFiles(String uuid) {
+		if (uuid == null) {
+			showWarning("Attached Files",
+					"Please load/save a record to see attached files");
+		} else {
 			ArchEntity fetchedArchEntity = (ArchEntity) fetchArchEnt(uuid);
 			List<String> attachedFiles = new ArrayList<String>();
-			for(EntityAttribute attribute : fetchedArchEntity.getAttributes()){
-				if("file".equalsIgnoreCase(attribute.getType())){
-					attachedFiles.add(attribute.getText());
+			for (EntityAttribute attribute : fetchedArchEntity.getAttributes()) {
+				if ("file".equalsIgnoreCase(attribute.getType())) {
+					if (!attribute.isDeleted()) {
+						attachedFiles.add(attribute.getText());
+					}
 				}
 			}
 			viewAttachedFiles(attachedFiles);
 		}
 	}
-	
-	public void viewRelAttachedFiles(String relId){
-		if(relId == null){
-			showWarning("Attached Files", "Please load/save a record to see attached files");
-		}else{
+
+	public void viewRelAttachedFiles(String relId) {
+		if (relId == null) {
+			showWarning("Attached Files",
+					"Please load/save a record to see attached files");
+		} else {
 			Relationship fetchedRelationship = (Relationship) fetchRel(relId);
 			List<String> attachedFiles = new ArrayList<String>();
-			for(RelationshipAttribute attribute : fetchedRelationship.getAttributes()){
-				if("file".equalsIgnoreCase(attribute.getType())){
-					attachedFiles.add(attribute.getText());
+			for (RelationshipAttribute attribute : fetchedRelationship
+					.getAttributes()) {
+				if ("file".equalsIgnoreCase(attribute.getType())) {
+					if (!attribute.isDeleted()) {
+						attachedFiles.add(attribute.getText());
+					}
 				}
 			}
 			viewAttachedFiles(attachedFiles);
 		}
 	}
-	
-	private void viewAttachedFiles(List<String> files){
-		if(files.isEmpty()){
-			showWarning("Attached Files", "There is no attached file for the record");
-		}else{
+
+	private void viewAttachedFiles(List<String> files) {
+		if (files.isEmpty()) {
+			showWarning("Attached Files",
+					"There is no attached file for the record");
+		} else {
 			final ListView listView = new ListView(activity);
 			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
 			Map<String, Integer> count = new HashMap<String, Integer>();
-			for(String attachedFile : files){
-				String filename = (new File(activity.getProjectDir() + "/" + attachedFile)).getName();
-				filename = filename.substring(filename.lastIndexOf("_")+1);
-				if(count.get(filename) != null){
+			for (String attachedFile : files) {
+				String filename = (new File(activity.getProjectDir() + "/"
+						+ attachedFile)).getName();
+				filename = filename.substring(filename.indexOf("_") + 1);
+				if (count.get(filename) != null) {
 					int fileCount = count.get(filename);
 					count.put(filename, fileCount + 1);
 					int index = filename.indexOf(".");
-					filename = filename.substring(0,index) + "(" + fileCount + ")" + filename.substring(index);
-				}else{
+					filename = filename.substring(0, index) + "(" + fileCount
+							+ ")" + filename.substring(index);
+				} else {
 					count.put(filename, 1);
 				}
-				NameValuePair file = new NameValuePair(filename, activity.getProjectDir() + "/" + attachedFile);
+				NameValuePair file = new NameValuePair(filename,
+						activity.getProjectDir() + "/" + attachedFile);
 				attachedFiles.add(file);
 			}
 			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                    activity,
-                    android.R.layout.simple_list_item_1,
-                    attachedFiles);
+					activity, android.R.layout.simple_list_item_1,
+					attachedFiles);
 			listView.setAdapter(arrayAdapter);
 			listView.setOnItemClickListener(new ListView.OnItemClickListener() {
 
@@ -3221,34 +3577,39 @@ public class BeanShellLinker {
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1,
 						int index, long arg3) {
-					NameValuePair pair = (NameValuePair) listView.getItemAtPosition(index);
+					NameValuePair pair = (NameValuePair) listView
+							.getItemAtPosition(index);
 					File file = new File(pair.getValue());
-					if(file.exists()){
-					    MimeTypeMap map = MimeTypeMap.getSingleton();
-					    String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
-					    String type = map.getMimeTypeFromExtension(ext.toLowerCase());
-	
-					    if (type == null)
-					        type = "*/*";
-	
-					    try{
-						    Intent intent = new Intent(Intent.ACTION_VIEW);
-						    Uri data = Uri.fromFile(file);
-		
-						    intent.setDataAndType(data, type);
-		
-						    activity.startActivity(intent);
-					    }catch(Exception e){
-					    	FLog.e("Can not open file with the extension",e);
-					    	Intent intent = new Intent(Intent.ACTION_VIEW);
-						    Uri data = Uri.fromFile(file);
-		
-						    intent.setDataAndType(data, "*/*");
-		
-						    activity.startActivity(intent);
-					    }
-					}else{
-						showWarning("Attached File", "The file does not currently exist in the FAIMS folder. If the file is still uploading or syncing please wait and try again when the process has finished");
+					if (file.exists()) {
+						MimeTypeMap map = MimeTypeMap.getSingleton();
+						String ext = MimeTypeMap.getFileExtensionFromUrl(file
+								.getName());
+						String type = map.getMimeTypeFromExtension(ext
+								.toLowerCase());
+
+						if (type == null)
+							type = "*/*";
+
+						try {
+							Intent intent = new Intent(Intent.ACTION_VIEW);
+							Uri data = Uri.fromFile(file);
+
+							intent.setDataAndType(data, type);
+
+							activity.startActivity(intent);
+						} catch (Exception e) {
+							FLog.e("Can not open file with the extension", e);
+							Intent intent = new Intent(Intent.ACTION_VIEW);
+							Uri data = Uri.fromFile(file);
+
+							intent.setDataAndType(data, "*/*");
+
+							activity.startActivity(intent);
+						}
+					} else {
+						showWarning(
+								"Attached File",
+								"The file does not currently exist in the FAIMS folder. If the file is still uploading or syncing please wait and try again when the process has finished");
 					}
 				}
 
@@ -3257,31 +3618,34 @@ public class BeanShellLinker {
 
 			builder.setTitle("Attached Files");
 			builder.setView(listView);
-			builder.setNeutralButton("Done", new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}
-			});
+			builder.setNeutralButton("Done",
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
 			builder.create().show();
 		}
 	}
 
 	public void storeBeanShellData(Bundle savedInstanceState) {
 		String persistedObjectName = getPersistedObjectName();
-		if(persistedObjectName != null){
+		if (persistedObjectName != null) {
 			try {
 				Object persistedObject = interpreter.get(persistedObjectName);
-				savedInstanceState.putSerializable(persistedObjectName, (Serializable) persistedObject);
+				savedInstanceState.putSerializable(persistedObjectName,
+						(Serializable) persistedObject);
 			} catch (EvalError e) {
 				FLog.e("error storing bean shell data", e);
 			}
 		}
 	}
 
-	public void restoreBeanShellData(Bundle savedInstanceState){
-		if(persistedObjectName != null){
-			Object object = savedInstanceState.getSerializable(persistedObjectName);
+	public void restoreBeanShellData(Bundle savedInstanceState) {
+		if (persistedObjectName != null) {
+			Object object = savedInstanceState
+					.getSerializable(persistedObjectName);
 			try {
 				interpreter.set(persistedObjectName, object);
 			} catch (EvalError e) {
@@ -3291,11 +3655,11 @@ public class BeanShellLinker {
 	}
 
 	public Geometry createGeometryPoint(MapPos point) {
-		return new CustomPoint(0, createPointStyle(0,0,0,0), point, null);
+		return new CustomPoint(0, createPointStyle(0, 0, 0, 0), point, null);
 	}
-	
+
 	public void setToolsEnabled(String ref, boolean enabled) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -3304,15 +3668,15 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error setting tools enabled value " + ref,e);
-			showWarning("Logic Error", "Error setting tools enabled value " + ref);
+		} catch (Exception e) {
+			FLog.e("error setting tools enabled value " + ref, e);
+			showWarning("Logic Error", "Error setting tools enabled value "
+					+ ref);
 		}
 	}
-	
+
 	public void addDatabaseLayerQuery(String ref, String name, String sql) {
-		try{
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -3321,15 +3685,16 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error adding database layer query " + ref,e);
-			showWarning("Logic Error", "Error adding database layer query " + ref);
+		} catch (Exception e) {
+			FLog.e("error adding database layer query " + ref, e);
+			showWarning("Logic Error", "Error adding database layer query "
+					+ ref);
 		}
 	}
 
-	public void addSelectQueryBuilder(String ref, String name, QueryBuilder builder) {
-		try{
+	public void addSelectQueryBuilder(String ref, String name,
+			QueryBuilder builder) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -3338,33 +3703,35 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error adding select query builder " + ref,e);
-			showWarning("Logic Error", "Error adding select query builder " + ref);
+		} catch (Exception e) {
+			FLog.e("error adding select query builder " + ref, e);
+			showWarning("Logic Error", "Error adding select query builder "
+					+ ref);
 		}
 	}
-	
-	public void addLegacySelectQueryBuilder(String ref, String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
-		try{
+
+	public void addLegacySelectQueryBuilder(String ref, String name,
+			String dbPath, String tableName, LegacyQueryBuilder builder) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				String filepath = activity.getProjectDir() + "/" + dbPath;
-				mapView.addLegacySelectQueryBuilder(name, filepath, tableName, builder);
+				mapView.addLegacySelectQueryBuilder(name, filepath, tableName,
+						builder);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error adding legacy select query builder " + ref,e);
-			showWarning("Logic Error", "Error adding legacy select query builder " + ref);
+		} catch (Exception e) {
+			FLog.e("error adding legacy select query builder " + ref, e);
+			showWarning("Logic Error",
+					"Error adding legacy select query builder " + ref);
 		}
 	}
-	
-	public void addTrackLogLayerQuery(String ref, String name, String sql){
-		try{
+
+	public void addTrackLogLayerQuery(String ref, String name, String sql) {
+		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
@@ -3373,9 +3740,8 @@ public class BeanShellLinker {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
-		}
-		catch(Exception e){
-			FLog.e("error adding track log query " + ref,e);
+		} catch (Exception e) {
+			FLog.e("error adding track log query " + ref, e);
 			showWarning("Logic Error", "Error adding track log query " + ref);
 		}
 	}

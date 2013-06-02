@@ -187,8 +187,8 @@ public class DatabaseManager {
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
-					query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, ? " +
+					query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp,deleted) " +
+								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, ?, ? " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
@@ -198,7 +198,8 @@ public class DatabaseManager {
 					st.bind(4, attribute.getText());
 					st.bind(5, attribute.getCertainty());
 					st.bind(6, currentTimestamp);
-					st.bind(7, attribute.getName());
+					st.bind(7, attribute.isDeleted() ? "true" : null);
+					st.bind(8, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -275,8 +276,8 @@ public class DatabaseManager {
 				
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
-					query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp) " +
-								   "SELECT cast(? as integer), ?, attributeId, ?, ?, ? " +
+					query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +
+								   "SELECT cast(? as integer), ?, attributeId, ?, ?, ?, ? " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
@@ -285,7 +286,8 @@ public class DatabaseManager {
 					st.bind(3, attribute.getText());
 					st.bind(4, attribute.getCertainty());
 					st.bind(5, currentTimestamp);
-					st.bind(6, attribute.getName());
+					st.bind(6, attribute.isDeleted() ? "true" : null);
+					st.bind(7, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -436,12 +438,12 @@ public class DatabaseManager {
 					return null;
 				}
 	
-				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
-								    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
-								        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid having deleted is null) ) " +
-								"JOIN attributekey USING (attributeid) " +
-								"JOIN ArchEntity USING (uuid) " +
-								"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
+				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
+					    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp, aentvalue.deleted as aentvaluedeleted FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
+					        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid) ) " +
+					"JOIN attributekey USING (attributeid) " +
+					"JOIN ArchEntity USING (uuid) " +
+					"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
@@ -455,10 +457,14 @@ public class DatabaseManager {
 					archAttribute.setText(stmt.column_string(4));
 					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 					archAttribute.setType(stmt.column_string(6));
+					archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
 					attributes.add(archAttribute);
 				}
 				stmt.close();
 				stmt = null;
+				for (EntityAttribute attribute : attributes) {
+					FLog.d(attribute.toString());
+				}
 				
 				// get vector geometry
 				stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
@@ -510,12 +516,12 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relntypeid FROM " +
-								    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
-								        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
-								"JOIN attributekey USING (attributeid) " +
-								"JOIN Relationship USING (relationshipid) " +
-								"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relnvaluedeleted, relntypeid FROM " +
+					    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty, relnvalue.deleted as relnvaluedeleted FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
+					        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
+					"JOIN attributekey USING (attributeid) " +
+					"JOIN Relationship USING (relationshipid) " +
+					"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
@@ -528,6 +534,7 @@ public class DatabaseManager {
 					relAttribute.setText(stmt.column_string(3));
 					relAttribute.setCertainty(stmt.column_string(4));
 					relAttribute.setType(stmt.column_string(5));
+					relAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
 					attributes.add(relAttribute);
 				}
 				stmt.close();
