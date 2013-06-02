@@ -12,6 +12,7 @@ import jsqlite.Callback;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
@@ -1253,8 +1254,10 @@ public class DatabaseManager {
 				}
 				return result;
 			} finally {
-				if (stmt != null) {
-					stmt.close();
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
 				}
 				try {
 					if (db != null) {
@@ -1270,32 +1273,159 @@ public class DatabaseManager {
 
 	public List<String> runLegacySelectionQuery(String dbPath,
 			String tableName, String sql, ArrayList<String> values) throws Exception {
-		FLog.d("run legacy selection query");
-		Stmt stmt = null;
-		try {
-			db = new jsqlite.Database();
-			db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			
-			stmt = db.prepare(sql);
-			for (int i = 0; i < values.size(); i++) {
-				stmt.bind(i+1, "".equals(values.get(i)) ? null : values.get(i));
-			}
-			ArrayList<String> result = new ArrayList<String>();
-			while(stmt.step()) {
-				result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
-			}
-			return result;
-		} finally {
-			if (stmt != null) {
-				stmt.close();
-			}
+		synchronized(DatabaseManager.class) {
+			FLog.d("run legacy selection query");
+			Stmt stmt = null;
 			try {
-				if (db != null) {
-					db.close();
-					db = null;
+				db = new jsqlite.Database();
+				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare(sql);
+				for (int i = 0; i < values.size(); i++) {
+					stmt.bind(i+1, "".equals(values.get(i)) ? null : values.get(i));
 				}
-			} catch (Exception e) {
-				FLog.e("error closing database", e);
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public List<String> runPointDistanceEntityQuery(CustomPoint point, float distance) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run point distance query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare(
+"select uuid, aenttimestamp\n" + 
+" from (select uuid, max(aenttimestamp) as aenttimestamp, deleted, geospatialcolumn\n" + 
+"          from archentity \n" + 
+"      group by uuid \n" + 
+"        having max(aenttimestamp))\n" + 
+" where deleted is null\n" + 
+" and PtDistWithin(centroid(geospatialcolumn), PointFromText(?, 4326), ?)");
+				FLog.d(WKTUtil.geometryToWKT(point));
+				FLog.d(""+distance);
+				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(2, distance);
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public List<String> runPointDistanceRelationshipQuery(CustomPoint point, float distance) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run point distance query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare(
+"select relationshipid, relntimestamp\n" + 
+" from (select relationshipid, max(relntimestamp) as relntimestamp, deleted, geospatialcolumn\n" + 
+"          from relationship \n" + 
+"      group by relationshipid \n" + 
+"        having max(relntimestamp))\n" + 
+" where deleted is null\n" + 
+" and PtDistWithin(centroid(geospatialcolumn), PointFromText(?, 4326), ?)");
+				FLog.d(WKTUtil.geometryToWKT(point));
+				FLog.d(""+distance);
+				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(2, distance);
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public Collection<? extends String> runPointDistanceLegacyQuery(
+			String dbPath, String tableName, String idColumn, String geometryColumn, CustomPoint point, float distance) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run point distance query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where PtDistWithin(centroid(" + geometryColumn + "), PointFromText(?, 4326), ?)");
+				FLog.d(WKTUtil.geometryToWKT(point));
+				FLog.d(""+distance);
+				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(2, distance);
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
 			}
 		}
 	}

@@ -923,6 +923,7 @@ public class CustomMapView extends MapView {
 		tools.add(new TouchSelectionTool(this.getContext(), this));
 		tools.add(new DatabaseSelectionTool(this.getContext(), this));
 		tools.add(new LegacySelectionTool(this.getContext(), this));
+		//tools.add(new PointSelectionTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -1531,6 +1532,43 @@ public class CustomMapView extends MapView {
 
 	public String getTrackLogQuerySql() {
 		return trackLogQuerySql;
+	}
+
+	public void runPointSelection(CustomPoint point, float distance, boolean remove) throws Exception {
+		if (selectedSelection == null) {
+			throw new MapException("Please select a selection");
+		}
+		
+		List<String> uuids = new ArrayList<String>();
+		try {
+			uuids.addAll(databaseManager.runPointDistanceEntityQuery(point, distance));
+			uuids.addAll(databaseManager.runPointDistanceRelationshipQuery(point, distance));
+			
+			// for each legacy data layer do point distance query
+			List<Layer> layers = getAllLayers();
+			for (Layer layer : layers) {
+				if (layer instanceof CustomSpatialiteLayer) {
+					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
+					uuids.addAll(databaseManager.runPointDistanceLegacyQuery(spatialLayer.getDbPath(), 
+							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), point, distance));
+				}
+			}
+			
+		} catch (Exception e) {
+			FLog.e("error running point selection query", e);
+			throw new MapException("Exception raised while trying to run point selection");
+		}
+		
+		if (remove) {
+			for (String uuid : uuids) {
+				selectedSelection.removeData(uuid);
+			}
+		} else {
+			for (String uuid : uuids) {
+				selectedSelection.addData(uuid);
+			}
+		}
+		updateSelections();
 	}
 
 }

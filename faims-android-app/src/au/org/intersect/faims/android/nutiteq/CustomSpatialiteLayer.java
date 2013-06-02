@@ -106,6 +106,14 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		return tableName;
 	}
 	
+	public String getIdColumn() {
+		return userColumns[0];
+	}
+	
+	public String getGeometryColumn() {
+		return dbLayer.geomColumn;
+	}
+	
 	public SpatialiteTextLayer getTextLayer() {
 		return textLayer;
 	}
