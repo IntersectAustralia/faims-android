@@ -25,8 +25,8 @@ public class AreaTool extends HighlightTool {
 		
 		private float textX;
 		private float textY;
-		
 		private boolean showKm;
+		private float area;
 		
 		public AreaToolCanvas(Context context) {
 			super(context);
@@ -37,9 +37,9 @@ public class AreaTool extends HighlightTool {
 			if (isDirty) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(AreaTool.this.area/(1000*1000)) + "\u00B2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(area/(1000*1000)) + "\u00B2", textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(AreaTool.this.area) + "\u00B2", textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(area) + "\u00B2", textX, textY, textPaint);
 				}
 				
 			}
@@ -47,6 +47,14 @@ public class AreaTool extends HighlightTool {
 		
 		public void drawArea(Polygon polygon) {
 			this.isDirty = true;
+			
+			try {
+				this.area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon));
+			} catch (Exception e) {
+				FLog.e("error computing area of polygon", e);
+				showError("Error computing area of polygon");
+				this.area = 0;
+			}
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
 			
@@ -68,8 +76,6 @@ public class AreaTool extends HighlightTool {
 	public static final String NAME = "Area";
 	
 	private AreaToolCanvas canvas;
-
-	private float area;
 	
 	private SettingsDialog settingsDialog;
 
@@ -129,7 +135,6 @@ public class AreaTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
-					computeArea();
 					drawArea();
 				}
 			} catch (Exception e) {
@@ -139,14 +144,6 @@ public class AreaTool extends HighlightTool {
 		} else {
 			// ignore
 		}
-	}
-	
-	private void computeArea() {
-		if (mapView.getHighlights().size() < 1) return;
-		
-		Polygon polygon = (Polygon) mapView.getHighlights().get(0);
-		
-		this.area = computePolygonArea(polygon);
 	}
 	
 	private void drawArea() {
@@ -159,18 +156,6 @@ public class AreaTool extends HighlightTool {
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
 		canvas.setShowKm(mapView.showKm());
-	}
-	
-	public float computePolygonArea(Polygon polygon) {
-		try {
-			polygon = (Polygon) GeometryUtil.convertGeometryToWgs84(polygon);
-			return (float) SpatialiteUtil.computeArea(polygon);
-		} catch (Exception e) {
-			FLog.e("error computing area of polygon", e);
-			showError("Error computing area of polygon");
-		}
-		
-		return 0;
 	}
 	
 	@Override

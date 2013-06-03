@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
@@ -13,6 +12,7 @@ import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -27,8 +27,8 @@ public class PointDistanceTool extends HighlightTool {
 		private float textY;
 		private MapPos tp1;
 		private MapPos tp2;
-		
 		private boolean showKm;
+		private float distance;
 		
 		public PointDistanceToolCanvas(Context context) {
 			super(context);
@@ -40,9 +40,9 @@ public class PointDistanceTool extends HighlightTool {
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(PointDistanceTool.this.distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(PointDistanceTool.this.distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
 				}
 				
 			}
@@ -50,6 +50,8 @@ public class PointDistanceTool extends HighlightTool {
 
 		public void drawDistanceBetween(MapPos p1, MapPos p2) {
 			this.isDirty = true;
+			
+			this.distance = SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2));
 			
 			this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
 			this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
@@ -80,8 +82,6 @@ public class PointDistanceTool extends HighlightTool {
 	public static final String NAME = "Point Distance";
 	
 	private PointDistanceToolCanvas canvas;
-
-	private float distance;
 
 	protected SettingsDialog settingsDialog;
 
@@ -141,7 +141,6 @@ public class PointDistanceTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
-					computeDistance();
 					drawDistance();
 				}
 			} catch (Exception e) {
@@ -151,15 +150,6 @@ public class PointDistanceTool extends HighlightTool {
 		} else {
 			// ignore
 		}
-	}
-	
-	private void computeDistance() {
-		if (mapView.getHighlights().size() < 2) return;
-		
-		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
-		
-		this.distance = computePointDistance(p1, p2);
 	}
 	
 	private void drawDistance() {
@@ -173,14 +163,6 @@ public class PointDistanceTool extends HighlightTool {
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
 		canvas.setShowKm(mapView.showKm());
-	}
-	
-	public float computePointDistance(MapPos p1, MapPos p2) {
-		p1 = GeometryUtil.convertToWgs84(p1);
-		p2 = GeometryUtil.convertToWgs84(p2);
-		float[] results = new float[3];
-		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
-		return results[0];
 	}
 	
 	@Override

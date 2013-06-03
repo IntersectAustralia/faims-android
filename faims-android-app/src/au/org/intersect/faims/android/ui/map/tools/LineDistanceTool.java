@@ -1,11 +1,8 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
-import java.util.List;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
@@ -15,6 +12,7 @@ import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -29,6 +27,7 @@ public class LineDistanceTool extends HighlightTool {
 		private float textY;
 		
 		private boolean showKm;
+		private float distance;
 		
 		public LineDistanceToolCanvas(Context context) {
 			super(context);
@@ -39,9 +38,9 @@ public class LineDistanceTool extends HighlightTool {
 			if (isDirty) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(LineDistanceTool.this.distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(LineDistanceTool.this.distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
 				}
 				
 			}
@@ -49,6 +48,8 @@ public class LineDistanceTool extends HighlightTool {
 
 		public void drawDistance(Line line) {
 			this.isDirty = true;
+			
+			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()));
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
 			
@@ -70,8 +71,6 @@ public class LineDistanceTool extends HighlightTool {
 	public static final String NAME = "Line Distance";
 	
 	private LineDistanceToolCanvas canvas;
-
-	private float distance;
 
 	protected SettingsDialog settingsDialog;
 
@@ -131,7 +130,6 @@ public class LineDistanceTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
-					computeDistance();
 					drawDistance();
 				}
 			} catch (Exception e) {
@@ -141,14 +139,6 @@ public class LineDistanceTool extends HighlightTool {
 		} else {
 			// ignore
 		}
-	}
-	
-	private void computeDistance() {
-		if (mapView.getHighlights().size() < 1) return;
-		
-		Line line = (Line) mapView.getHighlights().get(0);
-		
-		this.distance = computeLineDistance(line.getVertexList());
 	}
 	
 	private void drawDistance() {
@@ -161,21 +151,6 @@ public class LineDistanceTool extends HighlightTool {
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
 		canvas.setShowKm(mapView.showKm());
-	}
-	
-	public float computeLineDistance(List<MapPos> points) {
-		float totalDistance = 0;
-		MapPos lp = null;
-		for (MapPos p : points) {
-			p = GeometryUtil.convertToWgs84(p);
-			if (lp != null) {
-				float[] results = new float[3];
-				Location.distanceBetween(lp.y, lp.x, p.y, p.x, results);
-				totalDistance += results[0];
-			}
-			lp = p;
-		}
-		return totalDistance;
 	}
 	
 	@Override
