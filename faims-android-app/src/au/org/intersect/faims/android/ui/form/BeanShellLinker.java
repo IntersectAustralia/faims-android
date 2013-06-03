@@ -2331,35 +2331,31 @@ public class BeanShellLinker {
 				if (obj instanceof CustomListView) {
 					final CustomListView list = (CustomListView) obj;
 					Map<NameValuePair, Boolean> audios = new HashMap<NameValuePair, Boolean>();
-					for (NameValuePair audio : pairs) {
-						if (list.getSelectedItems() != null
-								&& !list.getSelectedItems().isEmpty()) {
-							if(containsAudio(audio, list.getSelectedItems())){
+					if(!pairs.isEmpty()){
+						for (NameValuePair audio : pairs) {
+							if (list.getSelectedItems() != null) {
+								if(containsAudio(audio, list.getSelectedItems())){
+									audios.put(audio, true);
+								}else{
+									if(containsAudio(audio, list.getAllItems())){
+										audios.put(audio, false);
+									}else{
+										audios.put(audio, true);
+									}
+								}
+							} else {
 								audios.put(audio, true);
-							}else{
-								audios.put(audio, false);
 							}
-						} else {
-							list.addSelectedItem(audio);
-							audios.put(audio, true);
 						}
-					}
-					if (!pairs.isEmpty()) {
-						NameValuePair pair = pairs.get(pairs.size() - 1);
-						if (list.getSelectedItems() != null) {
-							List<Object> selectedItems = new ArrayList<Object>();
-							selectedItems.addAll(list.getSelectedItems());
-							if(!containsAudio(pair, selectedItems)){
-								list.addSelectedItem(pair);
-								audios.put(pair,true);
-							}
-						} else {
-							list.addSelectedItem(pair);
-							audios.put(pair, true);
-						}
-					} else {
-						list.removeSelectedItems();
+					}else{
 						audios.clear();
+					}
+					list.removeSelectedItems();
+					for(Entry<NameValuePair, Boolean> audio : audios.entrySet()){
+						if(audio.getValue()){
+							list.addSelectedItem(audio.getKey());
+						}
+						list.addAllItem(audio.getKey());
 					}
 
 					AudioListAdapter adapter = new AudioListAdapter(audios);
