@@ -8,13 +8,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.components.MapPos;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
@@ -25,7 +25,7 @@ public class CreateLineTool extends BaseGeometryTool {
 
 	private MapButton createButton;
 
-	private LinkedList<CustomPoint> pointsList;
+	private LinkedList<Point> pointsList;
 
 	private MapButton undoButton;
 	
@@ -41,7 +41,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
 		
-		pointsList = new LinkedList<CustomPoint>();
+		pointsList = new LinkedList<Point>();
 		
 		updateLayout();
 	}
@@ -92,7 +92,7 @@ public class CreateLineTool extends BaseGeometryTool {
 			return;
 		}
 		
-		CustomPoint p = pointsList.removeLast();
+		Point p = pointsList.removeLast();
 		
 		try {
 			mapView.clearGeometry(p);
@@ -135,7 +135,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		
 		// convert points to map positions
 		ArrayList<MapPos> positions = new ArrayList<MapPos>();
-		for (CustomPoint p : pointsList) {
+		for (Point p : pointsList) {
 			positions.add((new EPSG3857().toWgs84(p.getMapPos().x, p.getMapPos().y)));
 		}
 		

@@ -12,7 +12,6 @@ import jsqlite.Callback;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
@@ -24,6 +23,7 @@ import au.org.intersect.faims.android.util.DateUtil;
 import com.google.inject.Singleton;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.ui.Label;
@@ -1314,7 +1314,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public List<String> runPointDistanceEntityQuery(CustomPoint point, float distance) throws Exception {
+	public List<String> runPointDistanceEntityQuery(Point point, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;
@@ -1357,7 +1357,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public List<String> runPointDistanceRelationshipQuery(CustomPoint point, float distance) throws Exception {
+	public List<String> runPointDistanceRelationshipQuery(Point point, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;
@@ -1401,7 +1401,7 @@ public class DatabaseManager {
 	}
 
 	public Collection<? extends String> runPointDistanceLegacyQuery(
-			String dbPath, String tableName, String idColumn, String geometryColumn, CustomPoint point, float distance) throws Exception {
+			String dbPath, String tableName, String idColumn, String geometryColumn, Point point, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;

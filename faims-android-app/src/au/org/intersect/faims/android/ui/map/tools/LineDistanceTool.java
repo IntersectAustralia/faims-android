@@ -9,7 +9,6 @@ import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -19,6 +18,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.VectorElement;
 
 public class LineDistanceTool extends HighlightTool {
@@ -47,7 +47,7 @@ public class LineDistanceTool extends HighlightTool {
 			}
 		}
 
-		public void drawDistance(CustomLine line) {
+		public void drawDistance(Line line) {
 			this.isDirty = true;
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
@@ -122,8 +122,8 @@ public class LineDistanceTool extends HighlightTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomLine) && (mapView.getHighlights().size() < 1)) {
-					CustomLine p = (CustomLine) element;
+				if ((element instanceof Line) && (mapView.getHighlights().size() < 1)) {
+					Line p = (Line) element;
 					
 					if (mapView.hasHighlight(p)) {
 						mapView.removeHighlight(p);
@@ -146,7 +146,7 @@ public class LineDistanceTool extends HighlightTool {
 	private void computeDistance() {
 		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomLine line = (CustomLine) mapView.getHighlights().get(0);
+		Line line = (Line) mapView.getHighlights().get(0);
 		
 		this.distance = computeLineDistance(line.getVertexList());
 	}
@@ -154,7 +154,7 @@ public class LineDistanceTool extends HighlightTool {
 	private void drawDistance() {
 		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomLine line = (CustomLine) mapView.getHighlights().get(0);
+		Line line = (Line) mapView.getHighlights().get(0);
 		
 		canvas.drawDistance(line);
 		canvas.setColor(mapView.getDrawViewColor());

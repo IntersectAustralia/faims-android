@@ -17,10 +17,6 @@ import com.nutiteq.geometry.Polygon;
 import com.nutiteq.layers.vector.SpatialLiteDb;
 import com.nutiteq.log.Log;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class CustomSpatialiteLayer extends GeometryLayer {
@@ -35,9 +31,9 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	private SpatialLiteDb spatialLite;
 	private DBLayer dbLayer;
 
-	private StyleSet<PointStyle> pointStyleSet;
-	private StyleSet<LineStyle> lineStyleSet;
-	private StyleSet<PolygonStyle> polygonStyle;
+	private GeometryStyle pointStyle;
+	private GeometryStyle lineStyle;
+	private GeometryStyle polygonStyle;
 
 	private int minZoom;
 	private int maxObjects;
@@ -47,9 +43,9 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, CustomMapView mapView, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
-			int maxObjects, StyleSet<PointStyle> pointStyleSet,
-			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet) {
+			int maxObjects, GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle) {
 		super(proj);
 		this.name = name;
 		this.layerId = layerId;
@@ -58,18 +54,19 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		this.mapView = mapView;
 		
 		this.userColumns = userColumns;
-	    this.pointStyleSet = pointStyleSet;
-	    this.lineStyleSet = lineStyleSet;
-	    this.polygonStyle = polygonStyleSet;
+	    this.pointStyle = pointStyle;
+	    this.lineStyle = lineStyle;
+	    this.polygonStyle = polygonStyle;
 	    this.maxObjects = maxObjects;
-	    if (pointStyleSet != null) {
-	      minZoom = pointStyleSet.getFirstNonNullZoomStyleZoom();
+	    
+	    if (pointStyle != null) {
+	      minZoom = pointStyle.toPointStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
-	    if (lineStyleSet != null) {
-	      minZoom = lineStyleSet.getFirstNonNullZoomStyleZoom();
+	    if (lineStyle != null) {
+	      minZoom = lineStyle.toLineStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
-	    if (polygonStyleSet != null) {
-	      minZoom = polygonStyleSet.getFirstNonNullZoomStyleZoom();
+	    if (polygonStyle != null) {
+	      minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
 
 	    spatialLite = new SpatialLiteDb(dbPath);
@@ -108,6 +105,10 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	
 	public String getIdColumn() {
 		return userColumns[0];
+	}
+	
+	public String getLabelColumn() {
+		return userColumns[1];
 	}
 	
 	public String getGeometryColumn() {
@@ -174,23 +175,29 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	    
 	    // apply styles, create new objects for these
 	    for(Geometry object: objectTemp){
-	    	String[] userData = null;
+	    	GeometryData geomData = null;
+	    	GeometryStyle style = null;
+	    	
 	    	if (userColumns != null) {
 		        @SuppressWarnings("unchecked")
-				final Map<String, String> oldUserData = (Map<String, String>) object.userData;
-		        userData = new String[userColumns.length];
-		        userData[0] = dbPath + ":" + tableName + ":" + oldUserData.get(userColumns[0]); // note: the id column is not unique so adding prepending db path + table name
-		        userData[1] = oldUserData.get(userColumns[1]);
+				final Map<String, String> userData = (Map<String, String>) object.userData;
+		        // note: the id column is not unique so adding prepending db path + table name
+		        String id = dbPath + ":" + tableName + ":" + userData.get(userColumns[0]);
+		        String label = userData.get(userColumns[1]);
+		        style = getGeometryStyle(object, id);
+		        geomData = new GeometryData(id, label, style);
+		    } else {
+		    	style = getGeometryStyle(object);
 		    }
 	        
 	        Geometry newObject = null;
 	        
 	        if(object instanceof Point){
-	            newObject = new Point(((Point) object).getMapPos(), null, getPointStyleSet(userData), userData);
+	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
 	        }else if(object instanceof Line){
-	            newObject = new Line(((Line) object).getVertexList(), null, getLineStyleSet(userData), userData);
+	            newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
 	        }else if(object instanceof Polygon){
-	            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, getPolygonStyleSet(userData), userData);
+	            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
 	        }
 	        
 	        newObject.attachToLayer(this);
@@ -202,44 +209,32 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	    setVisibleElementsList(objects);
 	
 	  }
-
-	  protected StyleSet<PointStyle> getPointStyleSet(Object o) {
-			if (o instanceof String[]) {
-				String[] userData = (String[]) o;
-				List<GeometrySelection> selections = mapView.getSelections();
-				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData[0])) {
-						return set.getPointStyle().toPointStyleSet();
-					}
-				}
-			}
-			return pointStyleSet;
-		}
-		
-		protected StyleSet<LineStyle> getLineStyleSet(Object o) {
-			if (o instanceof String[]) {
-				String[] userData = (String[]) o;
-				List<GeometrySelection> selections = mapView.getSelections();
-				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData[0])) {
-						return set.getLineStyle().toLineStyleSet();
-					}
-				}
-			}
-			return lineStyleSet;
-		}
-		
-		protected StyleSet<PolygonStyle> getPolygonStyleSet(Object o) {
-			if (o instanceof String[]) {
-				String[] userData = (String[]) o;
-				List<GeometrySelection> selections = mapView.getSelections();
-				for (GeometrySelection set : selections) {
-					if (set.isActive() && set.hasData(userData[0])) {
-						return set.getPolygonStyle().toPolygonStyleSet();
-					}
-				}
-			}
-			return polygonStyle;
-		}
+	  
+	  protected GeometryStyle getGeometryStyle(Geometry geom) {
+		  if (geom instanceof Point) {
+			  return pointStyle;
+		  } else if (geom instanceof Line) {
+			  return lineStyle;
+		  } else if (geom instanceof Polygon) {
+			  return polygonStyle;
+		  }
+		  return null;
+	  }
+	  
+	  protected GeometryStyle getGeometryStyle(Geometry geom, String id) {
+		  List<GeometrySelection> selections = mapView.getSelections();
+		  for (GeometrySelection set : selections) {
+			  if (set.isActive() && set.hasData(id)) {
+				  if (geom instanceof Point) {
+					  return set.getPointStyle();
+				  } else if (geom instanceof Line) {
+					  return set.getLineStyle();
+				  } else if (geom instanceof Polygon) {
+					  return set.getPolygonStyle();
+				  }
+			  }
+		  }
+		  return getGeometryStyle(geom);
+	  }
 
 }

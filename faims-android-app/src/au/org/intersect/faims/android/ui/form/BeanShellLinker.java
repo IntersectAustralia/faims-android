@@ -73,7 +73,7 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
+import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
@@ -89,6 +89,7 @@ import bsh.Interpreter;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
 
@@ -2780,9 +2781,9 @@ public class BeanShellLinker {
 
 				String filepath = activity.getProjectDir() + "/" + filename;
 				return mapView.addSpatialLayer(layerName, filepath, tablename,
-						idColumn, labelColumn, pointStyle.toPointStyleSet(),
-						lineStyle.toLineStyleSet(),
-						polygonStyle.toPolygonStyleSet(),
+						idColumn, labelColumn, pointStyle,
+						lineStyle,
+						polygonStyle,
 						textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2808,9 +2809,9 @@ public class BeanShellLinker {
 				CustomMapView mapView = (CustomMapView) obj;
 
 				return mapView.addDatabaseLayer(layerName, isEntity, queryName,
-						querySql, pointStyle.toPointStyleSet(),
-						lineStyle.toLineStyleSet(),
-						polygonStyle.toPolygonStyleSet(),
+						querySql, pointStyle,
+						lineStyle,
+						polygonStyle,
 						textStyle.toStyleSet());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2893,7 +2894,8 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return mapView.drawPoint(layerId, point, style).getGeomId();
+				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, point, style).userData;
+				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2916,7 +2918,8 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return mapView.drawLine(layerId, points, style).getGeomId();
+				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, points, style).userData;
+				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2939,7 +2942,8 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return mapView.drawPolygon(layerId, points, style).getGeomId();
+				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, points, style).userData;
+				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -3655,7 +3659,7 @@ public class BeanShellLinker {
 	}
 
 	public Geometry createGeometryPoint(MapPos point) {
-		return new CustomPoint(0, createPointStyle(0, 0, 0, 0), point, null);
+		return new Point(point, null, createPointStyle(0, 0, 0, 0).toPointStyleSet(), null);
 	}
 
 	public void setToolsEnabled(String ref, boolean enabled) {

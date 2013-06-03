@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.location.Location;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.MeasurementUtil;
@@ -13,6 +12,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
 
@@ -147,8 +147,8 @@ public class AzimuthTool extends HighlightTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomPoint) && (mapView.getHighlights().size() < 2)) {
-					CustomPoint p = (CustomPoint) element;
+				if ((element instanceof Point) && (mapView.getHighlights().size() < 2)) {
+					Point p = (Point) element;
 					
 					if (mapView.hasHighlight(p)) {
 						mapView.removeHighlight(p);
@@ -170,8 +170,8 @@ public class AzimuthTool extends HighlightTool {
 	private void drawAzimuth() {
 		if (mapView.getHighlights().size() < 2) return;
 		
-		MapPos p1 = ((CustomPoint) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((CustomPoint) mapView.getHighlights().get(1)).getMapPos();
+		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 		
 		canvas.drawAzimuthFrom(p1, p2);
 		canvas.setColor(mapView.getDrawViewColor());

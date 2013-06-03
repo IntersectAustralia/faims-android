@@ -715,7 +715,7 @@ public class LayerManagerDialog extends AlertDialog {
 						String idColumn = idColumnSpinner.getSelectedItem() != null ? (String) idColumnSpinner.getSelectedItem() : null;
 						String labelColumn = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
 						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, idColumn, labelColumn, 
-								pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+								pointStyle, lineStyle, polygonStyle, 
 								textStyle.toStyleSet());
 						redrawLayers();
 					}
@@ -788,7 +788,7 @@ public class LayerManagerDialog extends AlertDialog {
 					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
 					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
 					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
-							pointStyle.toPointStyleSet(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), 
+							pointStyle, lineStyle, polygonStyle, 
 							textStyle.toStyleSet());
 					redrawLayers();
 				} catch (Exception e) {
@@ -849,7 +849,8 @@ public class LayerManagerDialog extends AlertDialog {
 	}
 
 	private void createUsersTrackLogLayer(String layerName) throws Exception {
-		mapView.setUserTrackLogLayer(mapView.addDataBaseLayerForTrackLog(layerName, pointStyle.toPointStyleSet(), mapView.getUserCheckedList(), mapView.getTrackLogQueryName(), mapView.getTrackLogQuerySql(), lineStyle.toLineStyleSet(), polygonStyle.toPolygonStyleSet(), textStyle.toStyleSet()));
+		mapView.setUserTrackLogLayer(mapView.addDataBaseLayerForTrackLog(layerName, mapView.getUserCheckedList(), mapView.getTrackLogQueryName(), mapView.getTrackLogQuerySql(),
+				pointStyle, lineStyle, polygonStyle, textStyle.toStyleSet()));
 	}
 
 	private View createUserSelectionButton() throws Exception {

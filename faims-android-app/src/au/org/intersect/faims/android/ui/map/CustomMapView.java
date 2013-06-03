@@ -29,13 +29,11 @@ import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
-import au.org.intersect.faims.android.nutiteq.CustomLine;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
-import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
+import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
@@ -65,7 +63,10 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Marker;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
 import com.nutiteq.layers.raster.GdalMapLayer;
@@ -488,12 +489,8 @@ public class CustomMapView extends MapView {
 	}
 
 	public int getGeometryId(Geometry geom) {
-		if (geom instanceof CustomPoint) {
-			return ((CustomPoint) geom).getGeomId();
-		} else if (geom instanceof CustomLine) {
-			return ((CustomLine) geom).getGeomId();
-		} else if (geom instanceof CustomPolygon) {
-			return ((CustomPolygon) geom).getGeomId();
+		if (geom.userData instanceof GeometryData) {
+			return ((GeometryData) geom.userData).geomId;
 		}
 		return 0;
 	}
@@ -648,9 +645,9 @@ public class CustomMapView extends MapView {
 	}
 
 	public int addSpatialLayer(String layerName, String file, String tablename,
-			String idColumn, String labelColumn, StyleSet<PointStyle> pointStyleSet,
-			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet,
+			String idColumn, String labelColumn, GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error file does not exist " + file);
@@ -671,8 +668,8 @@ public class CustomMapView extends MapView {
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(
 				nextLayerId(), layerName, new EPSG3857(), this, file, tablename,
 				"Geometry", labelColumns,
-				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet,
-				polygonStyleSet);
+				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyle, lineStyle,
+				polygonStyle);
 		this.getLayers().addLayer(spatialLayer);
 		
 		if (textStyleSet != null) {
@@ -695,15 +692,15 @@ public class CustomMapView extends MapView {
 	}
 	
 	public int addDatabaseLayer(String layerName, boolean isEntity, String queryName, String querySql, 
-			StyleSet<PointStyle> pointStyleSet,
-			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet,
+			GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		validateLayerName(layerName);
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
-				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyleSet, lineStyleSet, polygonStyleSet);
+				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
 		if (textStyleSet != null) {
@@ -716,15 +713,16 @@ public class CustomMapView extends MapView {
 		return addLayer(layer);
 	}
 	
-	public int addDataBaseLayerForTrackLog(String layerName, StyleSet<PointStyle> pointStyleSet, Map<User, Boolean> users,
+	public int addDataBaseLayerForTrackLog(String layerName, Map<User, Boolean> users,
 			String queryName, String querySql,
-			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet,
+			GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		validateLayerName(layerName);
 		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,  databaseManager,
-				FaimsSettings.MAX_VECTOR_OBJECTS, users, pointStyleSet, lineStyleSet, polygonStyleSet);
+				FaimsSettings.MAX_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
 		if (textStyleSet != null) {
@@ -737,22 +735,22 @@ public class CustomMapView extends MapView {
 		return addLayer(layer);
 	}
 
-	public CustomPoint drawPoint(int layerId, MapPos point, GeometryStyle style) throws Exception {
+	public Point drawPoint(int layerId, MapPos point, GeometryStyle style) throws Exception {
 		return drawPoint(getLayer(layerId), point, style);
 	}
 	
-	public CustomPoint drawPoint(Layer layer, MapPos point, GeometryStyle style)  throws Exception {
+	public Point drawPoint(Layer layer, MapPos point, GeometryStyle style)  throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomPoint p = canvas.addPoint(nextGeomId(), point, style);
+		Point p = canvas.addPoint(nextGeomId(), point, style);
 		addGeometry(layer, p);
 		updateRenderer();
 		return p;
 	}
 	
-	public void restylePoint(CustomPoint point, GeometryStyle style) throws Exception {
+	public void restylePoint(Point point, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(point);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
@@ -764,22 +762,22 @@ public class CustomMapView extends MapView {
 		updateRenderer();
 	}
 
-	public CustomLine drawLine(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
+	public Line drawLine(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
 		return drawLine(getLayer(layerId), points, style);
 	}
 	
-	public CustomLine drawLine(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
+	public Line drawLine(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomLine l = canvas.addLine(nextGeomId(), points, style);
+		Line l = canvas.addLine(nextGeomId(), points, style);
 		addGeometry(layer, l);
 		updateRenderer();
 		return l;
 	}
 
-	public void restyleLine(CustomLine line, GeometryStyle style) throws Exception {
+	public void restyleLine(Line line, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(line);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
@@ -791,22 +789,22 @@ public class CustomMapView extends MapView {
 		updateRenderer();
 	}
 
-	public CustomPolygon drawPolygon(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
+	public Polygon drawPolygon(int layerId, List<MapPos> points, GeometryStyle style) throws Exception {
 		return drawPolygon(getLayer(layerId), points, style);
 	}
 
-	public CustomPolygon drawPolygon(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
+	public Polygon drawPolygon(Layer layer, List<MapPos> points, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) layer;
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
 		}
-		CustomPolygon p = canvas.addPolygon(nextGeomId(), points, style);
+		Polygon p = canvas.addPolygon(nextGeomId(), points, style);
 		addGeometry(layer, p);
 		updateRenderer();
 		return p;
 	}
 	
-	public void restylePolygon(CustomPolygon polygon, GeometryStyle style) throws Exception {
+	public void restylePolygon(Polygon polygon, GeometryStyle style) throws Exception {
 		CanvasLayer canvas = (CanvasLayer) geometryLayerMap.get(polygon);
 		if (canvas == null) {
 			throw new MapException("Layer does not exist");
@@ -1534,7 +1532,7 @@ public class CustomMapView extends MapView {
 		return trackLogQuerySql;
 	}
 
-	public void runPointSelection(CustomPoint point, float distance, boolean remove) throws Exception {
+	public void runPointSelection(Point point, float distance, boolean remove) throws Exception {
 		if (selectedSelection == null) {
 			throw new MapException("Please select a selection");
 		}

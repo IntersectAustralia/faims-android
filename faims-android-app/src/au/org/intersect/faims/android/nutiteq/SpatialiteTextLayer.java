@@ -56,8 +56,8 @@ public class SpatialiteTextLayer extends TextLayer {
 	    
 	    for(Geometry geom: geometries){
 	        
-			String[] userData = (String[]) geom.userData;
-	        String name = userData[1];
+			GeometryData userData = (GeometryData) geom.userData;
+	        String name = userData.label;
 	        
 	        MapPos topRight = null;
 	        if (geom instanceof Point) {

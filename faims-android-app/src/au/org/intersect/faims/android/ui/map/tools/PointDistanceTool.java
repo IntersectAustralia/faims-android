@@ -7,7 +7,6 @@ import android.location.Location;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -17,6 +16,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
 public class PointDistanceTool extends HighlightTool {
@@ -132,8 +132,8 @@ public class PointDistanceTool extends HighlightTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomPoint) && (mapView.getHighlights().size() < 2)) {
-					CustomPoint p = (CustomPoint) element;
+				if ((element instanceof Point) && (mapView.getHighlights().size() < 2)) {
+					Point p = (Point) element;
 					
 					if (mapView.hasHighlight(p)) {
 						mapView.removeHighlight(p);
@@ -156,8 +156,8 @@ public class PointDistanceTool extends HighlightTool {
 	private void computeDistance() {
 		if (mapView.getHighlights().size() < 2) return;
 		
-		MapPos p1 = ((CustomPoint) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((CustomPoint) mapView.getHighlights().get(1)).getMapPos();
+		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 		
 		this.distance = computePointDistance(p1, p2);
 	}
@@ -165,8 +165,8 @@ public class PointDistanceTool extends HighlightTool {
 	private void drawDistance() {
 		if (mapView.getHighlights().size() < 2) return;
 		
-		MapPos p1 = ((CustomPoint) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((CustomPoint) mapView.getHighlights().get(1)).getMapPos();
+		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 		
 		canvas.drawDistanceBetween(p1, p2);
 		canvas.setColor(mapView.getDrawViewColor());

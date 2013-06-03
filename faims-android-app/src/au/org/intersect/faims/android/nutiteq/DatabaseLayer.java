@@ -15,10 +15,6 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
@@ -34,9 +30,9 @@ public class DatabaseLayer extends GeometryLayer {
 	protected DatabaseTextLayer textLayer;
 	protected boolean textVisible;
 	protected DatabaseManager dbmgr;
-	protected StyleSet<PointStyle> pointStyleSet;
-	protected StyleSet<LineStyle> lineStyleSet;
-	protected StyleSet<PolygonStyle> polygonStyleSet;
+	protected GeometryStyle pointStyle;
+	protected GeometryStyle lineStyle;
+	protected GeometryStyle polygonStyle;
 	protected int maxObjects;
 	protected int minZoom;
 	protected Type type;
@@ -48,9 +44,9 @@ public class DatabaseLayer extends GeometryLayer {
 	protected String userid;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
-			int maxObjects, StyleSet<PointStyle> pointStyleSet,
-			StyleSet<LineStyle> lineStyleSet,
-			StyleSet<PolygonStyle> polygonStyleSet) {
+			int maxObjects, GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle) {
 		super(projection);
 		this.name = name;
 		this.layerId = layerId;
@@ -59,18 +55,19 @@ public class DatabaseLayer extends GeometryLayer {
 		this.querySql = querySql;
 		this.type = type;
 		this.dbmgr = dbmgr;
-		this.pointStyleSet = pointStyleSet;
-	    this.lineStyleSet = lineStyleSet;
-	    this.polygonStyleSet = polygonStyleSet;
+		this.pointStyle = pointStyle;
+	    this.lineStyle = lineStyle;
+	    this.polygonStyle = polygonStyle;
 	    this.maxObjects = maxObjects;
-		if (pointStyleSet != null) {
-	      minZoom = pointStyleSet.getFirstNonNullZoomStyleZoom();
+	    
+	    if (pointStyle != null) {
+	      minZoom = pointStyle.toPointStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
-	    if (lineStyleSet != null) {
-	      minZoom = lineStyleSet.getFirstNonNullZoomStyleZoom();
+	    if (lineStyle != null) {
+	      minZoom = lineStyle.toLineStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
-	    if (polygonStyleSet != null) {
-	      minZoom = polygonStyleSet.getFirstNonNullZoomStyleZoom();
+	    if (polygonStyle != null) {
+	      minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
 	}
 
@@ -165,58 +162,22 @@ public class DatabaseLayer extends GeometryLayer {
 		}
 	}
 	
-	protected StyleSet<PointStyle> getPointStyleSet(Object o) {
-		if (o instanceof String[]) {
-			String[] userData = (String[]) o;
-			List<GeometrySelection> selections = mapView.getSelections();
-			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData[0])) {
-					return set.getPointStyle().toPointStyleSet();
-				}
-			}
-		}
-		return pointStyleSet;
-	}
-	
-	protected StyleSet<LineStyle> getLineStyleSet(Object o) {
-		if (o instanceof String[]) {
-			String[] userData = (String[]) o;
-			List<GeometrySelection> selections = mapView.getSelections();
-			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData[0])) {
-					return set.getLineStyle().toLineStyleSet();
-				}
-			}
-		}
-		return lineStyleSet;
-	}
-	
-	protected StyleSet<PolygonStyle> getPolygonStyleSet(Object o) {
-		if (o instanceof String[]) {
-			String[] userData = (String[]) o;
-			List<GeometrySelection> selections = mapView.getSelections();
-			for (GeometrySelection set : selections) {
-				if (set.isActive() && set.hasData(userData[0])) {
-					return set.getPolygonStyle().toPolygonStyleSet();
-				}
-			}
-		}
-		return polygonStyleSet;
-	}
-
 	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
 			Vector<Geometry> objects) {
 		// apply styles, create new objects for these
 		for(Geometry object: objectTemp){
 		    
 		    Geometry newObject = null;
+		    String[] userData = (String[]) object.userData;
+		    GeometryStyle style = getGeometryStyle(object, userData[0]);
+		    GeometryData geomData = new GeometryData(userData[0], userData[1], style);
 		    
 		    if(object instanceof Point){
-	            newObject = new Point(((Point) object).getMapPos(), null, getPointStyleSet(object.userData), object.userData);
+	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
 	        }else if(object instanceof Line){
-	            newObject = new Line(((Line) object).getVertexList(), null, getLineStyleSet(object.userData), object.userData);
+	            newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
 	        }else if(object instanceof Polygon){
-	            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, getPolygonStyleSet(object.userData), object.userData);
+	            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
 	        }
 		    
 		    Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
@@ -227,5 +188,32 @@ public class DatabaseLayer extends GeometryLayer {
 		    objects.add(transformedObject);
 		}
 	}
+	
+	protected GeometryStyle getGeometryStyle(Geometry geom) {
+		  if (geom instanceof Point) {
+			  return pointStyle;
+		  } else if (geom instanceof Line) {
+			  return lineStyle;
+		  } else if (geom instanceof Polygon) {
+			  return polygonStyle;
+		  }
+		  return null;
+	  }
+	  
+	  protected GeometryStyle getGeometryStyle(Geometry geom, String id) {
+		  List<GeometrySelection> selections = mapView.getSelections();
+		  for (GeometrySelection set : selections) {
+			  if (set.isActive() && set.hasData(id)) {
+				  if (geom instanceof Point) {
+					  return set.getPointStyle();
+				  } else if (geom instanceof Line) {
+					  return set.getLineStyle();
+				  } else if (geom instanceof Polygon) {
+					  return set.getPolygonStyle();
+				  }
+			  }
+		  }
+		  return getGeometryStyle(geom);
+	  }
 
 }

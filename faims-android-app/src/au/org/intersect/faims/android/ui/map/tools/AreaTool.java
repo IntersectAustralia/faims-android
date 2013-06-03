@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomPolygon;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -17,6 +16,7 @@ import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class AreaTool extends HighlightTool {
@@ -45,7 +45,7 @@ public class AreaTool extends HighlightTool {
 			}
 		}
 		
-		public void drawArea(CustomPolygon polygon) {
+		public void drawArea(Polygon polygon) {
 			this.isDirty = true;
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
@@ -120,8 +120,8 @@ public class AreaTool extends HighlightTool {
 			double arg2, boolean arg3) {
 		if (element instanceof Geometry) {
 			try {
-				if ((element instanceof CustomPolygon) && (mapView.getHighlights().size() < 1)) {
-					CustomPolygon p = (CustomPolygon) element;
+				if ((element instanceof Polygon) && (mapView.getHighlights().size() < 1)) {
+					Polygon p = (Polygon) element;
 					
 					if (mapView.hasHighlight(p)) {
 						mapView.removeHighlight(p);
@@ -144,7 +144,7 @@ public class AreaTool extends HighlightTool {
 	private void computeArea() {
 		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomPolygon polygon = (CustomPolygon) mapView.getHighlights().get(0);
+		Polygon polygon = (Polygon) mapView.getHighlights().get(0);
 		
 		this.area = computePolygonArea(polygon);
 	}
@@ -152,7 +152,7 @@ public class AreaTool extends HighlightTool {
 	private void drawArea() {
 		if (mapView.getHighlights().size() < 1) return;
 		
-		CustomPolygon polygon = (CustomPolygon) mapView.getHighlights().get(0);
+		Polygon polygon = (Polygon) mapView.getHighlights().get(0);
 		
 		canvas.drawArea(polygon);
 		canvas.setColor(mapView.getDrawViewColor());
@@ -161,9 +161,9 @@ public class AreaTool extends HighlightTool {
 		canvas.setShowKm(mapView.showKm());
 	}
 	
-	public float computePolygonArea(CustomPolygon polygon) {
+	public float computePolygonArea(Polygon polygon) {
 		try {
-			polygon = (CustomPolygon) GeometryUtil.convertGeometryToWgs84(polygon);
+			polygon = (Polygon) GeometryUtil.convertGeometryToWgs84(polygon);
 			return (float) SpatialiteUtil.computeArea(polygon);
 		} catch (Exception e) {
 			FLog.e("error computing area of polygon", e);

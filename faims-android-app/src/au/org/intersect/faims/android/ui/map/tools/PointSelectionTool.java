@@ -6,12 +6,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
 public class PointSelectionTool extends HighlightSelectionTool {
@@ -68,9 +68,9 @@ public class PointSelectionTool extends HighlightSelectionTool {
 								return;
 							}
 							
-							CustomPoint point = (CustomPoint) mapView.getHighlights().get(0);
+							Point point = (Point) mapView.getHighlights().get(0);
 							
-							mapView.runPointSelection((CustomPoint) GeometryUtil.convertGeometryToWgs84(point), distance, remove);
+							mapView.runPointSelection((Point) GeometryUtil.convertGeometryToWgs84(point), distance, remove);
 						} catch (Exception e) {
 							FLog.e("error running point selection query", e);
 							showError(e.getMessage());
@@ -97,7 +97,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	@Override
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
-		if ((element instanceof CustomPoint) && (mapView.getHighlights().size() < 2)) {
+		if ((element instanceof Point) && (mapView.getHighlights().size() < 2)) {
 			super.onVectorElementClicked(element, arg1, arg2, arg3);
 		}
 	}

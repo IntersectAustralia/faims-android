@@ -10,6 +10,9 @@ import com.nutiteq.components.Components;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.utils.Const;
 import com.nutiteq.utils.Quadtree;
@@ -73,28 +76,28 @@ public class CanvasLayer extends GeometryLayer {
 		}
 	}
 
-	public CustomPoint addPoint(int geomId, MapPos point, GeometryStyle style) {		
-		CustomPoint p = new CustomPoint(geomId, style, projection.fromWgs84(point.x, point.y), null);
+	public Point addPoint(int geomId, MapPos point, GeometryStyle style) {		
+		Point p = new Point(projection.fromWgs84(point.x, point.y), null, style.toPointStyle(), new GeometryData(geomId, style));
 		addGeometry(p);
 		return p;
 	}
 	
-	public CustomLine addLine(int geomId, List<MapPos> points, GeometryStyle style) {
+	public Line addLine(int geomId, List<MapPos> points, GeometryStyle style) {
         List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomLine l = new CustomLine(geomId, style, vertices, null);
+        Line l = new Line(vertices, null, style.toLineStyle(), new GeometryData(geomId, style));
 		addGeometry(l);
 		return l;
 	}
 	
-	public CustomPolygon addPolygon(int geomId, List<MapPos> points, GeometryStyle style) {		
+	public Polygon addPolygon(int geomId, List<MapPos> points, GeometryStyle style) {		
 		List<MapPos> vertices = new ArrayList<MapPos>();
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-		CustomPolygon p = new CustomPolygon(geomId, style, vertices, null);
+        Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, style.toPolygonStyle(), new GeometryData(geomId, style));
 		
 		addGeometry(p);
 		return p;

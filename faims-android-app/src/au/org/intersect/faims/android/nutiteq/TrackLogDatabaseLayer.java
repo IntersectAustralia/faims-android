@@ -17,10 +17,6 @@ import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.LineStyle;
-import com.nutiteq.style.PointStyle;
-import com.nutiteq.style.PolygonStyle;
-import com.nutiteq.style.StyleSet;
 
 public class TrackLogDatabaseLayer extends DatabaseLayer {
 
@@ -28,9 +24,11 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 
 	public TrackLogDatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type,
 			String queryName, String querySql, DatabaseManager dbmgr, int maxObjects, Map<User, Boolean> users,
-			StyleSet<PointStyle> pointStyleSet, StyleSet<LineStyle> lineStyleSet, StyleSet<PolygonStyle> polygonStyleSet) {
+			GeometryStyle pointStyle,
+			GeometryStyle lineStyle,
+			GeometryStyle polygonStyle) {
 		super(layerId, name, projection, mapView, type, queryName, querySql, dbmgr,
-				maxObjects, pointStyleSet, lineStyleSet, polygonStyleSet);
+				maxObjects, pointStyle, lineStyle, polygonStyle);
 		this.users = users;
 	}
 
@@ -58,7 +56,7 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 						hsv[2] = 1;
 						GeometryStyle pointStyle = GeometryStyle.defaultPointStyle();
 						pointStyle.pointColor = Color.HSVToColor(hsv);
-						pointStyleSet = pointStyle.toPointStyleSet();
+						this.pointStyle = pointStyle;
 						objectTemp = dbmgr.fetchVisibleGPSTrackingForUser(min, max, maxObjects, querySql, user.getKey().getUserId());
 						createElementsInLayer(zoom, objectTemp, objects);
 					}

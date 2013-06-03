@@ -7,9 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
-import au.org.intersect.faims.android.nutiteq.CustomLine;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
-import au.org.intersect.faims.android.nutiteq.CustomPolygon;
+import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
@@ -17,6 +15,9 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 
 public class DrawView extends View {
 	
@@ -67,37 +68,40 @@ public class DrawView extends View {
 	}
 	
 	private void drawGeometryOverlay(Geometry geom, Canvas canvas) {
-		if (geom instanceof CustomPoint) {
-			drawPointOverlay((CustomPoint) geom, canvas);
-		} else if (geom instanceof CustomLine) {
-			drawLineOverlay((CustomLine) geom, canvas);
-		} else if (geom instanceof CustomPolygon) {
-			drawPolygonOverlay((CustomPolygon) geom, canvas);
+		if (geom instanceof Point) {
+			drawPointOverlay((Point) geom, canvas);
+		} else if (geom instanceof Line) {
+			drawLineOverlay((Line) geom, canvas);
+		} else if (geom instanceof Polygon) {
+			drawPolygonOverlay((Polygon) geom, canvas);
 		}
 	}
 	
 	private void drawGeometryInfo(Geometry geom, Canvas canvas) {
-		if (geom instanceof CustomPoint) {
-			drawPointInfo((CustomPoint) geom, canvas);
-		} else if (geom instanceof CustomLine) {
-			drawLineInfo((CustomLine) geom, canvas);
-		} else if (geom instanceof CustomPolygon) {
-			drawPolygonInfo((CustomPolygon) geom, canvas);
+		if (geom instanceof Point) {
+			drawPointInfo((Point) geom, canvas);
+		} else if (geom instanceof Line) {
+			drawLineInfo((Line) geom, canvas);
+		} else if (geom instanceof Polygon) {
+			drawPolygonInfo((Polygon) geom, canvas);
 		}
 	}
 	
-	private void drawPointOverlay(CustomPoint point, Canvas canvas) {
-		float size = ScaleUtil.getDip(this.getContext(), point.getStyle().size * SCALE_FACTOR);
+	private void drawPointOverlay(Point point, Canvas canvas) {
+		GeometryData data = (GeometryData) point.userData;
+		float size = ScaleUtil.getDip(this.getContext(), data.style.size * SCALE_FACTOR);
 		MapPos p = transformPoint(point.getMapPos());
 		canvas.drawCircle((float) p.x, (float) p.y, size, paint);
 	}
 	
-	private void drawLineOverlay(CustomLine line, Canvas canvas) {
+	private void drawLineOverlay(Line line, Canvas canvas) {
 		MapPos lp = null;
 		for (MapPos p : line.getVertexList()) {
 			p = transformPoint(p);
 			if (lp != null) {
-				paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), line.getStyle().width * SCALE_FACTOR));
+				GeometryData data = (GeometryData) line.userData;
+				float size = ScaleUtil.getDip(this.getContext(), data.style.width * SCALE_FACTOR);
+				paint.setStrokeWidth(size);
 				canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
 			}
 			lp = p;
@@ -105,7 +109,7 @@ public class DrawView extends View {
 		paint.setStrokeWidth(ScaleUtil.getDip(this.getContext(), strokeSize * STROKE_SCALE));
 	}
 	
-	private void drawPolygonOverlay(CustomPolygon polygon, Canvas canvas) {
+	private void drawPolygonOverlay(Polygon polygon, Canvas canvas) {
 		MapPos lp = null;
 		for (MapPos p : polygon.getVertexList()) {
 			p = transformPoint(p);
@@ -119,24 +123,27 @@ public class DrawView extends View {
 		canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
 	}
 	
-	private void drawPointInfo(CustomPoint point, Canvas canvas) {
-		float offset = getPosOffset(point.getStyle());
+	private void drawPointInfo(Point point, Canvas canvas) {
+		GeometryData data = (GeometryData) point.userData;
+		float offset = getPosOffset(data.style);
 		MapPos p = transformPoint(point.getMapPos());
 		drawPosInfo(p, pointToText(projectPoint(point.getMapPos())), offset, -offset, canvas);
 	}
 	
-	private void drawLineInfo(CustomLine line, Canvas canvas) {
+	private void drawLineInfo(Line line, Canvas canvas) {
 		for (MapPos p : line.getVertexList()) {
 			MapPos tp = transformPoint(p);
-			float offset = getPosOffset(line.getStyle());
+			GeometryData data = (GeometryData) line.userData;
+			float offset = getPosOffset(data.style);
 			drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
 		}
 	}
 	
-	private void drawPolygonInfo(CustomPolygon polygon, Canvas canvas) {
+	private void drawPolygonInfo(Polygon polygon, Canvas canvas) {
 		for (MapPos p : polygon.getVertexList()) {
 			MapPos tp = transformPoint(p);
-			float offset = getPosOffset(polygon.getStyle());
+			GeometryData data = (GeometryData) polygon.userData;
+			float offset = getPosOffset(data.style);
 			drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
 		}
 	}

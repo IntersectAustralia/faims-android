@@ -8,9 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.CustomLine;
-import au.org.intersect.faims.android.nutiteq.CustomPoint;
-import au.org.intersect.faims.android.nutiteq.CustomPolygon;
+import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
@@ -21,6 +19,9 @@ import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class EditTool extends HighlightTool {
@@ -112,14 +113,6 @@ public class EditTool extends HighlightTool {
 		lockButton.setChecked(false);
 		updateLockButton();
 		mapView.clearHighlightTransform();
-	}
-	
-	@Override
-	public void onVectorElementClicked(VectorElement element, double arg1,
-			double arg2, boolean arg3) {
-		if (!mapView.hasTransformGeometry()) {
-			super.onVectorElementClicked(element, arg1, arg2, arg3);
-		}
 	}
 	
 	protected void clearSelection() {
@@ -218,12 +211,12 @@ public class EditTool extends HighlightTool {
 				
 				Geometry geom = selection.get(0);
 				
-				if (geom instanceof CustomPoint) {
-					showPointProperties((CustomPoint) geom);
-				} else if (geom instanceof CustomLine) {
-					showLineProperties((CustomLine) geom);
-				} else if (geom instanceof CustomPolygon) {
-					showPolygonProperties((CustomPolygon) geom);
+				if (geom instanceof Point) {
+					showPointProperties((Point) geom);
+				} else if (geom instanceof Line) {
+					showLineProperties((Line) geom);
+				} else if (geom instanceof Polygon) {
+					showPolygonProperties((Polygon) geom);
 				}
 			}
 				
@@ -231,8 +224,9 @@ public class EditTool extends HighlightTool {
 		return button;
 	}
 	
-	private void showPointProperties(final CustomPoint point) {
-		final GeometryStyle style = point.getStyle();
+	private void showPointProperties(final Point point) {
+		GeometryData data = (GeometryData) point.userData;
+		final GeometryStyle style = data.style;
 		PointStyleDialog.Builder builder = new PointStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
@@ -268,8 +262,9 @@ public class EditTool extends HighlightTool {
 		pointStyleDialog.show();
 	}
 	
-	private void showLineProperties(final CustomLine line) {
-		final GeometryStyle style = line.getStyle();
+	private void showLineProperties(final Line line) {
+		GeometryData data = (GeometryData) line.userData;
+		final GeometryStyle style = data.style;
 		LineStyleDialog.Builder builder = new LineStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
@@ -312,8 +307,9 @@ public class EditTool extends HighlightTool {
 		lineStyleDialog.show();
 	}
 	
-	private void showPolygonProperties(final CustomPolygon polygon) {
-		final GeometryStyle style = polygon.getStyle();
+	private void showPolygonProperties(final Polygon polygon) {
+		GeometryData data = (GeometryData) polygon.userData;
+		final GeometryStyle style = data.style;
 		PolygonStyleDialog.Builder builder = new PolygonStyleDialog.Builder(context, style);
 		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			
@@ -358,5 +354,21 @@ public class EditTool extends HighlightTool {
 		
 		polygonStyleDialog = (PolygonStyleDialog) builder.create();
 		polygonStyleDialog.show();
+	}
+	
+	@Override
+	public void onVectorElementClicked(VectorElement element, double arg1,
+			double arg2, boolean arg3) {
+		if (!mapView.hasTransformGeometry()) {
+			if (element instanceof Geometry) {
+				Geometry geom = (Geometry) element;
+				if (geom.userData instanceof GeometryData) {
+					GeometryData geomData = (GeometryData) geom.userData;
+					if (geomData.id == null) {
+						super.onVectorElementClicked(element, arg1, arg2, arg3);
+					}
+				}
+			} 
+		}
 	}
 }
