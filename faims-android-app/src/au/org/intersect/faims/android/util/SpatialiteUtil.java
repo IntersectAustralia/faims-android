@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.util;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import jsqlite.Stmt;
@@ -8,7 +9,12 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 
 import com.nutiteq.components.MapPos;
+import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.Line;
+import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
+import com.nutiteq.utils.Utils;
+import com.nutiteq.utils.WkbRead;
 
 public class SpatialiteUtil {
 	
@@ -77,7 +83,11 @@ private static String dbname;
 			return new MapPos(st.column_double(0), st.column_double(1));
 		} finally {
 			if (st != null) {
-				st.close();
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
 			}
 			if (db != null) {
 				try {
@@ -102,7 +112,107 @@ private static String dbname;
 			return st.column_double(0);
 		} finally {
 			if (st != null) {
-				st.close();
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
+			}
+			if (db != null) {
+				try {
+					db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public static boolean isPointOnPath(Point point, Line path, float buffer) throws Exception {
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String sql = "select st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform(GeomFromText(?, 4326), 3785));";
+			st = db.prepare(sql);
+			st.bind(1, WKTUtil.geometryToWKT(path));
+			st.bind(2, buffer);
+			st.bind(3, WKTUtil.geometryToWKT(point));
+			st.step();
+			return st.column_int(0) == 1;
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
+			}
+			if (db != null) {
+				try {
+					db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public static double distanceBetween(MapPos p1, MapPos p2) {
+		return computePointDistance(p1, p2);
+	}
+
+	public static Point nearestPointOnPath(Point point, Line path) throws Exception {
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("select spatialite_Version(), geos_version();", new jsqlite.Callback() {
+
+				@Override
+				public void columns(String[] arg0) {
+					for (String s : arg0) {
+						FLog.d(s);
+					}
+				}
+
+				@Override
+				public boolean newrow(String[] arg0) {
+					for (String s : arg0) {
+						FLog.d(s);
+					}
+					return false;
+				}
+
+				@Override
+				public void types(String[] arg0) {
+					for (String s : arg0) {
+						FLog.d(s);
+					}
+				}
+				
+			});
+			String sql = "select transform(closestPoint(transform(GeomFromText(?, 4326), 3785), transform(GeomFromText(?, 4326), 3785)), 4326);";
+			st = db.prepare(sql);
+			st.bind(1, WKTUtil.geometryToWKT(path));
+			st.bind(2, WKTUtil.geometryToWKT(point));
+			st.step();
+			Geometry[] gs = WkbRead.readWkb(
+                    new ByteArrayInputStream(Utils
+                            .hexStringToByteArray(st.column_string(0))), null);
+			if (gs != null) {
+	            return (Point) gs[0];
+			}
+			return null;
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
 			}
 			if (db != null) {
 				try {

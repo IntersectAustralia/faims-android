@@ -46,13 +46,16 @@ import au.org.intersect.faims.android.ui.map.tools.CreatePointTool;
 import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.DatabaseSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
+import au.org.intersect.faims.android.ui.map.tools.FollowTool;
 import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LegacySelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
+import au.org.intersect.faims.android.ui.map.tools.PathFollowerTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
 import au.org.intersect.faims.android.util.ScaleUtil;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.google.inject.Inject;
 import com.nutiteq.MapView;
@@ -231,6 +234,8 @@ public class CustomMapView extends MapView {
 	private ArrayList<LegacyQueryBuilder> legacySelectQueryList;
 
 	private String lastSelectionQuery;
+
+	private Line pathToFollow;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -922,6 +927,8 @@ public class CustomMapView extends MapView {
 		tools.add(new DatabaseSelectionTool(this.getContext(), this));
 		tools.add(new LegacySelectionTool(this.getContext(), this));
 		//tools.add(new PointSelectionTool(this.getContext(), this));
+		tools.add(new FollowTool(this.getContext(), this));
+		tools.add(new PathFollowerTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -1567,6 +1574,35 @@ public class CustomMapView extends MapView {
 			}
 		}
 		updateSelections();
+	}
+
+	public void setPathToFollow(Line line) {
+		this.pathToFollow = line;
+	}
+	
+	public Line getPathToFollow() {
+		return pathToFollow;
+	}
+
+	public MapPos nextPointOnPath(MapPos currentPoint, float buffer) throws Exception {
+		if (pathToFollow == null) return null;
+		
+		if (SpatialiteUtil.isPointOnPath(new Point(currentPoint, null, (PointStyle) null, null), pathToFollow, buffer)) {
+			double min = 0;
+			int minIndex = -1;
+			for (int i = 0; i < pathToFollow.getVertexList().size(); i++) {
+				double d = SpatialiteUtil.distanceBetween(pathToFollow.getVertexList().get(i), currentPoint);
+				if (d > min) {
+					d = min;
+					minIndex = i;
+				}
+			}
+			if (minIndex == -1) return null;
+			if (minIndex == pathToFollow.getVertexList().size()-1) return null;
+			return pathToFollow.getVertexList().get(minIndex+1);
+		} else {
+			return SpatialiteUtil.nearestPointOnPath(new Point(currentPoint, null, (PointStyle) null, null), pathToFollow).getMapPos();
+		}
 	}
 
 }

@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
@@ -121,6 +123,8 @@ public class HighlightTool extends SettingsTool {
 				} else {
 					mapView.addHighlight(geom);
 				}
+				
+				FLog.d(WKTUtil.geometryToWKT(GeometryUtil.convertGeometryToWgs84(geom)));
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
 				showError(e.getMessage());

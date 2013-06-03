@@ -828,14 +828,14 @@ private initUIMap() {
 		" group by uuid, attributeid\n" + 
 		" having max(valuetimestamp)\n" + 
 		"    and max(aenttimestamp)");
-	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forrest", 
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forest", 
 		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
 		" FROM archentity join aenttype using (aenttypeid)\n" + 
 		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
 		" where archentity.deleted is null\n" + 
 		"   and lower(aenttypename) = lower('simpleentity')\n" + 
 		"   and aentvalue.deleted is null\n" + 
-		"   and (freetext LIKE '%'||'forrest'||'%'\n" + 
+		"   and (freetext LIKE '%'||'forest'||'%'\n" + 
 		"        OR measure LIKE '%'||null||'%'\n" + 
 		"        OR vocabname LIKE '%'||null||'%')\n" + 
 		" group by uuid, attributeid\n" + 
