@@ -12,6 +12,7 @@ public class CustomListView extends ListView {
 	private String type;
 	private String value;
 	private List<Object> selectedItems;
+	private List<Object> allItems;
 	
 	public CustomListView(Context context) {
 		super(context);
@@ -63,5 +64,29 @@ public class CustomListView extends ListView {
 			selectedItems.clear();
 		}
 		selectedItems = null;
+	}
+
+	public List<Object> getAllItems(){
+		return allItems;
+	}
+
+	public void addAllItem(Object item){
+		if(allItems == null){
+			allItems = new ArrayList<Object>();
+		}
+		allItems.add(item);
+	}
+	
+	public void removeAllItem(Object item){
+		if(allItems != null){
+			allItems.remove(item);
+		}
+	}
+
+	public void removeAllItems(){
+		if(allItems != null){
+			allItems.clear();
+		}
+		allItems = null;
 	}
 }
