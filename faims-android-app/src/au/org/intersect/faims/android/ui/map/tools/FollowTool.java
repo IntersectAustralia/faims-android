@@ -146,7 +146,7 @@ public class FollowTool extends HighlightTool {
 		
 		Line line = (Line) mapView.getHighlights().get(0);
 		
-		mapView.setPathToFollow(line);
+		mapView.setGeomToFollow(line);
 		
 		canvas.drawDistanceAndBearing(line);
 		canvas.setColor(mapView.getDrawViewColor());

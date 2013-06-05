@@ -235,7 +235,7 @@ public class CustomMapView extends MapView {
 
 	private String lastSelectionQuery;
 
-	private Line pathToFollow;
+	private Geometry geomToFollow;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -530,6 +530,10 @@ public class CustomMapView extends MapView {
 				.distance(GeometryUtil.convertToWgs84(this.screenToWorld(0,
 						height, 0)), GeometryUtil.convertToWgs84(this
 						.screenToWorld(width, height, 0))));
+		
+		for (MapTool tool : tools) {
+			tool.onMapUpdate();
+		}
 	}
 
 	public void startThread(Runnable runnable) {
@@ -1576,32 +1580,43 @@ public class CustomMapView extends MapView {
 		updateSelections();
 	}
 
-	public void setPathToFollow(Line line) {
-		this.pathToFollow = line;
+	public void setGeomToFollow(Line line) {
+		this.geomToFollow = line;
 	}
 	
-	public Line getPathToFollow() {
-		return pathToFollow;
+	public Geometry getGeomToFollow() {
+		return geomToFollow;
 	}
 
-	public MapPos nextPointOnPath(MapPos currentPoint, float buffer) throws Exception {
-		if (pathToFollow == null) return null;
-		
-		if (SpatialiteUtil.isPointOnPath(new Point(currentPoint, null, (PointStyle) null, null), pathToFollow, buffer)) {
-			double min = 0;
-			int minIndex = -1;
-			for (int i = 0; i < pathToFollow.getVertexList().size(); i++) {
-				double d = SpatialiteUtil.distanceBetween(pathToFollow.getVertexList().get(i), currentPoint);
-				if (d > min) {
-					d = min;
-					minIndex = i;
+	public MapPos nextPointToFollow(MapPos pos, float buffer) throws Exception {
+		if (geomToFollow instanceof Point) {
+			return ((Point) geomToFollow).getMapPos();
+		} else if (geomToFollow instanceof Line) {
+			Line line = (Line) geomToFollow;
+			Point point = new Point(pos, null, (PointStyle) null, null);
+			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
+			MapPos mp = lp;
+			double min = SpatialiteUtil.distanceBetween(pos,  lp);
+			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
+				MapPos p = line.getVertexList().get(i);
+				ArrayList<MapPos> pts = new ArrayList<MapPos>();
+				pts.add(p);
+				pts.add(lp);
+				Line seg = new Line(pts, null, (LineStyle) null, null);
+				if (SpatialiteUtil.isPointOnPath(point, seg, buffer)) {
+					return lp;
+				} else {
+					double d = SpatialiteUtil.distanceBetween(pos, p);
+					if (d < min) {
+						min = d;
+						mp = p;
+					}
 				}
+				lp = p;
 			}
-			if (minIndex == -1) return null;
-			if (minIndex == pathToFollow.getVertexList().size()-1) return null;
-			return pathToFollow.getVertexList().get(minIndex+1);
+			return mp;
 		} else {
-			return SpatialiteUtil.nearestPointOnPath(new Point(currentPoint, null, (PointStyle) null, null), pathToFollow).getMapPos();
+			return null;
 		}
 	}
 

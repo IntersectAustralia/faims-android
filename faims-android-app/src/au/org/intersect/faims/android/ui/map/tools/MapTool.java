@@ -48,6 +48,10 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 		
 	}
 	
+	public void onMapUpdate() {
+		
+	}
+	
 	public View getUI() {
 		return container;
 	}

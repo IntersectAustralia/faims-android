@@ -10,11 +10,13 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class PathFollowerTool extends HighlightTool {
@@ -22,6 +24,7 @@ public class PathFollowerTool extends HighlightTool {
 	private class PathFollowerToolCanvas extends ToolCanvas {
 		
 		private MapPos tp;
+		private Geometry geom;
 
 		public PathFollowerToolCanvas(Context context) {
 			super(context);
@@ -33,6 +36,9 @@ public class PathFollowerTool extends HighlightTool {
 				
 				canvas.drawCircle((float) tp.x, (float) tp.y, 10, paint);
 				
+				if (geom instanceof Polygon) {
+					drawPolygonOverlay((Polygon) geom, canvas);
+				}
 			}
 		}
 
@@ -42,6 +48,30 @@ public class PathFollowerTool extends HighlightTool {
 			this.tp = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(p), PathFollowerTool.this.mapView, true);
 			
 			invalidate();
+		}
+
+		public void drawBuffer(Geometry bufferGeom) {
+			this.isDirty = true;
+			this.geom = bufferGeom;
+			invalidate();
+		}
+		
+		private void drawPolygonOverlay(Polygon polygon, Canvas canvas) {
+			MapPos lp = null;
+			for (MapPos p : polygon.getVertexList()) {
+				p = transformPoint(p);
+				if (lp != null) {
+					canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
+				}
+				lp = p;
+			}
+			MapPos p = polygon.getVertexList().get(0);
+			p = transformPoint(p);
+			canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
+		}
+		
+		protected MapPos transformPoint(MapPos p) {
+			return GeometryUtil.transformVertex(p, mapView, true);
 		}
 		
 	}
@@ -61,6 +91,8 @@ public class PathFollowerTool extends HighlightTool {
 	private MapPos currentPoint;
 
 	protected float buffer = 0.5f;
+
+	private Geometry bufferGeom;
 
 	public PathFollowerTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -119,7 +151,7 @@ public class PathFollowerTool extends HighlightTool {
 						mapView.addHighlight(line);
 					}
 					
-					mapView.setPathToFollow((Line) GeometryUtil.convertGeometryToWgs84(line));
+					mapView.setGeomToFollow((Line) GeometryUtil.convertGeometryToWgs84(line));
 				} else if ((element instanceof Point) && (mapView.getHighlights().size() == 1)) {
 					Point p = (Point) element;
 					
@@ -140,9 +172,21 @@ public class PathFollowerTool extends HighlightTool {
 		}
 	}
 	
+	@Override
+	public void onMapUpdate() {
+
+		PathFollowerTool.this.updatePath();
+	
+	}
+	
 	private void startPathFollower(Point p) {
 		killFollowerThread = false;
 		currentPoint = p.getMapPos();
+		try {
+			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100);
+		} catch (Exception e) {
+			FLog.e("error gettting geometry buffer", e);
+		}
 		pathFollowerThread = new Thread(new Runnable() {
 			
 
@@ -150,19 +194,26 @@ public class PathFollowerTool extends HighlightTool {
 			public void run() {
 				while(!killFollowerThread) {
 					try {
-						MapPos point = PathFollowerTool.this.mapView.nextPointOnPath(currentPoint, buffer * 10);
+						MapPos point = PathFollowerTool.this.mapView.nextPointToFollow(currentPoint, buffer * 100);
 						FLog.d("Next Point: " + point);
 						if (point != null) {
 						
 							double dx = point.x - currentPoint.x;
 							double dy = point.y - currentPoint.y;
-							double d = Math.sqrt(dx * dx + dy * dy);
+							double d = SpatialiteUtil.distanceBetween(point, currentPoint);
 							
-							double nextStep = speed * 10;
+							double nextStep;
+							if (d == 0) {
+								d = 1;
+								nextStep = 1;
+							} else {
+								nextStep = speed * 100;
+								if (nextStep > d) {
+									nextStep = d;
+								}
+							}
+							
 							currentPoint = new MapPos(currentPoint.x + nextStep * dx / d, currentPoint.y + nextStep * dy / d);
-							
-							PathFollowerTool.this.updatePath();
-						
 						}
 						Thread.sleep(1000);
 					} catch (Exception e) {
@@ -183,6 +234,7 @@ public class PathFollowerTool extends HighlightTool {
 		if (mapView.getHighlights().size() < 2) return;
 		
 		canvas.drawPointOnPath(currentPoint);
+		canvas.drawBuffer(bufferGeom);
 		canvas.setColor(mapView.getDrawViewColor());
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
