@@ -510,15 +510,14 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if (activityData.isSyncEnabled()) {
 			startSync();
 		}
-		gpsDataManager.setGpsUpdateInterval(this.activityData.getGpsUpdateInterval());
-		if(activityData.isExternalGPSStarted()){
+		if(gpsDataManager.isExternalGPSStarted()){
 			gpsDataManager.startExternalGPSListener();
 		}
-		if(activityData.isInternalGPSStarted()){
+		if(gpsDataManager.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		if(activityData.getTrackingType() != null){
-			linker.startTrackingGPS(activityData.getTrackingType(), activityData.getTrackingValue());
+		if(gpsDataManager.getTrackingType() != null){
+			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue());
 		}
 	}
 	
@@ -1187,10 +1186,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
 		renderer.storeTabs(savedInstanceState);
 		renderer.storeViewValues(savedInstanceState);
-		activityData.setExternalGPSStarted(gpsDataManager.isExternalGPSStarted());
-		activityData.setInternalGPSStarted(gpsDataManager.isInternalGPSStarted());
 		activityData.setUserId(databaseManager.getUserId());
 		activityData.saveTo(savedInstanceState);
+		gpsDataManager.saveTo(savedInstanceState);
 		gpsDataManager.destroyListener();
 	}
 
@@ -1201,15 +1199,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		renderer.restoreTabs(savedInstanceState);
 		renderer.restoreViewValues(savedInstanceState);
 		activityData.restoreFrom(savedInstanceState);
-		gpsDataManager.setGpsUpdateInterval(activityData.getGpsUpdateInterval());
-		if(activityData.isExternalGPSStarted()){
+		gpsDataManager.restoreFrom(savedInstanceState);
+		if(gpsDataManager.isExternalGPSStarted()){
 			gpsDataManager.startExternalGPSListener();
 		}
-		if(activityData.isInternalGPSStarted()){
+		if(gpsDataManager.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		if(activityData.getTrackingType() != null){
-			linker.startTrackingGPS(activityData.getTrackingType(), activityData.getTrackingValue());
+		if(gpsDataManager.getTrackingType() != null){
+			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue());
 		}
 		this.databaseManager.setUserId(activityData.getUserId());
 	}

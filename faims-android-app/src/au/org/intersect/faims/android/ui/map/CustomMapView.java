@@ -14,8 +14,11 @@ import roboguice.RoboGuice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -65,6 +68,7 @@ import com.nutiteq.components.Constraints;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
+import com.nutiteq.geometry.DynamicMarker;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Marker;
@@ -208,6 +212,7 @@ public class CustomMapView extends MapView {
 	
 	private MarkerLayer currentPositionLayer;
 	private GPSLocation previousLocation;
+	private Float previousHeading;
 
 	private WeakReference<ShowProjectActivity> activityRef;
 	
@@ -236,6 +241,12 @@ public class CustomMapView extends MapView {
 	private String lastSelectionQuery;
 
 	private Geometry geomToFollow;
+
+	private float buffer = 50;
+
+	protected boolean locationValid;
+
+	private Marker gpsMarker;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -391,6 +402,10 @@ public class CustomMapView extends MapView {
 			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
 		} else if (layer instanceof DatabaseLayer) {
 			removeLayer(((DatabaseLayer) layer).getTextLayer());
+		} else if (layer instanceof GdalMapLayer) {
+			this.getLayers().removeLayer(currentPositionLayer);
+			currentPositionLayer = null;
+			gpsMarker = null;
 		}
 		
 	}
@@ -608,6 +623,12 @@ public class CustomMapView extends MapView {
 		this.getLayers().setBaseLayer(gdalLayer);
 		//setZoomRange(gdalLayer);
 		//setMapBounds(gdalLayer);
+		
+		if(currentPositionLayer == null){
+        	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+        	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
+        }
+		
 		return addLayer(gdalLayer);
 	}
 
@@ -1223,6 +1244,7 @@ public class CustomMapView extends MapView {
 							@Override
 							public void run() {
 								CustomMapView.this.updateMapOverlay();
+								CustomMapView.this.updateMapMarker();
 							}
 							
 						});
@@ -1238,14 +1260,40 @@ public class CustomMapView extends MapView {
         });
 	}
 	
-	private Marker createGPSMarker(GdalMapLayer layer, GPSLocation location) {
+	private void updateMapMarker() {
+		if (currentPositionLayer != null && previousLocation != null) {
+			MapPos p = new MapPos(previousLocation.getLongitude(), previousLocation.getLatitude());
+			MarkerStyle style = createMarkerStyle(previousHeading, locationValid);
+			if (gpsMarker == null) {
+				gpsMarker = new DynamicMarker(p, null, style, null);
+				currentPositionLayer.clear();
+				currentPositionLayer.add(gpsMarker);
+			}
+			gpsMarker.setMapPos(GeometryUtil.convertFromWgs84(p));
+			gpsMarker.setStyle(style);
+		}
+	}
+	
+	private MarkerStyle createMarkerStyle(Float heading, boolean valid) {
+		int drawable = heading == null ? (valid ? R.drawable.blue_dot : R.drawable.grey_dot) : (valid ? R.drawable.blue_arrow : R.drawable.grey_arrow);
 		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-				this.getContext().getResources(), R.drawable.blue_dot);
-        MarkerStyle markerStyle = MarkerStyle.builder().setBitmap(pointMarker)
-                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
-        MapPos markerLocation = layer.getProjection().fromWgs84(
-                location.getLongitude(), location.getLatitude());
-        return new Marker(markerLocation, null, markerStyle, null);
+				this.getContext().getResources(), drawable);
+		if (heading != null) {
+			Canvas canvas = new Canvas();
+			Matrix matrix = new Matrix();
+			int w = pointMarker.getWidth();
+			int h = pointMarker.getHeight();
+			int d = (int) Math.sqrt(w * w + h * h);
+			matrix.postRotate(heading + this.getRotation(), w / 2, h / 2);
+			Bitmap rotateBitmap = Bitmap.createBitmap(d, d, Config.ARGB_8888);
+			canvas.setBitmap(rotateBitmap);
+			canvas.drawBitmap(pointMarker, matrix, null);
+	        return MarkerStyle.builder().setBitmap(rotateBitmap)
+	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+		} else {
+			return MarkerStyle.builder().setBitmap(pointMarker)
+	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+		}
 	}
 	
 	private void startGPSLocationThread() {
@@ -1258,37 +1306,27 @@ public class CustomMapView extends MapView {
 					
 					Thread.sleep(1000);
 					while(CustomMapView.this.canRunThreads()) {
-						GdalMapLayer gdalLayer = (GdalMapLayer) CustomMapView.this.getLayers().getBaseLayer();
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
+						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
+						if (currentHeading == null) {
+							currentHeading = previousHeading;
+						}
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
+							Float heading = (Float) currentHeading;
 							previousLocation = location;
-							Marker gpsMarker = createGPSMarker(gdalLayer, location);
-							if(currentPositionLayer == null){
-		                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-		                    	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
-		                    }
-		                    currentPositionLayer.clear();
-		                    currentPositionLayer.add(gpsMarker);
-		                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
-						}else{
+							previousHeading = heading;
+							locationValid = true;
+						} else {
 							if(previousLocation != null){
 								// when there is no gps signal for two minutes, change the color of the marker to be grey
 								if(System.currentTimeMillis() - previousLocation.getTimeStamp() > FaimsSettings.GPS_MARKER_TIMEOUT){
-				                    Marker gpsMarker = createGPSMarker(gdalLayer, previousLocation);
-				                    if(currentPositionLayer == null){
-				                    	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-				                    	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
-				                    }
-				                    currentPositionLayer.clear();
-				                    currentPositionLayer.add(gpsMarker);
-				                    currentPositionLayer.getComponents().mapRenderers.getMapRenderer().frustumChanged();
-									previousLocation = null;
+				                    locationValid = false;
 								}
 							}
 						}
 						
-						Thread.sleep(CustomMapView.this.gpsDataManager.getGpsUpdateInterval());
+						Thread.sleep(CustomMapView.this.gpsDataManager.getGpsUpdateInterval() * 1000);
 					}
 					FLog.d("stopping map gps thread");
 				} catch (Exception e) {
@@ -1302,7 +1340,7 @@ public class CustomMapView extends MapView {
 		List<Layer> layers = getLayers().getAllLayers();
 		List<Layer> tempLayers = new ArrayList<Layer>();
 		for (Layer layer : layers) {
-			if ((layer instanceof SpatialiteTextLayer) || (layer instanceof DatabaseTextLayer)) {
+			if ((layer instanceof SpatialiteTextLayer) || (layer instanceof DatabaseTextLayer) || (layer instanceof MarkerLayer)) {
 				// ignore
 			} else {
 				tempLayers.add(layer);
@@ -1580,8 +1618,8 @@ public class CustomMapView extends MapView {
 		updateSelections();
 	}
 
-	public void setGeomToFollow(Line line) {
-		this.geomToFollow = line;
+	public void setGeomToFollow(Geometry geom) {
+		this.geomToFollow = geom;
 	}
 	
 	public Geometry getGeomToFollow() {
@@ -1618,6 +1656,30 @@ public class CustomMapView extends MapView {
 		} else {
 			return null;
 		}
+	}
+
+	public float getPathBuffer() {
+		return buffer;
+	}
+	
+	public void setPathBuffer(float value) {
+		this.buffer = value;
+	}
+
+	public MapPos getCurrentPosition() {
+		GPSLocation location = gpsDataManager.getGPSPosition();
+		if (location == null) {
+			return null;
+		}
+		return new MapPos(location.getLongitude(), location.getLatitude());
+	}
+	
+	public Float getCurrentHeading() {
+		Float heading = (Float) gpsDataManager.getGPSHeading();
+		if (heading == null) {
+			return null;
+		}
+		return heading + this.getRotation();
 	}
 
 }

@@ -222,6 +222,8 @@ public class BeanShellLinker {
 	}
 
 	public void startTrackingGPS(final String type, final int value) {
+		this.activity.getGPSDataManager().setTrackingType(type);
+		this.activity.getGPSDataManager().setTrackingValue(value);
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()

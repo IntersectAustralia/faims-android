@@ -23,4 +23,8 @@ public class GPSLocation {
 	public long getTimeStamp() {
 		return this.timeStamp;
 	}
+	
+	public String toString() {
+		return "(" + longitude + "," + latitude + ")";
+	}
 }

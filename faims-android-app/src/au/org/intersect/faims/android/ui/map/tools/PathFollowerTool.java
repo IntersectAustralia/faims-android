@@ -52,7 +52,9 @@ public class PathFollowerTool extends HighlightTool {
 
 		public void drawBuffer(Geometry bufferGeom) {
 			this.isDirty = true;
+			
 			this.geom = bufferGeom;
+			
 			invalidate();
 		}
 		

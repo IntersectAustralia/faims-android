@@ -175,9 +175,6 @@ private static String dbname;
 			st.bind(1, WKTUtil.geometryToWKT(path));
 			st.bind(2, buffer);
 			st.bind(3, WKTUtil.geometryToWKT(point));
-			FLog.d(WKTUtil.geometryToWKT(path));
-			FLog.d("buffer:" + buffer);
-			FLog.d(WKTUtil.geometryToWKT(point));
 			st.step();
 			return st.column_int(0) == 1;
 		} finally {

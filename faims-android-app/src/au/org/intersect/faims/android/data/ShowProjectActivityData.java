@@ -13,14 +13,6 @@ public class ShowProjectActivityData implements ActivityData {
 	private boolean fileSyncEnabled;
 
 	private String userId;
-	
-	private boolean isExternalGPSStarted;
-
-	private boolean isInternalGPSStarted;
-
-	private int gpsUpdateInterval;
-	private String trackingType;
-	private int trackingValue;
 
 	public boolean isSyncEnabled() {
 		return syncEnabled;
@@ -46,59 +38,14 @@ public class ShowProjectActivityData implements ActivityData {
 		return this.userId;
 	}
 
-	public boolean isExternalGPSStarted() {
-		return isExternalGPSStarted;
-	}
-
-	public void setExternalGPSStarted(boolean isExternalGPSStarted) {
-		this.isExternalGPSStarted = isExternalGPSStarted;
-	}
-
-	public boolean isInternalGPSStarted() {
-		return isInternalGPSStarted;
-	}
-
-	public void setInternalGPSStarted(boolean isInternalGPSStarted) {
-		this.isInternalGPSStarted = isInternalGPSStarted;
-	}
-
-	public int getGpsUpdateInterval() {
-		return gpsUpdateInterval;
-	}
-
-	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		this.gpsUpdateInterval = gpsUpdateInterval;
-	}
-
-	public String getTrackingType() {
-		return trackingType;
-	}
-
-	public void setTrackingType(String trackingType) {
-		this.trackingType = trackingType;
-	}
-
-	public int getTrackingValue() {
-		return trackingValue;
-	}
-
-	public void setTrackingValue(int trackingValue) {
-		this.trackingValue = trackingValue;
-	}
-
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		savedInstanceState.putBoolean("syncEnabled", syncEnabled);
 		savedInstanceState.putBoolean("fileSyncEnabled", fileSyncEnabled);
 		savedInstanceState.putString("userId", userId);
-		savedInstanceState.putBoolean("isExternalGPSStarted", isExternalGPSStarted);
-		savedInstanceState.putBoolean("isInternalGPSStarted", isInternalGPSStarted);
-		savedInstanceState.putInt("gpsUpdateInterval", gpsUpdateInterval);
 		savedInstanceState.putFloat("syncMaxInterval", syncMaxInterval);
 		savedInstanceState.putFloat("syncMinInterval", syncMinInterval);
 		savedInstanceState.putFloat("syncDelay", syncDelay);
-		savedInstanceState.putString("trackingType", trackingType);
-		savedInstanceState.putInt("trackingValue", trackingValue);
 	}
 
 	@Override
@@ -106,14 +53,9 @@ public class ShowProjectActivityData implements ActivityData {
 		setSyncEnabled(savedInstancestate.getBoolean("syncEnabled"));
 		setFileSyncEnabled(savedInstancestate.getBoolean("fileSyncEnabled"));
 		setUserId(savedInstancestate.getString("userId"));
-		setExternalGPSStarted(savedInstancestate.getBoolean("isExternalGPSStarted"));
-		setInternalGPSStarted(savedInstancestate.getBoolean("isInternalGPSStarted"));
-		setGpsUpdateInterval(savedInstancestate.getInt("gpsUpdateInterval"));
 		setSyncMaxInterval(savedInstancestate.getFloat("syncMaxInterval"));
 		setSyncMinInterval(savedInstancestate.getFloat("syncMinInterval"));
 		setSyncDelay(savedInstancestate.getFloat("syncDelay"));
-		setTrackingType(savedInstancestate.getString("trackingType"));
-		setTrackingValue(savedInstancestate.getInt("trackingValue"));
 	}
 
 	public float getSyncMinInterval() {
