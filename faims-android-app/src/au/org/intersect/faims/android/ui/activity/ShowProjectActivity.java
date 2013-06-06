@@ -1179,7 +1179,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public void showFileBrowser(int requestCode) {
 		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) new LocalFile(Environment.getExternalStorageDirectory()));
+		LocalFile rootPath = new LocalFile(getProjectDir());
+		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) rootPath);
 		startActivityForResult(intent, requestCode);
 	}
 	
