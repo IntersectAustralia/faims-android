@@ -227,6 +227,7 @@ public class LayerManagerDialog extends AlertDialog {
 					mapView.setLayerVisible(layer, itemView.isChecked());
 					mapView.updateLayers();
 				} catch (Exception e) {
+					FLog.e("error setting layer visibility", e);
 					showErrorDialog("Error setting layer visibility");
 				}
 			}
@@ -550,6 +551,7 @@ public class LayerManagerDialog extends AlertDialog {
 						redrawLayers();
 					}
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -720,6 +722,7 @@ public class LayerManagerDialog extends AlertDialog {
 						redrawLayers();
 					}
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -792,6 +795,7 @@ public class LayerManagerDialog extends AlertDialog {
 							textStyle.toStyleSet());
 					redrawLayers();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -834,6 +838,7 @@ public class LayerManagerDialog extends AlertDialog {
 					createUsersTrackLogLayer(layerName);
 					redrawLayers();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -1053,6 +1058,7 @@ public class LayerManagerDialog extends AlertDialog {
 					mapView.addCanvasLayer(editText.getText().toString());
 					redrawLayers();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -1085,6 +1091,7 @@ public class LayerManagerDialog extends AlertDialog {
 					}
 					redrawLayers();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -1129,6 +1136,7 @@ public class LayerManagerDialog extends AlertDialog {
 					mapView.renameLayer(layer, editText.getText().toString());
 					redrawLayers();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}

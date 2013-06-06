@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
@@ -142,6 +143,7 @@ public class LegacySelectionTool extends SelectionTool {
 						try {
 							mapView.runLegacySelectionQuery(name, values, removeBox.isChecked());
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 						

@@ -14,11 +14,8 @@ import roboguice.RoboGuice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -54,9 +51,9 @@ import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LegacySelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
-import au.org.intersect.faims.android.ui.map.tools.PathFollowerTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
+import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
@@ -247,6 +244,18 @@ public class CustomMapView extends MapView {
 	protected boolean locationValid;
 
 	private Marker gpsMarker;
+
+	private Bitmap blueDot;
+
+	private Bitmap greyDot;
+
+	private Bitmap blueArrow;
+
+	private Bitmap greyArrow;
+
+	private Bitmap tempBitmap;
+
+	private Geometry geomToFollowBuffer;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -294,6 +303,15 @@ public class CustomMapView extends MapView {
 		getOptions().setMapListener(internalMapListener);
 		
 		RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
+		
+		blueDot = UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.blue_dot);
+		greyDot = UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.grey_dot);
+		blueArrow = UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.blue_arrow);
+		greyArrow = UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.grey_arrow);
 		
 		startMapOverlayThread();
         startGPSLocationThread();
@@ -545,10 +563,6 @@ public class CustomMapView extends MapView {
 				.distance(GeometryUtil.convertToWgs84(this.screenToWorld(0,
 						height, 0)), GeometryUtil.convertToWgs84(this
 						.screenToWorld(width, height, 0))));
-		
-		for (MapTool tool : tools) {
-			tool.onMapUpdate();
-		}
 	}
 
 	public void startThread(Runnable runnable) {
@@ -953,7 +967,7 @@ public class CustomMapView extends MapView {
 		tools.add(new LegacySelectionTool(this.getContext(), this));
 		//tools.add(new PointSelectionTool(this.getContext(), this));
 		tools.add(new FollowTool(this.getContext(), this));
-		tools.add(new PathFollowerTool(this.getContext(), this));
+		//tools.add(new PathFollowerTool(this.getContext(), this));
 	}
 
 	public MapTool getTool(String name) {
@@ -992,8 +1006,8 @@ public class CustomMapView extends MapView {
 	}
 
 	public void updateLayers() {
-		for (MapTool tool: tools) {
-			tool.onLayersChanged();
+		if (toolsEnabled && currentTool != null) {
+			currentTool.onLayersChanged();
 		}
 	}
 
@@ -1245,6 +1259,10 @@ public class CustomMapView extends MapView {
 							public void run() {
 								CustomMapView.this.updateMapOverlay();
 								CustomMapView.this.updateMapMarker();
+								// update tool
+								if (toolsEnabled && currentTool != null) {
+									currentTool.onMapUpdate();
+								}
 							}
 							
 						});
@@ -1275,23 +1293,15 @@ public class CustomMapView extends MapView {
 	}
 	
 	private MarkerStyle createMarkerStyle(Float heading, boolean valid) {
-		int drawable = heading == null ? (valid ? R.drawable.blue_dot : R.drawable.grey_dot) : (valid ? R.drawable.blue_arrow : R.drawable.grey_arrow);
-		Bitmap pointMarker = UnscaledBitmapLoader.decodeResource(
-				this.getContext().getResources(), drawable);
 		if (heading != null) {
-			Canvas canvas = new Canvas();
-			Matrix matrix = new Matrix();
-			int w = pointMarker.getWidth();
-			int h = pointMarker.getHeight();
-			int d = (int) Math.sqrt(w * w + h * h);
-			matrix.postRotate(heading + this.getRotation(), w / 2, h / 2);
-			Bitmap rotateBitmap = Bitmap.createBitmap(d, d, Config.ARGB_8888);
-			canvas.setBitmap(rotateBitmap);
-			canvas.drawBitmap(pointMarker, matrix, null);
-	        return MarkerStyle.builder().setBitmap(rotateBitmap)
+			if (tempBitmap != null) {
+				tempBitmap.recycle();
+			}
+			this.tempBitmap = BitmapUtil.rotateBitmap(valid ? blueArrow : greyArrow, heading + this.getRotation());
+	        return MarkerStyle.builder().setBitmap(tempBitmap)
 	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 		} else {
-			return MarkerStyle.builder().setBitmap(pointMarker)
+			return MarkerStyle.builder().setBitmap(valid ? blueDot : greyDot)
 	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 		}
 	}
@@ -1308,9 +1318,6 @@ public class CustomMapView extends MapView {
 					while(CustomMapView.this.canRunThreads()) {
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
 						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
-						if (currentHeading == null) {
-							currentHeading = previousHeading;
-						}
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
 							Float heading = (Float) currentHeading;
@@ -1326,6 +1333,9 @@ public class CustomMapView extends MapView {
 							}
 						}
 						
+						// update action bar
+						updateActionBar();
+						
 						Thread.sleep(CustomMapView.this.gpsDataManager.getGpsUpdateInterval() * 1000);
 					}
 					FLog.d("stopping map gps thread");
@@ -1334,6 +1344,27 @@ public class CustomMapView extends MapView {
 				}
 			}
 		});
+	}
+	
+	private void updateActionBar() {
+		if (previousLocation != null && activityRef.get() != null) {
+			activityRef.get().runOnUiThread(new Runnable() {
+	
+				@Override
+				public void run() {
+					if (geomToFollow != null) {
+						activityRef.get().setPathDistance(getGPSToGeomDistance());
+						activityRef.get().setPathBearing(getGPSToGeomAngle());
+						activityRef.get().setPathHeading(previousHeading);
+						activityRef.get().setPathValid(locationValid);
+						activityRef.get().setPathVisible(true);
+					} else {
+						activityRef.get().setPathVisible(false);
+					}
+				}
+				
+			});
+		}
 	}
 
 	public List<Layer> getAllLayers() {
@@ -1479,8 +1510,8 @@ public class CustomMapView extends MapView {
 	}
 	
 	public void updateSelections() {
-		for (MapTool tool: tools) {
-			tool.onSelectionChanged();
+		if (currentTool != null) {
+			currentTool.onSelectionChanged();
 		}
 		updateRenderer();
 	}
@@ -1620,6 +1651,8 @@ public class CustomMapView extends MapView {
 
 	public void setGeomToFollow(Geometry geom) {
 		this.geomToFollow = geom;
+		updateGeomBuffer();
+		updateActionBar();
 	}
 	
 	public Geometry getGeomToFollow() {
@@ -1664,10 +1697,27 @@ public class CustomMapView extends MapView {
 	
 	public void setPathBuffer(float value) {
 		this.buffer = value;
+		updateGeomBuffer();
+	}
+	
+	private void updateGeomBuffer() {
+		if (geomToFollow != null) {
+			try {
+				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer);
+			} catch (Exception e) {
+				FLog.e("error getting geometry buffer", e);
+			}
+		} else {
+			geomToFollowBuffer = null;
+		}
+	}
+	
+	public Geometry getGeomToFollowBuffer() {
+		return geomToFollowBuffer;
 	}
 
 	public MapPos getCurrentPosition() {
-		GPSLocation location = gpsDataManager.getGPSPosition();
+		GPSLocation location = previousLocation;
 		if (location == null) {
 			return null;
 		}
@@ -1675,11 +1725,43 @@ public class CustomMapView extends MapView {
 	}
 	
 	public Float getCurrentHeading() {
-		Float heading = (Float) gpsDataManager.getGPSHeading();
+		Float heading = previousHeading;
 		if (heading == null) {
 			return null;
 		}
-		return heading + this.getRotation();
+		return heading;
+	}
+	
+	public float getGPSToGeomDistance() {
+		try {
+			MapPos pos = getCurrentPosition();
+			if (pos == null) {
+				return 0;
+			}
+			
+			MapPos targetPoint = nextPointToFollow(pos, getPathBuffer());
+			
+			return (float) SpatialiteUtil.distanceBetween(pos, targetPoint);
+		} catch (Exception e) {
+			FLog.e("error getting distance to geom", e);
+			return 0;
+		}
+	}
+	
+	public float getGPSToGeomAngle() {
+		try {
+			MapPos pos = getCurrentPosition();
+			if (pos == null) {
+				return 0;
+			}
+			
+			MapPos targetPoint = nextPointToFollow(pos, getPathBuffer());
+			
+			return SpatialiteUtil.computeAzimuth(pos, targetPoint);
+		} catch(Exception e) {
+			FLog.e("error getting angle to geom", e);
+			return 0;
+		}
 	}
 
 }

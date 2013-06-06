@@ -31,11 +31,9 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	}
 	
 	public void activate() {
-		
 	}
 	
 	public void deactivate() {
-		
 	}
 	
 	public void onLayersChanged() {
@@ -45,11 +43,9 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	}
 	
 	public void onMapChanged() {
-		
 	}
 	
 	public void onMapUpdate() {
-		
 	}
 	
 	public View getUI() {

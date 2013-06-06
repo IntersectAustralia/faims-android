@@ -202,6 +202,7 @@ public class PointDistanceTool extends HighlightTool {
 							
 							PointDistanceTool.this.drawDistance();
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 					}

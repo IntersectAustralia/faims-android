@@ -170,6 +170,7 @@ public class HighlightTool extends SettingsTool {
 							mapView.setEditViewTextSize(textSize);
 							mapView.setShowDecimal(showDecimal);
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 					}

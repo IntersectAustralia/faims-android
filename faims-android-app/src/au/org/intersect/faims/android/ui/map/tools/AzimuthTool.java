@@ -14,7 +14,6 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.projections.EPSG3857;
 
 public class AzimuthTool extends HighlightTool {
 	
@@ -22,8 +21,6 @@ public class AzimuthTool extends HighlightTool {
 
 		private MapPos tp1;
 		private MapPos tp2;
-		private MapPos tp3;
-		private float startAngle;
 		private float angle;
 		private float textX;
 		private float textY;
@@ -39,7 +36,7 @@ public class AzimuthTool extends HighlightTool {
 				// line to point
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				// angle
-				canvas.drawArc(rectF, startAngle-90, angle, true, paint);
+				canvas.drawArc(rectF, AzimuthTool.this.mapView.getRotation()-90, angle, true, paint);
 				// text
 				canvas.drawText(MeasurementUtil.displayAsDegrees(angle), textX, textY, textPaint);
 			}
@@ -50,11 +47,9 @@ public class AzimuthTool extends HighlightTool {
 			
 			MapPos pp1 = GeometryUtil.convertToWgs84(p1);
 			MapPos pp2 = GeometryUtil.convertToWgs84(p2);
-			MapPos p3 = new EPSG3857().fromWgs84(pp1.x, pp1.y + Math.abs(pp2.y - pp1.y));
 			
 			this.tp1 = GeometryUtil.transformVertex(p1, AzimuthTool.this.mapView, true);
 			this.tp2 = GeometryUtil.transformVertex(p2, AzimuthTool.this.mapView, true);
-			this.tp3 = GeometryUtil.transformVertex(p3, AzimuthTool.this.mapView, true);
 			
 			this.angle = SpatialiteUtil.computeAzimuth(pp1, pp2);
 			
@@ -63,9 +58,6 @@ public class AzimuthTool extends HighlightTool {
 			float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
 			
 			this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
-			
-			// note: angle between two vectors
-			this.startAngle = SpatialiteUtil.computeAngleBetween(new MapPos(0, -1), new MapPos(tp3.x - tp1.x, tp3.y - tp1.y));
 			
 			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
 			

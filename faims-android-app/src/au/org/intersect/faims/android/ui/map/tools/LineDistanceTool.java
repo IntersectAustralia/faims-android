@@ -190,6 +190,7 @@ public class LineDistanceTool extends HighlightTool {
 							
 							LineDistanceTool.this.drawDistance();
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 					}

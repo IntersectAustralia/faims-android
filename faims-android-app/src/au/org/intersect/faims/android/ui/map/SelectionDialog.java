@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
@@ -105,6 +106,7 @@ public class SelectionDialog extends AlertDialog {
 					itemView.toggle();
 					mapView.setSelectionActive(selections.get(position), itemView.isChecked());
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -220,6 +222,7 @@ public class SelectionDialog extends AlertDialog {
 					mapView.addSelection(editText.getText().toString());
 					redrawSelection();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}
@@ -267,6 +270,7 @@ public class SelectionDialog extends AlertDialog {
 					mapView.renameSelection(editText.getText().toString(), set);
 					redrawSelection();
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());
 				}
 			}

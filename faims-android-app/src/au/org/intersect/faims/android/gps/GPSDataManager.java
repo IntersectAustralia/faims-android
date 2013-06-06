@@ -148,7 +148,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		}else if(isUsingInternalGPS()){
 			return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
 		}else{
-			return new GPSLocation(151.27, -33.88, 0);
+			return null;
 		}
 	}
 
@@ -170,7 +170,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
 				return bodSentence.getTrueBearing();
 			}else{
-				return 0.0f;
+				return null;
 			}
 		}else if(isUsingInternalGPS()){
 			if (this.location.hasBearing()) {
@@ -179,7 +179,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 				return null;
 			}
 		}else{
-			return 36.0f;
+			return null;
 		}
 	}
 
@@ -216,7 +216,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
 				return bodSentence.getTrueBearing();
 			}else{
-				return 0.0f;
+				return null;
 			}
 		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
 			if (this.location.hasBearing()) {

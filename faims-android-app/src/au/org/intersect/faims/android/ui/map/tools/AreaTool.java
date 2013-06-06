@@ -195,6 +195,7 @@ public class AreaTool extends HighlightTool {
 							
 							AreaTool.this.drawArea();
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 					}

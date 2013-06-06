@@ -78,7 +78,7 @@ public class PathFollowerTool extends HighlightTool {
 		
 	}
 	
-	public static final String NAME = "Follow Path - Debug";
+	public static final String NAME = "Path Follower Tool - Debug";
 	
 	private PathFollowerToolCanvas canvas;
 
@@ -280,6 +280,7 @@ public class PathFollowerTool extends HighlightTool {
 							PathFollowerTool.this.buffer = buffer;
 							PathFollowerTool.this.speed = speed;
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());
 						}
 					}

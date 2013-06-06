@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -72,11 +74,14 @@ import au.org.intersect.faims.android.ui.form.BeanShellLinker;
 import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.google.inject.Inject;
+import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class ShowProjectActivity extends FragmentActivity implements IFAIMSRestorable{
 	
@@ -353,6 +358,22 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private String projectDir;
 
+	private boolean pathIndicatorVisible;
+
+	private float pathDistance;
+	
+	private boolean pathValid;
+	
+	private BitmapDrawable blueArrow;
+
+	private BitmapDrawable greyArrow;
+
+	private Bitmap tempBitmap;
+
+	private float pathBearing;
+
+	private Float pathHeading;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -372,6 +393,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		CustomMapView.registerLicense(getApplicationContext());
 		
 		this.activityData = new ShowProjectActivityData();
+		
+		blueArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.direction_indicator_blue));
+		greyArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.direction_indicator_grey));
 		
 		setupSync();
 		setupWifiBroadcast();
@@ -588,20 +614,67 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		MenuItem indicator = menu.findItem(R.id.sync_indicator);
-		indicator.setVisible(syncIndicatorVisible);
+		menu.findItem(R.id.green_sync_indicator).setVisible(false);
+		menu.findItem(R.id.orange_sync_indicator).setVisible(false);
+		menu.findItem(R.id.red_sync_indicator).setVisible(false);
 		switch(syncIndicatorColor) {
-		case GREEN:
-			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_green));
-			break;
-		case ORANGE:
-			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_orange));
-			break;
-		default:
-			indicator.setIcon(getResources().getDrawable(R.drawable.ic_sync_indicator_red));
-			break;
+			case GREEN:
+				menu.findItem(R.id.green_sync_indicator).setVisible(syncIndicatorVisible);
+				break;
+			case ORANGE:
+				menu.findItem(R.id.orange_sync_indicator).setVisible(syncIndicatorVisible);
+				break;
+			default:
+				menu.findItem(R.id.red_sync_indicator).setVisible(syncIndicatorVisible);
+				break;
 		}
+		
+		MenuItem distance_text = menu.findItem(R.id.distance_text);
+		distance_text.setVisible(pathIndicatorVisible);
+		if (pathDistance > 1000) {
+			distance_text.setTitle(MeasurementUtil.displayAsKiloMeters(pathDistance/1000, "###,###,###,###.0"));
+		} else {
+			distance_text.setTitle(MeasurementUtil.displayAsMeters(pathDistance, "###,###,###,###"));
+		}
+		
+		MenuItem direction_text = menu.findItem(R.id.direction_text);
+		direction_text.setVisible(pathIndicatorVisible);
+		direction_text.setTitle(MeasurementUtil.displayAsDegrees(pathBearing, "###"));
+		
+		MenuItem direction_indicator = menu.findItem(R.id.direction_indicator);
+		direction_indicator.setVisible(pathIndicatorVisible);
+		if (pathHeading != null) {
+			if (tempBitmap != null) {
+				tempBitmap.recycle();
+			}
+			this.tempBitmap = BitmapUtil.rotateBitmap(pathValid ? blueArrow.getBitmap() : greyArrow.getBitmap(), pathBearing - pathHeading);
+			direction_indicator.setIcon(new BitmapDrawable(getResources(), tempBitmap));
+		} else {
+			direction_indicator.setVisible(false);
+		}
+		
 	    return true;
+	}
+	
+	public void setPathVisible(boolean value) {
+		this.pathIndicatorVisible = value;
+		invalidateOptionsMenu();
+	}
+	
+	public void setPathDistance(float value) {
+		this.pathDistance = value;
+	}
+	
+	public void setPathBearing(float value) {
+		this.pathBearing = value;
+	}
+	
+	public void setPathHeading(Float heading) {
+		this.pathHeading = heading;
+	}
+	
+	public void setPathValid(boolean value) {
+		this.pathValid = value;
 	}
 	
 	protected void renderUI(Bundle savedInstanceState) {

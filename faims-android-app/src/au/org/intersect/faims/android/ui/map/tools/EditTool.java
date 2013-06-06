@@ -131,6 +131,7 @@ public class EditTool extends HighlightTool {
 					List<Geometry> selection = EditTool.this.mapView.getHighlights();
 					EditTool.this.mapView.clearGeometryList(selection);
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showError(e.getMessage());
 				}
 			}
@@ -245,6 +246,7 @@ public class EditTool extends HighlightTool {
 					
 					EditTool.this.mapView.restylePoint(point, style);
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showError(e.getMessage());
 				}
 			}
@@ -290,6 +292,7 @@ public class EditTool extends HighlightTool {
 					
 					EditTool.this.mapView.restyleLine(line, style);
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showError(e.getMessage());
 				}
 			}
@@ -339,6 +342,7 @@ public class EditTool extends HighlightTool {
 					
 					EditTool.this.mapView.restylePolygon(polygon, style);
 				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
 					showError(e.getMessage());
 				}
 			}

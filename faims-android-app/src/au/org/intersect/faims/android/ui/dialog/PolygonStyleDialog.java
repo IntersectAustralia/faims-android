@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 
 public class PolygonStyleDialog extends StyleDialog {
@@ -57,6 +58,7 @@ public class PolygonStyleDialog extends StyleDialog {
 							style.showStroke = showStroke;
 							style.showPoints = showPoints;
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							d.showError(e.getMessage());
 						}
 					}

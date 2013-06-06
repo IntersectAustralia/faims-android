@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 
 public class PointStyleDialog extends StyleDialog {
@@ -42,6 +43,7 @@ public class PointStyleDialog extends StyleDialog {
 							style.size = size;
 							style.pickingSize = pickingSize;
 						} catch (Exception e) {
+							FLog.e(e.getMessage(), e);
 							d.showError(e.getMessage());
 						}
 					}
