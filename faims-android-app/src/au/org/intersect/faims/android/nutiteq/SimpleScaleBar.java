@@ -1,8 +1,12 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Join;
+import android.graphics.Paint.Style;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 //Note: this is an old nutiteq library class
 public class SimpleScaleBar {
@@ -51,11 +55,11 @@ public class SimpleScaleBar {
 			10, 5, 2, 1, 0.500, 0.200, 0.100, 0.050, 0.020 };
 	
 	private Paint white;
-	//private Paint black;
+	private Paint black;
 	
 	public SimpleScaleBar() {
 		white = getPaint(Color.WHITE);
-		//black = getPaint(Color.BLACK);
+		black = getStrokePaint(Color.BLACK);
 	}
 
 	/**
@@ -148,39 +152,45 @@ public class SimpleScaleBar {
 		calculateScaleBar();
 	}
 
-	public void paint(Canvas g) {
+	public void paint(Context context, Canvas g) {
+		paint(context, g, black);
+		paint(context, g, white);
+	}
+	
+	public void paint(Context context, Canvas g, Paint paint) {
 		if (scale > 0 && barWidth > 0) {
+			int barSize = (int) ScaleUtil.getDip(context, BAR_SIZE);
+			int barBorder = (int) ScaleUtil.getDip(context, BAR_BORDER);
 			int sx = startx;
 			int sy = starty;
 			int ex = startx + Math.abs(startx - endx);
-			int ey = starty + BAR_SIZE;
+			int ey = starty + barSize;
 			
-			//g.drawRect(sx - BAR_BORDER, sy - BAR_BORDER, ex + BAR_BORDER, ey + BAR_BORDER, black);
 			int barEndHeight = 8;
-			g.drawRect(sx, sy - barEndHeight, sx + BAR_BORDER, ey, white);
-			g.drawRect(ex - BAR_BORDER, sy - barEndHeight, ex, ey, white);
+			g.drawRect(sx, sy - barEndHeight, sx + barBorder, ey, paint);
+			g.drawRect(ex - barBorder, sy - barEndHeight, ex, ey, paint);
 			
-			g.drawRect(sx, sy, ex, ey, white);
-
+			g.drawRect(sx, sy, ex, ey, paint);
+	
 			if (unitMode == METRIC) {
 				if (scale >= 1.0) {
 					g.drawText(Double.toString(round2Places(scale))
-							+ METRIC_UNIT, sx + 2 * BAR_BORDER, sy
-							- BAR_BORDER, white);
+							+ METRIC_UNIT, sx + 3 * barBorder, sy
+							- 2 * barBorder, paint);
 				} else {
 					g.drawText(Double.toString(round2Places(scale * KM_TO_M))
-							+ METRIC_UNIT_SMALL, sx + 2 * BAR_BORDER, sy
-							- BAR_BORDER, white);
+							+ METRIC_UNIT_SMALL, sx + 3 * barBorder, sy
+							- 2 * barBorder, paint);
 				}
 			} else if (unitMode == IMPERIAL) {
 				if (scale >= 1.0) {
 					g.drawText(Double.toString(round2Places(scale))
-							+ IMPERIAL_UNIT, sx + 2 * BAR_BORDER, sy
-							- BAR_BORDER, white);
+							+ IMPERIAL_UNIT, sx + 3 * barBorder, sy
+							- 2 * barBorder, paint);
 				} else {
 					g.drawText(Double.toString(round2Places(scale * MI_TO_FT))
-							+ IMPERIAL_UNIT_SMALL, sx + 2 * BAR_BORDER, sy
-							-  BAR_BORDER, white);
+							+ IMPERIAL_UNIT_SMALL, sx + 3 * barBorder, sy
+							- 2 * barBorder, paint);
 				}
 			}
 		}
@@ -189,7 +199,18 @@ public class SimpleScaleBar {
 	private Paint getPaint(int color) {
 		Paint p = new Paint();
 		p.setColor(color);
-		p.setStrokeWidth(5.0f);
+		p.setStyle(Style.FILL);
+		p.setAntiAlias(true);
+		return p;
+	}
+	
+	private Paint getStrokePaint(int color) {
+		Paint p = new Paint();
+		p.setColor(color);
+		p.setStyle(Style.STROKE);
+		p.setStrokeJoin(Join.ROUND);
+		p.setStrokeMiter(10);
+		p.setStrokeWidth(3.0f);
 		p.setAntiAlias(true);
 		return p;
 	}

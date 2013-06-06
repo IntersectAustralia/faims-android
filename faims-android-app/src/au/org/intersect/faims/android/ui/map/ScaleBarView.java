@@ -18,7 +18,7 @@ public class ScaleBarView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		bar.paint(canvas);
+		bar.paint(this.getContext(), canvas);
 	}
 
 	public void setMapBoundary(float zoom, int width, int height,
