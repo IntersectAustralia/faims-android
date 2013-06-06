@@ -35,7 +35,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -382,9 +381,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		// inject faimsClient and serverDiscovery
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
 		
-		// set file browser to reset last location when activity is created
-		DisplayPrefs.setLastLocation(ShowProjectActivity.this, Environment.getExternalStorageDirectory().getAbsolutePath());
-		
 		// initialize server discovery
 		serverDiscovery.setApplication(getApplication());
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -402,6 +398,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		setupSync();
 		setupWifiBroadcast();
 		setupProject();
+		
+		// set file browser to reset last location when activity is created
+		DisplayPrefs.setLastLocation(ShowProjectActivity.this, getProjectDir());
 		
 		renderUI(savedInstanceState);
 	}
@@ -1179,8 +1178,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public void showFileBrowser(int requestCode) {
 		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
-		LocalFile rootPath = new LocalFile(getProjectDir());
-		intent.putExtra(FileChooserActivity._Rootpath, (Parcelable) rootPath);
 		startActivityForResult(intent, requestCode);
 	}
 	
