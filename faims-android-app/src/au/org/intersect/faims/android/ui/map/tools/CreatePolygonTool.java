@@ -33,6 +33,8 @@ public class CreatePolygonTool extends BaseGeometryTool {
 	
 	private PolygonStyleDialog styleDialog;
 
+	private MapButton plotButton;
+
 	public CreatePolygonTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
@@ -40,6 +42,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		
 		createButton = createCreateButton(context);
 		undoButton = createUndoButton(context);
+		plotButton = createPlotButton(context);
 		
 		pointsList = new LinkedList<Point>();
 		
@@ -55,6 +58,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (createButton != null) layout.addView(createButton);
 		if (undoButton != null) layout.addView(undoButton);
+		if (plotButton != null) layout.addView(plotButton);
 		if (selectedLayer != null) layout.addView(selectedLayer);
 	}
 	
@@ -146,6 +150,35 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		clearPoints();
+	}
+	
+	private MapButton createPlotButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Plot GPS");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				MapPos gpsPoint = CreatePolygonTool.this.mapView.getCurrentPosition();
+				if (gpsPoint != null) {
+					CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
+					if (layer == null) {
+						showLayerNotFoundError();
+						return;
+					}
+					
+					try {
+						pointsList.add(mapView.drawPoint(layer, gpsPoint, createGuidePointStyle()));
+					} catch (Exception e) {
+						FLog.e("error drawing point", e);
+					}
+				} else {
+					showError("No GPS Signal");
+				}
+			}
+			
+		});
+		return button;
 	}
 	
 	private MapButton createUndoButton(final Context context) {

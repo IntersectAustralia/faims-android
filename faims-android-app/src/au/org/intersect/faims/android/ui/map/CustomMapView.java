@@ -1318,8 +1318,8 @@ public class CustomMapView extends MapView {
 					while(CustomMapView.this.canRunThreads()) {
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
 						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
-						currentLocation = new GPSLocation(150.89, -33.85, 0);
-						currentHeading = 26.0f;
+						//currentLocation = new GPSLocation(150.89, -33.85, 0);
+						//currentHeading = 26.0f;
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
 							Float heading = (Float) currentHeading;
