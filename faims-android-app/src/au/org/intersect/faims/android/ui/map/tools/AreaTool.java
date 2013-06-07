@@ -151,11 +151,11 @@ public class AreaTool extends HighlightTool {
 		
 		Polygon polygon = (Polygon) mapView.getHighlights().get(0);
 		
-		canvas.drawArea(polygon);
 		canvas.setColor(mapView.getDrawViewColor());
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
 		canvas.setShowKm(mapView.showKm());
+		canvas.drawArea(polygon);
 	}
 	
 	@Override

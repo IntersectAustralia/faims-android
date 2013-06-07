@@ -146,11 +146,11 @@ public class LineDistanceTool extends HighlightTool {
 		
 		Line line = (Line) mapView.getHighlights().get(0);
 		
-		canvas.drawDistance(line);
 		canvas.setColor(mapView.getDrawViewColor());
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
 		canvas.setShowKm(mapView.showKm());
+		canvas.drawDistance(line);
 	}
 	
 	@Override

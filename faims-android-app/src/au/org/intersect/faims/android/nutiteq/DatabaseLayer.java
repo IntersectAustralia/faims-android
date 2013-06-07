@@ -170,7 +170,7 @@ public class DatabaseLayer extends GeometryLayer {
 		    Geometry newObject = null;
 		    String[] userData = (String[]) object.userData;
 		    GeometryStyle style = getGeometryStyle(object, userData[0]);
-		    GeometryData geomData = new GeometryData(userData[0], userData[1], style);
+		    GeometryData geomData = new GeometryData(userData[0], userData[1], style, layerId);
 		    
 		    if(object instanceof Point){
 	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);

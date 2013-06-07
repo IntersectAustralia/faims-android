@@ -146,10 +146,10 @@ public class AzimuthTool extends HighlightTool {
 		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
 		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 		
-		canvas.drawAzimuthFrom(p1, p2);
 		canvas.setColor(mapView.getDrawViewColor());
 		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 		canvas.setTextSize(mapView.getDrawViewTextSize());
+		canvas.drawAzimuthFrom(p1, p2);
 	}
 
 }

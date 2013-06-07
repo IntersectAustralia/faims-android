@@ -56,7 +56,6 @@ public abstract class ToolCanvas extends View {
 		textPaint.setColor(color);
 		textPaint.setTextSize(ScaleUtil.getSp(this.getContext(), textSize * TEXT_SCALE));
 		textPaint.setAntiAlias(true);
-		invalidate();
 	}
 	
 }

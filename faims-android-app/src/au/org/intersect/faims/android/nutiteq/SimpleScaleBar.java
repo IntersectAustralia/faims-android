@@ -159,6 +159,8 @@ public class SimpleScaleBar {
 	
 	public void paint(Context context, Canvas g, Paint paint) {
 		if (scale > 0 && barWidth > 0) {
+			paint.setTextSize(ScaleUtil.getSp(context, 12));
+			
 			int barSize = (int) ScaleUtil.getDip(context, BAR_SIZE);
 			int barBorder = (int) ScaleUtil.getDip(context, BAR_BORDER);
 			int sx = startx;

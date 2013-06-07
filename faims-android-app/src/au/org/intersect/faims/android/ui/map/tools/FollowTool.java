@@ -1,13 +1,19 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import java.util.List;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.GeometryData;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
@@ -39,10 +45,14 @@ public class FollowTool extends HighlightTool {
 		private MapPos tp1;
 		private MapPos tp2;
 		private RectF rectF;
-		private Geometry geom;
+		private Paint targetPaint;
+		private MapPos tp3;
+		private float radius;
 		
 		public FollowToolCanvas(Context context) {
 			super(context);
+			
+			targetPaint = new Paint();
 		}
 
 		@Override
@@ -61,28 +71,9 @@ public class FollowTool extends HighlightTool {
 				
 				canvas.drawText("Bearing: " + MeasurementUtil.displayAsDegrees(angle), angleTextX, angleTextY, textPaint);
 				
-				if (geom instanceof Polygon) {
-					drawPolygonOverlay((Polygon) geom, canvas);
-				}
+				canvas.drawCircle((float) tp3.x, (float) tp3.y, radius, targetPaint);
+			
 			}
-		}
-		
-		private void drawPolygonOverlay(Polygon polygon, Canvas canvas) {
-			MapPos lp = null;
-			for (MapPos p : polygon.getVertexList()) {
-				p = transformPoint(p);
-				if (lp != null) {
-					canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
-				}
-				lp = p;
-			}
-			MapPos p = polygon.getVertexList().get(0);
-			p = transformPoint(p);
-			canvas.drawLine((float) lp.x, (float) lp.y, (float) p.x, (float) p.y, paint);
-		}
-		
-		protected MapPos transformPoint(MapPos p) {
-			return GeometryUtil.transformVertex(p, mapView, true);
 		}
 
 		public void drawDistanceAndBearing(MapPos currentPoint, MapPos targetPoint) {
@@ -108,6 +99,16 @@ public class FollowTool extends HighlightTool {
 			
 			angleTextX = (float) tp1.x + offset;
 			angleTextY = (float) tp1.y + 2 * offset;
+
+			Geometry geomToFollow = FollowTool.this.mapView.getGeomToFollow();
+			if (geomToFollow instanceof Point) {
+				this.tp3 = tp2;
+			} else {
+				List<MapPos> list = ((Line) geomToFollow).getVertexList();
+				this.tp3 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(list.get(list.size()-1)), mapView, true);
+			}
+			
+			this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
 			
 			invalidate();
 		}
@@ -117,12 +118,14 @@ public class FollowTool extends HighlightTool {
 			invalidate();
 		}
 
-		public void drawBuffer(Geometry geom) {
-			this.isDirty = true;
+		public void setColors(int color, int targetColor) {
+			setColor(color);
 			
-			this.geom = geom;
+			targetPaint.setColor(targetColor);
+			targetPaint.setStyle(Paint.Style.STROKE);
+			targetPaint.setStrokeWidth(paint.getStrokeWidth());
+			targetPaint.setAntiAlias(true);
 			
-			this.invalidate();
 		}
 		
 	}
@@ -133,10 +136,22 @@ public class FollowTool extends HighlightTool {
 
 	protected SettingsDialog settingsDialog;
 
+	protected GeometryStyle bufferStyle;
+
+	protected int targetColor;
+
+	private Polygon buffer;
+	
 	public FollowTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		canvas = new FollowToolCanvas(context);
 		container.addView(canvas);
+		
+		bufferStyle = GeometryStyle.defaultPolygonStyle();
+		bufferStyle.polygonColor = 0x00000000;
+		bufferStyle.lineColor = Color.GREEN;
+		
+		targetColor = Color.RED;
 	}
 
 	@Override 
@@ -180,6 +195,8 @@ public class FollowTool extends HighlightTool {
 		super.clearSelection();
 		canvas.clear();
 		mapView.setGeomToFollow(null);
+		updateBuffer();
+		
 	}
 	
 	@Override
@@ -199,6 +216,7 @@ public class FollowTool extends HighlightTool {
 					mapView.setGeomToFollow(GeometryUtil.convertGeometryToWgs84(geom));
 					
 					updateDistanceAndBearing();
+					updateBuffer();
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
@@ -209,23 +227,39 @@ public class FollowTool extends HighlightTool {
 		}
 	}
 	
+	private void updateBuffer() {
+		try {
+			if (buffer != null) {
+				mapView.clearGeometry(buffer);
+				buffer = null;
+			}
+			Geometry geom = mapView.getGeomToFollow();
+			if (geom == null) return;
+			GeometryData data = (GeometryData) geom.userData;
+			
+			Geometry geomBuffer = mapView.getGeomToFollowBuffer();
+			if (geomBuffer instanceof Polygon) {
+				buffer = mapView.drawPolygon(data.layerId, ((Polygon) geomBuffer).getVertexList(), bufferStyle);
+			}
+		} catch (Exception e) {
+			FLog.e("error updating buffer", e);
+		}
+	}
+	
 	private void updateDistanceAndBearing() {
 		try {
-			MapPos pos = mapView.getCurrentPosition();
-			if (pos == null) return;
 			if (mapView.getGeomToFollow() == null) return;
 			
-			Geometry buffer = mapView.getGeomToFollowBuffer();
-			
-			canvas.drawBuffer(buffer);
+			MapPos pos = mapView.getCurrentPosition();
+			if (pos == null) return;
 
 			MapPos targetPoint = mapView.nextPointToFollow(pos, mapView.getPathBuffer());
 			
-			canvas.drawDistanceAndBearing(pos, targetPoint);
-			canvas.setColor(mapView.getDrawViewColor());
+			canvas.setColors(mapView.getDrawViewColor(), targetColor);
 			canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 			canvas.setTextSize(mapView.getDrawViewTextSize());
 			canvas.setShowKm(mapView.showKm());
+			canvas.drawDistanceAndBearing(pos, targetPoint);
 		} catch (Exception e) {
 			FLog.e("error updating distance and bearing", e);
 			showError(e.getMessage());
@@ -249,6 +283,8 @@ public class FollowTool extends HighlightTool {
 				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				builder.addTextField("buffer", "Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
+				builder.addTextField("bufferColor", "Buffer Color:", Integer.toHexString(bufferStyle.lineColor));
+				builder.addTextField("targetColor", "Target Color:", Integer.toHexString(targetColor));
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -261,6 +297,8 @@ public class FollowTool extends HighlightTool {
 							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
 							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							float buffer = Float.parseFloat(((EditText)settingsDialog.getField("buffer")).getText().toString());
+							int bufferColor = settingsDialog.parseColor("bufferColor");
+							int targetColor = settingsDialog.parseColor("targetColor");
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);
@@ -270,7 +308,11 @@ public class FollowTool extends HighlightTool {
 							mapView.setShowKm(showKm);
 							mapView.setPathBuffer(buffer);
 							
+							FollowTool.this.bufferStyle.lineColor = bufferColor;
+							FollowTool.this.targetColor = targetColor;
+							
 							FollowTool.this.updateDistanceAndBearing();
+							FollowTool.this.updateBuffer();
 						} catch (Exception e) {
 							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());

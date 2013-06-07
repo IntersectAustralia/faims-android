@@ -292,8 +292,8 @@ public class CustomMapView extends MapView {
 		this.editView.setColor(Color.GREEN);
 		
 		// TODO make this configurable
-		scaleView.setBarWidthRange((int) ScaleUtil.getDip(activity, 40),
-				(int) ScaleUtil.getDip(activity, 100));
+		scaleView.setBarWidthRange((int) ScaleUtil.getDip(activity, 60),
+				(int) ScaleUtil.getDip(activity, 120));
 
 		initTools();
 
@@ -1299,10 +1299,10 @@ public class CustomMapView extends MapView {
 			}
 			this.tempBitmap = BitmapUtil.rotateBitmap(valid ? blueArrow : greyArrow, heading + this.getRotation());
 	        return MarkerStyle.builder().setBitmap(tempBitmap)
-	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+	                .setSize(0.5f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 		} else {
 			return MarkerStyle.builder().setBitmap(valid ? blueDot : greyDot)
-	                .setSize(1.0f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
+	                .setSize(0.8f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 		}
 	}
 	
@@ -1318,6 +1318,8 @@ public class CustomMapView extends MapView {
 					while(CustomMapView.this.canRunThreads()) {
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
 						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
+						currentLocation = new GPSLocation(150.89, -33.85, 0);
+						currentHeading = 26.0f;
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
 							Float heading = (Float) currentHeading;
@@ -1353,11 +1355,24 @@ public class CustomMapView extends MapView {
 				@Override
 				public void run() {
 					if (geomToFollow != null) {
-						activityRef.get().setPathDistance(getGPSToGeomDistance());
-						activityRef.get().setPathBearing(getGPSToGeomAngle());
-						activityRef.get().setPathHeading(previousHeading);
-						activityRef.get().setPathValid(locationValid);
-						activityRef.get().setPathVisible(true);
+						try {
+							MapPos currentPoint = getCurrentPosition();
+							if (currentPoint == null) return;
+							
+							MapPos targetPoint = nextPointToFollow(currentPoint, getPathBuffer());
+							
+							Geometry geom = getGeomToFollow();
+							Line line = (geom instanceof Line) ? (Line) geom : null;
+							
+							activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint));
+							activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
+							activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
+							activityRef.get().setPathHeading(previousHeading);
+							activityRef.get().setPathValid(locationValid);
+							activityRef.get().setPathVisible(true);
+						} catch (Exception e) {
+							FLog.e("error updating action bar", e);
+						}
 					} else {
 						activityRef.get().setPathVisible(false);
 					}
@@ -1730,38 +1745,6 @@ public class CustomMapView extends MapView {
 			return null;
 		}
 		return heading;
-	}
-	
-	public float getGPSToGeomDistance() {
-		try {
-			MapPos pos = getCurrentPosition();
-			if (pos == null) {
-				return 0;
-			}
-			
-			MapPos targetPoint = nextPointToFollow(pos, getPathBuffer());
-			
-			return (float) SpatialiteUtil.distanceBetween(pos, targetPoint);
-		} catch (Exception e) {
-			FLog.e("error getting distance to geom", e);
-			return 0;
-		}
-	}
-	
-	public float getGPSToGeomAngle() {
-		try {
-			MapPos pos = getCurrentPosition();
-			if (pos == null) {
-				return 0;
-			}
-			
-			MapPos targetPoint = nextPointToFollow(pos, getPathBuffer());
-			
-			return SpatialiteUtil.computeAzimuth(pos, targetPoint);
-		} catch(Exception e) {
-			FLog.e("error getting angle to geom", e);
-			return 0;
-		}
 	}
 
 }

@@ -185,7 +185,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		        String id = dbPath + ":" + tableName + ":" + userData.get(userColumns[0]);
 		        String label = userData.get(userColumns[1]);
 		        style = getGeometryStyle(object, id);
-		        geomData = new GeometryData(id, label, style);
+		        geomData = new GeometryData(id, label, style, layerId);
 		    } else {
 		    	style = getGeometryStyle(object);
 		    }

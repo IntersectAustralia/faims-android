@@ -134,7 +134,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String sql = "select Hex(AsBinary(buffer(transform(GeomFromText(?, 4326), 3785), ?)));";
+			String sql = "select Hex(AsBinary(transform(buffer(transform(GeomFromText(?, 4326), 3785), ?), 4326)));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(geom));
 			st.bind(2, buffer);

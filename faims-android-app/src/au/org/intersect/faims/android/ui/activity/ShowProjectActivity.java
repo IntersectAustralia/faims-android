@@ -373,6 +373,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private Float pathHeading;
 
+	private int pathIndex;
+
+	private int pathLength;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -391,9 +395,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		this.activityData = new ShowProjectActivityData();
 		
 		blueArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
-				getResources(), R.drawable.direction_indicator_blue));
+				getResources(), R.drawable.blue_arrow));
 		greyArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
-				getResources(), R.drawable.direction_indicator_grey));
+				getResources(), R.drawable.grey_arrow));
 		
 		setupSync();
 		setupWifiBroadcast();
@@ -630,10 +634,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		MenuItem distance_text = menu.findItem(R.id.distance_text);
 		distance_text.setVisible(pathIndicatorVisible);
+		String distanceInfo = pathIndex < 0 ? "" : " to point (" + pathIndex + "/" + pathLength + ")";
 		if (pathDistance > 1000) {
-			distance_text.setTitle(MeasurementUtil.displayAsKiloMeters(pathDistance/1000, "###,###,###,###.0"));
+			distance_text.setTitle(MeasurementUtil.displayAsKiloMeters(pathDistance/1000, "###,###,###,###.0") + distanceInfo);
 		} else {
-			distance_text.setTitle(MeasurementUtil.displayAsMeters(pathDistance, "###,###,###,###"));
+			distance_text.setTitle(MeasurementUtil.displayAsMeters(pathDistance, "###,###,###,###") + distanceInfo);
 		}
 		
 		MenuItem direction_text = menu.findItem(R.id.direction_text);
@@ -662,6 +667,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public void setPathDistance(float value) {
 		this.pathDistance = value;
+	}
+	
+	public void setPathIndex(int value, int length) {
+		this.pathIndex = value;
+		this.pathLength = length;
 	}
 	
 	public void setPathBearing(float value) {
