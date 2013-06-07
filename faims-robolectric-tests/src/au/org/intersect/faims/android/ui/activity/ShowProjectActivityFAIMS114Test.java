@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.util.TestProjectUtil;
+import au.org.intersect.faims.android.R;
 
 @RunWith(FAIMSRobolectricTestRunner.class)
 public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
@@ -50,7 +51,6 @@ public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
 		*/
 		// We now tell the activity to render the project UI
 		
-		activity.renderUI(null);
 		// We should have Field1, Field2 and a copy button
 		
 		String field1Ref = "tabgroup1/tab1/field1";

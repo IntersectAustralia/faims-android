@@ -394,11 +394,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		this.activityData = new ShowProjectActivityData();
 		
-		blueArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
-				getResources(), R.drawable.blue_arrow));
-		greyArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
-				getResources(), R.drawable.grey_arrow));
-		
 		setupSync();
 		setupWifiBroadcast();
 		setupProject();
@@ -651,6 +646,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			if (tempBitmap != null) {
 				tempBitmap.recycle();
 			}
+			if (blueArrow == null) {
+				blueArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
+					getResources(), au.org.intersect.faims.android.R.drawable.blue_arrow));
+			}
+			if (greyArrow == null) {
+				greyArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
+					getResources(), au.org.intersect.faims.android.R.drawable.grey_arrow));
+			}
+			
 			this.tempBitmap = BitmapUtil.rotateBitmap(pathValid ? blueArrow.getBitmap() : greyArrow.getBitmap(), pathBearing - pathHeading);
 			direction_indicator.setIcon(new BitmapDrawable(getResources(), tempBitmap));
 		} else {
