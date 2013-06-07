@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -10,6 +12,7 @@ import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
@@ -18,6 +21,7 @@ import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
+import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
@@ -39,15 +43,22 @@ public class EditTool extends HighlightTool {
 	private LineStyleDialog lineStyleDialog;
 
 	private PolygonStyleDialog polygonStyleDialog;
+
+	private MapToggleButton vertexButton;
+
+	protected float vertexSize = 0.2f;
+
+	protected List<Geometry> vertexGeometry;
+
+	protected HashMap<Geometry, ArrayList<Point>> vertexGeometryToPointsMap;
 	
 	public EditTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
 		lockButton = createLockButton(context);
 		propertiesButton = createPropertiesButton(context);
-		deleteButton = createDeleteButton(context); 
-				
-		updateLockButton();
+		deleteButton = createDeleteButton(context);
+		vertexButton = createVertexButton(context);
 		
 		updateLayout();
 	}
@@ -55,18 +66,21 @@ public class EditTool extends HighlightTool {
 	@Override
 	public void activate() {
 		clearLock();
+		resetVertexGeometry();
 		super.activate();
 	}
 	
 	@Override
 	public void deactivate() {
 		clearLock();
+		resetVertexGeometry();
 		super.activate();
 	}
 	
 	@Override
 	public void onLayersChanged() {
 		clearLock();
+		resetVertexGeometry();
 		super.onLayersChanged();
 	}
 	
@@ -76,10 +90,137 @@ public class EditTool extends HighlightTool {
 		if (lockButton != null) layout.addView(lockButton);
 		if (propertiesButton != null) layout.addView(propertiesButton);
 		if (deleteButton != null) layout.addView(deleteButton);
+		if (vertexButton != null) layout.addView(vertexButton);
+	}
+	
+	public void resetVertexGeometry() {
+		vertexButton.setChecked(false);
+		try {
+			if (EditTool.this.vertexGeometry != null) {
+				for (Geometry geom : EditTool.this.vertexGeometry) {
+					GeometryData data = (GeometryData) geom.userData;
+					if (geom instanceof Line) {
+						EditTool.this.mapView.drawLine(data.layerId, GeometryUtil.convertToWgs84(((Line) geom).getVertexList()), data.style);
+					} else if (geom instanceof Polygon) {
+						EditTool.this.mapView.drawPolygon(data.layerId, GeometryUtil.convertToWgs84(((Polygon) geom).getVertexList()), data.style);
+					}
+					
+					ArrayList<Point> geometryPoints = EditTool.this.vertexGeometryToPointsMap.get(geom);
+					for (Point point : geometryPoints) {
+						// check if point exists
+						GeometryData pointData = (GeometryData) point.userData;
+						Point realPoint = (Point) EditTool.this.mapView.getGeometry(pointData.geomId);
+						if (realPoint != null) {
+							EditTool.this.mapView.clearGeometry(realPoint);
+						}
+					}
+				}
+				
+			}
+		} catch (Exception e) {
+			FLog.e("error resetting vertex geometry", e);
+			showError("error resetting vertex geometry");
+		}
+		EditTool.this.vertexGeometry = null;
+		EditTool.this.vertexGeometryToPointsMap = null;
+	}
+	
+	private MapToggleButton createVertexButton(final Context context) {
+		final MapToggleButton button = new MapToggleButton(context);
+		button.setTextOn("Join");
+		button.setTextOff("Break");
+		button.setChecked(false);
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					if (!button.isChecked()) {
+						
+						if (EditTool.this.mapView.hasTransformGeometry()) {
+							showError("Please clear locked geometry before joining");
+							button.setChecked(true);
+							return;
+						}
+						
+						for (Geometry geom : EditTool.this.vertexGeometry) {
+							ArrayList<Point> geometryPoints = EditTool.this.vertexGeometryToPointsMap.get(geom);
+							ArrayList<MapPos> pts = new ArrayList<MapPos>();
+							for (Point point : geometryPoints) {
+								// check if point exists
+								GeometryData pointData = (GeometryData) point.userData;
+								Point realPoint = (Point) EditTool.this.mapView.getGeometry(pointData.geomId);
+								if (realPoint != null) {
+									pts.add(GeometryUtil.convertToWgs84(realPoint.getMapPos()));
+									EditTool.this.mapView.clearGeometry(realPoint);
+								}
+							}
+
+							GeometryData data = (GeometryData) geom.userData;
+							if (geom instanceof Line) {
+								EditTool.this.mapView.drawLine(data.layerId, pts, data.style);
+							} else if (geom instanceof Polygon) {
+								EditTool.this.mapView.drawPolygon(data.layerId, pts, data.style);
+							}
+						}
+						
+						EditTool.this.vertexGeometry = null;
+						EditTool.this.vertexGeometryToPointsMap = null;
+						
+					} else {
+						List<Geometry> list = EditTool.this.mapView.getHighlights();
+						List<Geometry> vertexGeometry = new ArrayList<Geometry>();
+						HashMap<Geometry, ArrayList<Point>> vertexGeometryToPointsMap = new HashMap<Geometry, ArrayList<Point>>();
+						for (Geometry geom : list) {
+							if (geom instanceof Line) {
+								vertexGeometry.add(geom);
+								EditTool.this.mapView.clearGeometry(geom);
+								
+								Line line = (Line) geom;
+								GeometryData data = (GeometryData) geom.userData;
+								GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
+								vertexStyle.pointColor = data.style.pointColor > 0 ? data.style.pointColor : data.style.lineColor;
+								vertexStyle.size = vertexSize;
+								ArrayList<Point> geometryPoints = new ArrayList<Point>();
+								for (MapPos p : line.getVertexList()) {
+									geometryPoints.add(EditTool.this.mapView.drawPoint(data.layerId, GeometryUtil.convertToWgs84(p), vertexStyle));
+								}
+								vertexGeometryToPointsMap.put(geom, geometryPoints);
+							} else if (geom instanceof Polygon) {
+								vertexGeometry.add(geom);
+								EditTool.this.mapView.clearGeometry(geom);
+								
+								Polygon polygon = (Polygon) geom;
+								GeometryData data = (GeometryData) geom.userData;
+								GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
+								vertexStyle.pointColor = data.style.pointColor > 0 ? data.style.pointColor : data.style.lineColor;
+								vertexStyle.size = vertexSize;
+								ArrayList<Point> geometryPoints = new ArrayList<Point>();
+								for (MapPos p : polygon.getVertexList()) {
+									geometryPoints.add(EditTool.this.mapView.drawPoint(data.layerId, GeometryUtil.convertToWgs84(p), vertexStyle));
+								}
+								vertexGeometryToPointsMap.put(geom, geometryPoints);
+							}
+							
+							EditTool.this.vertexGeometry = vertexGeometry;
+							EditTool.this.vertexGeometryToPointsMap = vertexGeometryToPointsMap;
+						}
+					}
+				} catch (Exception e) {
+					FLog.e("error generating geometry vertices", e);
+					showError("Error generating geometry vertices");
+				}
+				
+			}
+			
+		});
+		return button;
 	}
 	
 	private MapToggleButton createLockButton(final Context context) {
 		MapToggleButton button = new MapToggleButton(context);
+		button.setTextOn("UnLock");
+		button.setTextOff("Lock");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -91,12 +232,7 @@ public class EditTool extends HighlightTool {
 		return button;
 	}
 	
-	private void updateLockButton() {
-		lockButton.setText(lockButton.isChecked() ? "UnLock" : "Lock");
-	}
-	
 	private void updateLock() {
-		updateLockButton();
 		try {
 			if (lockButton.isChecked()) {
 				mapView.prepareHighlightTransform();
@@ -111,7 +247,6 @@ public class EditTool extends HighlightTool {
 	
 	private void clearLock() {
 		lockButton.setChecked(false);
-		updateLockButton();
 		mapView.clearHighlightTransform();
 	}
 	
@@ -156,6 +291,7 @@ public class EditTool extends HighlightTool {
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
 				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				builder.addSlider("vertexSize", "Vertex Size:", vertexSize);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -167,6 +303,7 @@ public class EditTool extends HighlightTool {
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
 							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							float vertexSize = settingsDialog.parseSlider("vertexSize");
 							
 							mapView.setDrawViewColor(color);
 							mapView.setEditViewColor(editColor);
@@ -174,6 +311,8 @@ public class EditTool extends HighlightTool {
 							mapView.setDrawViewTextSize(textSize);
 							mapView.setEditViewTextSize(textSize);
 							mapView.setShowDecimal(showDecimal);
+							
+							EditTool.this.vertexSize = vertexSize;
 						} catch (Exception e) {
 							showError(e.getMessage());
 						}

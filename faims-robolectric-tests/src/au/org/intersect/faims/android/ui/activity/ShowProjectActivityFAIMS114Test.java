@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.util.TestProjectUtil;
-import au.org.intersect.faims.android.R;
 
 @RunWith(FAIMSRobolectricTestRunner.class)
 public class ShowProjectActivityFAIMS114Test extends FAIMSLogicTestBase {
