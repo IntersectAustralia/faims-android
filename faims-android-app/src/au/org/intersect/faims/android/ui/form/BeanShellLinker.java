@@ -1893,10 +1893,10 @@ public class BeanShellLinker {
 						gallery.setPadding(10, 10, 10, 10);
 						gallery.setLayoutParams(layoutParams);
 						gallery.setPicture(picture);
-						gallery.setOnLongClickListener(new OnLongClickListener() {
+						gallery.setOnClickListener(new OnClickListener() {
 
 							@Override
-							public boolean onLongClick(View v) {
+							public void onClick(View v) {
 								CustomImageView selectedImageView = (CustomImageView) v;
 								if (horizontalScrollView.isMulti()) {
 									for (ImageView view : galleryImages) {
@@ -1923,14 +1923,14 @@ public class BeanShellLinker {
 										}
 									}
 								}
-								return true;
 							}
 						});
-						gallery.setOnClickListener(new OnClickListener() {
+						gallery.setOnLongClickListener(new OnLongClickListener() {
 
 							@Override
-							public void onClick(View v) {
+							public boolean onLongClick(View v) {
 								previewCameraPicture(v);
+								return true;
 							}
 						});
 						TextView textView = new TextView(
@@ -2107,10 +2107,10 @@ public class BeanShellLinker {
 						gallery.setPadding(10, 10, 10, 10);
 						gallery.setLayoutParams(layoutParams);
 						gallery.setPicture(picture);
-						gallery.setOnLongClickListener(new OnLongClickListener() {
+						gallery.setOnClickListener(new OnClickListener() {
 
 							@Override
-							public boolean onLongClick(View v) {
+							public void onClick(View v) {
 								CustomImageView selectedImageView = (CustomImageView) v;
 								if (horizontalScrollView.isMulti()) {
 									for (ImageView view : galleryImages) {
@@ -2137,14 +2137,14 @@ public class BeanShellLinker {
 										}
 									}
 								}
-								return true;
 							}
 						});
-						gallery.setOnClickListener(new OnClickListener() {
+						gallery.setOnLongClickListener(new OnLongClickListener() {
 
 							@Override
-							public void onClick(View v) {
+							public boolean onLongClick(View v) {
 								previewVideo(v);
+								return true;
 							}
 						});
 						TextView textView = new TextView(
@@ -2366,22 +2366,8 @@ public class BeanShellLinker {
 					list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 						@Override
-						public void onItemClick(AdapterView<?> arg0, View arg1,
+						public void onItemClick(AdapterView<?> arg0, View view,
 								int arg2, long arg3) {
-							NameValuePair audioPair = pairs.get(arg2);
-							String path = audioPair.getValue().contains(
-									Environment.getExternalStorageDirectory()
-											.getPath()) ? audioPair.getValue()
-									: activity.getProjectDir() + "/"
-											+ audioPair.getValue();
-							previewAudio(path);
-						}
-					});
-					list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-						@Override
-						public boolean onItemLongClick(AdapterView<?> arg0,
-								View view, int arg2, long arg3) {
 							AudioListItem item = (AudioListItem) view;
 							item.toggle();
 							if (item.isChecked()) {
@@ -2389,6 +2375,20 @@ public class BeanShellLinker {
 							} else {
 								list.removeSelectedItem(item.getAudioPair());
 							}
+						}
+					});
+					list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+						@Override
+						public boolean onItemLongClick(AdapterView<?> arg0,
+								View view, int arg2, long arg3) {
+							NameValuePair audioPair = pairs.get(arg2);
+							String path = audioPair.getValue().contains(
+									Environment.getExternalStorageDirectory()
+											.getPath()) ? audioPair.getValue()
+									: activity.getProjectDir() + "/"
+											+ audioPair.getValue();
+							previewAudio(path);
 							return true;
 						}
 					});
@@ -3495,7 +3495,7 @@ public class BeanShellLinker {
 			String name= file.getName();
 			name = name.indexOf("_") > 0 ? name.substring(name.indexOf("_") + 1) : name;
 			// create random file path
-			attachFile += "/" + UUID.randomUUID() + "_" + file.getName();
+			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
 			activity.copyFile(filePath, activity.getProjectDir() + "/"
 					+ attachFile);

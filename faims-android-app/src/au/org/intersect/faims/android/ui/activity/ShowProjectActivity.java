@@ -1305,14 +1305,21 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					
 					LockManager.waitForLock(lock);
 					
-					new CopyFileTask(fromFile, toFile, new ITaskListener() {
-			
+					ShowProjectActivity.this.runOnUiThread(new Runnable() {
+
 						@Override
-						public void handleTaskCompleted(Object result) {
-							LockManager.clearLock(lock);
+						public void run() {
+							new CopyFileTask(fromFile, toFile, new ITaskListener() {
+								
+								@Override
+								public void handleTaskCompleted(Object result) {
+									LockManager.clearLock(lock);
+								}
+								
+							}).execute();
 						}
 						
-					}).execute();
+					});
 					
 				} catch (Exception e) {
 					FLog.e("error copying file", e);
