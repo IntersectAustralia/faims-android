@@ -77,7 +77,7 @@ public class CanvasLayer extends GeometryLayer {
 	}
 
 	public Point addPoint(int geomId, MapPos point, GeometryStyle style) {		
-		Point p = new Point(projection.fromWgs84(point.x, point.y), null, style.toPointStyle(), new GeometryData(geomId, style, layerId));
+		Point p = new Point(projection.fromWgs84(point.x, point.y), null, style.toPointStyleSet(), new GeometryData(geomId, style, layerId));
 		addGeometry(p);
 		return p;
 	}
@@ -87,7 +87,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-        Line l = new Line(vertices, null, style.toLineStyle(), new GeometryData(geomId, style, layerId));
+        Line l = new Line(vertices, null, style.toLineStyleSet(), new GeometryData(geomId, style, layerId));
 		addGeometry(l);
 		return l;
 	}
@@ -97,7 +97,7 @@ public class CanvasLayer extends GeometryLayer {
         for (MapPos p : points) {
         	vertices.add(projection.fromWgs84(p.x, p.y));
         }
-        Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, style.toPolygonStyle(), new GeometryData(geomId, style, layerId));
+        Polygon p = new Polygon(vertices, new ArrayList<List<MapPos>>(), null, style.toPolygonStyleSet(), new GeometryData(geomId, style, layerId));
 		
 		addGeometry(p);
 		return p;
