@@ -187,19 +187,20 @@ public class DatabaseManager {
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
-					query = "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp,deleted) " +
-								   "SELECT cast(? as integer), ?, attributeID, ?, ?, ?, ?, ? " +
+					query = "INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted) " +
+								   "SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ? " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
 					st.bind(1, uuid);
-					st.bind(2, attribute.getVocab());
-					st.bind(3, attribute.getMeasure());
-					st.bind(4, attribute.getText());
-					st.bind(5, attribute.getCertainty());
-					st.bind(6, currentTimestamp);
-					st.bind(7, attribute.isDeleted() ? "true" : null);
-					st.bind(8, attribute.getName());
+					st.bind(2, userId);
+					st.bind(3, attribute.getVocab());
+					st.bind(4, attribute.getMeasure());
+					st.bind(5, attribute.getText());
+					st.bind(6, attribute.getCertainty());
+					st.bind(7, currentTimestamp);
+					st.bind(8, attribute.isDeleted() ? "true" : null);
+					st.bind(9, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -276,18 +277,19 @@ public class DatabaseManager {
 				
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
-					query = "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +
-								   "SELECT cast(? as integer), ?, attributeId, ?, ?, ?, ? " +
+					query = "INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +
+								   "SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ? " +
 								   "FROM AttributeKey " + 
 								   "WHERE attributeName = ? COLLATE NOCASE;";
 					st = db.prepare(query);
 					st.bind(1, uuid);
-					st.bind(2, attribute.getVocab());
-					st.bind(3, attribute.getText());
-					st.bind(4, attribute.getCertainty());
-					st.bind(5, currentTimestamp);
-					st.bind(6, attribute.isDeleted() ? "true" : null);
-					st.bind(7, attribute.getName());
+					st.bind(2, userId);
+					st.bind(3, attribute.getVocab());
+					st.bind(4, attribute.getText());
+					st.bind(5, attribute.getCertainty());
+					st.bind(6, currentTimestamp);
+					st.bind(7, attribute.isDeleted() ? "true" : null);
+					st.bind(8, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -396,13 +398,14 @@ public class DatabaseManager {
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
 				// create new entity relationship
-				String query = "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
-							   "VALUES (?, ?, ?, ?);";
+				String query = "INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp) " +
+							   "VALUES (?, ?, ?, ?, ?);";
 				st = db.prepare(query);
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);
-				st.bind(3, verb);
-				st.bind(4, currentTimestamp);
+				st.bind(3, userId);
+				st.bind(4, verb);
+				st.bind(5, currentTimestamp);
 				st.step();
 				st.close();
 				st = null;
@@ -1223,11 +1226,26 @@ public class DatabaseManager {
 				
 				String query = 
 						"attach database '" + file.getAbsolutePath() + "' as import;" +
-						"insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn, deleted from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);" +
-						"insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);" +
-						"insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);" +
-						"insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);" + 
-						"insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);" +
+						"insert into archentity (\n" + 
+						"         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
+						"  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn \n" + 
+						"  from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);\n" + 
+						"insert into aentvalue (\n" + 
+						"         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+						"  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
+						"  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);\n" + 
+						"insert into relationship (\n" + 
+						"         relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
+						"  select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn\n" + 
+						"  from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);\n" + 
+						"insert into relnvalue (\n" + 
+						"         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+						"  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
+						"  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);\n" + 
+						"insert into aentreln (\n" + 
+						"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+						"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
+						"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
 						"detach database import;";
 				db.exec(query, createCallback());
 			} finally {
