@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.map.tools;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -9,6 +10,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
+import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 import com.nutiteq.geometry.Point;
@@ -18,13 +20,19 @@ public class PointSelectionTool extends HighlightSelectionTool {
 
 	private static final String NAME = "Point Selection";
 	private MapButton settingsButton;
-	protected float distance;
+	protected float distance = 0;
 	protected SettingsDialog settingsDialog;
+	private MapButton clearButton;
+	private MapText selectedDistance;
 
 	public PointSelectionTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
 		settingsButton = createSettingsButton(context);
+		clearButton = createClearButton(context);
+		selectedDistance = new MapText(context);
+		selectedDistance.setBackgroundColor(Color.WHITE);
+		selectedDistance.setText("Current Distance: " + distance + " m");
 		
 		updateLayout();
 	}
@@ -35,9 +43,25 @@ public class PointSelectionTool extends HighlightSelectionTool {
 			layout.removeAllViews();
 			layout.addView(settingsButton);
 			layout.addView(selectSelection);
+			layout.addView(clearButton);
 			layout.addView(selectedSelection);
+			layout.addView(selectedDistance);
 			layout.addView(selectionCount);
 		}
+	}
+	
+	private MapButton createClearButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Clear");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				clearSelection();
+			}
+			
+		});
+		return button;
 	}
 	
 	protected MapButton createSettingsButton(final Context context) {
@@ -71,6 +95,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 							Point point = (Point) mapView.getHighlights().get(0);
 							
 							mapView.runPointSelection((Point) GeometryUtil.convertGeometryToWgs84(point), distance, remove);
+							selectedDistance.setText("Current Distance: " + distance + " m");
 						} catch (Exception e) {
 							FLog.e("error running point selection query", e);
 							showError(e.getMessage());

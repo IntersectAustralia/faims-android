@@ -1310,8 +1310,9 @@ public class DatabaseManager {
 "          from archentity \n" + 
 "      group by uuid \n" + 
 "        having max(aenttimestamp))\n" + 
-" where deleted is null\n" + 
-" and PtDistWithin(centroid(geospatialcolumn), PointFromText(?, 4326), ?)");
+" where deleted is null\n" +
+" and geospatialcolumn is not null\n" +
+" and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))");
 				FLog.d(WKTUtil.geometryToWKT(point));
 				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(point));
@@ -1353,8 +1354,9 @@ public class DatabaseManager {
 "          from relationship \n" + 
 "      group by relationshipid \n" + 
 "        having max(relntimestamp))\n" + 
-" where deleted is null\n" + 
-" and PtDistWithin(centroid(geospatialcolumn), PointFromText(?, 4326), ?)");
+" where deleted is null\n" +
+" and geospatialcolumn is not null\n" +
+" and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))");
 				FLog.d(WKTUtil.geometryToWKT(point));
 				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(point));
@@ -1391,15 +1393,16 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare("select " + idColumn + " from " + tableName + " where PtDistWithin(centroid(" + geometryColumn + "), PointFromText(?, 4326), ?)");
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform("+ geometryColumn + ",3785))");
 				FLog.d(WKTUtil.geometryToWKT(point));
 				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(point));
 				stmt.bind(2, distance);
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
-					result.add(stmt.column_string(0));
+					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
 				}
+				FLog.d("Result: " + result.toString());
 				return result;
 			} finally {
 				try {
