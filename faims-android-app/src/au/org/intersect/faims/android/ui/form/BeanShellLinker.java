@@ -2645,7 +2645,7 @@ public class BeanShellLinker {
 				final CustomMapView mapView = (CustomMapView) obj;
 
 				String filepath = activity.getProjectDir() + "/" + filename;
-				mapView.addRasterMap(layerName, filepath);
+				mapView.addBaseMap(layerName, filepath);
 
 			} else {
 				FLog.w("cannot find map view " + ref);
