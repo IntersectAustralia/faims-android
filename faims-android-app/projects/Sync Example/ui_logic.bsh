@@ -407,9 +407,10 @@ clearRel() {
 updateAll() {
 	Object entities = fetchEntityList("small");
 	Object relationships = fetchRelationshipList("abovebelow");
-	
+	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	populateDropDown("tabgroup1/tab3/entities", entities);
 	populateDropDown("tabgroup2/tab2/relationships", relationships);
+	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 }
 
 onEvent("tabgroup2/tab1/save", "click", "saveRel()");
