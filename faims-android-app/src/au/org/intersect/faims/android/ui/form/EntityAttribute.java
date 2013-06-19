@@ -9,6 +9,8 @@ public class EntityAttribute {
 	private String vocab;
 	private String type;
 	private boolean isDeleted;
+	private boolean dirty;
+	private String dirtyReason;
 
 	public String getName() {
 		return name;
@@ -84,5 +86,21 @@ public class EntityAttribute {
 
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+	
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 }

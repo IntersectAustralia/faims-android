@@ -53,6 +53,7 @@ public class Tab implements Parcelable{
 	private Map<String, String> viewReference;
 	private Map<String, List<View>> viewMap;
 	private Map<String, Object> valueReference;
+	private Map<String, Button> dirtyButtonMap;
 	private List<View> viewList;
 	private List<CustomMapView> mapViewList;
 	private String name;
@@ -82,6 +83,7 @@ public class Tab implements Parcelable{
 		this.linearLayout = new LinearLayout(activity);
 		this.viewReference = new HashMap<String, String>();
 		this.valueReference = new HashMap<String, Object>();
+		this.dirtyButtonMap = new HashMap<String, Button>();
 		this.viewMap = new HashMap<String, List<View>>();
 		this.viewList = new ArrayList<View>();
 		this.mapViewList = new ArrayList<CustomMapView>();
@@ -121,10 +123,15 @@ public class Tab implements Parcelable{
 
 		return linearLayout;
 	}
+	
+	public Button getDirtyButton(String ref) {
+		return dirtyButtonMap.get(ref);
+	}
 
 	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
     	Button certaintyButton = null;
     	Button annotationButton = null;
+    	Button dirtyButton = null;
 		if (linearLayout == null) {
 			linearLayout = this.linearLayout;
 		}
@@ -143,9 +150,16 @@ public class Tab implements Parcelable{
     			fieldLinearLayout.addView(certaintyButton);
     		}
     		
-    		if(attribute.annotation && !FREETEXT.equals(attribute.type)){
+    		if(attribute.annotation && (isArchEnt || isRelationship) && !FREETEXT.equals(attribute.type)){
     			annotationButton = createAnnotationButton();
     			fieldLinearLayout.addView(annotationButton);
+    		}
+    		
+    		if (isArchEnt || isRelationship) {
+	    		dirtyButton = createDirtyButton();
+	    		dirtyButton.setVisibility(View.GONE);
+	    		fieldLinearLayout.addView(dirtyButton);
+	    		dirtyButtonMap.put(ref, dirtyButton);
     		}
         }
 		
@@ -158,30 +172,30 @@ public class Tab implements Parcelable{
             	switch (attribute.dataType) {
 	                case Constants.DATATYPE_INTEGER:
 	                	view = createIntegerTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
 	                    break;
 	                case Constants.DATATYPE_DECIMAL:
 	                	view = createDecimalTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
 	                    break;
 	                case Constants.DATATYPE_LONG:
 	                	view = createLongTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
 	                    break;
 	                // set input type as date picker
 	                case Constants.DATATYPE_DATE:
 	                	view = createDatePicker(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref, DateUtil.getDate((CustomDatePicker) view));
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, DateUtil.getDate((CustomDatePicker) view));
 	                    break;
 	                // get the text area
 	                case Constants.DATATYPE_TEXT:
 	                	view = createTextArea(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
 	                    break;
 	                // set input type as time picker
 	                case Constants.DATATYPE_TIME:
 	                	view = createTimePicker(attribute, ref);
-	    				setupView(linearLayout, view, certaintyButton, annotationButton, ref, DateUtil.getTime((CustomTimePicker) view));
+	    				setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, DateUtil.getTime((CustomTimePicker) view));
 	                    break;
 	                // default is edit text
 	                default:
@@ -195,7 +209,7 @@ public class Tab implements Parcelable{
 	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
-	                		setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+	                		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
 	                	}
 	                    break;
             	}
@@ -231,12 +245,12 @@ public class Tab implements Parcelable{
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForSingleSelection(attribute, directory, ref);
-                            setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(attribute.questionAppearance)) {
                         	view = createRadioGroup(attribute, ref);
-                        	setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
                         // List
                         } else if ("compact".equalsIgnoreCase(attribute.questionAppearance) ) {
                         	view = createList(attribute);
@@ -245,7 +259,7 @@ public class Tab implements Parcelable{
                         } else {
                         	view = createDropDown(attribute, ref);
                         	NameValuePair pair = (NameValuePair) ((CustomSpinner) view).getSelectedItem();
-                        	setupView(linearLayout, view, certaintyButton, annotationButton, ref, pair.getValue());
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, pair.getValue());
                         }
                         break;
                 }
@@ -256,10 +270,10 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForMultiSelection(attribute, directory, ref);
-                            setupView(linearLayout, view, certaintyButton, annotationButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
                         }else{
 	                    	view = createCheckListGroup(attribute, ref);
-	                    	setupView(linearLayout, view, certaintyButton, annotationButton, ref, new ArrayList<NameValuePair>());
+	                    	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, new ArrayList<NameValuePair>());
                         }
                 }
                 break;
@@ -288,7 +302,7 @@ public class Tab implements Parcelable{
 	private Button createCertaintyButton() {
 		Button button = new Button(this.activityRef.get());
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 30);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 34);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -300,7 +314,7 @@ public class Tab implements Parcelable{
 	private Button createAnnotationButton() {
 		Button button = new Button(this.activityRef.get());
 		button.setBackgroundResource(R.drawable.square_button);
-		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 30);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 34);
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
@@ -309,13 +323,26 @@ public class Tab implements Parcelable{
 		return button;
 	}
 	
-	private void setupView(LinearLayout linearLayout, View view, Button certaintyButton, Button annotationButton, String ref) {
-		setupView(linearLayout, view, certaintyButton, annotationButton, ref, "");
+	private Button createDirtyButton() {
+		Button button = new Button(this.activityRef.get());
+		button.setBackgroundResource(R.drawable.square_button);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 34);
+		LayoutParams layoutParams = new LayoutParams(size, size);
+		layoutParams.topMargin = 10;
+		button.setLayoutParams(layoutParams);
+		button.setText("\u26A0");
+		button.setTextSize(10);
+		return button;
 	}
 	
-	private void setupView(LinearLayout linearLayout,View view, Button certaintyButton, Button annotationButton, String ref, Object value) {
+	private void setupView(LinearLayout linearLayout, View view, Button certaintyButton, Button annotationButton, Button dirtyButton, String ref) {
+		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, "");
+	}
+	
+	private void setupView(LinearLayout linearLayout,View view, Button certaintyButton, Button annotationButton, Button dirtyButton, String ref, Object value) {
 		if (certaintyButton != null) onCertaintyButtonClicked(certaintyButton, view);
         if (annotationButton != null) onAnnotationButtonClicked(annotationButton, view);
+        if (dirtyButton != null) onDirtyButtonClicked(dirtyButton, view);
         linearLayout.addView(view);
         valueReference.put(ref, value);
 	}
@@ -451,6 +478,47 @@ public class Tab implements Parcelable{
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
+	}
+	
+	private void onDirtyButtonClicked(Button dirtyButton, final View view) {
+		dirtyButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				final TextView textView = new EditText(v.getContext());
+				if (view instanceof CustomEditText){
+	        		CustomEditText customEditText = (CustomEditText) view;
+	        		textView.setText(customEditText.getDirtyReason());
+				}else if (view instanceof CustomDatePicker){
+	        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
+	        		textView.setText(customDatePicker.getDirtyReason());
+	        	}else if (view instanceof CustomTimePicker){
+	        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
+	        		textView.setText(customTimePicker.getDirtyReason());
+	        	}else if (view instanceof CustomLinearLayout){
+	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
+	        		textView.setText(customLinearLayout.getDirtyReason());
+	        	}else if (view instanceof CustomHorizontalScrollView){
+	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
+	        		textView.setText(customHorizontalScrollView.getDirtyReason());
+	        	}else if (view instanceof CustomSpinner){
+	        		CustomSpinner customSpinner = (CustomSpinner) view;
+	        		textView.setText(customSpinner.getDirtyReason());
+	        	}
+				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+				
+				builder.setTitle("Annotation");
+				builder.setMessage("Dirty Reason:");
+				builder.setView(textView);
+				builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
+				        public void onClick(DialogInterface dialog, int id) {
+				            // User cancelled the dialog
+				        }
+				    });
+				
+				builder.create().show();
+			}
+		});
 	}
 
 	private void onAnnotationButtonClicked(Button annotationButton, final View view) {
@@ -787,6 +855,8 @@ public class Tab implements Parcelable{
 				text.setCurrentCertainty(1);
 				text.setCurrentAnnotation("");
 				valueReference.put(text.getRef(), "");
+				Button dirtyButton = dirtyButtonMap.get(text.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomDatePicker) {
 				CustomDatePicker date = (CustomDatePicker) v;
 				Time now = new Time();
@@ -795,6 +865,8 @@ public class Tab implements Parcelable{
 				date.setCertainty(1);
 				date.setCurrentCertainty(1);
 				valueReference.put(date.getRef(), DateUtil.getDate(date));
+				Button dirtyButton = dirtyButtonMap.get(date.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomTimePicker) {
 				CustomTimePicker time = (CustomTimePicker) v;
 				Time now = new Time();
@@ -804,6 +876,8 @@ public class Tab implements Parcelable{
 				time.setCertainty(1);
 				time.setCurrentCertainty(1);
 				valueReference.put(time.getRef(), DateUtil.getTime(time));
+				Button dirtyButton = dirtyButtonMap.get(time.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomLinearLayout) {
 				CustomLinearLayout layout = (CustomLinearLayout) v;
 				layout.setCertainty(1);
@@ -826,6 +900,8 @@ public class Tab implements Parcelable{
 					}
 					valueReference.put(layout.getRef(), new ArrayList<NameValuePair>());
 				}
+				Button dirtyButton = dirtyButtonMap.get(layout.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
 				spinner.setSelection(0);
@@ -835,6 +911,8 @@ public class Tab implements Parcelable{
 				spinner.setCurrentAnnotation("");
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
 				valueReference.put(spinner.getRef(), pair.getValue());
+				Button dirtyButton = dirtyButtonMap.get(spinner.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if(v instanceof CustomHorizontalScrollView){
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
 				horizontalScrollView.setCertainty(1);
@@ -846,6 +924,8 @@ public class Tab implements Parcelable{
 				}
 				horizontalScrollView.setSelectedImageView(null);
 				horizontalScrollView.removeSelectedImageViews();
+				Button dirtyButton = dirtyButtonMap.get(horizontalScrollView.getRef());
+				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			}
 		}
 	}

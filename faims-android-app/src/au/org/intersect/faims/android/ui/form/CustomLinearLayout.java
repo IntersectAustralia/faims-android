@@ -18,6 +18,8 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
 	private float currentCertainty = 1;
 	private String annotation = "";
 	private String currentAnnotation = "";
+	private boolean dirty;
+	private String dirtyReason;
 	
 	public CustomLinearLayout(Context context) {
 		super(context);
@@ -110,5 +112,21 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
 			}
 		}
 		
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 }

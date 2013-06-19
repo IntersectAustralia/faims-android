@@ -10,6 +10,8 @@ public class CustomDatePicker extends DatePicker {
 	private String ref;
 	private float certainty = 1;
 	private float currentCertainty = 1;
+	private boolean dirty;
+	private String dirtyReason;
 	
 	public CustomDatePicker(Context context) {
 		super(context);
@@ -52,5 +54,21 @@ public class CustomDatePicker extends DatePicker {
 
 	public void setCurrentCertainty(float currentCertainty) {
 		this.currentCertainty = currentCertainty;
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 }

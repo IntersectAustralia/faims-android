@@ -48,6 +48,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -1063,6 +1064,7 @@ public class BeanShellLinker {
 			setFieldAnnotation(ref, attribute.getText());
 		}
 		setFieldCertainty(ref, attribute.getCertainty());
+		setFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
 
@@ -1075,6 +1077,7 @@ public class BeanShellLinker {
 			setFieldAnnotation(ref, relationshipAttribute.getText());
 		}
 		setFieldCertainty(ref, relationshipAttribute.getCertainty());
+		setFieldDirty(ref, relationshipAttribute.isDirty(), relationshipAttribute.getDirtyReason());
 		tab.setValueReference(ref, getFieldValue(ref));
 	}
 
@@ -1355,6 +1358,53 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error setting field annotation " + ref, e);
 			showWarning("Logic Error", "Error setting field annotation " + ref);
+		}
+	}
+	
+	public void setFieldDirty(String ref, boolean isDirty, String isDirtyReason) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			if (obj != null) {
+				Button dirtyButton = activity.getUIRenderer().getTabForView(ref).getDirtyButton(ref);
+				if (dirtyButton != null) {
+					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
+				}
+			}
+
+			if (obj instanceof CustomEditText) {
+				CustomEditText tv = (CustomEditText) obj;
+				tv.setDirty(isDirty);
+				tv.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomSpinner) {
+				CustomSpinner spinner = (CustomSpinner) obj;
+				spinner.setDirty(isDirty);
+				spinner.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomLinearLayout) {
+				CustomLinearLayout layout = (CustomLinearLayout) obj;
+				layout.setDirty(isDirty);
+				layout.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomDatePicker) {
+				CustomDatePicker date = (CustomDatePicker) obj;
+				date.setDirty(isDirty);
+				date.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomTimePicker) {
+				CustomTimePicker time = (CustomTimePicker) obj;
+				time.setDirty(isDirty);
+				time.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomHorizontalScrollView) {
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				horizontalScrollView.setDirty(isDirty);
+				horizontalScrollView.setDirtyReason(isDirtyReason);
+			} else {
+				FLog.w("cannot set field isDirty " + ref + " = "
+						+ isDirty);
+				showWarning("Logic Error", "Cannot set field isDirty "
+						+ ref + " = " + isDirty);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting field isDirty " + ref, e);
+			showWarning("Logic Error", "Error setting field isDirty " + ref);
 		}
 	}
 

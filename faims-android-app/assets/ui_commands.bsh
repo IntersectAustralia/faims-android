@@ -557,3 +557,7 @@ String getLastVideoFilePath(){
 String getLastAudioFilePath(){
 	return linker.getLastAudioFilePath();
 }
+
+clearFieldDirty(String ref) {
+	linker.setFieldDirty(ref, false, "");
+}

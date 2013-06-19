@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -73,6 +74,7 @@ public class UIRenderer implements IRestoreActionListener{
 	private Map<String, Object> viewValues;
 	private Map<String, Object> viewCertainties;
 	private Map<String, Object> viewAnnotations;
+	private Map<String, String> viewDirtyReasons;
 
 	private Map<String,Map<String,String>> styles;
 
@@ -90,6 +92,7 @@ public class UIRenderer implements IRestoreActionListener{
         this.viewValues = new HashMap<String, Object>();
         this.viewCertainties = new HashMap<String, Object>();
         this.viewAnnotations = new HashMap<String, Object>();
+        this.viewDirtyReasons = new HashMap<String, String>();
         this.styles = new HashMap<String, Map<String,String>>();
     }
 
@@ -537,6 +540,47 @@ public class UIRenderer implements IRestoreActionListener{
 			return null;
 		}
 	}
+	
+	private String getFieldDirty(String ref){
+		
+		try{
+			Object obj = getViewByRef(ref);
+			
+			if (obj instanceof CustomEditText){
+				CustomEditText tv = (CustomEditText) obj;
+				return tv.getDirtyReason();
+			}
+			else if (obj instanceof CustomSpinner){
+				CustomSpinner spinner = (CustomSpinner) obj;
+				return spinner.getDirtyReason();
+			}
+			else if (obj instanceof CustomLinearLayout){
+				CustomLinearLayout layout = (CustomLinearLayout) obj;
+				return layout.getDirtyReason();
+			}
+			else if (obj instanceof CustomDatePicker) {
+				CustomDatePicker date = (CustomDatePicker) obj;
+				return date.getDirtyReason();
+			} 
+			else if (obj instanceof CustomTimePicker) {
+				CustomTimePicker time = (CustomTimePicker) obj;
+				return time.getDirtyReason();
+			}
+			else if (obj instanceof CustomHorizontalScrollView){
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				return horizontalScrollView.getDirtyReason();
+			}
+			else {
+				// TODO show warning
+				return null;
+			}
+		}
+		catch(Exception e){
+			FLog.e("error getting field annotation",e);
+			// TODO show warning
+			return null;
+		}
+	}
 
 	private void setFieldValue(String ref, Object valueObj) {
 		try{
@@ -763,6 +807,50 @@ public class UIRenderer implements IRestoreActionListener{
 			// TODO show warning
 		}
 	}
+	
+	public void setFieldDirty(String ref, boolean isDirty, String isDirtyReason) {
+		try {
+			Object obj = getViewByRef(ref);
+			
+			if (obj != null) {
+				Button dirtyButton = getTabForView(ref).getDirtyButton(ref);
+				if (dirtyButton != null) {
+					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
+				}
+			}
+
+			if (obj instanceof CustomEditText) {
+				CustomEditText tv = (CustomEditText) obj;
+				tv.setDirty(isDirty);
+				tv.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomSpinner) {
+				CustomSpinner spinner = (CustomSpinner) obj;
+				spinner.setDirty(isDirty);
+				spinner.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomLinearLayout) {
+				CustomLinearLayout layout = (CustomLinearLayout) obj;
+				layout.setDirty(isDirty);
+				layout.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomDatePicker) {
+				CustomDatePicker date = (CustomDatePicker) obj;
+				date.setDirty(isDirty);
+				date.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomTimePicker) {
+				CustomTimePicker time = (CustomTimePicker) obj;
+				time.setDirty(isDirty);
+				time.setDirtyReason(isDirtyReason);
+			} else if (obj instanceof CustomHorizontalScrollView) {
+				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+				horizontalScrollView.setDirty(isDirty);
+				horizontalScrollView.setDirtyReason(isDirtyReason);
+			} else {
+				FLog.w("cannot set field isDirty " + ref + " = "
+						+ isDirty);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting field isDirty " + ref, e);
+		}
+	}
 
 	@SuppressWarnings("rawtypes")
 	public List<View> getViewByType(Class type){
@@ -816,10 +904,12 @@ public class UIRenderer implements IRestoreActionListener{
 			viewValues.put(reference, getFieldValue(reference));
 			viewCertainties.put(reference, getFieldCertainty(reference));
 			viewAnnotations.put(reference, getFieldAnnotation(reference));
+			viewDirtyReasons.put(reference, getFieldDirty(reference));
 		}
 		savedInstanceState.putSerializable("viewValues", (Serializable) viewValues);
 		savedInstanceState.putSerializable("viewCertainties", (Serializable) viewCertainties);
 		savedInstanceState.putSerializable("viewAnnotations", (Serializable) viewAnnotations);
+		savedInstanceState.putSerializable("viewDirtyReasons", (Serializable) viewDirtyReasons);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -827,6 +917,7 @@ public class UIRenderer implements IRestoreActionListener{
 		viewValues = (Map<String, Object>) savedInstanceState.getSerializable("viewValues");
 		viewCertainties = (Map<String, Object>) savedInstanceState.getSerializable("viewCertainties");
 		viewAnnotations = (Map<String, Object>) savedInstanceState.getSerializable("viewAnnotations");
+		viewDirtyReasons = (Map<String, String>) savedInstanceState.getSerializable("viewDirtyReasons");
 	}
 	
 	@Override
@@ -836,6 +927,7 @@ public class UIRenderer implements IRestoreActionListener{
 				setFieldValue(reference, viewValues.get(reference));
 				setFieldCertainty(reference, viewCertainties.get(reference));
 				setFieldAnnotation(reference, viewAnnotations.get(reference));
+				setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
 			}
 		}
 	}

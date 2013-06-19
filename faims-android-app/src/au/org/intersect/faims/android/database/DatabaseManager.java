@@ -441,8 +441,8 @@ public class DatabaseManager {
 					return null;
 				}
 	
-				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, AEntTypeID, aenttimestamp, valuetimestamp FROM " +
-					    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp, aentvalue.deleted as aentvaluedeleted FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
+				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, aentdirty, aentdirtyreason FROM " +
+					    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp, aentvalue.deleted as aentvaluedeleted, aentvalue.isDirty as aentdirty, aentvalue.isDirtyReason as aentdirtyreason FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
 					        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid) ) " +
 					"JOIN attributekey USING (attributeid) " +
 					"JOIN ArchEntity USING (uuid) " +
@@ -450,9 +450,7 @@ public class DatabaseManager {
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-				String type = null;
 				while(stmt.step()){
-					type = stmt.column_string(6);
 					EntityAttribute archAttribute = new EntityAttribute();
 					archAttribute.setName(stmt.column_string(1));
 					archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
@@ -461,6 +459,8 @@ public class DatabaseManager {
 					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 					archAttribute.setType(stmt.column_string(6));
 					archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
+					archAttribute.setDirty(stmt.column_string(8) != null ? true : false);
+					archAttribute.setDirtyReason(stmt.column_string(9));
 					attributes.add(archAttribute);
 				}
 				stmt.close();
@@ -487,7 +487,7 @@ public class DatabaseManager {
 				stmt.close();
 				stmt = null;
 	
-				ArchEntity archEntity = new ArchEntity(id, type, attributes, geomList);
+				ArchEntity archEntity = new ArchEntity(id, null, attributes, geomList);
 				
 				return archEntity;
 			} finally {
@@ -519,8 +519,8 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relnvaluedeleted, relntypeid FROM " +
-					    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty, relnvalue.deleted as relnvaluedeleted FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
+				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relnvaluedeleted, relndirty, relndirtyreason FROM " +
+					    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty, relnvalue.deleted as relnvaluedeleted, relnvalue.isDirty as relndirty, relnvalue.isDirtyReason as relndirtyreason FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
 					        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
 					"JOIN attributekey USING (attributeid) " +
 					"JOIN Relationship USING (relationshipid) " +
@@ -528,16 +528,16 @@ public class DatabaseManager {
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-				String type = null;
 				while(stmt.step()){
-					type = stmt.column_string(4);
 					RelationshipAttribute relAttribute = new RelationshipAttribute();
 					relAttribute.setName(stmt.column_string(1));
 					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 					relAttribute.setText(stmt.column_string(3));
 					relAttribute.setCertainty(stmt.column_string(4));
 					relAttribute.setType(stmt.column_string(5));
-					relAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
+					relAttribute.setDeleted(stmt.column_string(6) != null ? true : false);
+					relAttribute.setDirty(stmt.column_string(7) != null ? true : false);
+					relAttribute.setDirtyReason(stmt.column_string(8));
 					attributes.add(relAttribute);
 				}
 				stmt.close();
@@ -561,7 +561,7 @@ public class DatabaseManager {
 				stmt.close();
 				stmt = null;
 				
-				Relationship relationship = new Relationship(id, type, attributes, geomList);
+				Relationship relationship = new Relationship(id, null, attributes, geomList);
 	
 				return relationship;
 			} finally {

@@ -19,6 +19,8 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	private String annotation = "";
 	private String currentAnnotation = "";
 	private boolean isMulti;
+	private boolean dirty;
+	private String dirtyReason;
 
 	public CustomHorizontalScrollView(Context context) {
 		super(context);
@@ -140,5 +142,21 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 
 	public boolean isMulti() {
 		return isMulti;
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 }

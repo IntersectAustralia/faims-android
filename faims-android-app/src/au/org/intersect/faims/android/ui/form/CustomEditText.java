@@ -12,6 +12,8 @@ public class CustomEditText extends EditText {
 	private float currentCertainty = 1;
 	private String annotation = "";
 	private String currentAnnotation = "";
+	private boolean dirty;
+	private String dirtyReason;
 	
 	public CustomEditText(Context context) {
 		super(context);
@@ -70,5 +72,21 @@ public class CustomEditText extends EditText {
 
 	public void setCurrentAnnotation(String currentAnnotation) {
 		this.currentAnnotation = currentAnnotation;
+	}
+	
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 }

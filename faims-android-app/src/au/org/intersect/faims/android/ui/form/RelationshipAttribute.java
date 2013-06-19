@@ -8,6 +8,8 @@ public class RelationshipAttribute {
 	private String certainty;
 	private String type;
 	private boolean isDeleted;
+	private boolean dirty;
+	private String dirtyReason;
 
 	public String getName() {
 		return name;
@@ -59,6 +61,22 @@ public class RelationshipAttribute {
 
 	public String toString() {
 		return "(" + name + "," + text + "," + vocab + "," + certainty + "," + isDeleted + ")";
+	}
+
+	public void setDirty(boolean value) {
+		this.dirty = value;
+	}
+	
+	public boolean isDirty() {
+		return this.dirty;
+	}
+	
+	public void setDirtyReason(String value) {
+		this.dirtyReason = value;
+	}
+	
+	public String getDirtyReason() {
+		return dirtyReason;
 	}
 
 }
