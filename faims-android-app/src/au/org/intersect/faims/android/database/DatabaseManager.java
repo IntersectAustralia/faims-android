@@ -687,103 +687,63 @@ public class DatabaseManager {
 
 	public Collection<List<String>> fetchEntityList(String type) throws Exception {
 		String query = 
-			"select uuid, group_concat(response, '; ') as response " +
-			"FROM (" +
-				"SELECT uuid, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, max(astamp, tstamp) as stamp, aenttypeid " +
-			    "FROM (" +
-			    	"SELECT uuid, attributeid, valuetimestamp, aenttimestamp " +
-			    	"FROM archentity " +
-			    	"JOIN aentvalue USING (uuid) " +
-			    	"JOIN idealaent using (aenttypeid, attributeid) " +
-			    	"WHERE isIdentifier = 'true' " +
-			    	"AND uuid IN (" +
-			    		"SELECT uuid " +
-			    		"FROM (" +
-			    		"SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel " +
-			    		"FROM archentity JOIN aenttype using (aenttypeid) " +
-			    		"WHERE aenttypename LIKE '%'||'" + (type == null ? "" : type) + "'||'%' " +
-			    		"GROUP BY uuid, aenttypeid " +
-			    		"HAVING max(aenttimestamp)" +
-			    		")" +
-			    	"JOIN (" +
-			    		"SELECT uuid, max(valuetimestamp) as valuetimestamp " +
-			    		"FROM aentvalue " +
-			    		"WHERE deleted is null " +
-			    		"GROUP BY uuid " +
-			    		"HAVING max(valuetimestamp) " +
-			    		")" +
-			    	"USING (uuid) " +
-			    	"WHERE entDel is null " +
-			    	"GROUP BY uuid " +
-			    	"ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid " +
-			    	")" +
-			    "GROUP BY uuid, attributeid " +
-			    "HAVING MAX(ValueTimestamp) " +
-			    "AND MAX(AEntTimestamp) " +
-			    ")" +
-			"JOIN attributekey using (attributeid) " +
-			"JOIN aentvalue using (uuid, attributeid, valuetimestamp) " +
-			"JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid) " +
-			"JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid) " +
-			"JOIN archentity using (uuid, aenttimestamp) " +
-			"LEFT OUTER JOIN vocabulary USING (vocabid, attributeid) " +
-			"WHERE aentvalue.deleted is null " +
-			"group by uuid, attributeid " +
-			"ORDER BY max(tstamp,astamp) desc, uuid, attributename) " +
-			"JOIN aenttype using (aenttypeid) " +
-			"group by uuid " +
-			"order by stamp;";
+			"select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
+			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
+			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" + 
+			"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
+			"                                                                                              measure    || ' (' || freetext || ')',\n" + 
+			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                              measure,\n" + 
+			"                                                                                              vocabname,\n" + 
+			"                                                                                              freetext), ' | ') as response\n" + 
+			"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" + 
+			"          FROM aentvalue\n" + 
+			"          JOIN attributekey USING (attributeid)\n" + 
+			"          join archentity USING (uuid)\n" + 
+			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and lower(aenttypename) = lower('" + type + "')) USING (attributeid, aenttypeid)\n" + 
+			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
+			"          JOIN (SELECT uuid, attributeid, valuetimestamp\n" + 
+			"                  FROM aentvalue\n" + 
+			"                  JOIN archentity USING (uuid)\n" + 
+			"                 WHERE archentity.deleted is NULL\n" + 
+			"              GROUP BY uuid, attributeid\n" + 
+			"                HAVING MAX(ValueTimestamp)\n" + 
+			"                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)\n" + 
+			"          WHERE aentvalue.deleted is NULl\n" + 
+			"       ORDER BY uuid, attributename ASC)\n" + 
+			"group by uuid;";
 		return fetchAll(query);
 	}
 	
 	public Collection<List<String>> fetchRelationshipList(String type) throws Exception {
 		String query = 
-			"select relationshipid, group_concat(response, '; ') as response " +
-			"FROM (" +
-				"SELECT relationshipid, coalesce(vocabname, group_concat(vocabname, ', '), group_concat(freetext, ', ')) AS response, max(astamp, tstamp) as stamp, relntypeid " +
-			    "FROM (" +
-			    	"SELECT relationshipid, attributeid, RelnValueTimestamp, relntimestamp " +
-			    	"FROM relationship " +
-			    	"JOIN relnvalue USING (relationshipid) " +
-			    	"JOIN idealreln using (relntypeid, attributeid) " +
-			    	"WHERE isIdentifier = 'true' " +
-			    	"AND relationshipid IN (" +
-			    		"SELECT relationshipid " +
-			    		"FROM (" +
-			    		"SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted " +
-			    		"FROM relationship JOIN relntype using (relntypeid) " +
-			    		"WHERE relntypename LIKE '%'||'" + (type == null ? "" : type) + "'||'%' " +
-			    		"GROUP BY relationshipid, relntypeid " +
-			    		"HAVING max(relntimestamp)" +
-			    		")" +
-			    	"JOIN (" +
-			    		"SELECT relationshipid, max(RelnValueTimestamp) as RelnValueTimestamp " +
-			    		"FROM relnvalue " +
-			    		"WHERE deleted is null " +
-			    		"GROUP BY relationshipid " +
-			    		"HAVING max(RelnValueTimestamp) " +
-			    		")" +
-			    	"USING (relationshipid) " +
-			    	"WHERE relnDeleted is null " +
-			    	"GROUP BY relationshipid " +
-			    	"ORDER BY max(RelnValueTimestamp, relntimestamp) desc, relationshipid " +
-			    	")" +
-			    "GROUP BY relationshipid, attributeid " +
-			    "HAVING MAX(RelnValueTimestamp) " +
-			    "AND MAX(relntimestamp) " +
-			    ")" +
-			"JOIN attributekey using (attributeid) " +
-			"JOIN relnvalue using (relationshipid, attributeid, RelnValueTimestamp) " +
-			"JOIN (SELECT relationshipid, max(RelnValueTimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid) " +
-			"JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid) " +
-			"JOIN relationship using (relationshipid, relntimestamp) " +
-			"LEFT OUTER JOIN vocabulary USING (vocabid, attributeid) " +
-			"WHERE relnvalue.deleted is null " +
-			"group by relationshipid, attributeid " +
-			"ORDER BY max(tstamp,astamp) desc, relationshipid, attributename) " +
-			"JOIN relntype using (relntypeid) " +
-			"group by relationshipid " +
-			"order by stamp;";
+			"select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
+			"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
+			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
+			"                                                                                         vocabname,\n" + 
+			"                                                                                         freetext), ' | ') as response\n" + 
+			"from (\n" + 
+			"SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" + 
+			"    FROM relnvalue\n" + 
+			"    JOIN attributekey USING (attributeid)\n" + 
+			"    JOIN relationship USING (relationshipid)\n" + 
+			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true' and lower(relntypename) = lower('" + type + "')) USING (attributeid, relntypeid)\n" + 
+			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
+			"    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid\n" + 
+			"             FROM relnvalue\n" + 
+			"             JOIN relationship USING (relationshipid)\n" + 
+			"            WHERE relationship.deleted is NULL\n" + 
+			"         GROUP BY relationshipid, attributeid\n" + 
+			"           HAVING MAX(relnvaluetimestamp)\n" + 
+			"              AND MAX(relntimestamp)\n" + 
+			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntypeid)\n" + 
+			"   WHERE relnvalue.deleted is NULL\n" + 
+			"ORDER BY relationshipid, attributename asc)\n" + 
+			"group by relationshipid;";
 		return fetchAll(query);
 	}
 	
@@ -1226,27 +1186,27 @@ public class DatabaseManager {
 				
 				String query = 
 						"attach database '" + file.getAbsolutePath() + "' as import;" +
-						"insert into archentity (\n" + 
+						"insert or replace into archentity (\n" + 
 						"         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
 						"  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn \n" + 
-						"  from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);\n" + 
-						"insert into aentvalue (\n" + 
+						"  from import.archentity;\n" + 
+						"insert or replace into aentvalue (\n" + 
 						"         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
 						"  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
-						"  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);\n" + 
-						"insert into relationship (\n" + 
+						"  from import.aentvalue;\n" + 
+						"insert or replace into relationship (\n" + 
 						"         relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
 						"  select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn\n" + 
-						"  from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);\n" + 
-						"insert into relnvalue (\n" + 
+						"  from import.relationship;\n" + 
+						"insert or replace into relnvalue (\n" + 
 						"         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
 						"  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
-						"  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);\n" + 
+						"  from import.relnvalue;\n" + 
 						"insert into aentreln (\n" + 
 						"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
 						"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
 						"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
-						"detach database import;";
+					    "detach database import;";
 				db.exec(query, createCallback());
 			} finally {
 				try {
