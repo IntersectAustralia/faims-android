@@ -480,36 +480,53 @@ public class Tab implements Parcelable{
          return button;
 	}
 	
+	private void setDirtyTextArea(EditText text, String value) {
+		String[] lines = value.split(";");
+		StringBuffer sb = new StringBuffer();
+		int count = 0;
+		for (String l : lines) {
+			if (l.equals("")) continue;
+			sb.append(l);
+			sb.append("\n");
+			count++;
+		}
+		text.setLines(count);
+		text.setText(sb.toString());
+	}
+	
 	private void onDirtyButtonClicked(Button dirtyButton, final View view) {
 		dirtyButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				final TextView textView = new EditText(v.getContext());
+				ScrollView scrollView = new ScrollView(activityRef.get());
+				EditText textView = new EditText(activityRef.get());
+				scrollView.addView(textView);
+				textView.setEnabled(false);
 				if (view instanceof CustomEditText){
 	        		CustomEditText customEditText = (CustomEditText) view;
-	        		textView.setText(customEditText.getDirtyReason());
+	        		setDirtyTextArea(textView, customEditText.getDirtyReason());
 				}else if (view instanceof CustomDatePicker){
 	        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
-	        		textView.setText(customDatePicker.getDirtyReason());
+	        		setDirtyTextArea(textView, customDatePicker.getDirtyReason());
 	        	}else if (view instanceof CustomTimePicker){
 	        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
-	        		textView.setText(customTimePicker.getDirtyReason());
+	        		setDirtyTextArea(textView, customTimePicker.getDirtyReason());
 	        	}else if (view instanceof CustomLinearLayout){
 	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-	        		textView.setText(customLinearLayout.getDirtyReason());
+	        		setDirtyTextArea(textView, customLinearLayout.getDirtyReason());
 	        	}else if (view instanceof CustomHorizontalScrollView){
 	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-	        		textView.setText(customHorizontalScrollView.getDirtyReason());
+	        		setDirtyTextArea(textView, customHorizontalScrollView.getDirtyReason());
 	        	}else if (view instanceof CustomSpinner){
 	        		CustomSpinner customSpinner = (CustomSpinner) view;
-	        		textView.setText(customSpinner.getDirtyReason());
+	        		setDirtyTextArea(textView, customSpinner.getDirtyReason());
 	        	}
 				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 				
 				builder.setTitle("Annotation");
 				builder.setMessage("Dirty Reason:");
-				builder.setView(textView);
+				builder.setView(scrollView);
 				builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
 				        public void onClick(DialogInterface dialog, int id) {
 				            // User cancelled the dialog
