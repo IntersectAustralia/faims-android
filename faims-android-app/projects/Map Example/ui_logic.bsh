@@ -30,6 +30,9 @@ onEvent("user/tab1/users", "click", "login()");
 
 onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
 onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
+onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\",10)");
+onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\",10)");
+onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
 
 getScreen(id, name) {
 	ArrayList screen = new ArrayList();
@@ -59,6 +62,33 @@ gotoScreen() {
 	showTabGroup(screen);
 }
 
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+	setSyncEnabled(true);
+	setFileSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+syncStarted() {
+	//showToast("starting sync");
+}
+
+syncCompleted() {
+	//showToast("completed sync");
+	//updateAll();
+}
+
+syncFailed() {
+	//showToast("failed sync");
+}
+
+onEvent("controls", "show", "cleanup()");
 onEvent("tabgroup1", "load", "showScreen(\"tabgroup1\")");
 onEvent("tabgroup2", "load", "showScreen(\"tabgroup2\")");
 onEvent("tabgroup3", "load", "showScreen(\"tabgroup3\")");
@@ -100,10 +130,17 @@ showScreen(name) {
 		initSpatialMap();
 	} else if ("tabgroup5".equals(name) && !initTabGroup5) {
 		initTabGroup5 = true;
+		startSync();
 		initUIMap();
 	}
 	
 }
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("user", "show", "cleanup()");
 
 setupMap(id, filename, lon, lat) {
 	setToolsEnabled(id, false);

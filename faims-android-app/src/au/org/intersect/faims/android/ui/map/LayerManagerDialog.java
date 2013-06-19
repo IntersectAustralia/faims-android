@@ -437,6 +437,18 @@ public class LayerManagerDialog extends AlertDialog {
 		builder.setView(scrollView);
 		final Dialog d = builder.create();
 		
+		Button loadBaseLayerButton = new Button(getContext());
+		loadBaseLayerButton.setText("Load Base Layer");
+		loadBaseLayerButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				d.dismiss();
+				addBaseLayer();
+			}
+			
+		});
+		
 		Button loadRasterLayerButton = new Button(getContext());
 		loadRasterLayerButton.setText("Load Raster Layer");
 		loadRasterLayerButton.setOnClickListener(new View.OnClickListener() {
@@ -498,13 +510,72 @@ public class LayerManagerDialog extends AlertDialog {
 			
 		});
 		
+		layout.addView(loadBaseLayerButton);
 		layout.addView(loadRasterLayerButton);
-//		layout.addView(loadShapeLayerButton);
 		layout.addView(loadSpatialLayerButton);
 		layout.addView(loadDatabaseLayerButton);
 		layout.addView(createLayerButton);
 		
 		d.show();
+	}
+	
+	private void addBaseLayer(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
+		
+		builder.setTitle("Layer Manager");
+		builder.setMessage("Add base layer:");
+		
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		builder.setView(scrollView);
+		
+		TextView textView = new TextView(this.getContext());
+		textView.setText("Base layer name:");
+		layout.addView(textView);
+		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
+		layout.addView(editText);
+		
+		Button browserButton = new Button(getContext());
+		browserButton.setText("browse");
+		browserButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
+			}
+		});
+		layout.addView(browserButton);
+		selectedFileText = new TextView(this.getContext());
+		layout.addView(selectedFileText);
+
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					if(rasterFile != null){
+						mapView.addBaseMap(editText.getText().toString(), rasterFile.getPath());
+						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
+						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
+						redrawLayers();
+					}
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int id) {
+	           // ignore
+	        }
+	    });
+		
+		builder.create().show();
 	}
 	
 	private void addRasterLayer(){
@@ -546,8 +617,6 @@ public class LayerManagerDialog extends AlertDialog {
 				try {
 					if(rasterFile != null){
 						mapView.addRasterMap(editText.getText().toString(), rasterFile.getPath());
-						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
-						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
 						redrawLayers();
 					}
 				} catch (Exception e) {

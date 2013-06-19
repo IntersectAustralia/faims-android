@@ -1206,7 +1206,11 @@ public class DatabaseManager {
 						"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
 						"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
 						"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
-					    "detach database import;";
+						"insert or replace into vocabulary (\n" + 
+						"         vocabid, attributeid, vocabname, SemanticMapURL,PictureURL) \n" + 
+						"  select vocabid, attributeid, vocabname, SemanticMapURL,PictureURL\n" + 
+						"  from import.vocabulary;\n" + 
+						"detach database import;";
 				db.exec(query, createCallback());
 			} finally {
 				try {

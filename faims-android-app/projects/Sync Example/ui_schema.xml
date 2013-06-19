@@ -9,6 +9,14 @@
     <model>
       <instance>
         <faims id="simple_example">
+          <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
           <user>
               <tab1>
                   <users></users>
@@ -21,10 +29,16 @@
           </menu>
           <tabgroup1>
               <tab1>
-                  <name></name>
-                  <value></value>
-                  <timestamp></timestamp>
-                  <location></location>
+                  <container1>
+                    <child1>
+                      <name></name>
+                      <value></value>
+                    </child1>
+                    <child2>
+                      <timestamp></timestamp>
+                      <location></location>
+                    </child2>
+                  </container1>
                   <filename></filename>
                   <file></file>
                   <sync></sync>
@@ -35,9 +49,18 @@
                   <audio></audio>
                   <attach></attach>
                   <viewattached></viewattached>
-                  <save></save>
-                  <update></update>
-                  <clear></clear>
+                  <container2>
+                    <child1>
+                      <save></save>
+                    </child1>
+                    <child2>
+                      <update></update>
+                    </child2>
+                    <child3>
+                      <clear></clear>
+                    </child3>
+                  </container2>
+                  
               </tab1>
               <tab2>
                   <audiolist></audiolist>
@@ -69,8 +92,8 @@
         </faims>
       </instance>
 
-      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
-      <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/container1/child1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/container1/child1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup1/tab1/filename" type="string"/>
       
     </model>
@@ -78,6 +101,21 @@
 
   
   <h:body>
+    <group ref="style">
+      <label></label>
+      <group ref="orientation">
+        <label></label>
+        <input ref="orientation">
+            <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label></label>
+        <input ref="layout_weight">
+            <label>1</label>
+        </input>
+      </group>
+    </group>
     <group ref="user">
       <label></label>
       <group ref="tab1" faims_scrollable="false">
@@ -108,22 +146,31 @@
       <label></label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
-          <label>Name:</label>
-        </input>
-        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
-            <label>Value:</label>
-        </input>
-        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-            <label>Timestamp:</label>
-        </input>
-        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-            <label>Location:</label>
-            <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
-        </select>
+        <group ref="container1" faims_style="orientation">
+          <label></label>
+          <group ref="child1" faims_style="even">
+            <label></label>
+            <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+              <label>Name:</label>
+            </input>
+            <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+                <label>Value:</label>
+            </input>
+          </group>
+          <group ref="child2" faims_style="even">
+            <label></label>
+            <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+              <label>Timestamp:</label>
+            </input>
+            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+                <label>Location:</label>
+                <item>
+                	<label>dummy</label>
+                	<value>dummy</value>
+              	</item>
+            </select>
+          </group>
+        </group>
         <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
             <label>Filename:</label>
         </input>
@@ -170,15 +217,27 @@
         <trigger ref="viewattached">
             <label>View Attached Files</label>
         </trigger>
-        <trigger ref="save">
-            <label>Save</label>
-        </trigger>
-        <trigger ref="update">
-            <label>Update</label>
-        </trigger>
-        <trigger ref="clear">
-            <label>Clear</label>
-        </trigger>
+        <group ref="container2" faims_style="orientation">
+          <label></label>
+          <group ref="child1" faims_style="even">
+            <label></label>
+            <trigger ref="save">
+              <label>Save</label>
+            </trigger>
+          </group>
+          <group ref="child2" faims_style="even">
+            <label></label>
+            <trigger ref="update">
+                <label>Update</label>
+            </trigger>
+          </group>
+          <group ref="child3" faims_style="even">
+            <label></label>
+            <trigger ref="clear">
+              <label>Clear</label>
+            </trigger>
+          </group>
+        </group>
       </group>
       <group ref="tab2" faims_scrollable="false">
         <label>Audio List</label>

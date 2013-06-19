@@ -18,6 +18,9 @@
               <tab1>
                   <connectexternal></connectexternal>
                   <connectinternal></connectinternal>
+                  <starttrackingtime></starttrackingtime>
+                  <starttrackingdistance></starttrackingdistance>
+                  <stoptracking></stoptracking>
               </tab1>
               <tab2>
                   <screens></screens>
@@ -131,7 +134,16 @@
 	        <trigger ref="connectinternal">
 	            <label>Connect internal gps</label>
 	        </trigger>
-        </group>
+            <trigger ref="starttrackingtime">
+	            <label>Start tracking gps based on time interval</label>
+	        </trigger>
+	        <trigger ref="starttrackingdistance">
+	            <label>Start tracking gps based on distance interval</label>
+	        </trigger>
+	        <trigger ref="stoptracking">
+	            <label>Stop tracking gps</label>
+	        </trigger>
+	        </group>
         <group ref="tab2" faims_scrollable="false">
             <label>Screens</label>
             <select1 ref="screens" appearance="compact">

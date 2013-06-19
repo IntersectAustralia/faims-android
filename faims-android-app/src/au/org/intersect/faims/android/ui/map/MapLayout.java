@@ -97,9 +97,12 @@ public class MapLayout extends LinearLayout {
 			
 		});
 		
-		addView(layerButton);
-		addView(setButton);
-		addView(toolsDropDown);
+		LinearLayout horizontalLayout = new LinearLayout(getContext());
+		horizontalLayout.setOrientation(LinearLayout.HORIZONTAL);
+		horizontalLayout.addView(layerButton);
+		horizontalLayout.addView(setButton);
+		horizontalLayout.addView(toolsDropDown);
+		addView(horizontalLayout);
 		addView(container);
 	}
 	
@@ -157,13 +160,19 @@ public class MapLayout extends LinearLayout {
 	}
 	
 	private Button createLayerButton() {
-		 Button button = new Button(this.getContext());
-         button.setText("Layer Manager Dialog");
-         return button;
+		Button button = new Button(this.getContext());
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
+        button.setText("Layer Manager Dialog");
+        return button;
 	}
-	
+
 	private Button createSetButton() {
-		 Button button = new Button(this.getContext());
+		Button button = new Button(this.getContext());
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		button.setLayoutParams(layoutParams);
         button.setText("Selection Manager Dialog");
         return button;
 	}
@@ -175,6 +184,9 @@ public class MapLayout extends LinearLayout {
 				this.getContext(),
 				android.R.layout.simple_spinner_dropdown_item,
 				tools);
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		layoutParams.weight = 1;
+		spinner.setLayoutParams(layoutParams);
 		spinner.setAdapter(arrayAdapter);
 		spinner.setSelection(0);
 		return spinner;

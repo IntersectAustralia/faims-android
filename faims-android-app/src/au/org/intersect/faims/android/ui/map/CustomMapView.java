@@ -615,7 +615,7 @@ public class CustomMapView extends MapView {
 		return canRunThreads;
 	}
 
-	public int addRasterMap(String layerName, String file) throws Exception {
+	public int addBaseMap(String layerName, String file) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("Error map does not exist " + file);
 		}
@@ -632,6 +632,29 @@ public class CustomMapView extends MapView {
 				this, true);
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().setBaseLayer(gdalLayer);
+		//setZoomRange(gdalLayer);
+		//setMapBounds(gdalLayer);
+		
+		if(currentPositionLayer == null){
+        	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
+        	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
+        }
+		
+		return addLayer(gdalLayer);
+	}
+
+	public int addRasterMap(String layerName, String file) throws Exception {
+		if (!new File(file).exists()) {
+			throw new MapException("Error map does not exist " + file);
+		}
+		
+		validateLayerName(layerName);
+
+		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
+				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
+				this, true);
+		//gdalLayer.setShowAlways(true);
+		this.getLayers().addLayer(gdalLayer);
 		//setZoomRange(gdalLayer);
 		//setMapBounds(gdalLayer);
 		
