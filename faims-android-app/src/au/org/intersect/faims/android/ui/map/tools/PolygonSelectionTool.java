@@ -13,19 +13,19 @@ import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
-import com.nutiteq.geometry.Point;
+import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
-public class PointSelectionTool extends HighlightSelectionTool {
+public class PolygonSelectionTool extends HighlightSelectionTool {
 
-	private static final String NAME = "Point Selection";
+	private static final String NAME = "Polygon Selection";
 	private MapButton settingsButton;
 	protected float distance = 0;
 	protected SettingsDialog settingsDialog;
 	private MapButton clearButton;
 	private MapText selectedDistance;
 
-	public PointSelectionTool(Context context, CustomMapView mapView) {
+	public PolygonSelectionTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
 		settingsButton = createSettingsButton(context);
@@ -85,19 +85,19 @@ public class PointSelectionTool extends HighlightSelectionTool {
 							float distance = Float.parseFloat(((EditText) settingsDialog.getField("distance")).getText().toString());
 							boolean remove = settingsDialog.parseCheckBox("remove");
 							
-							PointSelectionTool.this.distance = distance;
+							PolygonSelectionTool.this.distance = distance;
 							
 							if (mapView.getHighlights().size() == 0) {
-								showError("Please select a point");
+								showError("Please select a polygon");
 								return;
 							}
 							
-							Point point = (Point) mapView.getHighlights().get(0);
+							Polygon polygon = (Polygon) mapView.getHighlights().get(0);
 							
-							mapView.runPointSelection((Point) GeometryUtil.convertGeometryToWgs84(point), distance, remove);
+							mapView.runPolygonSelection((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), distance, remove);
 							selectedDistance.setText("Current Distance: " + distance + " m");
 						} catch (Exception e) {
-							FLog.e("error running point selection query", e);
+							FLog.e("error running polygon selection query", e);
 							showError(e.getMessage());
 						}
 					}
@@ -122,7 +122,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	@Override
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
-		if ((element instanceof Point) && (mapView.getHighlights().size() == 1)) {
+		if ((element instanceof Polygon) && (mapView.getHighlights().size() == 1)) {
 			super.onVectorElementClicked(element, arg1, arg2, arg3);
 		}
 	}

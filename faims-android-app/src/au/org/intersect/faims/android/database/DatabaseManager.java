@@ -23,7 +23,6 @@ import au.org.intersect.faims.android.util.DateUtil;
 import com.google.inject.Singleton;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.ui.Label;
@@ -171,10 +170,7 @@ public class DatabaseManager {
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
-				String query = "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
-									"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ? " +
-									"FROM aenttype " + 
-									"WHERE aenttypename = ? COLLATE NOCASE;";
+				String query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
@@ -187,10 +183,7 @@ public class DatabaseManager {
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
-					query = "INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted) " +
-								   "SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ? " +
-								   "FROM AttributeKey " + 
-								   "WHERE attributeName = ? COLLATE NOCASE;";
+					query = DatabaseQueries.INSERT_INTO_AENTVALUE;
 					st = db.prepare(query);
 					st.bind(1, uuid);
 					st.bind(2, userId);
@@ -261,10 +254,7 @@ public class DatabaseManager {
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
-				String query = "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
-									"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ? " +
-									"FROM relntype " +
-									"WHERE relntypename = ? COLLATE NOCASE;";
+				String query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
@@ -277,10 +267,7 @@ public class DatabaseManager {
 				
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
-					query = "INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +
-								   "SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ? " +
-								   "FROM AttributeKey " + 
-								   "WHERE attributeName = ? COLLATE NOCASE;";
+					query = DatabaseQueries.INSERT_INTO_RELNVALUE;
 					st = db.prepare(query);
 					st.bind(1, uuid);
 					st.bind(2, userId);
@@ -327,9 +314,7 @@ public class DatabaseManager {
 			
 			// check if attributes exist
 			for (EntityAttribute attribute : attributes) {
-				String query = "SELECT count(AEntTypeName) " + 
-							   "FROM IdealAEnt left outer join AEntType using (AEntTypeId) left outer join AttributeKey using (AttributeId) " + 
-							   "WHERE AEntTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+				String query = DatabaseQueries.CHECK_VALID_AENT;
 				
 				st = db.prepare(query);
 				st.bind(1, entity_type);
@@ -358,9 +343,7 @@ public class DatabaseManager {
 			
 			// check if attributes exist
 			for (RelationshipAttribute attribute : attributes) {
-				String query = "SELECT count(RelnTypeName) " + 
-						   	   "FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
-						       "WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+				String query = DatabaseQueries.CHECK_VALID_RELN;
 				st = db.prepare(query);
 				st.bind(1, rel_type);
 				st.bind(2, attribute.getName());
@@ -398,8 +381,7 @@ public class DatabaseManager {
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
 				// create new entity relationship
-				String query = "INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp) " +
-							   "VALUES (?, ?, ?, ?, ?);";
+				String query = DatabaseQueries.INSERT_AENT_RELN;
 				st = db.prepare(query);
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);
@@ -441,12 +423,7 @@ public class DatabaseManager {
 					return null;
 				}
 	
-				String query = "SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, aentdirty, aentdirtyreason FROM " +
-					    "(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp, aentvalue.deleted as aentvaluedeleted, aentvalue.isDirty as aentdirty, aentvalue.isDirtyReason as aentdirtyreason FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
-					        "(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid) ) " +
-					"JOIN attributekey USING (attributeid) " +
-					"JOIN ArchEntity USING (uuid) " +
-					"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
+				String query = DatabaseQueries.FETCH_AENT_VALUE;
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
@@ -470,7 +447,7 @@ public class DatabaseManager {
 				}
 				
 				// get vector geometry
-				stmt = db.prepare("SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN ( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);");
+				stmt = db.prepare(DatabaseQueries.FETCH_ARCHENTITY_GEOSPATIALCOLUMN);
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
@@ -519,12 +496,7 @@ public class DatabaseManager {
 					return null;
 				}
 				
-				String query = "SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relnvaluedeleted, relndirty, relndirtyreason FROM " +
-					    "(SELECT relationshipid, attributeid, vocabid, freetext, certainty, relnvalue.deleted as relnvaluedeleted, relnvalue.isDirty as relndirty, relnvalue.isDirtyReason as relndirtyreason FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
-					        "(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
-					"JOIN attributekey USING (attributeid) " +
-					"JOIN Relationship USING (relationshipid) " +
-					"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
+				String query = DatabaseQueries.FETCH_RELN_VALUE;
 				stmt = db.prepare(query);
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
@@ -544,7 +516,7 @@ public class DatabaseManager {
 				stmt = null;
 				
 				// get vector geometry
-				stmt = db.prepare("SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN ( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);");
+				stmt = db.prepare(DatabaseQueries.FETCH_RELN_GEOSPATIALCOLUMN);
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
@@ -686,64 +658,12 @@ public class DatabaseManager {
 	}
 
 	public Collection<List<String>> fetchEntityList(String type) throws Exception {
-		String query = 
-			"select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
-			"                                                                                              measure    || ' (' || freetext || ')',\n" + 
-			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              measure,\n" + 
-			"                                                                                              vocabname,\n" + 
-			"                                                                                              freetext), ' | ') as response\n" + 
-			"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" + 
-			"          FROM aentvalue\n" + 
-			"          JOIN attributekey USING (attributeid)\n" + 
-			"          join archentity USING (uuid)\n" + 
-			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and lower(aenttypename) = lower('" + type + "')) USING (attributeid, aenttypeid)\n" + 
-			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-			"          JOIN (SELECT uuid, attributeid, valuetimestamp\n" + 
-			"                  FROM aentvalue\n" + 
-			"                  JOIN archentity USING (uuid)\n" + 
-			"                 WHERE archentity.deleted is NULL\n" + 
-			"              GROUP BY uuid, attributeid\n" + 
-			"                HAVING MAX(ValueTimestamp)\n" + 
-			"                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)\n" + 
-			"          WHERE aentvalue.deleted is NULl\n" + 
-			"       ORDER BY uuid, attributename ASC)\n" + 
-			"group by uuid;";
+		String query = DatabaseQueries.FETCH_ENTITY_LIST(type);
 		return fetchAll(query);
 	}
 	
 	public Collection<List<String>> fetchRelationshipList(String type) throws Exception {
-		String query = 
-			"select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
-			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                         vocabname,\n" + 
-			"                                                                                         freetext), ' | ') as response\n" + 
-			"from (\n" + 
-			"SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" + 
-			"    FROM relnvalue\n" + 
-			"    JOIN attributekey USING (attributeid)\n" + 
-			"    JOIN relationship USING (relationshipid)\n" + 
-			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true' and lower(relntypename) = lower('" + type + "')) USING (attributeid, relntypeid)\n" + 
-			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-			"    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid\n" + 
-			"             FROM relnvalue\n" + 
-			"             JOIN relationship USING (relationshipid)\n" + 
-			"            WHERE relationship.deleted is NULL\n" + 
-			"         GROUP BY relationshipid, attributeid\n" + 
-			"           HAVING MAX(relnvaluetimestamp)\n" + 
-			"              AND MAX(relntimestamp)\n" + 
-			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntypeid)\n" + 
-			"   WHERE relnvalue.deleted is NULL\n" + 
-			"ORDER BY relationshipid, attributename asc)\n" + 
-			"group by relationshipid;";
+		String query = DatabaseQueries.FETCH_RELN_LIST(type);
 		return fetchAll(query);
 	}
 	
@@ -758,47 +678,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-				String query = "SELECT uuid, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, Hex(AsBinary(geospatialcolumn))\n" + 
-						"    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp\n" + 
-						"            FROM archentity\n" + 
-						"            JOIN aentvalue USING (uuid)\n" + 
-						"            JOIN idealaent using (aenttypeid, attributeid)\n" + 
-						"           WHERE isIdentifier = 'true'\n" + 
-						"             AND uuid IN (SELECT uuid\n" + 
-						"                            FROM (SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel\n" + 
-						"                                    FROM archentity\n" + 
-						"                                   where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
-						"                                GROUP BY uuid, aenttypeid\n" + 
-						"                                  HAVING max(aenttimestamp)\n" + 
-						"                                     )\n" + 
-						"                            JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp\n" + 
-						"                                    FROM aentvalue --this gives us a temporal ordering...\n" + 
-						"                                  WHERE deleted is null\n" + 
-						"                                GROUP BY uuid\n" + 
-						"                                  HAVING max(valuetimestamp)\n" + 
-						"                                    )\n" + 
-						"                            USING (uuid)\n" +
-															userQuery +
-						"                           WHERE entDel is null\n" + 
-						"                           GROUP BY uuid\n" + 
-						"                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid\n" + 
-						"                        LIMIT ?\n" + 
-						"                        -- OFFSET ?\n" + 
-						"                      )\n" + 
-						"        GROUP BY uuid, attributeid\n" + 
-						"          HAVING MAX(ValueTimestamp)\n" + 
-						"             AND MAX(AEntTimestamp)\n" + 
-						"             )\n" + 
-						"    JOIN attributekey using (attributeid)\n" + 
-						"    JOIN aentvalue using (uuid, attributeid, valuetimestamp)\n" + 
-						"    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)\n" + 
-						"    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)\n" + 
-						"    JOIN archentity using (uuid, aenttimestamp)\n" + 
-						"    JOIN aenttype using (aenttypeid)\n" + 
-						"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-						"WHERE aentvalue.deleted is null\n" + 
-						"group by uuid\n" + 
-						"ORDER BY max(tstamp,astamp) desc, uuid, attributename;";
+				String query = DatabaseQueries.FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				ArrayList<MapPos> list = new ArrayList<MapPos>();
 				list.add(new MapPos(min.x, min.y));
@@ -856,44 +736,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-				String query = "SELECT relationshipid, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, Hex(AsBinary(geospatialcolumn))\n" + 
-						"   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp\n" + 
-						"            FROM relationship\n" + 
-						"            JOIN relnvalue USING (relationshipid)\n" + 
-						"            JOIN idealreln using (relntypeid, attributeid)\n" + 
-						"           WHERE isIdentifier = 'true'\n" + 
-						"             AND relationshipid in (SELECT distinct relationshipid\n" + 
-						"                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted\n" + 
-						"                                              FROM relationship\n" + 
-						"                                              where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
-						"                                          GROUP BY relationshipid\n" + 
-						"                                            HAVING max(relntimestamp))\n" + 
-						"                                      JOIN (SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp\n" + 
-						"                                              FROM relnvalue\n" + 
-						"                                             WHERE deleted is null\n" + 
-						"                                          GROUP BY relationshipid, attributeid, vocabid\n" + 
-						"                                            HAVING max(relnvaluetimestamp)\n" + 
-						"                                        ) USING (relationshipid)\n" + 
-																	userQuery +
-						"                                     WHERE relnDeleted is null\n" + 
-						"                                  GROUP BY relationshipid\n" + 
-						"                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid\n" + 
-						"                                  LIMIT ?\n" + 
-						"                                  --OFFSET ?\n" + 
-						"                                    )\n" + 
-						"        GROUP BY relationshipid, attributeid\n" + 
-						"          HAVING MAX(relntimestamp)\n" + 
-						"             AND MAX(relnvaluetimestamp))\n" + 
-						"   JOIN relationship using (relationshipid, relntimestamp)\n" + 
-						"   JOIN relntype using (relntypeid)\n" + 
-						"   JOIN attributekey using (attributeid)\n" + 
-						"   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)\n" + 
-						"   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-						"   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)\n" + 
-						"   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)\n" + 
-						"  WHERE relnvalue.deleted is NULL\n" + 
-						"GROUP BY relationshipid, attributeid, relnvaluetimestamp\n" + 
-						"ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;";
+				String query = DatabaseQueries.FETCH_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				ArrayList<MapPos> list = new ArrayList<MapPos>();
 				list.add(new MapPos(min.x, min.y));
@@ -943,7 +786,7 @@ public class DatabaseManager {
 	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {
 		Stmt st = null;
 		try {
-			st = db.prepare("select count(AEntTypeID) from AEntType where AEntTypeName = ? COLLATE NOCASE;");
+			st = db.prepare(DatabaseQueries.COUNT_ENTITY_TYPE);
 			st.bind(1, entity_type);
 			st.step();
 			if (st.column_int(0) == 0) {
@@ -959,7 +802,7 @@ public class DatabaseManager {
 	private boolean hasEntity(jsqlite.Database db, String entity_id) throws Exception {
 		Stmt st = null;
 		try {
-			st = db.prepare("select count(UUID) from ArchEntity where UUID = ?;");
+			st = db.prepare(DatabaseQueries.COUNT_ENTITY);
 			st.bind(1, entity_id);
 			st.step();
 			if (st.column_int(0) == 0) {
@@ -975,7 +818,7 @@ public class DatabaseManager {
 	private boolean hasRelationshipType(jsqlite.Database db, String rel_type) throws Exception {
 		Stmt st = null;
 		try {
-			st = db.prepare("select count(RelnTypeID) from RelnType where RelnTypeName = ? COLLATE NOCASE;");
+			st = db.prepare(DatabaseQueries.COUNT_RELN_TYPE);
 			st.bind(1, rel_type);
 			st.step();
 			if (st.column_int(0) == 0) {
@@ -991,7 +834,7 @@ public class DatabaseManager {
 	private boolean hasRelationship(jsqlite.Database db, String rel_id) throws Exception {
 		Stmt st = null;
 		try {
-			st = db.prepare("select count(RelationshipID) from Relationship where RelationshipID = ?;");
+			st = db.prepare(DatabaseQueries.COUNT_RELN);
 			st.bind(1, rel_id);
 			st.step();
 			if (st.column_int(0) == 0) {
@@ -1041,14 +884,7 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 	
-				String query = 
-							"attach database '" + file.getAbsolutePath() + "' as export;" +
-							"create table export.archentity as select * from archentity;" +
-							"create table export.aentvalue as select * from aentvalue;" +
-							"create table export.aentreln as select * from aentreln;" + 
-							"create table export.relationship as select * from relationship;" +
-							"create table export.relnvalue as select * from relnvalue;" +
-							"detach database export;";
+				String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath());
 				db.exec(query, createCallback());
 				
 			} finally {
@@ -1072,14 +908,7 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 	
-				String query = 
-							"attach database '" + file.getAbsolutePath() + "' as export;" +
-							"create table export.archentity as select * from archentity where aenttimestamp > '" + fromTimestamp + "';" +
-							"create table export.aentvalue as select * from aentvalue where valuetimestamp > '" + fromTimestamp + "';" +
-							"create table export.aentreln as select * from aentreln where aentrelntimestamp > '" + fromTimestamp + "';" +
-							"create table export.relationship as select * from relationship where relntimestamp > '" + fromTimestamp + "';" +
-							"create table export.relnvalue as select * from relnvalue where relnvaluetimestamp > '" + fromTimestamp + "';" +
-							"detach database export;";
+				String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath(), fromTimestamp);
 				db.exec(query, createCallback());
 				
 			} finally {
@@ -1183,40 +1012,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-				
-				String query = 
-						"attach database '" + file.getAbsolutePath() + "' as import;" +
-						"insert or replace into archentity (\n" + 
-						"         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
-						"  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn \n" + 
-						"  from import.archentity;\n" +
-						"delete from aentvalue\n" + 
-						"    where uuid || valuetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(measure, '')|| coalesce(certainty, '')|| userid IN\n" + 
-						"    (select uuid || valuetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(measure, '')|| coalesce(certainty, '')|| userid from import.aentvalue);" +
-						"insert into aentvalue (\n" + 
-						"         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-						"  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
-						"  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);\n" + 
-						"insert or replace into relationship (\n" + 
-						"         relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
-						"  select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn\n" + 
-						"  from import.relationship;\n" + 
-						"delete from relnvalue\n" + 
-						"    where relationshipid || relnvaluetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')||  coalesce(certainty, '')|| userid IN\n" + 
-						"    (select relationshipid || relnvaluetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(certainty, '')|| userid from import.relnvalue);" +
-						"insert into relnvalue (\n" + 
-						"         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-						"  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
-						"  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);\n" + 
-						"insert into aentreln (\n" + 
-						"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-						"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
-						"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
-						"insert or replace into vocabulary (\n" + 
-						"         vocabid, attributeid, vocabname, SemanticMapURL,PictureURL) \n" + 
-						"  select vocabid, attributeid, vocabname, SemanticMapURL,PictureURL\n" + 
-						"  from import.vocabulary;\n" + 
-						"detach database import;";
+				String query = DatabaseQueries.MERGE_DATABASE_FROM(file.getAbsolutePath());
 				db.exec(query, createCallback());
 			} finally {
 				try {
@@ -1302,7 +1098,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public List<String> runPointDistanceEntityQuery(Point point, float distance) throws Exception {
+	public List<String> runDistanceEntityQuery(Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;
@@ -1310,18 +1106,10 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare(
-"select uuid, aenttimestamp\n" + 
-" from (select uuid, max(aenttimestamp) as aenttimestamp, deleted, geospatialcolumn\n" + 
-"          from archentity \n" + 
-"      group by uuid \n" + 
-"        having max(aenttimestamp))\n" + 
-" where deleted is null\n" +
-" and geospatialcolumn is not null\n" +
-" and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))");
-				FLog.d(WKTUtil.geometryToWKT(point));
+				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_ENTITY);
+				FLog.d(WKTUtil.geometryToWKT(geometry));
 				FLog.d(""+distance);
-				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				stmt.bind(2, distance);
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
@@ -1346,7 +1134,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public List<String> runPointDistanceRelationshipQuery(Point point, float distance) throws Exception {
+	public List<String> runDistanceRelationshipQuery(Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;
@@ -1354,18 +1142,10 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare(
-"select relationshipid, relntimestamp\n" + 
-" from (select relationshipid, max(relntimestamp) as relntimestamp, deleted, geospatialcolumn\n" + 
-"          from relationship \n" + 
-"      group by relationshipid \n" + 
-"        having max(relntimestamp))\n" + 
-" where deleted is null\n" +
-" and geospatialcolumn is not null\n" +
-" and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))");
-				FLog.d(WKTUtil.geometryToWKT(point));
+				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_RELATIONSHIP);
+				FLog.d(WKTUtil.geometryToWKT(geometry));
 				FLog.d(""+distance);
-				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				stmt.bind(2, distance);
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
@@ -1390,8 +1170,8 @@ public class DatabaseManager {
 		}
 	}
 
-	public Collection<? extends String> runPointDistanceLegacyQuery(
-			String dbPath, String tableName, String idColumn, String geometryColumn, Point point, float distance) throws Exception {
+	public Collection<? extends String> runDistanceLegacyQuery(
+			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run point distance query");
 			Stmt stmt = null;
@@ -1399,10 +1179,10 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(PointFromText(?, 4326), 3785), ?), transform("+ geometryColumn + ",3785))");
-				FLog.d(WKTUtil.geometryToWKT(point));
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform("+ geometryColumn + ",3785))");
+				FLog.d(WKTUtil.geometryToWKT(geometry));
 				FLog.d(""+distance);
-				stmt.bind(1, WKTUtil.geometryToWKT(point));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				stmt.bind(2, distance);
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
