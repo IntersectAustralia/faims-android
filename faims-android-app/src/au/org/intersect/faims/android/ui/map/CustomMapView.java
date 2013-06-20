@@ -1664,15 +1664,15 @@ public class CustomMapView extends MapView {
 		
 		List<String> uuids = new ArrayList<String>();
 		try {
-			uuids.addAll(databaseManager.runPointDistanceEntityQuery(point, distance));
-			uuids.addAll(databaseManager.runPointDistanceRelationshipQuery(point, distance));
+			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance));
+			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance));
 			
 			// for each legacy data layer do point distance query
 			List<Layer> layers = getAllLayers();
 			for (Layer layer : layers) {
 				if (layer instanceof CustomSpatialiteLayer) {
 					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
-					uuids.addAll(databaseManager.runPointDistanceLegacyQuery(spatialLayer.getDbPath(), 
+					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
 							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), point, distance));
 				}
 			}
@@ -1692,6 +1692,44 @@ public class CustomMapView extends MapView {
 			}
 		}
 		updateSelections();
+	}
+	
+	public void runPolygonSelection(Polygon polygon, float distance, boolean remove) throws Exception {
+		if (selectedSelection == null) {
+			throw new MapException("Please select a selection");
+		}
+		
+		List<String> uuids = new ArrayList<String>();
+		try {
+			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance));
+			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance));
+			
+			// for each legacy data layer do point distance query
+			List<Layer> layers = getAllLayers();
+			for (Layer layer : layers) {
+				if (layer instanceof CustomSpatialiteLayer) {
+					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
+					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
+							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), polygon, distance));
+				}
+			}
+			
+		} catch (Exception e) {
+			FLog.e("error running polygon selection query", e);
+			throw new MapException("Exception raised while trying to run polygon selection");
+		}
+		
+		if (remove) {
+			for (String uuid : uuids) {
+				selectedSelection.removeData(uuid);
+			}
+		} else {
+			for (String uuid : uuids) {
+				selectedSelection.addData(uuid);
+			}
+		}
+		updateSelections();
+		
 	}
 
 	public void setGeomToFollow(Geometry geom) {
