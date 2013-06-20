@@ -1012,7 +1012,6 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
-				
 				String query = DatabaseQueries.MERGE_DATABASE_FROM(file.getAbsolutePath());
 				db.exec(query, createCallback());
 			} finally {
