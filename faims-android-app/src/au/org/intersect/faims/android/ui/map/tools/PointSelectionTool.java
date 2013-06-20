@@ -122,7 +122,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	@Override
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
-		if ((element instanceof Point) && (mapView.getHighlights().size() == 1)) {
+		if ((element instanceof Point) && (mapView.getHighlights().size() < 1)) {
 			super.onVectorElementClicked(element, arg1, arg2, arg3);
 		}
 	}

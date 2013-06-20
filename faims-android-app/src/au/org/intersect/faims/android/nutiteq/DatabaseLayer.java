@@ -151,7 +151,6 @@ public class DatabaseLayer extends GeometryLayer {
 			}else {
 				throw new Exception("database layer has no type");
 			}
-			FLog.d(objectTemp.toString());
 			
 		    createElementsInLayer(zoom, objectTemp, objects);
 		    

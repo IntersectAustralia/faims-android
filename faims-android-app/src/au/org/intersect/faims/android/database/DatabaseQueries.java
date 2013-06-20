@@ -65,146 +65,115 @@ public final class DatabaseQueries {
 			"( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);";
 
 	public static final String FETCH_ENTITY_LIST(String type){
-		return "select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
-			"                                                                                              measure    || ' (' || freetext || ')',\n" + 
-			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                              measure,\n" + 
-			"                                                                                              vocabname,\n" + 
-			"                                                                                              freetext), ' | ') as response\n" + 
-			"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" + 
-			"          FROM aentvalue\n" + 
-			"          JOIN attributekey USING (attributeid)\n" + 
-			"          join archentity USING (uuid)\n" + 
-			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and lower(aenttypename) = lower('" + type + "')) USING (attributeid, aenttypeid)\n" + 
-			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-			"          JOIN (SELECT uuid, attributeid, valuetimestamp\n" + 
-			"                  FROM aentvalue\n" + 
-			"                  JOIN archentity USING (uuid)\n" + 
-			"                 WHERE archentity.deleted is NULL\n" + 
-			"              GROUP BY uuid, attributeid\n" + 
-			"                HAVING MAX(ValueTimestamp)\n" + 
-			"                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)\n" + 
-			"          WHERE aentvalue.deleted is NULl\n" + 
-			"       ORDER BY uuid, attributename ASC)\n" + 
+		return "select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || freetext || ')',\n" +
+			"                                                                                              measure    || ' (' || freetext || ')',\n" +
+			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              measure,\n" +
+			"                                                                                              vocabname,\n" +
+			"                                                                                              freetext), ' | ') as response\n" +
+			"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" +
+			"          FROM aentvalue\n" +
+			"          JOIN attributekey USING (attributeid)\n" +
+			"          join archentity USING (uuid)\n" +
+			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and lower(aenttypename) = lower('" + type + "')) USING (attributeid, aenttypeid)\n" +
+			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
+			"          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp\n" +
+			"                  FROM aentvalue\n" +
+			"                  JOIN archentity USING (uuid)\n" +
+			"                 WHERE archentity.deleted is NULL\n" +
+			"              GROUP BY uuid, attributeid\n" +
+			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" +
+			"          WHERE aentvalue.deleted is NULl\n" +
+			"       ORDER BY uuid, attributename ASC)\n" +
 			"group by uuid;";
 	}
 
 	public static final String FETCH_RELN_LIST(String type){
-		return "select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" + 
-			"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
-			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" + 
-			"                                                                                         vocabname,\n" + 
-			"                                                                                         freetext), ' | ') as response\n" + 
-			"from (\n" + 
-			"SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" + 
-			"    FROM relnvalue\n" + 
-			"    JOIN attributekey USING (attributeid)\n" + 
-			"    JOIN relationship USING (relationshipid)\n" + 
-			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true' and lower(relntypename) = lower('" + type + "')) USING (attributeid, relntypeid)\n" + 
-			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-			"    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid\n" + 
-			"             FROM relnvalue\n" + 
-			"             JOIN relationship USING (relationshipid)\n" + 
-			"            WHERE relationship.deleted is NULL\n" + 
-			"         GROUP BY relationshipid, attributeid\n" + 
-			"           HAVING MAX(relnvaluetimestamp)\n" + 
-			"              AND MAX(relntimestamp)\n" + 
-			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntypeid)\n" + 
-			"   WHERE relnvalue.deleted is NULL\n" + 
-			"ORDER BY relationshipid, attributename asc)\n" + 
+		return "select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                         vocabname  || ' (' || freetext || ')',\n" +
+			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                         vocabname,\n" +
+			"                                                                                         freetext), ' | ') as response\n" +
+			"from (\n" +
+			"SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" +
+			"    FROM relnvalue\n" +
+			"    JOIN attributekey USING (attributeid)\n" +
+			"    JOIN relationship USING (relationshipid)\n" +
+			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true' and lower(relntypename) = lower('" + type + "')) USING (attributeid, relntypeid)\n" +
+			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
+			"    JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp, max(relntimestamp) as relntimestamp, relntypeid\n" +
+			"             FROM relnvalue\n" +
+			"             JOIN relationship USING (relationshipid)\n" +
+			"            WHERE relationship.deleted is NULL\n" +
+			"         GROUP BY relationshipid, attributeid\n" +
+			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" +
+			"   WHERE relnvalue.deleted is NULL\n" +
+			"ORDER BY relationshipid, attributename asc)\n" +
 			"group by relationshipid;";
 	}
 
 	public static final String FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
-		return "SELECT uuid, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, Hex(AsBinary(geospatialcolumn))\n" + 
-			"    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp\n" + 
-			"            FROM archentity\n" + 
-			"            JOIN aentvalue USING (uuid)\n" + 
-			"            JOIN idealaent using (aenttypeid, attributeid)\n" + 
-			"           WHERE isIdentifier = 'true'\n" + 
-			"             AND uuid IN (SELECT uuid\n" + 
-			"                            FROM (SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel\n" + 
-			"                                    FROM archentity\n" + 
-			"                                   where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
-			"                                GROUP BY uuid, aenttypeid\n" + 
-			"                                  HAVING max(aenttimestamp)\n" + 
-			"                                     )\n" + 
-			"                            JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp\n" + 
-			"                                    FROM aentvalue --this gives us a temporal ordering...\n" + 
-			"                                  WHERE deleted is null\n" + 
-			"                                GROUP BY uuid\n" + 
-			"                                  HAVING max(valuetimestamp)\n" + 
-			"                                    )\n" + 
-			"                            USING (uuid)\n" +
-												userQuery +
-			"                           WHERE entDel is null\n" + 
-			"                           GROUP BY uuid\n" + 
-			"                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid\n" + 
-			"                        LIMIT ?\n" + 
-			"                        -- OFFSET ?\n" + 
-			"                      )\n" + 
-			"        GROUP BY uuid, attributeid\n" + 
-			"          HAVING MAX(ValueTimestamp)\n" + 
-			"             AND MAX(AEntTimestamp)\n" + 
-			"             )\n" + 
-			"    JOIN attributekey using (attributeid)\n" + 
-			"    JOIN aentvalue using (uuid, attributeid, valuetimestamp)\n" + 
-			"    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)\n" + 
-			"    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)\n" + 
-			"    JOIN archentity using (uuid, aenttimestamp)\n" + 
-			"    JOIN aenttype using (aenttypeid)\n" + 
-			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" + 
-			"WHERE aentvalue.deleted is null\n" + 
-			"group by uuid\n" + 
-			"ORDER BY max(tstamp,astamp) desc, uuid, attributename;";
+		return "select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || freetext || ')',\n" +
+			"                                                                                              measure    || ' (' || freetext || ')',\n" +
+			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                              measure,\n" +
+			"                                                                                              vocabname,\n" +
+			"                                                                                              freetext), ' | ') as response\n, Hex(AsBinary(geospatialcolumn))" +
+			"FROM (  SELECT uuid, geospatialcolumn, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" +
+			"          FROM aentvalue\n" +
+			"          JOIN attributekey USING (attributeid)\n" +
+			"          join archentity USING (uuid)\n" +
+			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)\n" +
+			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
+			"          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp\n" +
+			"                  FROM aentvalue\n" +
+			"                  JOIN archentity USING (uuid)\n" +
+			"                 WHERE archentity.deleted is NULL\n" +
+			"                   and st_intersects(geospatialcolumn, PolyFromText(?, 4326))" +
+			"              GROUP BY uuid, attributeid\n" +
+			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" +
+			"          WHERE aentvalue.deleted is NULL\n" +
+			"       ORDER BY uuid, attributename ASC, valuetimestamp desc)\n" +
+			"group by uuid limit ?;";
 	}
 
 	public static final String FETCH_ALL_VISIBLE_RELN_GEOMETRY(String userQuery){
-		return "SELECT relationshipid, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, Hex(AsBinary(geospatialcolumn))\n" + 
-			"   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp\n" + 
-			"            FROM relationship\n" + 
-			"            JOIN relnvalue USING (relationshipid)\n" + 
-			"            JOIN idealreln using (relntypeid, attributeid)\n" + 
-			"           WHERE isIdentifier = 'true'\n" + 
-			"             AND relationshipid in (SELECT distinct relationshipid\n" + 
-			"                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted\n" + 
-			"                                              FROM relationship\n" + 
-			"                                              where st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" + 
-			"                                          GROUP BY relationshipid\n" + 
-			"                                            HAVING max(relntimestamp))\n" + 
-			"                                      JOIN (SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp\n" + 
-			"                                              FROM relnvalue\n" + 
-			"                                             WHERE deleted is null\n" + 
-			"                                          GROUP BY relationshipid, attributeid, vocabid\n" + 
-			"                                            HAVING max(relnvaluetimestamp)\n" + 
-			"                                        ) USING (relationshipid)\n" + 
-														userQuery +
-			"                                     WHERE relnDeleted is null\n" + 
-			"                                  GROUP BY relationshipid\n" + 
-			"                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid\n" + 
-			"                                  LIMIT ?\n" + 
-			"                                  --OFFSET ?\n" + 
-			"                                    )\n" + 
-			"        GROUP BY relationshipid, attributeid\n" + 
-			"          HAVING MAX(relntimestamp)\n" + 
-			"             AND MAX(relnvaluetimestamp))\n" + 
-			"   JOIN relationship using (relationshipid, relntimestamp)\n" + 
-			"   JOIN relntype using (relntypeid)\n" + 
-			"   JOIN attributekey using (attributeid)\n" + 
-			"   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)\n" + 
-			"   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-			"   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)\n" + 
-			"   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)\n" + 
-			"  WHERE relnvalue.deleted is NULL\n" + 
-			"GROUP BY relationshipid, attributeid, relnvaluetimestamp\n" + 
-			"ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;";
+		return "select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
+			"                                                                                         vocabname  || ' (' || freetext || ')',\n" +
+			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
+			"                                                                                         vocabname,\n" +
+			"                                                                                         freetext), ' | ') as response, Hex(AsBinary(geospatialcolumn))\n" +
+			"from (\n" +
+			"SELECT relationshipid, geospatialcolumn, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" +
+			"    FROM relnvalue\n" +
+			"    JOIN attributekey USING (attributeid)\n" +
+			"    JOIN relationship USING (relationshipid)\n" +
+			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true') USING (attributeid, relntypeid)\n" +
+			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
+			"    JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp, max(relntimestamp) as relntimestamp, relntypeid\n" +
+			"             FROM relnvalue\n" +
+			"             JOIN relationship USING (relationshipid)\n" +
+			"            WHERE relationship.deleted is NULL\n" +
+			"              and st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" +
+			"         GROUP BY relationshipid, attributeid\n" +
+			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" +
+			"   WHERE relnvalue.deleted is NULL\n" +
+			"ORDER BY relationshipid, attributename asc)\n" +
+			"group by relationshipid limit ?;";
 	}
 
 	public static final String COUNT_ENTITY_TYPE =

@@ -53,6 +53,7 @@ import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.PointSelectionTool;
+import au.org.intersect.faims.android.ui.map.tools.PolygonSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
 import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
@@ -996,6 +997,7 @@ public class CustomMapView extends MapView {
 		tools.add(new DatabaseSelectionTool(this.getContext(), this));
 		tools.add(new LegacySelectionTool(this.getContext(), this));
 		tools.add(new PointSelectionTool(this.getContext(), this));
+		tools.add(new PolygonSelectionTool(this.getContext(), this));
 		tools.add(new FollowTool(this.getContext(), this));
 		//tools.add(new PathFollowerTool(this.getContext(), this));
 	}
