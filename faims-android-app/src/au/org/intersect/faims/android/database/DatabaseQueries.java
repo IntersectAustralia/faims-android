@@ -231,11 +231,11 @@ public final class DatabaseQueries {
 
 	public static final String DUMP_DATABASE_TO(String path, String fromTimestamp){
 		return "attach database '" + path + "' as export;" +
-				"create table export.archentity as select * from archentity where aenttimestamp > '" + fromTimestamp + "';" +
-				"create table export.aentvalue as select * from aentvalue where valuetimestamp > '" + fromTimestamp + "';" +
-				"create table export.aentreln as select * from aentreln where aentrelntimestamp > '" + fromTimestamp + "';" +
-				"create table export.relationship as select * from relationship where relntimestamp > '" + fromTimestamp + "';" +
-				"create table export.relnvalue as select * from relnvalue where relnvaluetimestamp > '" + fromTimestamp + "';" +
+				"create table export.archentity as select * from archentity where aenttimestamp >= '" + fromTimestamp + "';" +
+				"create table export.aentvalue as select * from aentvalue where valuetimestamp >= '" + fromTimestamp + "';" +
+				"create table export.aentreln as select * from aentreln where aentrelntimestamp >= '" + fromTimestamp + "';" +
+				"create table export.relationship as select * from relationship where relntimestamp >= '" + fromTimestamp + "';" +
+				"create table export.relnvalue as select * from relnvalue where relnvaluetimestamp >= '" + fromTimestamp + "';" +
 				"detach database export;";
 	}
 
