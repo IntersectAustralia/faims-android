@@ -92,7 +92,6 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.projections.EPSG3857;
 
 public class BeanShellLinker {
 
@@ -477,8 +476,8 @@ public class BeanShellLinker {
 					@Override
 					public void onMapClicked(double x, double y, boolean arg2) {
 						try {
-							interpreter.set("_map_point_clicked",
-									(new EPSG3857()).toWgs84(x, y));
+							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), new MapPos(x, y));
+							interpreter.set("_map_point_clicked", p);
 							execute(clickCallback);
 						} catch (Exception e) {
 							FLog.e("error setting map point clicked", e);
@@ -1624,8 +1623,9 @@ public class BeanShellLinker {
 	public String saveArchEnt(String entity_id, String entity_type,
 			List<Geometry> geo_data, List<EntityAttribute> attributes) {
 		try {
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geo_data);
 			return activity.getDatabaseManager().saveArchEnt(entity_id,
-					entity_type, WKTUtil.collectionToWKT(geo_data), attributes);
+					entity_type, WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
 			FLog.e("error saving arch entity");
@@ -1637,9 +1637,9 @@ public class BeanShellLinker {
 	public String saveRel(String rel_id, String rel_type,
 			List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
 		try {
-
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geo_data);
 			return activity.getDatabaseManager().saveRel(rel_id, rel_type,
-					WKTUtil.collectionToWKT(geo_data), attributes);
+					WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
 			FLog.e("error saving relationship");
@@ -2598,7 +2598,10 @@ public class BeanShellLinker {
 
 	public Object fetchArchEnt(String id) {
 		try {
-			return activity.getDatabaseManager().fetchArchEnt(id);
+			ArchEntity e = activity.getDatabaseManager().fetchArchEnt(id);
+			List<Geometry> geomList = e.getGeometryList();
+			e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+			return e;
 		} catch (Exception e) {
 			FLog.e("error fetching arch entity", e);
 			showWarning("Logic Error", "Error fetching arch entity");
@@ -2608,7 +2611,10 @@ public class BeanShellLinker {
 
 	public Object fetchRel(String id) {
 		try {
-			return activity.getDatabaseManager().fetchRel(id);
+			Relationship r = activity.getDatabaseManager().fetchRel(id);
+			List<Geometry> geomList = r.getGeometryList();
+			r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+			return r;
 		} catch (Exception e) {
 			FLog.e("error fetching relationship", e);
 			showWarning("Logic Error", "Error fetching relationship");
@@ -2705,6 +2711,15 @@ public class BeanShellLinker {
 	public Object getGPSPosition() {
 		return this.activity.getGPSDataManager().getGPSPosition();
 	}
+	
+	public Object getGPSPositionProjected() {
+		GPSLocation l = (GPSLocation) this.activity.getGPSDataManager().getGPSPosition();
+		if (l == null) return l;
+		MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
+		l.setLongitude(p.x);
+		l.setLatitude(p.y);
+		return l;
+	}
 
 	public Object getGPSEstimatedAccuracy() {
 		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy();
@@ -2754,8 +2769,8 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-
-				mapView.setMapFocusPoint(longitude, latitude);
+				MapPos p = GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
+				mapView.setMapFocusPoint((float) p.x, (float) p.y);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2981,7 +2996,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, point, style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, point), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3005,7 +3020,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, points, style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3029,7 +3044,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, points, style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3093,7 +3108,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryListToWgs84(mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
 						.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3112,7 +3127,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryToWgs84(mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
 						.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3200,7 +3215,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryListToWgs84(mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
 						.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3422,6 +3437,10 @@ public class BeanShellLinker {
 
 	public String getProjectName() {
 		return this.project.getName();
+	}
+	
+	public String getProjectSrid() {
+		return this.project.getSrid();
 	}
 
 	public String getProjectId() {

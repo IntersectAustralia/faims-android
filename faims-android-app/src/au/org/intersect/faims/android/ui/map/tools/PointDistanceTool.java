@@ -49,27 +49,31 @@ public class PointDistanceTool extends HighlightTool {
 		}
 
 		public void drawDistanceBetween(MapPos p1, MapPos p2) {
-			this.isDirty = true;
-			
-			this.distance = SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2));
-			
-			this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
-			this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
-			
-			float midX = (float) (tp1.x + tp2.x) / 2;
-			float midY = (float) (tp1.y + tp2.y) / 2;
-			
-			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-			
-			textX = midX + offset;
-			
-			if (((tp1.x < tp2.x) && (tp1.y > tp2.y)) || ((tp1.x > tp2.x) && (tp1.y < tp2.y))){
-				textY = midY + offset;
-			} else {
-				textY = midY - offset;
+			try {
+				this.isDirty = true;
+				
+				this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), PointDistanceTool.this.mapView.getActivity().getProject().getSrid());
+				
+				this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
+				this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
+				
+				float midX = (float) (tp1.x + tp2.x) / 2;
+				float midY = (float) (tp1.y + tp2.y) / 2;
+				
+				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+				
+				textX = midX + offset;
+				
+				if (((tp1.x < tp2.x) && (tp1.y > tp2.y)) || ((tp1.x > tp2.x) && (tp1.y < tp2.y))){
+					textY = midY + offset;
+				} else {
+					textY = midY - offset;
+				}
+				
+				invalidate();
+			} catch (Exception e) {
+				FLog.e("error drawing distance", e);
 			}
-			
-			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {
@@ -179,7 +183,9 @@ public class PointDistanceTool extends HighlightTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -190,7 +196,11 @@ public class PointDistanceTool extends HighlightTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							
 							mapView.setDrawViewColor(color);

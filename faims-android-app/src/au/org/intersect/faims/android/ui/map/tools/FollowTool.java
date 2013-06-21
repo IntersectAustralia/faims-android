@@ -77,40 +77,44 @@ public class FollowTool extends HighlightTool {
 		}
 
 		public void drawDistanceAndBearing(MapPos currentPoint, MapPos targetPoint) {
-			this.isDirty = true;
-			
-			this.tp1 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(currentPoint), FollowTool.this.mapView, true);
-			this.tp2 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(targetPoint), FollowTool.this.mapView, true);
-			
-			this.distance = (float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint);
-			
-			float dx = (float) (tp2.x - tp1.x);
-			float dy = (float) (tp2.y - tp1.y);
-			float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
-			
-			this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
-			
-			this.angle = SpatialiteUtil.computeAzimuth(currentPoint, targetPoint);
-			
-			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-			
-			distanceTextX = (float) tp1.x + offset;
-			distanceTextY = (float) tp1.y + offset;
-			
-			angleTextX = (float) tp1.x + offset;
-			angleTextY = (float) tp1.y + 2 * offset;
-
-			Geometry geomToFollow = FollowTool.this.mapView.getGeomToFollow();
-			if (geomToFollow instanceof Point) {
-				this.tp3 = tp2;
-			} else {
-				List<MapPos> list = ((Line) geomToFollow).getVertexList();
-				this.tp3 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(list.get(list.size()-1)), mapView, true);
+			try {
+				this.isDirty = true;
+				
+				this.tp1 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(currentPoint), FollowTool.this.mapView, true);
+				this.tp2 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(targetPoint), FollowTool.this.mapView, true);
+				
+				this.distance = (float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, mapView.getActivity().getProject().getSrid());
+				
+				float dx = (float) (tp2.x - tp1.x);
+				float dy = (float) (tp2.y - tp1.y);
+				float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
+				
+				this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
+				
+				this.angle = SpatialiteUtil.computeAzimuth(currentPoint, targetPoint);
+				
+				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+				
+				distanceTextX = (float) tp1.x + offset;
+				distanceTextY = (float) tp1.y + offset;
+				
+				angleTextX = (float) tp1.x + offset;
+				angleTextY = (float) tp1.y + 2 * offset;
+	
+				Geometry geomToFollow = FollowTool.this.mapView.getGeomToFollow();
+				if (geomToFollow instanceof Point) {
+					this.tp3 = tp2;
+				} else {
+					List<MapPos> list = ((Line) geomToFollow).getVertexList();
+					this.tp3 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(list.get(list.size()-1)), mapView, true);
+				}
+				
+				this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
+				
+				invalidate();
+			} catch (Exception e) {
+				FLog.e("error drawing distance and bearing", e);
 			}
-			
-			this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
-			
-			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {
@@ -280,7 +284,9 @@ public class FollowTool extends HighlightTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				builder.addTextField("buffer", "Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
 				builder.addTextField("bufferColor", "Buffer Color:", Integer.toHexString(bufferStyle.lineColor));
@@ -294,7 +300,11 @@ public class FollowTool extends HighlightTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							float buffer = Float.parseFloat(((EditText)settingsDialog.getField("buffer")).getText().toString());
 							int bufferColor = settingsDialog.parseColor("bufferColor");

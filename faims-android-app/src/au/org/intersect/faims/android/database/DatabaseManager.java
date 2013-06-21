@@ -412,7 +412,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public Object fetchArchEnt(String id) throws Exception {
+	public ArchEntity fetchArchEnt(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
@@ -485,7 +485,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public Object fetchRel(String id) throws Exception {
+	public Relationship fetchRel(String id) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {

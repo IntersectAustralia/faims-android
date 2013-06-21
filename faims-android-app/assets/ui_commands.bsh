@@ -242,6 +242,10 @@ Object getGPSPosition(){
 	return linker.getGPSPosition();
 }
 
+Object getGPSPositionProjected() {
+	return linker.getGPSPositionProjected();
+}
+
 Object getGPSEstimatedAccuracy(){
 	return linker.getGPSEstimatedAccuracy();
 }
@@ -444,6 +448,10 @@ setSyncDelay(float value) {
 
 String getProjectName(){
 	return linker.getProjectName();
+}
+
+String getProjectSrid(){
+	return linker.getProjectSrid();
 }
 
 String getProjectId(){

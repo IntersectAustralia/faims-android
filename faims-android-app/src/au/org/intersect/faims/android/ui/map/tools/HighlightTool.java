@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapToggleButton;
@@ -148,7 +149,10 @@ public class HighlightTool extends SettingsTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					
@@ -158,7 +162,11 @@ public class HighlightTool extends SettingsTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							
 							mapView.setDrawViewColor(color);
 							mapView.setDrawViewStrokeStyle(strokeSize);

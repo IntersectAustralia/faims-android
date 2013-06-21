@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class WKTUtil {
 		
 		if (geometry instanceof Point) {
 			Point point = (Point) geometry;
-			return "POINT (" + String.valueOf(point.getMapPos().x) + " " + String.valueOf(point.getMapPos().y) + ")";
+			return "POINT (" + doubleString(point.getMapPos().x) + " " + doubleString(point.getMapPos().y) + ")";
 		} else if (geometry instanceof Line) {
 			Line line = (Line) geometry;
 			StringBuilder sb = new StringBuilder();
@@ -75,6 +76,10 @@ public class WKTUtil {
 		return sb.toString();
 	}
 	
+	private static String doubleString(double d) {
+		return BigDecimal.valueOf(d).toPlainString();
+	}
+	
 	private static String verticesToWKT(List<MapPos> vertices) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
@@ -85,7 +90,7 @@ public class WKTUtil {
 			} else {
 				sb.append(", ");
 			}
-			sb.append(String.valueOf(vertex.x) + " " + String.valueOf(vertex.y));
+			sb.append(doubleString(vertex.x) + " " + doubleString(vertex.y));
 		}
 		sb.append(")");
 		return sb.toString();

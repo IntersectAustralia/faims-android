@@ -49,7 +49,7 @@ public class AreaTool extends HighlightTool {
 			this.isDirty = true;
 			
 			try {
-				this.area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon));
+				this.area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), AreaTool.this.mapView.getActivity().getProject().getSrid());
 			} catch (Exception e) {
 				FLog.e("error computing area of polygon", e);
 				showError("Error computing area of polygon");
@@ -172,7 +172,9 @@ public class AreaTool extends HighlightTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -183,7 +185,11 @@ public class AreaTool extends HighlightTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							
 							mapView.setDrawViewColor(color);

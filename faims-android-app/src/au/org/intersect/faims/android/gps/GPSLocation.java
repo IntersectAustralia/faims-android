@@ -15,9 +15,17 @@ public class GPSLocation {
 	public double getLongitude() {
 		return this.longitude;
 	}
+	
+	public void setLongitude(double value) {
+		this.longitude = value;
+	}
 
 	public double getLatitude() {
 		return this.latitude;
+	}
+	
+	public void setLatitude(double value) {
+		this.latitude = value;
 	}
 
 	public long getTimeStamp() {

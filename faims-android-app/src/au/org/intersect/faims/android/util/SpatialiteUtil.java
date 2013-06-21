@@ -1,11 +1,13 @@
 package au.org.intersect.faims.android.util;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import jsqlite.Stmt;
 import android.location.Location;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 
 import com.nutiteq.components.MapPos;
@@ -13,6 +15,7 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
+import com.nutiteq.style.LineStyle;
 import com.nutiteq.utils.Utils;
 import com.nutiteq.utils.WkbRead;
 
@@ -24,24 +27,87 @@ private static String dbname;
 		dbname = name;
 	}
 	
-	public static float computeLineDistance(List<MapPos> points) {
-		float totalDistance = 0;
-		MapPos lp = null;
-		for (MapPos p : points) {
-			if (lp != null) {
-				float[] results = new float[3];
-				Location.distanceBetween(lp.y, lp.x, p.y, p.x, results);
-				totalDistance += results[0];
+	public static float computeLineDistance(List<MapPos> points, String srid) throws Exception {
+		if (GeometryUtil.EPSG4326.equals(srid)) {
+			float totalDistance = 0;
+			MapPos lp = null;
+			for (MapPos p : points) {
+				if (lp != null) {
+					float[] results = new float[3];
+					Location.distanceBetween(lp.y, lp.x, p.y, p.x, results);
+					totalDistance += results[0];
+				}
+				lp = p;
 			}
-			lp = p;
+			return totalDistance;
+		} else {
+			jsqlite.Database db = null;
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String sql = "select st_length(transform(LineFromText(?, 4326), ?));";
+				st = db.prepare(sql);
+				st.bind(1, WKTUtil.geometryToWKT(new Line(points, null, (LineStyle) null, null)));
+				st.bind(2, Integer.parseInt(srid));
+				st.step();
+				return (float) st.column_double(0);
+			} finally {
+				if (st != null) {
+					try {
+						st.close();
+					} catch (Exception e) {
+						FLog.e("error closing statement", e);
+					}
+				}
+				if (db != null) {
+					try {
+						db.close();
+					} catch (Exception e) {
+						FLog.e("error closing database", e);
+					}
+				}
+			}
 		}
-		return totalDistance;
 	}
 	
-	public static float computePointDistance(MapPos p1, MapPos p2) {
-		float[] results = new float[3];
-		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
-		return results[0];
+	public static double computePointDistance(MapPos p1, MapPos p2, String srid) throws Exception {
+		if (GeometryUtil.EPSG4326.equals(srid)) {
+			float[] results = new float[3];
+			Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
+			return results[0];
+		} else {
+			jsqlite.Database db = null;
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String sql = "select st_length(transform(LineFromText(?, 4326), ?));";
+				st = db.prepare(sql);
+				ArrayList<MapPos> list = new ArrayList<MapPos>();
+				list.add(p1);
+				list.add(p2);
+				st.bind(1, WKTUtil.geometryToWKT(new Line(list, null, (LineStyle) null, null)));
+				st.bind(2, Integer.parseInt(srid));
+				st.step();
+				return st.column_double(0);
+			} finally {
+				if (st != null) {
+					try {
+						st.close();
+					} catch (Exception e) {
+						FLog.e("error closing statement", e);
+					}
+				}
+				if (db != null) {
+					try {
+						db.close();
+					} catch (Exception e) {
+						FLog.e("error closing database", e);
+					}
+				}
+			}
+		}
 	}
 	
 	public static float computeAngleBetween(MapPos v1, MapPos v2) {
@@ -99,15 +165,16 @@ private static String dbname;
 		}
 	}
 	
-	public static double computePolygonArea(Polygon polygon) throws Exception {
+	public static double computePolygonArea(Polygon polygon, String srid) throws Exception {
 		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String sql = "select area(transform(GeomFromText(?, 4326), 28356));";
+			String sql = "select area(transform(GeomFromText(?, 4326), ?));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(polygon));
+			st.bind(2, Integer.parseInt(srid));
 			st.step();
 			return st.column_double(0);
 		} finally {
@@ -195,8 +262,8 @@ private static String dbname;
 		}
 	}
 
-	public static double distanceBetween(MapPos p1, MapPos p2) {
-		return computePointDistance(p1, p2);
+	public static double distanceBetween(MapPos p1, MapPos p2, String srid) throws Exception {
+		return computePointDistance(p1, p2, srid);
 	}
 
 	public static Point nearestPointOnPath(Point point, Line path) throws Exception {
@@ -215,6 +282,43 @@ private static String dbname;
                             .hexStringToByteArray(st.column_string(0))), null);
 			if (gs != null) {
 	            return (Point) gs[0];
+			}
+			return null;
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
+			}
+			if (db != null) {
+				try {
+					db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public static Geometry convertFromProjToProj(String fromSrid, String toSrid, Geometry geom) throws Exception {
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String sql = "select Hex(AsBinary(transform(GeomFromText(?, ?), ?)));";
+			st = db.prepare(sql);
+			st.bind(1, WKTUtil.geometryToWKT(geom));
+			st.bind(2, Integer.parseInt(fromSrid));
+			st.bind(3, Integer.parseInt(toSrid));
+			st.step();
+			Geometry[] gs = WkbRead.readWkb(
+                    new ByteArrayInputStream(Utils
+                            .hexStringToByteArray(st.column_string(0))), null);
+			if (gs != null) {
+	            return (Geometry) gs[0];
 			}
 			return null;
 		} finally {

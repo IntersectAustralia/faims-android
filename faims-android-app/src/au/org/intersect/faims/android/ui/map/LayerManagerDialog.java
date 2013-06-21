@@ -42,6 +42,7 @@ import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
@@ -53,6 +54,7 @@ import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 import au.org.intersect.faims.android.ui.form.CustomListView;
 
 import com.google.inject.Inject;
+import com.nutiteq.components.MapPos;
 import com.nutiteq.layers.Layer;
 
 public class LayerManagerDialog extends AlertDialog {
@@ -1275,13 +1277,17 @@ public class LayerManagerDialog extends AlertDialog {
 			layout.addView(fileSizeEditText);
 
 			double[][] originalBounds = gdalMapLayer.getBoundaries();
+			
+			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
+			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
+			
 	        TextView upperLeftTextView = new TextView(this.getContext());
 	        upperLeftTextView.setText("Upper left boundary:");
 			layout.addView(upperLeftTextView);
 
 			EditText upperLeftEditText = new EditText(LayerManagerDialog.this.getContext());
 			upperLeftEditText.setEnabled(false);
-			upperLeftEditText.setText(originalBounds[0][0] + "," + originalBounds[0][1]);
+			upperLeftEditText.setText(upperLeft.x + "," + upperLeft.y);
 			layout.addView(upperLeftEditText);
 
 			TextView bottomRightTextView = new TextView(this.getContext());
@@ -1290,7 +1296,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			EditText bottomRightEditText = new EditText(LayerManagerDialog.this.getContext());
 			bottomRightEditText.setEnabled(false);
-			bottomRightEditText.setText(originalBounds[3][0] + "," + originalBounds[3][1]);
+			bottomRightEditText.setText(bottomRight.x + "," + bottomRight.y);
 			layout.addView(bottomRightEditText);
 
 		}else if(layer instanceof CustomSpatialiteLayer){

@@ -47,18 +47,22 @@ public class LineDistanceTool extends HighlightTool {
 		}
 
 		public void drawDistance(Line line) {
-			this.isDirty = true;
-			
-			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()));
-			
-			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-			
-			MapPos p = GeometryUtil.transformVertex(line.getVertexList().get(line.getVertexList().size()-1), LineDistanceTool.this.mapView, true);
-			
-			textX = (float) p.x + offset;
-			textY = (float) p.y + offset;
-			
-			invalidate();
+			try {
+				this.isDirty = true;
+				
+				this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), LineDistanceTool.this.mapView.getActivity().getProject().getSrid());
+				
+				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+				
+				MapPos p = GeometryUtil.transformVertex(line.getVertexList().get(line.getVertexList().size()-1), LineDistanceTool.this.mapView, true);
+				
+				textX = (float) p.x + offset;
+				textY = (float) p.y + offset;
+				
+				invalidate();
+			} catch (Exception e) {
+				FLog.e("error drawing distance", e);
+			}
 		}
 		
 		public void setShowKm(boolean value) {
@@ -167,7 +171,9 @@ public class LineDistanceTool extends HighlightTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -178,7 +184,11 @@ public class LineDistanceTool extends HighlightTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							boolean showKm = settingsDialog.parseCheckBox("showKm");
 							
 							mapView.setDrawViewColor(color);

@@ -153,7 +153,7 @@ public class DrawView extends View {
 	}
 	
 	private String pointToText(MapPos p) {
-		if (showDecimal) {
+		if (GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid()) && showDecimal) {
 			return "(" + MeasurementUtil.displayAsCoord(p.x) + ", " + MeasurementUtil.displayAsCoord(p.y) + ")";
 		} else {
 			return "(" + MeasurementUtil.convertToDegrees(p.x) + ", " + MeasurementUtil.convertToDegrees(p.y) + ")";
@@ -169,7 +169,7 @@ public class DrawView extends View {
 	}
 	
 	protected MapPos projectPoint(MapPos p) {
-		return GeometryUtil.convertToWgs84(p);
+		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, mapView.getActivity().getProject().getSrid(), p);
 	}
 	
 	public void setDrawList(List<Geometry> geometryList) {

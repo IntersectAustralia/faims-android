@@ -560,10 +560,14 @@ public class CustomMapView extends MapView {
 		int width = this.getWidth();
 		int height = this.getHeight();
 
-		scaleView.setMapBoundary(this.getZoom(), width, height, GeometryUtil
-				.distance(GeometryUtil.convertToWgs84(this.screenToWorld(0,
-						height, 0)), GeometryUtil.convertToWgs84(this
-						.screenToWorld(width, height, 0))));
+		try {
+			scaleView.setMapBoundary(this.getZoom(), width, height, SpatialiteUtil
+					.distanceBetween(GeometryUtil.convertToWgs84(this.screenToWorld(0,
+							height, 0)), GeometryUtil.convertToWgs84(this
+							.screenToWorld(width, height, 0)), GeometryUtil.EPSG4326));
+		} catch (Exception e) {
+			FLog.e("error updating scalebar", e);
+		}
 	}
 
 	public void startThread(Runnable runnable) {
@@ -1399,7 +1403,7 @@ public class CustomMapView extends MapView {
 							Geometry geom = getGeomToFollow();
 							Line line = (geom instanceof Line) ? (Line) geom : null;
 							
-							activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint));
+							activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, activityRef.get().getProject().getSrid()));
 							activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
 							activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
 							activityRef.get().setPathHeading(previousHeading);
@@ -1793,7 +1797,7 @@ public class CustomMapView extends MapView {
 			Point point = new Point(pos, null, (PointStyle) null, null);
 			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
 			MapPos mp = lp;
-			double min = SpatialiteUtil.distanceBetween(pos,  lp);
+			double min = SpatialiteUtil.distanceBetween(pos,  lp, activityRef.get().getProject().getSrid());
 			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
 				MapPos p = line.getVertexList().get(i);
 				ArrayList<MapPos> pts = new ArrayList<MapPos>();
@@ -1803,7 +1807,7 @@ public class CustomMapView extends MapView {
 				if (SpatialiteUtil.isPointOnPath(point, seg, buffer)) {
 					return lp;
 				} else {
-					double d = SpatialiteUtil.distanceBetween(pos, p);
+					double d = SpatialiteUtil.distanceBetween(pos, p, activityRef.get().getProject().getSrid());
 					if (d < min) {
 						min = d;
 						mp = p;

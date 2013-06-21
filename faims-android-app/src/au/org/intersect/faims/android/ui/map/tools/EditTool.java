@@ -290,7 +290,9 @@ public class EditTool extends HighlightTool {
 				builder.addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addSlider("vertexSize", "Vertex Size:", vertexSize);
 				
 				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -302,7 +304,11 @@ public class EditTool extends HighlightTool {
 							int editColor = settingsDialog.parseColor("editColor");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							float vertexSize = settingsDialog.parseSlider("vertexSize");
 							
 							mapView.setDrawViewColor(color);

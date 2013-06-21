@@ -18,6 +18,7 @@ public class Project implements Serializable {
 	public String participants;
 	public String version;
 	public String timestamp;
+	public String srid;
 	
 	public Project() {
 		
@@ -40,6 +41,7 @@ public class Project implements Serializable {
 		if (object.has("participant")) p.participants = object.get("participant").getAsString();
 		if (object.has("version")) p.version = object.get("version").getAsString();
 		if (object.has("timestamp")) p.timestamp = object.get("timestamp").getAsString();
+		if (object.has("srid")) p.srid = object.get("srid").getAsString();
 		return p;
 	}
 
@@ -55,6 +57,7 @@ public class Project implements Serializable {
 		if (participants != null) object.addProperty("participant", participants);
 		if (version != null) object.addProperty("version", version);
 		if (timestamp != null) object.addProperty("timestamp", timestamp);
+		if (srid != null) object.addProperty("srid", srid);
 		return object;	
 	}
 	
@@ -120,6 +123,14 @@ public class Project implements Serializable {
 
 	public void setParticipants(String participants) {
 		this.participants = participants;
+	}
+
+	public String getSrid() {
+		return srid;
+	}
+	
+	public void setSrid(String srid) {
+		this.srid = srid;
 	}
 	
 }

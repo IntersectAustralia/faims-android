@@ -37,4 +37,8 @@ public class Relationship {
 	public List<Geometry> getGeometryList() {
 		return geometryList;
 	}
+	
+	public void setGeometryList(List<Geometry> geomList) {
+		geometryList = geomList;
+	}
 }

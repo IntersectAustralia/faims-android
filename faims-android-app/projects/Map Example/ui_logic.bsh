@@ -320,11 +320,10 @@ plotGPSPoint() {
 		clearGeometry("tabgroup1/tab1/map", lastPointId);
 	}
 
-	location = getGPSPosition();
+	location = getGPSPositionProjected();
 	if (location == null) {
 		showWarning("Logic Error", "No GPS Signal");
 	} else {
-		Object location = getGPSPosition();
 		longitude = location.getLongitude();
 		latitude = location.getLatitude();
 		point = createPoint(longitude, latitude);

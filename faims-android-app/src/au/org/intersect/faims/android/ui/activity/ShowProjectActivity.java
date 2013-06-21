@@ -420,6 +420,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		return arch16n;
 	}
 	
+	public Project getProject() {
+		return ProjectUtil.getProject(projectKey);
+	}
+	
 	public String getProjectDir() {
 		return projectDir;
 	}

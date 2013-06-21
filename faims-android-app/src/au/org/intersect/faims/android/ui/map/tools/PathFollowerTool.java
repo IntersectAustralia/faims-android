@@ -202,7 +202,7 @@ public class PathFollowerTool extends HighlightTool {
 						
 							double dx = point.x - currentPoint.x;
 							double dy = point.y - currentPoint.y;
-							double d = SpatialiteUtil.distanceBetween(point, currentPoint);
+							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getActivity().getProject().getSrid());
 							
 							double nextStep;
 							if (d == 0) {
@@ -256,7 +256,9 @@ public class PathFollowerTool extends HighlightTool {
 				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				if (isEPSG4326)
+					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addSlider("buffer", "Path Buffer", buffer);
 				builder.addSlider("speed", "Path Speed:", speed);
 				
@@ -268,7 +270,11 @@ public class PathFollowerTool extends HighlightTool {
 							int color = settingsDialog.parseColor("color");
 							float strokeSize = settingsDialog.parseSlider("strokeSize");
 							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							boolean showDecimal;
+							if (isEPSG4326)
+								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
+							else
+								showDecimal = false;
 							float buffer = settingsDialog.parseSlider("buffer");
 							float speed = settingsDialog.parseSlider("speed");
 							

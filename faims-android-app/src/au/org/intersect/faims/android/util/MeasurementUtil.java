@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.util;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 public class MeasurementUtil {
@@ -21,19 +22,19 @@ public class MeasurementUtil {
 	}
 	
 	public static String displayAsCoord(double value) {
-		return new DecimalFormat("#.0000").format(value);
+		return BigDecimal.valueOf(value).toPlainString();
 	}
 	
 	public static String displayAsMeters(double value) {
-		return displayAsMeters(value, "###,###,###,###.0000");
+		return displayAsMeters(value, "###,###,###,###.00");
 	}
 	
 	public static String displayAsKiloMeters(double value) {
-		return displayAsKiloMeters(value, "###,###,###,###.0000");
+		return displayAsKiloMeters(value, "###,###,###,###.00");
 	}
 
 	public static String displayAsDegrees(float value) {
-		return displayAsDegrees(value, "###.0000");
+		return displayAsDegrees(value, "###.00");
 	}
 	
 	public static String displayAsMeters(double value, String format) {

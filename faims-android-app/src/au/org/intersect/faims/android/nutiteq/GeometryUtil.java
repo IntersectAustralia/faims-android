@@ -3,7 +3,8 @@ package au.org.intersect.faims.android.nutiteq;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.location.Location;
+import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.MapPos;
@@ -12,8 +13,12 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.EPSG3857;
+import com.nutiteq.style.PointStyle;
 
 public class GeometryUtil {
+
+	public static final String EPSG4326 = "4326";
+	public static final String EPSG3785 = "3785";
 
 	public static Geometry fromGeometry(Geometry geom) {
 		if (geom instanceof Point) {
@@ -119,12 +124,6 @@ public class GeometryUtil {
 		return newGeomList;
 	}
 	
-	public static double distance(MapPos p1, MapPos p2) {
-		float[] results = new float[3];
-		Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
-		return results[0] / 1000;
-	}
-	
 	public static List<MapPos> convertFromWgs84(List<MapPos> pts) {
 		ArrayList<MapPos> list = new ArrayList<MapPos>();
 		for (MapPos p : pts) {
@@ -149,6 +148,7 @@ public class GeometryUtil {
 		return (new EPSG3857()).toWgs84(p.x, p.y);
 	}
 
+	/*
 	public static MapPos computeAverage(List<MapPos> list) {
 		if (list == null || list.size() == 0) {
 			return new MapPos(0, 0);
@@ -179,6 +179,74 @@ public class GeometryUtil {
 			}
 		}
 		return new MapPos((minx + maxx) / 2, (miny + maxy) / 2);
+	}
+	*/
+	
+	public static MapPos convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
+		try {
+			Point point = (Point) SpatialiteUtil.convertFromProjToProj(fromSrid, toSrid, new Point(p, null, (PointStyle) null, null));
+			return point.getMapPos();
+		} catch (Exception e) {
+			FLog.e("error converting from proj " + fromSrid + " to " + toSrid, e);
+			return null;
+		}
+	}
+	
+	public static List<MapPos> convertFromProjToProj(String fromSrid, String toSrid, List<MapPos> list) {
+		try {
+			ArrayList<MapPos> newList = new ArrayList<MapPos>();
+			for (MapPos p : list) {
+				Point point = (Point) SpatialiteUtil.convertFromProjToProj(fromSrid, toSrid, new Point(p, null, (PointStyle) null, null));
+				newList.add(point.getMapPos());
+			}
+			return newList;
+		} catch (Exception e) {
+			FLog.e("error converting from proj " + fromSrid + " to " + toSrid, e);
+			return null;
+		}
+	}
+	
+	public static Geometry convertGeometryFromProjToProj(String fromSrid, String toSrid, Geometry geom) {
+		try {
+			Geometry g = SpatialiteUtil.convertFromProjToProj(fromSrid, toSrid, geom);
+			if (geom instanceof Point) {
+				Point p = (Point) geom;
+				return new Point(((Point)g).getMapPos(), p.getLabel(), p.getStyleSet(), p.userData);
+			} else if (geom instanceof Line) {
+				Line l = (Line) geom;
+				return new Line(((Line)g).getVertexList(), l.getLabel(), l.getStyleSet(), l.userData);
+			} else if (geom instanceof Polygon) {
+				Polygon p = (Polygon) geom;
+				return new Polygon(((Polygon)g).getVertexList(), new ArrayList<List<MapPos>>(), p.getLabel(), p.getStyleSet(), p.userData);
+			}
+			return null;
+		} catch (Exception e) {
+			FLog.e("error converting from proj " + fromSrid + " to " + toSrid, e);
+			return null;
+		}
+	}
+	
+	public static List<Geometry> convertGeometryFromProjToProj(String fromSrid, String toSrid, List<Geometry> geomList) {
+		try {
+			ArrayList<Geometry> newList = new ArrayList<Geometry>();
+			for (Geometry geom : geomList) {
+				Geometry g = SpatialiteUtil.convertFromProjToProj(fromSrid, toSrid, geom);
+				if (geom instanceof Point) {
+					Point p = (Point) geom;
+					newList.add(new Point(((Point)g).getMapPos(), p.getLabel(), p.getStyleSet(), p.userData));
+				} else if (geom instanceof Line) {
+					Line l = (Line) geom;
+					newList.add(new Line(((Line)g).getVertexList(), l.getLabel(), l.getStyleSet(), l.userData));
+				} else if (geom instanceof Polygon) {
+					Polygon p = (Polygon) geom;
+					newList.add(new Polygon(((Polygon)g).getVertexList(), new ArrayList<List<MapPos>>(), p.getLabel(), p.getStyleSet(), p.userData));
+				}
+			}
+			return newList;
+		} catch (Exception e) {
+			FLog.e("error converting from proj " + fromSrid + " to " + toSrid, e);
+			return null;
+		}
 	}
 	
 }
