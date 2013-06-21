@@ -1100,7 +1100,7 @@ public class DatabaseManager {
 
 	public List<String> runDistanceEntityQuery(Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("run point distance query");
+			FLog.d("run distance query");
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
@@ -1136,7 +1136,7 @@ public class DatabaseManager {
 	
 	public List<String> runDistanceRelationshipQuery(Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("run point distance query");
+			FLog.d("run distance query");
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
@@ -1173,7 +1173,7 @@ public class DatabaseManager {
 	public Collection<? extends String> runDistanceLegacyQuery(
 			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry, float distance) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("run point distance query");
+			FLog.d("run distance query");
 			Stmt stmt = null;
 			try {
 				db = new jsqlite.Database();
@@ -1184,6 +1184,110 @@ public class DatabaseManager {
 				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				stmt.bind(2, distance);
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
+				}
+				FLog.d("Result: " + result.toString());
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public List<String> runIntersectEntityQuery(Geometry geometry) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run intersect query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_ENTITY);
+				FLog.d(WKTUtil.geometryToWKT(geometry));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public List<String> runIntersectRelationshipQuery(Geometry geometry) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run intersect query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_RELATIONSHIP);
+				FLog.d(WKTUtil.geometryToWKT(geometry));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
+				ArrayList<String> result = new ArrayList<String>();
+				while(stmt.step()) {
+					result.add(stmt.column_string(0));
+				}
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public Collection<? extends String> runIntersectLegacyQuery(
+			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("run intersect query");
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(transform(GeomFromText(?, 4326), 3785), transform("+ geometryColumn + ",3785))");
+				FLog.d(WKTUtil.geometryToWKT(geometry));
+				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
 					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));

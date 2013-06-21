@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -47,6 +48,7 @@ import au.org.intersect.faims.android.ui.map.tools.CreatePolygonTool;
 import au.org.intersect.faims.android.ui.map.tools.DatabaseSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.EditTool;
 import au.org.intersect.faims.android.ui.map.tools.FollowTool;
+import au.org.intersect.faims.android.ui.map.tools.GeometriesIntersectSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LegacySelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
@@ -998,6 +1000,7 @@ public class CustomMapView extends MapView {
 		tools.add(new LegacySelectionTool(this.getContext(), this));
 		tools.add(new PointSelectionTool(this.getContext(), this));
 		tools.add(new PolygonSelectionTool(this.getContext(), this));
+		tools.add(new GeometriesIntersectSelectionTool(this.getContext(), this));
 		tools.add(new FollowTool(this.getContext(), this));
 		//tools.add(new PathFollowerTool(this.getContext(), this));
 	}
@@ -1731,7 +1734,45 @@ public class CustomMapView extends MapView {
 			}
 		}
 		updateSelections();
+	}
+
+	public void runIntersectionSelection(Collection<Geometry> geometries, boolean remove) throws Exception {
+		if (selectedSelection == null) {
+			throw new MapException("Please select a selection");
+		}
 		
+		List<String> uuids = new ArrayList<String>();
+		try {
+			for(Geometry geometry : geometries){
+				uuids.addAll(databaseManager.runIntersectEntityQuery(geometry));
+				uuids.addAll(databaseManager.runIntersectRelationshipQuery(geometry));
+				
+				// for each legacy data layer do point distance query
+				List<Layer> layers = getAllLayers();
+				for (Layer layer : layers) {
+					if (layer instanceof CustomSpatialiteLayer) {
+						CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
+						uuids.addAll(databaseManager.runIntersectLegacyQuery(spatialLayer.getDbPath(), 
+								spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), geometry));
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			FLog.e("error running polygon intersection selection query", e);
+			throw new MapException("Exception raised while trying to run polygon intersection selection");
+		}
+		
+		if (remove) {
+			for (String uuid : uuids) {
+				selectedSelection.removeData(uuid);
+			}
+		} else {
+			for (String uuid : uuids) {
+				selectedSelection.addData(uuid);
+			}
+		}
+		updateSelections();
 	}
 
 	public void setGeomToFollow(Geometry geom) {

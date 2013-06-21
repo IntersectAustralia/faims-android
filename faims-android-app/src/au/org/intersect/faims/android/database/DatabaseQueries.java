@@ -262,4 +262,24 @@ public final class DatabaseQueries {
 			" where deleted is null\n" +
 			" and geospatialcolumn is not null\n" +
 			" and st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))";
+
+	public static String RUN_INTERSECT_ENTITY = 
+			"select uuid, aenttimestamp\n" + 
+				" from (select uuid, max(aenttimestamp) as aenttimestamp, deleted, geospatialcolumn\n" + 
+				"          from archentity \n" + 
+				"      group by uuid \n" + 
+				"        having max(aenttimestamp))\n" + 
+				" where deleted is null\n" +
+				" and geospatialcolumn is not null\n" +
+				" and st_intersects(GeomFromText(?, 4326), geospatialcolumn)";
+
+	public static String RUN_INTERSECT_RELATIONSHIP =
+			"select relationshipid, relntimestamp\n" + 
+				" from (select relationshipid, max(relntimestamp) as relntimestamp, deleted, geospatialcolumn\n" + 
+				"          from relationship \n" + 
+				"      group by relationshipid \n" + 
+				"        having max(relntimestamp))\n" + 
+				" where deleted is null\n" +
+				" and geospatialcolumn is not null\n" +
+				" and st_intersects(GeomFromText(?, 4326), geospatialcolumn)";
 }
