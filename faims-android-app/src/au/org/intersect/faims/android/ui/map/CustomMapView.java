@@ -230,6 +230,7 @@ public class CustomMapView extends MapView {
 	private HashMap<String, GeometrySelection> selectionMap;
 
 	private GeometrySelection selectedSelection;
+	private GeometrySelection restrictedSelection;
 
 	private HashMap<String, QueryBuilder> selectQueryMap;
 
@@ -1531,6 +1532,9 @@ public class CustomMapView extends MapView {
 		if (selectedSelection != null && selectedSelection.getName().equals(name)) {
 			selectedSelection = null;
 			updateSelections();
+		}else if(restrictedSelection != null && restrictedSelection.getName().equals(name)){
+			restrictedSelection = null;
+			updateSelections();
 		}
 	}
 	
@@ -1554,9 +1558,25 @@ public class CustomMapView extends MapView {
 	public GeometrySelection getSelectedSelection() {
 		return selectedSelection;
 	}
+	
+	public GeometrySelection getRestrictedSelection() {
+		return restrictedSelection;
+	} 
+	
+	public void addToSelection(String data){
+		this.selectedSelection.addData(data);
+	}
+	
+	public void removeFromSelection(String data){
+		this.selectedSelection.removeData(data);
+	}
 
 	public void setSelectedSelection(GeometrySelection set) {
 		this.selectedSelection = set;
+	}
+	
+	public void setRestrictedSelection(GeometrySelection set) {
+		this.restrictedSelection = set;
 	}
 	
 	public void updateSelections() {
@@ -1597,11 +1617,19 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				selectedSelection.removeData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					removeFromSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				selectedSelection.addData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					addToSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		}
 		updateSelections();
@@ -1644,11 +1672,19 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				selectedSelection.removeData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					removeFromSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				selectedSelection.addData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					addToSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		}
 		updateSelections();
@@ -1689,11 +1725,19 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				selectedSelection.removeData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					removeFromSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				selectedSelection.addData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					addToSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		}
 		updateSelections();
@@ -1726,11 +1770,19 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				selectedSelection.removeData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					removeFromSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				selectedSelection.addData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					addToSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		}
 		updateSelections();
@@ -1765,11 +1817,19 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				selectedSelection.removeData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					removeFromSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				selectedSelection.addData(uuid);
+				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
+					addToSelection(uuid);
+				}else if(getRestrictedSelection() == null){
+					addToSelection(uuid);
+				}
 			}
 		}
 		updateSelections();
