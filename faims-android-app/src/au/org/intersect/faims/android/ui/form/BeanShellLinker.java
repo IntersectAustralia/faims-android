@@ -925,14 +925,38 @@ public class BeanShellLinker {
 			}
 		}
 	}
+	
+	private String joinStr(String s1, String s2) {
+		if (s1 == null) {
+			return s2;
+		} else if (s2 == null) {
+			return s1;
+		} 
+		return s1 + ";" + s2;
+	}
 
 	private void reinitiateArchEntFieldsValue(Tab tab, ArchEntity archEntity) {
 		tab.clearViews();
+		HashMap<String, String> dirtyMap = new HashMap<String, String>();
+		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
+			String s;
+			if (dirtyMap.containsKey(entityAttribute.getName())) {
+				s = dirtyMap.get(entityAttribute.getName());
+			} else {
+				s = null;
+			}
+			
+			dirtyMap.put(entityAttribute.getName(), joinStr(s, entityAttribute.getDirtyReason()));
+		}
 		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
 			if (tab.hasView(entityAttribute.getName())) {
 				List<View> views = tab.getViews(entityAttribute.getName());
-				if (views != null)
+				if (views != null) {
+					String s = dirtyMap.get(entityAttribute.getName());
+					entityAttribute.setDirty(s != null);
+					entityAttribute.setDirtyReason(s);
 					loadArchEntFieldsValue(tab, entityAttribute, views);
+				}
 			}
 		}
 	}
@@ -958,14 +982,29 @@ public class BeanShellLinker {
 	private void reinitiateRelationshipFieldsValue(Tab tab,
 			Relationship relationship) {
 		tab.clearViews();
+		HashMap<String, String> dirtyMap = new HashMap<String, String>();
+		for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
+			String s;
+			if (dirtyMap.containsKey(relationshipAttribute.getName())) {
+				s = dirtyMap.get(relationshipAttribute.getName());
+			} else {
+				s = null;
+			}
+			
+			dirtyMap.put(relationshipAttribute.getName(), joinStr(s, relationshipAttribute.getDirtyReason()));
+		}
 		for (RelationshipAttribute relationshipAttribute : relationship
 				.getAttributes()) {
 			if (tab.hasView(relationshipAttribute.getName())) {
 				List<View> views = tab
 						.getViews(relationshipAttribute.getName());
-				if (views != null)
+				if (views != null) {
+					String s = dirtyMap.get(relationshipAttribute.getName());
+					relationshipAttribute.setDirty(s != null);
+					relationshipAttribute.setDirtyReason(s);
 					loadRelationshipFieldsValue(tab, relationshipAttribute,
 							views);
+				}
 			}
 		}
 	}
