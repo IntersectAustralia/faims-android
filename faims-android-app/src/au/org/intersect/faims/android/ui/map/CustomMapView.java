@@ -562,9 +562,10 @@ public class CustomMapView extends MapView {
 
 		try {
 			scaleView.setMapBoundary(this.getZoom(), width, height, SpatialiteUtil
-					.distanceBetween(GeometryUtil.convertToWgs84(this.screenToWorld(0,
-							height, 0)), GeometryUtil.convertToWgs84(this
-							.screenToWorld(width, height, 0)), GeometryUtil.EPSG4326));
+					.distanceBetween(
+							GeometryUtil.convertToWgs84(this.screenToWorld(0, height, 0)), 
+							GeometryUtil.convertToWgs84(this.screenToWorld(width, height, 0)), 
+							GeometryUtil.EPSG4326));
 		} catch (Exception e) {
 			FLog.e("error updating scalebar", e);
 		}
