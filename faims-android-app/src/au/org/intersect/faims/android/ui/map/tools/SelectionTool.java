@@ -24,6 +24,7 @@ public class SelectionTool extends MapTool {
 	protected LinearLayout layout;
 	protected MapButton restrictSelection;
 	protected MapButton selectSelection;
+	protected MapButton clearRestrictSelection;
 	protected MapText restrictedSelection;
 	protected MapText selectedSelection;
 	protected MapText selectionCount;
@@ -46,7 +47,8 @@ public class SelectionTool extends MapTool {
 		
 		selectSelection = createSelectButton(context);
 		restrictSelection = createRestrictSelectButton(context);
-		
+		clearRestrictSelection = createClearRestrictSelectButton(context);
+	
 		updateLayout();
 	}
 	
@@ -55,6 +57,7 @@ public class SelectionTool extends MapTool {
 			layout.removeAllViews();
 			layout.addView(selectSelection);
 			layout.addView(restrictSelection);
+			layout.addView(clearRestrictSelection);
 			layout.addView(selectedSelection);
 			layout.addView(restrictedSelection);
 			layout.addView(selectionCount);
@@ -75,6 +78,7 @@ public class SelectionTool extends MapTool {
 	@Override
 	public void onSelectionChanged() {
 		setSelectedSelection(mapView.getSelectedSelection());
+		setRestrictedSelection(mapView.getRestrictedSelection());
 	}
 	
 	private MapButton createSelectButton(final Context context) {
@@ -166,6 +170,25 @@ public class SelectionTool extends MapTool {
 					});
 					
 					d.show();
+				}
+			}
+			
+		});
+		return button;
+	}
+	
+	private MapButton createClearRestrictSelectButton(final Context context) {
+		MapButton button = new MapButton(context);
+		button.setText("Clear Restricted Selection");
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if(mapView.getRestrictedSelection() == null){
+					showError("No restricted selection is selected");
+				}else{
+					mapView.setRestrictedSelection(null);
+					setRestrictedSelection(null);
 				}
 			}
 			

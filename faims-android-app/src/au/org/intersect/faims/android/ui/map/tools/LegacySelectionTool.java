@@ -45,6 +45,7 @@ public class LegacySelectionTool extends SelectionTool {
 			layout.addView(queryButton);
 			layout.addView(selectSelection);
 			layout.addView(restrictSelection);
+			layout.addView(clearRestrictSelection);
 			layout.addView(selectedSelection);
 			layout.addView(restrictedSelection);
 			layout.addView(selectionCount);
