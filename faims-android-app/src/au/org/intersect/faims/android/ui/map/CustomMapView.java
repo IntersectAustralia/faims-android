@@ -1627,7 +1627,7 @@ public class CustomMapView extends MapView {
 				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
 					removeFromSelection(uuid);
 				}else if(getRestrictedSelection() == null){
-					addToSelection(uuid);
+					removeFromSelection(uuid);
 				}
 			}
 		} else {
@@ -1682,7 +1682,7 @@ public class CustomMapView extends MapView {
 				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
 					removeFromSelection(uuid);
 				}else if(getRestrictedSelection() == null){
-					addToSelection(uuid);
+					removeFromSelection(uuid);
 				}
 			}
 		} else {
@@ -1736,7 +1736,7 @@ public class CustomMapView extends MapView {
 				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
 					removeFromSelection(uuid);
 				}else if(getRestrictedSelection() == null){
-					addToSelection(uuid);
+					removeFromSelection(uuid);
 				}
 			}
 		} else {
@@ -1782,7 +1782,7 @@ public class CustomMapView extends MapView {
 				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
 					removeFromSelection(uuid);
 				}else if(getRestrictedSelection() == null){
-					addToSelection(uuid);
+					removeFromSelection(uuid);
 				}
 			}
 		} else {
@@ -1829,7 +1829,7 @@ public class CustomMapView extends MapView {
 				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
 					removeFromSelection(uuid);
 				}else if(getRestrictedSelection() == null){
-					addToSelection(uuid);
+					removeFromSelection(uuid);
 				}
 			}
 		} else {

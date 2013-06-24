@@ -39,6 +39,7 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 			layout.addView(settingsButton);
 			layout.addView(selectSelection);
 			layout.addView(restrictSelection);
+			layout.addView(clearRestrictSelection);
 			layout.addView(clearButton);
 			layout.addView(selectedSelection);
 			layout.addView(restrictedSelection);
