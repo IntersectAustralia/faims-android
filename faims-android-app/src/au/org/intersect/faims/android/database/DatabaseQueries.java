@@ -8,6 +8,11 @@ public final class DatabaseQueries {
 			"FROM aenttype " + 
 			"WHERE aenttypename = ? COLLATE NOCASE;";
 	
+	public static final String INSERT_AND_UPDATE_INTO_ARCHENTITY = 
+			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn)\n" + 
+			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326)\n" + 
+			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid);";
+	
 	public static final String INSERT_INTO_AENTVALUE = 
 		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted) " +
 			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ? " +
@@ -19,6 +24,11 @@ public final class DatabaseQueries {
 			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ? " +
 			"FROM relntype " +
 			"WHERE relntypename = ? COLLATE NOCASE;";
+	
+	public static final String INSERT_AND_UPDATE_INTO_RELATIONSHIP = 
+			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn)\n" + 
+			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326)\n" + 
+			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid);";
 	
 	public static final String INSERT_INTO_RELNVALUE = 
 		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +

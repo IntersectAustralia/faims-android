@@ -577,3 +577,19 @@ clearFieldDirty(String ref) {
 convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
 	return linker.convertFromProjToProj(fromSrid, toSrid, p);
 }
+
+onToolEvent(String ref, String type, String callback) {
+	linker.bindToolEvent(ref, type, callback);
+}
+
+setToolCreateEnabled(boolean enabled) {
+	linker.setToolCreateEnabled(enabled);
+}
+
+getMapGeometryCreated() {
+	return _map_geometry_created;
+}
+
+getMapGeometryLoaded() {
+	return _map_geometry_loaded;
+}

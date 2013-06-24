@@ -219,6 +219,85 @@ public class DatabaseManager {
 		}
 	}
 	
+	public String updateArchEnt(String uuid, String geo_data) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("uuid:" + uuid);
+			FLog.d("geo_data:" + geo_data);
+			
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				String query = DatabaseQueries.INSERT_AND_UPDATE_INTO_ARCHENTITY;
+				st = db.prepare(query);
+				st.bind(1, userId);
+				st.bind(2, geo_data);
+				st.bind(3, uuid);
+				st.step();
+				st.close();
+				st = null;
+				
+				return uuid;
+				
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public String updateRel(String uuid, String geo_data) throws Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("uuid:" + uuid);
+			FLog.d("geo_data:" + geo_data);
+			
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				String query = DatabaseQueries.INSERT_AND_UPDATE_INTO_RELATIONSHIP;
+				st = db.prepare(query);
+				st.bind(1, userId);
+				st.bind(2, geo_data);
+				st.bind(3, uuid);
+				st.step();
+				st.close();
+				st = null;
+				
+				return uuid;
+				
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+			
+		}
+	}
+	
 	public String saveRel(String rel_id, String rel_type,
 			String geo_data, List<RelationshipAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {

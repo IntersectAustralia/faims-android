@@ -144,7 +144,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.drawLine(layer, positions, createLineStyle());
+			mapView.notifyGeometryCreated(mapView.drawLine(layer, positions, createLineStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing line", e);
 			showError(e.getMessage());

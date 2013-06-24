@@ -143,7 +143,7 @@ public class CreatePolygonTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.drawPolygon(layer, positions, createPolygonStyle());
+			mapView.notifyGeometryCreated(mapView.drawPolygon(layer, positions, createPolygonStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing polygon", e);
 			showError(e.getMessage());

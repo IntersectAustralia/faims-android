@@ -81,7 +81,7 @@ public class CreatePointTool extends BaseGeometryTool {
 					}
 					
 					try {
-						mapView.drawPoint(layer, gpsPoint, createPointStyle());
+						mapView.notifyGeometryCreated(mapView.drawPoint(layer, gpsPoint, createPointStyle()));
 					} catch (Exception e) {
 						FLog.e("error drawing point", e);
 						showError(e.getMessage());

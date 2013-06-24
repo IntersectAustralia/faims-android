@@ -3865,4 +3865,64 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
+	
+	public void bindToolEvent(String ref, String type, final String callback) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				if ("create".equals(type)) {
+					mapView.setCreateCallback(new CustomMapView.CreateCallback() {
+						
+						@Override
+						public void onCreate(int geomId) {
+							try {
+								interpreter.set("_map_geometry_created", geomId);
+								execute(callback);
+							} catch (Exception e) {
+								FLog.e("error setting geometry created", e);
+							}
+						}
+					});
+				} else {
+					mapView.setLoadCallback(new CustomMapView.LoadCallback() {
+						
+						@Override
+						public void onLoad(String id) {
+							try {
+								interpreter.set("_map_geometry_loaded", id);
+								execute(callback);
+							} catch (Exception e) {
+								FLog.e("error setting geometry loaded", e);
+							}
+						}
+					});	
+				}
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error binding tool event " + ref, e);
+			showWarning("Logic Error",
+					"Error binding tool event " + ref);
+		}
+	}
+	
+	public void setToolCreateEnabled(String ref, boolean enabled) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+				mapView.setToolCreateEnabled(enabled);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting tool create enabled " + ref, e);
+			showWarning("Logic Error",
+					"Error setting tool create enabled " + ref);
+		}
+	}
 }

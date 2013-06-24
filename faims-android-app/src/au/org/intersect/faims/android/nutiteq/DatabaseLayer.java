@@ -144,15 +144,18 @@ public class DatabaseLayer extends GeometryLayer {
 			Vector<Geometry> objectTemp = null;
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
+			GeometryData.Type dataType;
 			if (type == Type.ENTITY) {
+				dataType = GeometryData.Type.ENTITY;
 				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
+				dataType = GeometryData.Type.RELATIONSHIP;
 				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(min, max, querySql, maxObjects);
 			}else {
 				throw new Exception("database layer has no type");
 			}
 			
-		    createElementsInLayer(zoom, objectTemp, objects);
+		    createElementsInLayer(zoom, objectTemp, objects, dataType);
 		    
 		    //FLog.d("visible objects " + objects.size());
 		    
@@ -163,14 +166,14 @@ public class DatabaseLayer extends GeometryLayer {
 	}
 	
 	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
-			Vector<Geometry> objects) {
+			Vector<Geometry> objects, GeometryData.Type dataType) {
 		// apply styles, create new objects for these
 		for(Geometry object: objectTemp){
 		    
 		    Geometry newObject = null;
 		    String[] userData = (String[]) object.userData;
 		    GeometryStyle style = getGeometryStyle(object, userData[0]);
-		    GeometryData geomData = new GeometryData(userData[0], userData[1], style, layerId);
+		    GeometryData geomData = new GeometryData(userData[0], dataType, userData[1], style, layerId);
 		    
 		    if(object instanceof Point){
 	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);

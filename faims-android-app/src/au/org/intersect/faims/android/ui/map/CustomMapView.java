@@ -39,6 +39,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
+import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
@@ -153,6 +154,18 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
+	public static interface CreateCallback {
+	
+		public void onCreate(int geomId);
+		
+	}
+	
+	public static interface LoadCallback {
+	
+		public void onLoad(String id);
+		
+	}
+	
 	@Inject
 	GPSDataManager gpsDataManager;
 	
@@ -261,6 +274,12 @@ public class CustomMapView extends MapView {
 	private Bitmap tempBitmap;
 
 	private Geometry geomToFollowBuffer;
+
+	private CreateCallback createCallback;
+
+	private LoadCallback loadCallback;
+
+	private boolean toolCreateEnabled;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -1159,13 +1178,21 @@ public class CustomMapView extends MapView {
 		ArrayList<Geometry> geomList = GeometryUtil.transformGeometryList(transformGeometryList, this, false);
 		
 		for (int i = 0; i < highlightGeometryList.size(); i++) {
-			Geometry geom = highlightGeometryList.get(i);
 			Geometry transformedGeom = geomList.get(i);
-			CanvasLayer layer = (CanvasLayer) geometryIdToLayerMap.get(getGeometryId(geom));
-			layer.removeGeometry(geom);
-			removeGeometryWithoutClearing(geom);
-			layer.addGeometry(transformedGeom);
-			addGeometry(layer, transformedGeom);
+			
+			Geometry geom = highlightGeometryList.get(i);
+			GeometryData data = (GeometryData) geom.userData;
+			if (data.id == null) {
+			
+				CanvasLayer layer = (CanvasLayer) geometryIdToLayerMap.get(getGeometryId(geom));
+				layer.removeGeometry(geom);
+				removeGeometryWithoutClearing(geom);
+				layer.addGeometry(transformedGeom);
+				addGeometry(layer, transformedGeom);
+			
+			}
+			
+			saveGeometry(GeometryUtil.convertGeometryToWgs84(transformedGeom));
 		}
 		
 		transformGeometryList = null;
@@ -1174,6 +1201,27 @@ public class CustomMapView extends MapView {
 		updateDrawView();
 	}
 	
+	public void saveGeometry(Geometry geom) {
+		try {
+			GeometryData data = (GeometryData) geom.userData;
+			
+			if (data.id == null) return;
+			
+			ArrayList<Geometry> geomList = new ArrayList<Geometry>();
+			geomList.add(geom);
+			
+			if (data.type == GeometryData.Type.ENTITY) {
+				activityRef.get().getDatabaseManager().updateArchEnt(data.id, WKTUtil.collectionToWKT(geomList));
+			} else if (data.type == GeometryData.Type.RELATIONSHIP) {
+				activityRef.get().getDatabaseManager().updateRel(data.id, WKTUtil.collectionToWKT(geomList));
+			}
+			
+			this.updateRenderer();
+		} catch (Exception e) {
+			FLog.e("error saving geometry", e);
+		}
+	}
+
 	public void clearHighlightTransform() {
 		transformGeometryList = null;
 		updateRenderer();
@@ -1925,6 +1973,40 @@ public class CustomMapView extends MapView {
 			return null;
 		}
 		return heading;
+	}
+	
+	public CreateCallback getCreateCallback() {
+		return createCallback;
+	}
+
+	public void setCreateCallback(CreateCallback createCallback) {
+		this.createCallback = createCallback;
+	}
+	
+	public LoadCallback getLoadCallback() {
+		return loadCallback;
+	}
+
+	public void setLoadCallback(LoadCallback loadCallback) {
+		this.loadCallback = loadCallback;
+	}
+
+	public void setToolCreateEnabled(boolean enabled) {
+		this.toolCreateEnabled = enabled;
+	}
+
+	public void notifyGeometryCreated(Geometry geom) {
+		GeometryData data = (GeometryData) geom.userData;
+		if (toolCreateEnabled && createCallback != null) {
+			createCallback.onCreate(data.geomId);
+		}
+	}
+
+	public void notifyGeometryLoaded(Geometry geom) {
+		GeometryData data = (GeometryData) geom.userData;
+		if (loadCallback != null) {
+			loadCallback.onLoad(data.id);
+		}
 	}
 
 }

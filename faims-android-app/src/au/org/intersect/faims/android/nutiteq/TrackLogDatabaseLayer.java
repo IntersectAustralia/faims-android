@@ -58,7 +58,7 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 						pointStyle.pointColor = Color.HSVToColor(hsv);
 						this.pointStyle = pointStyle;
 						objectTemp = dbmgr.fetchVisibleGPSTrackingForUser(min, max, maxObjects, querySql, user.getKey().getUserId());
-						createElementsInLayer(zoom, objectTemp, objects);
+						createElementsInLayer(zoom, objectTemp, objects, GeometryData.Type.ENTITY);
 					}
 				}
 				setVisibleElementsList(objects);

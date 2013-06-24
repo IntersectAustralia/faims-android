@@ -157,11 +157,17 @@ public class EditTool extends HighlightTool {
 							}
 
 							GeometryData data = (GeometryData) geom.userData;
+							Geometry newGeom = null;
 							if (geom instanceof Line) {
-								EditTool.this.mapView.drawLine(data.layerId, pts, data.style);
+								newGeom = EditTool.this.mapView.drawLine(data.layerId, pts, data.style);
 							} else if (geom instanceof Polygon) {
-								EditTool.this.mapView.drawPolygon(data.layerId, pts, data.style);
+								newGeom = EditTool.this.mapView.drawPolygon(data.layerId, pts, data.style);
 							}
+							
+							if (newGeom != null) {
+								mapView.saveGeometry(GeometryUtil.convertGeometryToWgs84(newGeom));
+							}
+								
 						}
 						
 						EditTool.this.vertexGeometry = null;
@@ -509,15 +515,7 @@ public class EditTool extends HighlightTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
 		if (!mapView.hasTransformGeometry()) {
-			if (element instanceof Geometry) {
-				Geometry geom = (Geometry) element;
-				if (geom.userData instanceof GeometryData) {
-					GeometryData geomData = (GeometryData) geom.userData;
-					if (geomData.id == null) {
-						super.onVectorElementClicked(element, arg1, arg2, arg3);
-					}
-				}
-			} 
+			super.onVectorElementClicked(element, arg1, arg2, arg3);
 		}
 	}
 }
