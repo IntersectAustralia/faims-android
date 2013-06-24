@@ -1098,7 +1098,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public List<String> runDistanceEntityQuery(Geometry geometry, float distance) throws Exception {
+	public List<String> runDistanceEntityQuery(Geometry geometry, float distance, String srid) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run distance query");
 			Stmt stmt = null;
@@ -1107,10 +1107,10 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_ENTITY);
-				FLog.d(WKTUtil.geometryToWKT(geometry));
-				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
-				stmt.bind(2, distance);
+				stmt.bind(2, Integer.parseInt(srid));
+				stmt.bind(3, distance);
+				stmt.bind(4, Integer.parseInt(srid));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
 					result.add(stmt.column_string(0));
@@ -1134,7 +1134,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public List<String> runDistanceRelationshipQuery(Geometry geometry, float distance) throws Exception {
+	public List<String> runDistanceRelationshipQuery(Geometry geometry, float distance, String srid) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run distance query");
 			Stmt stmt = null;
@@ -1143,10 +1143,10 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_RELATIONSHIP);
-				FLog.d(WKTUtil.geometryToWKT(geometry));
-				FLog.d(""+distance);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
-				stmt.bind(2, distance);
+				stmt.bind(2, Integer.parseInt(srid));
+				stmt.bind(3, distance);
+				stmt.bind(4, Integer.parseInt(srid));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
 					result.add(stmt.column_string(0));
@@ -1171,7 +1171,7 @@ public class DatabaseManager {
 	}
 
 	public Collection<? extends String> runDistanceLegacyQuery(
-			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry, float distance) throws Exception {
+			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry, float distance, String srid) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("run distance query");
 			Stmt stmt = null;
@@ -1179,16 +1179,15 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform("+ geometryColumn + ",3785))");
-				FLog.d(WKTUtil.geometryToWKT(geometry));
-				FLog.d(""+distance);
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform("+ geometryColumn + ", ?))");
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
-				stmt.bind(2, distance);
+				stmt.bind(2, Integer.parseInt(srid));
+				stmt.bind(3, distance);
+				stmt.bind(4, Integer.parseInt(srid));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
 					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
 				}
-				FLog.d("Result: " + result.toString());
 				return result;
 			} finally {
 				try {
@@ -1217,7 +1216,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_ENTITY);
-				FLog.d(WKTUtil.geometryToWKT(geometry));
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
@@ -1251,7 +1249,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_RELATIONSHIP);
-				FLog.d(WKTUtil.geometryToWKT(geometry));
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
@@ -1285,14 +1282,12 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
-				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(transform(GeomFromText(?, 4326), 3785), transform("+ geometryColumn + ",3785))");
-				FLog.d(WKTUtil.geometryToWKT(geometry));
+				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(GeomFromText(?, 4326), transform("+ geometryColumn + ", 4326))");
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
 				ArrayList<String> result = new ArrayList<String>();
 				while(stmt.step()) {
 					result.add(dbPath + ":" + tableName + ":" + stmt.column_string(0));
 				}
-				FLog.d("Result: " + result.toString());
 				return result;
 			} finally {
 				try {

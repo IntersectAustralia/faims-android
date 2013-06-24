@@ -251,7 +251,7 @@ public final class DatabaseQueries {
 			"        having max(aenttimestamp))\n" + 
 			" where deleted is null\n" +
 			" and geospatialcolumn is not null\n" +
-			" and st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))";
+			" and st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform(geospatialcolumn, ?))";
 
 	public static String RUN_DISTANCE_RELATIONSHIP =
 		"select relationshipid, relntimestamp\n" + 
@@ -261,7 +261,7 @@ public final class DatabaseQueries {
 			"        having max(relntimestamp))\n" + 
 			" where deleted is null\n" +
 			" and geospatialcolumn is not null\n" +
-			" and st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform(geospatialcolumn,3785))";
+			" and st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform(geospatialcolumn, ?))";
 
 	public static String RUN_INTERSECT_ENTITY = 
 			"select uuid, aenttimestamp\n" + 

@@ -1711,9 +1711,10 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
+		String srid = activityRef.get().getProject().getSrid();
 		try {
-			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance));
-			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance));
+			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance, srid));
+			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance, srid));
 			
 			// for each legacy data layer do point distance query
 			List<Layer> layers = getAllLayers();
@@ -1721,7 +1722,7 @@ public class CustomMapView extends MapView {
 				if (layer instanceof CustomSpatialiteLayer) {
 					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
 					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
-							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), point, distance));
+							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), point, distance, srid));
 				}
 			}
 			
@@ -1756,9 +1757,10 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
+		String srid = activityRef.get().getProject().getSrid();
 		try {
-			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance));
-			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance));
+			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance, srid));
+			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance, srid));
 			
 			// for each legacy data layer do point distance query
 			List<Layer> layers = getAllLayers();
@@ -1766,7 +1768,7 @@ public class CustomMapView extends MapView {
 				if (layer instanceof CustomSpatialiteLayer) {
 					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
 					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
-							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), polygon, distance));
+							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), polygon, distance, srid));
 				}
 			}
 			
