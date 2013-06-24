@@ -135,13 +135,13 @@ public class EditTool extends HighlightTool {
 			@Override
 			public void onClick(View v) {
 				try {
+					if (EditTool.this.mapView.hasTransformGeometry()) {
+						showError("Please clear locked geometry before joining");
+						button.setChecked(false);
+						return;
+					}
+					
 					if (!button.isChecked()) {
-						
-						if (EditTool.this.mapView.hasTransformGeometry()) {
-							showError("Please clear locked geometry before joining");
-							button.setChecked(true);
-							return;
-						}
 						
 						for (Geometry geom : EditTool.this.vertexGeometry) {
 							ArrayList<Point> geometryPoints = EditTool.this.vertexGeometryToPointsMap.get(geom);
