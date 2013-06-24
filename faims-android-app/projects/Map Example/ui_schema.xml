@@ -320,10 +320,10 @@
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="longitude">
-            <label>Longitude:</label>
+            <label>X:</label>
         </input>
         <input ref="latitude">
-            <label>Latitude:</label>
+            <label>Y:</label>
         </input>
         <input ref="map" faims_map="true">
             <label>Map:</label>

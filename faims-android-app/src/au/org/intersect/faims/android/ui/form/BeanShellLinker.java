@@ -2837,7 +2837,7 @@ public class BeanShellLinker {
 	}
 
 	public void centerOnCurrentPosition(String ref) {
-		Object currentLocation = getGPSPosition();
+		Object currentLocation = getGPSPositionProjected();
 		if (currentLocation != null) {
 			GPSLocation location = (GPSLocation) currentLocation;
 			setMapFocusPoint(ref, (float) location.getLongitude(),
@@ -3854,5 +3854,15 @@ public class BeanShellLinker {
 			FLog.e("error adding track log query " + ref, e);
 			showWarning("Logic Error", "Error adding track log query " + ref);
 		}
+	}
+	
+	public MapPos convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
+		try {
+			return GeometryUtil.convertFromProjToProj(fromSrid, toSrid, p);
+		} catch (Exception e) {
+			FLog.e("error converting project from " + fromSrid + " to " + toSrid, e);
+			showWarning("Logic Error", "Error converting projection from " + fromSrid + " to " + toSrid);
+		}
+		return null;
 	}
 }

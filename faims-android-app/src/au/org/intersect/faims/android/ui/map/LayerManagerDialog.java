@@ -1287,7 +1287,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			EditText upperLeftEditText = new EditText(LayerManagerDialog.this.getContext());
 			upperLeftEditText.setEnabled(false);
-			upperLeftEditText.setText(upperLeft.x + "," + upperLeft.y);
+			upperLeftEditText.setText(upperLeft != null ? (upperLeft.x + "," + upperLeft.y) : "N/A");
 			layout.addView(upperLeftEditText);
 
 			TextView bottomRightTextView = new TextView(this.getContext());
@@ -1296,7 +1296,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			EditText bottomRightEditText = new EditText(LayerManagerDialog.this.getContext());
 			bottomRightEditText.setEnabled(false);
-			bottomRightEditText.setText(bottomRight.x + "," + bottomRight.y);
+			bottomRightEditText.setText(bottomRight != null ? (bottomRight.x + "," + bottomRight.y) : "N/A");
 			layout.addView(bottomRightEditText);
 
 		}else if(layer instanceof CustomSpatialiteLayer){

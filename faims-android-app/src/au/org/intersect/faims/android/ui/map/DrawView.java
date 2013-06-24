@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
@@ -124,27 +125,39 @@ public class DrawView extends View {
 	}
 	
 	private void drawPointInfo(Point point, Canvas canvas) {
-		GeometryData data = (GeometryData) point.userData;
-		float offset = getPosOffset(data.style);
-		MapPos p = transformPoint(point.getMapPos());
-		drawPosInfo(p, pointToText(projectPoint(point.getMapPos())), offset, -offset, canvas);
+		try {
+			GeometryData data = (GeometryData) point.userData;
+			float offset = getPosOffset(data.style);
+			MapPos p = transformPoint(point.getMapPos());
+			drawPosInfo(p, pointToText(projectPoint(point.getMapPos())), offset, -offset, canvas);
+		} catch (Exception e) {
+			FLog.e("error drawing point info", e);
+		}
 	}
 	
 	private void drawLineInfo(Line line, Canvas canvas) {
-		for (MapPos p : line.getVertexList()) {
-			MapPos tp = transformPoint(p);
-			GeometryData data = (GeometryData) line.userData;
-			float offset = getPosOffset(data.style);
-			drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
+		try {
+			for (MapPos p : line.getVertexList()) {
+				MapPos tp = transformPoint(p);
+				GeometryData data = (GeometryData) line.userData;
+				float offset = getPosOffset(data.style);
+				drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
+			}
+		} catch (Exception e) {
+			FLog.e("error drawing line info", e);
 		}
 	}
 	
 	private void drawPolygonInfo(Polygon polygon, Canvas canvas) {
-		for (MapPos p : polygon.getVertexList()) {
-			MapPos tp = transformPoint(p);
-			GeometryData data = (GeometryData) polygon.userData;
-			float offset = getPosOffset(data.style);
-			drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
+		try {
+			for (MapPos p : polygon.getVertexList()) {
+				MapPos tp = transformPoint(p);
+				GeometryData data = (GeometryData) polygon.userData;
+				float offset = getPosOffset(data.style);
+				drawPosInfo(tp, pointToText(projectPoint(p)), offset, -offset, canvas);
+			}
+		} catch (Exception e) {
+			FLog.e("error drawing polygon info", e);
 		}
 	}
 	
@@ -153,7 +166,7 @@ public class DrawView extends View {
 	}
 	
 	private String pointToText(MapPos p) {
-		if (GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid()) && showDecimal) {
+		if (showDecimal) {
 			return "(" + MeasurementUtil.displayAsCoord(p.x) + ", " + MeasurementUtil.displayAsCoord(p.y) + ")";
 		} else {
 			return "(" + MeasurementUtil.convertToDegrees(p.x) + ", " + MeasurementUtil.convertToDegrees(p.y) + ")";

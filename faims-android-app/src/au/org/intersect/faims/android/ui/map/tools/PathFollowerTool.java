@@ -43,10 +43,10 @@ public class PathFollowerTool extends HighlightTool {
 		}
 
 		public void drawPointOnPath(MapPos p) {
-			this.isDirty = true;
 			
 			this.tp = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(p), PathFollowerTool.this.mapView, true);
 			
+			this.isDirty = true;
 			invalidate();
 		}
 

@@ -46,24 +46,22 @@ public class AreaTool extends HighlightTool {
 		}
 		
 		public void drawArea(Polygon polygon) {
-			this.isDirty = true;
-			
 			try {
 				this.area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), AreaTool.this.mapView.getActivity().getProject().getSrid());
+			
+				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+				
+				MapPos p = GeometryUtil.transformVertex(polygon.getVertexList().get(polygon.getVertexList().size()-1), AreaTool.this.mapView, true);
+				
+				textX = (float) p.x + offset;
+				textY = (float) p.y + offset;
+				
+				this.isDirty = true;
+				invalidate();
 			} catch (Exception e) {
 				FLog.e("error computing area of polygon", e);
 				showError("Error computing area of polygon");
-				this.area = 0;
 			}
-			
-			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-			
-			MapPos p = GeometryUtil.transformVertex(polygon.getVertexList().get(polygon.getVertexList().size()-1), AreaTool.this.mapView, true);
-			
-			textX = (float) p.x + offset;
-			textY = (float) p.y + offset;
-			
-			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {

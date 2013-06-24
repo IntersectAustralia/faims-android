@@ -78,7 +78,6 @@ public class FollowTool extends HighlightTool {
 
 		public void drawDistanceAndBearing(MapPos currentPoint, MapPos targetPoint) {
 			try {
-				this.isDirty = true;
 				
 				this.tp1 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(currentPoint), FollowTool.this.mapView, true);
 				this.tp2 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(targetPoint), FollowTool.this.mapView, true);
@@ -111,9 +110,11 @@ public class FollowTool extends HighlightTool {
 				
 				this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
 				
+				this.isDirty = true;
 				invalidate();
 			} catch (Exception e) {
 				FLog.e("error drawing distance and bearing", e);
+				showError("Error computing distance and bearing");
 			}
 		}
 		
@@ -266,7 +267,6 @@ public class FollowTool extends HighlightTool {
 			canvas.drawDistanceAndBearing(pos, targetPoint);
 		} catch (Exception e) {
 			FLog.e("error updating distance and bearing", e);
-			showError(e.getMessage());
 		}
 	}
 	

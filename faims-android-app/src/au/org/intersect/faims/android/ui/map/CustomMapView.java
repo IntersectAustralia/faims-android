@@ -320,6 +320,8 @@ public class CustomMapView extends MapView {
 		
 		startMapOverlayThread();
         startGPSLocationThread();
+        
+        setShowDecimal(!GeometryUtil.EPSG4326.equals(activityRef.get().getProject().getSrid()));
 	}
 
 	public CustomMapView(Context context) {
@@ -566,7 +568,7 @@ public class CustomMapView extends MapView {
 					.distanceBetween(
 							GeometryUtil.convertToWgs84(this.screenToWorld(0, height, 0)), 
 							GeometryUtil.convertToWgs84(this.screenToWorld(width, height, 0)), 
-							GeometryUtil.EPSG4326));
+							GeometryUtil.EPSG4326) / 1000.0);
 		} catch (Exception e) {
 			FLog.e("error updating scalebar", e);
 		}

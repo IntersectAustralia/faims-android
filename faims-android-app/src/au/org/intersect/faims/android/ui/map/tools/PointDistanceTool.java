@@ -50,8 +50,6 @@ public class PointDistanceTool extends HighlightTool {
 
 		public void drawDistanceBetween(MapPos p1, MapPos p2) {
 			try {
-				this.isDirty = true;
-				
 				this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), PointDistanceTool.this.mapView.getActivity().getProject().getSrid());
 				
 				this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
@@ -70,9 +68,11 @@ public class PointDistanceTool extends HighlightTool {
 					textY = midY - offset;
 				}
 				
+				this.isDirty = true;
 				invalidate();
 			} catch (Exception e) {
 				FLog.e("error drawing distance", e);
+				showError("Error computing point distance");
 			}
 		}
 		

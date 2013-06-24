@@ -274,6 +274,10 @@ setMapFocusPoint(String ref, float longitude, float latitude) {
 	linker.setMapFocusPoint(ref, longitude, latitude);
 }
 
+setMapFocusPoint(String ref, double longitude, double latitude) {
+	setMapFocusPoint(ref, (float) longitude, (float) latitude);
+}
+
 setMapRotation(String ref, float rotation) {
 	linker.setMapRotation(ref, rotation);
 }
@@ -568,4 +572,8 @@ String getLastAudioFilePath(){
 
 clearFieldDirty(String ref) {
 	linker.setFieldDirty(ref, false, "");
+}
+
+convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
+	return linker.convertFromProjToProj(fromSrid, toSrid, p);
 }

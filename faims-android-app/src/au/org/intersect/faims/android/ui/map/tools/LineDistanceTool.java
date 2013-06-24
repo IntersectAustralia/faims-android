@@ -48,7 +48,6 @@ public class LineDistanceTool extends HighlightTool {
 
 		public void drawDistance(Line line) {
 			try {
-				this.isDirty = true;
 				
 				this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), LineDistanceTool.this.mapView.getActivity().getProject().getSrid());
 				
@@ -59,9 +58,11 @@ public class LineDistanceTool extends HighlightTool {
 				textX = (float) p.x + offset;
 				textY = (float) p.y + offset;
 				
+				this.isDirty = true;
 				invalidate();
 			} catch (Exception e) {
 				FLog.e("error drawing distance", e);
+				showError("Error computing line distance");
 			}
 		}
 		

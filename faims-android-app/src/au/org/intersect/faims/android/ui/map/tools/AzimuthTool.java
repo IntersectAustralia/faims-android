@@ -43,7 +43,6 @@ public class AzimuthTool extends HighlightTool {
 		}
 
 		public void drawAzimuthFrom(MapPos p1, MapPos p2) {
-			isDirty = true;
 			
 			MapPos pp1 = GeometryUtil.convertToWgs84(p1);
 			MapPos pp2 = GeometryUtil.convertToWgs84(p2);
@@ -64,6 +63,7 @@ public class AzimuthTool extends HighlightTool {
 			textX = (float) tp2.x + offset;
 			textY = (float) tp2.y + offset;
 			
+			isDirty = true;
 			this.invalidate();
 		}
 		
