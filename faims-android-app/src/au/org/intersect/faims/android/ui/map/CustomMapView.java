@@ -1869,7 +1869,7 @@ public class CustomMapView extends MapView {
 				pts.add(p);
 				pts.add(lp);
 				Line seg = new Line(pts, null, (LineStyle) null, null);
-				if (SpatialiteUtil.isPointOnPath(point, seg, buffer)) {
+				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, activityRef.get().getProject().getSrid())) {
 					return lp;
 				} else {
 					double d = SpatialiteUtil.distanceBetween(pos, p, activityRef.get().getProject().getSrid());
@@ -1898,7 +1898,7 @@ public class CustomMapView extends MapView {
 	private void updateGeomBuffer() {
 		if (geomToFollow != null) {
 			try {
-				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer);
+				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, activityRef.get().getProject().getSrid());
 			} catch (Exception e) {
 				FLog.e("error getting geometry buffer", e);
 			}

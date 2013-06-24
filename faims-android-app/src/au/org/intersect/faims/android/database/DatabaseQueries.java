@@ -142,7 +142,7 @@ public final class DatabaseQueries {
 			"                  FROM aentvalue\n" +
 			"                  JOIN archentity USING (uuid)\n" +
 			"                 WHERE archentity.deleted is NULL\n" +
-			"                   and st_intersects(geospatialcolumn, PolyFromText(?, 4326))" +
+			"                   and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))" +
 			"              GROUP BY uuid, attributeid\n" +
 			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" +
 			"          WHERE aentvalue.deleted is NULL\n" +
@@ -168,7 +168,7 @@ public final class DatabaseQueries {
 			"             FROM relnvalue\n" +
 			"             JOIN relationship USING (relationshipid)\n" +
 			"            WHERE relationship.deleted is NULL\n" +
-			"              and st_intersects(geospatialcolumn, PolyFromText(?, 4326))\n" +
+			"              and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n" +
 			"         GROUP BY relationshipid, attributeid\n" +
 			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" +
 			"   WHERE relnvalue.deleted is NULL\n" +

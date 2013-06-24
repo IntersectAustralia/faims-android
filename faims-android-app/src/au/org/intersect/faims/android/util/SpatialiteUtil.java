@@ -195,16 +195,17 @@ private static String dbname;
 		}
 	}
 	
-	public static Geometry geometryBuffer(Geometry geom, float buffer) throws Exception {
+	public static Geometry geometryBuffer(Geometry geom, float buffer, String srid) throws Exception {
 		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String sql = "select Hex(AsBinary(transform(buffer(transform(GeomFromText(?, 4326), 3785), ?), 4326)));";
+			String sql = "select Hex(AsBinary(transform(buffer(transform(GeomFromText(?, 4326), ?), ?), 4326)));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(geom));
-			st.bind(2, buffer);
+			st.bind(2, Integer.parseInt(srid));
+			st.bind(3, buffer);
 			st.step();
 			Geometry[] gs = WkbRead.readWkb(
                     new ByteArrayInputStream(Utils
@@ -231,17 +232,19 @@ private static String dbname;
 		}
 	}
 
-	public static boolean isPointOnPath(Point point, Line path, float buffer) throws Exception {
+	public static boolean isPointOnPath(Point point, Line path, float buffer, String srid) throws Exception {
 		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String sql = "select st_intersects(buffer(transform(GeomFromText(?, 4326), 3785), ?), transform(GeomFromText(?, 4326), 3785));";
+			String sql = "select st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform(GeomFromText(?, 4326), ?));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(path));
-			st.bind(2, buffer);
-			st.bind(3, WKTUtil.geometryToWKT(point));
+			st.bind(2, Integer.parseInt(srid));
+			st.bind(3, buffer);
+			st.bind(4, WKTUtil.geometryToWKT(point));
+			st.bind(5, Integer.parseInt(srid));
 			st.step();
 			return st.column_int(0) == 1;
 		} finally {
@@ -266,13 +269,14 @@ private static String dbname;
 		return computePointDistance(p1, p2, srid);
 	}
 
+	/*
 	public static Point nearestPointOnPath(Point point, Line path) throws Exception {
 		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
-			String sql = "select Hex(AsBinary(transform(closestPoint(transform(GeomFromText(?, 4326), 3785), transform(GeomFromText(?, 4326), 3785)), 4326)));";
+			String sql = "select Hex(AsBinary(transform(closestPoint(transform(GeomFromText(?, 4326), ?), transform(GeomFromText(?, 4326), ?)), 4326)));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(path));
 			st.bind(2, WKTUtil.geometryToWKT(point));
@@ -301,6 +305,7 @@ private static String dbname;
 			}
 		}
 	}
+	*/
 	
 	public static Geometry convertFromProjToProj(String fromSrid, String toSrid, Geometry geom) throws Exception {
 		jsqlite.Database db = null;

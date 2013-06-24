@@ -185,7 +185,7 @@ public class PathFollowerTool extends HighlightTool {
 		killFollowerThread = false;
 		currentPoint = p.getMapPos();
 		try {
-			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100);
+			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getActivity().getProject().getSrid());
 		} catch (Exception e) {
 			FLog.e("error gettting geometry buffer", e);
 		}
