@@ -669,7 +669,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public Vector<Geometry> fetchVisibleGPSTrackingForUser(MapPos min, MapPos max, int maxObjects, String querySql, String userid) throws Exception{
+	public Vector<Geometry> fetchVisibleGPSTrackingForUser(List<MapPos> list, int maxObjects, String querySql, String userid) throws Exception{
 		if(querySql == null){
 			return null;
 		}
@@ -679,7 +679,7 @@ public class DatabaseManager {
 			s = "0" + s;
 		}
 		String uuidForUser = "1" + s;
-		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
+		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(list, querySql, maxObjects);
 		Vector<Geometry> userGeometries = new Vector<Geometry>();
 		for (Geometry geometry : geometries) {
 			String[] userData = (String[]) geometry.userData;
@@ -710,7 +710,7 @@ public class DatabaseManager {
 		return fetchAll(query);
 	}
 	
-	public Vector<Geometry> fetchAllVisibleEntityGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+	public Vector<Geometry> fetchAllVisibleEntityGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
@@ -723,12 +723,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
-				ArrayList<MapPos> list = new ArrayList<MapPos>();
-				list.add(new MapPos(min.x, min.y));
-				list.add(new MapPos(max.x, min.y));
-				list.add(new MapPos(max.x, max.y));
-				list.add(new MapPos(min.x, max.y));
-				list.add(new MapPos(min.x, min.y));
 				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
 				stmt.bind(2, maxObjects);
 				Vector<Geometry> results = new Vector<Geometry>();
@@ -768,7 +762,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
@@ -781,12 +775,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
-				ArrayList<MapPos> list = new ArrayList<MapPos>();
-				list.add(new MapPos(min.x, min.y));
-				list.add(new MapPos(max.x, min.y));
-				list.add(new MapPos(max.x, max.y));
-				list.add(new MapPos(min.x, max.y));
-				list.add(new MapPos(min.x, min.y));
 				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
 				stmt.bind(2, maxObjects);
 				Vector<Geometry> results = new Vector<Geometry>();
