@@ -19,6 +19,7 @@ public class TouchSelectionTool extends SelectionTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {		
 		GeometrySelection selection = mapView.getSelectedSelection();
+		GeometrySelection restrictedSelection = mapView.getRestrictedSelection();
 		if (selection == null) {
 			showError("No selection selected");
 			return;
@@ -28,10 +29,18 @@ public class TouchSelectionTool extends SelectionTool {
 		if (geomData.id == null) return;
 		
 		String data = geomData.id;
-		if (selection.hasData(data)) {
-			selection.removeData(data);
-		} else {
-			selection.addData(data);
+		if(restrictedSelection!= null && restrictedSelection.hasData(data)){
+			if (selection.hasData(data)) {
+				mapView.removeFromSelection(data);
+			} else {
+				mapView.addToSelection(data);
+			}
+		}else if(restrictedSelection == null){
+			if (selection.hasData(data)) {
+				mapView.removeFromSelection(data);
+			} else {
+				mapView.addToSelection(data);
+			}
 		}
 		
 		mapView.updateSelections();

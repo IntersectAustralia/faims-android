@@ -43,9 +43,10 @@ public class PointSelectionTool extends HighlightSelectionTool {
 			layout.removeAllViews();
 			layout.addView(settingsButton);
 			layout.addView(selectSelection);
+			layout.addView(restrictSelection);
 			layout.addView(clearButton);
 			layout.addView(selectedSelection);
-			layout.addView(selectedDistance);
+			layout.addView(restrictedSelection);
 			layout.addView(selectionCount);
 		}
 	}

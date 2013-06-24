@@ -43,7 +43,9 @@ public class DatabaseSelectionTool extends SelectionTool {
 			layout.removeAllViews();
 			layout.addView(queryButton);
 			layout.addView(selectSelection);
+			layout.addView(restrictSelection);
 			layout.addView(selectedSelection);
+			layout.addView(restrictedSelection);
 			layout.addView(selectionCount);
 		}
 	}
