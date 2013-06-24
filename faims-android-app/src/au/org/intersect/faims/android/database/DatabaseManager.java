@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -170,16 +171,37 @@ public class DatabaseManager {
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
-				String query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
+				// get parent timestamp for arch entity
+				String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
+				String archEntParentTimestamp = null;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if(st.step()){
+					archEntParentTimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
+				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, entity_type);
+				st.bind(5, archEntParentTimestamp);
+				st.bind(6, entity_type);
 				st.step();
 				st.close();
 				st = null;
+				
+				// get parent timestamp for each attribute
+				HashMap<String, String> aentValueParentTimestamp = new HashMap<String, String>();
+				query = DatabaseQueries.GET_AENT_VALUE_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				while(st.step()){
+					aentValueParentTimestamp.put(st.column_string(0), st.column_string(1));
+				}
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
@@ -191,9 +213,10 @@ public class DatabaseManager {
 					st.bind(4, attribute.getMeasure());
 					st.bind(5, attribute.getText());
 					st.bind(6, attribute.getCertainty());
-					st.bind(7, currentTimestamp);
-					st.bind(8, attribute.isDeleted() ? "true" : null);
-					st.bind(9, attribute.getName());
+					st.bind(7, aentValueParentTimestamp.get(attribute.getName()));
+					st.bind(8, currentTimestamp);
+					st.bind(9, attribute.isDeleted() ? "true" : null);
+					st.bind(10, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -253,18 +276,37 @@ public class DatabaseManager {
 				}
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
-				
-				String query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
+				// get parent timestamp for relationship
+				String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
+				String relationshipParentTimestamp = null;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if(st.step()){
+					relationshipParentTimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+
+				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, rel_type);
+				st.bind(5,relationshipParentTimestamp);
+				st.bind(6, rel_type);
 				st.step();
 				st.close();
 				st = null;
 				
+				// get parent timestamp for each attribute
+				HashMap<String, String> relnValueParentTimestamp = new HashMap<String, String>();
+				query = DatabaseQueries.GET_RELN_VALUE_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				while(st.step()){
+					relnValueParentTimestamp.put(st.column_string(0), st.column_string(1));
+				}
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
 					query = DatabaseQueries.INSERT_INTO_RELNVALUE;
@@ -274,9 +316,10 @@ public class DatabaseManager {
 					st.bind(3, attribute.getVocab());
 					st.bind(4, attribute.getText());
 					st.bind(5, attribute.getCertainty());
-					st.bind(6, currentTimestamp);
-					st.bind(7, attribute.isDeleted() ? "true" : null);
-					st.bind(8, attribute.getName());
+					st.bind(6, relnValueParentTimestamp.get(attribute.getName()));
+					st.bind(7, currentTimestamp);
+					st.bind(8, attribute.isDeleted() ? "true" : null);
+					st.bind(9, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
