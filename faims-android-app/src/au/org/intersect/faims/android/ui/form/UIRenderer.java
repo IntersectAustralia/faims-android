@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -410,21 +411,27 @@ public class UIRenderer implements IRestoreActionListener{
 					}
 					return valueList;
 				}
-				else if (child0 instanceof RadioGroup){
-					RadioGroup rg = (RadioGroup) child0;
-					String value = "";
-					for(int i = 0; i < rg.getChildCount(); ++i){
-						View view = rg.getChildAt(i);
-						
-						if (view instanceof CustomRadioButton){
-							CustomRadioButton rb = (CustomRadioButton) view;
-							if (rb.isChecked()){
-								value = rb.getValue();
-								break;
+				else if (child0 instanceof HorizontalScrollView) {
+					
+					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+					View child1 = horizontalScrollView.getChildAt(0);
+					if(child1 instanceof RadioGroup){
+						RadioGroup rg = (RadioGroup) child1;
+						String value = "";
+						for(int i = 0; i < rg.getChildCount(); ++i){
+							View view = rg.getChildAt(i);
+							
+							if (view instanceof CustomRadioButton){
+								CustomRadioButton rb = (CustomRadioButton) view;
+								if (rb.isChecked()){
+									value = rb.getValue();
+									break;
+								}
 							}
 						}
+						return value;
 					}
-					return value;
+					return null;
 				}
 				else{
 					return null;
@@ -615,26 +622,31 @@ public class UIRenderer implements IRestoreActionListener{
 					
 					View child0 = ll.getChildAt(0);
 					
-					if (child0 instanceof RadioGroup){
-						RadioGroup rg = (RadioGroup) child0;
-						List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
-						for(int i = 0; i < rg.getChildCount(); ++i){
-							View view = rg.getChildAt(i);
-							if (view instanceof CustomRadioButton){
-								buttons.add((CustomRadioButton) view);
+					if (child0 instanceof HorizontalScrollView) {
+						
+						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+						View child1 = horizontalScrollView.getChildAt(0);
+						if(child1 instanceof RadioGroup){
+							RadioGroup rg = (RadioGroup) child1;
+							List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
+							for(int i = 0; i < rg.getChildCount(); ++i){
+								View view = rg.getChildAt(i);
+								if (view instanceof CustomRadioButton){
+									buttons.add((CustomRadioButton) view);
+								}
 							}
+							rg.removeAllViews();
+							for (CustomRadioButton rb : buttons) {
+								CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
+	                            radioButton.setText(rb.getText());
+	                            radioButton.setValue(rb.getValue());
+	                            if (rb.getValue().toString().equalsIgnoreCase(value)){
+	                            	radioButton.setChecked(true);
+								}
+	                            rg.addView(radioButton);
+	                        	
+	                        }
 						}
-						rg.removeAllViews();
-						for (CustomRadioButton rb : buttons) {
-							CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
-                            radioButton.setText(rb.getText());
-                            radioButton.setValue(rb.getValue());
-                            if (rb.getValue().toString().equalsIgnoreCase(value)){
-                            	radioButton.setChecked(true);
-							}
-                            rg.addView(radioButton);
-                        	
-                        }
 						
 					}else if (child0 instanceof CheckBox){
 						for(int i = 0; i < ll.getChildCount(); ++i){

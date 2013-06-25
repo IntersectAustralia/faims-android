@@ -563,7 +563,7 @@ recordAudio(){
 OnAudioRecorded(){
     audioFilePath = getLastAudioFilePath();
     audios.add(audioFilePath);
-    populateAudioList("structure/final/AudioList",audios);
+    populateAudioList("structure/attachment/AudioList",audios);
 }
 
 onEvent("structure/final/Video", "click", "takeVideo()");
@@ -600,7 +600,7 @@ saveRel() {
     audios.clear();
     populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
     populateVideoGallery("structure/final/VideoGallery", videos);
-    populateAudioList("structure/final/AudioList",audios);
+    populateAudioList("structure/attachment/AudioList",audios);
     loadFileAttributes(entity_id);
 }
 

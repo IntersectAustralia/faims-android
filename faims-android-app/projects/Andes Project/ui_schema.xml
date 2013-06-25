@@ -154,7 +154,6 @@
               <VideoGallery/>
               <Video/>
               <Audio/>
-              <AudioList/>
               <Sketch/>
               <sketchfile/>
               <sketchfilename/>
@@ -167,6 +166,9 @@
               <Delete/>
 
             </final>
+            <attachment>
+              <AudioList/>
+            </attachment>
           </structure>
           <corner>
             <cornerDetail>
@@ -983,13 +985,6 @@
         <trigger ref="Audio">
             <label>Record Audio</label>
         </trigger>
-        <select1 ref="AudioList" appearance="compact" faims_certainty="false">
-          <label>Audio List:</label>
-          <item>
-            <label> </label>
-            <value> </value>
-          </item>
-        </select1>
 
         <trigger ref="Sketch">
           <label>Sketch</label>
@@ -1020,6 +1015,16 @@
         <trigger ref="Delete">
           <label>Delete this record</label>
         </trigger>
+      </group>
+      <group ref="attachment" faims_scrollable="false">
+        <label>Audio Attachment</label>
+        <select1 ref="AudioList" appearance="compact" faims_certainty="false">
+          <label>Audio List:</label>
+          <item>
+            <label> </label>
+            <value> </value>
+          </item>
+        </select1>
       </group>
     </group>
     <group ref="corner" faims_archent_type="Corner">
