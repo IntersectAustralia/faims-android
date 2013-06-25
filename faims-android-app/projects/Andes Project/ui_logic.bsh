@@ -28,6 +28,21 @@ populateListForUsers(){
 
 populateListForUsers();
 
+populateListForEntityTypes() {
+	ArrayList list = new ArrayList();
+	list.add("Structure");
+	list.add("Wall");
+	list.add("Doorway");
+	list.add("Feature");
+	list.add("Special Find");
+	list.add("Lichen");
+	list.add("Surface Collection");
+	list.add("Canal");
+	populateDropDown("control/map/entityType", list);
+}
+
+populateListForEntityTypes();
+
 String username = "";
 String device = "";
 
@@ -161,27 +176,43 @@ newCanal(){
     showTabGroup("canal");
 }
 
+newEntity() {
+	
+	type = getFieldValue("control/map/entityType");
+	if (type == null || "".equals(type)) return;
+	
+	if ("Structure".equals(type)) {
+		newStructure();
+	} else if ("Wall".equals(type)) {
+		newFreeWall();
+	} else if ("Doorway".equals(type)) {
+		newDoorway();
+	} else if ("Feature".equals(type)) {
+		newFeature();
+	} else if ("Special Find".equals(type)) {
+		newSpecialFind();
+	} else if ("Lichen".equals(type)) {
+		newLichen();
+	} else if ("Surface Collection".equals(type)) {
+		newSurfaceCollection();
+	} else if ("Canal".equals(type)) {
+		newCanal();
+	}
+
+}
+
+onEvent("control/map/create", "click", "newEntity()");
 onEvent("structure/component/AddCorner", "click", "newCorner()");
 onEvent("structure/component/AddWall", "click", "newStructureWall()");
 onEvent("structure/component/AddDoorway", "click", "newDoorway()");
 onEvent("structure/component/AddNiche", "click", "newNiche()");
-onEvent("control/buttonholder/Doorway", "click", "newDoorway()");
 onEvent("wall/structureWall/NewNiche", "click", "newNiche()");
 onEvent("corner/cornerDetail/AddNiche", "click", "newNiche()");
 onEvent("wall/structureWall/NewWindow", "click", "newWindow()");
 onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
-onEvent("control/buttonholder/Lichen", "click", "newLichen()");
-onEvent("control/buttonholder/Wall", "click", "newFreeWall()");
-onEvent("control/buttonholder/Feature", "click", "newFeature()");
-onEvent("control/buttonholder/SpecialFind", "click", "newSpecialFind()");
-onEvent("control/buttonholder/SurfaceCollection", "click", "newSurfaceCollection()");
-onEvent("control/buttonholder/Canal", "click", "newCanal()");
 onEvent("surfaceCollection/material/Lot", "click", "newLot()");
 
-
-
 onEvent("user/tab1/login", "click", "login()");
-onEvent("control/buttonholder/Structure", "click", "newStructure()");
 
 onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
 onEvent("control/gps/connectinternal", "click", "startInternalGPS()");

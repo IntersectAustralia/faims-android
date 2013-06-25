@@ -23,6 +23,14 @@
           <control>
             <map>
               <map/>
+              <mapContainer>
+                  <child1>
+                      <create></create>
+                  </child1>
+                  <child2>
+                      <entityType></entityType>
+                  </child2>
+              </mapContainer>
             </map>
             <buttonholder>
               <Structure/>
@@ -375,6 +383,7 @@
               <CanalID/>
               <Timestamp/>
               <Author/>
+              <Device></Device>
               <InternalWidth/>
               <ExternalWidth/>
               <Notes/>
@@ -504,129 +513,47 @@
       <bind nodeset="/faims/structure/info/ArchaeologicalElementID" type="decimal"/>
       <bind nodeset="/faims/structure/info/Description" type="string"/>
       <bind nodeset="/faims/structure/info/PreservationDescription" type="string"/>
-
-
-
       <bind nodeset="/faims/structure/info/FormDescription" type="string"/>
       <bind nodeset="/faims/structure/component/WallsTotalCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/WallsGabledCount" type="decimal"/>
-      <bind nodeset="/faims/structure/component/PartitionDescription" type="string"/>
       <bind nodeset="/faims/structure/component/WindowCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/NicheCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/DoorwayCount" type="decimal"/>
-
-
-
+      <bind nodeset="/faims/structure/component/PartitionDescription" type="string"/>
+      <bind nodeset="/faims/structure/construction/ConstructionPeriodDescription" type="string"/>
       <bind nodeset="/faims/structure/construction/ModificationDescription" type="string"/>
       <bind nodeset="/faims/structure/construction/PrincipalFunctionDescription" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/FloorRemainsDescription" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/LongAxis" type="decimal"/>
       <bind nodeset="/faims/structure/finalObservations/ShortAxis" type="decimal"/>
       <bind nodeset="/faims/structure/finalObservations/Diameter" type="decimal"/>
-
-
-
       <bind nodeset="/faims/structure/finalObservations/SurfaceCondition" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetail" type="string"/>
-
-
-
-
-
-
-      <bind nodeset="/faims/corner/cornerDetail/Name" type="string"/>
-      <bind nodeset="/faims/corner/cornerDetail/MasonryDescription" type="string"/>
-      <bind nodeset="/faims/corner/cornerDetail/InkaMasonryDescription" type="string"/>
-      <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="string"/>
-      <bind nodeset="/faims/corner/cornerDetail/CornerDescription" type="string"/>
-
-
-      <bind nodeset="/faims/wall/structureWall/WallID" type="string"/>
+      
+      
+      
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/InkaMasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/WallThickness" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/WallHeight" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/GableHeight" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/GableDistance" type="decimal"/>
-      <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/WindowCount" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/NicheCount" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/DoorwayCount" type="decimal"/>
-
-
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallID" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Timestamp" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Author" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Device" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
-
-
-
-      <bind nodeset="/faims/window/windowDetail/WindowID" type="string"/>
-      <bind nodeset="/faims/window/windowDetail/WindowPosition" type="string"/>
-      <bind nodeset="/faims/window/windowDetail/WindowHeight" type="decimal"/>
-      <bind nodeset="/faims/window/windowDetail/WindowWidth" type="decimal"/>
-      <bind nodeset="/faims/window/windowDetail/WindowDescription" type="string"/>
-
-
-      <bind nodeset="/faims/niche/nicheDetail/NicheID" type="string"/>
-      <bind nodeset="/faims/niche/nicheDetail/NichePosition" type="string"/>
-      <bind nodeset="/faims/niche/nicheDetail/NicheHeight" type="decimal"/>
-      <bind nodeset="/faims/niche/nicheDetail/NicheDepth" type="decimal"/>
-      <bind nodeset="/faims/niche/nicheDetail/NicheWidth" type="decimal"/>
-      <bind nodeset="/faims/niche/nicheDetail/NicheDescription" type="string"/>
-
-
-
-
-      <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
-      <bind nodeset="/faims/lichen/lichenDetail/Size" type="decimal"/>
-      <bind nodeset="/faims/lichen/lichenDetail/Quality" type="string"/>
-      <bind nodeset="/faims/lichen/lichenDetail/Comment" type="string"/>
-      <bind nodeset="/faims/lichen/lichenDetail/GPSLong" type="string"/>
-      <bind nodeset="/faims/lichen/lichenDetail/GPSLat" type="string"/>
-
-
-
-
-
-      <bind nodeset="/faims/feature/featureDetail/FeatureID" type="string"/>
-      <bind nodeset="/faims/feature/featureDetail/Timestamp" type="string"/>
-      <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallID" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Timestamp" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Author" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/Device" type="string"/>
-
-
-
-
-
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
-
-
-
-
-      <bind nodeset="/faims/canal/canalDetail/CanalID" type="string"/>
-      <bind nodeset="/faims/canal/canalDetail/Timestamp" type="string"/>
-      <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
-      <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
-      <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
-
-
-
-
-      <bind nodeset="/faims/doorway/doorDetail/DoorID" type="string"/>
+      
+      
+      
+      <bind nodeset="/faims/corner/cornerDetail/MasonryDescription" type="string"/>
+      <bind nodeset="/faims/corner/cornerDetail/InkaMasonryDescription" type="string"/>
+	  <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
+	  <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="decimal"/>
+      <bind nodeset="/faims/corner/cornerDetail/CornerDescription" type="string"/>
+      
+      
+      
       <bind nodeset="/faims/doorway/doorDetail/DoorOrientation" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/DoorHeight" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/DoorTopWidth" type="decimal"/>
@@ -636,26 +563,58 @@
       <bind nodeset="/faims/doorway/doorDetail/DoorDescription" type="string"/>
       <bind nodeset="/faims/doorway/doorDetail/GPSLong" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/GPSLat" type="decimal"/>
+      
+      
+      
+      <bind nodeset="/faims/niche/nicheDetail/NicheHeight" type="decimal"/>
+      <bind nodeset="/faims/niche/nicheDetail/NicheDepth" type="decimal"/>
+      <bind nodeset="/faims/niche/nicheDetail/NicheWidth" type="decimal"/>
+      <bind nodeset="/faims/niche/nicheDetail/NicheDescription" type="string"/>
+      
+
+	 	
+      <bind nodeset="/faims/window/windowDetail/WindowHeight" type="decimal"/>
+      <bind nodeset="/faims/window/windowDetail/WindowWidth" type="decimal"/>
+      <bind nodeset="/faims/window/windowDetail/WindowDescription" type="string"/>
+
+      
+
+      <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
+      <bind nodeset="/faims/lichen/lichenDetail/Size" type="decimal"/>
+      <bind nodeset="/faims/lichen/lichenDetail/Comment" type="string"/>
+      <bind nodeset="/faims/lichen/lichenDetail/GPSLong" type="decimal"/>
+      <bind nodeset="/faims/lichen/lichenDetail/GPSLat" type="decimal"/>
+
+
+
+      <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
+
+
+
+      
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
 
 
 
 
-      <bind nodeset="/faims/specialFind/findDetail/SpecialFindID" type="string"/>
+      <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
+      <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
+      <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
+
+
+      
+
       <bind nodeset="/faims/specialFind/findDetail/Description" type="string"/>
 
 
 
-      <bind nodeset="/faims/surfaceCollection/description/SurfaceCollectionID" type="string"/>
-      <bind nodeset="/faims/surfaceCollection/description/Author" type="string"/>
-      <bind nodeset="/faims/surfaceCollection/description/Device" type="string"/>
-      <bind nodeset="/faims/surfaceCollection/description/Timestamp" type="string"/>
       <bind nodeset="/faims/surfaceCollection/description/ContextDescription" type="string"/>
       <bind nodeset="/faims/surfaceCollection/material/Comments" type="string"/>
       <bind nodeset="/faims/surfaceCollection/material/LotNumbers" type="string"/>
-      <bind nodeset="/faims/lot/lot/LotID" type="string"/>
-      <bind nodeset="/faims/lot/lot/Timestamp" type="string"/>
-      <bind nodeset="/faims/lot/lot/Author" type="string"/>
-      <bind nodeset="/faims/lot/lot/Device" type="string"/>
     </model>
   </h:head>
   <h:body>
@@ -704,34 +663,25 @@
         <input ref="map" faims_map="true" faims_certainty="false">
           <label> </label>
         </input>
-      </group>
-      <group ref="buttonholder">
-        <label>Actions</label>
-        <trigger ref="Structure">
-          <label>Create Structure</label>
-        </trigger>
-        <trigger ref="Wall">
-          <label>Create Wall</label>
-        </trigger>
-        <trigger ref="Doorway">
-          <label>Create Doorway</label>
-        </trigger>
-        <trigger ref="Feature">
-          <label>Create Feature</label>
-        </trigger>
-        <trigger ref="SpecialFind">
-          <label>Create SpecialFind</label>
-        </trigger>
-        <trigger ref="Lichen">
-          <label>Create Lichen</label>
-        </trigger>
-        <trigger ref="SurfaceCollection">
-          <label>Create Surface Collection</label>
-        </trigger>
-
-        <trigger ref="Canal">
-          <label>Create Canal</label>
-        </trigger>
+        <group ref="mapContainer" faims_style="orientation">
+            <label></label>
+            <group ref="child1" faims_style="even">
+             	<label></label>
+                <trigger ref="create">
+                    <label>Create</label>
+                </trigger>
+            </group>
+            <group ref="child2" faims_style="even">
+                <label></label>
+                <select1 ref="entityType" faims_certainty="false">
+                    <label>Type</label>
+                    <item>
+			            <label>dummy</label>
+			            <value>dummy</value>
+			        </item>
+                </select1>
+            </group>
+        </group>
       </group>
       <group ref="data">
         <label>Loading Data</label>
@@ -832,7 +782,7 @@
         </trigger>
       </group>
     </group>
-    <group ref="structure" faims_rel_type="Structure">
+    <group ref="structure" faims_archent_type="Structure">
       <label>Structure Detail</label>
       <group ref="info">
         <label>Structure Information</label>
@@ -874,19 +824,19 @@
       </group>
       <group ref="component">
         <label>Component Tab</label>
-        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
+        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Walls Recorded:</label>
         </input>
-        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
+        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Gabeled Walls Recorded:</label>
         </input>
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Windows Recorded:</label>
         </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Niches Recorded:</label>
         </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Doorways Recorded:</label>
         </input>
         <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
@@ -994,10 +944,13 @@
         <input ref="Diameter" faims_attribute_name="Diameter" faims_attribute_type="measure">
           <label>Diameter:</label>
         </input>
-        <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="measure">
+        <input ref="SurfaceCondition" faims_attribute_name="SurfaceCondition" faims_attribute_type="freetext">
+          <label>Surface Condition:</label>
+        </input>
+        <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="freetext">
           <label>Modern Use:</label>
         </input>
-        <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="measure">
+        <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
           <label>Disturbances:</label>
         </input>
         <input ref="OtherArchitecturalDetail" faims_attribute_name="OtherArchitecturalDetail" faims_attribute_type="freetext">
@@ -1069,7 +1022,7 @@
         </trigger>
       </group>
     </group>
-    <group ref="corner">
+    <group ref="corner" faims_archent_type="Corner">
       <label>Corner Detail</label>
       <group ref="cornerDetail">
         <label>Corner of a Structure</label>
@@ -1110,11 +1063,11 @@
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
           <label>InkaMasonryDescription:</label>
         </input>
-        <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="freetext">
+        <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="measure">
           <label>CornerNicheCount:</label>
         </input>
         <!--Only include following attributes if no walls are preserved -->
-        <input ref="CornerHeight" faims_attribute_name="CornerHeight" faims_attribute_type="freetext">
+        <input ref="CornerHeight" faims_attribute_name="CornerHeight" faims_attribute_type="measure">
           <label>CornerHeight:</label>
         </input>
         <input ref="CornerDescription" faims_attribute_name="CornerDescription" faims_attribute_type="freetext">
@@ -1136,7 +1089,7 @@
         <!-- {Button: “Add Niche”}               -->
       </group>
     </group>
-        <group ref="wall">
+        <group ref="wall" faims_archent_type="StructureWall">
       <label>Wall Detail</label>
       <group ref="structureWall">
         <label>Wall of a Structure</label>
@@ -1170,10 +1123,10 @@
           <label>InkaMasonryDescription:</label>
         </input>
 
-        <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="freetext">
+        <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
           <label>WallThickness:</label>
         </input>
-        <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="freetext">
+        <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
           <label>WallHeight:</label>
         </input>
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
@@ -1192,19 +1145,19 @@
           </item>
         </select1>
         <!-- Yes,No,Not observable   -->
-        <input ref="GableHeight" faims_attribute_name="GableHeight" faims_attribute_type="freetext">
+        <input ref="GableHeight" faims_attribute_name="GableHeight" faims_attribute_type="measure">
           <label>GableHeight:</label>
         </input>
-        <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="freetext">
+        <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
           <label>GableDistance:</label>
         </input>
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="freetext">
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true">
           <label>WindowCount:</label>
         </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="freetext">
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true">
           <label>NicheCount:</label>
         </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="freetext">
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true">
           <label>DoorwayCount:</label>
         </input>
         <trigger ref="WallPhotos">
@@ -1249,7 +1202,7 @@
 </group>
 
 
-    <group ref="doorway">
+    <group ref="doorway" faims_archent_type="Doorway">
       <label>Doorway Detail</label>
       <group ref="doorDetail">
         <label>Doorway Detail</label>
@@ -1284,16 +1237,16 @@
           </item>
         </select1>
         <!-- <Complete/>,Max preserved -->
-        <input ref="DoorTopWidth" faims_attribute_name="DoorTopWidth" faims_attribute_type="freetext">
+        <input ref="DoorTopWidth" faims_attribute_name="DoorTopWidth" faims_attribute_type="measure">
           <label>DoorTopWidth:</label>
         </input>
-        <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="freetext">
+        <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="measure">
           <label>DoorBaseWidth:</label>
         </input>
-        <input ref="DoorOtherWidth" faims_attribute_name="DoorOtherWidth" faims_attribute_type="freetext">
+        <input ref="DoorOtherWidth" faims_attribute_name="DoorOtherWidth" faims_attribute_type="measure">
           <label>DoorOtherWidth:</label>
         </input>
-        <input ref="DoorOtherWidthHeight" faims_attribute_name="DoorOtherWidthHeight" faims_attribute_type="freetext">
+        <input ref="DoorOtherWidthHeight" faims_attribute_name="DoorOtherWidthHeight" faims_attribute_type="measure">
           <label>DoorOtherWidthHeight:</label>
         </input>
         <input ref="DoorDescription" faims_attribute_name="DoorDescription" faims_attribute_type="freetext">
@@ -1309,10 +1262,10 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="freetext">
+        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label>GPSLong:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="freetext">
+        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label>GPSLat:</label>
         </input>
         <trigger ref="TakePoint">
@@ -1342,7 +1295,7 @@
       </group>
     </group>
 
-    <group ref="niche">
+    <group ref="niche" faims_archent_type="Niche">
       <label>Niche Detail</label>
       <group ref="nicheDetail">
         <label>Niche Detail</label>
@@ -1359,7 +1312,7 @@
             <value>dummy</value>
           </item>
         </select1>
-        <input ref="NicheHeight" faims_attribute_name="NicheHeight" faims_attribute_type="freetext">
+        <input ref="NicheHeight" faims_attribute_name="NicheHeight" faims_attribute_type="measure">
           <label>NicheHeight:</label>
         </input>
         <select1 appearance="full" ref="NicheHeightPreservation" faims_attribute_name="NicheHeightPreservation" faims_attribute_type="vocab">
@@ -1378,10 +1331,10 @@
           </item>
         </select1>
         <!-- <Bottom/>,Top -->
-        <input ref="NicheWidth" faims_attribute_name="NicheWidth" faims_attribute_type="freetext">
+        <input ref="NicheWidth" faims_attribute_name="NicheWidth" faims_attribute_type="measure">
           <label>NicheWidth:</label>
         </input>
-        <input ref="NicheDepth" faims_attribute_name="NicheDepth" faims_attribute_type="freetext">
+        <input ref="NicheDepth" faims_attribute_name="NicheDepth" faims_attribute_type="measure">
           <label>NicheDepth:</label>
         </input>
         <select1 appearance="full" ref="NicheAltar" faims_attribute_name="NicheAltar" faims_attribute_type="vocab">
@@ -1427,14 +1380,14 @@
         <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
-    <group ref="lichen">
+    <group ref="lichen" faims_archent_type="Lichen">
       <label>Lichen Detail</label>
       <group ref="lichenDetail">
         <label>Lichen Detail</label>
         <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext">
           <label>LichenID:</label>
         </input>
-        <input ref="Size" faims_attribute_name="Size" faims_attribute_type="freetext">
+        <input ref="Size" faims_attribute_name="Size" faims_attribute_type="measure">
           <label>Size:</label>
         </input>
         <select1 appearance="full" ref="Substrate" faims_attribute_name="Substrate" faims_attribute_type="vocab">
@@ -1475,10 +1428,10 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="freetext">
+        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label>GPSLong:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="freetext">
+        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label>GPSLat:</label>
         </input>
         <trigger ref="TakePoint">
@@ -1507,20 +1460,20 @@
         <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
-    <group ref="feature">
+    <group ref="feature" faims_archent_type="Feature">
       <label>Feature Detail</label>
       <group ref="featureDetail">
         <label>Features</label>
         <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext">
           <label>FeatureID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
@@ -1558,20 +1511,20 @@
         <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
       </group>
     </group>
-    <group ref="freeWall">
+    <group ref="freeWall" faims_archent_type="FreeWall">
       <label>Free Standing Wall Detail</label>
       <group ref="freeWallDetail">
         <label>Free Standing Wall</label>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext">
           <label>WallID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
         </input>
         <input ref="WallDescription" faims_attribute_name="WallDescription" faims_attribute_type="freetext">
@@ -1653,23 +1606,26 @@
         <!-- {button}-->
       </group>
     </group>
-    <group ref="canal">
+    <group ref="canal" faims_archent_type="Canal">
       <label>Canal Detail</label>
       <group ref="canalDetail">
         <label>Canal Detail</label>
         <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext">
           <label>CanalID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="InternalWidth" faims_attribute_name="InternalWidth" faims_attribute_type="freetext">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>Device:</label>
+        </input>
+        <input ref="InternalWidth" faims_attribute_name="InternalWidth" faims_attribute_type="measure">
           <label>InternalWidth:</label>
         </input>
-        <input ref="ExternalWidth" faims_attribute_name="ExternalWidth" faims_attribute_type="freetext">
+        <input ref="ExternalWidth" faims_attribute_name="ExternalWidth" faims_attribute_type="measure">
           <label>ExternalWidth:</label>
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext">
@@ -1707,20 +1663,20 @@
         <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
       </group>
     </group>
-    <group ref="specialFind">
+    <group ref="specialFind" faims_archent_type="SpecialFind">
       <label>Special Find</label>
       <group ref="findDetail">
         <label>Special Find Detail</label>
         <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext">
           <label>SpecialFindID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
@@ -1766,20 +1722,20 @@
         <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
       </group>
     </group>
-    <group ref="surfaceCollection">
+    <group ref="surfaceCollection" faims_archent_type="SurfaceCollection">
       <label>Surface Collection</label>
       <group ref="description">
         <label>Collection Description</label>
         <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext">
           <label>SurfaceCollectionID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
         </input>
         <select1 appearance="full" ref="SurfaceCollectionContext" faims_attribute_name="SurfaceCollectionContext" faims_attribute_type="vocab">
@@ -1852,7 +1808,7 @@
       </group>
    </group>
 
-      <group ref="lot">
+      <group ref="lot" faims_archent_type="Lot">
         <label>Lot Description</label>
         <group ref="lot">
                   <label>Lot Description</label>
@@ -1860,13 +1816,13 @@
         <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext">
           <label>LotID:</label>
         </input>
-        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
         </input>
         <select1 appearance="full" ref="Material" faims_attribute_name="Material" faims_attribute_type="vocab">
@@ -1900,7 +1856,7 @@
       </group>
     </group>
 
-        <group ref="window">
+        <group ref="window" faims_archent_type="Window">
       <label>Window Detail</label>
       <group ref="windowDetail">
         <label>Window Detail</label>
@@ -1910,7 +1866,7 @@
         <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">
           <label>WindowPosition:</label>
         </input>
-        <input ref="WindowHeight" faims_attribute_name="WindowHeight" faims_attribute_type="freetext">
+        <input ref="WindowHeight" faims_attribute_name="WindowHeight" faims_attribute_type="measure">
           <label>WindowHeight:</label>
         </input>
         <select1 appearance="full" ref="WindowHeightPreservation" faims_attribute_name="WindowHeightPreservation" faims_attribute_type="vocab">
@@ -1921,7 +1877,7 @@
           </item>
         </select1>
         <!-- <Complete/>,Max complete -->
-        <input ref="WindowWidth" faims_attribute_name="WindowWidth" faims_attribute_type="freetext">
+        <input ref="WindowWidth" faims_attribute_name="WindowWidth" faims_attribute_type="measure">
           <label>WindowWidth:</label>
         </input>
         <input ref="WindowDescription" faims_attribute_name="WindowDescription" faims_attribute_type="freetext">
