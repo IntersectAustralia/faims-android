@@ -54,6 +54,7 @@ import au.org.intersect.faims.android.ui.map.tools.GeometriesIntersectSelectionT
 import au.org.intersect.faims.android.ui.map.tools.HighlightTool;
 import au.org.intersect.faims.android.ui.map.tools.LegacySelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.LineDistanceTool;
+import au.org.intersect.faims.android.ui.map.tools.LoadTool;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
 import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.PointSelectionTool;
@@ -163,7 +164,7 @@ public class CustomMapView extends MapView {
 	
 	public static interface LoadCallback {
 	
-		public void onLoad(String id);
+		public void onLoad(String id, boolean isEntity);
 		
 	}
 	
@@ -279,8 +280,6 @@ public class CustomMapView extends MapView {
 	private CreateCallback createCallback;
 
 	private LoadCallback loadCallback;
-
-	private boolean toolCreateEnabled;
 
 	private int vertexLayerId;
 	
@@ -1057,6 +1056,7 @@ public class CustomMapView extends MapView {
 		tools.add(new PolygonSelectionTool(this.getContext(), this));
 		tools.add(new GeometriesIntersectSelectionTool(this.getContext(), this));
 		tools.add(new FollowTool(this.getContext(), this));
+		tools.add(new LoadTool(this.getContext(), this));
 		//tools.add(new PathFollowerTool(this.getContext(), this));
 	}
 
@@ -2041,13 +2041,9 @@ public class CustomMapView extends MapView {
 		this.loadCallback = loadCallback;
 	}
 
-	public void setToolCreateEnabled(boolean enabled) {
-		this.toolCreateEnabled = enabled;
-	}
-
 	public void notifyGeometryCreated(Geometry geom) {
 		GeometryData data = (GeometryData) geom.userData;
-		if (toolCreateEnabled && createCallback != null) {
+		if (createCallback != null) {
 			createCallback.onCreate(data.geomId);
 		}
 	}
@@ -2055,7 +2051,7 @@ public class CustomMapView extends MapView {
 	public void notifyGeometryLoaded(Geometry geom) {
 		GeometryData data = (GeometryData) geom.userData;
 		if (loadCallback != null) {
-			loadCallback.onLoad(data.id);
+			loadCallback.onLoad(data.id, data.type == GeometryData.Type.ENTITY);
 		}
 	}
 	

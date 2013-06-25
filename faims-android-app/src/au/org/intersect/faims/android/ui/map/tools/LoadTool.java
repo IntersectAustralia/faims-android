@@ -9,9 +9,9 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 
 public class LoadTool extends MapTool {
 	
-	public static final String NAME = "Load";
+	public static final String NAME = "Load Data";
 
-	public LoadTool(Context context, CustomMapView mapView, String name) {
+	public LoadTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 	}
 	

@@ -582,14 +582,18 @@ onToolEvent(String ref, String type, String callback) {
 	linker.bindToolEvent(ref, type, callback);
 }
 
-setToolCreateEnabled(boolean enabled) {
-	linker.setToolCreateEnabled(enabled);
-}
-
 getMapGeometryCreated() {
 	return _map_geometry_created;
 }
 
 getMapGeometryLoaded() {
 	return _map_geometry_loaded;
+}
+
+getMapGeometryLoadedType() {
+	return _map_geometry_loaded_type;
+}
+
+refreshMap(String ref) {
+	linker.refreshMap(ref);
 }

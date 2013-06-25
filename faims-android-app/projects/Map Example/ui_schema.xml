@@ -9,6 +9,14 @@
     <model>
       <instance>
         <faims id="map_example">
+          <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
           <user>
               <tab1>
                   <users></users>
@@ -86,6 +94,14 @@
           <tabgroup5>
               <tab1>
                   <map></map>
+                  <container>
+                      <child1>
+                          <clear></clear>
+                      </child1>
+                      <child2>
+                          <createChoices></createChoices>
+                      </child2>
+                  </container>
               </tab1>
               <tab2>
                   <entity></entity>
@@ -111,6 +127,21 @@
   </h:head>
 
   <h:body>
+    <group ref="style">
+      <label></label>
+      <group ref="orientation">
+        <label></label>
+        <input ref="orientation">
+            <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label></label>
+        <input ref="layout_weight">
+            <label>1</label>
+        </input>
+      </group>
+    </group>
     <group ref="user">
       <label>User List</label>
       <group ref="tab1" faims_scrollable="false">
@@ -349,9 +380,28 @@
       <label>Map UI</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
-        <input ref="map" faims_map="true">
+        <input ref="map" faims_map="true" fains_certainty="false">
             <label>Map:</label>
         </input>
+        <group ref="container" faims_style="orientation">
+            <label></label>
+            <group ref="child1" faims_style="even">
+                <label></label>
+                <trigger ref="clear">
+		            <label>Clear</label>
+		        </trigger>
+            </group>
+            <group ref="child2" faims_style="even">
+                <label></label>
+                <select1 ref="createChoices" appearance="full"  faims_certainty="false" faims_annotation="false">
+	              <label>Create:</label>
+	              <item>
+	                  <label>dummy</label>
+	                  <value>dummy</value>
+	              </item>
+	          </select1>
+            </group>
+        </group>
       </group>
       <group ref="tab2">
           <label>Entity</label>

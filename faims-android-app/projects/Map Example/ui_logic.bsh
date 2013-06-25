@@ -936,17 +936,60 @@ private initUIMap() {
 	refreshUIEntities();
 	refreshUIRelationships();
 	
+	choices = new ArrayList();
+	choices.add("None");
+	choices.add("Simple Entity");
+	choices.add("Above Below Relationship");
+	populateRadioGroup("tabgroup5/tab1/createChoices", choices);
+	
 }
 
 onEvent("tabgroup5/tab2/clear", "click", "clearUIEntity()");
 onEvent("tabgroup5/tab2/save", "click", "saveUIEntity()");
 onEvent("tabgroup5/tab2/update", "click", "updateUIEntity(getFieldValue(\"tabgroup5/tab2/entity\"))");
-onEvent("tabgroup5/tab2/load", "click", "loadUIEntity()");
+onEvent("tabgroup5/tab2/load", "click", "loadUIEntity(null)");
 
 onEvent("tabgroup5/tab3/clear", "click", "clearUIRelationship()");
 onEvent("tabgroup5/tab3/save", "click", "saveUIRelationship()");
 onEvent("tabgroup5/tab3/update", "click", "updateUIRelationship(getFieldValue(\"tabgroup5/tab3/relationship\"))");
-onEvent("tabgroup5/tab3/load", "click", "loadUIRelationship()");
+onEvent("tabgroup5/tab3/load", "click", "loadUIRelationship(null)");
+
+onEvent("tabgroup5/tab1/clear", "click", "clearCreateGeometry()");
+onToolEvent("tabgroup5/tab1/map", "create", "onCreateGeometry()");
+onToolEvent("tabgroup5/tab1/map", "load", "onLoadGeometry()");
+
+int createGeomId = 0;
+
+clearCreateGeometry() {
+	createGeomId = 0;
+}
+
+onCreateGeometry() {
+	createGeomId = getMapGeometryCreated();
+	
+	System.out.println("create id:" + createGeomId);
+	
+	choice = getFieldValue("tabgroup5/tab1/createChoices");
+	if ("None".equals(choice)) {
+		createGeomId = 0;
+	} else if ("Simple Entity".equals(choice)) {
+		showTab("tabgroup5/tab2");
+	} else if ("Above Below Relationship".equals(choice)) {
+		showTab("tabgroup5/tab3");
+	}
+	
+}
+
+onLoadGeometry() {
+	uuid = getMapGeometryLoaded();
+	isEntity = "entity".equals(getMapGeometryLoadedType());
+	
+	if (isEntity) {
+		loadUIEntity(uuid);
+	} else {
+		loadUIRelationship(uuid);
+	}
+}
 
 refreshUIEntities() {
 	Object entities = fetchEntityList("simpleentity");
@@ -965,11 +1008,6 @@ saveUIEntity() {
 updateUIEntity(String entityId) {
 	
 	if (entityId == null || "".equals(entityId)) entityId = null;
-	
-	if (getGeometryHighlights("tabgroup5/tab1/map") == null || getGeometryHighlights("tabgroup5/tab1/map").size() == 0) {
-		showWarning("Logic Error", "Please select geometry to save to entity");
-		return;
-	}
 
 	List attributes = createAttributeList();
 	if (entityId == null) {
@@ -978,27 +1016,36 @@ updateUIEntity(String entityId) {
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
 	
-	List collection = getGeometryHighlights("tabgroup5/tab1/map");
-	if (collection != null) {
-		System.out.println(collection);
+	ArrayList list = null;
+	if (createGeomId > 0) {
+		Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+		list = new ArrayList();
+		list.add(g);
+		
+		clearGeometry("tabgroup5/tab1/map", createGeomId);
+		createGeomId = 0;
 	}
 	
-	String id = saveArchEnt(entityId, "simpleentity", collection, attributes);
+	String id = saveArchEnt(entityId, "simpleentity", list, attributes);
 	
 	refreshUIEntities();
+	
+	refreshMap("tabgroup5/tab1/map");
 	
 	return id;
 }
 
-loadUIEntity() {
+loadUIEntity(entityId) {
 	
-	entityId = getFieldValue("tabgroup5/tab2/entity");
+	if (entityId == null) {
+		entityId = getFieldValue("tabgroup5/tab2/entity");
+	}
 	
 	if (entityId == null || "".equals(entityId)) return;
 	
 	Object entity = fetchArchEnt(entityId);
 	
-	showTabGroup("tabgroup5", entityId);
+	showTab("tabgroup5/tab2", entityId);
 	
 }
 
@@ -1020,11 +1067,6 @@ saveUIRelationship() {
 updateUIRelationship(String relId) {
 	
 	if (relId == null || "".equals(relId)) relId = null;
-	
-	if (getGeometryHighlights("tabgroup5/tab1/map") == null || getGeometryHighlights("tabgroup5/tab1/map").size() == 0) {
-		showWarning("Logic Error", "Please select geometry to save to relationship");
-		return;
-	}	
 
 	List attributes = createAttributeList();
 	if (relId == null) {
@@ -1032,21 +1074,30 @@ updateUIRelationship(String relId) {
 	}
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
 	
-	List collection = getGeometryHighlights("tabgroup5/tab1/map"); 
-	if (collection != null) {
-		System.out.println(collection);
+	ArrayList list = null;
+	if (createGeomId > 0) {
+		Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+		list = new ArrayList();
+		list.add(g);
+		
+		clearGeometry("tabgroup5/tab1/map", createGeomId);
+		createGeomId = 0;
 	}
 	
-	String id = saveRel(relId, "abovebelow", collection, attributes);
+	String id = saveRel(relId, "abovebelow", list, attributes);
 	
 	refreshUIRelationships();
+	
+	refreshMap("tabgroup5/tab1/map");
 	
 	return id;
 }
 
-loadUIRelationship() {
+loadUIRelationship(relId) {
 	
-	relId = getFieldValue("tabgroup5/tab3/relationship");
+	if (relId == null) {
+		relId = getFieldValue("tabgroup5/tab3/relationship");
+	}
 	
 	if (relId == null || "".equals(relId)) return;
 	
@@ -1059,5 +1110,7 @@ loadUIRelationship() {
 			setFieldCertainty("tabgroup5/tab3/name", attribute.getCertainty());
 		}
 	}
+	
+	showTab("tabgroup5/tab3");
 	
 }

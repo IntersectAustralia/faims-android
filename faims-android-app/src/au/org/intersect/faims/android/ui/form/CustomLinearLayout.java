@@ -89,7 +89,7 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
 	@Override
 	public void applyStyle(List<Map<String, String>> styleMappings) {
 		if(!styleMappings.isEmpty()){
-			LayoutParams layoutParams = this.getLayoutParams() != null ? (LayoutParams) this.getLayoutParams() : new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+			LayoutParams layoutParams = this.getLayoutParams() != null ? (LayoutParams) this.getLayoutParams() : new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			for (Map<String, String> styles : styleMappings) {
 				if (!styles.isEmpty()) {
 					for (Entry<String, String> attribute : styles.entrySet()) {

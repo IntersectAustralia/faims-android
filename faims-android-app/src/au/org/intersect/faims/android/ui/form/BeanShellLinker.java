@@ -3884,19 +3884,23 @@ public class BeanShellLinker {
 							}
 						}
 					});
-				} else {
+				} else if ("load".equals(type)) {
 					mapView.setLoadCallback(new CustomMapView.LoadCallback() {
 						
 						@Override
-						public void onLoad(String id) {
+						public void onLoad(String id, boolean isEntity) {
 							try {
 								interpreter.set("_map_geometry_loaded", id);
+								interpreter.set("_map_geometry_loaded_type", isEntity ? "entity" : "relationship");
 								execute(callback);
 							} catch (Exception e) {
 								FLog.e("error setting geometry loaded", e);
 							}
 						}
 					});	
+				} else {
+					FLog.w("Error cannot bind to tool event " + type);
+					showWarning("Logic Error", "Error cannot bind to tool event " + type);
 				}
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3909,20 +3913,20 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void setToolCreateEnabled(String ref, boolean enabled) {
+	public void refreshMap(String ref) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.setToolCreateEnabled(enabled);
+				mapView.updateRenderer();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
 			}
 		} catch (Exception e) {
-			FLog.e("error setting tool create enabled " + ref, e);
-			showWarning("Logic Error",
-					"Error setting tool create enabled " + ref);
+			FLog.e("error refreshing map " + ref, e);
+			showWarning("Logic Error", "Error refreshing map " + ref);
 		}
 	}
+	
 }
