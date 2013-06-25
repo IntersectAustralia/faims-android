@@ -1,0 +1,593 @@
+getDefaultUsersList() {
+    fetchOne("delete from user;");
+    fetchOne("insert into user values(1, 'Adela', 'Sobotkova');");
+    fetchOne("insert into user values(2, 'Brian', 'Ballsun-Stanton');");
+    fetchOne("insert into user values(3, 'Oliver', 'Brown');");
+    fetchOne("insert into user values(4, 'Matthew', 'Kelly');");
+    fetchOne("insert into user values(5, 'Penny', 'Crook');");
+    fetchOne("insert into user values(6, 'Shawn', 'Ross');");
+    fetchOne("insert into user values(7, 'Anita', 'Yousif');");
+    users = fetchAll("select userid, fname ||' ' || lname from user");
+    return users;
+}
+
+usersList = getDefaultUsersList();
+
+
+populateListForUsers(){
+    populateDropDown("user/tab1/users", getDefaultUsersList());
+    populateList("user/tab1/devices", fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = 'Device' "));
+}
+
+/*login(){
+    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+    setUser(user);
+    showTabGroup("controls");
+}*/
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+
+    if (getFieldValue("user/tab1/devices") != ""){
+    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
+    device = deviceResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("control");}
+    else {
+        showWarning("Logic Error", "Please Choose Device");
+
+    }
+}
+
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
+    return a;
+}
+
+makeGallery(String attrib){
+    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"'");
+    return a;
+}
+
+newStructure(){
+    showTabGroup("structure");
+    populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
+    populateDropDown("structure/info/Form", makeVocab("Form"));
+    populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
+    populateList("structure/construction/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/construction/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/construction/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/construction/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/construction/Classification", makeVocab("Classification"));
+    populateList("structure/finalObservations/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/finalObservations/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
+    setFieldValue("structure/info/Timestamp", getCurrentTime());
+    setFieldValue("structure/info/Author", username);
+    setFieldValue("structure/info/Device", device);
+}
+
+
+newCorner(){
+    showTabGroup("corner");
+    populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
+    populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
+    populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
+    populateList("corner/cornerDetail/InkaMasonry", makeVocab("InkaMasonry"));
+
+}
+
+newStructureWall(){
+    showTabGroup("wall");
+    populatePictureGallery("wall/structureWall/MasonryType", makeGallery("MasonryType"));
+    populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
+    populateList("wall/structureWall/Gable", makeVocab("Gable"));
+    populateList("wall/structureWall/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+
+
+}
+
+newDoorway(){
+    showTabGroup("doorway");
+    populateList("doorway/doorDetail/DoorMasonry", makeVocab("DoorMasonry"));
+    populateList("doorway/doorDetail/DoorHeightPreservation", makeVocab("DoorHeightPreservation"));
+    populateList("doorway/doorDetail/DoorPosition", makeVocab("DoorPosition"));
+
+}
+newNiche(){
+    showTabGroup("niche");
+    populateList("niche/nicheDetail/NicheForm", makeVocab("NicheForm"));
+    populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
+    populateList("niche/nicheDetail/NicheWidthLoc", makeVocab("NicheWidthLoc"));
+    populateList("niche/nicheDetail/NicheAltar", makeVocab("NicheAltar"));
+
+}
+newWindow(){
+    showTabGroup("window");
+    populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
+}
+newLichen(){
+    showTabGroup("lichen");
+    populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
+    populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
+    populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
+
+}
+
+newFreeWall(){
+    showTabGroup("freeWall");
+    populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
+    populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
+    populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+
+}
+
+newFeature(){
+    showTabGroup("feature");
+}
+
+newSpecialFind(){
+    showTabGroup("specialFind");
+    populateList("specialFind/findDetail/Type", makeVocab("Type"));
+
+}
+
+newSurfaceCollection(){
+    showTabGroup("surfaceCollection");
+    populateList("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
+    populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
+    populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
+    populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
+
+
+
+}
+
+newLot(){
+    showTabGroup("lot");
+    populateList("lot/lot/Material", makeVocab("Material"));
+
+}
+
+newCanal(){
+    showTabGroup("canal");
+}
+
+onEvent("structure/component/AddCorner", "click", "newCorner()");
+onEvent("structure/component/AddWall", "click", "newStructureWall()");
+onEvent("structure/component/AddDoorway", "click", "newDoorway()");
+onEvent("structure/component/AddNiche", "click", "newNiche()");
+onEvent("control/buttonholder/Doorway", "click", "newDoorway()");
+onEvent("wall/structureWall/NewNiche", "click", "newNiche()");
+onEvent("corner/cornerDetail/AddNiche", "click", "newNiche()");
+onEvent("wall/structureWall/NewWindow", "click", "newWindow()");
+onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
+onEvent("control/buttonholder/Lichen", "click", "newLichen()");
+onEvent("control/buttonholder/Wall", "click", "newFreeWall()");
+onEvent("control/buttonholder/Feature", "click", "newFeature()");
+onEvent("control/buttonholder/SpecialFind", "click", "newSpecialFind()");
+onEvent("control/buttonholder/SurfaceCollection", "click", "newSurfaceCollection()");
+onEvent("control/buttonholder/Canal", "click", "newCanal()");
+onEvent("surfaceCollection/material/Lot", "click", "newLot()");
+
+
+
+onEvent("user/tab1/login", "click", "login()");
+onEvent("control/buttonholder/Structure", "click", "newStructure()");
+
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+setGPSUpdateInterval(4);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+
+}
+
+
+syncStarted() {
+    //showToast("starting sync");
+}
+
+syncCompleted() {
+    //showToast("completed sync");
+    updateAll();
+}
+
+syncFailed() {
+    //showToast("failed sync");
+}
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+
+saveFiles(values, loadedfiles, files, type, attributes){
+    if (!"".equals(values)){
+        if(loadedfiles.isEmpty()){
+            for(String file : files){
+
+                filename = attachFile(file, 1);
+                if(values.contains(file)){
+                    attributes.add(createEntityAttribute(type, filename, null, null, null));
+                }else{
+                    attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+                }
+            }
+        }else{
+            for(String file : files){
+                if(loadedfiles.contains(file)){
+                    if(values.contains(file)){
+                        attributes.add(createEntityAttribute(type, file, null, null, null));
+                    }else{
+                        attributes.add(createEntityAttribute(type, file, null, null, null,true));
+                    }
+                }else{
+
+                    filename = attachFile(file, 1);
+                    if(values.contains(file)){
+                        attributes.add(createEntityAttribute(type, filename, null, null, null));
+                    }else{
+                        attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+                    }
+                }
+            }
+        }
+    }else{
+        if(loadedfiles.isEmpty()){
+            for(String file : files){
+
+                filename = attachFile(file, 1);
+                attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+            }
+        }else{
+            for(String file : files){
+                if(loadedfiles.contains(file)){
+                    attributes.add(createEntityAttribute(type, file, null, null, null,true));
+                }else{
+
+                    filename = attachFile(file, 1);
+                    attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+                }
+            }
+        }
+    }
+}
+
+
+setFilename() {
+    setFieldValue("structure/final/file", getLastSelectedFilename());
+}
+
+setSketchFilename() {
+    setFieldValue("structure/final/sketchfile", getLastSelectedFilename());
+}
+
+
+attachSketchFile() {
+    showFileBrowser("setSketchFilename()");
+}
+
+attachFile() {
+    showFileBrowser("setFilename()");
+}
+
+
+
+ArrayList pictures = new ArrayList();
+
+takePicture() {
+    openCamera("OnPictureTaken()");
+}
+
+OnPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    pictures.add(pictureFilepath);
+    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
+}
+
+
+ArrayList cornerpictures = new ArrayList();
+
+takeCornerPicture() {
+    openCamera("OnCornerPictureTaken()");
+}
+
+OnCornerPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    cornerpictures.add(pictureFilepath);
+    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerpictures);
+}
+
+
+onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
+
+
+
+
+ArrayList nichepictures = new ArrayList();
+
+takeNichePicture() {
+    openCamera("OnNichePictureTaken()");
+}
+
+OnNichePictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    nichepictures.add(pictureFilepath);
+    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichepictures);
+}
+
+
+onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
+
+
+
+ArrayList canalpictures = new ArrayList();
+
+takecanalPicture() {
+    openCamera("OncanalPictureTaken()");
+}
+
+OncanalPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    canalpictures.add(pictureFilepath);
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+}
+
+
+onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
+
+
+ArrayList lichenpictures = new ArrayList();
+
+takeLichenPicture() {
+    openCamera("OnLichenPictureTaken()");
+}
+
+OnLichenPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    lichenpictures.add(pictureFilepath);
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
+}
+
+
+onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
+
+
+
+ArrayList windowpictures = new ArrayList();
+
+takeWindowPicture() {
+    openCamera("OnWindowPictureTaken()");
+}
+
+OnWindowPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    windowpictures.add(pictureFilepath);
+    populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowpictures);
+}
+
+
+onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
+
+
+
+
+ArrayList specialFindpictures = new ArrayList();
+
+takespecialFindPicture() {
+    openCamera("OnspecialFindPictureTaken()");
+}
+
+OnspecialFindPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    specialFindpictures.add(pictureFilepath);
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
+}
+
+
+onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
+
+
+ArrayList featurepictures = new ArrayList();
+
+takeFeaturePicture() {
+    openCamera("OnFeaturePictureTaken()");
+}
+
+OnFeaturePictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    featurepictures.add(pictureFilepath);
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+}
+
+
+onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
+
+
+ArrayList freewallpictures = new ArrayList();
+
+takeFreewallPicture() {
+    openCamera("OnFreewallPictureTaken()");
+}
+
+OnFreewallPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    freewallpictures.add(pictureFilepath);
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallpictures);
+}
+
+
+onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
+
+
+
+ArrayList doorwaypictures = new ArrayList();
+
+takeDoorwayPicture() {
+    openCamera("OnDoorwayPictureTaken()");
+}
+
+OnDoorwayPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    doorwaypictures.add(pictureFilepath);
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
+}
+
+takeDoorywayPoint(){
+    location = getGPSPosition();
+    if (location == null) {
+        showWarning("Logic Error", "No GPS Signal");
+    } else {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+
+        setFieldValue("doorway/doorDetail/GPSLong", longitude);
+        setFieldValue("doorway/doorDetail/GPSLat", latitude);
+
+        //point = createPoint(longitude, latitude);
+
+        // TODO make this reflect db layer when saving with db.
+        //lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
+
+    }
+}
+onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
+onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
+
+takeLichenPoint(){
+    location = getGPSPosition();
+    if (location == null) {
+        showWarning("Logic Error", "No GPS Signal");
+    } else {
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+
+        setFieldValue("lichen/lichenDetail/GPSLong", longitude);
+        setFieldValue("lichen/lichenDetail/GPSLat", latitude);
+
+        //point = createPoint(longitude, latitude);
+
+        // TODO make this reflect db layer when saving with db.
+        //lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
+
+    }
+}
+
+onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
+
+
+ArrayList swallpictures = new ArrayList();
+
+
+takeStructWallPicture() {
+    openCamera("OnStructWallPictureTaken()");
+}
+OnStructWallPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    swallpictures.add(pictureFilepath);
+    populateCameraPictureGallery("wall/structureWall/PhotoGallery", swallpictures);
+}
+
+onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
+
+ArrayList videos = new ArrayList();
+
+takeVideo() {
+    openVideo("OnVideoTaken()");
+}
+
+OnVideoTaken() {
+    videoFilepath = getLastVideoFilePath();
+    videos.add(videoFilepath);
+    populateVideoGallery("structure/final/VideoGallery", videos);
+}
+
+ArrayList audios = new ArrayList();
+
+recordAudio(){
+    recordAudio("OnAudioRecorded()");
+}
+
+OnAudioRecorded(){
+    audioFilePath = getLastAudioFilePath();
+    audios.add(audioFilePath);
+    populateAudioList("structure/final/AudioList",audios);
+}
+
+onEvent("structure/final/Video", "click", "takeVideo()");
+onEvent("structure/final/Audio", "click", "recordAudio()");
+onEvent("structure/final/AddAttachment", "click", "attachFile()");
+onEvent("structure/final/Sketch", "click", "attachFile()");
+onEvent("structure/final/SaveAndClose", "click", "saveRelAndClose()");
+onEvent("structure/final/Photo", "click", "takePicture()");
+
+String entity_id = null;
+String rel_id = null;
+
+
+saveEntity() {
+    entity_id = updateEntity(null);
+    /*pictures.clear();
+    videos.clear();
+    audios.clear();
+    populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+    populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+    populateAudioList("tabgroup1/tab2/audiolist",audios);
+    loadFileAttributes(entity_id);*/
+}
+
+saveRelAndClose(){
+    rel_id = updateRel(null);
+    closeTabGroup("structure");
+}
+
+saveRel() {
+    rel_id = updateRel(null);
+    pictures.clear();
+    videos.clear();
+    audios.clear();
+    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
+    populateVideoGallery("structure/final/VideoGallery", videos);
+    populateAudioList("structure/final/AudioList",audios);
+    loadFileAttributes(entity_id);
+}
+
+updateStructure(id){
+    if (id == null || "".equals(id)) id = null;
+
+    ArrayList loadedFiles = new ArrayList();
+    ArrayList loadedSketches = new ArrayList();
+    ArrayList loadedPictures = new ArrayList();
+    ArrayList loadedVideos = new ArrayList();
+    ArrayList loadedAudios = new ArrayList();
+    List attributes = createAttributeList();
+    if (id == null){
+        //attributes.add(createRelationshipAttribute("relationship", "Small " + entityCount++, null, null, null));
+    } else {
+        //load the reln here.
+    }
+
+
+
+}

@@ -733,14 +733,32 @@ removeLayer(String ref, int layerId) {
 	linker.removeLayer(ref, layerId);
 }
 
+/**
+  * Centering the map that has the reference based on the current GPS position if there is GPS position.
+  * If the map reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map
+  */
 centerOnCurrentPosition(String ref){
 	linker.centerOnCurrentPosition(ref);
 }
 
+/**
+  * Create canvas layer and add it to the map that has the reference. If the map reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map
+  * @param layerName the name of the canvas layer
+  */
 createCanvasLayer(String ref, String layerName) {
 	return linker.createCanvasLayer(ref, layerName);
 }
 
+/**
+  * Set the visibility of a layer in the map that has the reference. If the map reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map
+  * @param layerId the layerId to set visibility, will show logic error dialog if not found
+  * @param visible the boolean to set whether it is visible or not
+  */
 setLayerVisible(String ref, int layerId, boolean visible) {
 	linker.setLayerVisible(ref, layerId, visible);
 }
