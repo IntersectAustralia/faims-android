@@ -1517,10 +1517,10 @@
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext">
           <label>Timestamp:</label>
         </input>
-        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_readonly="true">
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true">
           <label>Author:</label>
         </input>
-        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_readonly="true">
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true">
           <label>Device:</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
