@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -171,16 +172,37 @@ public class DatabaseManager {
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
-				String query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
+				// get parent timestamp for arch entity
+				String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
+				String archEntParentTimestamp = null;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if(st.step()){
+					archEntParentTimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
+				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, entity_type);
+				st.bind(5, archEntParentTimestamp);
+				st.bind(6, entity_type);
 				st.step();
 				st.close();
 				st = null;
+				
+				// get parent timestamp for each attribute
+				HashMap<String, String> aentValueParentTimestamp = new HashMap<String, String>();
+				query = DatabaseQueries.GET_AENT_VALUE_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				while(st.step()){
+					aentValueParentTimestamp.put(st.column_string(0), st.column_string(1));
+				}
 				
 				// save entity attributes
 				for (EntityAttribute attribute : attributes) {
@@ -192,9 +214,10 @@ public class DatabaseManager {
 					st.bind(4, attribute.getMeasure());
 					st.bind(5, attribute.getText());
 					st.bind(6, attribute.getCertainty());
-					st.bind(7, currentTimestamp);
-					st.bind(8, attribute.isDeleted() ? "true" : null);
-					st.bind(9, attribute.getName());
+					st.bind(7, aentValueParentTimestamp.get(attribute.getName()));
+					st.bind(8, currentTimestamp);
+					st.bind(9, attribute.isDeleted() ? "true" : null);
+					st.bind(10, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -333,18 +356,37 @@ public class DatabaseManager {
 				}
 				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
-				
-				String query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
+				// get parent timestamp for relationship
+				String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
+				String relationshipParentTimestamp = null;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if(st.step()){
+					relationshipParentTimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+
+				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, rel_type);
+				st.bind(5,relationshipParentTimestamp);
+				st.bind(6, rel_type);
 				st.step();
 				st.close();
 				st = null;
 				
+				// get parent timestamp for each attribute
+				HashMap<String, String> relnValueParentTimestamp = new HashMap<String, String>();
+				query = DatabaseQueries.GET_RELN_VALUE_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				while(st.step()){
+					relnValueParentTimestamp.put(st.column_string(0), st.column_string(1));
+				}
 				// save relationship attributes
 				for (RelationshipAttribute attribute : attributes) {
 					query = DatabaseQueries.INSERT_INTO_RELNVALUE;
@@ -354,9 +396,10 @@ public class DatabaseManager {
 					st.bind(3, attribute.getVocab());
 					st.bind(4, attribute.getText());
 					st.bind(5, attribute.getCertainty());
-					st.bind(6, currentTimestamp);
-					st.bind(7, attribute.isDeleted() ? "true" : null);
-					st.bind(8, attribute.getName());
+					st.bind(6, relnValueParentTimestamp.get(attribute.getName()));
+					st.bind(7, currentTimestamp);
+					st.bind(8, attribute.isDeleted() ? "true" : null);
+					st.bind(9, attribute.getName());
 					st.step();
 					st.close();
 					st = null;
@@ -706,7 +749,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public Vector<Geometry> fetchVisibleGPSTrackingForUser(MapPos min, MapPos max, int maxObjects, String querySql, String userid) throws Exception{
+	public Vector<Geometry> fetchVisibleGPSTrackingForUser(List<MapPos> list, int maxObjects, String querySql, String userid) throws Exception{
 		if(querySql == null){
 			return null;
 		}
@@ -716,7 +759,7 @@ public class DatabaseManager {
 			s = "0" + s;
 		}
 		String uuidForUser = "1" + s;
-		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
+		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(list, querySql, maxObjects);
 		Vector<Geometry> userGeometries = new Vector<Geometry>();
 		for (Geometry geometry : geometries) {
 			String[] userData = (String[]) geometry.userData;
@@ -747,7 +790,7 @@ public class DatabaseManager {
 		return fetchAll(query);
 	}
 	
-	public Vector<Geometry> fetchAllVisibleEntityGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+	public Vector<Geometry> fetchAllVisibleEntityGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
@@ -760,12 +803,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
-				ArrayList<MapPos> list = new ArrayList<MapPos>();
-				list.add(new MapPos(min.x, min.y));
-				list.add(new MapPos(max.x, min.y));
-				list.add(new MapPos(max.x, max.y));
-				list.add(new MapPos(min.x, max.y));
-				list.add(new MapPos(min.x, min.y));
 				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
 				stmt.bind(2, maxObjects);
 				Vector<Geometry> results = new Vector<Geometry>();
@@ -805,7 +842,7 @@ public class DatabaseManager {
 		}
 	}
 	
-	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(MapPos min, MapPos max, String userQuery, int maxObjects) throws Exception {
+	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
@@ -818,12 +855,6 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
-				ArrayList<MapPos> list = new ArrayList<MapPos>();
-				list.add(new MapPos(min.x, min.y));
-				list.add(new MapPos(max.x, min.y));
-				list.add(new MapPos(max.x, max.y));
-				list.add(new MapPos(min.x, max.y));
-				list.add(new MapPos(min.x, min.y));
 				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
 				stmt.bind(2, maxObjects);
 				Vector<Geometry> results = new Vector<Geometry>();

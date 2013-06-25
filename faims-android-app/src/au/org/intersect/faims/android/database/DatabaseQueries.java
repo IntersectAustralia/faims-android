@@ -3,8 +3,8 @@ package au.org.intersect.faims.android.database;
 public final class DatabaseQueries {
 
 	public static final String INSERT_INTO_ARCHENTITY = 
-		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp) " +
-			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ? " +
+		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, parentTimeStamp) " +
+			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, ? " +
 			"FROM aenttype " + 
 			"WHERE aenttypename = ? COLLATE NOCASE;";
 	
@@ -12,16 +12,24 @@ public final class DatabaseQueries {
 			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn)\n" + 
 			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326)\n" + 
 			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid);";
-	
+
+	public static final String GET_ARCH_ENT_PARENT_TIMESTAMP =
+		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
+
 	public static final String INSERT_INTO_AENTVALUE = 
-		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted) " +
-			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ? " +
+		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, parentTimeStamp, ValueTimestamp, deleted) " +
+			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " + 
 			"WHERE attributeName = ? COLLATE NOCASE;";
-	
+
+	public static final String GET_AENT_VALUE_PARENT_TIMESTAMP =
+		"SELECT attributename, max(valuetimestamp) FROM aentvalue " +
+			"JOIN attributekey using (attributeid) " +
+			"WHERE uuid = ? group by attributeid;";
+
 	public static final String INSERT_INTO_RELATIONSHIP = 
-		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp) " +
-			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ? " +
+		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, parentTimeStamp) " +
+			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, ?" +
 			"FROM relntype " +
 			"WHERE relntypename = ? COLLATE NOCASE;";
 	
@@ -30,9 +38,17 @@ public final class DatabaseQueries {
 			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326)\n" + 
 			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid);";
 	
+	public static final String GET_RELATIONSHIP_PARENT_TIMESTAMP =
+		"SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;";
+
+	public static final String GET_RELN_VALUE_PARENT_TIMESTAMP =
+		"SELECT attributename, max(relnvaluetimestamp) FROM relnvalue " +
+			"JOIN attributekey using (attributeid) " +
+			"WHERE relationshipid = ? group by attributeid;";
+
 	public static final String INSERT_INTO_RELNVALUE = 
-		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted) " +
-			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ? " +
+		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, parentTimeStamp, RelnValueTimestamp, deleted) " +
+			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " + 
 			"WHERE attributeName = ? COLLATE NOCASE;";
 

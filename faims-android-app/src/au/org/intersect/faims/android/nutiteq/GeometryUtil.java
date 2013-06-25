@@ -229,6 +229,7 @@ public class GeometryUtil {
 	public static List<Geometry> convertGeometryFromProjToProj(String fromSrid, String toSrid, List<Geometry> geomList) {
 		try {
 			ArrayList<Geometry> newList = new ArrayList<Geometry>();
+			if(geomList == null) return null;
 			for (Geometry geom : geomList) {
 				Geometry g = SpatialiteUtil.convertFromProjToProj(fromSrid, toSrid, geom);
 				if (geom instanceof Point) {

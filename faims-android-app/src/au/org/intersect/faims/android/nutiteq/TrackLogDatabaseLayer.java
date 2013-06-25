@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -40,9 +41,7 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 	    }
 		
 		try {
-			MapPos min = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
-			MapPos max = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
-			
+			ArrayList<MapPos> pts = getMapBoundaries();
 			if (type == Type.GPS_TRACK) {
 				Vector<Geometry> objects = new Vector<Geometry>();
 				for(Entry<User, Boolean> user : users.entrySet()){
@@ -57,7 +56,8 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 						GeometryStyle pointStyle = GeometryStyle.defaultPointStyle();
 						pointStyle.pointColor = Color.HSVToColor(hsv);
 						this.pointStyle = pointStyle;
-						objectTemp = dbmgr.fetchVisibleGPSTrackingForUser(min, max, maxObjects, querySql, user.getKey().getUserId());
+
+						objectTemp = dbmgr.fetchVisibleGPSTrackingForUser(pts, maxObjects, querySql, user.getKey().getUserId());
 						createElementsInLayer(zoom, objectTemp, objects, GeometryData.Type.ENTITY);
 					}
 				}

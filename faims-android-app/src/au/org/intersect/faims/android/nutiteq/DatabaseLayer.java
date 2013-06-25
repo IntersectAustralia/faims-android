@@ -143,18 +143,17 @@ public class DatabaseLayer extends GeometryLayer {
 	    }
 		
 		try {
-			MapPos min = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
-			MapPos max = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
+			ArrayList<MapPos> pts = getMapBoundaries();
 			Vector<Geometry> objectTemp = null;
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
 			GeometryData.Type dataType;
 			if (type == Type.ENTITY) {
 				dataType = GeometryData.Type.ENTITY;
-				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(min, max, querySql, maxObjects);
+				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
 				dataType = GeometryData.Type.RELATIONSHIP;
-				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(min, max, querySql, maxObjects);
+				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, maxObjects);
 			}else {
 				throw new Exception("database layer has no type");
 			}
@@ -199,31 +198,46 @@ public class DatabaseLayer extends GeometryLayer {
 	}
 	
 	protected GeometryStyle getGeometryStyle(Geometry geom) {
-		  if (geom instanceof Point) {
-			  return pointStyle;
-		  } else if (geom instanceof Line) {
-			  return lineStyle;
-		  } else if (geom instanceof Polygon) {
-			  return polygonStyle;
-		  }
-		  return null;
-	  }
-	  
-	  protected GeometryStyle getGeometryStyle(Geometry geom, String id) {
-		  List<GeometrySelection> selections = mapView.getSelections();
-		  for (GeometrySelection set : selections) {
-			  if (set.isActive() && set.hasData(id)) {
-				  if (geom instanceof Point) {
-					  return set.getPointStyle();
-				  } else if (geom instanceof Line) {
-					  return set.getLineStyle();
-				  } else if (geom instanceof Polygon) {
-					  return set.getPolygonStyle();
-				  }
-			  }
-		  }
-		  return getGeometryStyle(geom);
-	  }
+		if (geom instanceof Point) {
+			return pointStyle;
+		} else if (geom instanceof Line) {
+			return lineStyle;
+		} else if (geom instanceof Polygon) {
+			return polygonStyle;
+		}
+		return null;
+	}
+
+	protected GeometryStyle getGeometryStyle(Geometry geom, String id) {
+		List<GeometrySelection> selections = mapView.getSelections();
+		for (GeometrySelection set : selections) {
+			if (set.isActive() && set.hasData(id)) {
+				if (geom instanceof Point) {
+					return set.getPointStyle();
+				} else if (geom instanceof Line) {
+					return set.getLineStyle();
+				} else if (geom instanceof Polygon) {
+					return set.getPolygonStyle();
+				}
+			}
+		}
+		return getGeometryStyle(geom);
+	}
+	
+	protected ArrayList<MapPos> getMapBoundaries() {
+			MapPos p1 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
+			MapPos p2 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
+			MapPos p3 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
+			MapPos p4 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
+			MapPos p5 = p1;
+			ArrayList<MapPos> pts = new ArrayList<MapPos>();
+			pts.add(p1);
+			pts.add(p2);
+			pts.add(p3);
+			pts.add(p4);
+			pts.add(p5);
+			return pts;
+		}
 
 	public void hideGeometry(String id) {
 		hideGeometryList.add(id);
