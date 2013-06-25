@@ -1203,27 +1203,31 @@ public class BeanShellLinker {
 
 					View child0 = ll.getChildAt(0);
 
-					if (child0 instanceof RadioGroup) {
-						RadioGroup rg = (RadioGroup) child0;
-						List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
-						for (int i = 0; i < rg.getChildCount(); ++i) {
-							View view = rg.getChildAt(i);
-							if (view instanceof CustomRadioButton) {
-								buttons.add((CustomRadioButton) view);
+					if (child0 instanceof HorizontalScrollView) {
+						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+						View child1 = horizontalScrollView.getChildAt(0);
+						if(child1 instanceof RadioGroup){
+							RadioGroup rg = (RadioGroup) child1;
+							List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
+							for (int i = 0; i < rg.getChildCount(); ++i) {
+								View view = rg.getChildAt(i);
+								if (view instanceof CustomRadioButton) {
+									buttons.add((CustomRadioButton) view);
+								}
 							}
-						}
-						rg.removeAllViews();
-						for (CustomRadioButton rb : buttons) {
-							CustomRadioButton radioButton = new CustomRadioButton(
-									rg.getContext());
-							radioButton.setText(rb.getText());
-							radioButton.setValue(rb.getValue());
-							if (rb.getValue().toString()
-									.equalsIgnoreCase(value)) {
-								radioButton.setChecked(true);
+							rg.removeAllViews();
+							for (CustomRadioButton rb : buttons) {
+								CustomRadioButton radioButton = new CustomRadioButton(
+										rg.getContext());
+								radioButton.setText(rb.getText());
+								radioButton.setValue(rb.getValue());
+								if (rb.getValue().toString()
+										.equalsIgnoreCase(value)) {
+									radioButton.setChecked(true);
+								}
+								rg.addView(radioButton);
+	
 							}
-							rg.addView(radioButton);
-
 						}
 
 					} else if (child0 instanceof CheckBox) {
@@ -1480,21 +1484,26 @@ public class BeanShellLinker {
 						}
 					}
 					return valueList;
-				} else if (child0 instanceof RadioGroup) {
-					RadioGroup rg = (RadioGroup) child0;
-					String value = "";
-					for (int i = 0; i < rg.getChildCount(); ++i) {
-						View view = rg.getChildAt(i);
-
-						if (view instanceof CustomRadioButton) {
-							CustomRadioButton rb = (CustomRadioButton) view;
-							if (rb.isChecked()) {
-								value = rb.getValue();
-								break;
+				} else if (child0 instanceof HorizontalScrollView) {
+					
+					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+					View child1 = horizontalScrollView.getChildAt(0);
+					if(child1 instanceof RadioGroup){
+						RadioGroup rg = (RadioGroup) child1;
+						String value = "";
+						for (int i = 0; i < rg.getChildCount(); ++i) {
+							View view = rg.getChildAt(i);
+	
+							if (view instanceof CustomRadioButton) {
+								CustomRadioButton rb = (CustomRadioButton) view;
+								if (rb.isChecked()) {
+									value = rb.getValue();
+									break;
+								}
 							}
 						}
+						return value;
 					}
-					return value;
 				} else {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
@@ -1749,16 +1758,21 @@ public class BeanShellLinker {
 							checkBox.setValue(pair.getValue());
 							ll.addView(checkBox);
 						}
-					} else if (child0 instanceof RadioGroup) {
-						RadioGroup rg = (RadioGroup) child0;
-						rg.removeAllViews();
-
-						for (NameValuePair pair : pairs) {
-							CustomRadioButton radioButton = new CustomRadioButton(
-									ll.getContext());
-							radioButton.setText(pair.getName());
-							radioButton.setValue(pair.getValue());
-							rg.addView(radioButton);
+					} else if (child0 instanceof HorizontalScrollView) {
+						
+						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+						View child1 = horizontalScrollView.getChildAt(0);
+						if(child1 instanceof RadioGroup){
+							RadioGroup rg = (RadioGroup) child1;
+							rg.removeAllViews();
+	
+							for (NameValuePair pair : pairs) {
+								CustomRadioButton radioButton = new CustomRadioButton(
+										ll.getContext());
+								radioButton.setText(pair.getName());
+								radioButton.setValue(pair.getValue());
+								rg.addView(radioButton);
+							}
 						}
 					}
 				} else if (obj instanceof CustomListView) {
@@ -1808,79 +1822,81 @@ public class BeanShellLinker {
 				galleriesLayout.removeAllViews();
 				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
 				for (Picture picture : pictures) {
-					String path = picture.getUrl()
-							.contains(
-									Environment.getExternalStorageDirectory()
-											.getPath()) ? picture.getUrl()
-							: activity.getProjectDir() + "/" + picture.getUrl();
-					File pictureFile = new File(path);
-					if (pictureFile.exists()) {
-						LinearLayout galleryLayout = new LinearLayout(
-								galleriesLayout.getContext());
-						galleryLayout.setOrientation(LinearLayout.VERTICAL);
-						final CustomImageView gallery = new CustomImageView(
-								galleriesLayout.getContext());
-						LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-								400, 400);
+					String path = null;
+					if(picture.getUrl() != null){
+						path = picture.getUrl()
+								.contains(
+										Environment.getExternalStorageDirectory()
+												.getPath()) ? picture.getUrl()
+								: activity.getProjectDir() + "/" + picture.getUrl();
+					}
+					LinearLayout galleryLayout = new LinearLayout(
+							galleriesLayout.getContext());
+					galleryLayout.setOrientation(LinearLayout.VERTICAL);
+					final CustomImageView gallery = new CustomImageView(
+							galleriesLayout.getContext());
+					LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+							400, 400);
+					if(path != null && new File(path).exists()){
 						gallery.setImageURI(Uri.parse(path));
-						gallery.setBackgroundColor(Color.LTGRAY);
-						gallery.setPadding(10, 10, 10, 10);
-						gallery.setLayoutParams(layoutParams);
-						gallery.setPicture(picture);
-						gallery.setOnClickListener(new OnClickListener() {
+					}
+					gallery.setBackgroundColor(Color.LTGRAY);
+					gallery.setPadding(10, 10, 10, 10);
+					gallery.setLayoutParams(layoutParams);
+					gallery.setPicture(picture);
+					gallery.setOnClickListener(new OnClickListener() {
 
-							@Override
-							public void onClick(View v) {
-								CustomImageView selectedImageView = (CustomImageView) v;
-								if (horizontalScrollView.isMulti()) {
-									for (ImageView view : galleryImages) {
-										if (view.equals(selectedImageView)) {
+						@Override
+						public void onClick(View v) {
+							CustomImageView selectedImageView = (CustomImageView) v;
+							if (horizontalScrollView.isMulti()) {
+								for (ImageView view : galleryImages) {
+									if (view.equals(selectedImageView)) {
+										if (horizontalScrollView
+												.getSelectedImageViews() != null) {
 											if (horizontalScrollView
-													.getSelectedImageViews() != null) {
-												if (horizontalScrollView
-														.getSelectedImageViews()
-														.contains(
-																selectedImageView)) {
-													view.setBackgroundColor(Color.LTGRAY);
-													horizontalScrollView
-															.removeSelectedImageView(selectedImageView);
-												} else {
-													view.setBackgroundColor(Color.BLUE);
-													horizontalScrollView
-															.addSelectedImageView(selectedImageView);
-												}
+													.getSelectedImageViews()
+													.contains(
+															selectedImageView)) {
+												view.setBackgroundColor(Color.LTGRAY);
+												horizontalScrollView
+														.removeSelectedImageView(selectedImageView);
 											} else {
 												view.setBackgroundColor(Color.BLUE);
 												horizontalScrollView
 														.addSelectedImageView(selectedImageView);
 											}
-										}
-									}
-								} else {
-									horizontalScrollView
-											.setSelectedImageView(selectedImageView);
-									for (ImageView view : galleryImages) {
-										if (view.equals(selectedImageView)) {
-											view.setBackgroundColor(Color.BLUE);
 										} else {
-											view.setBackgroundColor(Color.LTGRAY);
+											view.setBackgroundColor(Color.BLUE);
+											horizontalScrollView
+													.addSelectedImageView(selectedImageView);
 										}
 									}
 								}
+							} else {
+								horizontalScrollView
+										.setSelectedImageView(selectedImageView);
+								for (ImageView view : galleryImages) {
+									if (view.equals(selectedImageView)) {
+										view.setBackgroundColor(Color.BLUE);
+									} else {
+										view.setBackgroundColor(Color.LTGRAY);
+									}
+								}
 							}
-						});
-						TextView textView = new TextView(
-								galleriesLayout.getContext());
-						String name = picture.getName() != null ? picture
-								.getName() : new File(path).getName();
-						textView.setText(name);
-						textView.setGravity(Gravity.CENTER_HORIZONTAL);
-						textView.setTextSize(20);
-						galleryLayout.addView(textView);
-						galleryImages.add(gallery);
-						galleryLayout.addView(gallery);
-						galleriesLayout.addView(galleryLayout);
-					}
+						}
+					});
+					TextView textView = new TextView(
+							galleriesLayout.getContext());
+					String name = picture.getName() != null ? picture
+							.getName() : new File(path).getName();
+					textView.setText(name);
+					textView.setGravity(Gravity.CENTER_HORIZONTAL);
+					textView.setTextSize(20);
+					galleryLayout.addView(textView);
+					galleryImages.add(gallery);
+					galleryLayout.addView(gallery);
+					galleriesLayout.addView(galleryLayout);
 				}
 				horizontalScrollView.setImageViews(galleryImages);
 			} else {

@@ -28,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -408,6 +409,8 @@ public class Tab implements Parcelable{
         selectLayout.setOrientation(LinearLayout.VERTICAL);
         RadioGroup radioGroupLayout = new RadioGroup(this.activityRef.get());
         radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
+        HorizontalScrollView scrollView = new HorizontalScrollView(this.activityRef.get());
+		scrollView.addView(radioGroupLayout);
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	CustomRadioButton radioButton = new CustomRadioButton(this.activityRef.get());
         	String innerText = selectChoice.getLabelInnerText();
@@ -416,7 +419,7 @@ public class Tab implements Parcelable{
             radioButton.setValue(selectChoice.getValue());
             radioGroupLayout.addView(radioButton);
         }
-        selectLayout.addView(radioGroupLayout);
+        selectLayout.addView(scrollView);
         return selectLayout;
 	}
 	

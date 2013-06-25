@@ -532,7 +532,7 @@ recordAudio(){
 OnAudioRecorded(){
     audioFilePath = getLastAudioFilePath();
     audios.add(audioFilePath);
-    populateAudioList("structure/final/AudioList",audios);
+    populateAudioList("structure/audioattachment/AudioList",audios);
 }
 
 onEvent("structure/final/Video", "click", "takeVideo()");

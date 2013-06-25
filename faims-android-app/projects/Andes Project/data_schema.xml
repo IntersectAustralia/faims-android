@@ -265,8 +265,8 @@
 			<term pictureURL="files/data/masonry/Type11b.jpg">Tipo 11b</term>
 			<term pictureURL="files/data/masonry/Type12.jpg">Tipo 12</term>
 			<term pictureURL="files/data/masonry/Type13.jpg">Tipo 13</term>
-			<term pictureURL="files/data/masonry/Other.jpg">Otro</term>
-			<term pictureURL="files/data/masonry/None.jpg">No observable</term>
+			<term>Otro</term>
+			<term>No observable</term>
 		</lookup>
 	</property>
 	<property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
