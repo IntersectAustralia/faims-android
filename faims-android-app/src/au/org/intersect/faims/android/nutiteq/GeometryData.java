@@ -33,4 +33,13 @@ public class GeometryData {
 		this.layerId = layerId;
 	}
 	
+	public boolean equals(GeometryData d) {
+		if (d.id != null && id != null && d.id.equals(id)) {
+			return true;
+		} else if (d.geomId > 0 && geomId > 0 && d.geomId == geomId) {
+			return true;
+		}
+		return false;
+	}
+	
 }

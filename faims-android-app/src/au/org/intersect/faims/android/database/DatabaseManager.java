@@ -13,6 +13,7 @@ import jsqlite.Stmt;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.WKBUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
@@ -530,9 +531,9 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] gs = WkbRead.readWkb(
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(1))), null);
+		                            .hexStringToByteArray(stmt.column_string(1))), null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -599,9 +600,9 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				List<Geometry> geomList = new ArrayList<Geometry>();
 				if(stmt.step()){
-					Geometry[] gs = WkbRead.readWkb(
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(1))), null);
+		                            .hexStringToByteArray(stmt.column_string(1))), null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -771,9 +772,9 @@ public class DatabaseManager {
 				while(stmt.step()){
 					String uuid = stmt.column_string(0);
 					String response = stmt.column_string(1);
-					Geometry[] gs = WkbRead.readWkb(
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(2))), null);
+		                            .hexStringToByteArray(stmt.column_string(2))), null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -829,9 +830,9 @@ public class DatabaseManager {
 				while(stmt.step()){
 					String uuid = stmt.column_string(0);
 					String response = stmt.column_string(1);
-					Geometry[] gs = WkbRead.readWkb(
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(2))), null);
+		                            .hexStringToByteArray(stmt.column_string(2))), null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];

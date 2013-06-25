@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -280,6 +281,8 @@ public class CustomMapView extends MapView {
 	private LoadCallback loadCallback;
 
 	private boolean toolCreateEnabled;
+
+	private int vertexLayerId;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -328,6 +331,7 @@ public class CustomMapView extends MapView {
 		
 		RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
 		
+		// cache gps bitmaps
 		blueDot = UnscaledBitmapLoader.decodeResource(
 				getResources(), R.drawable.blue_dot);
 		greyDot = UnscaledBitmapLoader.decodeResource(
@@ -337,10 +341,22 @@ public class CustomMapView extends MapView {
 		greyArrow = UnscaledBitmapLoader.decodeResource(
 				getResources(), R.drawable.grey_arrow);
 		
+		// start map threads
 		startMapOverlayThread();
         startGPSLocationThread();
         
+        // set default value for showing point coords as degrees or decimal
         setShowDecimal(!GeometryUtil.EPSG4326.equals(activityRef.get().getProject().getSrid()));
+        
+        // create vertex editing canvas
+        try {
+        	CanvasLayer layer = new CanvasLayer(nextLayerId(), "Vertex Canvas Layer " + UUID.randomUUID(),
+    				new EPSG3857());
+    		this.getLayers().addLayer(layer);
+        	vertexLayerId = addLayer(layer);
+        } catch (Exception e) {
+        	FLog.e("error adding vertex layer", e);
+        }
 	}
 
 	public CustomMapView(Context context) {
@@ -671,6 +687,8 @@ public class CustomMapView extends MapView {
         	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
         }
 		
+		orderLayers();
+		
 		return addLayer(gdalLayer);
 	}
 
@@ -693,6 +711,8 @@ public class CustomMapView extends MapView {
         	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
         	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
         }
+		
+		orderLayers();
 		
 		return addLayer(gdalLayer);
 	}
@@ -736,6 +756,7 @@ public class CustomMapView extends MapView {
 		// ogrLayer.printSupportedDrivers();
 		// ogrLayer.printLayerDetails(table);
 		this.getLayers().addLayer(ogrLayer);
+		orderLayers();
 		return addLayer(ogrLayer);
 	}
 
@@ -774,6 +795,8 @@ public class CustomMapView extends MapView {
 			this.getLayers().addLayer(textLayer);
 		}
 		
+		orderLayers();
+		
 		return addLayer(spatialLayer);
 	}
 
@@ -783,6 +806,7 @@ public class CustomMapView extends MapView {
 		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName,
 				new EPSG3857());
 		this.getLayers().addLayer(layer);
+		orderLayers();
 		return addLayer(layer);
 	}
 	
@@ -805,6 +829,8 @@ public class CustomMapView extends MapView {
 			this.getLayers().addLayer(textLayer);
 		}
 		
+		orderLayers();
+		
 		return addLayer(layer);
 	}
 	
@@ -826,6 +852,8 @@ public class CustomMapView extends MapView {
 			layer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
+		
+		orderLayers();
 		
 		return addLayer(layer);
 	}
@@ -1132,12 +1160,25 @@ public class CustomMapView extends MapView {
 			throw new MapException("Geometry highlight is locked");
 		}
 		
-		highlightGeometryList.remove(geom);
+		GeometryData data = (GeometryData) geom.userData;
+		for (ListIterator<Geometry> iterator = highlightGeometryList.listIterator(); iterator.hasNext();) {
+			Geometry g = iterator.next();
+			GeometryData d = (GeometryData) g.userData;
+			if (d.equals(data)) {
+				iterator.remove();
+				break;
+			}
+		}
 		updateDrawView();
 	}
 	
 	public boolean hasHighlight(Geometry geom) {
-		return highlightGeometryList.contains(geom);
+		GeometryData data = (GeometryData) geom.userData;
+		for (Geometry g :  highlightGeometryList) {
+			GeometryData d = (GeometryData) g.userData;
+			if (d.equals(data)) return true;
+		}
+		return false;
 	}
 	
 	public List<Geometry> getHighlights() {
@@ -1472,6 +1513,10 @@ public class CustomMapView extends MapView {
 			});
 		}
 	}
+	
+	public void orderLayers() {
+		setAllLayers(getAllLayers());
+	}
 
 	public List<Layer> getAllLayers() {
 		List<Layer> layers = getLayers().getAllLayers();
@@ -1480,7 +1525,11 @@ public class CustomMapView extends MapView {
 			if ((layer instanceof SpatialiteTextLayer) || (layer instanceof DatabaseTextLayer) || (layer instanceof MarkerLayer)) {
 				// ignore
 			} else {
-				tempLayers.add(layer);
+				if (layer instanceof CanvasLayer && ((CanvasLayer) layer).getLayerId() == vertexLayerId) {
+					// ignore
+				} else {
+					tempLayers.add(layer);
+				}
 			}
 		}
 		return tempLayers;
@@ -1501,6 +1550,7 @@ public class CustomMapView extends MapView {
 				tempLayers.add(layer);
 			}
 		}
+		tempLayers.add(getLayer(vertexLayerId));
 		this.getLayers().setLayers(tempLayers);
 	}
 	
@@ -2006,6 +2056,41 @@ public class CustomMapView extends MapView {
 		GeometryData data = (GeometryData) geom.userData;
 		if (loadCallback != null) {
 			loadCallback.onLoad(data.id);
+		}
+	}
+	
+	public int getVertexLayerId() {
+		return vertexLayerId;
+	}
+
+	// note: temporarily disable database layer loading geom
+	public void hideGeometry(Geometry geom) {
+		GeometryData data = (GeometryData) geom.userData;
+		if (data.id == null) {
+			FLog.d("geometry must have id");
+			return;
+		}
+		Layer layer = getLayer(data.layerId);
+		if (layer instanceof DatabaseLayer) {
+			DatabaseLayer dblayer = (DatabaseLayer) layer;
+			dblayer.hideGeometry(data.id);
+		} else {
+			FLog.d("layer must be database layer");
+		}
+	}
+	
+	public void clearHiddenGeometry(Geometry geom) {
+		GeometryData data = (GeometryData) geom.userData;
+		if (data.id == null) {
+			FLog.d("geometry must have id");
+			return;
+		}
+		Layer layer = getLayer(data.layerId);
+		if (layer instanceof DatabaseLayer) {
+			DatabaseLayer dblayer = (DatabaseLayer) layer;
+			dblayer.clearHiddenList();
+		} else {
+			FLog.d("layer must be database layer");
 		}
 	}
 

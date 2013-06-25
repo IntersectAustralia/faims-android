@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -42,6 +43,7 @@ public class DatabaseLayer extends GeometryLayer {
 	protected String querySql;
 	protected CustomMapView mapView;
 	protected String userid;
+	private ArrayList<String> hideGeometryList;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, GeometryStyle pointStyle,
@@ -69,6 +71,8 @@ public class DatabaseLayer extends GeometryLayer {
 	    if (polygonStyle != null) {
 	      minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
 	    }
+	    
+	    hideGeometryList = new ArrayList<String>();
 	}
 
 	public String getName() {
@@ -175,6 +179,8 @@ public class DatabaseLayer extends GeometryLayer {
 		    GeometryStyle style = getGeometryStyle(object, userData[0]);
 		    GeometryData geomData = new GeometryData(userData[0], dataType, userData[1], style, layerId);
 		    
+		    if (hideGeometryList.contains(geomData.id)) continue; 
+		    
 		    if(object instanceof Point){
 	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
 	        }else if(object instanceof Line){
@@ -218,5 +224,13 @@ public class DatabaseLayer extends GeometryLayer {
 		  }
 		  return getGeometryStyle(geom);
 	  }
+
+	public void hideGeometry(String id) {
+		hideGeometryList.add(id);
+	}
+	
+	public void clearHiddenList() {
+		hideGeometryList.clear();
+	}
 
 }

@@ -99,10 +99,15 @@ public class EditTool extends HighlightTool {
 			if (EditTool.this.vertexGeometry != null) {
 				for (Geometry geom : EditTool.this.vertexGeometry) {
 					GeometryData data = (GeometryData) geom.userData;
-					if (geom instanceof Line) {
-						EditTool.this.mapView.drawLine(data.layerId, GeometryUtil.convertToWgs84(((Line) geom).getVertexList()), data.style);
-					} else if (geom instanceof Polygon) {
-						EditTool.this.mapView.drawPolygon(data.layerId, GeometryUtil.convertToWgs84(((Polygon) geom).getVertexList()), data.style);
+					
+					if (data.id == null) {
+						if (geom instanceof Line) {
+							EditTool.this.mapView.drawLine(data.layerId, GeometryUtil.convertToWgs84(((Line) geom).getVertexList()), data.style);
+						} else if (geom instanceof Polygon) {
+							EditTool.this.mapView.drawPolygon(data.layerId, GeometryUtil.convertToWgs84(((Polygon) geom).getVertexList()), data.style);
+						}
+					} else {
+						mapView.clearHiddenGeometry(geom);
 					}
 					
 					ArrayList<Point> geometryPoints = EditTool.this.vertexGeometryToPointsMap.get(geom);
@@ -115,7 +120,7 @@ public class EditTool extends HighlightTool {
 						}
 					}
 				}
-				
+				mapView.updateRenderer();
 			}
 		} catch (Exception e) {
 			FLog.e("error resetting vertex geometry", e);
@@ -140,6 +145,11 @@ public class EditTool extends HighlightTool {
 						button.setChecked(false);
 						return;
 					}
+					if (hasLegacyGeometry()) {
+						showError("Cannot edit legacy geometry");
+						button.setChecked(false);
+						return;
+					}
 					
 					if (!button.isChecked()) {
 						
@@ -157,18 +167,26 @@ public class EditTool extends HighlightTool {
 							}
 
 							GeometryData data = (GeometryData) geom.userData;
-							Geometry newGeom = null;
-							if (geom instanceof Line) {
-								newGeom = EditTool.this.mapView.drawLine(data.layerId, pts, data.style);
-							} else if (geom instanceof Polygon) {
-								newGeom = EditTool.this.mapView.drawPolygon(data.layerId, pts, data.style);
-							}
 							
-							if (newGeom != null) {
-								mapView.saveGeometry(GeometryUtil.convertGeometryToWgs84(newGeom));
+							if (data.id == null) {
+								if (geom instanceof Line) {
+									EditTool.this.mapView.drawLine(data.layerId, pts, data.style);
+								} else if (geom instanceof Polygon) {
+									EditTool.this.mapView.drawPolygon(data.layerId, pts, data.style);
+								}
+							} else {
+								
+								mapView.clearHiddenGeometry(geom);
+								
+								if (geom instanceof Line) {
+									mapView.saveGeometry(new Line(pts, null, data.style.toLineStyleSet(), data));
+								} else if (geom instanceof Polygon) {
+									mapView.saveGeometry(new Polygon(pts, null, null, data.style.toPolygonStyleSet(), data));
+								}
 							}
 								
 						}
+						mapView.updateRenderer();
 						
 						EditTool.this.vertexGeometry = null;
 						EditTool.this.vertexGeometryToPointsMap = null;
@@ -178,35 +196,41 @@ public class EditTool extends HighlightTool {
 						List<Geometry> vertexGeometry = new ArrayList<Geometry>();
 						HashMap<Geometry, ArrayList<Point>> vertexGeometryToPointsMap = new HashMap<Geometry, ArrayList<Point>>();
 						for (Geometry geom : list) {
-							if (geom instanceof Line) {
-								vertexGeometry.add(geom);
+							vertexGeometry.add(geom);
+							GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
+							vertexStyle.size = vertexSize;
+							GeometryData data = (GeometryData) geom.userData;
+							if (data.id == null) {
 								EditTool.this.mapView.clearGeometry(geom);
-								
+							} else {
+								EditTool.this.mapView.hideGeometry(geom);
+							}
+							
+							if (geom instanceof Line) {
 								Line line = (Line) geom;
-								GeometryData data = (GeometryData) geom.userData;
-								GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
+								
 								vertexStyle.pointColor = data.style.pointColor > 0 ? data.style.pointColor : data.style.lineColor;
-								vertexStyle.size = vertexSize;
+								vertexStyle.pointColor = vertexStyle.pointColor | 0xFF000000;
+								
 								ArrayList<Point> geometryPoints = new ArrayList<Point>();
 								for (MapPos p : line.getVertexList()) {
-									geometryPoints.add(EditTool.this.mapView.drawPoint(data.layerId, GeometryUtil.convertToWgs84(p), vertexStyle));
+									geometryPoints.add(EditTool.this.mapView.drawPoint(mapView.getVertexLayerId(), GeometryUtil.convertToWgs84(p), vertexStyle));
 								}
 								vertexGeometryToPointsMap.put(geom, geometryPoints);
 							} else if (geom instanceof Polygon) {
-								vertexGeometry.add(geom);
-								EditTool.this.mapView.clearGeometry(geom);
-								
 								Polygon polygon = (Polygon) geom;
-								GeometryData data = (GeometryData) geom.userData;
-								GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
-								vertexStyle.pointColor = data.style.pointColor > 0 ? data.style.pointColor : data.style.lineColor;
-								vertexStyle.size = vertexSize;
+								
+								vertexStyle.pointColor = data.style.pointColor > 0 ? data.style.pointColor : data.style.polygonColor;
+								vertexStyle.pointColor = vertexStyle.pointColor | 0xFF000000;
+								
 								ArrayList<Point> geometryPoints = new ArrayList<Point>();
 								for (MapPos p : polygon.getVertexList()) {
-									geometryPoints.add(EditTool.this.mapView.drawPoint(data.layerId, GeometryUtil.convertToWgs84(p), vertexStyle));
+									geometryPoints.add(EditTool.this.mapView.drawPoint(mapView.getVertexLayerId(), GeometryUtil.convertToWgs84(p), vertexStyle));
 								}
 								vertexGeometryToPointsMap.put(geom, geometryPoints);
 							}
+							mapView.clearHighlights();
+							mapView.updateRenderer();
 							
 							EditTool.this.vertexGeometry = vertexGeometry;
 							EditTool.this.vertexGeometryToPointsMap = vertexGeometryToPointsMap;
@@ -223,14 +247,28 @@ public class EditTool extends HighlightTool {
 		return button;
 	}
 	
+	private boolean hasLegacyGeometry() {
+		List<Geometry> list = EditTool.this.mapView.getHighlights();
+		for (Geometry geom : list) {
+			GeometryData data = (GeometryData) geom.userData;
+			if (data.type == GeometryData.Type.LEGACY) return true;
+		}
+		return false;
+	}
+	
 	private MapToggleButton createLockButton(final Context context) {
-		MapToggleButton button = new MapToggleButton(context);
+		final MapToggleButton button = new MapToggleButton(context);
 		button.setTextOn("UnLock");
 		button.setTextOff("Lock");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+				if (hasLegacyGeometry()) {
+					showError("Cannot edit legacy geometry");
+					button.setChecked(false);
+					return;
+				}
 				updateLock();
 			}
 			

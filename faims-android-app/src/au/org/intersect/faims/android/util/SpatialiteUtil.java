@@ -8,6 +8,7 @@ import jsqlite.Stmt;
 import android.location.Location;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.nutiteq.WKBUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 
 import com.nutiteq.components.MapPos;
@@ -207,9 +208,9 @@ private static String dbname;
 			st.bind(2, Integer.parseInt(srid));
 			st.bind(3, buffer);
 			st.step();
-			Geometry[] gs = WkbRead.readWkb(
+			Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
                     new ByteArrayInputStream(Utils
-                            .hexStringToByteArray(st.column_string(0))), null);
+                            .hexStringToByteArray(st.column_string(0))), null));
 			if (gs != null) {
 	            return (Polygon) gs[0];
 			}
@@ -319,9 +320,9 @@ private static String dbname;
 			st.bind(2, Integer.parseInt(fromSrid));
 			st.bind(3, Integer.parseInt(toSrid));
 			st.step();
-			Geometry[] gs = WkbRead.readWkb(
+			Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
                     new ByteArrayInputStream(Utils
-                            .hexStringToByteArray(st.column_string(0))), null);
+                            .hexStringToByteArray(st.column_string(0))), null));
 			if (gs != null) {
 	            return (Geometry) gs[0];
 			}

@@ -67,7 +67,7 @@ public abstract class BaseGeometryTool extends SettingsTool {
 
 			@Override
 			public void onClick(View arg0) {
-				List<Layer> layers = BaseGeometryTool.this.mapView.getLayers().getAllLayers();
+				List<Layer> layers = BaseGeometryTool.this.mapView.getAllLayers();
 				
 				final ArrayList<Layer> filteredLayers = new ArrayList<Layer>();
 				ArrayList<String> layerNames = new ArrayList<String>();
