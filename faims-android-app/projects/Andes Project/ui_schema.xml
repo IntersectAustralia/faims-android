@@ -1014,7 +1014,7 @@
             </item>
         </select>
         <trigger ref="viewattached">
-          <label>View AttachmentS</label>
+          <label>View Attachment</label>
         </trigger>
         <trigger ref="Update">
           <label>Update Existing Record</label>
@@ -1048,51 +1048,51 @@
           <label>Name:</label>
         </input>
         <select1 ref="CornerExteriorForm" faims_attribute_name="CornerExteriorForm" faims_attribute_type="vocab">
-          <label>CornerExteriorForm:</label>
+          <label>Corner Exterior Form:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 ref="CornerInteriorForm" faims_attribute_name="CornerInteriorForm" faims_attribute_type="vocab">
-          <label>CornerInteriorForm:</label>
+          <label>Corner Interior Form:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
-          <label>MasonryType:</label>
+          <label>Masonry Type:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
            </item>
         </select1>
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>MasonryDescription:</label>
+          <label>Masonry Description:</label>
         </input>
         <select1 appearance="full" ref="InkaMasonry" faims_attribute_name="InkaMasonry" faims_attribute_type="vocab">
-          <label>InkaMasonry:</label>
+          <label>Inka Masonry:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
-          <label>InkaMasonryDescription:</label>
+          <label>Inka Masonry Description:</label>
         </input>
         <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>CornerNicheCount:</label>
+          <label>Corner Niche Count:</label>
         </input>
         <!--Only include following attributes if no walls are preserved -->
         <input ref="CornerHeight" faims_attribute_name="CornerHeight" faims_attribute_type="measure">
-          <label>CornerHeight:</label>
+          <label>Corner Height:</label>
         </input>
         <input ref="CornerDescription" faims_attribute_name="CornerDescription" faims_attribute_type="freetext">
-          <label>CornerDescription:</label>
+          <label>Corner Description:</label>
         </input>
         <trigger ref="CornerPhotos">
-          <label>CornerPhotos</label>
+          <label>Corner Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
             <label>Gallery:</label>
@@ -1102,7 +1102,7 @@
             </item>
         </select>
         <trigger ref="AddNiche">
-          <label>AddNiche</label>
+          <label>Add Niche</label>
         </trigger>
         <!-- {Button: “Add Niche”}               -->
         <trigger ref="Update">
@@ -1124,7 +1124,7 @@
       <group ref="structureWall">
         <label>Wall of a Structure</label>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>WallID:</label>
+          <label>Wall ID:</label>
         </input>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
           <label>MasonryType:</label>
@@ -1134,15 +1134,15 @@
           </item>
         </select1>
         <trigger ref="DuplicateFromCorner">
-          <label>DuplicateFromCorner</label>
+          <label>Duplicate From Corner</label>
         </trigger>
         <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
         <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>MasonryDescription:</label>
+          <label>Masonry Description:</label>
         </input>
         <select1 appearance="full" ref="InkaMasonry" faims_attribute_name="InkaMasonry" faims_attribute_type="vocab">
-          <label>InkaMasonry:</label>
+          <label>Inka Masonry:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1150,17 +1150,17 @@
         </select1>
         <!--Yes,No-->
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
-          <label>InkaMasonryDescription:</label>
+          <label>Inka Masonry Description:</label>
         </input>
 
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
-          <label>WallThickness:</label>
+          <label>Wall Thickness:</label>
         </input>
         <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
-          <label>WallHeight:</label>
+          <label>Wall Height:</label>
         </input>
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
-          <label>WallHeightPreservation:</label>
+          <label>Wall Height Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1176,22 +1176,22 @@
         </select1>
         <!-- Yes,No,Not observable   -->
         <input ref="GableHeight" faims_attribute_name="GableHeight" faims_attribute_type="measure">
-          <label>GableHeight:</label>
+          <label>Gable Height:</label>
         </input>
         <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
-          <label>GableDistance:</label>
+          <label>Gable Distance:</label>
         </input>
         <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>WindowCount:</label>
+          <label>Window Count:</label>
         </input>
         <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>NicheCount:</label>
+          <label>Niche Count:</label>
         </input>
         <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>DoorwayCount:</label>
+          <label>Doorway Count:</label>
         </input>
         <trigger ref="WallPhotos">
-          <label>WallPhotos</label>
+          <label>Wall Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
             <label>Gallery:</label>
@@ -1201,15 +1201,15 @@
             </item>
         </select>
         <trigger ref="NewWindow">
-          <label>NewWindow</label>
+          <label>New Window</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="NewNiche">
-          <label>NewNiche</label>
+          <label>New Niche</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="NewLichen">
-          <label>NewLichen</label>
+          <label>New Lichen</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
@@ -1217,6 +1217,7 @@
         </trigger>
         <trigger ref="Save">
           <label>Save Record and Close</label>
+        <!-- {button}-->
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1234,7 +1235,7 @@
       <group ref="doorDetail">
         <label>Doorway Detail</label>
         <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>DoorID:</label>
+          <label>Door ID:</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>Timestamp:</label>
@@ -1249,14 +1250,14 @@
           <label>DoorOrientation:</label>
         </input>
         <select1 appearance="full" ref="DoorPosition" faims_attribute_name="DoorPosition" faims_attribute_type="vocab">
-          <label>DoorPosition:</label>
+          <label>Door Position:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 appearance="full" ref="DoorMasonry" faims_attribute_name="DoorMasonry" faims_attribute_type="vocab">
-          <label>DoorMasonry:</label>
+          <label>Door Masonry:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1266,7 +1267,7 @@
           <label>DoorHeight:</label>
         </input>
         <select1 appearance="full" ref="DoorHeightPreservation" faims_attribute_name="DoorHeightPreservation" faims_attribute_type="vocab">
-          <label>DoorHeightPreservation:</label>
+          <label>Door Height Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1274,22 +1275,22 @@
         </select1>
         <!-- <Complete/>,Max preserved -->
         <input ref="DoorTopWidth" faims_attribute_name="DoorTopWidth" faims_attribute_type="measure">
-          <label>DoorTopWidth:</label>
+          <label>Door Top Width:</label>
         </input>
         <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="measure">
-          <label>DoorBaseWidth:</label>
+          <label>Door Base Width:</label>
         </input>
         <input ref="DoorOtherWidth" faims_attribute_name="DoorOtherWidth" faims_attribute_type="measure">
-          <label>DoorOtherWidth:</label>
+          <label>Door Other Width:</label>
         </input>
         <input ref="DoorOtherWidthHeight" faims_attribute_name="DoorOtherWidthHeight" faims_attribute_type="measure">
-          <label>DoorOtherWidthHeight:</label>
+          <label>Door Other Width Height:</label>
         </input>
         <input ref="DoorDescription" faims_attribute_name="DoorDescription" faims_attribute_type="freetext">
-          <label>DoorDescription:</label>
+          <label>Door Description:</label>
         </input>
         <trigger ref="DoorPhotos">
-          <label>DoorPhotos</label>
+          <label>Door Photos</label>
         </trigger>
          <select ref="PhotoGallery" type="image">
             <label>Gallery:</label>
@@ -1299,13 +1300,13 @@
             </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
-          <label>GPSLong:</label>
+          <label>GPS Long:</label>
         </input>
         <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
-          <label>GPSLat:</label>
+          <label>GPS Lat:</label>
         </input>
         <trigger ref="TakePoint">
-          <label>TakePoint</label>
+          <label>Take Point</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
@@ -1322,7 +1323,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
       </group>
@@ -1333,23 +1334,23 @@
       <group ref="nicheDetail">
         <label>Niche Detail</label>
         <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>NicheID:</label>
+          <label>Niche ID:</label>
         </input>
         <input ref="NichePosition" faims_attribute_name="NichePosition" faims_attribute_type="freetext">
-          <label>NichePosition:</label>
+          <label>Niche Position:</label>
         </input>
         <select1 appearance="full" ref="NicheForm" faims_attribute_name="NicheForm" faims_attribute_type="vocab">
-          <label>NicheForm:</label>
+          <label>Niche Form:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="NicheHeight" faims_attribute_name="NicheHeight" faims_attribute_type="measure">
-          <label>NicheHeight:</label>
+          <label>Niche Height:</label>
         </input>
         <select1 appearance="full" ref="NicheHeightPreservation" faims_attribute_name="NicheHeightPreservation" faims_attribute_type="vocab">
-          <label>NicheHeightPreservation:</label>
+          <label>Niche Height Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1357,7 +1358,7 @@
         </select1>
         <!-- <Complete/>,Max complete -->
         <select1 appearance="full" ref="NicheWidthLoc" faims_attribute_name="NicheWidthLoc" faims_attribute_type="vocab">
-          <label>NicheWidthLoc:</label>
+          <label>Niche Width Loc:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1365,13 +1366,13 @@
         </select1>
         <!-- <Bottom/>,Top -->
         <input ref="NicheWidth" faims_attribute_name="NicheWidth" faims_attribute_type="measure">
-          <label>NicheWidth:</label>
+          <label>Niche Width:</label>
         </input>
         <input ref="NicheDepth" faims_attribute_name="NicheDepth" faims_attribute_type="measure">
-          <label>NicheDepth:</label>
+          <label>Niche Depth:</label>
         </input>
         <select1 appearance="full" ref="NicheAltar" faims_attribute_name="NicheAltar" faims_attribute_type="vocab">
-          <label>NicheAltar:</label>
+          <label>Niche Altar:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1379,10 +1380,10 @@
         </select1>
         <!--Yes,No-->
         <input ref="NicheDescription" faims_attribute_name="NicheDescription" faims_attribute_type="freetext">
-          <label>NicheDescription:</label>
+          <label>Niche Description:</label>
         </input>
         <trigger ref="NichePhotos">
-          <label>NichePhotos</label>
+          <label>Niche Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
             <label>Gallery:</label>
@@ -1458,10 +1459,10 @@
             </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
-          <label>GPSLong:</label>
+          <label>GPS Long:</label>
         </input>
         <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
-          <label>GPSLat:</label>
+          <label>GPS Lat:</label>
         </input>
         <trigger ref="TakePoint">
           <label>TakePoint</label>
@@ -1481,7 +1482,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
       </group>
@@ -1491,7 +1492,7 @@
       <group ref="featureDetail">
         <label>Features</label>
         <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>FeatureID:</label>
+          <label>Feature ID:</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
@@ -1529,7 +1530,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
       </group>
@@ -1539,7 +1540,7 @@
       <group ref="freeWallDetail">
         <label>Free Standing Wall</label>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>WallID:</label>
+          <label>Wall ID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
@@ -1551,21 +1552,21 @@
           <label>Device:</label>
         </input>
         <input ref="WallDescription" faims_attribute_name="WallDescription" faims_attribute_type="freetext">
-          <label>WallDescription:</label>
+          <label>Wall Description:</label>
         </input>
         <input ref="WallClass" faims_attribute_name="WallClass" faims_attribute_type="freetext">
-          <label>WallClass:</label>
+          <label>Wall Class:</label>
         </input>
         <!--Delimitación de manzana,División interna de manzana,División de grupo patio,  Muro de contención,Muro de plataforma,Escalera,Otro,No Definido-->
         <select1 appearance="full" ref="WallPreservation" faims_attribute_name="WallPreservation" faims_attribute_type="vocab">
-          <label>WallPreservation:</label>
+          <label>Wall Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
-          <label>MasonryType:</label>
+          <label>Masonry Type:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1573,12 +1574,12 @@
         </select1>
         <!-- Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable -->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>MasonryDescription:</label>
+          <label>Masonry Description:</label>
         </input>
 
 
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
-          <label>WallHeightPreservation:</label>
+          <label>Wall Height Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1587,14 +1588,14 @@
         <!-- Complete,Max complete-->
 
         <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
-          <label>WallHeight:</label>
+          <label>Wall Height:</label>
         </input>
 
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
-          <label>WallThickness:</label>
+          <label>Wall Thickness:</label>
         </input>
         <input ref="WallComment" faims_attribute_name="WallComments" faims_attribute_type="freetext">
-          <label>WallComments:</label>
+          <label>Wall Comments:</label>
         </input>
         <trigger ref="Photos">
           <label>Photos</label>
@@ -1621,7 +1622,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {button}-->
       </group>
@@ -1643,10 +1644,10 @@
           <label>Device:</label>
         </input>
         <input ref="InternalWidth" faims_attribute_name="InternalWidth" faims_attribute_type="measure">
-          <label>InternalWidth:</label>
+          <label>Internal Width:</label>
         </input>
         <input ref="ExternalWidth" faims_attribute_name="ExternalWidth" faims_attribute_type="measure">
-          <label>ExternalWidth:</label>
+          <label>External Width:</label>
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext">
           <label>Notes:</label>
@@ -1675,7 +1676,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
       </group>
@@ -1685,7 +1686,7 @@
       <group ref="findDetail">
         <label>Special Find Detail</label>
         <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>SpecialFindID:</label>
+          <label>Special Find ID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
@@ -1731,7 +1732,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
       </group>
@@ -1741,7 +1742,7 @@
       <group ref="description">
         <label>Collection Description</label>
         <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>SurfaceCollectionID:</label>
+          <label>Surface Collection ID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
@@ -1753,7 +1754,7 @@
           <label>Device:</label>
         </input>
         <select1 appearance="full" ref="SurfaceCollectionContext" faims_attribute_name="SurfaceCollectionContext" faims_attribute_type="vocab">
-          <label>SurfaceCollectionContext:</label>
+          <label>Surface Collection Context:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1761,13 +1762,13 @@
         </select1>
         <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
         <input ref="ContextDescription" faims_attribute_name="ContextDescription" faims_attribute_type="freetext">
-          <label>ContextDescription:</label>
+          <label>Context Description:</label>
         </input>
       </group>
       <group ref="material">
         <label>Material Description</label>
         <select1 appearance="full" ref="DiagnosticsPresent" faims_attribute_name="DiagnosticsPresent" faims_attribute_type="vocab">
-          <label>DiagnosticsPresent:</label>
+          <label>Diagnostics Present:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1775,7 +1776,7 @@
         </select1>
         <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
         <select1 appearance="full" ref="MaterialDensity" faims_attribute_name="MaterialDensity" faims_attribute_type="vocab">
-          <label>MaterialDensity:</label>
+          <label>Material Density:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1786,7 +1787,7 @@
           <label>Comments:</label>
         </input>
         <select1 appearance="full" ref="LotLabPriority" faims_attribute_name="LotLabPriority" faims_attribute_type="vocab">
-          <label>LotLabPriority:</label>
+          <label>Lot Lab Priority:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1794,7 +1795,7 @@
         </select1>
         <!--Baja prioridad,Mediana prioridad,Alta prioridad-->
         <input ref="LotNumbers" faims_attribute_name="LotNumbers" faims_attribute_type="freetext">
-          <label>LotNumbers:</label>
+          <label>Lot Numbers:</label>
         </input>
         <trigger ref="Lot">
           <label>Create Lot</label>
@@ -1813,7 +1814,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
       </group>
@@ -1858,7 +1859,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
+          <label>Associate With</label>
         </trigger>
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
       </group>
@@ -1869,16 +1870,16 @@
       <group ref="windowDetail">
         <label>Window Detail</label>
         <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>WindowID:</label>
+          <label>Window ID:</label>
         </input>
         <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">
-          <label>WindowPosition:</label>
+          <label>Window Position:</label>
         </input>
         <input ref="WindowHeight" faims_attribute_name="WindowHeight" faims_attribute_type="measure">
-          <label>WindowHeight:</label>
+          <label>Window Height:</label>
         </input>
         <select1 appearance="full" ref="WindowHeightPreservation" faims_attribute_name="WindowHeightPreservation" faims_attribute_type="vocab">
-          <label>WindowHeightPreservation:</label>
+          <label>Window Height Preservation:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -1886,13 +1887,13 @@
         </select1>
         <!-- <Complete/>,Max complete -->
         <input ref="WindowWidth" faims_attribute_name="WindowWidth" faims_attribute_type="measure">
-          <label>WindowWidth:</label>
+          <label>Window Width:</label>
         </input>
         <input ref="WindowDescription" faims_attribute_name="WindowDescription" faims_attribute_type="freetext">
-          <label>WindowDescription:</label>
+          <label>Window Description:</label>
         </input>
         <trigger ref="WindowPhotos">
-          <label>WindowPhotos</label>
+          <label>Window Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
             <label>Gallery:</label>
