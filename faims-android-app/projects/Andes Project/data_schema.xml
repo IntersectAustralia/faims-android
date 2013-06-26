@@ -254,7 +254,7 @@
 	</property>
 	<property type="string" name="CornerDescription" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="CornerPhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="CornerPhotos" minCardinality="1" maxCardinality="n">
   </property>
   <property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
 		<lookup>
@@ -368,7 +368,7 @@
 	</property>
 	<property type="string" name="DoorwayCount" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="WallPhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="WallPhotos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Wall">
@@ -447,7 +447,7 @@
 	</property>
 	<property type="string" name="WallComments" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="WallPhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="WallPhotos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Doorway">
@@ -545,7 +545,7 @@
 	</property>
 	<property type="string" name="WindowDescription" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="WindowPhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="WindowPhotos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Niche">
@@ -604,7 +604,7 @@
 	</property>
 	<property type="string" name="NicheDescription" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="NichePhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="NichePhotos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Lichen">
