@@ -1068,7 +1068,7 @@
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
           <label>InkaMasonryDescription:</label>
         </input>
-        <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="measure">
+        <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>CornerNicheCount:</label>
         </input>
         <!--Only include following attributes if no walls are preserved -->
@@ -1098,7 +1098,7 @@
       <label>Wall Detail</label>
       <group ref="structureWall">
         <label>Wall of a Structure</label>
-        <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext">
+        <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>WallID:</label>
         </input>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
@@ -1156,13 +1156,13 @@
         <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
           <label>GableDistance:</label>
         </input>
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true">
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>WindowCount:</label>
         </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true">
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>NicheCount:</label>
         </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true">
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>DoorwayCount:</label>
         </input>
         <trigger ref="WallPhotos">
@@ -1211,7 +1211,7 @@
       <label>Doorway Detail</label>
       <group ref="doorDetail">
         <label>Doorway Detail</label>
-        <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext">
+        <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext" faims_certainty="false">
           <label>DoorID:</label>
         </input>
         <input ref="DoorOrientation" faims_attribute_name="DoorOrientation" faims_attribute_type="freetext">
@@ -1304,7 +1304,7 @@
       <label>Niche Detail</label>
       <group ref="nicheDetail">
         <label>Niche Detail</label>
-        <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext">
+        <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
           <label>NicheID:</label>
         </input>
         <input ref="NichePosition" faims_attribute_name="NichePosition" faims_attribute_type="freetext">
@@ -1389,7 +1389,7 @@
       <label>Lichen Detail</label>
       <group ref="lichenDetail">
         <label>Lichen Detail</label>
-        <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext">
+        <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
           <label>LichenID:</label>
         </input>
         <input ref="Size" faims_attribute_name="Size" faims_attribute_type="measure">
@@ -1469,7 +1469,7 @@
       <label>Feature Detail</label>
       <group ref="featureDetail">
         <label>Features</label>
-        <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext">
+        <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false">
           <label>FeatureID:</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1520,7 +1520,7 @@
       <label>Free Standing Wall Detail</label>
       <group ref="freeWallDetail">
         <label>Free Standing Wall</label>
-        <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext">
+        <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>WallID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1615,7 +1615,7 @@
       <label>Canal Detail</label>
       <group ref="canalDetail">
         <label>Canal Detail</label>
-        <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext">
+        <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext" faims_certainty="false">
           <label>CanalID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1672,7 +1672,7 @@
       <label>Special Find</label>
       <group ref="findDetail">
         <label>Special Find Detail</label>
-        <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext">
+        <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
           <label>SpecialFindID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1731,7 +1731,7 @@
       <label>Surface Collection</label>
       <group ref="description">
         <label>Collection Description</label>
-        <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext">
+        <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
           <label>SurfaceCollectionID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1818,7 +1818,7 @@
         <group ref="lot">
                   <label>Lot Description</label>
 
-        <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext">
+        <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">
           <label>LotID:</label>
         </input>
          <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1865,7 +1865,7 @@
       <label>Window Detail</label>
       <group ref="windowDetail">
         <label>Window Detail</label>
-        <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext">
+        <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
           <label>WindowID:</label>
         </input>
         <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">

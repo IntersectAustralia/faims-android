@@ -73,7 +73,13 @@ makeGallery(String attrib){
 }
 
 newStructure(){
-    showTabGroup("structure");
+    newTabGroup("structure");
+    pictures = new ArrayList();
+    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
+    videos = new ArrayList();
+    populateVideoGallery("structure/final/VideoGallery", videos);
+    audios = new ArrayList();
+    populateAudioList("structure/attachment/AudioList",audios);
     populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
     populateDropDown("structure/info/Form", makeVocab("Form"));
     populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
@@ -92,7 +98,7 @@ newStructure(){
 
 
 newCorner(){
-    showTabGroup("corner");
+    newTabGroup("corner");
     populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
     populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
@@ -101,7 +107,7 @@ newCorner(){
 }
 
 newStructureWall(){
-    showTabGroup("wall");
+    newTabGroup("wall");
     populatePictureGallery("wall/structureWall/MasonryType", makeGallery("MasonryType"));
     populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
     populateList("wall/structureWall/Gable", makeVocab("Gable"));
@@ -111,14 +117,16 @@ newStructureWall(){
 }
 
 newDoorway(){
-    showTabGroup("doorway");
+    newTabGroup("doorway");
+    doorwaypictures = new ArrayList();
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
     populateList("doorway/doorDetail/DoorMasonry", makeVocab("DoorMasonry"));
     populateList("doorway/doorDetail/DoorHeightPreservation", makeVocab("DoorHeightPreservation"));
     populateList("doorway/doorDetail/DoorPosition", makeVocab("DoorPosition"));
 
 }
 newNiche(){
-    showTabGroup("niche");
+    newTabGroup("niche");
     populateList("niche/nicheDetail/NicheForm", makeVocab("NicheForm"));
     populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
     populateList("niche/nicheDetail/NicheWidthLoc", makeVocab("NicheWidthLoc"));
@@ -126,11 +134,13 @@ newNiche(){
 
 }
 newWindow(){
-    showTabGroup("window");
+    newTabGroup("window");
     populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
 }
 newLichen(){
-    showTabGroup("lichen");
+    newTabGroup("lichen");
+    lichenpictures = new ArrayList();
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
     populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
     populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
     populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
@@ -138,7 +148,7 @@ newLichen(){
 }
 
 newFreeWall(){
-    showTabGroup("freeWall");
+    newTabGroup("freeWall");
     populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
     populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
     populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
@@ -146,17 +156,21 @@ newFreeWall(){
 }
 
 newFeature(){
-    showTabGroup("feature");
+    newTabGroup("feature");
+    featurepictures = new ArrayList();
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
 }
 
 newSpecialFind(){
-    showTabGroup("specialFind");
+    newTabGroup("specialFind");
+    specialFindpictures = new ArrayList();
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
     populateList("specialFind/findDetail/Type", makeVocab("Type"));
 
 }
 
 newSurfaceCollection(){
-    showTabGroup("surfaceCollection");
+    newTabGroup("surfaceCollection");
     populateList("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
     populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
     populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
@@ -167,13 +181,15 @@ newSurfaceCollection(){
 }
 
 newLot(){
-    showTabGroup("lot");
+    newTabGroup("lot");
     populateList("lot/lot/Material", makeVocab("Material"));
 
 }
 
 newCanal(){
-    showTabGroup("canal");
+    newTabGroup("canal");
+    canalpictures = new ArrayList();
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
 }
 
 newEntity() {
@@ -201,6 +217,7 @@ newEntity() {
 
 }
 
+onEvent("control", "show", "updateAll()");
 onEvent("control/map/create", "click", "newEntity()");
 onEvent("structure/component/AddCorner", "click", "newCorner()");
 onEvent("structure/component/AddWall", "click", "newStructureWall()");
@@ -622,3 +639,204 @@ updateStructure(id){
 
 
 }
+
+updateAll(){
+	Object structure = fetchEntityList("Structure");
+	Object wall = fetchEntityList("Wall");
+	Object doorway = fetchEntityList("Doorway");
+	Object feature = fetchEntityList("Feature");
+	Object specialFind = fetchEntityList("SpecialFind");
+	Object lichen = fetchEntityList("Lichen");
+	Object surfaceCollection = fetchEntityList("SurfaceCollection");
+	Object lot = fetchEntityList("Lot");
+	populateDropDown("control/data/structureList", structure);
+	populateDropDown("control/data/wallList", wall);
+	populateDropDown("control/data/doorwayList", doorway);
+	populateDropDown("control/data/featureList", feature);
+	populateDropDown("control/data/specialFindList", specialFind);
+	populateDropDown("control/data/lichenList", lichen);
+	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
+	populateDropDown("control/data/lotList", lot);
+}
+
+loadStructure() {
+
+	structure_id = getFieldValue("control/data/structureList");
+	
+	if (structure_id == null || "".equals(structure_id)) return;
+	newStructure();
+	
+	showTabGroup("structure", structure_id);
+	loadStructureFileAttributes(structure_id);
+}
+
+loadStructureFileAttributes(id){
+	pictures = new ArrayList();
+	videos = new ArrayList();
+	audios = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("Photo".equals(attr.getName())){
+					pictures.add(attr.getText());
+				}else if("video".equals(attr.getName())){
+					videos.add(attr.getText());
+				}else if("audio".equals(attr.getName())){
+					audios.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
+    populateVideoGallery("structure/final/VideoGallery", videos);
+    populateAudioList("structure/attachment/AudioList",audios);
+}
+
+loadWall() {
+
+	wall_id = getFieldValue("control/data/wallList");
+	
+	if (wall_id == null || "".equals(wall_id)) return;
+	newFreeWall();
+	
+	showTabGroup("freeWall", wall_id);
+}
+
+loadDoorWay() {
+
+	doorway_id = getFieldValue("control/data/doorwayList");
+	
+	if (doorway_id == null || "".equals(doorway_id)) return;
+	newDoorway();
+	
+	showTabGroup("doorway", doorway_id);
+	loadDoorwayFileAttributes(doorway_id);
+}
+
+loadDoorwayFileAttributes(id){
+	doorwaypictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("DoorPhotos".equals(attr.getName())){
+					doorwaypictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
+}
+
+loadFeature() {
+
+	feature_id = getFieldValue("control/data/featureList");
+	
+	if (feature_id == null || "".equals(feature_id)) return;
+	newFeature();
+	
+	showTabGroup("feature", feature_id);
+	loadFeatureFileAttributes(feature_id);
+}
+
+loadFeatureFileAttributes(id){
+	featurepictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("Photos".equals(attr.getName())){
+					featurepictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+}
+
+loadSpecialFind() {
+
+	special_find_id = getFieldValue("control/data/specialFindList");
+	
+	if (special_find_id == null || "".equals(special_find_id)) return;
+	newSpecialFind();
+	
+	showTabGroup("specialFind", special_find_id);
+	loadSpecialFindFileAttributes(special_find_id);
+}
+
+loadSpecialFindFileAttributes(id){
+	specialFindpictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("Photos".equals(attr.getName())){
+					specialFindpictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
+}
+
+loadLichen() {
+
+	lichen_id = getFieldValue("control/data/lichenList");
+	
+	if (lichen_id == null || "".equals(lichen_id)) return;
+	newLichen();
+	
+	showTabGroup("lichen", lichen_id);
+	loadLichenFileAttributes(lichen_id);
+}
+
+loadLichenFileAttributes(id){
+	lichenpictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("Photos".equals(attr.getName())){
+					lichenpictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
+}
+
+loadSurfaceCollection() {
+
+	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
+	
+	if (surface_collection_id == null || "".equals(surface_collection_id)) return;
+	newSurfaceCollection();
+	
+	showTabGroup("surfaceCollection", surface_collection_id);
+}
+
+loadLot() {
+
+	lot_id = getFieldValue("control/data/lotList");
+	
+	if (lot_id == null || "".equals(lot_id)) return;
+	newLot();
+	
+	showTabGroup("lot", lot_id);
+}
+
+onEvent("control/data/structureLoad", "click", "loadStructure()");
+onEvent("control/data/wallLoad", "click", "loadWall()");
+onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
+onEvent("control/data/featureLoad", "click", "loadFeature()");
+onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
+onEvent("control/data/lichenLoad", "click", "loadLichen()");
+onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
+onEvent("control/data/lotLoad", "click", "loadLot()");
