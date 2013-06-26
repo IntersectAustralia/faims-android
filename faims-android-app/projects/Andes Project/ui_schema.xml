@@ -54,6 +54,8 @@
               <doorwayLoad/>
               <nicheList/>
               <nicheLoad/>
+              <windowList/>
+              <windowLoad/>
               <wallList/>
               <wallLoad/>
               <featureList/>
@@ -267,6 +269,9 @@
           <window>
             <windowDetail>
               <WindowID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
               <WindowPosition/>
               <WindowHeight/>
               <!-- number-->
@@ -324,6 +329,9 @@
           <lichen>
             <lichenDetail>
               <LichenID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
               <Size/>
               <!-- in mm with two decimals-->
               <Substrate/>
@@ -748,6 +756,16 @@
         </select1>
         <trigger ref="nicheLoad">
           <label>Load Niche</label>
+        </trigger>
+        <select1 ref="windowList" faims_certainty="false" faims_annotation="false">
+          <label>Windows</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="windowLoad">
+          <label>Load Window</label>
         </trigger>
         <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
           <label>Walls</label>
@@ -1489,6 +1507,15 @@
         <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
           <label>LichenID:</label>
         </input>
+         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Timestamp:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Author:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Device:</label>
+        </input>
         <input ref="Size" faims_attribute_name="Size" faims_attribute_type="measure">
           <label>Size:</label>
         </input>
@@ -1943,6 +1970,15 @@
         <label>Window Detail</label>
         <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Window ID:</label>
+        </input>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>Timestamp:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>Author:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>Device:</label>
         </input>
         <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">
           <label>Window Position:</label>

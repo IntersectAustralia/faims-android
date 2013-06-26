@@ -597,6 +597,7 @@ updateCanal(id) {
 
 /*** WINDOW ***/
 
+String window_id = null;
 ArrayList windowPictures = new ArrayList();
 
 takeWindowPicture() {
@@ -610,6 +611,49 @@ OnWindowPictureTaken() {
 }
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
+
+onEvent("window/windowDetail/Update", "click", "updateWindow(window_id)");
+onEvent("window/windowDetail/Save", "click", "saveWindowAndClose()");
+onEvent("window/windowDetail/Clear", "click", "newWindow()");
+onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
+
+saveWindowAndClose() {
+	window_id = updateWindow(null);
+	cancelTabGroup("window", false);
+}
+
+updateWindow(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    windowPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("WindowPhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("WindowID", "freetext", "window/windowDetail/WindowID"),
+    	AttributeDef("Timestamp", "freetext", "window/windowDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "window/windowDetail/Author"),
+    	AttributeDef("Device", "freetext", "window/windowDetail/Device"),
+    	AttributeDef("WindowPosition", "freetext", "window/windowDetail/WindowPosition"),
+    	AttributeDef("WindowHeight", "measure", "window/windowDetail/WindowHeight"),
+    	AttributeDef("WindowWidth", "measure", "window/windowDetail/WindowWidth"),
+    	AttributeDef("WindowHeightPreservation", "vocab", "window/windowDetail/WindowHeightPreservation"),
+    	AttributeDef("WindowDescription", "freetext", "window/windowDetail/WindowDescription"),
+    	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "Window", attributeDefs, null); 
+}
 
 /*** SPECIAL FIND ***/
 
@@ -982,6 +1026,7 @@ updateAll(){
 	Object structureWall = fetchEntityList("StructureWall");
 	Object corner = fetchEntityList("Corner");
 	Object niche = fetchEntityList("Niche");
+	Object window = fetchEntityList("Window");
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
 	populateDropDown("control/data/doorwayList", doorway);
@@ -994,6 +1039,7 @@ updateAll(){
 	populateDropDown("control/data/structureWallList", structureWall);
 	populateDropDown("control/data/cornerList", corner);
 	populateDropDown("control/data/nicheList", niche);
+	populateDropDown("control/data/windowList", window);
 }
 
 loadStructure() {
@@ -1205,13 +1251,22 @@ loadCorners() {
 	showTabGroup("corner", corner_id);
 }
 
-loadNiches() {
+loadNiche() {
 	newNiche();
 	
 	niche_id = getFieldValue("control/data/nicheList");
 	if (niche_id == null || "".equals(niche_id)) return;
 	
 	showTabGroup("niche", niche_id);
+}
+
+laodWindow() {
+	newWindow();
+	
+	window_id = getFieldValue("control/data/window_list");
+	if (window_id == null || "".equals(window_id)) return;
+	
+	showTabGroup("window", window_id);
 }
 
 onEvent("control/data/structureLoad", "click", "loadStructure()");
@@ -1226,3 +1281,4 @@ onEvent("control/data/canalLoad", "click", "loadCanal()");
 onEvent("control/data/structureWallLoad", "click", "loadStructureWall()");
 onEvent("control/data/cornerLoad", "click", "loadCorner()");
 onEvent("control/data/nicheLoad", "click", "loadNiche()");
+onEvent("control/data/windowLoad", "click", "laodWindow()");
