@@ -477,6 +477,7 @@ updateCorner(id) {
 
 /*** NICHE ***/
 
+String niche_id = null;
 ArrayList nichePictures = new ArrayList();
 
 takeNichePicture() {
@@ -490,6 +491,53 @@ OnNichePictureTaken() {
 }
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
+
+onEvent("niche/nicheDetail/Update", "click", "updateNiche(niche_id)");
+onEvent("niche/nicheDetail/Save", "click", "saveNicheAndClose()");
+onEvent("niche/nicheDetail/Clear", "click", "newNiche()");
+onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
+
+saveNicheAndClose() {
+	niche_id = updateNiche(null);
+	cancelTabGroup("niche", false);
+}
+
+updateNiche(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    nichePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("NichePhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("NicheID", "freetext", "niche/nicheDetail/NicheID"),
+    	AttributeDef("Timestamp", "freetext", "niche/nicheDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "niche/nicheDetail/Author"),
+    	AttributeDef("Device", "freetext", "niche/nicheDetail/Device"),
+    	AttributeDef("NichePosition", "freetext", "niche/nicheDetail/NichePosition"),
+    	AttributeDef("NicheForm", "vocab", "niche/nicheDetail/NicheForm"),
+    	AttributeDef("NicheHeight", "measure", "niche/nicheDetail/NicheHeight"),
+    	AttributeDef("NicheWidthLoc", "vocab", "niche/nicheDetail/NicheWidthLoc"),
+    	AttributeDef("NicheWidth", "measure", "niche/nicheDetail/NicheWidth"),
+    	AttributeDef("NicheDepth", "measure", "niche/nicheDetail/NicheDepth"),
+    	AttributeDef("NicheHeightPreservation", "vocab", "niche/nicheDetail/NicheHeightPreservation"),
+    	AttributeDef("NicheAltar", "vocab", "niche/nicheDetail/NicheAltar"),
+    	AttributeDef("NicheDescription", "freetext", "niche/nicheDetail/NicheDescription"),
+    	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "Niche", attributeDefs, null); 
+}
 
 /*** CANAL ***/
 

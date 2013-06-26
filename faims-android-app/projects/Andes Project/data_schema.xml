@@ -290,7 +290,25 @@
 	</property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="StructureWall">
-	<property type="string" name="WallID" isIdentifier="true" minCardinality="1" maxCardinality="1"/>
+	<property type="string" name="WallID" minCardinality="1" maxCardinality="1" isIdentifier="true">
+	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
+	</property>
 	<property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term pictureURL="files/data/masonry/Type1a.jpg">Tipo 1a</term>
@@ -433,7 +451,7 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Doorway">
-	<property type="string" name="DoorID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="DoorID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
@@ -494,7 +512,7 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Window">
-	<property type="string" name="WindowID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="WindowID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
@@ -531,7 +549,7 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Niche">
-	<property type="string" name="NicheID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="NicheID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
@@ -590,7 +608,7 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Lichen">
-	<property type="string" name="LichenID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="LichenID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
@@ -645,7 +663,7 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Canal">
-	<property type="string" name="CanalID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="CanalID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
@@ -674,13 +692,13 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="SpecialFind">
-	<property type="string" name="SpecialFindID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="SpecialFindID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
-	<property type="string" name="Device" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
 		<lookup>
 			<term>Llama</term>
 			<term>Vizcacha</term>
@@ -708,13 +726,13 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Feature">
-	<property type="string" name="FeatureID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="FeatureID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
-	<property type="string" name="Device" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
 		<lookup>
 			<term>Llama</term>
 			<term>Vizcacha</term>
@@ -733,13 +751,13 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="SurfaceCollection">
-	<property type="string" name="SurfaceCollectionID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="SurfaceCollectionID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
-	<property type="string" name="Device" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
 		<lookup>
 			<term>Llama</term>
 			<term>Vizcacha</term>
@@ -805,13 +823,13 @@
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Lot">
-	<property type="string" name="LotID" minCardinality="1" maxCardinality="n">
+	<property type="string" name="LotID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
-	<property type="string" name="Device" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
 		<lookup>
 			<term>Llama</term>
 			<term>Vizcacha</term>

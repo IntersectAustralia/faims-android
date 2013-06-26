@@ -215,6 +215,9 @@
           <wall>
             <structureWall>
               <WallID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
               <!-- real number, 1,2,3,4 or so-->
               <MasonryType/>
               <!-- picture dictionary-->
@@ -286,6 +289,9 @@
           <niche>
             <nicheDetail>
               <NicheID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
               <NichePosition/>
               <NicheForm/>
               <!--Square,Rectangular,Trapezoidal, Other-->
@@ -1174,6 +1180,15 @@
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Wall ID:</label>
         </input>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Timestamp:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Author:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Device:</label>
+        </input>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
           <label>MasonryType:</label>
           <item>
@@ -1383,6 +1398,15 @@
         <label>Niche Detail</label>
         <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Niche ID:</label>
+        </input>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Timestamp:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Author:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Device:</label>
         </input>
         <input ref="NichePosition" faims_attribute_name="NichePosition" faims_attribute_type="freetext">
           <label>Niche Position:</label>
