@@ -144,7 +144,7 @@
               <ModernUse/>
               <Disturbances/>
               <!--No evidente,Pocos,Varios-->
-              <OtherArchitecturalDetail/>
+              <OtherArchitecturalDetails/>
             </finalObservations>
             <final>
 
@@ -155,14 +155,12 @@
               <Video/>
               <Audio/>
               <Sketch/>
-              <sketchfile/>
-              <sketchfilename/>
+              <sketchfilelist/>
               <Update/>
               <SaveAndClose/>
               <AddAttachment/>
+              <filelist></filelist>
               <viewattached></viewattached>
-              <filename></filename>
-              <file></file>
               <Delete/>
 
             </final>
@@ -532,7 +530,7 @@
       <bind nodeset="/faims/structure/finalObservations/SurfaceCondition" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetail" type="string"/>
+      <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetails" type="string"/>
           
       
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
@@ -975,13 +973,13 @@
         <trigger ref="Sketch">
           <label>Sketch</label>
         </trigger>
-        <select1 ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
+        <select ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
             <label>Sketch File List:</label>
             <item>
                 <label>dummy</label>
                 <value>dummy</value>
             </item>
-        </select1>
+        </select>
         <trigger ref="Update">
           <label>Update Existing Entity</label>
         </trigger>
@@ -997,7 +995,10 @@
                 <label>dummy</label>
                 <value>dummy</value>
             </item>
-        </select1>
+        </select>
+        <trigger ref="viewattached">
+          <label>View Attachments</label>
+        </trigger>
         <trigger ref="Delete">
           <label>Delete this record</label>
         </trigger>
