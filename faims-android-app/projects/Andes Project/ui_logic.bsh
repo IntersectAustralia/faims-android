@@ -720,6 +720,7 @@ updateSpecialFind(id) {
 
 /*** FEATURES ***/
 
+String feature_id = null;
 ArrayList featurePictures = new ArrayList();
 
 takeFeaturePicture() {
@@ -733,6 +734,45 @@ OnFeaturePictureTaken() {
 }
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
+
+onEvent("feature/featureDetail/Update", "click", "updateFeature(feature_id)");
+onEvent("feature/featureDetail/Save", "click", "saveFeatureAndClose()");
+onEvent("feature/featureDetail/Clear", "click", "newFeature()");
+onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
+
+saveFeatureAndClose() {
+	feature_id = updateFeature(null);
+	cancelTabGroup("feature", false);
+}
+
+updateFeature(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    featurePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("FeatureID", "freetext", "feature/featureDetail/FeatureID"),
+    	AttributeDef("Timestamp", "freetext", "feature/featureDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "feature/featureDetail/Author"),
+    	AttributeDef("Device", "freetext", "feature/featureDetail/Device"),
+    	AttributeDef("Description", "freetext", "feature/featureDetail/Description"),
+    	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "Feature", attributeDefs, null); 
+}
 
 /*** FREEWALL ***/
 
