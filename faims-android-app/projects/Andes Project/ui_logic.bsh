@@ -1,3 +1,5 @@
+setMapZoom("control/map/map", 15.0f);
+
 /*** MISC ***/
 
 AttributeDef(String name, String type, String ref) {
@@ -12,6 +14,14 @@ AttributeDef(String name, String type, String ref, ArrayList loadedFiles) {
 	this.type = type;
 	this.ref = ref;
 	this.loadedFiles = loadedFiles;
+	return this;
+}
+
+AttributeDef(String name, String type, String ref1, String ref2) {
+	this.name = name;
+	this.type = type;
+	this.ref1 = ref1;
+	this.ref2 = ref2;
 	return this;
 }
 
@@ -79,6 +89,13 @@ saveEntity(entityId, entityType, attributeDefs, geoData) {
     			files.add(pair.getName());
     		} 
     		saveFiles(def.loadedFiles,files , def.name, attributes);
+    	} else if ("gps".equals(def.type)) {
+    		if (!("".equals(getFieldValue(def.ref1)) || "".equals(getFieldValue(def.ref2)))) {
+	    		geoData = new ArrayList();
+	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
+	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
+	    		geoData.add(new Point(p, null, (PointStyle) null, null));
+	    	}
     	}
     	
     }
@@ -620,7 +637,7 @@ updateCanal(id) {
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Canal", attributeDefs, null); 
+    saved_id = saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map")); 
     loadCanalFileAttributes(saved_id);
     return saved_id;
 }
@@ -741,7 +758,7 @@ updateSpecialFind(id) {
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "SpecialFind", attributeDefs, null);
+    saved_id = saveEntity(id, "SpecialFind", attributeDefs, getGeometryHighlights("control/map/map"));
     loadSpecialFindFileAttributes(saved_id);
     return saved_id;
 }
@@ -799,7 +816,7 @@ updateFeature(id) {
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Feature", attributeDefs, null);
+    saved_id = saveEntity(id, "Feature", attributeDefs, getGeometryHighlights("control/map/map"));
     loadFeatureFileAttributes(saved_id);
     return saved_id;
 }
@@ -865,7 +882,7 @@ updateFreeWall(id) {
     	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Wall", attributeDefs, null);
+    saved_id = saveEntity(id, "Wall", attributeDefs, getGeometryHighlights("control/map/map"));
     loadWallFileAttributes(saved_id);
     return saved_id;
 }
@@ -949,9 +966,10 @@ updateDoorway(id) {
     	AttributeDef("DoorOtherWidthHeight", "measure", "doorway/doorDetail/DoorOtherWidthHeight"),
     	AttributeDef("DoorDescription", "freetext", "doorway/doorDetail/DoorDescription"),
     	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
+    	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
     
-    saved_id = saveEntity(id, "Doorway", attributeDefs, null);
+    saved_id = saveEntity(id, "Doorway", attributeDefs, getGeometryHighlights("control/map/map"));
     loadDoorwayFileAttributes(saved_id);
     return saved_id;
 }
@@ -1012,9 +1030,10 @@ updateLichen(id) {
     	AttributeDef("InsideOutside", "vocab", "lichen/lichenDetail/InsideOutside"),
     	AttributeDef("Comments", "freetext", "lichen/lichenDetail/Comments"),
     	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
+    	AttributeDef("", "gps", "lichen/lichenDetail/GPSLong", "lichen/lichenDetail/GPSLat")
     	};
     
-    saved_id = saveEntity(id, "Lichen", attributeDefs, null);
+    saved_id = saveEntity(id, "Lichen", attributeDefs, getGeometryHighlights("control/map/map"));
     loadLichenFileAttributes(saved_id);
     return saved_id;
 }
@@ -1071,7 +1090,7 @@ updateSurfaceCollection(id) {
     	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
     	};
     
-    return saveEntity(id, "SurfaceCollection", attributeDefs, null); 
+    return saveEntity(id, "SurfaceCollection", attributeDefs, getGeometryHighlights("control/map/map")); 
 }
 
 /*** LOT ***/
@@ -1338,7 +1357,7 @@ updateStructure(id){
     	AttributeDef("audio", "files", "structure/attachment/AudioList", loadedAudios)
     	};
     
-    saved_id = saveEntity(id, "Structure", attributeDefs, null);
+    saved_id = saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"));
     loadStructureFileAttributes(saved_id);
     return saved_id;
 }
@@ -1459,6 +1478,14 @@ loadDoorway() {
 	
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
+	
+	archEntity = fetchArchEnt(doorway_id);
+	geomList = archEntity.getGeometryList();
+	point = geomList.get(0);
+	p = point.getMapPos();
+	p = convertFromProjToProj(getProjectSrid(), "4326", p);
+	setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
+	setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
 }
 
 loadDoorwayFileAttributes(id){
@@ -1537,6 +1564,14 @@ loadLichen() {
 	
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
+	
+	archEntity = fetchArchEnt(lichen_id);
+	geomList = archEntity.getGeometryList();
+	point = geomList.get(0);
+	p = point.getMapPos();
+	p = convertFromProjToProj(getProjectSrid(), "4326", p);
+	setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
+	setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
 }
 
 loadLichenFileAttributes(id){
