@@ -415,6 +415,7 @@ onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 /*** CANAL ***/
 
 ArrayList canalPictures = new ArrayList();
+String canal_id = null;
 
 takecanalPicture() {
     openCamera("OncanalPictureTaken()");
@@ -427,6 +428,45 @@ OncanalPictureTaken() {
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
+onEvent("canal/canalDetail/Update", "click", "updateCanal()");
+onEvent("canal/canalDetail/Save", "click", "saveCanalAndClose()");
+onEvent("canal/canalDetail/Clear", "click", "newCanal()");
+onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
+
+saveCanalAndClose() {
+	canal_id = updateCanal(null);
+	cancelTabGroup("canal", false);
+}
+
+updateCanal(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    canalPictures = getNoneList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("CanalID", "freetext", "canal/canalDetail/CanalID"),
+    	AttributeDef("Timestamp", "freetext", "canal/canalDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "canal/canalDetail/Author"),
+    	AttributeDef("Device", "freetext", "canal/canalDetail/Device"),
+    	AttributeDef("InternalWidth", "measure", "canal/canalDetail/InternalWidth"),
+    	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
+    	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "Canal", attributeDefs, null); 
+}
 
 /*** WINDOW ***/
 
@@ -807,6 +847,7 @@ updateAll(){
 	Object lichen = fetchEntityList("Lichen");
 	Object surfaceCollection = fetchEntityList("SurfaceCollection");
 	Object lot = fetchEntityList("Lot");
+	Object canal = fetchEntityList("Canal");
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
 	populateDropDown("control/data/doorwayList", doorway);
@@ -815,6 +856,7 @@ updateAll(){
 	populateDropDown("control/data/lichenList", lichen);
 	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
 	populateDropDown("control/data/lotList", lot);
+	populateDropDown("control/data/canalList", canal);
 }
 
 loadStructure() {
@@ -999,6 +1041,15 @@ loadLot() {
 	showTabGroup("lot", lot_id);
 }
 
+loadCanal() {
+	newCanal();
+	
+	canal_id = getFieldValue("control/data/canalList");
+	if (canal_id == null || "".equals(canal_id)) return;
+	
+	showTabGroup("canal", canal_id);
+}
+
 onEvent("control/data/structureLoad", "click", "loadStructure()");
 onEvent("control/data/wallLoad", "click", "loadWall()");
 onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
@@ -1007,3 +1058,4 @@ onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
 onEvent("control/data/lichenLoad", "click", "loadLichen()");
 onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
 onEvent("control/data/lotLoad", "click", "loadLot()");
+onEvent("control/data/canalLoad", "click", "loadCanal()");

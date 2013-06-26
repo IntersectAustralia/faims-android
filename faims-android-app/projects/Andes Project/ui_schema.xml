@@ -60,6 +60,8 @@
               <surfaceCollectionLoad/>
               <lotList/>
               <lotLoad/>
+              <canalList/>
+              <canalLoad/>
             </data>
             <gps>
               <connectexternal/>
@@ -761,6 +763,16 @@
         </select1>
         <trigger ref="lotLoad">
           <label>Load Lot</label>
+        </trigger>
+        <select1 ref="canalList" faims_certainty="false" faims_annotation="false">
+          <label>Canals</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="canalLoad">
+          <label>Load Canal</label>
         </trigger>
       </group>
       <group ref="gps">
