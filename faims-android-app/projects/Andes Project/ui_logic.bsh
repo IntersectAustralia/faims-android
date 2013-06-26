@@ -52,7 +52,7 @@ saveFiles(loadedFiles, files, type, attributes) {
 				}
 			}
 		}
-		attributes.add(createEntityAttribute(type, filename, null, null, null, true));
+		attributes.add(createEntityAttribute(type, filename, null, null, null));
 	}
 }
 
@@ -71,11 +71,21 @@ saveEntity(entityId, entityType, attributeDefs, geoData) {
     		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, getFieldCertainty(def.ref)));
     	} else if ("files".equals(def.type)) {
     		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
+    	} else if ("attachments".equals(def.type)) {
+    		List pairs = getFieldValue(def.ref);
+    		ArrayList files = new ArrayList();
+    		for (NameValuePair pair : pairs) {
+    		
+    			files.add(pair.getName());
+    		} 
+    		saveFiles(def.loadedFiles,files , def.name, attributes);
     	}
     	
     }
     
-    return saveArchEnt(entityId, entityType, geoData, attributes);
+    saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
+    updateAll();
+    return saved_id;
 }
 
 /*** USER ***/
@@ -223,6 +233,9 @@ newDoorway(){
     populateList("doorway/doorDetail/DoorMasonry", makeVocab("DoorMasonry"));
     populateList("doorway/doorDetail/DoorHeightPreservation", makeVocab("DoorHeightPreservation"));
     populateList("doorway/doorDetail/DoorPosition", makeVocab("DoorPosition"));
+    setFieldValue("doorway/doorDetail/Timestamp", getCurrentTime());
+    setFieldValue("doorway/doorDetail/Author", username);
+    setFieldValue("doorway/doorDetail/Device", device);
 
 }
 newNiche(){
@@ -260,6 +273,9 @@ newFreeWall(){
     populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
     populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
     populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+    setFieldValue("freeWall/freeWallDetail/Timestamp", getCurrentTime());
+    setFieldValue("freeWall/freeWallDetail/Author", username);
+    setFieldValue("freeWall/freeWallDetail/Device", device);
 
 }
 
@@ -269,6 +285,9 @@ newFeature(){
     newTabGroup("feature");
     featurepictures = new ArrayList();
     populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+    setFieldValue("feature/featureDetail/Timestamp", getCurrentTime());
+    setFieldValue("feature/featureDetail/Author", username);
+    setFieldValue("feature/featureDetail/Device", device);
 }
 
 newSpecialFind(){
@@ -278,6 +297,9 @@ newSpecialFind(){
     specialFindpictures = new ArrayList();
     populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
     populateList("specialFind/findDetail/Type", makeVocab("Type"));
+    setFieldValue("specialFind/findDetail/Timestamp", getCurrentTime());
+    setFieldValue("specialFind/findDetail/Author", username);
+    setFieldValue("specialFind/findDetail/Device", device);
 
 }
 
@@ -289,6 +311,9 @@ newSurfaceCollection(){
     populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
     populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
     populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
+    setFieldValue("surfaceCollection/description/Timestamp", getCurrentTime());
+    setFieldValue("surfaceCollection/description/Author", username);
+    setFieldValue("surfaceCollection/description/Device", device);
 
 }
 
@@ -297,6 +322,9 @@ newLot(){
 	
     newTabGroup("lot");
     populateList("lot/lot/Material", makeVocab("Material"));
+    setFieldValue("lot/lot/Timestamp", getCurrentTime());
+    setFieldValue("lot/lot/Author", username);
+    setFieldValue("lot/lot/Device", device);
 
 }
 
@@ -306,6 +334,9 @@ newCanal(){
     newTabGroup("canal");
     canalpictures = new ArrayList();
     populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+    setFieldValue("structure/info/Timestamp", getCurrentTime());
+    setFieldValue("structure/info/Author", username);
+    setFieldValue("structure/info/Device", device);
 }
 
 newEntity() {
@@ -798,6 +829,8 @@ onEvent("structure/final/Save", "click", "saveStructureAndClose()");
 onEvent("structure/final/Clear", "click", "newStructure()");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
+onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
+
 String structure_id = null;
 
 saveStructureAndClose(){
@@ -820,7 +853,7 @@ updateStructure(id){
 	ArrayList loadedVideos = new ArrayList();
 	ArrayList loadedAudios = new ArrayList();
 	
-	if (structure_id != null) {
+	if (id != null) {
 		entity = fetchArchEnt(structure_id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -872,16 +905,18 @@ updateStructure(id){
     	AttributeDef("PreservationDescription", "freetext", "structure/info/PreservationDescription"),
     	AttributeDef("SurfaceCondition", "freetext", "structure/finalObservations/SurfaceCondition"),
     	AttributeDef("ModernUse", "freetext", "structure/finalObservations/ModernUse"),
-    	AttributeDef("Disturbances", "vocab", "structure/finalObservations/Disturbances"),
+    	AttributeDef("Disturbances", "freetext", "structure/finalObservations/Disturbances"),
     	AttributeDef("OtherArchitecturalDetails", "freetext", "structure/finalObservations/OtherArchitecturalDetails"),
     	AttributeDef("Photo", "files", "structure/final/PhotoGallery", loadedPictures),
-    	AttributeDef("sketchfilename", "files", "structure/final/sketchfilelist", loadedSketches),
-    	AttributeDef("filename", "files", "structure/final/filelist", loadedFiles),
+    	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches),
+    	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles),
     	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos),
     	AttributeDef("audio", "files", "structure/attachment/AudioList", loadedAudios)
     	};
     
-    return saveEntity(structure_id, "Structure", attributeDefs, null); 
+    saved_id = saveEntity(id, "Structure", attributeDefs, null);
+    loadStructureFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** LOAD ***/
@@ -967,7 +1002,7 @@ loadWall() {
 	showTabGroup("freeWall", wall_id);
 }
 
-loadDoorWay() {
+loadDoorway() {
 	newDoorway();
 	
 	doorway_id = getFieldValue("control/data/doorwayList");
