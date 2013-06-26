@@ -465,7 +465,7 @@ updateCorner(id) {
     	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount"),
     	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
     	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
-    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/CornerPhotos", loadedPictures),
+    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures),
     	AttributeDef("MasonryType", "vocab", "corner/cornerDetail/MasonryType"),
     	AttributeDef("MasonryDescription", "freetext", "corner/cornerDetail/MasonryDescription"),
     	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
@@ -931,6 +931,9 @@ updateAll(){
 	Object surfaceCollection = fetchEntityList("SurfaceCollection");
 	Object lot = fetchEntityList("Lot");
 	Object canal = fetchEntityList("Canal");
+	Object structureWall = fetchEntityList("StructureWall");
+	Object corner = fetchEntityList("Corner");
+	Object niche = fetchEntityList("Niche");
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
 	populateDropDown("control/data/doorwayList", doorway);
@@ -940,6 +943,9 @@ updateAll(){
 	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
 	populateDropDown("control/data/lotList", lot);
 	populateDropDown("control/data/canalList", canal);
+	populateDropDown("control/data/structureWallList", structureWall);
+	populateDropDown("control/data/cornerList", corner);
+	populateDropDown("control/data/nicheList", niche);
 }
 
 loadStructure() {
@@ -1133,6 +1139,33 @@ loadCanal() {
 	showTabGroup("canal", canal_id);
 }
 
+loadStructureWalls() {
+	newStructureWall();
+	
+	structure_wall_id = getFieldValue("control/data/structureWallList");
+	if (canalstructure_wall_id_id == null || "".equals(structure_wall_id)) return;
+	
+	showTabGroup("wall", structure_wall_id);
+}
+
+loadCorners() {
+	newCorner();
+	
+	corner_id = getFieldValue("control/data/cornerList");
+	if (corner_id == null || "".equals(corner_id)) return;
+	
+	showTabGroup("corner", corner_id);
+}
+
+loadNiches() {
+	newNiche();
+	
+	niche_id = getFieldValue("control/data/nicheList");
+	if (niche_id == null || "".equals(niche_id)) return;
+	
+	showTabGroup("niche", niche_id);
+}
+
 onEvent("control/data/structureLoad", "click", "loadStructure()");
 onEvent("control/data/wallLoad", "click", "loadWall()");
 onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
@@ -1142,3 +1175,6 @@ onEvent("control/data/lichenLoad", "click", "loadLichen()");
 onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
 onEvent("control/data/lotLoad", "click", "loadLot()");
 onEvent("control/data/canalLoad", "click", "loadCanal()");
+onEvent("control/data/structureWallLoad", "click", "loadStructureWall()");
+onEvent("control/data/cornerLoad", "click", "loadCorner()");
+onEvent("control/data/nicheLoad", "click", "loadNiche()");
