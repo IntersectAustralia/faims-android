@@ -249,6 +249,9 @@ newNiche(){
     populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
     populateList("niche/nicheDetail/NicheWidthLoc", makeVocab("NicheWidthLoc"));
     populateList("niche/nicheDetail/NicheAltar", makeVocab("NicheAltar"));
+    setFieldValue("niche/nicheDetail/Timestamp", getCurrentTime());
+    setFieldValue("niche/nicheDetail/Author", username);
+    setFieldValue("niche/nicheDetail/Device", device);
 
 }
 newWindow(){
