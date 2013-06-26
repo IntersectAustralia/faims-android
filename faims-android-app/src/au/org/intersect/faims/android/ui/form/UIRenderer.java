@@ -670,13 +670,15 @@ public class UIRenderer implements IRestoreActionListener{
 					DateUtil.setTimePicker(time, value);
 				}else if (obj instanceof CustomHorizontalScrollView){
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-						if(customImageView.getPicture().getId().equals(value)){
-							customImageView.setBackgroundColor(Color.BLUE);
-							horizontalScrollView.setSelectedImageView(customImageView);
-							break;
-						}
-					};
+					if(horizontalScrollView.getImageViews() != null){
+						for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
+							if(customImageView.getPicture().getId().equals(value)){
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView.setSelectedImageView(customImageView);
+								break;
+							}
+						};
+					}
 				}
 				else
 				{

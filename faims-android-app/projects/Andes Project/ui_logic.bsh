@@ -209,6 +209,8 @@ newCorner(){
     populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
     populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
+    cornerPictures = new ArrayList();
+    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
     populateList("corner/cornerDetail/InkaMasonry", makeVocab("InkaMasonry"));
     setFieldValue("corner/cornerDetail/Timestamp", getCurrentTime());
     setFieldValue("corner/cornerDetail/Author", username);
@@ -227,6 +229,8 @@ newStructureWall(){
     setFieldValue("wall/structureWall/Timestamp", getCurrentTime());
     setFieldValue("wall/structureWall/Author", username);
     setFieldValue("wall/structureWall/Device", device);
+    structureWallPictures = new ArrayList();
+    populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
 }
 
 newDoorway(){
@@ -251,6 +255,8 @@ newNiche(){
     populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
     populateList("niche/nicheDetail/NicheWidthLoc", makeVocab("NicheWidthLoc"));
     populateList("niche/nicheDetail/NicheAltar", makeVocab("NicheAltar"));
+    nichePictures = new ArrayList();
+    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
     setFieldValue("niche/nicheDetail/Timestamp", getCurrentTime());
     setFieldValue("niche/nicheDetail/Author", username);
     setFieldValue("niche/nicheDetail/Device", device);
@@ -261,7 +267,13 @@ newWindow(){
 	
     newTabGroup("window");
     populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
+    windowPictures = new ArrayList();
+    populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
+    setFieldValue("window/windowDetail/Timestamp", getCurrentTime());
+    setFieldValue("window/windowDetail/Author", username);
+    setFieldValue("window/windowDetail/Device", device);
 }
+
 newLichen(){
 	lichen_id = null;
 	
@@ -271,7 +283,7 @@ newLichen(){
     populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
     populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
     populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
-	setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
+    setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
     setFieldValue("lichen/lichenDetail/Author", username);
     setFieldValue("lichen/lichenDetail/Device", device);
 }
@@ -283,6 +295,8 @@ newFreeWall(){
     populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
     populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
     populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+    freewallPictures = new ArrayList();
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
     setFieldValue("freeWall/freeWallDetail/Timestamp", getCurrentTime());
     setFieldValue("freeWall/freeWallDetail/Author", username);
     setFieldValue("freeWall/freeWallDetail/Device", device);
@@ -344,9 +358,9 @@ newCanal(){
     newTabGroup("canal");
     canalpictures = new ArrayList();
     populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
-    setFieldValue("structure/info/Timestamp", getCurrentTime());
-    setFieldValue("structure/info/Author", username);
-    setFieldValue("structure/info/Device", device);
+    setFieldValue("canal/canalDetail/Timestamp", getCurrentTime());
+    setFieldValue("canal/canalDetail/Author", username);
+    setFieldValue("canal/canalDetail/Device", device);
 }
 
 newEntity() {
@@ -482,7 +496,9 @@ updateCorner(id) {
     	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
     	};
     
-    return saveEntity(id, "Corner", attributeDefs, null); 
+    saved_id = saveEntity(id, "Corner", attributeDefs, null);
+    loadCornerFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** NICHE ***/
@@ -546,7 +562,9 @@ updateNiche(id) {
     	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "Niche", attributeDefs, null); 
+    saved_id = saveEntity(id, "Niche", attributeDefs, null);
+    loadNicheFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** CANAL ***/
@@ -602,7 +620,9 @@ updateCanal(id) {
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "Canal", attributeDefs, null); 
+    saved_id = saveEntity(id, "Canal", attributeDefs, null); 
+    loadCanalFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** WINDOW ***/
@@ -662,7 +682,9 @@ updateWindow(id) {
     	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "Window", attributeDefs, null); 
+    saved_id = saveEntity(id, "Window", attributeDefs, null);
+    loadWindowFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** SPECIAL FIND ***/
@@ -719,7 +741,9 @@ updateSpecialFind(id) {
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "SpecialFind", attributeDefs, null); 
+    saved_id = saveEntity(id, "SpecialFind", attributeDefs, null);
+    loadSpecialFindFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** FEATURES ***/
@@ -775,7 +799,9 @@ updateFeature(id) {
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "Feature", attributeDefs, null); 
+    saved_id = saveEntity(id, "Feature", attributeDefs, null);
+    loadFeatureFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** FREEWALL ***/
@@ -839,7 +865,9 @@ updateFreeWall(id) {
     	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
     	};
     
-    return saveEntity(id, "Wall", attributeDefs, null); 
+    saved_id = saveEntity(id, "Wall", attributeDefs, null);
+    loadWallFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** DOORWAY ***/
@@ -923,7 +951,9 @@ updateDoorway(id) {
     	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
     	};
     
-    return saveEntity(id, "Doorway", attributeDefs, null); 
+    saved_id = saveEntity(id, "Doorway", attributeDefs, null);
+    loadDoorwayFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** LICHEN ***/
@@ -984,7 +1014,9 @@ updateLichen(id) {
     	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
     	};
     
-    return saveEntity(id, "Lichen", attributeDefs, null); 
+    saved_id = saveEntity(id, "Lichen", attributeDefs, null);
+    loadLichenFileAttributes(saved_id);
+    return saved_id;
 }
 
 takeLichenPoint(){
@@ -1073,7 +1105,9 @@ updateStructureWall(id) {
     	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
     	};
     
-    return saveEntity(id, "StructureWall", attributeDefs, null); 
+    saved_id = saveEntity(id, "StructureWall", attributeDefs, null);
+    loadStructureWallFileAttributes(saved_id);
+    return saved_id;
 }
 
 /*** STRUCTURE ***/
@@ -1581,13 +1615,30 @@ loadNicheFileAttributes(id){
     populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
 }
 
-laodWindow() {
+loadWindow() {
 	newWindow();
 	
-	window_id = getFieldValue("control/data/window_list");
+	window_id = getFieldValue("control/data/windowList");
 	if (window_id == null || "".equals(window_id)) return;
 	
 	showTabGroup("window", window_id);
+	loadWindowFileAttributes(window_id);
+}
+
+loadWindowFileAttributes(id){
+	windowPictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("WindowPhotos".equals(attr.getName())){
+					windowPictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
 }
 
 onEvent("control/data/structureLoad", "click", "loadStructure()");
@@ -1602,4 +1653,4 @@ onEvent("control/data/canalLoad", "click", "loadCanal()");
 onEvent("control/data/structureWallLoad", "click", "loadStructureWall()");
 onEvent("control/data/cornerLoad", "click", "loadCorner()");
 onEvent("control/data/nicheLoad", "click", "loadNiche()");
-onEvent("control/data/windowLoad", "click", "laodWindow()");
+onEvent("control/data/windowLoad", "click", "loadWindow()");
