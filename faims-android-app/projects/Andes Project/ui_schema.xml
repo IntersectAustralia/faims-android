@@ -527,7 +527,7 @@
             </material>
           </surfaceCollection>
           <lot>
-            <lot>
+            <lotDetail>
               <LotID/>
               <Timestamp/>
               <Author/>
@@ -542,7 +542,7 @@
               <Delete/>
               <AssociateWith/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
-            </lot>
+            </lotDetail>
           </lot>
         </faims>
       </instance>
@@ -1921,7 +1921,7 @@
 
       <group ref="lot" faims_archent_type="Lot">
         <label>Lot Description</label>
-        <group ref="lot">
+        <group ref="lotDetail">
                   <label>Lot Description</label>
 
         <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">

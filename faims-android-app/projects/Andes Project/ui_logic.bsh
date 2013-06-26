@@ -331,10 +331,10 @@ newLot(){
 	lot_id = null;
 	
     newTabGroup("lot");
-    populateList("lot/lot/Material", makeVocab("Material"));
-    setFieldValue("lot/lot/Timestamp", getCurrentTime());
-    setFieldValue("lot/lot/Author", username);
-    setFieldValue("lot/lot/Device", device);
+    populateList("lot/lotDetail/Material", makeVocab("Material"));
+    setFieldValue("lot/lotDetail/Timestamp", getCurrentTime());
+    setFieldValue("lot/lotDetail/Author", username);
+    setFieldValue("lot/lotDetail/Device", device);
 
 }
 
@@ -1007,6 +1007,68 @@ takeLichenPoint(){
 }
 
 onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
+
+/*** SURFACE COLLECTION ***/
+
+String surface_collection_id = null;
+
+onEvent("surfaceCollection/material/Update", "click", "updateSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Save", "click", "saveSurfaceCollectionAndClose()");
+onEvent("surfaceCollection/material/Clear", "click", "newSurfaceCollection()");
+onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
+
+saveSurfaceCollectionAndClose() {
+	surface_collection_id = updateSurfaceCollection(null);
+	cancelTabGroup("surfaceCollection", false);
+}
+
+updateSurfaceCollection(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID"),
+    	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp"),
+    	AttributeDef("Author", "freetext" , "surfaceCollection/description/Author"),
+    	AttributeDef("Device", "freetext", "surfaceCollection/description/Device"),
+    	AttributeDef("SurfaceCollectionContext", "vocab", "surfaceCollection/description/SurfaceCollectionContext"),
+    	AttributeDef("ContextDescription", "freetext", "surfaceCollection/description/ContextDescription"),
+    	AttributeDef("DiagnosticsPresent", "vocab", "surfaceCollection/material/DiagnosticsPresent"),
+    	AttributeDef("MaterialDensity", "vocab", "surfaceCollection/material/MaterialDensity"),
+    	AttributeDef("Comments", "freetext", "surfaceCollection/material/Comments"),
+    	AttributeDef("LotLabPriority", "vocab", "surfaceCollection/material/LotLabPriority"),
+    	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
+    	};
+    
+    return saveEntity(id, "SurfaceCollection", attributeDefs, null); 
+}
+
+/*** LOT ***/
+
+String lot_id = null;
+
+onEvent("lot/lotDetail/Update", "click", "updateLot(lot_id)");
+onEvent("lot/lotDetail/Save", "click", "saveLotAndClose()");
+onEvent("lot/lotDetail/Clear", "click", "newLot()");
+onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
+
+saveLotAndClose() {
+	lot_id = updateLot(null);
+	cancelTabGroup("lot", false);
+}
+
+updateLot(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID"),
+    	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "lot/lotDetail/Author"),
+    	AttributeDef("Device", "freetext", "lot/lotDetail/Device"),
+    	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
+    	};
+    
+    return saveEntity(id, "Lot", attributeDefs, null); 
+}
 
 /*** STRUCTURE WALL ***/
 
