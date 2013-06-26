@@ -11,8 +11,10 @@ import com.nutiteq.geometry.Polygon;
 public class WKBUtil {
 	
 	public static Geometry[] cleanGeometry(Geometry[] geoms) {
-		for (int i = 0; i < geoms.length; i++) {
-			geoms[i] = cleanGeometry(geoms[i]);
+		if (geoms != null) {
+			for (int i = 0; i < geoms.length; i++) {
+				geoms[i] = cleanGeometry(geoms[i]);
+			}
 		}
 		return geoms;
 	}

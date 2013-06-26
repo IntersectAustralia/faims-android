@@ -153,12 +153,6 @@
 	</property>
 	<property type="string" name="NicheCount" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="NicheAltar" minCardinality="1" maxCardinality="n">
-		<lookup>
-			<term>Yes</term>
-			<term>No</term>
-		</lookup>
-	</property>
 	<property type="string" name="FloorRemainsDescription" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="RoofForm" minCardinality="1" maxCardinality="n">

@@ -2615,8 +2615,12 @@ public class BeanShellLinker {
 	public Object fetchArchEnt(String id) {
 		try {
 			ArchEntity e = activity.getDatabaseManager().fetchArchEnt(id);
-			List<Geometry> geomList = e.getGeometryList();
-			e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+			if (e != null) {
+				List<Geometry> geomList = e.getGeometryList();
+				if (geomList != null) {
+					e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+				}
+			}
 			return e;
 		} catch (Exception e) {
 			FLog.e("error fetching arch entity", e);
@@ -2628,8 +2632,12 @@ public class BeanShellLinker {
 	public Object fetchRel(String id) {
 		try {
 			Relationship r = activity.getDatabaseManager().fetchRel(id);
-			List<Geometry> geomList = r.getGeometryList();
-			r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+			if (r != null) {
+				List<Geometry> geomList = r.getGeometryList();
+				if (geomList != null) {
+					r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+				}
+			}
 			return r;
 		} catch (Exception e) {
 			FLog.e("error fetching relationship", e);

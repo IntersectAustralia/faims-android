@@ -976,8 +976,8 @@
         <select ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
             <label>Sketch File List:</label>
             <item>
-                <label>dummy</label>
-                <value>dummy</value>
+                <label>None</label>
+                <value>None</value>
             </item>
         </select>
         <trigger ref="Update">
@@ -990,14 +990,14 @@
           <label>Add Attachment</label>
         </trigger>
 		<select ref="filelist" faims_attribute_name="filename" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false">
-            <label>Sketch File List:</label>
+            <label>Attachment File List:</label>
             <item>
-                <label>dummy</label>
-                <value>dummy</value>
+                <label>None</label>
+                <value>None</value>
             </item>
         </select>
         <trigger ref="viewattached">
-          <label>View Attachments</label>
+          <label>View AttachmentS</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete this record</label>
