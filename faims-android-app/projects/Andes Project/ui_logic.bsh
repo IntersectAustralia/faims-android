@@ -663,6 +663,7 @@ updateWindow(id) {
 
 /*** SPECIAL FIND ***/
 
+String special_find_id = null;
 ArrayList specialFindPictures = new ArrayList();
 
 takespecialFindPicture() {
@@ -676,6 +677,46 @@ OnspecialFindPictureTaken() {
 }
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
+
+onEvent("specialFind/findDetail/Update", "click", "updateSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Save", "click", "saveSpecialFindAndClose()");
+onEvent("specialFind/findDetail/Clear", "click", "newSpecialFind()");
+onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
+
+saveSpecialFindAndClose() {
+	special_find_id = updateSpecialFind(null);
+	cancelTabGroup("specialFind", false);
+}
+
+updateSpecialFind(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    specialFindPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("SpecialFindID", "freetext", "specialFind/findDetail/SpecialFindID"),
+    	AttributeDef("Timestamp", "freetext", "specialFind/findDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "specialFind/findDetail/Author"),
+    	AttributeDef("Device", "freetext", "specialFind/findDetail/Device"),
+    	AttributeDef("Description", "freetext", "specialFind/findDetail/Description"),
+    	AttributeDef("Type", "vocab", "specialFind/findDetail/Type"),
+    	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "SpecialFind", attributeDefs, null); 
+}
 
 /*** FEATURES ***/
 
