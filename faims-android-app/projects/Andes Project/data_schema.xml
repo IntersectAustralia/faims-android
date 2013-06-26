@@ -430,7 +430,7 @@
 	</property>
 	<property type="string" name="DoorDescription" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="DoorPhotos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="DoorPhotos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Window">
@@ -530,7 +530,7 @@
 	</property>
 	<property type="string" name="Comments" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Photos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="Photos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Canal">
@@ -546,7 +546,7 @@
 	</property>
 	<property type="string" name="Notes" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Photos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="Photos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="SpecialFind">
@@ -580,7 +580,7 @@
 			<term>Otro</term>
 		</lookup>
 	</property>
-	<property type="string" name="Photos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="Photos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Feature">
@@ -605,7 +605,7 @@
 	</property>
 	<property type="string" name="Description" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Photos" minCardinality="1" maxCardinality="n">
+	<property type="file" name="Photos" minCardinality="1" maxCardinality="n">
   </property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="SurfaceCollection">
