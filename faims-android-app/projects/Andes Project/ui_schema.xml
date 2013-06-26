@@ -1380,10 +1380,10 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Long:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Lat:</label>
         </input>
         <trigger ref="TakePoint">
@@ -1557,10 +1557,10 @@
                 <value>dummy</value>
             </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Long:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Lat:</label>
         </input>
         <trigger ref="TakePoint">
