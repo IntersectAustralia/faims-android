@@ -600,7 +600,7 @@ OncanalPictureTaken() {
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
-onEvent("canal/canalDetail/Update", "click", "updateCanal()");
+onEvent("canal/canalDetail/Update", "click", "updateCanal(canal_id)");
 onEvent("canal/canalDetail/Save", "click", "saveCanalAndClose()");
 onEvent("canal/canalDetail/Clear", "click", "newCanal()");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
