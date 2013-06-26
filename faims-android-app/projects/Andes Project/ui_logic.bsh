@@ -269,7 +269,9 @@ newLichen(){
     populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
     populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
     populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
-
+	setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
+    setFieldValue("lichen/lichenDetail/Author", username);
+    setFieldValue("lichen/lichenDetail/Device", device);
 }
 
 newFreeWall(){
@@ -804,7 +806,7 @@ saveFreeWallAndClose() {
 updateFreeWall(id) {
 	if (id == null || "".equals(id)) id = null;
     
-    featurePictures = new ArrayList();
+    freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 	
@@ -924,6 +926,7 @@ updateDoorway(id) {
 
 /*** LICHEN ***/
 
+String lichen_id = null;
 ArrayList lichenPictures = new ArrayList();
 
 takeLichenPicture() {
@@ -937,6 +940,50 @@ OnLichenPictureTaken() {
 }
 
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
+
+onEvent("lichen/lichenDetail/Update", "click", "updateLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Save", "click", "saveLichenAndClose()");
+onEvent("lichen/lichenDetail/Clear", "click", "newLichen()");
+onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
+
+saveLichenAndClose() {
+	lichen_id = updateLichen(null);
+	cancelTabGroup("lichen", false);
+}
+
+updateLichen(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    lichenPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("LichenID", "freetext", "lichen/lichenDetail/LichenID"),
+    	AttributeDef("Timestamp", "freetext", "lichen/lichenDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "lichen/lichenDetail/Author"),
+    	AttributeDef("Device", "freetext", "lichen/lichenDetail/Device"),
+    	AttributeDef("Size", "measure", "lichen/lichenDetail/Size"),
+    	AttributeDef("Substrate", "vocab", "lichen/lichenDetail/Substrate"),
+    	AttributeDef("Quality", "freetext", "lichen/lichenDetail/Quality"),
+    	AttributeDef("Aspect", "vocab", "lichen/lichenDetail/Aspect"),
+    	AttributeDef("InsideOutside", "vocab", "lichen/lichenDetail/InsideOutside"),
+    	AttributeDef("Comments", "freetext", "lichen/lichenDetail/Comments"),
+    	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
+    	};
+    
+    return saveEntity(id, "Lichen", attributeDefs, null); 
+}
 
 takeLichenPoint(){
     location = getGPSPosition();

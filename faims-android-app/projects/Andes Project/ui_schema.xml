@@ -342,7 +342,7 @@
               <InsideOutside/>
               <!-- dropdown-->
               <!--Interior Wall Surface,Exterior Wall Surface,Wall Fall Surface,Doorway,Wall top,Other-->
-              <Comment/>
+              <Comments/>
               <Photos/>
               <PhotoGallery/>
               <GPSLong/>
@@ -1544,7 +1544,7 @@
           </item>
         </select1>
         <!--Interior Wall Surface,Exterior Wall Surface,Wall Fall Surface,Doorway,Wall top,Other-->
-        <input ref="Comment" faims_attribute_name="Comments" faims_attribute_type="freetext">
+        <input ref="Comments" faims_attribute_name="Comments" faims_attribute_type="freetext">
           <label>Comments:</label>
         </input>
         <trigger ref="Photos">
