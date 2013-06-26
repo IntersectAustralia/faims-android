@@ -210,6 +210,9 @@ newCorner(){
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
     populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
     populateList("corner/cornerDetail/InkaMasonry", makeVocab("InkaMasonry"));
+    setFieldValue("corner/cornerDetail/Timestamp", getCurrentTime());
+    setFieldValue("corner/cornerDetail/Author", username);
+    setFieldValue("corner/cornerDetail/Device", device);
 
 }
 
@@ -1054,6 +1057,23 @@ loadWall() {
 	if (wall_id == null || "".equals(wall_id)) return;
 	
 	showTabGroup("freeWall", wall_id);
+	loadWallFileAttributes(wall_id);
+}
+
+loadWallFileAttributes(id){
+	freewallPictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("WallPhotos".equals(attr.getName())){
+					freewallPictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
 }
 
 loadDoorway() {
@@ -1185,33 +1205,101 @@ loadCanal() {
 	if (canal_id == null || "".equals(canal_id)) return;
 	
 	showTabGroup("canal", canal_id);
+	loadCanalFileAttributes(canal_id);
 }
 
-loadStructureWalls() {
+loadCanalFileAttributes(id){
+	canalpictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("Photos".equals(attr.getName())){
+					canalpictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+}
+
+loadStructureWall() {
 	newStructureWall();
 	
 	structure_wall_id = getFieldValue("control/data/structureWallList");
 	if (canalstructure_wall_id_id == null || "".equals(structure_wall_id)) return;
 	
 	showTabGroup("wall", structure_wall_id);
+	loadStructureWallFileAttributes(structure_wall_id);
 }
 
-loadCorners() {
+loadStructureWallFileAttributes(id){
+	structureWallPictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("WallPhotos".equals(attr.getName())){
+					structureWallPictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
+}
+
+loadCorner() {
 	newCorner();
 	
 	corner_id = getFieldValue("control/data/cornerList");
 	if (corner_id == null || "".equals(corner_id)) return;
 	
 	showTabGroup("corner", corner_id);
+	loadCornerFileAttributes(corner_id);
 }
 
-loadNiches() {
+loadCornerFileAttributes(id){
+	cornerPictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("CornerPhotos".equals(attr.getName())){
+					cornerPictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
+}
+
+loadNiche() {
 	newNiche();
 	
 	niche_id = getFieldValue("control/data/nicheList");
 	if (niche_id == null || "".equals(niche_id)) return;
 	
 	showTabGroup("niche", niche_id);
+	loadNicheFileAttributes(niche_id);
+}
+
+loadNicheFileAttributes(id){
+	nichePictures = new ArrayList();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("NichePhotos".equals(attr.getName())){
+					nichePictures.add(attr.getText());
+				}
+			}
+		}
+	}
+    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
 }
 
 onEvent("control/data/structureLoad", "click", "loadStructure()");

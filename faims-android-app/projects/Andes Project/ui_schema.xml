@@ -1089,7 +1089,7 @@
       <label>Corner Detail</label>
       <group ref="cornerDetail">
         <label>Corner of a Structure</label>
-        <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext">
+        <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext" faims_certainty="false">
           <label>CornerID:</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
