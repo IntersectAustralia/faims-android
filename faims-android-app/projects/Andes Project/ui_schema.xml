@@ -399,7 +399,7 @@
               <!-- Complete,Max complete-->
               <WallThickness/>
               <!-- number-->
-              <WallComment/>
+              <WallComments/>
               <Photos/>
               <PhotoGallery/>
               <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
@@ -1653,7 +1653,7 @@
         <input ref="WallDescription" faims_attribute_name="WallDescription" faims_attribute_type="freetext">
           <label>Wall Description:</label>
         </input>
-        <input ref="WallClass" faims_attribute_name="WallClass" faims_attribute_type="freetext">
+        <input ref="WallClass" faims_attribute_name="WallClass" faims_attribute_type="vocab">
           <label>Wall Class:</label>
         </input>
         <!--Delimitación de manzana,División interna de manzana,División de grupo patio,  Muro de contención,Muro de plataforma,Escalera,Otro,No Definido-->
@@ -1693,7 +1693,7 @@
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
           <label>Wall Thickness:</label>
         </input>
-        <input ref="WallComment" faims_attribute_name="WallComments" faims_attribute_type="freetext">
+        <input ref="WallComments" faims_attribute_name="WallComments" faims_attribute_type="freetext">
           <label>Wall Comments:</label>
         </input>
         <trigger ref="Photos">

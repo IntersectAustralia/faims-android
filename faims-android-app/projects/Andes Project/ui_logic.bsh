@@ -776,6 +776,7 @@ updateFeature(id) {
 
 /*** FREEWALL ***/
 
+String wall_id = null;
 ArrayList freewallPictures = new ArrayList();
 
 takeFreewallPicture() {
@@ -789,6 +790,53 @@ OnFreewallPictureTaken() {
 }
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
+
+onEvent("freeWall/freeWallDetail/Update", "click", "updateFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Save", "click", "saveFreeWallAndClose()");
+onEvent("freeWall/freeWallDetail/Clear", "click", "newFreeWall()");
+onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
+
+saveFreeWallAndClose() {
+	wall_id = updateFreeWall(null);
+	cancelTabGroup("freeWall", false);
+}
+
+updateFreeWall(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    featurePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("WallPhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("WallID", "freetext", "freeWall/freeWallDetail/WallID"),
+    	AttributeDef("Timestamp", "freetext", "freeWall/freeWallDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "freeWall/freeWallDetail/Author"),
+    	AttributeDef("Device", "freetext", "freeWall/freeWallDetail/Device"),
+    	AttributeDef("WallDescription", "freetext", "freeWall/freeWallDetail/WallDescription"),
+    	AttributeDef("WallClass", "vocab", "freeWall/freeWallDetail/WallClass"),
+    	AttributeDef("WallPreservation", "vocab", "freeWall/freeWallDetail/WallPreservation"),
+    	AttributeDef("MasonryType", "vocab", "freeWall/freeWallDetail/MasonryType"),
+    	AttributeDef("MasonryDescription", "freetext", "freeWall/freeWallDetail/MasonryDescription"),
+    	AttributeDef("WallHeight", "measure", "freeWall/freeWallDetail/WallHeight"),
+    	AttributeDef("WallHeightPreservation", "vocab", "freeWall/freeWallDetail/WallHeightPreservation"),
+    	AttributeDef("WallThickness", "measure", "freeWall/freeWallDetail/WallThickness"),
+    	AttributeDef("WallComments", "freetext", "freeWall/freeWallDetail/WallComments"),
+    	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
+    	};
+    
+    return saveEntity(id, "Wall", attributeDefs, null); 
+}
 
 /*** DOORWAY ***/
 
