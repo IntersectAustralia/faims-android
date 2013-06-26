@@ -211,6 +211,23 @@
 <ArchaeologicalElement type="Corner">
 	<property type="string" name="CornerID" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
+	</property>
 	<property type="string" name="CornerExteriorForm" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>Redondeada-bloques</term>
@@ -309,9 +326,9 @@
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
 	</property>
-	<property type="string" name="Device" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
 		<lookup>
 			<term>Llama</term>
 			<term>Vizcacha</term>
@@ -386,6 +403,23 @@
 <ArchaeologicalElement type="Doorway">
 	<property type="string" name="DoorID" minCardinality="1" maxCardinality="n">
 	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
+	</property>
 	<property type="string" name="DoorOrientation" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="DoorPosition" minCardinality="1" maxCardinality="n">
@@ -430,6 +464,23 @@
 <ArchaeologicalElement type="Window">
 	<property type="string" name="WindowID" minCardinality="1" maxCardinality="n">
 	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
+	</property>
 	<property type="string" name="WindowPosition" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="WindowHeight" minCardinality="1" maxCardinality="n">
@@ -449,6 +500,23 @@
 </ArchaeologicalElement>
 <ArchaeologicalElement type="Niche">
 	<property type="string" name="NicheID" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
 	</property>
 	<property type="string" name="NichePosition" minCardinality="1" maxCardinality="n">
 	</property>
@@ -492,6 +560,23 @@
 <ArchaeologicalElement type="Lichen">
 	<property type="string" name="LichenID" minCardinality="1" maxCardinality="n">
 	</property>
+	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
+	</property>
 	<property type="string" name="Size" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="Substrate" minCardinality="1" maxCardinality="n">
@@ -532,7 +617,20 @@
 	</property>
 	<property type="string" name="Timestamp" minCardinality="1" maxCardinality="n">
 	</property>
-	<property type="string" name="Author" minCardinality="1" maxCardinality="n">
+	<property type="string" name="Author" minCardinality="1" maxCardinality="n" isIdentifier="true">
+	</property>
+	<property type="string" name="Device" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		<lookup>
+			<term>Llama</term>
+			<term>Vizcacha</term>
+			<term>Condor</term>
+			<term>Puma</term>
+			<term>Cuy</term>
+			<term>Alpaca</term>
+			<term>Vicuna</term>
+			<term>Guanaco</term>
+			<term>Taruca</term>
+		</lookup>
 	</property>
 	<property type="string" name="InternalWidth" minCardinality="1" maxCardinality="n">
 	</property>

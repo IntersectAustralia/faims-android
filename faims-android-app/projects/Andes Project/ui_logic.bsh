@@ -56,6 +56,28 @@ saveFiles(loadedFiles, files, type, attributes) {
 	}
 }
 
+saveEntity(entityId, entityType, attributeDefs, geoData) {
+	
+    List attributes = createAttributeList();
+    
+    for (Object def : attributeDefs) {
+    	
+    	// name, text, vocab, measure, certainty
+    	if ("freetext".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, getFieldCertainty(def.ref)));
+    	} else if ("measure".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), getFieldCertainty(def.ref)));
+    	} else if ("vocab".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, getFieldCertainty(def.ref)));
+    	} else if ("files".equals(def.type)) {
+    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
+    	}
+    	
+    }
+    
+    return saveArchEnt(entityId, entityType, geoData, attributes);
+}
+
 /*** USER ***/
 
 getDefaultUsersList() {
@@ -171,6 +193,8 @@ newStructure(){
 
 
 newCorner(){
+	corner_id = null;
+	
     newTabGroup("corner");
     populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
@@ -180,6 +204,8 @@ newCorner(){
 }
 
 newStructureWall(){
+	structure_wall_id = null;
+	
     newTabGroup("wall");
     populatePictureGallery("wall/structureWall/MasonryType", makeGallery("MasonryType"));
     populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
@@ -200,6 +226,8 @@ newDoorway(){
 
 }
 newNiche(){
+	niche_id = null;
+	
     newTabGroup("niche");
     populateList("niche/nicheDetail/NicheForm", makeVocab("NicheForm"));
     populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
@@ -208,6 +236,8 @@ newNiche(){
 
 }
 newWindow(){
+	window_id = null;
+	
     newTabGroup("window");
     populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
 }
@@ -271,6 +301,8 @@ newLot(){
 }
 
 newCanal(){
+	canal_id = null;
+
     newTabGroup("canal");
     canalpictures = new ArrayList();
     populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
@@ -462,6 +494,7 @@ onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
 /*** DOORWAY ***/
 
+String doorway_id = null;
 ArrayList doorwayPictures = new ArrayList();
 
 takeDoorwayPicture() {
@@ -494,6 +527,54 @@ takeDoorywayPoint(){
 }
 onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
+
+onEvent("doorway/doorDetail/Update", "click", "updateDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Save", "click", "saveDoorwayAndClose()");
+onEvent("doorway/doorDetail/Clear", "click", "newDoorway()");
+onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
+
+saveDoorwayAndClose() {
+	doorway_id = updateDoorway(null);
+	cancelTabGroup("doorway", false);
+}
+
+updateDoorway(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    doorwayPictures = getNoneList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("DoorPhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("DoorID", "freetext", "doorway/doorDetail/DoorID"),
+    	AttributeDef("Timestamp", "freetext", "doorway/doorDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "doorway/doorDetail/Author"),
+    	AttributeDef("Device", "freetext", "doorway/doorDetail/Device"),
+    	AttributeDef("DoorOrientation", "measure", "doorway/doorDetail/DoorOrientation"),
+    	AttributeDef("DoorPosition", "vocab", "doorway/doorDetail/DoorPosition"),
+    	AttributeDef("DoorMasonry", "vocab", "doorway/doorDetail/DoorMasonry"),
+    	AttributeDef("DoorHeight", "measure", "doorway/doorDetail/DoorHeight"),
+    	AttributeDef("DoorHeightPreservation", "vocab", "doorway/doorDetail/DoorHeightPreservation"),
+    	AttributeDef("DoorTopWidth", "measure", "doorway/doorDetail/DoorTopWidth"),
+    	AttributeDef("DoorBaseWidth", "measure", "doorway/doorDetail/DoorBaseWidth"),
+    	AttributeDef("DoorOtherWidth", "measure", "doorway/doorDetail/DoorOtherWidth"),
+    	AttributeDef("DoorOtherWidthHeight", "measure", "doorway/doorDetail/DoorOtherWidthHeight"),
+    	AttributeDef("DoorDescription", "freetext", "doorway/doorDetail/DoorDescription"),
+    	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
+    	};
+    
+    return saveEntity(id, "Doorway", attributeDefs, null); 
+}
 
 /*** LICHEN ***/
 
@@ -625,31 +706,11 @@ onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
 onEvent("structure/final/Update", "click", "updateStructure(structure_id)");
-onEvent("structure/final/SaveAndClose", "click", "saveStructureAndClose()");
+onEvent("structure/final/Save", "click", "saveStructureAndClose()");
+onEvent("structure/final/Clear", "click", "newStructure()");
+onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 String structure_id = null;
-
-saveEntity(entityId, entityType, attributeDefs, geoData) {
-	
-    List attributes = createAttributeList();
-    
-    for (Object def : attributeDefs) {
-    	
-    	// name, text, vocab, measure, certainty
-    	if ("freetext".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, getFieldCertainty(def.ref)));
-    	} else if ("measure".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), getFieldCertainty(def.ref)));
-    	} else if ("vocab".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, getFieldCertainty(def.ref)));
-    	} else if ("files".equals(def.type)) {
-    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
-    	}
-    	
-    }
-    
-    return saveArchEnt(entityId, entityType, geoData, attributes);
-}
 
 saveStructureAndClose(){
     structure_id = updateStructure(null);
