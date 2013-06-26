@@ -533,8 +533,7 @@
       <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetail" type="string"/>
-      
-      
+          
       
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/InkaMasonryDescription" type="string"/>
@@ -547,13 +546,11 @@
       <bind nodeset="/faims/wall/structureWall/DoorwayCount" type="decimal"/>
       
       
-      
       <bind nodeset="/faims/corner/cornerDetail/MasonryDescription" type="string"/>
       <bind nodeset="/faims/corner/cornerDetail/InkaMasonryDescription" type="string"/>
 	  <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
 	  <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="decimal"/>
       <bind nodeset="/faims/corner/cornerDetail/CornerDescription" type="string"/>
-      
       
       
       <bind nodeset="/faims/doorway/doorDetail/DoorOrientation" type="decimal"/>
@@ -567,18 +564,15 @@
       <bind nodeset="/faims/doorway/doorDetail/GPSLat" type="decimal"/>
       
       
-      
       <bind nodeset="/faims/niche/nicheDetail/NicheHeight" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheDepth" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheWidth" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheDescription" type="string"/>
       
-
 	 	
       <bind nodeset="/faims/window/windowDetail/WindowHeight" type="decimal"/>
       <bind nodeset="/faims/window/windowDetail/WindowWidth" type="decimal"/>
       <bind nodeset="/faims/window/windowDetail/WindowDescription" type="string"/>
-
       
 
       <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
@@ -588,10 +582,7 @@
       <bind nodeset="/faims/lichen/lichenDetail/GPSLat" type="decimal"/>
 
 
-
       <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
-
-
 
       
       <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
@@ -601,17 +592,12 @@
       <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
 
 
-
-
       <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
-
-
       
 
       <bind nodeset="/faims/specialFind/findDetail/Description" type="string"/>
-
 
 
       <bind nodeset="/faims/surfaceCollection/description/ContextDescription" type="string"/>
@@ -955,7 +941,7 @@
         <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
           <label>Disturbances:</label>
         </input>
-        <input ref="OtherArchitecturalDetail" faims_attribute_name="OtherArchitecturalDetail" faims_attribute_type="freetext">
+        <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>Other Architectural Detail:</label>
         </input>
       </group>
@@ -989,12 +975,13 @@
         <trigger ref="Sketch">
           <label>Sketch</label>
         </trigger>
-        <input ref="sketchfilename" faims_read_only="true" faims_certainty="false" faims_attribute_name="sketchfilename" faims_attribute_type="freetext">
-            <label>Sketch Filename:</label>
-        </input>
-        <input ref="sketchfile" faims_read_only="true" faims_certainty="false">
-            <label>Attached Sketch:</label>
-        </input>
+        <select1 ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
+            <label>Sketch File List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="Update">
           <label>Update Existing Entity</label>
         </trigger>
@@ -1004,14 +991,13 @@
         <trigger ref="AddAttachment">
           <label>Add Attachment</label>
         </trigger>
-
-        <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
-            <label>Filename:</label>
-        </input>
-        <input ref="file" faims_read_only="true" faims_certainty="false">
-            <label>Attached File:</label>
-        </input>
-
+		<select ref="filelist" faims_attribute_name="filename" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false">
+            <label>Sketch File List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="Delete">
           <label>Delete this record</label>
         </trigger>
@@ -1516,7 +1502,7 @@
         <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
       </group>
     </group>
-    <group ref="freeWall" faims_archent_type="FreeWall">
+    <group ref="freeWall" faims_archent_type="Wall">
       <label>Free Standing Wall Detail</label>
       <group ref="freeWallDetail">
         <label>Free Standing Wall</label>

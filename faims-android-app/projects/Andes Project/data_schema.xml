@@ -147,7 +147,7 @@
 			<term>Not observable</term>
 		</lookup>
 	</property>
-	<property type="string" name="WindowsCount" minCardinality="1" maxCardinality="n">
+	<property type="string" name="WindowCount" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="DoorwayCount" minCardinality="1" maxCardinality="n">
 	</property>

@@ -1,3 +1,5 @@
+/*** USER ***/
+
 getDefaultUsersList() {
     fetchOne("delete from user;");
     fetchOne("insert into user values(1, 'Adela', 'Sobotkova');");
@@ -18,13 +20,6 @@ populateListForUsers(){
     populateDropDown("user/tab1/users", getDefaultUsersList());
     populateList("user/tab1/devices", fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = 'Device' "));
 }
-
-/*login(){
-    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
-    setUser(user);
-    showTabGroup("controls");
-}*/
 
 populateListForUsers();
 
@@ -61,6 +56,8 @@ login(){
 
     }
 }
+
+onEvent("user/tab1/login", "click", "login()");
 
 makeVocab(String attrib){
     Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
@@ -106,8 +103,7 @@ newStructureWall(){
     populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
     populateList("wall/structureWall/Gable", makeVocab("Gable"));
     populateList("wall/structureWall/WallHeightPreservation", makeVocab("WallHeightPreservation"));
-
-
+    
 }
 
 newDoorway(){
@@ -162,8 +158,6 @@ newSurfaceCollection(){
     populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
     populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
 
-
-
 }
 
 newLot(){
@@ -202,20 +196,11 @@ newEntity() {
 }
 
 onEvent("control/map/create", "click", "newEntity()");
-onEvent("structure/component/AddCorner", "click", "newCorner()");
-onEvent("structure/component/AddWall", "click", "newStructureWall()");
-onEvent("structure/component/AddDoorway", "click", "newDoorway()");
-onEvent("structure/component/AddNiche", "click", "newNiche()");
-onEvent("wall/structureWall/NewNiche", "click", "newNiche()");
-onEvent("corner/cornerDetail/AddNiche", "click", "newNiche()");
-onEvent("wall/structureWall/NewWindow", "click", "newWindow()");
-onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
-onEvent("surfaceCollection/material/Lot", "click", "newLot()");
-
-onEvent("user/tab1/login", "click", "login()");
-
 onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
 onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
@@ -233,7 +218,6 @@ stopSync() {
 
 }
 
-
 syncStarted() {
     //showToast("starting sync");
 }
@@ -247,98 +231,17 @@ syncFailed() {
     //showToast("failed sync");
 }
 
-onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+onEvent("structure/component/AddCorner", "click", "newCorner()");
+onEvent("structure/component/AddWall", "click", "newStructureWall()");
+onEvent("structure/component/AddDoorway", "click", "newDoorway()");
+onEvent("structure/component/AddNiche", "click", "newNiche()");
+onEvent("wall/structureWall/NewNiche", "click", "newNiche()");
+onEvent("wall/structureWall/NewWindow", "click", "newWindow()");
+onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
+onEvent("corner/cornerDetail/AddNiche", "click", "newNiche()");
+onEvent("surfaceCollection/material/Lot", "click", "newLot()");
 
-onEvent("control/gps/startsync", "click", "startSync()");
-onEvent("control/gps/stopsync", "click", "stopSync()");
-
-
-saveFiles(values, loadedfiles, files, type, attributes){
-    if (!"".equals(values)){
-        if(loadedfiles.isEmpty()){
-            for(String file : files){
-
-                filename = attachFile(file, 1);
-                if(values.contains(file)){
-                    attributes.add(createEntityAttribute(type, filename, null, null, null));
-                }else{
-                    attributes.add(createEntityAttribute(type, filename, null, null, null,true));
-                }
-            }
-        }else{
-            for(String file : files){
-                if(loadedfiles.contains(file)){
-                    if(values.contains(file)){
-                        attributes.add(createEntityAttribute(type, file, null, null, null));
-                    }else{
-                        attributes.add(createEntityAttribute(type, file, null, null, null,true));
-                    }
-                }else{
-
-                    filename = attachFile(file, 1);
-                    if(values.contains(file)){
-                        attributes.add(createEntityAttribute(type, filename, null, null, null));
-                    }else{
-                        attributes.add(createEntityAttribute(type, filename, null, null, null,true));
-                    }
-                }
-            }
-        }
-    }else{
-        if(loadedfiles.isEmpty()){
-            for(String file : files){
-
-                filename = attachFile(file, 1);
-                attributes.add(createEntityAttribute(type, filename, null, null, null,true));
-            }
-        }else{
-            for(String file : files){
-                if(loadedfiles.contains(file)){
-                    attributes.add(createEntityAttribute(type, file, null, null, null,true));
-                }else{
-
-                    filename = attachFile(file, 1);
-                    attributes.add(createEntityAttribute(type, filename, null, null, null,true));
-                }
-            }
-        }
-    }
-}
-
-
-setFilename() {
-    setFieldValue("structure/final/file", getLastSelectedFilename());
-}
-
-setSketchFilename() {
-    setFieldValue("structure/final/sketchfile", getLastSelectedFilename());
-}
-
-
-attachSketchFile() {
-    showFileBrowser("setSketchFilename()");
-}
-
-attachFile() {
-    showFileBrowser("setFilename()");
-}
-
-
-
-ArrayList pictures = new ArrayList();
-
-takePicture() {
-    openCamera("OnPictureTaken()");
-}
-
-OnPictureTaken() {
-    pictureFilepath = getLastPictureFilePath();
-    pictures.add(pictureFilepath);
-    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
-}
-
-
-ArrayList cornerpictures = new ArrayList();
+/*** CORNER ***/
 
 takeCornerPicture() {
     openCamera("OnCornerPictureTaken()");
@@ -346,17 +249,15 @@ takeCornerPicture() {
 
 OnCornerPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    cornerpictures.add(pictureFilepath);
-    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerpictures);
+    pictures = getFieldValue("corner/cornerDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
-
-
-
-ArrayList nichepictures = new ArrayList();
+/*** NICHE ***/
 
 takeNichePicture() {
     openCamera("OnNichePictureTaken()");
@@ -364,16 +265,15 @@ takeNichePicture() {
 
 OnNichePictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    nichepictures.add(pictureFilepath);
-    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichepictures);
+    pictures = getFieldValue("niche/nicheDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
-
-
-ArrayList canalpictures = new ArrayList();
+/*** CANAL ***/
 
 takecanalPicture() {
     openCamera("OncanalPictureTaken()");
@@ -381,32 +281,15 @@ takecanalPicture() {
 
 OncanalPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    canalpictures.add(pictureFilepath);
-    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+    pictures = getFieldValue("canal/canalDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
 
-
-ArrayList lichenpictures = new ArrayList();
-
-takeLichenPicture() {
-    openCamera("OnLichenPictureTaken()");
-}
-
-OnLichenPictureTaken() {
-    pictureFilepath = getLastPictureFilePath();
-    lichenpictures.add(pictureFilepath);
-    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
-}
-
-
-onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
-
-
-
-ArrayList windowpictures = new ArrayList();
+/*** WINDOW ***/
 
 takeWindowPicture() {
     openCamera("OnWindowPictureTaken()");
@@ -414,17 +297,15 @@ takeWindowPicture() {
 
 OnWindowPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    windowpictures.add(pictureFilepath);
-    populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowpictures);
+    pictures = getFieldValue("window/windowDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("window/windowDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
-
-
-
-ArrayList specialFindpictures = new ArrayList();
+/*** SPECIAL FIND ***/
 
 takespecialFindPicture() {
     openCamera("OnspecialFindPictureTaken()");
@@ -432,15 +313,15 @@ takespecialFindPicture() {
 
 OnspecialFindPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    specialFindpictures.add(pictureFilepath);
-    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
+    pictures = getFieldValue("specialFind/findDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
-
-ArrayList featurepictures = new ArrayList();
+/*** FEATURES ***/
 
 takeFeaturePicture() {
     openCamera("OnFeaturePictureTaken()");
@@ -448,15 +329,15 @@ takeFeaturePicture() {
 
 OnFeaturePictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    featurepictures.add(pictureFilepath);
-    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+    pictures = getFieldValue("feature/featureDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
-
-ArrayList freewallpictures = new ArrayList();
+/*** FREEWALL ***/
 
 takeFreewallPicture() {
     openCamera("OnFreewallPictureTaken()");
@@ -464,16 +345,15 @@ takeFreewallPicture() {
 
 OnFreewallPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    freewallpictures.add(pictureFilepath);
-    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallpictures);
+    pictures = getFieldValue("freeWall/freeWallDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", newPictures);
 }
-
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
-
-
-ArrayList doorwaypictures = new ArrayList();
+/*** DOORWAY ***/
 
 takeDoorwayPicture() {
     openCamera("OnDoorwayPictureTaken()");
@@ -481,8 +361,10 @@ takeDoorwayPicture() {
 
 OnDoorwayPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    doorwaypictures.add(pictureFilepath);
-    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
+    pictures = getFieldValue("doorway/doorDetail/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", newPictures);
 }
 
 takeDoorywayPoint(){
@@ -506,6 +388,22 @@ takeDoorywayPoint(){
 onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
+/*** LICHEN ***/
+
+takeLichenPicture() {
+    openCamera("OnLichenPictureTaken()");
+}
+
+OnLichenPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    pictures = getFieldValue("structure/final/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", newPictures);
+}
+
+onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
+
 takeLichenPoint(){
     location = getGPSPosition();
     if (location == null) {
@@ -527,22 +425,57 @@ takeLichenPoint(){
 
 onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 
-
-ArrayList swallpictures = new ArrayList();
-
+/*** STRUCTURE WALL ***/
 
 takeStructWallPicture() {
     openCamera("OnStructWallPictureTaken()");
 }
+
 OnStructWallPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    swallpictures.add(pictureFilepath);
-    populateCameraPictureGallery("wall/structureWall/PhotoGallery", swallpictures);
+    pictures = getFieldValue("structure/final/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("wall/structureWall/PhotoGallery", newPictures);
 }
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 
-ArrayList videos = new ArrayList();
+/*** STRUCTURE ***/
+
+attachFile() {
+    showFileBrowser("setFilename()");
+}
+
+setFilename() {
+	List files = getFieldValue("structure/final/filelist");
+	ArrayList newFiles = new ArrayList(files); 
+	newFiles.add(getLastSelectedFilepath());
+	populateCheckBoxGroup("structure/final/filelist", newFiles);
+}
+
+attachSketchFile() {
+    showFileBrowser("setSketchFilename()");
+}
+
+setSketchFilename() {
+    List files = getFieldValue("structure/final/sketchfilelist");
+	ArrayList newFiles = new ArrayList(files);   
+	newFiles.add(getLastSelectedFilepath());
+	populateCheckBoxGroup("structure/final/sketchfilelist", newFiles);
+}
+
+takePicture() {
+    openCamera("OnPictureTaken()");
+}
+
+OnPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    pictures = getFieldValue("structure/final/PhotoGallery");
+    newPictures = new ArrayList(pictures);
+    newPictures.add(pictureFilepath);
+    populateCameraPictureGallery("structure/final/PhotoGallery", newPictures);
+}
 
 takeVideo() {
     openVideo("OnVideoTaken()");
@@ -550,11 +483,11 @@ takeVideo() {
 
 OnVideoTaken() {
     videoFilepath = getLastVideoFilePath();
-    videos.add(videoFilepath);
-    populateVideoGallery("structure/final/VideoGallery", videos);
+    videos = getFieldValue("structure/final/VideoGallery");
+    newVideos = new ArrayList(videos);
+    newVideos.add(videoFilepath);
+    populateVideoGallery("structure/final/VideoGallery", newVideos);
 }
-
-ArrayList audios = new ArrayList();
 
 recordAudio(){
     recordAudio("OnAudioRecorded()");
@@ -562,63 +495,181 @@ recordAudio(){
 
 OnAudioRecorded(){
     audioFilePath = getLastAudioFilePath();
-    audios.add(audioFilePath);
-    populateAudioList("structure/attachment/AudioList",audios);
+    audios = getFieldValue("structure/final/AudioList");
+    newAudios = new ArrayList(audios);
+    newAudios.add(audioFilePath);
+    populateAudioList("structure/attachment/AudioList", newAudios);
 }
 
+onEvent("structure/final/AddAttachment", "click", "attachFile()");
+onEvent("structure/final/Sketch", "click", "attachSketchFile()");
+onEvent("structure/final/Photo", "click", "takePicture()");
 onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
-onEvent("structure/final/AddAttachment", "click", "attachFile()");
-onEvent("structure/final/Sketch", "click", "attachFile()");
-onEvent("structure/final/SaveAndClose", "click", "saveRelAndClose()");
-onEvent("structure/final/Photo", "click", "takePicture()");
 
-String entity_id = null;
-String rel_id = null;
+onEvent("structure/final/Update", "click", "updateStructure(structureId)");
+onEvent("structure/final/SaveAndClose", "click", "saveStructureAndClose()");
 
+String structureId = null;
 
-saveEntity() {
-    entity_id = updateEntity(null);
-    /*pictures.clear();
-    videos.clear();
-    audios.clear();
-    populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
-    populateVideoGallery("tabgroup1/tab1/videogallery", videos);
-    populateAudioList("tabgroup1/tab2/audiolist",audios);
-    loadFileAttributes(entity_id);*/
+saveEntity(entityType, attributeDefs) {
+	
+    List attributes = createAttributeList();
+    
+    for (String[] def : attributeDefs) {
+    	
+    	// name, text, vocab, measure, certainty
+    	if ("freetext".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, getFieldCertainty(def.ref)));
+    	} else if ("measure".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), getFieldCertainty(def.ref)));
+    	} else if ("vocab".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, getFieldCertainty(def.ref)));
+    	} else if ("files".equals(def.type)) {
+    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
+    	}
+    }
+    
 }
 
-saveRelAndClose(){
-    rel_id = updateRel(null);
+saveStructureAndClose(){
+    structureId = updateStructure(null);
     closeTabGroup("structure");
-}
-
-saveRel() {
-    rel_id = updateRel(null);
-    pictures.clear();
-    videos.clear();
-    audios.clear();
-    populateCameraPictureGallery("structure/final/PhotoGallery", pictures);
-    populateVideoGallery("structure/final/VideoGallery", videos);
-    populateAudioList("structure/attachment/AudioList",audios);
-    loadFileAttributes(entity_id);
 }
 
 updateStructure(id){
     if (id == null || "".equals(id)) id = null;
 
-    ArrayList loadedFiles = new ArrayList();
-    ArrayList loadedSketches = new ArrayList();
-    ArrayList loadedPictures = new ArrayList();
-    ArrayList loadedVideos = new ArrayList();
-    ArrayList loadedAudios = new ArrayList();
-    List attributes = createAttributeList();
-    if (id == null){
-        //attributes.add(createRelationshipAttribute("relationship", "Small " + entityCount++, null, null, null));
-    } else {
-        //load the reln here.
-    }
+	ArrayList loadedSketches = new ArrayList();
+	ArrayList loadedFiles = new ArrayList();
+	ArrayList loadedPictures = new ArrayList();
+	ArrayList loadedVideos = new ArrayList();
+	ArrayList loadedAudios = new ArrayList();
+	
+	if (structureId != null) {
+		entity = fetchArchEnt(structureId);
+		for (Object attribute : relationship.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photo".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			} else if ("sketchfilename".equals(attribute.getName())) {
+				loadedSketches.add(attribute.getText());
+			} else if ("filename".equals(attribute.getName())) {
+				loadedFiles.add(attribute.getText());
+			} else if ("video".equals(attribute.getName())) {
+				loadedVideos.add(attribute.getText());
+			} else if ("audio".equals(attribute.getName())) {
+				loadedAudios.add(attribute.getText());
+			}
+		}
+	}
+    
+   	AttributeDef[] attributeDefs = new AttributeDef[] {
+    	new AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID"),
+    	new AttributeDef("Description", "freetext", "structure/info/Description"),
+    	new AttributeDef("Timestamp", "freetext", "structure/info/Timestamp"),
+    	new AttributeDef("Author", "freetext" , "structure/info/Author"},
+    	new AttributeDef("Device", "freetext", "structure/info/Device"),
+    	new AttributeDef("Form", "vocab", "structure/info/Form"),
+    	new AttributeDef("FormDescription", "freetext", "structure/info/FormDescription"),
+    	new AttributeDef("ConstructionPeriod", "vocab", "structure/info/ConstructionPeriod"),
+    	new AttributeDef("ConstructionPeriodDescription", "freetext", "structure/info/ConstructionPeriodDescription"),
+    	new AttributeDef("Modifications", "vocab", "structure/info/Modifications"),
+    	new AttributeDef("ModificationDescription", "freetext", "structure/info/ModificationDescription"),
+    	new AttributeDef("PrincipalFunction", "vocab", "structure/info/PrincipalFunction"),
+    	new AttributeDef("PrincipalFunctionDescription", "freetext", "structure/info/PrincipalFunctionDescription"),
+    	new AttributeDef("Classification", "vocab", "structure/info/Classification"),
+    	new AttributeDef("ConstructionQuality", "vocab", "structure/info/ConstructionQuality"),
+    	new AttributeDef("WallsTotalCount", "measure", "structure/info/WallsTotalCount"),
+    	new AttributeDef("WallsGabledCount", "measure", "structure/info/WallsGabledCount"),
+    	new AttributeDef("WallsInternalPartition", "vocab", "structure/info/WallsInternalPartition"),
+    	new AttributeDef("PartitionDescription", "freetext", "structure/info/PartitionDescription"),
+    	new AttributeDef("StuccoInterior", "vocab", "structure/info/StuccoInterior"),
+    	new AttributeDef("StuccoExterior", "vocab", "structure/info/StuccoExterior"),
+    	new AttributeDef("WindowCount", "measure", "structure/info/WindowCount"),
+    	new AttributeDef("DoorwayCount", "measure", "structure/info/DoorwayCount"),
+    	new AttributeDef("NicheCount", "measure", "structure/info/NicheCount"),
+    	new AttributeDef("NicheAltar", "vocab", "structure/info/NicheAltar"),
+    	new AttributeDef("FloorRemainsDescription", "freetext", "structure/info/FloorRemainsDescription"),
+    	new AttributeDef("RoofForm", "vocab", "structure/info/RoofForm"),
+    	new AttributeDef("LongAxis", "measure", "structure/info/LongAxis"),
+    	new AttributeDef("ShortAxis", "measure", "structure/info/ShortAxis"),
+    	new AttributeDef("Diameter", "measure", "structure/info/Diameter"),
+    	new AttributeDef("Preservation", "vocab", "structure/info/Preservation"),
+    	new AttributeDef("PreservationDescription", "freetext", "structure/info/PreservationDescription"),
+    	new AttributeDef("SurfaceCondition", "freetext", "structure/info/SurfaceCondition"),
+    	new AttributeDef("ModernUse", "freetext", "structure/info/ModernUse"),
+    	new AttributeDef("Disturbances", "vocab", "structure/info/Disturbances"),
+    	new AttributeDef("OtherArchitecturalDetails", "freetext", "structure/info/OtherArchitecturalDetails"),
+    	new AttributeDef("Photo", "files", "structure/info/PhotoGallery", loadedPictures),
+    	new AttributeDef("sketchfilename", "files", "structure/info/sketchfilelist", loadedSketches),
+    	new AttributeDef("filename", "files", "structure/info/filelist", loadedFiles),
+    	new AttributeDef("video", "files", "structure/info/VideoGallery", loadedVideos),
+    	new AttributeDef("audio" "files", "structure/info/AudioList", loadedAudios)
+    	};
+    
+    return saveEntity("Structure",  attributeDefs); 
+    
+}
 
+/*** MISC ***/
 
+class AttributeDef {
 
+	public String name;
+	public String type;
+	public String ref;
+	public ArrayList loadedFiles;
+
+	public AttributeDef(String name, String type, String ref) {
+		this.name = name;
+		this.type = type;
+		this.ref = ref;
+	}
+	
+	public AttributeDef(String name, String type, String ref, ArrayList loadedFiles) {
+		this.name = name;
+		this.type = type;
+		this.ref = ref;
+		this.loadedFiles = loadedFiles;
+	}
+
+}
+
+getLoadedFileName(filename) {
+	if (filename.indexOf("_") > 0) {
+		filename = filename.substring(filename.indexOf("_") + 1);
+	}
+	return filename;
+}
+
+hasFile(files, filename) {
+	for (String f : files) {
+		if (getLoadedFileName(f).equals(getLoadedFileName(filename))) return true;
+	}
+	return false;
+}
+
+saveFiles(loadedFiles, files, type, attributes) {
+	// delete attributes that are not included
+	for (String file : loadedFiles) {
+		if (!hasFile(files, file)) {
+			attributes.add(createEntityAttribute(type, file, null, null, null, true));
+		}
+	}
+	// add new attributes that are included
+	for (String file : files) {
+		String filename = null;
+		if (!hasFile(loadedFiles, file)) {
+			filename = attachFile(file, true);
+		} else {
+			for (String f : loadedFiles) {
+				if (getLoadedFileName(f).equals(getLoadedFileName(file))) {
+					filename = f;
+					break;
+				}
+			}
+		}
+		attributes.add(createEntityAttribute(type, filename, null, null, null, true));
+	}
 }
