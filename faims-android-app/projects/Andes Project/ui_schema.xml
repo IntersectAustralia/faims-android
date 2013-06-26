@@ -174,7 +174,10 @@
           </structure>
           <corner>
             <cornerDetail>
-              <Name/>
+              <CornerID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
               <CornerExteriorForm/>
               <!-- Redondeada-bloques,Redondeada-amarrada,Redondeada-mixta,Angular-bloques,Angular-amarrada,Angular-mixta,Otro,No observable -->
               <CornerInteriorForm/>
@@ -187,7 +190,7 @@
               <!--  radiobutton
                 <Yes/>,No -->
               <InkaMasonryDescription/>
-              <CornerNicheCount/>
+              <NicheCount/>
               <!-- Number or Not observable -->
               <!-- Only include following attributes if no walls are preserved -->
               <CornerHeight/>
@@ -1044,8 +1047,17 @@
       <label>Corner Detail</label>
       <group ref="cornerDetail">
         <label>Corner of a Structure</label>
-        <input ref="Name" faims_attribute_name="Name" faims_attribute_type="freetext">
-          <label>Name:</label>
+        <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext">
+          <label>CornerID:</label>
+        </input>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Timestamp:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Author:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>Device:</label>
         </input>
         <select1 ref="CornerExteriorForm" faims_attribute_name="CornerExteriorForm" faims_attribute_type="vocab">
           <label>CornerExteriorForm:</label>
@@ -1081,8 +1093,8 @@
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
           <label>InkaMasonryDescription:</label>
         </input>
-        <input ref="CornerNicheCount" faims_attribute_name="CornerNicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>CornerNicheCount:</label>
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>NicheCount:</label>
         </input>
         <!--Only include following attributes if no walls are preserved -->
         <input ref="CornerHeight" faims_attribute_name="CornerHeight" faims_attribute_type="measure">

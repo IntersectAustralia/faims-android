@@ -382,6 +382,7 @@ onEvent("surfaceCollection/material/Lot", "click", "newLot()");
 
 /*** CORNER ***/
 
+String corner_id = null;
 ArrayList cornerPictures = new ArrayList();
 
 takeCornerPicture() {
@@ -395,6 +396,53 @@ OnCornerPictureTaken() {
 }
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
+
+onEvent("corner/cornerDetail/Update", "click", "updateCorner(corner_id)");
+onEvent("corner/cornerDetail/Save", "click", "saveCornerAndClose()");
+onEvent("corner/cornerDetail/Clear", "click", "newCorner()");
+onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
+
+saveCornerAndClose() {
+	corner_id = updateCorner(null);
+	cancelTabGroup("corner", false);
+}
+
+updateCorner(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    cornerPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("CornerPhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID"),
+    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp"),
+    	AttributeDef("Author", "freetext" , "corner/cornerDetail/Author"),
+    	AttributeDef("Device", "freetext", "corner/cornerDetail/Device"),
+    	AttributeDef("CornerExteriorForm", "vocab", "corner/cornerDetail/CornerExteriorForm"),
+    	AttributeDef("CornerInteriorForm", "vocab", "corner/cornerDetail/CornerInteriorForm"),
+    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount"),
+    	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
+    	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
+    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/CornerPhotos", loadedPictures),
+    	AttributeDef("MasonryType", "vocab", "corner/cornerDetail/MasonryType"),
+    	AttributeDef("MasonryDescription", "freetext", "corner/cornerDetail/MasonryDescription"),
+    	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
+    	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
+    	};
+    
+    return saveEntity(id, "Corner", attributeDefs, null); 
+}
 
 /*** NICHE ***/
 
@@ -441,7 +489,7 @@ saveCanalAndClose() {
 updateCanal(id) {
 	if (id == null || "".equals(id)) id = null;
     
-    canalPictures = getNoneList();
+    canalPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 	
@@ -581,7 +629,7 @@ saveDoorwayAndClose() {
 updateDoorway(id) {
 	if (id == null || "".equals(id)) id = null;
     
-    doorwayPictures = getNoneList();
+    doorwayPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 	

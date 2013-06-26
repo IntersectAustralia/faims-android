@@ -256,6 +256,38 @@
 	</property>
 	<property type="string" name="CornerPhotos" minCardinality="1" maxCardinality="n">
   </property>
+  <property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
+		<lookup>
+			<term pictureURL="files/data/masonry/Type1a.jpg">Tipo 1a</term>
+			<term pictureURL="files/data/masonry/Type1b.jpg">Tipo 1b</term>
+			<term pictureURL="files/data/masonry/Type2.jpg">Tipo 2</term>
+			<term pictureURL="files/data/masonry/Type3.jpg">Tipo 3</term>
+			<term pictureURL="files/data/masonry/Type4a.jpg">Tipo 4a</term>
+			<term pictureURL="files/data/masonry/Type4b.jpg">Tipo 4b</term>
+			<term pictureURL="files/data/masonry/Type5.jpg">Tipo 5</term>
+			<term pictureURL="files/data/masonry/Type6.jpg">Tipo 6</term>
+			<term pictureURL="files/data/masonry/Type7.jpg">Tipo 7</term>
+			<term pictureURL="files/data/masonry/Type8.jpg">Tipo 8</term>
+			<term pictureURL="files/data/masonry/Type10.jpg">Tipo 10</term>
+			<term pictureURL="files/data/masonry/Type11a.jpg">Tipo 11a</term>
+			<term pictureURL="files/data/masonry/Type11b.jpg">Tipo 11b</term>
+			<term pictureURL="files/data/masonry/Type12.jpg">Tipo 12</term>
+			<term pictureURL="files/data/masonry/Type13.jpg">Tipo 13</term>
+			<term>Otro</term>
+			<term>No observable</term>
+		</lookup>
+	</property>
+	<property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
+	</property>
+	<property type="string" name="InkaMasonry" minCardinality="1" maxCardinality="n">
+		<lookup>
+			<term>Yes</term>
+			<term>No</term>
+			<term>Not observable</term>
+		</lookup>
+	</property>
+	<property type="string" name="InkaMasonryDescription" minCardinality="1" maxCardinality="n">
+	</property>
 </ArchaeologicalElement>
 <ArchaeologicalElement type="StructureWall">
 	<property type="string" name="WallID" isIdentifier="true" minCardinality="1" maxCardinality="1"/>
