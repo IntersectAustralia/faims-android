@@ -224,7 +224,9 @@ newStructureWall(){
     populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
     populateList("wall/structureWall/Gable", makeVocab("Gable"));
     populateList("wall/structureWall/WallHeightPreservation", makeVocab("WallHeightPreservation"));
-    
+    setFieldValue("wall/structureWall/Timestamp", getCurrentTime());
+    setFieldValue("wall/structureWall/Author", username);
+    setFieldValue("wall/structureWall/Device", device);
 }
 
 newDoorway(){
@@ -1008,6 +1010,7 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 
 /*** STRUCTURE WALL ***/
 
+String structure_wall_id = null;
 ArrayList structureWallPictures = new ArrayList();
 
 takeStructWallPicture() {
@@ -1021,6 +1024,57 @@ OnStructWallPictureTaken() {
 }
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
+
+onEvent("wall/structureWall/Update", "click", "updateStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Save", "click", "saveStructureWallAndClose()");
+onEvent("wall/structureWall/Clear", "click", "newStructureWall()");
+onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
+
+saveStructureWallAndClose() {
+	structure_wall_id = updateStructureWall(null);
+	cancelTabGroup("wall", false);
+}
+
+updateStructureWall(id) {
+	if (id == null || "".equals(id)) id = null;
+    
+    structureWallPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+	
+	if (id != null) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("WallPhotos".equals(attribute.getName())) {
+				loadedPictures.add(attribute.getText());
+			}
+		}
+	}
+    
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID"),
+    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp"),
+    	AttributeDef("Author", "freetext" , "wall/structureWall/Author"),
+    	AttributeDef("Device", "freetext", "wall/structureWall/Device"),
+    	AttributeDef("MasonryType", "vocab", "wall/structureWall/MasonryType"),
+    	AttributeDef("MasonryDescription", "freetext", "wall/structureWall/MasonryDescription"),
+    	AttributeDef("InkaMasonry", "vocab", "wall/structureWall/InkaMasonry"),
+    	AttributeDef("InkaMasonryDescription", "freetext", "wall/structureWall/InkaMasonryDescription"),
+    	AttributeDef("WallThickness", "measure", "wall/structureWall/WallThickness"),
+    	AttributeDef("WallHeight", "measure", "wall/structureWall/WallHeight"),
+    	AttributeDef("WallHeightPreservation", "vocab", "wall/structureWall/WallHeightPreservation"),
+    	AttributeDef("Gable", "vocab", "wall/structureWall/Gable"),
+    	AttributeDef("GableHeight", "measure", "wall/structureWall/GableHeight"),
+    	AttributeDef("GableDistance", "measure", "wall/structureWall/GableDistance"),
+    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount"),
+    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount"),
+    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount"),
+    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
+    	};
+    
+    return saveEntity(id, "StructureWall", attributeDefs, null); 
+}
 
 /*** STRUCTURE ***/
 
