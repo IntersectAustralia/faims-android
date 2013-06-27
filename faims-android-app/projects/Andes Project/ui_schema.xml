@@ -290,6 +290,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
             </windowDetail>
@@ -325,6 +326,8 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
+              <AssociateWithType/>
               <AssociateWith/>
               <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
             </nicheDetail>
@@ -355,6 +358,8 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
+              <AssociateWithType/>
               <AssociateWith/>
               <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
             </lichenDetail>
@@ -373,6 +378,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
             </featureDetail>
@@ -410,6 +416,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
             </freeWallDetail>
           </freeWall>
@@ -429,6 +436,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
             </canalDetail>
@@ -469,6 +477,8 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
+              <AssociateWithType/>
               <AssociateWith/>
               <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
             </doorDetail>
@@ -490,6 +500,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
             </findDetail>
@@ -524,6 +535,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <NewLot/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
@@ -543,6 +555,7 @@
               <Save/>
               <Clear/>
               <Delete/>
+              <AssociateWithList/>
               <AssociateWith/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
             </lotDetail>
@@ -1067,7 +1080,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1188,7 +1201,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1304,7 +1317,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         <!-- {button}-->
         </trigger>
         <trigger ref="Clear">
@@ -1401,7 +1414,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1410,6 +1423,20 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+            <label>Associate With Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1493,7 +1520,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1501,6 +1528,20 @@
         <trigger ref="Delete">
           <label>Delete record</label>
         </trigger>
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+            <label>Associate With Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>AssociateWith</label>
         </trigger>
@@ -1578,7 +1619,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1587,6 +1628,20 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+            <label>Associate With Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1626,7 +1681,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1635,6 +1690,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1718,7 +1780,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1727,6 +1789,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1772,7 +1841,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1781,6 +1850,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1828,7 +1904,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1837,6 +1913,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1910,7 +1993,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1919,6 +2002,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1955,7 +2045,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -1964,6 +2054,13 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -2021,7 +2118,7 @@
           <label>Update Existing Record</label>
         </trigger>
         <trigger ref="Save">
-          <label>Save Record and Close</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Clear">
           <label>Clear Record</label>
@@ -2029,6 +2126,13 @@
         <trigger ref="Delete">
           <label>Delete record</label>
         </trigger>
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>Associate With List:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
         <trigger ref="AssociateWith">
           <label>AssociateWith</label>
         </trigger>

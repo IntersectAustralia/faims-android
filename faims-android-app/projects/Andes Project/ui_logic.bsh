@@ -172,6 +172,15 @@ populateListForEntityTypes() {
 
 populateListForEntityTypes();
 
+populateNicheAssociateWithTypes() {
+	ArrayList list = new ArrayList();
+	list.add("StructureContains");
+	list.add("NicheIn");
+	populateDropDown("niche/nicheDetail/AssociateWithType", list);
+}
+
+populateNicheAssociateWithTypes();
+
 String username = "";
 String device = "";
 
@@ -495,15 +504,13 @@ OnCornerPictureTaken() {
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
-onEvent("corner/cornerDetail/Update", "click", "updateCorner(corner_id)");
-onEvent("corner/cornerDetail/Save", "click", "saveCornerAndClose()");
+onEvent("corner/cornerDetail/Update", "click", "corner_id = updateCorner(corner_id)");
+onEvent("corner/cornerDetail/Save", "click", "saveCorner()");
 onEvent("corner/cornerDetail/Clear", "click", "newCorner()");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
-saveCornerAndClose() {
+saveCorner() {
 	corner_id = updateCorner(null);
-	if (structure_wall_id != null)
-		cancelTabGroup("corner", false);
 }
 
 updateCorner(id) {
@@ -575,14 +582,32 @@ OnNichePictureTaken() {
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
-onEvent("niche/nicheDetail/Update", "click", "updateNiche(niche_id)");
-onEvent("niche/nicheDetail/Save", "click", "saveNicheAndClose()");
+onEvent("niche/nicheDetail/Update", "click", "niche_id = updateNiche(niche_id)");
+onEvent("niche/nicheDetail/Save", "click", "saveNiche()");
 onEvent("niche/nicheDetail/Clear", "click", "newNiche()");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
+onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
-saveNicheAndClose() {
+associateWithNiche() {
+	id = getFieldValue("niche/nicheDetail/AssociateWithList");
+	type = getFieldValue("niche/nicheDetail/AssociateWithType");
+	if (id == null || "".equals(id)) {
+		showWarning("Logic Error", "Please select an id to associate with");
+		return;
+	}
+	if (type == null || "".equals(type)) {
+		showWarning("Logic Error", "Please select a type to associate with");
+		return;
+	}
+	if (niche_id == null) {
+		showWarning("Logic Error", "Please save record before associating with");
+		return;
+	}
+	saveEntitiesToRel(type, niche_id, id);
+}
+
+saveNiche() {
 	niche_id = updateNiche(null);
-	cancelTabGroup("niche", false);
 }
 
 updateNiche(id) {
@@ -640,14 +665,14 @@ OncanalPictureTaken() {
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
-onEvent("canal/canalDetail/Update", "click", "updateCanal(canal_id)");
-onEvent("canal/canalDetail/Save", "click", "saveCanalAndClose()");
+onEvent("canal/canalDetail/Update", "click", "canal_id = updateCanal(canal_id)");
+onEvent("canal/canalDetail/Save", "click", "saveCanal()");
 onEvent("canal/canalDetail/Clear", "click", "newCanal()");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
+// TODO associate with ?
 
-saveCanalAndClose() {
+saveCanal() {
 	canal_id = updateCanal(null);
-	cancelTabGroup("canal", false);
 }
 
 updateCanal(id) {
@@ -699,14 +724,27 @@ OnWindowPictureTaken() {
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
-onEvent("window/windowDetail/Update", "click", "updateWindow(window_id)");
-onEvent("window/windowDetail/Save", "click", "saveWindowAndClose()");
+onEvent("window/windowDetail/Update", "click", "window_id = updateWindow(window_id)");
+onEvent("window/windowDetail/Save", "click", "saveWindow()");
 onEvent("window/windowDetail/Clear", "click", "newWindow()");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
+onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
-saveWindowAndClose() {
+associateWithWindow() {
+	id = getFieldValue("window/windowDetail/AssociateWithList");
+	if (id == null || "".equals(id)) {
+		showWarning("Logic Error", "Please select an id to associate with");
+		return;
+	}
+	if (window_id == null) {
+		showWarning("Logic Error", "Please save record before associating with");
+		return;
+	}
+	saveEntitiesToRel("WallWindow", window_id, id);
+}
+
+saveWindow() {
 	window_id = updateWindow(null);
-	cancelTabGroup("window", false);
 }
 
 updateWindow(id) {
@@ -761,14 +799,14 @@ OnspecialFindPictureTaken() {
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
-onEvent("specialFind/findDetail/Update", "click", "updateSpecialFind(special_find_id)");
-onEvent("specialFind/findDetail/Save", "click", "saveSpecialFindAndClose()");
+onEvent("specialFind/findDetail/Update", "click", "special_find_id = updateSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Save", "click", "saveSpecialFind()");
 onEvent("specialFind/findDetail/Clear", "click", "newSpecialFind()");
 onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
+// TODO associate with ?
 
-saveSpecialFindAndClose() {
+saveSpecialFind() {
 	special_find_id = updateSpecialFind(null);
-	cancelTabGroup("specialFind", false);
 }
 
 updateSpecialFind(id) {
@@ -820,14 +858,14 @@ OnFeaturePictureTaken() {
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
-onEvent("feature/featureDetail/Update", "click", "updateFeature(feature_id)");
-onEvent("feature/featureDetail/Save", "click", "saveFeatureAndClose()");
+onEvent("feature/featureDetail/Update", "click", "feature_id = updateFeature(feature_id)");
+onEvent("feature/featureDetail/Save", "click", "saveFeature()");
 onEvent("feature/featureDetail/Clear", "click", "newFeature()");
 onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
+// TODO associate with ?
 
-saveFeatureAndClose() {
+saveFeature() {
 	feature_id = updateFeature(null);
-	cancelTabGroup("feature", false);
 }
 
 updateFeature(id) {
@@ -878,14 +916,14 @@ OnFreewallPictureTaken() {
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
-onEvent("freeWall/freeWallDetail/Update", "click", "updateFreeWall(wall_id)");
-onEvent("freeWall/freeWallDetail/Save", "click", "saveFreeWallAndClose()");
+onEvent("freeWall/freeWallDetail/Update", "click", "wall_id = updateFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Save", "click", "saveFreeWall()");
 onEvent("freeWall/freeWallDetail/Clear", "click", "newFreeWall()");
 onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
+// TODO associate with ?
 
-saveFreeWallAndClose() {
+saveFreeWall() {
 	wall_id = updateFreeWall(null);
-	cancelTabGroup("freeWall", false);
 }
 
 updateFreeWall(id) {
@@ -963,14 +1001,14 @@ takeDoorywayPoint(){
 onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
-onEvent("doorway/doorDetail/Update", "click", "updateDoorway(doorway_id)");
-onEvent("doorway/doorDetail/Save", "click", "saveDoorwayAndClose()");
+onEvent("doorway/doorDetail/Update", "click", "doorway_id = updateDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Save", "click", "saveDoorway()");
 onEvent("doorway/doorDetail/Clear", "click", "newDoorway()");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
+// TODO associate with ?
 
-saveDoorwayAndClose() {
+saveDoorway() {
 	doorway_id = updateDoorway(null);
-	cancelTabGroup("doorway", false);
 }
 
 updateDoorway(id) {
@@ -1031,14 +1069,14 @@ OnLichenPictureTaken() {
 
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
 
-onEvent("lichen/lichenDetail/Update", "click", "updateLichen(lichen_id)");
-onEvent("lichen/lichenDetail/Save", "click", "saveLichenAndClose()");
+onEvent("lichen/lichenDetail/Update", "click", "lichen_id = updateLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Save", "click", "saveLichen()");
 onEvent("lichen/lichenDetail/Clear", "click", "newLichen()");
 onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
+// TODO associate with ?
 
-saveLichenAndClose() {
+saveLichen() {
 	lichen_id = updateLichen(null);
-	cancelTabGroup("lichen", false);
 }
 
 updateLichen(id) {
@@ -1103,14 +1141,14 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 
 String surface_collection_id = null;
 
-onEvent("surfaceCollection/material/Update", "click", "updateSurfaceCollection(surface_collection_id)");
-onEvent("surfaceCollection/material/Save", "click", "saveSurfaceCollectionAndClose()");
+onEvent("surfaceCollection/material/Update", "click", "surface_collection_id = updateSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Save", "click", "saveSurfaceCollection()");
 onEvent("surfaceCollection/material/Clear", "click", "newSurfaceCollection()");
 onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
+// TODO associate with ?
 
-saveSurfaceCollectionAndClose() {
+saveSurfaceCollection() {
 	surface_collection_id = updateSurfaceCollection(null);
-	cancelTabGroup("surfaceCollection", false);
 }
 
 updateSurfaceCollection(id) {
@@ -1137,14 +1175,14 @@ updateSurfaceCollection(id) {
 
 String lot_id = null;
 
-onEvent("lot/lotDetail/Update", "click", "updateLot(lot_id)");
-onEvent("lot/lotDetail/Save", "click", "saveLotAndClose()");
+onEvent("lot/lotDetail/Update", "click", "lot_id = updateLot(lot_id)");
+onEvent("lot/lotDetail/Save", "click", "saveLot()");
 onEvent("lot/lotDetail/Clear", "click", "newLot()");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
+// TODO associate with ?
 
-saveLotAndClose() {
+saveLot() {
 	lot_id = updateLot(null);
-	cancelTabGroup("lot", false);
 }
 
 updateLot(id) {
@@ -1178,15 +1216,13 @@ OnStructWallPictureTaken() {
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 
-onEvent("wall/structureWall/Update", "click", "updateStructureWall(structure_wall_id)");
-onEvent("wall/structureWall/Save", "click", "saveStructureWallAndClose()");
+onEvent("wall/structureWall/Update", "click", "structure_wall_id = updateStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Save", "click", "saveStructureWall()");
 onEvent("wall/structureWall/Clear", "click", "newStructureWall()");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 
-saveStructureWallAndClose() {
+saveStructureWall() {
 	structure_wall_id = updateStructureWall(null);
-	if (structure_wall_id != null)
-		cancelTabGroup("wall", false);
 }
 
 updateStructureWall(id) {
@@ -1320,8 +1356,8 @@ onEvent("structure/final/Photo", "click", "takePicture()");
 onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
-onEvent("structure/final/Update", "click", "updateStructure(structure_id)");
-onEvent("structure/final/Save", "click", "saveStructureAndClose()");
+onEvent("structure/final/Update", "click", "structure_id = updateStructure(structure_id)");
+onEvent("structure/final/Save", "click", "saveStructure()");
 onEvent("structure/final/Clear", "click", "newStructure()");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
@@ -1329,9 +1365,8 @@ onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(struc
 
 String structure_id = null;
 
-saveStructureAndClose(){
+saveStructure(){
     structure_id = updateStructure(null);
-    cancelTabGroup("structure", false);
 }
 
 updateStructure(id){
@@ -1444,6 +1479,19 @@ updateAll(){
 	populateDropDown("structure/load/cornerList", corner);
 	populateDropDown("control/data/nicheList", niche);
 	populateDropDown("control/data/windowList", window);
+	
+	// window association dropdown
+	populateDropDown("window/windowDetail/AssociateWithList", structureWall);
+	// TODO niche association dropdown (needs structure AND STRUCTURE WALLS)
+	populateDropDown("niche/nicheDetail/AssociateWithList", structure);
+	// TODO free wall association
+	// TODO doorway association
+	// TODO lichen association
+	// TODO canal association
+	// TODO special find association
+	// TODO feature association
+	// TODO surface collection association
+	// TODO lot association
 }
 
 loadStructure() {
