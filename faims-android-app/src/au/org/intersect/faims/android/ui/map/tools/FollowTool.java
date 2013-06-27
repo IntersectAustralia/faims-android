@@ -33,10 +33,8 @@ public class FollowTool extends HighlightTool {
 	
 	private class FollowToolCanvas extends ToolCanvas {
 		
-		private float distance;
 		private float distanceTextX;
 		private float distanceTextY;
-		private float angle;
 		private float angleTextX;
 		private float angleTextY;
 		
@@ -62,14 +60,14 @@ public class FollowTool extends HighlightTool {
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				
 				if (showKm) {
-					canvas.drawText("Distance: " + MeasurementUtil.displayAsKiloMeters(distance/1000), distanceTextX, distanceTextY, textPaint);
+					canvas.drawText("Distance: " + MeasurementUtil.displayAsKiloMeters(FollowTool.this.distance/1000), distanceTextX, distanceTextY, textPaint);
 				} else {
-					canvas.drawText("Distance: " + MeasurementUtil.displayAsMeters(distance), distanceTextX, distanceTextY, textPaint);
+					canvas.drawText("Distance: " + MeasurementUtil.displayAsMeters(FollowTool.this.distance), distanceTextX, distanceTextY, textPaint);
 				}
 				
-				canvas.drawArc(rectF, FollowTool.this.mapView.getRotation()-90, angle, true, paint);
+				canvas.drawArc(rectF, FollowTool.this.mapView.getRotation()-90, FollowTool.this.angle, true, paint);
 				
-				canvas.drawText("Bearing: " + MeasurementUtil.displayAsDegrees(angle), angleTextX, angleTextY, textPaint);
+				canvas.drawText("Bearing: " + MeasurementUtil.displayAsDegrees(FollowTool.this.angle), angleTextX, angleTextY, textPaint);
 				
 				canvas.drawCircle((float) tp3.x, (float) tp3.y, radius, targetPaint);
 			
@@ -77,45 +75,35 @@ public class FollowTool extends HighlightTool {
 		}
 
 		public void drawDistanceAndBearing(MapPos currentPoint, MapPos targetPoint) {
-			try {
-				
-				this.tp1 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(currentPoint), FollowTool.this.mapView, true);
-				this.tp2 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(targetPoint), FollowTool.this.mapView, true);
-				
-				this.distance = (float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, mapView.getActivity().getProject().getSrid());
-				
-				float dx = (float) (tp2.x - tp1.x);
-				float dy = (float) (tp2.y - tp1.y);
-				float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
-				
-				this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
-				
-				this.angle = SpatialiteUtil.computeAzimuth(currentPoint, targetPoint);
-				
-				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-				
-				distanceTextX = (float) tp1.x + offset;
-				distanceTextY = (float) tp1.y + offset;
-				
-				angleTextX = (float) tp1.x + offset;
-				angleTextY = (float) tp1.y + 2 * offset;
-	
-				Geometry geomToFollow = FollowTool.this.mapView.getGeomToFollow();
-				if (geomToFollow instanceof Point) {
-					this.tp3 = tp2;
-				} else {
-					List<MapPos> list = ((Line) geomToFollow).getVertexList();
-					this.tp3 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(list.get(list.size()-1)), mapView, true);
-				}
-				
-				this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
-				
-				this.isDirty = true;
-				invalidate();
-			} catch (Exception e) {
-				FLog.e("error drawing distance and bearing", e);
-				showError("Error computing distance and bearing");
+			this.tp1 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(currentPoint), FollowTool.this.mapView, true);
+			this.tp2 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(targetPoint), FollowTool.this.mapView, true);
+			
+			float dx = (float) (tp2.x - tp1.x);
+			float dy = (float) (tp2.y - tp1.y);
+			float d = (float) Math.sqrt(dx * dx + dy * dy) / 2;
+			
+			this.rectF = new RectF((float) tp1.x - d, (float) tp1.y - d, (float) tp1.x + d, (float) tp1.y + d);
+			
+			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+			
+			distanceTextX = (float) tp1.x + offset;
+			distanceTextY = (float) tp1.y + offset;
+			
+			angleTextX = (float) tp1.x + offset;
+			angleTextY = (float) tp1.y + 2 * offset;
+
+			Geometry geomToFollow = FollowTool.this.mapView.getGeomToFollow();
+			if (geomToFollow instanceof Point) {
+				this.tp3 = tp2;
+			} else {
+				List<MapPos> list = ((Line) geomToFollow).getVertexList();
+				this.tp3 = GeometryUtil.transformVertex(GeometryUtil.convertFromWgs84(list.get(list.size()-1)), mapView, true);
 			}
+			
+			this.radius = ScaleUtil.getDip(FollowTool.this.mapView.getContext(), 10);
+			
+			this.isDirty = true;
+			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {
@@ -146,6 +134,14 @@ public class FollowTool extends HighlightTool {
 	protected int targetColor;
 
 	private Polygon buffer;
+	
+	private float distance;
+	
+	private float angle;
+
+	private MapPos currentPosition;
+
+	private MapPos targetPoint;
 	
 	public FollowTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -180,13 +176,14 @@ public class FollowTool extends HighlightTool {
 	@Override
 	public void onMapChanged() {
 		super.onMapChanged();
-		updateDistanceAndBearing();
+		drawDistanceAndBearing();
 	}
 	
 	@Override
 	public void onMapUpdate() {
 		super.onMapUpdate();
-		updateDistanceAndBearing();
+		calculateDistanceAndBearing();
+		drawDistanceAndBearing();
 	}
 	
 	@Override
@@ -200,8 +197,7 @@ public class FollowTool extends HighlightTool {
 		super.clearSelection();
 		canvas.clear();
 		mapView.setGeomToFollow(null);
-		updateBuffer();
-		
+		drawBuffer();
 	}
 	
 	@Override
@@ -220,8 +216,9 @@ public class FollowTool extends HighlightTool {
 					
 					mapView.setGeomToFollow(GeometryUtil.convertGeometryToWgs84(geom));
 					
-					updateDistanceAndBearing();
-					updateBuffer();
+					calculateDistanceAndBearing();
+					drawDistanceAndBearing();
+					drawBuffer();
 				}
 			} catch (Exception e) {
 				FLog.e("error selecting element", e);
@@ -232,7 +229,7 @@ public class FollowTool extends HighlightTool {
 		}
 	}
 	
-	private void updateBuffer() {
+	private void drawBuffer() {
 		try {
 			if (buffer != null) {
 				mapView.clearGeometry(buffer);
@@ -251,22 +248,36 @@ public class FollowTool extends HighlightTool {
 		}
 	}
 	
-	private void updateDistanceAndBearing() {
+	private void calculateDistanceAndBearing() {
 		try {
 			if (mapView.getGeomToFollow() == null) return;
 			
-			MapPos pos = mapView.getCurrentPosition();
-			if (pos == null) return;
+			currentPosition = mapView.getCurrentPosition();
+			if (currentPosition == null) return;
 
-			MapPos targetPoint = mapView.nextPointToFollow(pos, mapView.getPathBuffer());
+			targetPoint = mapView.nextPointToFollow(currentPosition, mapView.getPathBuffer());
+			
+			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getActivity().getProject().getSrid());
+			angle = SpatialiteUtil.computeAzimuth(currentPosition, targetPoint);
+		} catch (Exception e) {
+			FLog.e("error calculating distance and bearing", e);
+			showError("Error calculating distance and bearing");
+		}
+	}
+	
+	private void drawDistanceAndBearing() {
+		try {
+			if (mapView.getGeomToFollow() == null) return;
+			
+			if (currentPosition == null || targetPoint == null) return;
 			
 			canvas.setColors(mapView.getDrawViewColor(), targetColor);
 			canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
 			canvas.setTextSize(mapView.getDrawViewTextSize());
 			canvas.setShowKm(mapView.showKm());
-			canvas.drawDistanceAndBearing(pos, targetPoint);
+			canvas.drawDistanceAndBearing(currentPosition, targetPoint);
 		} catch (Exception e) {
-			FLog.e("error updating distance and bearing", e);
+			FLog.e("error drawing distance and bearing");
 		}
 	}
 	
@@ -321,8 +332,8 @@ public class FollowTool extends HighlightTool {
 							FollowTool.this.bufferStyle.lineColor = bufferColor;
 							FollowTool.this.targetColor = targetColor;
 							
-							FollowTool.this.updateDistanceAndBearing();
-							FollowTool.this.updateBuffer();
+							FollowTool.this.drawDistanceAndBearing();
+							FollowTool.this.drawBuffer();
 						} catch (Exception e) {
 							FLog.e(e.getMessage(), e);
 							showError(e.getMessage());

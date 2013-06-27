@@ -27,7 +27,6 @@ public class LineDistanceTool extends HighlightTool {
 		private float textY;
 		
 		private boolean showKm;
-		private float distance;
 		
 		public LineDistanceToolCanvas(Context context) {
 			super(context);
@@ -38,32 +37,24 @@ public class LineDistanceTool extends HighlightTool {
 			if (isDirty) {
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(LineDistanceTool.this.distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(LineDistanceTool.this.distance), textX, textY, textPaint);
 				}
 				
 			}
 		}
 
 		public void drawDistance(Line line) {
-			try {
-				
-				this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), LineDistanceTool.this.mapView.getActivity().getProject().getSrid());
-				
-				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-				
-				MapPos p = GeometryUtil.transformVertex(line.getVertexList().get(line.getVertexList().size()-1), LineDistanceTool.this.mapView, true);
-				
-				textX = (float) p.x + offset;
-				textY = (float) p.y + offset;
-				
-				this.isDirty = true;
-				invalidate();
-			} catch (Exception e) {
-				FLog.e("error drawing distance", e);
-				showError("Error computing line distance");
-			}
+			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+			
+			MapPos p = GeometryUtil.transformVertex(line.getVertexList().get(line.getVertexList().size()-1), LineDistanceTool.this.mapView, true);
+			
+			textX = (float) p.x + offset;
+			textY = (float) p.y + offset;
+			
+			this.isDirty = true;
+			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {
@@ -78,6 +69,8 @@ public class LineDistanceTool extends HighlightTool {
 	private LineDistanceToolCanvas canvas;
 
 	protected SettingsDialog settingsDialog;
+	
+	private float distance;
 
 	public LineDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -135,6 +128,7 @@ public class LineDistanceTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
+					calculateDistance();
 					drawDistance();
 				}
 			} catch (Exception e) {
@@ -146,16 +140,33 @@ public class LineDistanceTool extends HighlightTool {
 		}
 	}
 	
+	private void calculateDistance() {
+		try {
+			if (mapView.getHighlights().size() < 1) return;
+			
+			Line line = (Line) mapView.getHighlights().get(0);
+			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), mapView.getActivity().getProject().getSrid());
+			
+		} catch (Exception e) {
+			FLog.e("error calculating line distance", e);
+			showError("Error calculating line distance");
+		}
+	}
+	
 	private void drawDistance() {
-		if (mapView.getHighlights().size() < 1) return;
-		
-		Line line = (Line) mapView.getHighlights().get(0);
-		
-		canvas.setColor(mapView.getDrawViewColor());
-		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
-		canvas.setTextSize(mapView.getDrawViewTextSize());
-		canvas.setShowKm(mapView.showKm());
-		canvas.drawDistance(line);
+		try {
+			if (mapView.getHighlights().size() < 1) return;
+			
+			Line line = (Line) mapView.getHighlights().get(0);
+			
+			canvas.setColor(mapView.getDrawViewColor());
+			canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
+			canvas.setTextSize(mapView.getDrawViewTextSize());
+			canvas.setShowKm(mapView.showKm());
+			canvas.drawDistance(line);
+		} catch (Exception e) {
+			FLog.e("error drawing line distance", e);
+		}
 	}
 	
 	@Override

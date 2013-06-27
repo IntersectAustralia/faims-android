@@ -21,7 +21,6 @@ public class AzimuthTool extends HighlightTool {
 
 		private MapPos tp1;
 		private MapPos tp2;
-		private float angle;
 		private float textX;
 		private float textY;
 		private RectF rectF;
@@ -36,21 +35,15 @@ public class AzimuthTool extends HighlightTool {
 				// line to point
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				// angle
-				canvas.drawArc(rectF, AzimuthTool.this.mapView.getRotation()-90, angle, true, paint);
+				canvas.drawArc(rectF, AzimuthTool.this.mapView.getRotation()-90, AzimuthTool.this.angle, true, paint);
 				// text
-				canvas.drawText(MeasurementUtil.displayAsDegrees(angle), textX, textY, textPaint);
+				canvas.drawText(MeasurementUtil.displayAsDegrees(AzimuthTool.this.angle), textX, textY, textPaint);
 			}
 		}
 
 		public void drawAzimuthFrom(MapPos p1, MapPos p2) {
-			
-			MapPos pp1 = GeometryUtil.convertToWgs84(p1);
-			MapPos pp2 = GeometryUtil.convertToWgs84(p2);
-			
 			this.tp1 = GeometryUtil.transformVertex(p1, AzimuthTool.this.mapView, true);
 			this.tp2 = GeometryUtil.transformVertex(p2, AzimuthTool.this.mapView, true);
-			
-			this.angle = SpatialiteUtil.computeAzimuth(pp1, pp2);
 			
 			float dx = (float) (tp2.x - tp1.x);
 			float dy = (float) (tp2.y - tp1.y);
@@ -72,6 +65,8 @@ public class AzimuthTool extends HighlightTool {
 	public static final String NAME = "Azimuth";
 	
 	private AzimuthToolCanvas canvas;
+	
+	private float angle;
 
 	public AzimuthTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -129,6 +124,7 @@ public class AzimuthTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
+					calculateAzimuth();
 					drawAzimuth();
 				}
 			} catch (Exception e) {
@@ -139,17 +135,34 @@ public class AzimuthTool extends HighlightTool {
 			// ignore
 		}
 	}
+	
+	private void calculateAzimuth() {
+		try {
+			if (mapView.getHighlights().size() < 2) return;
+			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
+			angle = SpatialiteUtil.computeAzimuth(p1, p2);
+		} catch (Exception e) {
+			FLog.e("error computing azimuth", e);
+			showError("Error computing azimuth");
+		}
+	}
 
 	private void drawAzimuth() {
-		if (mapView.getHighlights().size() < 2) return;
-		
-		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
-		
-		canvas.setColor(mapView.getDrawViewColor());
-		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
-		canvas.setTextSize(mapView.getDrawViewTextSize());
-		canvas.drawAzimuthFrom(p1, p2);
+		try {
+			if (mapView.getHighlights().size() < 2) return;
+			
+			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
+			if (p1 == null || p2 == null) return;
+			
+			canvas.setColor(mapView.getDrawViewColor());
+			canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
+			canvas.setTextSize(mapView.getDrawViewTextSize());
+			canvas.drawAzimuthFrom(p1, p2);
+		} catch (Exception e) {
+			FLog.e("error drawing azimuth", e);
+		}
 	}
 
 }

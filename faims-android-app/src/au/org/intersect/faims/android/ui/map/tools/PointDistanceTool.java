@@ -28,7 +28,6 @@ public class PointDistanceTool extends HighlightTool {
 		private MapPos tp1;
 		private MapPos tp2;
 		private boolean showKm;
-		private float distance;
 		
 		public PointDistanceToolCanvas(Context context) {
 			super(context);
@@ -40,40 +39,33 @@ public class PointDistanceTool extends HighlightTool {
 				canvas.drawLine((float) tp1.x, (float) tp1.y, (float) tp2.x, (float) tp2.y, paint);
 				
 				if (showKm) {
-					canvas.drawText(MeasurementUtil.displayAsKiloMeters(distance/1000), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsKiloMeters(PointDistanceTool.this.distance/1000), textX, textY, textPaint);
 				} else {
-					canvas.drawText(MeasurementUtil.displayAsMeters(distance), textX, textY, textPaint);
+					canvas.drawText(MeasurementUtil.displayAsMeters(PointDistanceTool.this.distance), textX, textY, textPaint);
 				}
 				
 			}
 		}
 
 		public void drawDistanceBetween(MapPos p1, MapPos p2) {
-			try {
-				this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), PointDistanceTool.this.mapView.getActivity().getProject().getSrid());
-				
-				this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
-				this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
-				
-				float midX = (float) (tp1.x + tp2.x) / 2;
-				float midY = (float) (tp1.y + tp2.y) / 2;
-				
-				float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
-				
-				textX = midX + offset;
-				
-				if (((tp1.x < tp2.x) && (tp1.y > tp2.y)) || ((tp1.x > tp2.x) && (tp1.y < tp2.y))){
-					textY = midY + offset;
-				} else {
-					textY = midY - offset;
-				}
-				
-				this.isDirty = true;
-				invalidate();
-			} catch (Exception e) {
-				FLog.e("error drawing distance", e);
-				showError("Error computing point distance");
+			this.tp1 = GeometryUtil.transformVertex(p1, PointDistanceTool.this.mapView, true);
+			this.tp2 = GeometryUtil.transformVertex(p2, PointDistanceTool.this.mapView, true);
+			
+			float midX = (float) (tp1.x + tp2.x) / 2;
+			float midY = (float) (tp1.y + tp2.y) / 2;
+			
+			float offset = ScaleUtil.getDip(this.getContext(), DEFAULT_OFFSET);
+			
+			textX = midX + offset;
+			
+			if (((tp1.x < tp2.x) && (tp1.y > tp2.y)) || ((tp1.x > tp2.x) && (tp1.y < tp2.y))){
+				textY = midY + offset;
+			} else {
+				textY = midY - offset;
 			}
+			
+			this.isDirty = true;
+			invalidate();
 		}
 		
 		public void setShowKm(boolean value) {
@@ -88,6 +80,8 @@ public class PointDistanceTool extends HighlightTool {
 	private PointDistanceToolCanvas canvas;
 
 	protected SettingsDialog settingsDialog;
+	
+	private float distance;
 
 	public PointDistanceTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -145,6 +139,7 @@ public class PointDistanceTool extends HighlightTool {
 						mapView.addHighlight(p);
 					}
 					
+					calculateDistance();
 					drawDistance();
 				}
 			} catch (Exception e) {
@@ -156,17 +151,38 @@ public class PointDistanceTool extends HighlightTool {
 		}
 	}
 	
+	private void calculateDistance() {
+		try {
+			if (mapView.getHighlights().size() < 2) return;
+			
+			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
+			
+			this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), mapView.getActivity().getProject().getSrid());
+			
+		} catch (Exception e) {
+			FLog.e("error calculating point distance", e);
+			showError("Error calculating point distance");
+		}
+	}
+	
 	private void drawDistance() {
-		if (mapView.getHighlights().size() < 2) return;
-		
-		MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
-		MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
-		
-		canvas.setColor(mapView.getDrawViewColor());
-		canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
-		canvas.setTextSize(mapView.getDrawViewTextSize());
-		canvas.setShowKm(mapView.showKm());
-		canvas.drawDistanceBetween(p1, p2);
+		try {
+			if (mapView.getHighlights().size() < 2) return;
+			
+			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
+			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
+			
+			if (p1 == null || p2 == null) return;
+			
+			canvas.setColor(mapView.getDrawViewColor());
+			canvas.setStrokeSize(mapView.getDrawViewStrokeStyle());
+			canvas.setTextSize(mapView.getDrawViewTextSize());
+			canvas.setShowKm(mapView.showKm());
+			canvas.drawDistanceBetween(p1, p2);
+		} catch (Exception e) {
+			FLog.e("error drawing line distance", e);
+		}
 	}
 	
 	@Override
