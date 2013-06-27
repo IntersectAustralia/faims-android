@@ -46,10 +46,6 @@
             <data>
               <structureList/>
               <structureLoad/>
-              <structureWallList/>
-              <structureWallLoad/>
-              <cornerList/>
-              <cornerLoad/>
               <doorwayList/>
               <doorwayLoad/>
               <nicheList/>
@@ -179,6 +175,13 @@
             <attachment>
               <AudioList/>
             </attachment>
+            <load>
+                <structureWallList/>
+              <structureWallLoad/>
+              <cornerList/>
+              <cornerLoad/>
+              
+            </load>
           </structure>
           <corner>
             <cornerDetail>
@@ -717,26 +720,7 @@
         <trigger ref="structureLoad">
           <label>Load Structure</label>
         </trigger>
-        <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
-          <label>Structure Walls</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="structureWallLoad">
-          <label>Load Structure Walls</label>
-        </trigger>
-        <select1 ref="cornerList" faims_certainty="false" faims_annotation="false">
-          <label>Corners</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="cornerLoad">
-          <label>Load Corner</label>
-        </trigger>
+        
          <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
           <label>Doorways</label>
           <item>
@@ -1101,6 +1085,29 @@
             <value> </value>
           </item>
         </select1>
+      </group>
+      <group ref="load" faims_scrollable="true">
+        <label>Load Structure Items</label>
+        <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
+          <label>Structure Walls</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="structureWallLoad">
+          <label>Load Structure Walls</label>
+        </trigger>
+        <select1 ref="cornerList" faims_certainty="false" faims_annotation="false">
+          <label>Corners</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="cornerLoad">
+          <label>Load Corner</label>
+        </trigger>
       </group>
     </group>
     <group ref="corner" faims_archent_type="Corner">

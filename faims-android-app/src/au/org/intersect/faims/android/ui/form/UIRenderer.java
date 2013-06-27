@@ -279,19 +279,16 @@ public class UIRenderer implements IRestoreActionListener{
     	FragmentManager fm = activity.getSupportFragmentManager();
     	
     	TabGroup tabGroup = this.tabGroupList.get(index);
+    	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
-    	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
-	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
-	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
+    	if (tabGroup == this.currentTabGroup) return currentTabGroup;
 	    
-	    String currentTag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(this.currentTabGroup));
-		
 	    FragmentTransaction ft = fm.beginTransaction();
         if(this.currentTabGroup == null){
-        	ft.add(R.id.fragment_content, tabGroup, tag);
+        	ft.add(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
         }else{
-        	ft.replace(R.id.fragment_content, tabGroup, tag);
-        	ft.addToBackStack(currentTag);
+        	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
+        	ft.addToBackStack(tabGroup.getGroupTag());
         }
         this.currentTabGroup = tabGroup;
         ft.commit();
@@ -305,18 +302,14 @@ public class UIRenderer implements IRestoreActionListener{
     	TabGroup tabGroup = this.tabGroupMap.get(name);
     	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
-    	String tag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(tabGroup));
-	    TabGroup currentTabGroup = (TabGroup) fm.findFragmentByTag(tag);
-	    if (currentTabGroup != null && currentTabGroup.isVisible()) return currentTabGroup;
+    	if (tabGroup == this.currentTabGroup) return currentTabGroup;
     	
-	    String currentTag = "TabGroup " + String.valueOf(this.tabGroupList.indexOf(this.currentTabGroup));
-	    
     	FragmentTransaction ft = fm.beginTransaction();
 	    if(this.currentTabGroup == null){
-        	ft.add(R.id.fragment_content, tabGroup, tag);
+        	ft.add(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
         }else{
-        	ft.replace(R.id.fragment_content, tabGroup, tag);
-        	ft.addToBackStack(currentTag);
+        	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
+        	ft.addToBackStack(tabGroup.getGroupTag());
         }
 	    this.currentTabGroup = tabGroup;
         ft.commit();

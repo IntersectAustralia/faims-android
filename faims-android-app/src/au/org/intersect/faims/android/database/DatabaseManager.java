@@ -146,8 +146,10 @@ public class DatabaseManager {
 			FLog.d("entity_type:" + entity_type);
 			FLog.d("geo_data:" + geo_data);
 			
-			for (EntityAttribute attribute : attributes) {
-				FLog.d(attribute.toString());
+			if (attributes != null) {
+				for (EntityAttribute attribute : attributes) {
+					FLog.d(attribute.toString());
+				}
 			}
 			
 			Stmt st = null;
@@ -205,22 +207,24 @@ public class DatabaseManager {
 				}
 				
 				// save entity attributes
-				for (EntityAttribute attribute : attributes) {
-					query = DatabaseQueries.INSERT_INTO_AENTVALUE;
-					st = db.prepare(query);
-					st.bind(1, uuid);
-					st.bind(2, userId);
-					st.bind(3, attribute.getVocab());
-					st.bind(4, attribute.getMeasure());
-					st.bind(5, attribute.getText());
-					st.bind(6, attribute.getCertainty());
-					st.bind(7, aentValueParentTimestamp.get(attribute.getName()));
-					st.bind(8, currentTimestamp);
-					st.bind(9, attribute.isDeleted() ? "true" : null);
-					st.bind(10, attribute.getName());
-					st.step();
-					st.close();
-					st = null;
+				if (attributes != null) {
+					for (EntityAttribute attribute : attributes) {
+						query = DatabaseQueries.INSERT_INTO_AENTVALUE;
+						st = db.prepare(query);
+						st.bind(1, uuid);
+						st.bind(2, userId);
+						st.bind(3, attribute.getVocab());
+						st.bind(4, attribute.getMeasure());
+						st.bind(5, attribute.getText());
+						st.bind(6, attribute.getCertainty());
+						st.bind(7, aentValueParentTimestamp.get(attribute.getName()));
+						st.bind(8, currentTimestamp);
+						st.bind(9, attribute.isDeleted() ? "true" : null);
+						st.bind(10, attribute.getName());
+						st.step();
+						st.close();
+						st = null;
+					}
 				}
 				
 				return uuid;
@@ -329,8 +333,10 @@ public class DatabaseManager {
 			FLog.d("rel_type:" + rel_type);
 			FLog.d("geo_data:" + geo_data);
 			
-			for (RelationshipAttribute attribute : attributes) {
-				FLog.d(attribute.toString());
+			if (attributes != null) {
+				for (RelationshipAttribute attribute : attributes) {
+					FLog.d(attribute.toString());
+				}
 			}
 			
 			Stmt st = null;
@@ -387,22 +393,25 @@ public class DatabaseManager {
 				while(st.step()){
 					relnValueParentTimestamp.put(st.column_string(0), st.column_string(1));
 				}
+				
 				// save relationship attributes
-				for (RelationshipAttribute attribute : attributes) {
-					query = DatabaseQueries.INSERT_INTO_RELNVALUE;
-					st = db.prepare(query);
-					st.bind(1, uuid);
-					st.bind(2, userId);
-					st.bind(3, attribute.getVocab());
-					st.bind(4, attribute.getText());
-					st.bind(5, attribute.getCertainty());
-					st.bind(6, relnValueParentTimestamp.get(attribute.getName()));
-					st.bind(7, currentTimestamp);
-					st.bind(8, attribute.isDeleted() ? "true" : null);
-					st.bind(9, attribute.getName());
-					st.step();
-					st.close();
-					st = null;
+				if (attributes != null) {
+					for (RelationshipAttribute attribute : attributes) {
+						query = DatabaseQueries.INSERT_INTO_RELNVALUE;
+						st = db.prepare(query);
+						st.bind(1, uuid);
+						st.bind(2, userId);
+						st.bind(3, attribute.getVocab());
+						st.bind(4, attribute.getText());
+						st.bind(5, attribute.getCertainty());
+						st.bind(6, relnValueParentTimestamp.get(attribute.getName()));
+						st.bind(7, currentTimestamp);
+						st.bind(8, attribute.isDeleted() ? "true" : null);
+						st.bind(9, attribute.getName());
+						st.step();
+						st.close();
+						st = null;
+					}
 				}
 				
 				return uuid;
@@ -436,18 +445,20 @@ public class DatabaseManager {
 			}
 			
 			// check if attributes exist
-			for (EntityAttribute attribute : attributes) {
-				String query = DatabaseQueries.CHECK_VALID_AENT;
-				
-				st = db.prepare(query);
-				st.bind(1, entity_type);
-				st.bind(2, attribute.getName());
-				st.step();
-				if (st.column_int(0) == 0) {
-					return false;
+			if (attributes != null) {
+				for (EntityAttribute attribute : attributes) {
+					String query = DatabaseQueries.CHECK_VALID_AENT;
+					
+					st = db.prepare(query);
+					st.bind(1, entity_type);
+					st.bind(2, attribute.getName());
+					st.step();
+					if (st.column_int(0) == 0) {
+						return false;
+					}
+					st.close();
+					st = null;
 				}
-				st.close();
-				st = null;
 			}
 		} finally {
 			if (st != null) st.close();
@@ -465,17 +476,19 @@ public class DatabaseManager {
 			}
 			
 			// check if attributes exist
-			for (RelationshipAttribute attribute : attributes) {
-				String query = DatabaseQueries.CHECK_VALID_RELN;
-				st = db.prepare(query);
-				st.bind(1, rel_type);
-				st.bind(2, attribute.getName());
-				st.step();
-				if (st.column_int(0) == 0) {
-					return false;
+			if (attributes != null) {
+				for (RelationshipAttribute attribute : attributes) {
+					String query = DatabaseQueries.CHECK_VALID_RELN;
+					st = db.prepare(query);
+					st.bind(1, rel_type);
+					st.bind(2, attribute.getName());
+					st.step();
+					if (st.column_int(0) == 0) {
+						return false;
+					}
+					st.close();
+					st = null;
 				}
-				st.close();
-				st = null;
 			}
 		} finally {
 			if (st != null) st.close();

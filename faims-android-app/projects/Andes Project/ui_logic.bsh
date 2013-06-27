@@ -126,6 +126,12 @@ saveEntity(entityId, entityType, attributeDefs, geoData) {
     return saved_id;
 }
 
+saveEntitiesToRel(type, entity1, entity2) {
+	rel_id = saveRel(null, type, null, null);
+	addReln(entity1, rel_id, null);
+	addReln(entity2, rel_id, null);
+}
+
 /*** USER ***/
 
 getDefaultUsersList() {
@@ -496,46 +502,60 @@ onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
 saveCornerAndClose() {
 	corner_id = updateCorner(null);
-	cancelTabGroup("corner", false);
+	if (structure_wall_id != null)
+		cancelTabGroup("corner", false);
 }
 
 updateCorner(id) {
 	if (id == null || "".equals(id)) id = null;
     
-    cornerPictures = new ArrayList();
-
-	ArrayList loadedPictures = new ArrayList();
+    if (structure_id == null) {
+  		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
+  		return null;
+   	} else {
+   	
+	    cornerPictures = new ArrayList();
 	
-	if (id != null) {
-		entity = fetchArchEnt(id);
-		for (Object attribute : entity.getAttributes()) {
-			System.out.println(attribute.toString());
-			if ("CornerPhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+		ArrayList loadedPictures = new ArrayList();
+		
+		if (id != null) {
+			entity = fetchArchEnt(id);
+			for (Object attribute : entity.getAttributes()) {
+				System.out.println(attribute.toString());
+				if ("CornerPhotos".equals(attribute.getName())) {
+					loadedPictures.add(attribute.getText());
+				}
 			}
 		}
+	    
+	   	Object[] attributeDefs = new Object[] {
+	    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID"),
+	    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp"),
+	    	AttributeDef("Author", "freetext" , "corner/cornerDetail/Author"),
+	    	AttributeDef("Device", "freetext", "corner/cornerDetail/Device"),
+	    	AttributeDef("CornerExteriorForm", "vocab", "corner/cornerDetail/CornerExteriorForm"),
+	    	AttributeDef("CornerInteriorForm", "vocab", "corner/cornerDetail/CornerInteriorForm"),
+	    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount"),
+	    	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
+	    	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
+	    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures),
+	    	AttributeDef("MasonryType", "vocab", "corner/cornerDetail/MasonryType"),
+	    	AttributeDef("MasonryDescription", "freetext", "corner/cornerDetail/MasonryDescription"),
+	    	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
+	    	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
+	    	};
+	    
+	    saved_id = saveEntity(id, "Corner", attributeDefs, null);
+	    loadCornerFileAttributes(saved_id);
+	    
+	    // save corner to structure if new corner
+	    if (id == null) {
+	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
+	    }
+	    
+	    return saved_id;
+	    
 	}
-    
-   	Object[] attributeDefs = new Object[] {
-    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID"),
-    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "corner/cornerDetail/Author"),
-    	AttributeDef("Device", "freetext", "corner/cornerDetail/Device"),
-    	AttributeDef("CornerExteriorForm", "vocab", "corner/cornerDetail/CornerExteriorForm"),
-    	AttributeDef("CornerInteriorForm", "vocab", "corner/cornerDetail/CornerInteriorForm"),
-    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount"),
-    	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
-    	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
-    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures),
-    	AttributeDef("MasonryType", "vocab", "corner/cornerDetail/MasonryType"),
-    	AttributeDef("MasonryDescription", "freetext", "corner/cornerDetail/MasonryDescription"),
-    	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
-    	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
-    	};
-    
-    saved_id = saveEntity(id, "Corner", attributeDefs, null);
-    loadCornerFileAttributes(saved_id);
-    return saved_id;
 }
 
 /*** NICHE ***/
@@ -1165,50 +1185,63 @@ onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 
 saveStructureWallAndClose() {
 	structure_wall_id = updateStructureWall(null);
-	cancelTabGroup("wall", false);
+	if (structure_wall_id != null)
+		cancelTabGroup("wall", false);
 }
 
 updateStructureWall(id) {
 	if (id == null || "".equals(id)) id = null;
-    
-    structureWallPictures = new ArrayList();
+	 
+   	if (structure_id == null) {
+  		showWarning("Logic Error", "Structure Wall cannot be saved as parent structure is not saved or loaded.");
+  		return null;
+   	} else {
+   	
+   		structureWallPictures = new ArrayList();
 
-	ArrayList loadedPictures = new ArrayList();
-	
-	if (id != null) {
-		entity = fetchArchEnt(id);
-		for (Object attribute : entity.getAttributes()) {
-			System.out.println(attribute.toString());
-			if ("WallPhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+		ArrayList loadedPictures = new ArrayList();
+		
+		if (id != null) {
+			entity = fetchArchEnt(id);
+			for (Object attribute : entity.getAttributes()) {
+				System.out.println(attribute.toString());
+				if ("WallPhotos".equals(attribute.getName())) {
+					loadedPictures.add(attribute.getText());
+				}
 			}
 		}
-	}
-    
-   	Object[] attributeDefs = new Object[] {
-    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID"),
-    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp"),
-    	AttributeDef("Author", "freetext" , "wall/structureWall/Author"),
-    	AttributeDef("Device", "freetext", "wall/structureWall/Device"),
-    	AttributeDef("MasonryType", "vocab", "wall/structureWall/MasonryType"),
-    	AttributeDef("MasonryDescription", "freetext", "wall/structureWall/MasonryDescription"),
-    	AttributeDef("InkaMasonry", "vocab", "wall/structureWall/InkaMasonry"),
-    	AttributeDef("InkaMasonryDescription", "freetext", "wall/structureWall/InkaMasonryDescription"),
-    	AttributeDef("WallThickness", "measure", "wall/structureWall/WallThickness"),
-    	AttributeDef("WallHeight", "measure", "wall/structureWall/WallHeight"),
-    	AttributeDef("WallHeightPreservation", "vocab", "wall/structureWall/WallHeightPreservation"),
-    	AttributeDef("Gable", "vocab", "wall/structureWall/Gable"),
-    	AttributeDef("GableHeight", "measure", "wall/structureWall/GableHeight"),
-    	AttributeDef("GableDistance", "measure", "wall/structureWall/GableDistance"),
-    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount"),
-    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount"),
-    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount"),
-    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
-    	};
-    
-    saved_id = saveEntity(id, "StructureWall", attributeDefs, null);
-    loadStructureWallFileAttributes(saved_id);
-    return saved_id;
+	    
+	   	Object[] attributeDefs = new Object[] {
+	    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID"),
+	    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp"),
+	    	AttributeDef("Author", "freetext" , "wall/structureWall/Author"),
+	    	AttributeDef("Device", "freetext", "wall/structureWall/Device"),
+	    	AttributeDef("MasonryType", "vocab", "wall/structureWall/MasonryType"),
+	    	AttributeDef("MasonryDescription", "freetext", "wall/structureWall/MasonryDescription"),
+	    	AttributeDef("InkaMasonry", "vocab", "wall/structureWall/InkaMasonry"),
+	    	AttributeDef("InkaMasonryDescription", "freetext", "wall/structureWall/InkaMasonryDescription"),
+	    	AttributeDef("WallThickness", "measure", "wall/structureWall/WallThickness"),
+	    	AttributeDef("WallHeight", "measure", "wall/structureWall/WallHeight"),
+	    	AttributeDef("WallHeightPreservation", "vocab", "wall/structureWall/WallHeightPreservation"),
+	    	AttributeDef("Gable", "vocab", "wall/structureWall/Gable"),
+	    	AttributeDef("GableHeight", "measure", "wall/structureWall/GableHeight"),
+	    	AttributeDef("GableDistance", "measure", "wall/structureWall/GableDistance"),
+	    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount"),
+	    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount"),
+	    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount"),
+	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
+	    	};
+	    
+	    saved_id = saveEntity(id, "StructureWall", attributeDefs, null);
+	    loadStructureWallFileAttributes(saved_id);
+	    
+	    // save structure wall to structure if new structure wall
+	    if (id == null) {
+	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
+	    }
+	    
+	    return saved_id;
+   	}
 }
 
 /*** STRUCTURE ***/
@@ -1407,17 +1440,19 @@ updateAll(){
 	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
 	populateDropDown("control/data/lotList", lot);
 	populateDropDown("control/data/canalList", canal);
-	populateDropDown("control/data/structureWallList", structureWall);
-	populateDropDown("control/data/cornerList", corner);
+	populateDropDown("structure/load/structureWallList", structureWall);
+	populateDropDown("structure/load/cornerList", corner);
 	populateDropDown("control/data/nicheList", niche);
 	populateDropDown("control/data/windowList", window);
 }
 
 loadStructure() {
-	newStructure();
-	
 	structure_id = getFieldValue("control/data/structureList");
 	if (structure_id == null || "".equals(structure_id)) return;
+	
+	id = structure_id;
+	newStructure();
+	structure_id = id;
 	
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
@@ -1465,10 +1500,12 @@ loadStructureFileAttributes(id){
 }
 
 loadWall() {
-	newFreeWall();
-	
 	wall_id = getFieldValue("control/data/wallList");
 	if (wall_id == null || "".equals(wall_id)) return;
+	
+	id = wall_id;
+	newFreeWall();
+	wall_id = id;
 	
 	showTabGroup("freeWall", wall_id);
 	loadWallFileAttributes(wall_id);
@@ -1491,10 +1528,12 @@ loadWallFileAttributes(id){
 }
 
 loadDoorway() {
-	newDoorway();
-	
 	doorway_id = getFieldValue("control/data/doorwayList");
 	if (doorway_id == null || "".equals(doorway_id)) return;
+	
+	id = doorway_id;
+	newDoorway();
+	doorway_id = id;
 	
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
@@ -1525,10 +1564,12 @@ loadDoorwayFileAttributes(id){
 }
 
 loadFeature() {
-	newFeature();
-	
 	feature_id = getFieldValue("control/data/featureList");
 	if (feature_id == null || "".equals(feature_id)) return;
+	
+	id = feature_id;
+	newFeature();
+	feature_id = id;
 	
 	showTabGroup("feature", feature_id);
 	loadFeatureFileAttributes(feature_id);
@@ -1551,10 +1592,12 @@ loadFeatureFileAttributes(id){
 }
 
 loadSpecialFind() {
-	newSpecialFind();
-	
 	special_find_id = getFieldValue("control/data/specialFindList");
 	if (special_find_id == null || "".equals(special_find_id)) return;
+	
+	id = special_find_id;
+	newSpecialFind();
+	special_find_id = id;
 	
 	showTabGroup("specialFind", special_find_id);
 	loadSpecialFindFileAttributes(special_find_id);
@@ -1577,10 +1620,12 @@ loadSpecialFindFileAttributes(id){
 }
 
 loadLichen() {
-	newLichen();
-	
 	lichen_id = getFieldValue("control/data/lichenList");
 	if (lichen_id == null || "".equals(lichen_id)) return;
+	
+	id = lichen_id;
+	newLichen();
+	lichen_id = id;
 	
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
@@ -1611,28 +1656,34 @@ loadLichenFileAttributes(id){
 }
 
 loadSurfaceCollection() {
-	newSurfaceCollection();
-	
 	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
 	if (surface_collection_id == null || "".equals(surface_collection_id)) return;
+	
+	id = surface_collection_id;
+	newSurfaceCollection();
+	surface_collection_id = id;
 	
 	showTabGroup("surfaceCollection", surface_collection_id);
 }
 
 loadLot() {
-	newLot();
-	
 	lot_id = getFieldValue("control/data/lotList");
 	if (lot_id == null || "".equals(lot_id)) return;
+	
+	id = lot_id;
+	newLot();
+	lot_id = id;
 	
 	showTabGroup("lot", lot_id);
 }
 
 loadCanal() {
-	newCanal();
-	
 	canal_id = getFieldValue("control/data/canalList");
 	if (canal_id == null || "".equals(canal_id)) return;
+	
+	id = canal_id;
+	newCanal();
+	canal_id = id;
 	
 	showTabGroup("canal", canal_id);
 	loadCanalFileAttributes(canal_id);
@@ -1655,10 +1706,12 @@ loadCanalFileAttributes(id){
 }
 
 loadStructureWall() {
-	newStructureWall();
+	structure_wall_id = getFieldValue("structure/load/structureWallList");
+	if (structure_wall_id == null || "".equals(structure_wall_id)) return;
 	
-	structure_wall_id = getFieldValue("control/data/structureWallList");
-	if (canalstructure_wall_id_id == null || "".equals(structure_wall_id)) return;
+	id = structure_wall_id;
+	newStructureWall();
+	structure_wall_id = id;
 	
 	showTabGroup("wall", structure_wall_id);
 	loadStructureWallFileAttributes(structure_wall_id);
@@ -1681,10 +1734,12 @@ loadStructureWallFileAttributes(id){
 }
 
 loadCorner() {
-	newCorner();
-	
-	corner_id = getFieldValue("control/data/cornerList");
+	corner_id = getFieldValue("structure/load/cornerList");
 	if (corner_id == null || "".equals(corner_id)) return;
+	
+	id = corner_id;
+	newCorner();
+	corner_id = id;
 	
 	showTabGroup("corner", corner_id);
 	loadCornerFileAttributes(corner_id);
@@ -1707,10 +1762,12 @@ loadCornerFileAttributes(id){
 }
 
 loadNiche() {
-	newNiche();
-	
 	niche_id = getFieldValue("control/data/nicheList");
 	if (niche_id == null || "".equals(niche_id)) return;
+	
+	id = niche_id;
+	newNiche();
+	niche_id = id;
 	
 	showTabGroup("niche", niche_id);
 	loadNicheFileAttributes(niche_id);
@@ -1733,10 +1790,12 @@ loadNicheFileAttributes(id){
 }
 
 loadWindow() {
-	newWindow();
-	
 	window_id = getFieldValue("control/data/windowList");
 	if (window_id == null || "".equals(window_id)) return;
+	
+	id = window_id;
+	newWindow();
+	window_id = id;
 	
 	showTabGroup("window", window_id);
 	loadWindowFileAttributes(window_id);
@@ -1767,7 +1826,7 @@ onEvent("control/data/lichenLoad", "click", "loadLichen()");
 onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
 onEvent("control/data/lotLoad", "click", "loadLot()");
 onEvent("control/data/canalLoad", "click", "loadCanal()");
-onEvent("control/data/structureWallLoad", "click", "loadStructureWall()");
-onEvent("control/data/cornerLoad", "click", "loadCorner()");
+onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
+onEvent("structure/load/cornerLoad", "click", "loadCorner()");
 onEvent("control/data/nicheLoad", "click", "loadNiche()");
 onEvent("control/data/windowLoad", "click", "loadWindow()");

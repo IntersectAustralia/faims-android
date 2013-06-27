@@ -1637,7 +1637,7 @@ public class BeanShellLinker {
 					entity_type, WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
-			FLog.e("error saving arch entity");
+			FLog.e("error saving arch entity", e);
 			showWarning("Logic Error", "Error saving arch entity");
 		}
 		return null;
@@ -1651,7 +1651,7 @@ public class BeanShellLinker {
 					WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
-			FLog.e("error saving relationship");
+			FLog.e("error saving relationship", e);
 			showWarning("Logic Error", "Error saving relationship");
 		}
 		return null;
@@ -1662,7 +1662,7 @@ public class BeanShellLinker {
 			return activity.getDatabaseManager().addReln(entity_id, rel_id,
 					verb);
 		} catch (Exception e) {
-			FLog.e("error saving arch entity relationship");
+			FLog.e("error saving arch entity relationship", e);
 			showWarning("Logic Error", "Error saving arch entity relationship");
 		}
 		return false;
@@ -1710,7 +1710,7 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Cannot populate drop down " + ref);
 			}
 		} catch (Exception e) {
-			FLog.e("error populate drop down " + ref);
+			FLog.e("error populate drop down " + ref, e);
 			showWarning("Logic Error", "Error populate drop down " + ref);
 		}
 	}
@@ -1786,7 +1786,7 @@ public class BeanShellLinker {
 				}
 			}
 		} catch (Exception e) {
-			FLog.e("error populate list " + ref);
+			FLog.e("error populate list " + ref, e);
 			showWarning("Logic Error", "Error populate list " + ref);
 		}
 	}

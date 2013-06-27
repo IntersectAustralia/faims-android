@@ -22,6 +22,8 @@ import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
+	public static int tabGroupId = 1;
+	
 	private WeakReference<ShowProjectActivity> activityRef;
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
@@ -33,6 +35,7 @@ public class TabGroup extends Fragment {
 	private String relType;
 	private IRestoreActionListener actionListener;
 	private Tab lastTab;
+	private String id;
 	
 	public TabGroup(){
 		
@@ -49,6 +52,7 @@ public class TabGroup extends Fragment {
 		this.archEntType = archEntType;
 		this.relType = relType;
 		this.actionListener = actionListener;
+		this.id = "TabGroup" + tabGroupId++;
 	}
 	
 	@Override
@@ -245,6 +249,10 @@ public class TabGroup extends Fragment {
 			tab.onHideTab();
 			lastTab = null;
 		}
+	}
+
+	public String getGroupTag() {
+		return id;
 	}
 
 }
