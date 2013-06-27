@@ -19,6 +19,8 @@ initMap() {
 	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
 }
 
+initMap();
+
 /*** MISC ***/
 
 AttributeDef(String name, String type, String ref) {
@@ -180,7 +182,6 @@ login(){
 	} else {
         showWarning("Logic Error", "Please Choose Device");
     }
-    initMap();
 }
 
 onEvent("user/tab1/login", "click", "login()");
