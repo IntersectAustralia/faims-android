@@ -523,8 +523,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		if(fragmentManager.getBackStackEntryCount() > 0){
 			TabGroup currentTabGroup = (TabGroup) fragmentManager.findFragmentByTag(fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount() - 1).getName());
-			renderer.invalidateListViews(currentTabGroup);
-			renderer.setCurrentTabGroup(currentTabGroup);
+			if (currentTabGroup != null) {
+				renderer.invalidateListViews(currentTabGroup);
+				renderer.setCurrentTabGroup(currentTabGroup);
+			}
 		}
 		super.onBackPressed();
 	}

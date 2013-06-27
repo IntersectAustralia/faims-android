@@ -288,7 +288,7 @@ public class UIRenderer implements IRestoreActionListener{
         	ft.add(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
         }else{
         	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
-        	ft.addToBackStack(tabGroup.getGroupTag());
+        	ft.addToBackStack(currentTabGroup.getGroupTag());
         }
         this.currentTabGroup = tabGroup;
         ft.commit();
@@ -309,7 +309,7 @@ public class UIRenderer implements IRestoreActionListener{
         	ft.add(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
         }else{
         	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
-        	ft.addToBackStack(tabGroup.getGroupTag());
+        	ft.addToBackStack(currentTabGroup.getGroupTag());
         }
 	    this.currentTabGroup = tabGroup;
         ft.commit();
