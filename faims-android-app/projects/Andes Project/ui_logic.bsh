@@ -1,4 +1,23 @@
-setMapZoom("control/map/map", 15.0f);
+/*** MAP ***/
+
+initMap() {
+	setMapZoom("control/map/map", 17.0f);
+	
+	showBaseMap("control/map/map", "Base Map", "files/data/maps/map.tif");
+	showRasterMap("control/map/map", "Raster Map", "files/data/maps/map.tif");
+	
+	isEntity = true; // are you loading entities or relationships?
+	queryName = "No Query"; // Name your query
+	querySQL = null; // Add your select sql query here note: it should have first column return the uuid or relationshipid
+	
+	// define database layer styles for points, lines, polygons and text
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+	
+	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
 
 /*** MISC ***/
 
@@ -151,17 +170,17 @@ String device = "";
 login(){
 
     if (getFieldValue("user/tab1/devices") != ""){
-    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
-    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
-    device = deviceResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("control");}
-    else {
+	    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
+	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
+	    device = deviceResult.get(0);
+	    setUser(user);
+	    username = userResult.get(1) + " " + userResult.get(2);
+	    showTabGroup("control");
+	} else {
         showWarning("Logic Error", "Please Choose Device");
-
     }
+    initMap();
 }
 
 onEvent("user/tab1/login", "click", "login()");

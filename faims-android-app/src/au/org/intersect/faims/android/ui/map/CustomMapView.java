@@ -686,6 +686,10 @@ public class CustomMapView extends MapView {
         	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
         }
 		
+		// center map 
+		double[][] boundaries = gdalLayer.getBoundaries();
+		setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
+		
 		orderLayers();
 		
 		return addLayer(gdalLayer);

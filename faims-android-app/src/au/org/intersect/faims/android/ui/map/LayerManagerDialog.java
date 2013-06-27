@@ -560,8 +560,6 @@ public class LayerManagerDialog extends AlertDialog {
 				try {
 					if(rasterFile != null){
 						mapView.addBaseMap(editText.getText().toString(), rasterFile.getPath());
-						double[][] boundaries = ((CustomGdalMapLayer) mapView.getLayers().getBaseLayer()).getBoundaries();
-						mapView.setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
 						redrawLayers();
 					}
 				} catch (Exception e) {

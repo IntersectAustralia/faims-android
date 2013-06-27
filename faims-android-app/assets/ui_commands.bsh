@@ -613,8 +613,19 @@ onMapEvent(String ref, String clickCallback, selectCallback) {
 }
 
 /**
-  * Show raster map to the map that has the reference. If the map reference is not found,\n
+  * Show base map to the map that has the reference. If the map reference is not found,\n
   * there will be a logic error dialog appearing. The map will be the base map.
+  * @param ref the reference to the map
+  * @param layerName the layer name for the raster map
+  * @param filename the filename of the map, will show error if the file does not exist
+  */
+showBaseMap(String ref, String layerName, String filename) {
+	linker.showBaseMap(ref, layerName, filename);
+}
+
+/**
+  * Show raster map to the map that has the reference. If the map reference is not found,\n
+  * there will be a logic error dialog appearing. You have include multiple raster maps.
   * @param ref the reference to the map
   * @param layerName the layer name for the raster map
   * @param filename the filename of the map, will show error if the file does not exist

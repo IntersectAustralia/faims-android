@@ -2765,7 +2765,7 @@ public class BeanShellLinker {
 		return this.activity.getGPSDataManager().getGPSHeading(gps);
 	}
 
-	public void showRasterMap(final String ref, String layerName,
+	public void showBaseMap(final String ref, String layerName,
 			String filename) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
@@ -2774,6 +2774,29 @@ public class BeanShellLinker {
 
 				String filepath = activity.getProjectDir() + "/" + filename;
 				mapView.addBaseMap(layerName, filepath);
+
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (MapException e) {
+			FLog.e("error showing base map", e);
+			showWarning("Logic Error", e.getMessage());
+		} catch (Exception e) {
+			FLog.e("error rendering base map", e);
+			showWarning("Logic Error", "Error cannot render base map " + ref);
+		}
+	}
+	
+	public void showRasterMap(final String ref, String layerName,
+			String filename) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				final CustomMapView mapView = (CustomMapView) obj;
+
+				String filepath = activity.getProjectDir() + "/" + filename;
+				mapView.addRasterMap(layerName, filepath);
 
 			} else {
 				FLog.w("cannot find map view " + ref);
