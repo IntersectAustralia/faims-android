@@ -990,18 +990,36 @@ removeGeometryHighlight(String ref, int geomId) {
 	linker.removeGeometryHighlight(ref, geomId);
 }
 
+/**
+  * This locks highlights in place so that when doHighlightTransform is called
+  * the highlighted geometry will be transformed to their new location
+  * @param ref the reference to the map view
+  */
 prepareHighlightTransform(String ref) {
 	linker.prepareHighlightTransform(ref);
 }
 
+/**
+  * This unlocks highlights so that geometries that were locked using prepareHighlightTransform
+  * get transformed to their new position, rotation and scaling
+  * @param ref the reference to the map view
+  */
 doHighlightTransform(String ref) {
 	linker.doHighlightTransform(ref);
 }
 
+/**
+  * This clears geometry highlights
+  * @param ref the reference to the map view
+  */
 clearGeometryHighlights(String ref) {
 	linker.clearGeometryHighlights(ref);
 }
 
+/**
+  * This returns a list of geometry highlights
+  * @param ref the reference to the map view
+  */
 getGeometryHighlights(String ref) {
 	return linker.getGeometryHighlights(ref);
 }
@@ -1088,26 +1106,54 @@ convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
 	return linker.convertFromProjToProj(fromSrid, toSrid, p);
 }
 
+/**
+  * Enable or disable map tools for the map view
+  * @param ref the reference to the map view
+  * @param enabled true or false to enable or disable map tools
+  */
 setToolsEnabled(String ref, boolean enabled) {
 	linker.setToolsEnabled(ref, enabled);
 }
 
+/** 
+  * Add tool specific events (create or load). 
+  * The create event is called when the create point, line or polygon
+  * tools generate their geometry
+  * The load event is called when the load data tool is used to select
+  * geometry
+  * @param ref the reference to the map view
+  * @param type the event type (create or load)
+  * @callback the callback code to execute
+  */ 
 onToolEvent(String ref, String type, String callback) {
 	linker.bindToolEvent(ref, type, callback);
 }
 
+/**
+  * This used with the tool creat event callback to get the created geometry id
+  */
 getMapGeometryCreated() {
 	return _map_geometry_created;
 }
 
+/**
+  * This used with the tool load event callback to get the uuid of the selected geometry
+  */
 getMapGeometryLoaded() {
 	return _map_geometry_loaded;
 }
 
+/**
+  * This used with the tool load event callback to get the type (entity or relationship) of the selected geometry
+  */
 getMapGeometryLoadedType() {
 	return _map_geometry_loaded_type;
 }
 
+/**
+  * This refreshes the map layers. Useful if you have saved entities or relationships into the
+  * database and want to update the map layers.
+  * @param reference to the map view
 refreshMap(String ref) {
 	linker.refreshMap(ref);
 }
