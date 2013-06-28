@@ -38,6 +38,14 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	}
 	
 	@Override
+	public void activate() {
+		super.activate();
+		if (!mapView.isProperProjection()) {
+			showError("This tool will not function properly as projection is non geographic.");
+		}
+	}
+	
+	@Override
 	protected void updateLayout() {
 		if (settingsButton != null) {
 			layout.removeAllViews();

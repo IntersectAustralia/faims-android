@@ -7,7 +7,6 @@ import java.util.List;
 import jsqlite.Stmt;
 import android.location.Location;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKBUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 
@@ -29,7 +28,7 @@ private static String dbname;
 	}
 	
 	public static float computeLineDistance(List<MapPos> points, String srid) throws Exception {
-		if (GeometryUtil.EPSG4326.equals(srid)) {
+		if (!isProperProjection(srid)) {
 			float totalDistance = 0;
 			MapPos lp = null;
 			for (MapPos p : points) {
@@ -73,7 +72,7 @@ private static String dbname;
 	}
 	
 	public static double computePointDistance(MapPos p1, MapPos p2, String srid) throws Exception {
-		if (GeometryUtil.EPSG4326.equals(srid)) {
+		if (!isProperProjection(srid)) {
 			float[] results = new float[3];
 			Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
 			return results[0];
@@ -327,6 +326,35 @@ private static String dbname;
 	            return (Geometry) gs[0];
 			}
 			return null;
+		} finally {
+			if (st != null) {
+				try {
+					st.close();
+				} catch (Exception e) {
+					FLog.e("error closing statement", e);
+				}
+			}
+			if (db != null) {
+				try {
+					db.close();
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public static boolean isProperProjection(String srid) throws Exception {
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			String sql = "select count(srid) from spatial_ref_sys where proj4text like '%+units=m%' and srid = ?;";
+			st = db.prepare(sql);
+			st.bind(1, Integer.parseInt(srid));
+			st.step();
+			return st.column_int(0) == 1;
 		} finally {
 			if (st != null) {
 				try {

@@ -81,6 +81,9 @@ public class AreaTool extends HighlightTool {
 	public void activate() {
 		super.activate();
 		canvas.clear();
+		if (!mapView.isProperProjection()) {
+			showError("This tool will not function properly as projection is non geographic.");
+		}
 	}
 	
 	@Override
