@@ -998,10 +998,20 @@ doHighlightTransform(String ref) {
 	linker.doHighlightTransform(ref);
 }
 
+/**
+  * Clearing all higlighted geometries list from the map view has the reference.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  */
 clearGeometryHighlights(String ref) {
 	linker.clearGeometryHighlights(ref);
 }
 
+/**
+  * Get all higlighted geometries list from the map view has the reference.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  */
 getGeometryHighlights(String ref) {
 	return linker.getGeometryHighlights(ref);
 }
