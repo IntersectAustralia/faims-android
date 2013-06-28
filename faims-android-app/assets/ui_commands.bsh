@@ -585,7 +585,7 @@ Object getGPSHeading(String gps){
 }
 
 /**
-  * Start track log of the GPS and save it to the database so the user can look at the track log in the map
+  * Start track log of the GPS and save it to the database so the user can look at the track log in the map view
   * @param type either "distance" or "time"
   * @param value the value of the tracking, if type is "distance", the value will be in meter, if type is "time", the value will be in seconds
   */
@@ -602,10 +602,10 @@ stopTrackingGPS(){
 
 //========= Map Functionalities ==========
 /**
-  * Binding map click event and vector click event to the map that has the reference. If the map reference is not found,\n
+  * Binding map click event and vector click event to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
-  * @param clickCallback the call back that is executed when the map is clicked
+  * @param ref the reference to the map view
+  * @param clickCallback the call back that is executed when the map view is clicked
   * @param selectCallback the call back that is executed when the vector element is clicked
   */
 onMapEvent(String ref, String clickCallback, selectCallback) {
@@ -613,31 +613,31 @@ onMapEvent(String ref, String clickCallback, selectCallback) {
 }
 
 /**
-  * Show base map to the map that has the reference. If the map reference is not found,\n
-  * there will be a logic error dialog appearing. The map will be the base map.
-  * @param ref the reference to the map
+  * Show base map to the map view that has the reference. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing. the map view will be the base map.
+  * @param ref the reference to the map view
   * @param layerName the layer name for the raster map
-  * @param filename the filename of the map, will show error if the file does not exist
+  * @param filename the filename of the map view, will show error if the file does not exist
   */
 showBaseMap(String ref, String layerName, String filename) {
 	linker.showBaseMap(ref, layerName, filename);
 }
 
 /**
-  * Show raster map to the map that has the reference. If the map reference is not found,\n
+  * Show raster map to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing. You have include multiple raster maps.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerName the layer name for the raster map
-  * @param filename the filename of the map, will show error if the file does not exist
+  * @param filename the filename of the map view, will show error if the file does not exist
   */
 showRasterMap(String ref, String layerName, String filename) {
 	linker.showRasterMap(ref, layerName, filename);
 }
 
 /**
-  * Set the focus point of the map that has the reference by specifying the float value of longitude and latitude.\n
-  * If the map reference is not found, there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * Set the focus point of the map view that has the reference by specifying the float value of longitude and latitude.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
   * @param longitude the longitude of the focus point
   * @param latitude the latitude of the focus point
   */
@@ -646,9 +646,9 @@ setMapFocusPoint(String ref, float longitude, float latitude) {
 }
 
 /**
-  * Set the focus point of the map that has the reference by specifying the double value of longitude and latitude.\n
-  * If the map reference is not found, there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * Set the focus point of the map view that has the reference by specifying the double value of longitude and latitude.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
   * @param longitude the longitude of the focus point
   * @param latitude the latitude of the focus point
   */
@@ -657,29 +657,29 @@ setMapFocusPoint(String ref, double longitude, double latitude) {
 }
 
 /**
-  * Set the rotation of the map that has the reference by specifying the rotation value.\n
-  * If the map reference is not found, there will be a logic error dialog appearing.
-  * @param ref the reference to the map
-  * @param rotation the rotation of the map in degrees
+  * Set the rotation of the map view that has the reference by specifying the rotation value.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param rotation the rotation of the map view in degrees
   */
 setMapRotation(String ref, float rotation) {
 	linker.setMapRotation(ref, rotation);
 }
 
 /**
-  * Set the zoom level of the map that has the reference by specifying the zoom value.\n
-  * If the map reference is not found, there will be a logic error dialog appearing.
-  * @param ref the reference to the map
-  * @param zoom the zoom value of the map
+  * Set the zoom level of the map view that has the reference by specifying the zoom value.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param zoom the zoom value of the map view
   */
 setMapZoom(String ref, float zoom) {
 	linker.setMapZoom(ref, zoom);
 }
 
 /**
-  * Set the perspective view of the map that has the reference. If the map reference is not found,\n
+  * Set the perspective view of the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param tilt the tilt value default is 90 degrees for 2d view, minimum is 30 degrees
   */
 setMapTilt(String ref, float tilt) {
@@ -687,9 +687,9 @@ setMapTilt(String ref, float tilt) {
 }
 
 /**
-  * Show a shape layer to the map that has the reference. If the map reference is not found,\n
+  * Show a shape layer to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerName the layer name for the shape layer
   * @param filename the file path of the shape map, will show error if the file does not exist
   * @param pointStyle the styling to points appearing in the layer
@@ -701,9 +701,9 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
 }
 
 /**
-  * Show a spatial layer to the map that has the reference. If the map reference is not found,\n
+  * Show a spatial layer to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerName the layer name for the shape layer
   * @param filename the file path of the shape map, will show error if the file does not exist
   * @param tableName the table name to be loaded from the database
@@ -720,9 +720,9 @@ showSpatialLayer(String ref, String layerName, String filename, String tableName
 }
 
 /**
-  * Show a database layer to the map that has the reference. If the map reference is not found,\n
+  * Show a database layer to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing. The layer shows all saved geometries in the database.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerName the layer name for the shape layer
   * @param isEntity a boolean value to determine whether it is entity or relationship
   * @param queryName the query name for the executed query
@@ -738,9 +738,9 @@ showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryNa
 }
 
 /**
-  * Remove a layer from the map that has the reference. If the map reference is not found,\n
+  * Remove a layer from the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerId the layerid to be removed, if not found, a logic error will appear.
   */
 removeLayer(String ref, int layerId) {
@@ -748,18 +748,18 @@ removeLayer(String ref, int layerId) {
 }
 
 /**
-  * Centering the map that has the reference based on the current GPS position if there is GPS position.
-  * If the map reference is not found, there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * Centering the map view that has the reference based on the current GPS position if there is GPS position.
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
   */
 centerOnCurrentPosition(String ref){
 	linker.centerOnCurrentPosition(ref);
 }
 
 /**
-  * Create canvas layer and add it to the map that has the reference. If the map reference is not found,\n
+  * Create canvas layer and add it to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerName the name of the canvas layer
   */
 createCanvasLayer(String ref, String layerName) {
@@ -767,9 +767,9 @@ createCanvasLayer(String ref, String layerName) {
 }
 
 /**
-  * Set the visibility of a layer in the map that has the reference. If the map reference is not found,\n
+  * Set the visibility of a layer in the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
-  * @param ref the reference to the map
+  * @param ref the reference to the map view
   * @param layerId the layerId to set visibility, will show logic error dialog if not found
   * @param visible the boolean to set whether it is visible or not
   */
@@ -777,50 +777,131 @@ setLayerVisible(String ref, int layerId, boolean visible) {
 	linker.setLayerVisible(ref, layerId, visible);
 }
 
+/**
+  * Get the clicked position in the map view
+  * @return the clicked map point
+  */
 getMapPointClicked() {
 	return _map_point_clicked;
 }
 
+/**
+  * Draw a point on the map view that has the reference by specifying the point and style. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param layerId the layerId to draw the point to, will show logic error dialog if not found
+  * @param point the map view point to be drawn
+  * @param style the style that will be applied to the point
+  */
 drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
 	linker.drawPoint(ref, layerId, point, style);
 }
 
+/**
+  * Draw a line on the map view that has the reference by specifying the points and style. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param layerId the layerId to draw the point to, will show logic error dialog if not found
+  * @param points the map view points to be drawn as a line
+  * @param style the style that will be applied to the line
+  */
 drawLine(String ref, int layerId, List points, GeometryStyle style) {
 	linker.drawLine(ref, layerId, points, style);
 }
 
+/**
+  * Draw a polygon on the map view that has the reference by specifying the points and style. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param layerId the layerId to draw the point to, will show logic error dialog if not found
+  * @param points the map view points to be drawn as polygon
+  * @param style the style that will be applied to the polygon
+  */
 drawPolygon(String ref, int layerId, List points, GeometryStyle style) {
 	linker.drawPolygon(ref, layerId, points, style);
 }
 
+/**
+  * Clear a geometry from the map view that has the reference by specifying the geometry id. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param geomId the id of the geometry to be cleared, will show logic error dialog if not found
+  */
 clearGeometry(String ref, int geomId) {
 	linker.clearGeometry(ref, geomId);
 }
 
+/**
+  * Clear a list of geometries from the map view that has the reference by specifying the list of geometry id.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param geomList the list of id of the geometries to be cleared, will show logic error dialog if not found
+  */
 clearGeometryList(String ref, List geomList) {
 	linker.clearGeometryList(ref, geomList);
 }
 
+/**
+  * Create a point from string longitude and string latitude
+  * @param lon the longitude of the point in String format
+  * @param lat the latitude of the point in String format
+  * @return MapPos the new point object for the map view
+  */
 createPoint(String lon, String lat) {
 	return createPoint(Float.parseFloat(lon), Float.parseFloat(lat));
 }
 
+/**
+  * Create a point from float longitude and float latitude
+  * @param lon the longitude of the point in float format
+  * @param lat the latitude of the point in float format
+  * @return MapPos the new point object for the map view
+  */
 createPoint(float lon, float lat) {
 	return new MapPos(lon, lat);
 }
 
+/**
+  * Create a point from double longitude and double latitude
+  * @param lon the longitude of the point in double format
+  * @param lat the latitude of the point in double format
+  * @return MapPos the new point object for the map view
+  */
 createPoint(double lon, double lat) {
 	return createPoint((float) lon, (float) lat);
 }
 
+/**
+  * Get all geometries in a specified layer from the map view that has the reference.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param layerId the layerId to get the geometries from, will show logic error dialog if not found
+  * @return list of the geometries or null
+  */
 getGeometryList(String ref, int layerId) {
 	return linker.getGeometryList(ref, layerId);
 }
 
+/**
+  * Get a geometry from the map view that has the reference by specifying the geometry id.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param geomId the id of the geometry, will show logic error dialog if not found
+  * @return list of the geometries or null
+  */
 getGeometry(String ref, int geomId) {
 	return linker.getGeometry(ref, geomId);
 }
 
+/**
+  * Draw geometry on the map view that has the reference by specifying the geometry and style. If the map view reference is not found,\n
+  * there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param layerId the layerId to draw the geometry to, will show logic error dialog if not found
+  * @param geom the geometry to be drawn
+  * @param style the style that will be applied to the geometry
+  * @return the id of the created geometry
+  */
 drawGeometry(String ref, int layerId, Geometry geom, GeometryStyle style) {
 	if (geom instanceof Point) {
 		return drawPoint(ref, layerId, ((Point) geom).getMapPos(), style);
@@ -831,30 +912,80 @@ drawGeometry(String ref, int layerId, Geometry geom, GeometryStyle style) {
 	}
 }
 
+/**
+  * Create styling for point by specifying the minZoom, color, size, and pickSize
+  * @param minZoom the minimum level of zoom for the point to show up
+  * @param color the color of the point
+  * @param size the size of the point, range from 0.0 - 1.0
+  * @param pickSize the picking size of the point, used for selecting the point, range from 0.0 - 1.0
+  * @return the new point style
+  */
 createPointStyle(int minZoom, int color, float size, float pickSize) {
 	return linker.createPointStyle(minZoom, color, size, pickSize);
 }
 
+/**
+  * Create styling for line by specifying the minZoom, color, width, pickWidth, and pointStyle
+  * @param minZoom the minimum level of zoom for the line to show up
+  * @param color the color of the line
+  * @param width the width of the line, range from 0.0 - 1.0
+  * @param pickWidth the picking width of the line, used for selecting the line, range from 0.0 - 1.0
+  * @param pointStyle the styling of the point for the line
+  * @return the new line style
+  */
 createLineStyle(int minZoom, int color, float width, float pickWidth, GeometryStyle pointStyle) {
 	return linker.createLineStyle(minZoom, color, width, pickWidth, pointStyle);
 }
 
+/**
+  * Create styling for polygon by specifying the minZoom, color, and lineStyle
+  * @param minZoom the minimum level of zoom for the polygon to show up
+  * @param color the color of the polygon
+  * @param lineStyle the styling of the line for the polygon
+  * @return the new polygon style
+  */
 createPolygonStyle(int minZoom, int color, GeometryStyle lineStyle) {
 	return linker.createPolygonStyle(minZoom, color, lineStyle);
 }
 
+/**
+  * Create styling for text label by specifying the minZoom, color, size, and font
+  * @param minZoom the minimum level of zoom for the text label to show up
+  * @param color the color of the text label
+  * @param size the size of the text label
+  * @param font the font of the text label
+  * @return the new text style
+  */
 createTextStyle(int minZoom, int color, int size, android.graphics.Typeface font) {
 	return linker.createTextStyle(minZoom, color, size, font);
 }
 
+/**
+  * Unlock or locking the map view has the reference from moving, useful when editing geometries.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param lock boolean value to set locking or unlocking
+  */
 lockMapView(String ref, boolean lock) {
 	linker.lockMapView(ref, lock);
 }
 
+/**
+  * Adding a geometry to the higlighted geometries list to the map view has the reference.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param geomId the id of the geometry to be highlighted
+  */
 addGeometryHighlight(String ref, int geomId) {
 	linker.addGeometryHighlight(ref, geomId);
 }
 
+/**
+  * Removing a geometry from the higlighted geometries list to the map view has the reference.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param geomId the id of the geometry to be removed from highlighted list
+  */
 removeGeometryHighlight(String ref, int geomId) {
 	linker.removeGeometryHighlight(ref, geomId);
 }
@@ -875,34 +1006,84 @@ getGeometryHighlights(String ref) {
 	return linker.getGeometryHighlights(ref);
 }
 
+/**
+  * Get the selected geometry on the map view
+  * @return the selected geometry
+  */
 getMapGeometrySelected() {
 	return _map_geometry_selected;
 }
 
+/**
+  * Adding a database layer query to the map view has the reference to show the saved geometries in the database.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param name the name of the query added
+  * @param sql the query to be executed when selected
+  */
 addDatabaseLayerQuery(String ref, String name, String sql) {
 	linker.addDatabaseLayerQuery(ref, name, sql);
 }
 
+/**
+  * Adding a tracklog layer query to the map view has the reference to show the GPS tracking for all users.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.
+  * @param ref the reference to the map view
+  * @param name the name of the query added
+  * @param sql the query to be executed when selected
+  */
 addTrackLogLayerQuery(String ref, String name, String sql) {
 	linker.addTrackLogLayerQuery(ref, name, sql);
 }
 
+/**
+  * Adding a query builder to the map view has the reference to select geometries based on the query.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.\n
+  * The selection will only select the geometries in the database layer.
+  * @param ref the reference to the map view
+  * @param name the name of the query added
+  * @param builder the query builder to be executed when selected
+  */
 addSelectQueryBuilder(String ref, String name, QueryBuilder builder) {
 	linker.addSelectQueryBuilder(ref, name, builder);
 }
 
+/**
+  * Create a query builder for database select by providing the sql query
+  * @param sql the query to be executed when selected
+  */
 createQueryBuilder(String sql) {
 	return new QueryBuilder(sql);
 }
 
+/**
+  * Adding a query builder to the map view has the reference to select geometries based on the query.\n
+  * If the map view reference is not found, there will be a logic error dialog appearing.\n
+  * The selection will only select the geometries in the legacy layer.
+  * @param ref the reference to the map view
+  * @param name the name of the query added
+  * @param dbPath the path of the database file
+  * @param tableName the name of the table for the database executed against
+  * @param builder the query builder to be executed when selected
+  */
 addLegacySelectQueryBuilder(String ref, String name, String dbPath, String tableName, QueryBuilder builder) {
 	linker.addLegacySelectQueryBuilder(ref, name, dbPath, tableName, builder);
 }
 
+/**
+  * Create a legacy query builder for legacy select by providing the sql query
+  * @param sql the query to be executed when selected
+  */
 createLegacyQueryBuilder(String sql) {
 	return new LegacyQueryBuilder(sql);
 }
 
+/**
+  * Convert a map position from one projection to another projection
+  * @param fromSrid the projection to convert
+  * @param toSrid the projection to be converted to
+  * @param p the map position to be converted
+  */
 convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
 	return linker.convertFromProjToProj(fromSrid, toSrid, p);
 }
@@ -932,124 +1113,253 @@ refreshMap(String ref) {
 }
 
 //========= Sync Functionalities ==========
+/**
+  * Pushing a database to the server which is used for syncing, after finished, it will execute the callback
+  * @param callback the callback that will be executed when the operation finished
+  */
 pushDatabaseToServer(String callback) {
 	linker.pushDatabaseToServer(callback);
 }
 
+/**
+  * Pulling a database from the server which is used for syncing, after finished, it will execute the callback
+  * @param callback the callback that will be executed when the operation finished
+  */
 pullDatabaseFromServer(String callback) {
 	linker.pullDatabaseFromServer(callback);
 }
 
+/**
+  * Set whether the sync should be enabled or not
+  * @param value boolean value to set the sync enabled or not
+  */
 setSyncEnabled(boolean value) {
 	linker.setSyncEnabled(value);
 }
 
+/**
+  * An event listener for sync that will execute call back for start, success, and failure of the sync
+  * @param startCallback the callback that will be executed when sync is started
+  * @param successCallback the callback that will be executed when sync is finish
+  * @param failureCallback the callback that will be executed when sync is failing
+  */
 onSyncEvent(String startCallback, String successCallback, String failureCallback) {
 	linker.addSyncListener(startCallback, successCallback, failureCallback);
 }
 
+/**
+  * Set the minimum interval for the sync to happen
+  * @param value the minimum interval for the sync to happen
+  */
 setSyncMinInterval(float value) {
 	linker.setSyncMinInterval(value);
 }
 
+/**
+  * Set the maximum interval for the sync to happen
+  * @param value the maximum interval for the sync to happen
+  */
 setSyncMaxInterval(float value) {
 	linker.setSyncMaxInterval(value);
 }
 
+/**
+  * Set the delay interval for each sync
+  * @param value the delay interval for each sync
+  */
 setSyncDelay(float value) {
 	linker.setSyncDelay(value);
 }
 
+/**
+  * Set whether the file sync should be enabled or not
+  * @param value boolean value to set the file sync enabled or not
+  */
 setFileSyncEnabled(boolean enabled) {
 	linker.setFileSyncEnabled(enabled);
 }
 
 //========= Static Data Functionalities ==========
+/**
+  * Get the static data for current project name
+  * @return project name
+  */
 String getProjectName(){
 	return linker.getProjectName();
 }
 
+/**
+  * Get the static data for current project projection
+  * @return project projection
+  */
 String getProjectSrid(){
 	return linker.getProjectSrid();
 }
 
+/**
+  * Get the static data for current project id
+  * @return project id
+  */
 String getProjectId(){
 	return linker.getProjectId();
 }
 
+/**
+  * Get the static data for current project season
+  * @return project season
+  */
 String getProjectSeason(){
 	return linker.getProjectSeason();
 }
 
+/**
+  * Get the static data for current project description
+  * @return project description
+  */
 String getProjectDescription(){
 	return linker.getProjectDescription();
 }
 
+/**
+  * Get the static data for current permit number
+  * @return permit number
+  */
 String getPermitNo(){
 	return linker.getPermitNo();
 }
 
+/**
+  * Get the static data for current permit holder
+  * @return permit holder
+  */
 String getPermitHolder(){
 	return linker.getPermitHolder();
 }
 
+/**
+  * Get the static data for current contact and address
+  * @return contact and address
+  */
 String getContactAndAddress(){
 	return linker.getContactAndAddress();
 }
 
+/**
+  * Get the static data for current participants
+  * @return participants
+  */
 String getParticipants(){
 	return linker.getParticipants();
 }
 
 //========= File attachment Functionalities ==========
+/**
+  * Get the name of last selected file from the file browser
+  * @return name of last selected file
+  */
 getLastSelectedFilename() {
 	return _last_selected_filename;
 }
 
+/**
+  * Get the path of last selected file from the file browser
+  * @return path of last selected file
+  */
 getLastSelectedFilepath() {
 	return _last_selected_filepath;
 }
 
+/**
+  * Show the file browser and execute the callback after finish
+  * @param callback the callback to be executed once the operation finished
+  */
 showFileBrowser(String callback) {
 	linker.showFileBrowser(callback);
 }
 
+/**
+  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
+  * the file will be available on the other devices syncing to the server. If not, the file\n
+  * will only available on the server. If the dir is defined, it will create the dir in the app/server folder.
+  * @param filepath the path of the file to be synced
+  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  * @param dir the directory to be added to the app/server folfer, might be null
+  */
 attachFile(String filePath, boolean sync, String dir) {
 	return linker.attachFile(filePath, sync, dir);
 }
 
+/**
+  * List all attached file to an arch entity by providing the id of the arch entity.
+  * @param id the id of the arch entity, it will get the logic error dialog if null
+  */
 viewArchEntAttachedFiles(String id){
 	linker.viewArchEntAttachedFiles(id);
 }
 
+/**
+  * List all attached file to an arch entity by providing the id of the relationship.
+  * @param id the id of the relationship, it will get the logic error dialog if null
+  */
 viewRelAttachedFiles(String id){
 	linker.viewRelAttachedFiles(id);
 }
 
+/**
+  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
+  * the file will be available on the other devices syncing to the server. If not, the file\n
+  * will only available on the server.
+  * @param filepath the path of the file to be synced
+  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  */
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null);
 }
 
+/**
+  * Open the camera and then execute the callback after finish
+  * @param callback the callback executed after operation is finish
+  */
 openCamera(String callback){
 	linker.openCamera(callback);
 }
 
+/**
+  * Open the video recorder and then execute the callback after finish
+  * @param callback the callback executed after operation is finish
+  */
 openVideo(String callback){
 	linker.openVideo(callback);
 }
 
+/**
+  * Open the audio recorder and then execute the callback after finish
+  * @param callback the callback executed after operation is finish
+  */
 recordAudio(String callback){
 	linker.recordAudio(callback);
 }
 
+/**
+  * Get the path of last taken picture
+  * @return the path of the last taken picture
+  */
 String getLastPictureFilePath(){
 	return linker.getLastPictureFilePath();
 }
 
+/**
+  * Get the path of last recorded video
+  * @return the path of the last recorded video
+  */
 String getLastVideoFilePath(){
 	return linker.getLastVideoFilePath();
 }
 
+/**
+  * Get the path of last recorded audio
+  * @return the path of the last recorded audio
+  */
 String getLastAudioFilePath(){
 	return linker.getLastAudioFilePath();
 }
