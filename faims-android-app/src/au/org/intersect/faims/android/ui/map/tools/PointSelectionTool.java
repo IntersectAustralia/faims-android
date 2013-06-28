@@ -41,7 +41,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	public void activate() {
 		super.activate();
 		if (!mapView.isProperProjection()) {
-			showError("This tool will not function properly as projection is non geographic.");
+			showError("This tool will not function properly as projection is not a projected coordinate system.");
 		}
 	}
 	

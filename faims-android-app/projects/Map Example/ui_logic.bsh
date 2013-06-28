@@ -1084,9 +1084,10 @@ updateUIRelationship(String relId) {
 	}
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
 	
+	ArrayList list = null;
+	
 	if (relId == null) {
 	
-		ArrayList list = null;
 		if (createGeomId > 0) {
 			Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
 			list = new ArrayList();
