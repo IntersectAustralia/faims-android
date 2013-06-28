@@ -1009,7 +1009,8 @@ doHighlightTransform(String ref) {
 }
 
 /**
-  * This clears geometry highlights
+  * Clearing all higlighted geometries list from the map view has the reference.
+  * If the map view reference is not found, there will be a logic error dialog appearing.
   * @param ref the reference to the map view
   */
 clearGeometryHighlights(String ref) {
@@ -1017,7 +1018,8 @@ clearGeometryHighlights(String ref) {
 }
 
 /**
-  * This returns a list of geometry highlights
+  * Get all higlighted geometries list from the map view has the reference.
+  * If the map view reference is not found, there will be a logic error dialog appearing.
   * @param ref the reference to the map view
   */
 getGeometryHighlights(String ref) {
