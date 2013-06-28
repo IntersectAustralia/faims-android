@@ -560,6 +560,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if (syncActive) {
 			stopSync();
 		}
+		
+		if(this.linker != null){
+			this.linker.stopTrackingGPS();
+		}
+		if(this.gpsDataManager != null){
+			this.gpsDataManager.destroyListener();
+		}
 	}
 
 	@Override
@@ -1273,14 +1280,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		linker.storeBeanShellData(savedInstanceState);
-		linker.stopTrackingGPS();
 		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
 		renderer.storeTabs(savedInstanceState);
 		renderer.storeViewValues(savedInstanceState);
 		activityData.setUserId(databaseManager.getUserId());
 		activityData.saveTo(savedInstanceState);
 		gpsDataManager.saveTo(savedInstanceState);
-		gpsDataManager.destroyListener();
 	}
 
 	@Override
@@ -1291,15 +1296,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		renderer.restoreViewValues(savedInstanceState);
 		activityData.restoreFrom(savedInstanceState);
 		gpsDataManager.restoreFrom(savedInstanceState);
-		if(gpsDataManager.isExternalGPSStarted()){
-			gpsDataManager.startExternalGPSListener();
-		}
-		if(gpsDataManager.isInternalGPSStarted()){
-			gpsDataManager.startInternalGPSListener();
-		}
-		if(gpsDataManager.getTrackingType() != null){
-			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue());
-		}
 		this.databaseManager.setUserId(activityData.getUserId());
 	}
 
