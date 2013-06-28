@@ -141,7 +141,7 @@ public class AzimuthTool extends HighlightTool {
 			if (mapView.getHighlights().size() < 2) return;
 			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
 			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
-			angle = SpatialiteUtil.computeAzimuth(p1, p2);
+			angle = SpatialiteUtil.computeAzimuth(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2));
 		} catch (Exception e) {
 			FLog.e("error computing azimuth", e);
 			showError("Error computing azimuth");

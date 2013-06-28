@@ -282,6 +282,8 @@ public class CustomMapView extends MapView {
 	private LoadCallback loadCallback;
 
 	private int vertexLayerId;
+
+	private boolean projectionProper;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -356,6 +358,13 @@ public class CustomMapView extends MapView {
         } catch (Exception e) {
         	FLog.e("error adding vertex layer", e);
         }
+        
+        // store proper projection result
+        try {
+			projectionProper = SpatialiteUtil.isProperProjection(activityRef.get().getProject().getSrid());
+		} catch (Exception e) {
+			FLog.e("error checking for proper projection", e);
+		}
 	}
 
 	public CustomMapView(Context context) {
@@ -2095,6 +2104,10 @@ public class CustomMapView extends MapView {
 		} else {
 			FLog.d("layer must be database layer");
 		}
+	}
+
+	public boolean isProperProjection() {
+		return projectionProper;
 	}
 
 }

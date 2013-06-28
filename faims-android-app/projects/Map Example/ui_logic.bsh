@@ -1017,13 +1017,23 @@ updateUIEntity(String entityId) {
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
 	
 	ArrayList list = null;
-	if (createGeomId > 0) {
-		Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
-		list = new ArrayList();
-		list.add(g);
+	if (entityId == null) {
+	
+		if (createGeomId > 0) {
+			Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+			list = new ArrayList();
+			list.add(g);
+			
+			clearGeometry("tabgroup5/tab1/map", createGeomId);
+			createGeomId = 0;
+		}
 		
-		clearGeometry("tabgroup5/tab1/map", createGeomId);
-		createGeomId = 0;
+	} else {
+		
+		entity = fetchArchEnt(entityId);
+		
+		list = entity.getGeometryList();
+		
 	}
 	
 	String id = saveArchEnt(entityId, "simpleentity", list, attributes);
@@ -1039,11 +1049,11 @@ loadUIEntity(entityId) {
 	
 	if (entityId == null) {
 		entityId = getFieldValue("tabgroup5/tab2/entity");
+	} else {
+		setFieldValue("tabgroup5/tab2/entity", entityId);
 	}
 	
 	if (entityId == null || "".equals(entityId)) return;
-	
-	Object entity = fetchArchEnt(entityId);
 	
 	showTab("tabgroup5/tab2", entityId);
 	
@@ -1075,13 +1085,24 @@ updateUIRelationship(String relId) {
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
 	
 	ArrayList list = null;
-	if (createGeomId > 0) {
-		Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
-		list = new ArrayList();
-		list.add(g);
+	
+	if (relId == null) {
+	
+		if (createGeomId > 0) {
+			Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+			list = new ArrayList();
+			list.add(g);
+			
+			clearGeometry("tabgroup5/tab1/map", createGeomId);
+			createGeomId = 0;
+		}
 		
-		clearGeometry("tabgroup5/tab1/map", createGeomId);
-		createGeomId = 0;
+	} else {
+	
+		rel = fetchRel(relId);
+		
+		list = rel.getGeometryList();
+		
 	}
 	
 	String id = saveRel(relId, "abovebelow", list, attributes);
@@ -1097,6 +1118,8 @@ loadUIRelationship(relId) {
 	
 	if (relId == null) {
 		relId = getFieldValue("tabgroup5/tab3/relationship");
+	} else {
+		setFieldValue("tabgroup5/tab3/relationship", relId);
 	}
 	
 	if (relId == null || "".equals(relId)) return;
