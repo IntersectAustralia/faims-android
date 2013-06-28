@@ -461,7 +461,7 @@ public class CustomMapView extends MapView {
 			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
 		} else if (layer instanceof DatabaseLayer) {
 			removeLayer(((DatabaseLayer) layer).getTextLayer());
-		} else if (layer instanceof GdalMapLayer) {
+		} else if ((layer instanceof GdalMapLayer) && layer == baseLayer) {
 			this.getLayers().removeLayer(currentPositionLayer);
 			currentPositionLayer = null;
 			gpsMarker = null;
@@ -1553,6 +1553,9 @@ public class CustomMapView extends MapView {
 			} else {
 				tempLayers.add(layer);
 			}
+		}
+		if (currentPositionLayer != null) {
+			tempLayers.add(currentPositionLayer);
 		}
 		tempLayers.add(getLayer(vertexLayerId));
 		this.getLayers().setLayers(tempLayers);
