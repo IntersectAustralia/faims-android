@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
@@ -238,13 +237,10 @@ public class FollowTool extends HighlightTool {
 				mapView.clearGeometry(buffer);
 				buffer = null;
 			}
-			Geometry geom = mapView.getGeomToFollow();
-			if (geom == null) return;
-			GeometryData data = (GeometryData) geom.userData;
 			
 			Geometry geomBuffer = mapView.getGeomToFollowBuffer();
 			if (geomBuffer instanceof Polygon) {
-				buffer = mapView.drawPolygon(data.layerId, ((Polygon) geomBuffer).getVertexList(), bufferStyle);
+				buffer = mapView.drawPolygon(mapView.getVertexLayerId(), ((Polygon) geomBuffer).getVertexList(), bufferStyle);
 			}
 		} catch (Exception e) {
 			FLog.e("error updating buffer", e);
