@@ -19,6 +19,7 @@ import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PolygonStyle;
+import android.app.Dialog;
 
 //========= Persist Functionalities ==========
 /**
@@ -128,6 +129,15 @@ showAlert(String title, String message, String okCallback, String cancelCallback
   */
 showWarning(String title, String message) {
 	linker.showWarning(title, message);
+}
+
+/**
+  * Showing a busy dialog to the user with the given message
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  */
+showBusy(String title, String message) {
+	return linker.showBusy(title, message);
 }
 
 //========= Setter / Getter Functionalities ==========
@@ -1156,6 +1166,7 @@ getMapGeometryLoadedType() {
   * This refreshes the map layers. Useful if you have saved entities or relationships into the
   * database and want to update the map layers.
   * @param reference to the map view
+  */
 refreshMap(String ref) {
 	linker.refreshMap(ref);
 }
@@ -1334,7 +1345,20 @@ showFileBrowser(String callback) {
   * @param dir the directory to be added to the app/server folfer, might be null
   */
 attachFile(String filePath, boolean sync, String dir) {
-	return linker.attachFile(filePath, sync, dir);
+	return linker.attachFile(filePath, sync, dir, null);
+}
+
+/**
+  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
+  * the file will be available on the other devices syncing to the server. If not, the file\n
+  * will only available on the server. If the dir is defined, it will create the dir in the app/server folder.
+  * @param filepath the path of the file to be synced
+  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  * @param dir the directory to be added to the app/server folfer, might be null
+  * @param callback code to execute when file is finish copying into files directory
+  */
+attachFile(String filePath, boolean sync, String dir, String callback) {
+	return linker.attachFile(filePath, sync, dir, callback);
 }
 
 /**
@@ -1410,4 +1434,19 @@ String getLastVideoFilePath(){
   */
 String getLastAudioFilePath(){
 	return linker.getLastAudioFilePath();
+}
+
+/**
+  * Executes a given string of code
+  * @param code the string of code to execute
+  */
+execute(String code){
+	return linker.execute(code);
+}
+
+/**
+  * @return returns true if files are currently being attached
+  */
+isAttachingFiles(){
+	return linker.isAttachingFiles();
 }

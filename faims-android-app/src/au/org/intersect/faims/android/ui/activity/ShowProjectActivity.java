@@ -92,6 +92,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 	}
 	
+	public interface AttachFileListener {
+		
+		public void handleComplete();
+	}
+	
 	private static abstract class ShowProjectActivityHandler extends Handler {
 		
 		private WeakReference<ShowProjectActivity> activityRef;
@@ -1208,6 +1213,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		startActivityForResult(intent, requestCode);
 	}
 	
+	public int getCopyFileCount() {
+		return activityData.getCopyFileCount();
+	}
+	
 	/*
 	
 	@SuppressWarnings("rawtypes")
@@ -1300,7 +1309,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 
 	// TODO think about what happens if copy fails
-	public void copyFile(final String fromFile, final String toFile) {
+	public void copyFile(final String fromFile, final String toFile, final AttachFileListener listener) {
+		activityData.setCopyFileCount(activityData.getCopyFileCount() + 1);
 		new Thread(new Runnable() {
 
 			@Override
@@ -1320,6 +1330,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 								@Override
 								public void handleTaskCompleted(Object result) {
 									LockManager.clearLock(lock);
+									activityData.setCopyFileCount(activityData.getCopyFileCount() - 1);
+									if (listener != null) {
+										listener.handleComplete();
+									}
 								}
 								
 							}).execute();

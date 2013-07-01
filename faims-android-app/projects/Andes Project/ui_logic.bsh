@@ -60,6 +60,25 @@ hasFile(files, filename) {
 	return false;
 }
 
+Dialog d = null;
+
+showBusyDialog() {
+	if (d == null) {
+		d = showBusy("Message", "Please wait while record is being saved.");
+	}
+}
+
+closeBusyDialog() {
+	if (d != null) {
+		d.dismiss();
+		d = null;
+	}
+}
+
+OnFilesAttached() {
+	checkFilesAttached();
+}
+
 saveFiles(loadedFiles, files, type, attributes) {
 	if (files == null || "".equals(files)) return;
 	if (files.size() == 1 && "None".equals(files.get(0))) return;
@@ -71,10 +90,13 @@ saveFiles(loadedFiles, files, type, attributes) {
 		}
 	}
 	// add new attributes that are included
+	hasAttachment = false;
+	attachmentCount = 0; 
 	for (String file : files) {
 		String filename = null;
 		if (!hasFile(loadedFiles, file)) {
-			filename = attachFile(file, true);
+			hasAttachment = true;
+			filename = attachFile(file, true, null, "OnFilesAttached()");
 		} else {
 			for (String f : loadedFiles) {
 				if (getLoadedFileName(f).equals(getLoadedFileName(file))) {
@@ -85,9 +107,30 @@ saveFiles(loadedFiles, files, type, attributes) {
 		}
 		attributes.add(createEntityAttribute(type, filename, null, null, null));
 	}
+	
+	if (!hasAttachment) {
+		OnFilesAttached();
+	} 
 }
 
-saveEntity(entityId, entityType, attributeDefs, geoData) {
+entitySaved = false;
+entityCallback = null;
+
+checkFilesAttached() {
+	if (entityCallback == null) return;
+	
+	if (entitySaved && !isAttachingFiles()) {
+		closeBusyDialog();
+		execute(entityCallback);
+	}
+}
+
+saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
+	
+	entitySaved = false;
+	entityCallback = callback;
+	
+	showBusyDialog();
 	
     List attributes = createAttributeList();
     
@@ -108,8 +151,8 @@ saveEntity(entityId, entityType, attributeDefs, geoData) {
     		for (NameValuePair pair : pairs) {
     		
     			files.add(pair.getName());
-    		} 
-    		saveFiles(def.loadedFiles,files , def.name, attributes);
+    		}
+    		saveFiles(def.loadedFiles, files, def.name, attributes);
     	} else if ("gps".equals(def.type)) {
     		if (!("".equals(getFieldValue(def.ref1)) || "".equals(getFieldValue(def.ref2)))) {
 	    		geoData = new ArrayList();
@@ -122,8 +165,20 @@ saveEntity(entityId, entityType, attributeDefs, geoData) {
     }
     
     saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
+    
+    entitySaved = true;
+    checkFilesAttached();
+    
     updateAll();
     return saved_id;
+}
+
+convertListToPairs(list) {
+	ArrayList pairs = new ArrayList();
+	for (String s : list) {
+		pairs.add(new NameValuePair(s, s));
+	}
+	return pairs;
 }
 
 saveEntitiesToRel(type, entity1, entity2) {
@@ -552,8 +607,7 @@ updateCorner(id) {
 	    	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
 	    	};
 	    
-	    saved_id = saveEntity(id, "Corner", attributeDefs, null);
-	    loadCornerFileAttributes(saved_id);
+	    saved_id = saveEntity(id, "Corner", attributeDefs, null, "loadCornerFileAttributes(corner_id);");
 	    
 	    // save corner to structure if new corner
 	    if (id == null) {
@@ -644,9 +698,7 @@ updateNiche(id) {
     	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Niche", attributeDefs, null);
-    loadNicheFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Niche", attributeDefs, null, "loadNicheFileAttributes(niche_id);");
 }
 
 /*** CANAL ***/
@@ -702,9 +754,7 @@ updateCanal(id) {
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map")); 
-    loadCanalFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map"), "loadCanalFileAttributes(canal_id);"); 
 }
 
 /*** WINDOW ***/
@@ -777,9 +827,7 @@ updateWindow(id) {
     	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Window", attributeDefs, null);
-    loadWindowFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Window", attributeDefs, null, "loadWindowFileAttributes(window_id);");
 }
 
 /*** SPECIAL FIND ***/
@@ -836,9 +884,7 @@ updateSpecialFind(id) {
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "SpecialFind", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadSpecialFindFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "SpecialFind", attributeDefs, getGeometryHighlights("control/map/map"), "loadSpecialFindFileAttributes(special_find_id);");
 }
 
 /*** FEATURES ***/
@@ -894,9 +940,7 @@ updateFeature(id) {
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Feature", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadFeatureFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Feature", attributeDefs, getGeometryHighlights("control/map/map"), "loadFeatureFileAttributes(feature_id);");
 }
 
 /*** FREEWALL ***/
@@ -960,9 +1004,7 @@ updateFreeWall(id) {
     	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
     	};
     
-    saved_id = saveEntity(id, "Wall", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadWallFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Wall", attributeDefs, getGeometryHighlights("control/map/map"), "loadWallFileAttributes(wall_id);");
 }
 
 /*** DOORWAY ***/
@@ -1047,9 +1089,7 @@ updateDoorway(id) {
     	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
     
-    saved_id = saveEntity(id, "Doorway", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadDoorwayFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Doorway", attributeDefs, getGeometryHighlights("control/map/map"), "loadDoorwayFileAttributes(doorway_id);");
 }
 
 /*** LICHEN ***/
@@ -1111,9 +1151,7 @@ updateLichen(id) {
     	AttributeDef("", "gps", "lichen/lichenDetail/GPSLong", "lichen/lichenDetail/GPSLat")
     	};
     
-    saved_id = saveEntity(id, "Lichen", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadLichenFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Lichen", attributeDefs, getGeometryHighlights("control/map/map"), "loadLichenFileAttributes(lichen_id);");
 }
 
 takeLichenPoint(){
@@ -1168,7 +1206,7 @@ updateSurfaceCollection(id) {
     	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
     	};
     
-    return saveEntity(id, "SurfaceCollection", attributeDefs, getGeometryHighlights("control/map/map")); 
+    return saveEntity(id, "SurfaceCollection", attributeDefs, getGeometryHighlights("control/map/map"), "loadSurfaceCollection(surface_collection_id);");
 }
 
 /*** LOT ***/
@@ -1196,7 +1234,7 @@ updateLot(id) {
     	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
     	};
     
-    return saveEntity(id, "Lot", attributeDefs, null); 
+    return saveEntity(id, "Lot", attributeDefs, null, "loadLoat(lot_id);"); 
 }
 
 /*** STRUCTURE WALL ***/
@@ -1268,8 +1306,7 @@ updateStructureWall(id) {
 	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
 	    	};
 	    
-	    saved_id = saveEntity(id, "StructureWall", attributeDefs, null);
-	    loadStructureWallFileAttributes(saved_id);
+	    saved_id = saveEntity(id, "StructureWall", attributeDefs, null, "loadStructureWallFileAttributes(structure_wall_id);");
 	    
 	    // save structure wall to structure if new structure wall
 	    if (id == null) {
@@ -1445,9 +1482,7 @@ updateStructure(id){
     	AttributeDef("audio", "files", "structure/attachment/AudioList", loadedAudios)
     	};
     
-    saved_id = saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"));
-    loadStructureFileAttributes(saved_id);
-    return saved_id;
+    return saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"), "loadStructureFileAttributes(structure_id);");
 }
 
 /*** LOAD ***/
@@ -1545,6 +1580,8 @@ loadStructureFileAttributes(id){
     populateAudioList("structure/attachment/AudioList",structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
+    setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
+    setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
 }
 
 loadWall() {

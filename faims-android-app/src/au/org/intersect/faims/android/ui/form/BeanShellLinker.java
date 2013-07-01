@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
@@ -80,6 +81,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -1169,6 +1171,14 @@ public class BeanShellLinker {
 		});
 		builder.create().show();
 
+	}
+	
+	public Dialog showBusy(final String title, final String message) {
+
+		BusyDialog d = new BusyDialog(this.activity, title, message, null);
+		d.show();
+		
+		return d;
 	}
 
 	public void setFieldValue(String ref, Object valueObj) {
@@ -3618,7 +3628,7 @@ public class BeanShellLinker {
 		}
 	}
 
-	public String attachFile(String filePath, boolean sync, String dir) {
+	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
 		try {
 			filePath = filePath
 					.contains(
@@ -3653,7 +3663,16 @@ public class BeanShellLinker {
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
 			activity.copyFile(filePath, activity.getProjectDir() + "/"
-					+ attachFile);
+					+ attachFile, new ShowProjectActivity.AttachFileListener() {
+
+						@Override
+						public void handleComplete() {
+							if (callback != null) {
+								execute(callback);
+							}
+						}
+				
+			});
 
 			return attachFile;
 		} catch (Exception e) {
@@ -3974,6 +3993,16 @@ public class BeanShellLinker {
 			FLog.e("error refreshing map " + ref, e);
 			showWarning("Logic Error", "Error refreshing map " + ref);
 		}
+	}
+	
+	public boolean isAttachingFiles() {
+		try {
+			return activity.getCopyFileCount() > 0;
+		} catch (Exception e) {
+			FLog.e("error checking for attached files ", e);
+			showWarning("Logic Error", "Error checking for attached files ");
+		}
+		return false;
 	}
 	
 }
