@@ -1266,7 +1266,7 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					for (CustomImageView customImageView : horizontalScrollView
 							.getImageViews()) {
-						if (customImageView.getPicture().getId().equals(value)) {
+						if (customImageView.getPicture().getUrl().equals(value)) {
 							customImageView.setBackgroundColor(Color.BLUE);
 							horizontalScrollView
 									.setSelectedImageView(customImageView);
@@ -1527,11 +1527,11 @@ public class BeanShellLinker {
 				return DateUtil.getTime(time);
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				if (horizontalScrollView.getSelectedImageView() != null) {
+				if (!horizontalScrollView.isMulti()) {
 					return horizontalScrollView.getSelectedImageView()
-							.getPicture().getId();
-				} else if (horizontalScrollView.getSelectedImageViews() != null) {
-					if (!horizontalScrollView.getSelectedImageViews().isEmpty()) {
+							.getPicture().getUrl();
+				} else {
+					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
 						for (CustomImageView imageView : horizontalScrollView
 								.getSelectedImageViews()) {
@@ -1540,8 +1540,6 @@ public class BeanShellLinker {
 						}
 						return selectedPictures;
 					}
-					return "";
-				} else {
 					return "";
 				}
 			} else if (obj instanceof CustomListView) {

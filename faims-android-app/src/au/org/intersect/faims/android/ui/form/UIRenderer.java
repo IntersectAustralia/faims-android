@@ -370,53 +370,53 @@ public class UIRenderer implements IRestoreActionListener{
 		this.currentTabGroup = currentTabGroup;
 	}
 
-	private Object getFieldValue(String ref) {
-		try{
+	public Object getFieldValue(String ref) {
+
+		try {
 			Object obj = getViewByRef(ref);
-			
-			if (obj instanceof TextView){
+
+			if (obj instanceof TextView) {
 				TextView tv = (TextView) obj;
 				return tv.getText().toString();
-			}
-			else if (obj instanceof Spinner){
+			} else if (obj instanceof Spinner) {
 				Spinner spinner = (Spinner) obj;
 				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-				if (pair == null) return "";
+				if (pair == null)
+					return "";
 				return pair.getValue();
-			}
-			else if (obj instanceof LinearLayout){
+			} else if (obj instanceof LinearLayout) {
 				LinearLayout ll = (LinearLayout) obj;
-				
+
 				View child0 = ll.getChildAt(0);
-				
-				if( child0 instanceof CheckBox){
+
+				if (child0 instanceof CheckBox) {
 					List<NameValuePair> valueList = new ArrayList<NameValuePair>();
-					
-					for(int i = 0; i < ll.getChildCount(); ++i){
+
+					for (int i = 0; i < ll.getChildCount(); ++i) {
 						View view = ll.getChildAt(i);
-						
-						if (view instanceof CustomCheckBox){
+
+						if (view instanceof CustomCheckBox) {
 							CustomCheckBox cb = (CustomCheckBox) view;
 							if (cb.isChecked()) {
-								valueList.add(new NameValuePair(cb.getValue(), "true"));
+								valueList.add(new NameValuePair(cb.getValue(),
+										"true"));
 							}
 						}
 					}
 					return valueList;
-				}
-				else if (child0 instanceof HorizontalScrollView) {
+				} else if (child0 instanceof HorizontalScrollView) {
 					
 					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
 					View child1 = horizontalScrollView.getChildAt(0);
 					if(child1 instanceof RadioGroup){
 						RadioGroup rg = (RadioGroup) child1;
 						String value = "";
-						for(int i = 0; i < rg.getChildCount(); ++i){
+						for (int i = 0; i < rg.getChildCount(); ++i) {
 							View view = rg.getChildAt(i);
-							
-							if (view instanceof CustomRadioButton){
+	
+							if (view instanceof CustomRadioButton) {
 								CustomRadioButton rb = (CustomRadioButton) view;
-								if (rb.isChecked()){
+								if (rb.isChecked()) {
 									value = rb.getValue();
 									break;
 								}
@@ -424,47 +424,53 @@ public class UIRenderer implements IRestoreActionListener{
 						}
 						return value;
 					}
+				} else {
+					FLog.w("cannot find view " + ref);
 					return null;
 				}
-				else{
-					return null;
-				}
-			}
-			else if (obj instanceof DatePicker) {
+			} else if (obj instanceof DatePicker) {
 				DatePicker date = (DatePicker) obj;
 				return DateUtil.getDate(date);
-			} 
-			else if (obj instanceof TimePicker) {
+			} else if (obj instanceof TimePicker) {
 				TimePicker time = (TimePicker) obj;
 				return DateUtil.getTime(time);
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
+			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				if(horizontalScrollView.getSelectedImageView() != null){
-					return horizontalScrollView.getSelectedImageView().getPicture().getId();
-				} else if(horizontalScrollView.getSelectedImageViews() != null){
-					if(!horizontalScrollView.getSelectedImageViews().isEmpty()){
+				if (!horizontalScrollView.isMulti()) {
+					return horizontalScrollView.getSelectedImageView()
+							.getPicture().getUrl();
+				} else {
+					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
-						for(CustomImageView imageView : horizontalScrollView.getSelectedImageViews()){
-							selectedPictures.add(imageView.getPicture().getUrl());
+						for (CustomImageView imageView : horizontalScrollView
+								.getSelectedImageViews()) {
+							selectedPictures.add(imageView.getPicture()
+									.getUrl());
 						}
 						return selectedPictures;
 					}
 					return "";
-				}else{
+				}
+			} else if (obj instanceof CustomListView) {
+				CustomListView listView = (CustomListView) obj;
+				if (listView.getSelectedItems() != null) {
+					List<String> audios = new ArrayList<String>();
+					for (Object item : listView.getSelectedItems()) {
+						NameValuePair pair = (NameValuePair) item;
+						audios.add(pair.getValue());
+					}
+					return audios;
+				} else {
 					return "";
 				}
-			}
-			else {
-				// TODO show warning
+			} else {
+				FLog.w("cannot find view " + ref);
 				return null;
 			}
+		} catch (Exception e) {
+			FLog.e("error getting field value " + ref, e);
 		}
-		catch(Exception e){
-			FLog.e("error getting field value",e);
-			// TODO show warning
-			return null;
-		}
+		return null;
 	}
 
 	private Object getFieldCertainty(String ref){
@@ -665,7 +671,7 @@ public class UIRenderer implements IRestoreActionListener{
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					if(horizontalScrollView.getImageViews() != null){
 						for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-							if(customImageView.getPicture().getId().equals(value)){
+							if(customImageView.getPicture().getUrl().equals(value)){
 								customImageView.setBackgroundColor(Color.BLUE);
 								horizontalScrollView.setSelectedImageView(customImageView);
 								break;

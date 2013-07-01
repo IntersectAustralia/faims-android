@@ -176,7 +176,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 convertListToPairs(list) {
 	ArrayList pairs = new ArrayList();
 	for (String s : list) {
-		pairs.add(new NameValuePair(s, s));
+		pairs.add(new NameValuePair(s, "true"));
 	}
 	return pairs;
 }
@@ -185,6 +185,12 @@ saveEntitiesToRel(type, entity1, entity2) {
 	rel_id = saveRel(null, type, null, null);
 	addReln(entity1, rel_id, null);
 	addReln(entity2, rel_id, null);
+}
+
+selectGallery(ref, list) {
+	for (String s : list) {
+		setFieldValue(ref, s);
+	}
 }
 
 /*** USER ***/
@@ -344,8 +350,8 @@ newDoorway(){
 	doorway_id = null;
 	
     newTabGroup("doorway");
-    doorwaypictures = new ArrayList();
-    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
+    doorwayPictures = new ArrayList();
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
     populateList("doorway/doorDetail/DoorMasonry", makeVocab("DoorMasonry"));
     populateList("doorway/doorDetail/DoorHeightPreservation", makeVocab("DoorHeightPreservation"));
     populateList("doorway/doorDetail/DoorPosition", makeVocab("DoorPosition"));
@@ -385,8 +391,8 @@ newLichen(){
 	lichen_id = null;
 	
     newTabGroup("lichen");
-    lichenpictures = new ArrayList();
-    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
+    lichenPictures = new ArrayList();
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
     populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
     populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
     populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
@@ -414,8 +420,8 @@ newFeature(){
 	feature_id = null;
 	
     newTabGroup("feature");
-    featurepictures = new ArrayList();
-    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+    featurePictures = new ArrayList();
+    selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
     setFieldValue("feature/featureDetail/Timestamp", getCurrentTime());
     setFieldValue("feature/featureDetail/Author", username);
     setFieldValue("feature/featureDetail/Device", device);
@@ -425,8 +431,8 @@ newSpecialFind(){
 	special_find_id = null;
 	
     newTabGroup("specialFind");
-    specialFindpictures = new ArrayList();
-    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
+    specialFindPictures = new ArrayList();
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
     populateList("specialFind/findDetail/Type", makeVocab("Type"));
     setFieldValue("specialFind/findDetail/Timestamp", getCurrentTime());
     setFieldValue("specialFind/findDetail/Author", username);
@@ -463,8 +469,8 @@ newCanal(){
 	canal_id = null;
 
     newTabGroup("canal");
-    canalpictures = new ArrayList();
-    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+    canalPictures = new ArrayList();
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
     setFieldValue("canal/canalDetail/Timestamp", getCurrentTime());
     setFieldValue("canal/canalDetail/Author", username);
     setFieldValue("canal/canalDetail/Device", device);
@@ -1342,6 +1348,7 @@ setFilename() {
 
 	structureFiles.add(getLastSelectedFilepath());
 	populateCheckBoxGroup("structure/final/filelist", structureFiles);
+	setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
 }
 
 attachSketchFile() {
@@ -1355,6 +1362,7 @@ setSketchFilename() {
 
     structureSketches.add(getLastSelectedFilepath());
 	populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+	setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
 }
 
 takePicture() {
@@ -1577,9 +1585,12 @@ loadStructureFileAttributes(id){
 	
     populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
     populateVideoGallery("structure/final/VideoGallery", structureVideos);
-    populateAudioList("structure/attachment/AudioList",structureAudios);
+    populateAudioList("structure/attachment/AudioList", structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
+    
+    selectGallery("structure/final/PhotoGallery", structurePictures);
+    selectGallery("structure/final/VideoGallery", structureVideos);
     setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
     setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
 }
@@ -1610,6 +1621,7 @@ loadWallFileAttributes(id){
 		}
 	}
     populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
+    selectGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
 }
 
 loadDoorway() {
@@ -1633,7 +1645,7 @@ loadDoorway() {
 }
 
 loadDoorwayFileAttributes(id){
-	doorwaypictures = new ArrayList();
+	doorwayPictures = new ArrayList();
 	archEntity = fetchArchEnt(id);
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
@@ -1645,7 +1657,8 @@ loadDoorwayFileAttributes(id){
 			}
 		}
 	}
-    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwaypictures);
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
+    selectGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
 }
 
 loadFeature() {
@@ -1661,7 +1674,7 @@ loadFeature() {
 }
 
 loadFeatureFileAttributes(id){
-	featurepictures = new ArrayList();
+	featurePictures = new ArrayList();
 	archEntity = fetchArchEnt(id);
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
@@ -1673,7 +1686,8 @@ loadFeatureFileAttributes(id){
 			}
 		}
 	}
-    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurepictures);
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurePictures);
+    selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
 }
 
 loadSpecialFind() {
@@ -1689,7 +1703,7 @@ loadSpecialFind() {
 }
 
 loadSpecialFindFileAttributes(id){
-	specialFindpictures = new ArrayList();
+	specialFindPictures = new ArrayList();
 	archEntity = fetchArchEnt(id);
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
@@ -1701,7 +1715,8 @@ loadSpecialFindFileAttributes(id){
 			}
 		}
 	}
-    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindpictures);
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
+    selectGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
 }
 
 loadLichen() {
@@ -1725,7 +1740,7 @@ loadLichen() {
 }
 
 loadLichenFileAttributes(id){
-	lichenpictures = new ArrayList();
+	lichenPictures = new ArrayList();
 	archEntity = fetchArchEnt(id);
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
@@ -1737,7 +1752,8 @@ loadLichenFileAttributes(id){
 			}
 		}
 	}
-    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenpictures);
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
+    selectGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
 }
 
 loadSurfaceCollection() {
@@ -1775,7 +1791,7 @@ loadCanal() {
 }
 
 loadCanalFileAttributes(id){
-	canalpictures = new ArrayList();
+	canalPictures = new ArrayList();
 	archEntity = fetchArchEnt(id);
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
@@ -1787,7 +1803,8 @@ loadCanalFileAttributes(id){
 			}
 		}
 	}
-    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalpictures);
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
+    selectGallery("canal/canalDetail/PhotoGallery", canalPictures);
 }
 
 loadStructureWall() {
@@ -1816,6 +1833,7 @@ loadStructureWallFileAttributes(id){
 		}
 	}
     populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
+    selectGallery("wall/structureWall/PhotoGallery", structureWallPictures);
 }
 
 loadCorner() {
@@ -1844,6 +1862,7 @@ loadCornerFileAttributes(id){
 		}
 	}
     populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
+    selectGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
 }
 
 loadNiche() {
@@ -1872,6 +1891,7 @@ loadNicheFileAttributes(id){
 		}
 	}
     populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
+    selectGallery("niche/nicheDetail/PhotoGallery", nichePictures);
 }
 
 loadWindow() {
@@ -1900,6 +1920,7 @@ loadWindowFileAttributes(id){
 		}
 	}
     populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
+    selectGallery("window/windowDetail/PhotoGallery", windowPictures);
 }
 
 onEvent("control/data/structureLoad", "click", "loadStructure()");
