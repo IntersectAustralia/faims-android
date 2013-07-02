@@ -71,7 +71,7 @@ Dialog d = null;
 
 showBusyDialog() {
 	if (d == null) {
-		d = showBusy("Message", "Please wait while record is being saved.");
+		d = showBusy("Message", "Please wait while attachments are copied.");
 	}
 }
 
@@ -87,7 +87,6 @@ OnFilesAttached() {
 }
 
 saveFiles(loadedFiles, files, type, attributes) {
-    showToast("Files are saving. Please wait.");
 	if (files == null || "".equals(files)) return;
 	if (files.size() == 1 && "None".equals(files.get(0))) return;
 
@@ -135,6 +134,7 @@ checkFilesAttached() {
 }
 
 saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
+	showToast("Saving record. Please wait.");
 	
 	showBusyDialog();
 	
