@@ -132,10 +132,10 @@ checkFilesAttached() {
 
 saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 	
+	showBusyDialog();
+	
 	entitySaved = false;
 	entityCallback = callback;
-	
-	showBusyDialog();
 	
     List attributes = createAttributeList();
     
@@ -575,8 +575,16 @@ OnCornerPictureTaken() {
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
-onEvent("corner/cornerDetail/Update", "click", "corner_id = updateCorner(corner_id)");
+onEvent("corner/cornerDetail/Update", "click", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
+
+cornerSaving = false; 
+saveCorner(id) {
+	if (cornerSaving) return;
+   	cornerSaving = true;
+	corner_id = updateCorner(id);
+    cornerSaving = false;
+}
 
 updateCorner(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -585,7 +593,7 @@ updateCorner(id) {
   		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
-   	
+   		
 	    cornerPictures = new ArrayList();
 	
 		ArrayList loadedPictures = new ArrayList();
@@ -646,7 +654,7 @@ OnNichePictureTaken() {
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
-onEvent("niche/nicheDetail/Update", "click", "niche_id = updateNiche(niche_id)");
+onEvent("niche/nicheDetail/Update", "click", "saveCorner(niche_id)");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
@@ -668,9 +676,17 @@ associateWithNiche() {
 	saveEntitiesToRel(type, niche_id, id);
 }
 
+nicheSaving = false;
+saveNiche(id) {
+	if (nicheSaving) return;
+	nicheSaving = true;
+	niche_id = updateNiche(id);
+	nicheSaving = false;
+}
+
 updateNiche(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     nichePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -721,13 +737,21 @@ OncanalPictureTaken() {
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
-onEvent("canal/canalDetail/Update", "click", "canal_id = updateCanal(canal_id)");
+onEvent("canal/canalDetail/Update", "click", "saveCanal(canal_id)");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 // TODO associate with ?
 
+canalSaving = false;
+saveCanal(id) {
+	if (canalSaving) return;
+	canalSaving = true;
+	canal_id = updateCanal(id);
+	canalSaving = false;
+}
+
 updateCanal(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     canalPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -772,7 +796,7 @@ OnWindowPictureTaken() {
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
-onEvent("window/windowDetail/Update", "click", "window_id = updateWindow(window_id)");
+onEvent("window/windowDetail/Update", "click", "saveWindow(window_id)");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
 onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
@@ -789,9 +813,17 @@ associateWithWindow() {
 	saveEntitiesToRel("WallWindow", window_id, id);
 }
 
+windowSaving = false;
+saveWindow(id) {
+	if (windowSaving) return;
+	windowSaving = true;
+	window_id = updateWindow(id);
+	windowSaving = false;
+}
+
 updateWindow(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     windowPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -839,13 +871,21 @@ OnspecialFindPictureTaken() {
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
-onEvent("specialFind/findDetail/Update", "click", "special_find_id = updateSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Update", "click", "saveSpecialFind(special_find_id)");
 onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
 // TODO associate with ?
 
+specialFindSaving = false;
+saveSpecialFind(id) {
+	if (specialFindSaving) return;
+	specialFindSaving = true;
+	special_find_id = updateSpecialFind(id);
+	specialFindSaving = false;
+}
+
 updateSpecialFind(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     specialFindPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -890,13 +930,21 @@ OnFeaturePictureTaken() {
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
-onEvent("feature/featureDetail/Update", "click", "feature_id = updateFeature(feature_id)");
+onEvent("feature/featureDetail/Update", "click", "saveFeature(feature_id)");
 onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
 // TODO associate with ?
 
+featureSaving = false;
+saveFeature(id) {
+	if (featureSaving) return;
+	featureSaving = true;
+	feature_id = updateFeature(id);
+	featureSaving = false;
+}
+
 updateFeature(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     featurePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -940,13 +988,21 @@ OnFreewallPictureTaken() {
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
-onEvent("freeWall/freeWallDetail/Update", "click", "wall_id = updateFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Update", "click", "saveFreeWall(wall_id)");
 onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
 // TODO associate with ?
 
+freeWallSaving = false;
+saveFreeWall(id) {
+	if (freeWallSaving) return;
+	freeWallSaving = true;
+	wall_id = updateFreeWall(id);
+	freeWallSaving = false;
+}
+
 updateFreeWall(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1017,13 +1073,21 @@ takeDoorywayPoint(){
 onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
-onEvent("doorway/doorDetail/Update", "click", "doorway_id = updateDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Update", "click", "saveDoorway(doorway_id)");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
 // TODO associate with ?
 
+doorwaySaving = false;
+saveDoorway(id) {
+	if (doorwaySaving) return;
+	doorwaySaving = true;
+	doorway_id = updateDoorway(id);
+	doorwaySaving = false;
+}
+
 updateDoorway(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     doorwayPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1077,13 +1141,21 @@ OnLichenPictureTaken() {
 
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
 
-onEvent("lichen/lichenDetail/Update", "click", "lichen_id = updateLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Update", "click", "saveLichen(lichen_id)");
 onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
 // TODO associate with ?
 
+lichenSaving = false;
+saveLichen(id) {
+	if (lichenSaving) return;
+	lichenSaving = true;
+	lichen_id = updateLichen(id);
+	lichenSaving = false;
+}
+
 updateLichen(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
     lichenPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1141,14 +1213,22 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 
 String surface_collection_id = null;
 
-onEvent("surfaceCollection/material/Update", "click", "surface_collection_id = updateSurfaceCollection(surface_collection_id)");
-onEvent("surfaceCollection/description/Update", "click", "surface_collection_id = updateSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Update", "click", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/description/Update", "click", "saveSurfaceCollection(surface_collection_id)");
 onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
 // TODO associate with ?
 
+surfaceCollectionSaving = false;
+saveSurfaceCollection(id) {
+	if (surfaceCollectionSaving) return;
+	surfaceCollectionSaving = true;
+	surface_collection_id = updateSurfaceCollection(id);
+	surfaceCollectionSaving = false;
+}
+
 updateSurfaceCollection(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
     	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp", false),
@@ -1170,13 +1250,21 @@ updateSurfaceCollection(id) {
 
 String lot_id = null;
 
-onEvent("lot/lotDetail/Update", "click", "lot_id = updateLot(lot_id)");
+onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 // TODO associate with ?
 
+lotSaving = false;
+saveLot(id) {
+	if (lotSaving) return;
+	lotSaving = true;
+	lot_id = updateLot(id);
+	lotSaving = false;
+}
+
 updateLot(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+	
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID", false),
     	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp", false),
@@ -1205,8 +1293,16 @@ OnStructWallPictureTaken() {
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 
-onEvent("wall/structureWall/Update", "click", "structure_wall_id = updateStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Update", "click", "saveStructureWall(structure_wall_id)");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
+
+structureWallSaving = false;
+saveStructureWall(id) {
+	if (structureWallSaving) return;
+	structureWallSaving = true;
+	structure_wall_id = updateStructureWall(id);
+	structureWallSaving = false;
+}
 
 updateStructureWall(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -1278,6 +1374,8 @@ ArrayList structurePictures = new ArrayList();
 ArrayList structureVideos = new ArrayList();
 ArrayList structureAudios = new ArrayList();
 
+String structure_id = null;
+
 attachFile() {
     showFileBrowser("setFilename()");
 }
@@ -1347,16 +1445,22 @@ onEvent("structure/final/Photo", "click", "takePicture()");
 onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
-onEvent("structure/final/Update", "click", "structure_id = updateStructure(structure_id)");
-onEvent("structure/info/Update", "click", "structure_id = updateStructure(structure_id)");
-onEvent("structure/component/Update", "click", "structure_id = updateStructure(structure_id)");
-onEvent("structure/construction/Update", "click", "structure_id = updateStructure(structure_id)");
-onEvent("structure/finalObservations/Update", "click", "structure_id = updateStructure(structure_id)");
+onEvent("structure/final/Update", "click", "saveStructure(structure_id)");
+onEvent("structure/info/Update", "click", "saveStructure(structure_id)");
+onEvent("structure/component/Update", "click", "saveStructure(structure_id)");
+onEvent("structure/construction/Update", "click", "saveStructure(structure_id)");
+onEvent("structure/finalObservations/Update", "click", "saveStructure(structure_id)");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
 
-String structure_id = null;
+structureSaving = false;
+saveStructure(id) {
+	if (structureSaving) return;
+	structureSaving = true;
+	structure_id = updateStructure(id);
+	structureSaving = false;
+}
 
 updateStructure(id){
     if (id == null || "".equals(id)) id = null;
