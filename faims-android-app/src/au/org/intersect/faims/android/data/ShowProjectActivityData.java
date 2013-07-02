@@ -13,6 +13,8 @@ public class ShowProjectActivityData implements ActivityData {
 	private boolean fileSyncEnabled;
 
 	private String userId;
+	
+	private int copyFileCount;
 
 	public boolean isSyncEnabled() {
 		return syncEnabled;
@@ -46,6 +48,7 @@ public class ShowProjectActivityData implements ActivityData {
 		savedInstanceState.putFloat("syncMaxInterval", syncMaxInterval);
 		savedInstanceState.putFloat("syncMinInterval", syncMinInterval);
 		savedInstanceState.putFloat("syncDelay", syncDelay);
+		savedInstanceState.putInt("copyFileCount", copyFileCount);
 	}
 
 	@Override
@@ -56,6 +59,7 @@ public class ShowProjectActivityData implements ActivityData {
 		setSyncMaxInterval(savedInstancestate.getFloat("syncMaxInterval"));
 		setSyncMinInterval(savedInstancestate.getFloat("syncMinInterval"));
 		setSyncDelay(savedInstancestate.getFloat("syncDelay"));
+		setCopyFileCount(savedInstancestate.getInt("copyFileCount"));
 	}
 
 	public float getSyncMinInterval() {
@@ -80,6 +84,14 @@ public class ShowProjectActivityData implements ActivityData {
 
 	public void setSyncDelay(float syncDelay) {
 		this.syncDelay = syncDelay;
+	}
+
+	public int getCopyFileCount() {
+		return copyFileCount;
+	}
+
+	public void setCopyFileCount(int copyFileCount) {
+		this.copyFileCount = copyFileCount;
 	}
 
 }

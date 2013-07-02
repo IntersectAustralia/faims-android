@@ -16,7 +16,9 @@ public class BusyDialog extends ProgressDialog {
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				listener.handleDialogResponse(DialogResultCode.CANCEL);
+				if (listener != null) {
+					listener.handleDialogResponse(DialogResultCode.CANCEL);
+				}
 			}
 			
 		});

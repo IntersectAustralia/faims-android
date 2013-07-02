@@ -89,6 +89,7 @@
               <Form/>
               <!-- Cuadrangular,Ovoide,Circular,Otro -->
               <FormDescription/>
+              <Update/>
             </info>
             <component>
               <WallsTotalCount/>
@@ -108,6 +109,7 @@
               <AddCorner/>
               <AddDoorway/>
               <AddNiche/>
+              <Update/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
             </component>
             <construction>
@@ -125,6 +127,7 @@
                 <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
               <PrincipalFunctionDescription/>
               <Classification/>
+              <Update/>
               <!--  dropdown of 10 values
                 <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
             </construction>
@@ -149,26 +152,23 @@
               <Disturbances/>
               <!--No evidente,Pocos,Varios-->
               <OtherArchitecturalDetails/>
+              <Update/>
             </finalObservations>
             <final>
-              <Photo/>
               <PhotoGallery/>
+              <Photo/>
               <VideoGallery/>
               <Video/>
               <Audio/>
+              <AudioList/>
               <Sketch/>
               <sketchfilelist/>
               <AddAttachment/>
               <filelist/>
               <viewattached/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
             </final>
-            <attachment>
-              <AudioList/>
-            </attachment>
             <load>
               <structureWallList/>
               <structureWallLoad/>
@@ -205,8 +205,6 @@
               <AddNiche/>
               <!-- {Button: “Add Niche”}               -->
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
             </cornerDetail>
           </corner>
@@ -255,8 +253,6 @@
               <NewNiche/>
               <NewLichen/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <!-- {Button: “Add Window to this wall”, “Add Niche to this wall”, “Add Lichen to this wall”, “Save”, “Delete”,”Load”} -->
             </structureWall>
@@ -280,8 +276,6 @@
               <WindowPhotos/>
               <PhotoGallery/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <AssociateWith/>
@@ -316,8 +310,6 @@
               <NichePhotos/>
               <PhotoGallery/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <!--<AssociateWithType/>-->
@@ -348,8 +340,6 @@
               <GPSLat/>
               <TakePoint/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <!--<AssociateWithType/>-->
@@ -368,8 +358,6 @@
               <Photos/>
               <PhotoGallery/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <AssociateWith/>
@@ -406,8 +394,6 @@
               <PhotoGallery/>
               <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <AssociateWith/>
@@ -425,8 +411,6 @@
               <Photos/>
               <PhotoGallery/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <!--<AssociateWithList/>
               <AssociateWith/>-->
@@ -466,8 +450,6 @@
               <GPSLat/>
               <TakePoint/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <!--<AssociateWithType/>-->
@@ -489,8 +471,6 @@
               <Photos/>
               <PhotoGallery/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <AssociateWith/>
@@ -508,6 +488,7 @@
               <!-- dropdown of 18 values-->
               <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
               <ContextDescription/>
+              <Update/>
             </description>
             <material>
               <DiagnosticsPresent/>
@@ -524,8 +505,6 @@
               <!-- textbox-->
               <Lot/>
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <!--<AssociateWithList/>
               <AssociateWith/>-->
@@ -548,8 +527,6 @@
               <!-- dropdown of 4 values-->
               <!--Cerámica,Metal,Vidrio,Otro,-->
               <Update/>
-              <Save/>
-              <Clear/>
               <Delete/>
               <AssociateWithList/>
               <AssociateWith/>
@@ -863,6 +840,9 @@
         <input ref="FormDescription" faims_attribute_name="FormDescription" faims_attribute_type="freetext">
           <label>Form Description:</label>
         </input>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
       </group>
       <group ref="component">
         <label>Component Tab</label>
@@ -902,6 +882,9 @@
         </trigger>
         <trigger ref="AddNiche">
           <label>Add Niche to structure</label>
+        </trigger>
+        <trigger ref="Update">
+          <label>Save Record</label>
         </trigger>
       </group>
       <group ref="construction">
@@ -950,7 +933,10 @@
             <value>dummy</value>
           </item>
         </select1>
-      </group>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
+        </group>
       <group ref="finalObservations">
         <label>Final Observations</label>
         <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
@@ -998,7 +984,10 @@
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>Other Architectural Detail:</label>
         </input>
-      </group>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
+        </group>
       <group ref="final">
         <label>Attachments and Saving</label>
         <trigger ref="Photo">
@@ -1024,51 +1013,42 @@
         <trigger ref="Audio">
           <label>Record Audio</label>
         </trigger>
+		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
+            <label>Audio List:</label>
+            <item>
+                <label>None</label>
+                <value>None</value>
+            </item>
+        </select>
         <trigger ref="Sketch">
           <label>Sketch</label>
         </trigger>
-        <select ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
-          <label>Sketch File List:</label>
-          <item>
-            <label>None</label>
-            <value>None</value>
-          </item>
+        <select ref="sketchfilelist" faims_certainty="false" faims_annotation="false">
+            <label>Sketch File List:</label>
+            <item>
+                <label>None</label>
+                <value>None</value>
+            </item>
         </select>
         <trigger ref="AddAttachment">
           <label>Add Attachment</label>
         </trigger>
-        <select ref="filelist" faims_attribute_name="filename" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false">
-          <label>Attachment File List:</label>
-          <item>
-            <label>None</label>
-            <value>None</value>
-          </item>
+		<select ref="filelist" faims_certainty="false" faims_annotation="false">
+            <label>Attachments:</label>
+            <item>
+                <label>None</label>
+                <value>None</value>
+            </item>
         </select>
         <trigger ref="viewattached">
-          <label>View Attachment</label>
+          <label>View Attachments</label>
         </trigger>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
         </trigger>
-      </group>
-      <group ref="attachment" faims_scrollable="false">
-        <label>Audio Attachment</label>
-        <select1 ref="AudioList" appearance="compact" faims_certainty="false">
-          <label>Audio List:</label>
-          <item>
-            <label> </label>
-            <value> </value>
-          </item>
-        </select1>
       </group>
       <group ref="load" faims_scrollable="true">
         <label>Load Structure Items</label>
@@ -1169,13 +1149,7 @@
         </trigger>
         <!-- {Button: “Add Niche”}               -->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1284,14 +1258,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-          <!-- {button}-->
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1379,13 +1346,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1484,13 +1445,7 @@
           </item>
         </select>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1583,13 +1538,7 @@
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1645,13 +1594,7 @@
           </item>
         </select>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1740,13 +1683,7 @@
         </select>
         <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1801,13 +1738,7 @@
           </item>
         </select>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1864,13 +1795,7 @@
           </item>
         </select>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -1916,7 +1841,10 @@
         <input ref="ContextDescription" faims_attribute_name="ContextDescription" faims_attribute_type="freetext">
           <label>Context Description:</label>
         </input>
-      </group>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
+        </group>
       <group ref="material">
         <label>Material Description</label>
         <select1 appearance="full" ref="DiagnosticsPresent" faims_attribute_name="DiagnosticsPresent" faims_attribute_type="vocab">
@@ -1953,13 +1881,7 @@
           <label>Create Lot</label>
         </trigger>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -2016,13 +1938,7 @@
         </select1>
         <!--Cerámica,Metal,Vidrio,Otro,-->
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>
@@ -2088,13 +2004,7 @@
           </item>
         </select>
         <trigger ref="Update">
-          <label>Update Existing Record</label>
-        </trigger>
-        <trigger ref="Save">
           <label>Save Record</label>
-        </trigger>
-        <trigger ref="Clear">
-          <label>Clear Record</label>
         </trigger>
         <trigger ref="Delete">
           <label>Delete record</label>

@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
@@ -80,6 +81,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -167,7 +169,6 @@ public class BeanShellLinker {
 	private String audioCallBack;
 
 	private MediaPlayer mediaPlayer;
-	private long mLastClickTime = 0;
 
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
@@ -393,10 +394,7 @@ public class BeanShellLinker {
 
 								@Override
 								public void onClick(View v) {
-									if(System.currentTimeMillis() - mLastClickTime > 1000){
-										execute(code);
-										mLastClickTime = System.currentTimeMillis();
-									}
+									execute(code);
 								}
 							});
 						}
@@ -1170,6 +1168,14 @@ public class BeanShellLinker {
 		builder.create().show();
 
 	}
+	
+	public Dialog showBusy(final String title, final String message) {
+
+		BusyDialog d = new BusyDialog(this.activity, title, message, null);
+		d.show();
+		
+		return d;
+	}
 
 	public void setFieldValue(String ref, Object valueObj) {
 		try {
@@ -1256,7 +1262,7 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					for (CustomImageView customImageView : horizontalScrollView
 							.getImageViews()) {
-						if (customImageView.getPicture().getId().equals(value)) {
+						if (customImageView.getPicture().getUrl().equals(value)) {
 							customImageView.setBackgroundColor(Color.BLUE);
 							horizontalScrollView
 									.setSelectedImageView(customImageView);
@@ -1517,11 +1523,11 @@ public class BeanShellLinker {
 				return DateUtil.getTime(time);
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				if (horizontalScrollView.getSelectedImageView() != null) {
+				if (!horizontalScrollView.isMulti()) {
 					return horizontalScrollView.getSelectedImageView()
-							.getPicture().getId();
-				} else if (horizontalScrollView.getSelectedImageViews() != null) {
-					if (!horizontalScrollView.getSelectedImageViews().isEmpty()) {
+							.getPicture().getUrl();
+				} else {
+					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
 						for (CustomImageView imageView : horizontalScrollView
 								.getSelectedImageViews()) {
@@ -1530,8 +1536,6 @@ public class BeanShellLinker {
 						}
 						return selectedPictures;
 					}
-					return "";
-				} else {
 					return "";
 				}
 			} else if (obj instanceof CustomListView) {
@@ -3618,7 +3622,7 @@ public class BeanShellLinker {
 		}
 	}
 
-	public String attachFile(String filePath, boolean sync, String dir) {
+	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
 		try {
 			filePath = filePath
 					.contains(
@@ -3653,7 +3657,16 @@ public class BeanShellLinker {
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
 			activity.copyFile(filePath, activity.getProjectDir() + "/"
-					+ attachFile);
+					+ attachFile, new ShowProjectActivity.AttachFileListener() {
+
+						@Override
+						public void handleComplete() {
+							if (callback != null) {
+								execute(callback);
+							}
+						}
+				
+			});
 
 			return attachFile;
 		} catch (Exception e) {
@@ -3974,6 +3987,16 @@ public class BeanShellLinker {
 			FLog.e("error refreshing map " + ref, e);
 			showWarning("Logic Error", "Error refreshing map " + ref);
 		}
+	}
+	
+	public boolean isAttachingFiles() {
+		try {
+			return activity.getCopyFileCount() > 0;
+		} catch (Exception e) {
+			FLog.e("error checking for attached files ", e);
+			showWarning("Logic Error", "Error checking for attached files ");
+		}
+		return false;
 	}
 	
 }
