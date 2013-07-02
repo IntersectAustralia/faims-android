@@ -24,9 +24,14 @@ initMap();
 /*** MISC ***/
 
 AttributeDef(String name, String type, String ref) {
+	return AttributeDef(name, type, ref, true);
+}
+
+AttributeDef(String name, String type, String ref, boolean saveCertainty) {
 	this.name = name;
 	this.type = type;
 	this.ref = ref;
+	this.saveCertainty = saveCertainty;
 	return this;
 }
 	
@@ -138,11 +143,11 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     	
     	// name, text, vocab, measure, certainty
     	if ("freetext".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, getFieldCertainty(def.ref)));
+    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, def.saveCertainty? getFieldCertainty(def.ref) : null));
     	} else if ("measure".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), getFieldCertainty(def.ref)));
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), def.saveCertainty? getFieldCertainty(def.ref) : null));
     	} else if ("vocab".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, getFieldCertainty(def.ref)));
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
     	} else if ("files".equals(def.type)) {
     		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
     	} else if ("attachments".equals(def.type)) {
@@ -571,13 +576,7 @@ OnCornerPictureTaken() {
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
 onEvent("corner/cornerDetail/Update", "click", "corner_id = updateCorner(corner_id)");
-onEvent("corner/cornerDetail/Save", "click", "saveCorner()");
-onEvent("corner/cornerDetail/Clear", "click", "newCorner()");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
-
-saveCorner() {
-	corner_id = updateCorner(null);
-}
 
 updateCorner(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -602,13 +601,13 @@ updateCorner(id) {
 		}
 	    
 	   	Object[] attributeDefs = new Object[] {
-	    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID"),
-	    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp"),
-	    	AttributeDef("Author", "freetext" , "corner/cornerDetail/Author"),
-	    	AttributeDef("Device", "freetext", "corner/cornerDetail/Device"),
+	    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID", false),
+	    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp", false),
+	    	AttributeDef("Author", "freetext" , "corner/cornerDetail/Author", false),
+	    	AttributeDef("Device", "freetext", "corner/cornerDetail/Device", false),
 	    	AttributeDef("CornerExteriorForm", "vocab", "corner/cornerDetail/CornerExteriorForm"),
 	    	AttributeDef("CornerInteriorForm", "vocab", "corner/cornerDetail/CornerInteriorForm"),
-	    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount"),
+	    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount", false),
 	    	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
 	    	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
 	    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures),
@@ -648,8 +647,6 @@ OnNichePictureTaken() {
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
 onEvent("niche/nicheDetail/Update", "click", "niche_id = updateNiche(niche_id)");
-onEvent("niche/nicheDetail/Save", "click", "saveNiche()");
-onEvent("niche/nicheDetail/Clear", "click", "newNiche()");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
@@ -671,10 +668,6 @@ associateWithNiche() {
 	saveEntitiesToRel(type, niche_id, id);
 }
 
-saveNiche() {
-	niche_id = updateNiche(null);
-}
-
 updateNiche(id) {
 	if (id == null || "".equals(id)) id = null;
     
@@ -693,10 +686,10 @@ updateNiche(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("NicheID", "freetext", "niche/nicheDetail/NicheID"),
-    	AttributeDef("Timestamp", "freetext", "niche/nicheDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "niche/nicheDetail/Author"),
-    	AttributeDef("Device", "freetext", "niche/nicheDetail/Device"),
+    	AttributeDef("NicheID", "freetext", "niche/nicheDetail/NicheID", false),
+    	AttributeDef("Timestamp", "freetext", "niche/nicheDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "niche/nicheDetail/Author", false),
+    	AttributeDef("Device", "freetext", "niche/nicheDetail/Device", false),
     	AttributeDef("NichePosition", "freetext", "niche/nicheDetail/NichePosition"),
     	AttributeDef("NicheForm", "vocab", "niche/nicheDetail/NicheForm"),
     	AttributeDef("NicheHeight", "measure", "niche/nicheDetail/NicheHeight"),
@@ -729,14 +722,8 @@ OncanalPictureTaken() {
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
 onEvent("canal/canalDetail/Update", "click", "canal_id = updateCanal(canal_id)");
-onEvent("canal/canalDetail/Save", "click", "saveCanal()");
-onEvent("canal/canalDetail/Clear", "click", "newCanal()");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 // TODO associate with ?
-
-saveCanal() {
-	canal_id = updateCanal(null);
-}
 
 updateCanal(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -756,10 +743,10 @@ updateCanal(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("CanalID", "freetext", "canal/canalDetail/CanalID"),
-    	AttributeDef("Timestamp", "freetext", "canal/canalDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "canal/canalDetail/Author"),
-    	AttributeDef("Device", "freetext", "canal/canalDetail/Device"),
+    	AttributeDef("CanalID", "freetext", "canal/canalDetail/CanalID", false),
+    	AttributeDef("Timestamp", "freetext", "canal/canalDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "canal/canalDetail/Author", false),
+    	AttributeDef("Device", "freetext", "canal/canalDetail/Device", false),
     	AttributeDef("InternalWidth", "measure", "canal/canalDetail/InternalWidth"),
     	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
@@ -786,8 +773,6 @@ OnWindowPictureTaken() {
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
 onEvent("window/windowDetail/Update", "click", "window_id = updateWindow(window_id)");
-onEvent("window/windowDetail/Save", "click", "saveWindow()");
-onEvent("window/windowDetail/Clear", "click", "newWindow()");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
 onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
@@ -802,10 +787,6 @@ associateWithWindow() {
 		return;
 	}
 	saveEntitiesToRel("WallWindow", window_id, id);
-}
-
-saveWindow() {
-	window_id = updateWindow(null);
 }
 
 updateWindow(id) {
@@ -826,10 +807,10 @@ updateWindow(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("WindowID", "freetext", "window/windowDetail/WindowID"),
-    	AttributeDef("Timestamp", "freetext", "window/windowDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "window/windowDetail/Author"),
-    	AttributeDef("Device", "freetext", "window/windowDetail/Device"),
+    	AttributeDef("WindowID", "freetext", "window/windowDetail/WindowID", false),
+    	AttributeDef("Timestamp", "freetext", "window/windowDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "window/windowDetail/Author", false),
+    	AttributeDef("Device", "freetext", "window/windowDetail/Device", false),
     	AttributeDef("WindowPosition", "freetext", "window/windowDetail/WindowPosition"),
     	AttributeDef("WindowHeight", "measure", "window/windowDetail/WindowHeight"),
     	AttributeDef("WindowWidth", "measure", "window/windowDetail/WindowWidth"),
@@ -859,14 +840,8 @@ OnspecialFindPictureTaken() {
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
 onEvent("specialFind/findDetail/Update", "click", "special_find_id = updateSpecialFind(special_find_id)");
-onEvent("specialFind/findDetail/Save", "click", "saveSpecialFind()");
-onEvent("specialFind/findDetail/Clear", "click", "newSpecialFind()");
 onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
 // TODO associate with ?
-
-saveSpecialFind() {
-	special_find_id = updateSpecialFind(null);
-}
 
 updateSpecialFind(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -886,10 +861,10 @@ updateSpecialFind(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("SpecialFindID", "freetext", "specialFind/findDetail/SpecialFindID"),
-    	AttributeDef("Timestamp", "freetext", "specialFind/findDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "specialFind/findDetail/Author"),
-    	AttributeDef("Device", "freetext", "specialFind/findDetail/Device"),
+    	AttributeDef("SpecialFindID", "freetext", "specialFind/findDetail/SpecialFindID", false),
+    	AttributeDef("Timestamp", "freetext", "specialFind/findDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "specialFind/findDetail/Author", false),
+    	AttributeDef("Device", "freetext", "specialFind/findDetail/Device", false),
     	AttributeDef("Description", "freetext", "specialFind/findDetail/Description"),
     	AttributeDef("Type", "vocab", "specialFind/findDetail/Type"),
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
@@ -916,14 +891,8 @@ OnFeaturePictureTaken() {
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
 onEvent("feature/featureDetail/Update", "click", "feature_id = updateFeature(feature_id)");
-onEvent("feature/featureDetail/Save", "click", "saveFeature()");
-onEvent("feature/featureDetail/Clear", "click", "newFeature()");
 onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
 // TODO associate with ?
-
-saveFeature() {
-	feature_id = updateFeature(null);
-}
 
 updateFeature(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -943,10 +912,10 @@ updateFeature(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("FeatureID", "freetext", "feature/featureDetail/FeatureID"),
-    	AttributeDef("Timestamp", "freetext", "feature/featureDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "feature/featureDetail/Author"),
-    	AttributeDef("Device", "freetext", "feature/featureDetail/Device"),
+    	AttributeDef("FeatureID", "freetext", "feature/featureDetail/FeatureID", false),
+    	AttributeDef("Timestamp", "freetext", "feature/featureDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "feature/featureDetail/Author", false),
+    	AttributeDef("Device", "freetext", "feature/featureDetail/Device", false),
     	AttributeDef("Description", "freetext", "feature/featureDetail/Description"),
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
@@ -972,14 +941,8 @@ OnFreewallPictureTaken() {
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
 onEvent("freeWall/freeWallDetail/Update", "click", "wall_id = updateFreeWall(wall_id)");
-onEvent("freeWall/freeWallDetail/Save", "click", "saveFreeWall()");
-onEvent("freeWall/freeWallDetail/Clear", "click", "newFreeWall()");
 onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
 // TODO associate with ?
-
-saveFreeWall() {
-	wall_id = updateFreeWall(null);
-}
 
 updateFreeWall(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -999,10 +962,10 @@ updateFreeWall(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("WallID", "freetext", "freeWall/freeWallDetail/WallID"),
-    	AttributeDef("Timestamp", "freetext", "freeWall/freeWallDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "freeWall/freeWallDetail/Author"),
-    	AttributeDef("Device", "freetext", "freeWall/freeWallDetail/Device"),
+    	AttributeDef("WallID", "freetext", "freeWall/freeWallDetail/WallID", false),
+    	AttributeDef("Timestamp", "freetext", "freeWall/freeWallDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "freeWall/freeWallDetail/Author", false),
+    	AttributeDef("Device", "freetext", "freeWall/freeWallDetail/Device", false),
     	AttributeDef("WallDescription", "freetext", "freeWall/freeWallDetail/WallDescription"),
     	AttributeDef("WallClass", "vocab", "freeWall/freeWallDetail/WallClass"),
     	AttributeDef("WallPreservation", "vocab", "freeWall/freeWallDetail/WallPreservation"),
@@ -1055,14 +1018,8 @@ onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
 onEvent("doorway/doorDetail/Update", "click", "doorway_id = updateDoorway(doorway_id)");
-onEvent("doorway/doorDetail/Save", "click", "saveDoorway()");
-onEvent("doorway/doorDetail/Clear", "click", "newDoorway()");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
 // TODO associate with ?
-
-saveDoorway() {
-	doorway_id = updateDoorway(null);
-}
 
 updateDoorway(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -1082,10 +1039,10 @@ updateDoorway(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("DoorID", "freetext", "doorway/doorDetail/DoorID"),
-    	AttributeDef("Timestamp", "freetext", "doorway/doorDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "doorway/doorDetail/Author"),
-    	AttributeDef("Device", "freetext", "doorway/doorDetail/Device"),
+    	AttributeDef("DoorID", "freetext", "doorway/doorDetail/DoorID", false),
+    	AttributeDef("Timestamp", "freetext", "doorway/doorDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "doorway/doorDetail/Author", false),
+    	AttributeDef("Device", "freetext", "doorway/doorDetail/Device", false),
     	AttributeDef("DoorOrientation", "measure", "doorway/doorDetail/DoorOrientation"),
     	AttributeDef("DoorPosition", "vocab", "doorway/doorDetail/DoorPosition"),
     	AttributeDef("DoorMasonry", "vocab", "doorway/doorDetail/DoorMasonry"),
@@ -1121,14 +1078,8 @@ OnLichenPictureTaken() {
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
 
 onEvent("lichen/lichenDetail/Update", "click", "lichen_id = updateLichen(lichen_id)");
-onEvent("lichen/lichenDetail/Save", "click", "saveLichen()");
-onEvent("lichen/lichenDetail/Clear", "click", "newLichen()");
 onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
 // TODO associate with ?
-
-saveLichen() {
-	lichen_id = updateLichen(null);
-}
 
 updateLichen(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -1148,10 +1099,10 @@ updateLichen(id) {
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("LichenID", "freetext", "lichen/lichenDetail/LichenID"),
-    	AttributeDef("Timestamp", "freetext", "lichen/lichenDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "lichen/lichenDetail/Author"),
-    	AttributeDef("Device", "freetext", "lichen/lichenDetail/Device"),
+    	AttributeDef("LichenID", "freetext", "lichen/lichenDetail/LichenID", false),
+    	AttributeDef("Timestamp", "freetext", "lichen/lichenDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "lichen/lichenDetail/Author", false),
+    	AttributeDef("Device", "freetext", "lichen/lichenDetail/Device", false),
     	AttributeDef("Size", "measure", "lichen/lichenDetail/Size"),
     	AttributeDef("Substrate", "vocab", "lichen/lichenDetail/Substrate"),
     	AttributeDef("Quality", "freetext", "lichen/lichenDetail/Quality"),
@@ -1191,23 +1142,18 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 String surface_collection_id = null;
 
 onEvent("surfaceCollection/material/Update", "click", "surface_collection_id = updateSurfaceCollection(surface_collection_id)");
-onEvent("surfaceCollection/material/Save", "click", "saveSurfaceCollection()");
-onEvent("surfaceCollection/material/Clear", "click", "newSurfaceCollection()");
+onEvent("surfaceCollection/description/Update", "click", "surface_collection_id = updateSurfaceCollection(surface_collection_id)");
 onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
 // TODO associate with ?
-
-saveSurfaceCollection() {
-	surface_collection_id = updateSurfaceCollection(null);
-}
 
 updateSurfaceCollection(id) {
 	if (id == null || "".equals(id)) id = null;
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID"),
-    	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp"),
-    	AttributeDef("Author", "freetext" , "surfaceCollection/description/Author"),
-    	AttributeDef("Device", "freetext", "surfaceCollection/description/Device"),
+    	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
+    	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "surfaceCollection/description/Author", false),
+    	AttributeDef("Device", "freetext", "surfaceCollection/description/Device", false),
     	AttributeDef("SurfaceCollectionContext", "vocab", "surfaceCollection/description/SurfaceCollectionContext"),
     	AttributeDef("ContextDescription", "freetext", "surfaceCollection/description/ContextDescription"),
     	AttributeDef("DiagnosticsPresent", "vocab", "surfaceCollection/material/DiagnosticsPresent"),
@@ -1225,23 +1171,17 @@ updateSurfaceCollection(id) {
 String lot_id = null;
 
 onEvent("lot/lotDetail/Update", "click", "lot_id = updateLot(lot_id)");
-onEvent("lot/lotDetail/Save", "click", "saveLot()");
-onEvent("lot/lotDetail/Clear", "click", "newLot()");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 // TODO associate with ?
-
-saveLot() {
-	lot_id = updateLot(null);
-}
 
 updateLot(id) {
 	if (id == null || "".equals(id)) id = null;
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID"),
-    	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp"),
-    	AttributeDef("Author", "freetext" , "lot/lotDetail/Author"),
-    	AttributeDef("Device", "freetext", "lot/lotDetail/Device"),
+    	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID", false),
+    	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "lot/lotDetail/Author", false),
+    	AttributeDef("Device", "freetext", "lot/lotDetail/Device", false),
     	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
     	};
     
@@ -1266,13 +1206,7 @@ OnStructWallPictureTaken() {
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 
 onEvent("wall/structureWall/Update", "click", "structure_wall_id = updateStructureWall(structure_wall_id)");
-onEvent("wall/structureWall/Save", "click", "saveStructureWall()");
-onEvent("wall/structureWall/Clear", "click", "newStructureWall()");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
-
-saveStructureWall() {
-	structure_wall_id = updateStructureWall(null);
-}
 
 updateStructureWall(id) {
 	if (id == null || "".equals(id)) id = null;
@@ -1297,10 +1231,10 @@ updateStructureWall(id) {
 		}
 	    
 	   	Object[] attributeDefs = new Object[] {
-	    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID"),
-	    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp"),
-	    	AttributeDef("Author", "freetext" , "wall/structureWall/Author"),
-	    	AttributeDef("Device", "freetext", "wall/structureWall/Device"),
+	    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID", false),
+	    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp", false),
+	    	AttributeDef("Author", "freetext" , "wall/structureWall/Author", false),
+	    	AttributeDef("Device", "freetext", "wall/structureWall/Device", false),
 	    	AttributeDef("MasonryType", "vocab", "wall/structureWall/MasonryType"),
 	    	AttributeDef("MasonryDescription", "freetext", "wall/structureWall/MasonryDescription"),
 	    	AttributeDef("InkaMasonry", "vocab", "wall/structureWall/InkaMasonry"),
@@ -1311,9 +1245,9 @@ updateStructureWall(id) {
 	    	AttributeDef("Gable", "vocab", "wall/structureWall/Gable"),
 	    	AttributeDef("GableHeight", "measure", "wall/structureWall/GableHeight"),
 	    	AttributeDef("GableDistance", "measure", "wall/structureWall/GableDistance"),
-	    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount"),
-	    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount"),
-	    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount"),
+	    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount", false),
+	    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount", false),
+	    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount", false),
 	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
 	    	};
 	    
@@ -1323,7 +1257,9 @@ updateStructureWall(id) {
 	    if (id == null) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
-	    
+	    wallCount = Integer.valueOf(getFieldValue("structure/component/WallsTotalCount"));
+	    wallCount += 1;
+	    setFieldValue("structure/component/WallsTotalCount", Integer.toString(wallCount));
 	    return saved_id;
    	}
 }
@@ -1412,17 +1348,15 @@ onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
 onEvent("structure/final/Update", "click", "structure_id = updateStructure(structure_id)");
-onEvent("structure/final/Save", "click", "saveStructure()");
-onEvent("structure/final/Clear", "click", "newStructure()");
+onEvent("structure/info/Update", "click", "structure_id = updateStructure(structure_id)");
+onEvent("structure/component/Update", "click", "structure_id = updateStructure(structure_id)");
+onEvent("structure/construction/Update", "click", "structure_id = updateStructure(structure_id)");
+onEvent("structure/finalObservations/Update", "click", "structure_id = updateStructure(structure_id)");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
 
 String structure_id = null;
-
-saveStructure(){
-    structure_id = updateStructure(null);
-}
 
 updateStructure(id){
     if (id == null || "".equals(id)) id = null;
@@ -1458,13 +1392,13 @@ updateStructure(id){
 	}
     
    	Object[] attributeDefs = new Object[] {
-    	AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID"),
+    	AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID", false),
     	AttributeDef("Description", "freetext", "structure/info/Description"),
-    	AttributeDef("Timestamp", "freetext", "structure/info/Timestamp"),
-    	AttributeDef("Author", "freetext" , "structure/info/Author"),
-    	AttributeDef("Device", "freetext", "structure/info/Device"),
-    	AttributeDef("Form", "vocab", "structure/info/Form"),
-    	AttributeDef("FormDescription", "freetext", "structure/info/FormDescription"),
+    	AttributeDef("Timestamp", "freetext", "structure/info/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "structure/info/Author", false),
+    	AttributeDef("Device", "freetext", "structure/info/Device", false),
+    	AttributeDef("Form", "vocab", "structure/info/Form",true),
+    	AttributeDef("FormDescription", "freetext", "structure/info/FormDescription",true),
     	AttributeDef("ConstructionPeriod", "vocab", "structure/construction/ConstructionPeriod"),
     	AttributeDef("ConstructionPeriodDescription", "freetext", "structure/construction/ConstructionPeriodDescription"),
     	AttributeDef("Modifications", "vocab", "structure/construction/Modifications"),
@@ -1473,15 +1407,15 @@ updateStructure(id){
     	AttributeDef("PrincipalFunctionDescription", "freetext", "structure/construction/PrincipalFunctionDescription"),
     	AttributeDef("Classification", "vocab", "structure/construction/Classification"),
     	AttributeDef("ConstructionQuality", "vocab", "structure/construction/ConstructionQuality"),
-    	AttributeDef("WallsTotalCount", "measure", "structure/component/WallsTotalCount"),
-    	AttributeDef("WallsGabledCount", "measure", "structure/component/WallsGabledCount"),
+    	AttributeDef("WallsTotalCount", "measure", "structure/component/WallsTotalCount", false),
+    	AttributeDef("WallsGabledCount", "measure", "structure/component/WallsGabledCount", false),
     	AttributeDef("WallsInternalPartition", "vocab", "structure/component/WallsInternalPartition"),
     	AttributeDef("PartitionDescription", "freetext", "structure/component/PartitionDescription"),
     	AttributeDef("StuccoInterior", "vocab", "structure/finalObservations/StuccoInterior"),
     	AttributeDef("StuccoExterior", "vocab", "structure/finalObservations/StuccoExterior"),
-    	AttributeDef("WindowCount", "measure", "structure/component/WindowCount"),
-    	AttributeDef("DoorwayCount", "measure", "structure/component/DoorwayCount"),
-    	AttributeDef("NicheCount", "measure", "structure/component/NicheCount"),
+    	AttributeDef("WindowCount", "measure", "structure/component/WindowCount", false),
+    	AttributeDef("DoorwayCount", "measure", "structure/component/DoorwayCount", false),
+    	AttributeDef("NicheCount", "measure", "structure/component/NicheCount", false),
     	AttributeDef("FloorRemainsDescription", "freetext", "structure/finalObservations/FloorRemainsDescription"),
     	AttributeDef("RoofForm", "vocab", "structure/finalObservations/RoofForm"),
     	AttributeDef("LongAxis", "measure", "structure/finalObservations/LongAxis"),

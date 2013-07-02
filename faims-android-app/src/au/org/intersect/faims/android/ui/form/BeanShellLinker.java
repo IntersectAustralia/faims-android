@@ -169,7 +169,6 @@ public class BeanShellLinker {
 	private String audioCallBack;
 
 	private MediaPlayer mediaPlayer;
-	private long mLastClickTime = 0;
 
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
@@ -395,10 +394,7 @@ public class BeanShellLinker {
 
 								@Override
 								public void onClick(View v) {
-									if(System.currentTimeMillis() - mLastClickTime > 1000){
-										execute(code);
-										mLastClickTime = System.currentTimeMillis();
-									}
+									execute(code);
 								}
 							});
 						}
