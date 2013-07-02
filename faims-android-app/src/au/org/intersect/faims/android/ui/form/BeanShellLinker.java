@@ -389,18 +389,6 @@ public class BeanShellLinker {
 										}
 
 									});
-						} else if (view instanceof CustomButton) {
-							view.setOnClickListener(new OnClickListener() {
-
-								@Override
-								public void onClick(View v) {
-									CustomButton button = (CustomButton) v;
-									if (button.canClick()) {
-										execute(code);
-										button.clicked();
-									}
-								}
-							});
 						} else {
 							view.setOnClickListener(new OnClickListener() {
 
@@ -412,6 +400,27 @@ public class BeanShellLinker {
 						}
 					}
 				}
+			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
+					View view = activity.getUIRenderer().getViewByRef(ref);
+					if (view == null) {
+						FLog.w("cannot find view " + ref);
+						showWarning("Logic Error", "Error cannot find view " + ref);
+						return;
+					} else {
+						if (view instanceof CustomButton) {
+							view.setOnClickListener(new OnClickListener() {
+	
+								@Override
+								public void onClick(View v) {
+									CustomButton button = (CustomButton) v;
+									if (button.canClick()) {
+										execute(code);
+										button.clicked();
+									}
+								}
+							});
+						}
+					}
 			} else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
 				if (tg == null) {

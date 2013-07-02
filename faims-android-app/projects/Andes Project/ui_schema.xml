@@ -24,12 +24,12 @@
             <map>
               <map/>
               <mapContainer>
-                  <child1>
-                      <create></create>
-                  </child1>
-                  <child2>
-                      <entityType></entityType>
-                  </child2>
+                <child1>
+                  <create/>
+                </child1>
+                <child2>
+                  <entityType/>
+                </child2>
               </mapContainer>
             </map>
             <buttonholder>
@@ -40,7 +40,6 @@
               <SpecialFind/>
               <Lichen/>
               <SurfaceCollection/>
-
               <Canal/>
             </buttonholder>
             <data>
@@ -72,7 +71,6 @@
               <connectinternal/>
               <startsync/>
               <stopsync/>
-
             </gps>
           </control>
           <structure>
@@ -134,7 +132,7 @@
                 <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
             </construction>
             <finalObservations>
-               <StuccoInterior/>
+              <StuccoInterior/>
               <!-- radiobutton?-->
               <!--Yes,No,Not observable-->
               <StuccoExterior/>
@@ -157,12 +155,10 @@
               <Update/>
             </finalObservations>
             <final>
-
-
               <PhotoGallery/>
               <Photo/>
               <VideoGallery/>
-              <Video/> 
+              <Video/>
               <Audio/>
               <AudioList/>
               <Sketch/>
@@ -170,16 +166,14 @@
               <AddAttachment/>
               <filelist/>
               <viewattached/>
-              
               <Update/>
               <Delete/>
             </final>
             <load>
-                <structureWallList/>
+              <structureWallList/>
               <structureWallLoad/>
               <cornerList/>
               <cornerLoad/>
-              
             </load>
           </structure>
           <corner>
@@ -318,7 +312,7 @@
               <Update/>
               <Delete/>
               <AssociateWithList/>
-              <AssociateWithType/>
+              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
             </nicheDetail>
@@ -348,7 +342,7 @@
               <Update/>
               <Delete/>
               <AssociateWithList/>
-              <AssociateWithType/>
+              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
             </lichenDetail>
@@ -405,13 +399,12 @@
               <AssociateWith/>
             </freeWallDetail>
           </freeWall>
-
           <canal>
             <canalDetail>
               <CanalID/>
               <Timestamp/>
               <Author/>
-              <Device></Device>
+              <Device/>
               <InternalWidth/>
               <ExternalWidth/>
               <Notes/>
@@ -419,8 +412,8 @@
               <PhotoGallery/>
               <Update/>
               <Delete/>
-              <AssociateWithList/>
-              <AssociateWith/>
+              <!--<AssociateWithList/>
+              <AssociateWith/>-->
               <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
             </canalDetail>
           </canal>
@@ -459,7 +452,7 @@
               <Update/>
               <Delete/>
               <AssociateWithList/>
-              <AssociateWithType/>
+              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
             </doorDetail>
@@ -513,11 +506,15 @@
               <Lot/>
               <Update/>
               <Delete/>
-              <AssociateWithList/>
-              <AssociateWith/>
+              <!--<AssociateWithList/>
+              <AssociateWith/>-->
               <NewLot/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
             </material>
+            <lotLoad>
+              <lotLoadList/>
+              <lotLoadButton/>
+            </lotLoad>
           </surfaceCollection>
           <lot>
             <lotDetail>
@@ -559,8 +556,6 @@
       <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
       <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetails" type="string"/>
-          
-      
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/InkaMasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/WallThickness" type="decimal"/>
@@ -570,15 +565,11 @@
       <bind nodeset="/faims/wall/structureWall/WindowCount" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/NicheCount" type="decimal"/>
       <bind nodeset="/faims/wall/structureWall/DoorwayCount" type="decimal"/>
-      
-      
       <bind nodeset="/faims/corner/cornerDetail/MasonryDescription" type="string"/>
       <bind nodeset="/faims/corner/cornerDetail/InkaMasonryDescription" type="string"/>
-	  <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
-	  <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="decimal"/>
+      <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
+      <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="decimal"/>
       <bind nodeset="/faims/corner/cornerDetail/CornerDescription" type="string"/>
-      
-      
       <bind nodeset="/faims/doorway/doorDetail/DoorOrientation" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/DoorHeight" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/DoorTopWidth" type="decimal"/>
@@ -588,44 +579,28 @@
       <bind nodeset="/faims/doorway/doorDetail/DoorDescription" type="string"/>
       <bind nodeset="/faims/doorway/doorDetail/GPSLong" type="decimal"/>
       <bind nodeset="/faims/doorway/doorDetail/GPSLat" type="decimal"/>
-      
-      
       <bind nodeset="/faims/niche/nicheDetail/NicheHeight" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheDepth" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheWidth" type="decimal"/>
       <bind nodeset="/faims/niche/nicheDetail/NicheDescription" type="string"/>
-      
-	 	
       <bind nodeset="/faims/window/windowDetail/WindowHeight" type="decimal"/>
       <bind nodeset="/faims/window/windowDetail/WindowWidth" type="decimal"/>
       <bind nodeset="/faims/window/windowDetail/WindowDescription" type="string"/>
-      
-
       <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
       <bind nodeset="/faims/lichen/lichenDetail/Size" type="decimal"/>
       <bind nodeset="/faims/lichen/lichenDetail/Comment" type="string"/>
       <bind nodeset="/faims/lichen/lichenDetail/GPSLong" type="decimal"/>
       <bind nodeset="/faims/lichen/lichenDetail/GPSLat" type="decimal"/>
-
-
       <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
-
-      
       <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
-
-
       <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
-      
-
       <bind nodeset="/faims/specialFind/findDetail/Description" type="string"/>
-
-
       <bind nodeset="/faims/surfaceCollection/description/ContextDescription" type="string"/>
       <bind nodeset="/faims/surfaceCollection/material/Comments" type="string"/>
       <bind nodeset="/faims/surfaceCollection/material/LotNumbers" type="string"/>
@@ -678,23 +653,23 @@
           <label> </label>
         </input>
         <group ref="mapContainer" faims_style="orientation">
-            <label></label>
-            <group ref="child1" faims_style="even">
-             	<label></label>
-                <trigger ref="create">
-                    <label>Create</label>
-                </trigger>
-            </group>
-            <group ref="child2" faims_style="even">
-                <label></label>
-                <select1 ref="entityType" faims_certainty="false">
-                    <label>Type</label>
-                    <item>
-			            <label>dummy</label>
-			            <value>dummy</value>
-			        </item>
-                </select1>
-            </group>
+          <label/>
+          <group ref="child1" faims_style="even">
+            <label/>
+            <trigger ref="create">
+              <label>Create</label>
+            </trigger>
+          </group>
+          <group ref="child2" faims_style="even">
+            <label/>
+            <select1 ref="entityType" faims_certainty="false">
+              <label>Type</label>
+              <item>
+                <label>dummy</label>
+                <value>dummy</value>
+              </item>
+            </select1>
+          </group>
         </group>
       </group>
       <group ref="data">
@@ -709,8 +684,7 @@
         <trigger ref="structureLoad">
           <label>Load Structure</label>
         </trigger>
-        
-         <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
+        <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
           <label>Doorways</label>
           <item>
             <label>dummy</label>
@@ -720,7 +694,7 @@
         <trigger ref="doorwayLoad">
           <label>Load Doorway</label>
         </trigger>
-         <select1 ref="nicheList" faims_certainty="false" faims_annotation="false">
+        <select1 ref="nicheList" faims_certainty="false" faims_annotation="false">
           <label>Niches</label>
           <item>
             <label>dummy</label>
@@ -1017,28 +991,27 @@
       <group ref="final">
         <label>Attachments and Saving</label>
         <trigger ref="Photo">
-            <label>Take picture</label>
+          <label>Take picture</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
-
         <trigger ref="Video">
-            <label>Take video</label>
+          <label>Take video</label>
         </trigger>
         <select ref="VideoGallery" type="image">
-            <label>Video Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Video Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Audio">
-            <label>Record Audio</label>
+          <label>Record Audio</label>
         </trigger>
 		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
             <label>Audio List:</label>
@@ -1136,7 +1109,7 @@
           <item>
             <label>dummy</label>
             <value>dummy</value>
-           </item>
+          </item>
         </select1>
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
           <label>Masonry Description:</label>
@@ -1165,11 +1138,11 @@
           <label>Corner Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="AddNiche">
           <label>Add Niche</label>
@@ -1183,7 +1156,7 @@
         </trigger>
       </group>
     </group>
-        <group ref="wall" faims_archent_type="StructureWall">
+    <group ref="wall" faims_archent_type="StructureWall">
       <label>Wall Detail</label>
       <group ref="structureWall">
         <label>Wall of a Structure</label>
@@ -1225,7 +1198,6 @@
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
           <label>Inka Masonry Description:</label>
         </input>
-
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
           <label>Wall Thickness:</label>
         </input>
@@ -1267,11 +1239,11 @@
           <label>Wall Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="NewWindow">
           <label>New Window</label>
@@ -1293,9 +1265,7 @@
         </trigger>
         <!-- {Button: “Add Window to this wall”, “Add Niche to this wall”, “Add Lichen to this wall”, “Save”, “Delete”,”Load”} -->
       </group>
-</group>
-
-
+    </group>
     <group ref="doorway" faims_archent_type="Doorway">
       <label>Doorway Detail</label>
       <group ref="doorDetail">
@@ -1358,12 +1328,12 @@
         <trigger ref="DoorPhotos">
           <label>Door Photos</label>
         </trigger>
-         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+        <select ref="PhotoGallery" type="image">
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Long:</label>
@@ -1383,26 +1353,25 @@
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
-        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-            <label>Associate With Type:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select1>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>Associate With Type:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
         <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
-
     <group ref="niche" faims_archent_type="Niche">
       <label>Niche Detail</label>
       <group ref="nicheDetail">
@@ -1469,11 +1438,11 @@
           <label>Niche Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Update">
           <label>Save Record</label>
@@ -1482,19 +1451,19 @@
           <label>Delete record</label>
         </trigger>
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
-        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-            <label>Associate With Type:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select1>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>Associate With Type:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
         <trigger ref="AssociateWith">
           <label>AssociateWith</label>
         </trigger>
@@ -1508,7 +1477,7 @@
         <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
           <label>LichenID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
@@ -1552,11 +1521,11 @@
           <label>Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>GPS Long:</label>
@@ -1576,19 +1545,19 @@
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
-        <select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
             <label>Associate With Type:</label>
             <item>
                 <label>dummy</label>
                 <value>dummy</value>
             </item>
-        </select1>
+        </select1>-->
         <trigger ref="AssociateWith">
           <label>Associate With</label>
         </trigger>
@@ -1618,11 +1587,11 @@
           <label>Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Update">
           <label>Save Record</label>
@@ -1632,11 +1601,11 @@
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
@@ -1651,7 +1620,7 @@
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Wall ID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1685,8 +1654,6 @@
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
           <label>Masonry Description:</label>
         </input>
-
-
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
           <label>Wall Height Preservation:</label>
           <item>
@@ -1695,11 +1662,9 @@
           </item>
         </select1>
         <!-- Complete,Max complete-->
-
         <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
           <label>Wall Height:</label>
         </input>
-
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
           <label>Wall Thickness:</label>
         </input>
@@ -1710,11 +1675,11 @@
           <label>Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
         <trigger ref="Update">
@@ -1725,11 +1690,11 @@
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
@@ -1744,7 +1709,7 @@
         <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext" faims_certainty="false">
           <label>CanalID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1766,11 +1731,11 @@
           <label>Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Update">
           <label>Save Record</label>
@@ -1779,7 +1744,7 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
-        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
             <label>Associate With List:</label>
             <item>
                 <label>dummy</label>
@@ -1788,7 +1753,7 @@
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
-        </trigger>
+        </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
       </group>
     </group>
@@ -1799,7 +1764,7 @@
         <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Special Find ID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1823,11 +1788,11 @@
           <label>Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Update">
           <label>Save Record</label>
@@ -1837,11 +1802,11 @@
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
@@ -1856,7 +1821,7 @@
         <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Surface Collection ID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1922,7 +1887,7 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
-        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
             <label>Associate With List:</label>
             <item>
                 <label>dummy</label>
@@ -1931,20 +1896,31 @@
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
-        </trigger>
+        </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
       </group>
-   </group>
-
-      <group ref="lot" faims_archent_type="Lot">
+      <group ref="lotLoad">
+        <label>Load Lots</label>
+        <select1 ref="lotLoadList" faims_certainty="false" faims_annotation="false">
+          <label>Lots</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="lotLoadButton">
+          <label>Load Lot</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="lot" faims_archent_type="Lot">
+      <label>Lot Description</label>
+      <group ref="lotDetail">
         <label>Lot Description</label>
-        <group ref="lotDetail">
-                  <label>Lot Description</label>
-
         <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">
           <label>LotID:</label>
         </input>
-         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Timestamp:</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
@@ -1968,7 +1944,7 @@
           <label>Delete record</label>
         </trigger>
         <!-- {button}-->
-        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
             <label>Associate With List:</label>
             <item>
                 <label>dummy</label>
@@ -1977,12 +1953,11 @@
         </select1>
         <trigger ref="AssociateWith">
           <label>Associate With</label>
-        </trigger>
+        </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
       </group>
     </group>
-
-        <group ref="window" faims_archent_type="Window">
+    <group ref="window" faims_archent_type="Window">
       <label>Window Detail</label>
       <group ref="windowDetail">
         <label>Window Detail</label>
@@ -2022,11 +1997,11 @@
           <label>Window Photos</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-            <label>Gallery:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Gallery:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select>
         <trigger ref="Update">
           <label>Save Record</label>
@@ -2035,11 +2010,11 @@
           <label>Delete record</label>
         </trigger>
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
+          <label>Associate With List:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
         </select1>
         <trigger ref="AssociateWith">
           <label>AssociateWith</label>
@@ -2047,6 +2022,5 @@
         <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
-
   </h:body>
 </h:html>

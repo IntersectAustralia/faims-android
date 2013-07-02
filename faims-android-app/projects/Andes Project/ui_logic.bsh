@@ -1,21 +1,23 @@
 /*** MAP ***/
 
 initMap() {
-	setMapZoom("control/map/map", 17.0f);
-	
-	showBaseMap("control/map/map", "Base Map", "files/data/maps/map.tif");
-	showRasterMap("control/map/map", "Raster Map", "files/data/maps/map.tif");
-	
+	setMapZoom("control/map/map", 15.0f);
+
+	showBaseMap("control/map/map", "Base Map", "files/data/maps/SydneyStreetmap.tif");
+	showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
+
+    createCanvasLayer("control/map/map", "Data Entry");
+
 	isEntity = true; // are you loading entities or relationships?
 	queryName = "No Query"; // Name your query
 	querySQL = null; // Add your select sql query here note: it should have first column return the uuid or relationshipid
-	
+
 	// define database layer styles for points, lines, polygons and text
 	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
 	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
 	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
 	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
-	
+
 	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
 }
 
@@ -34,7 +36,7 @@ AttributeDef(String name, String type, String ref, boolean saveCertainty) {
 	this.saveCertainty = saveCertainty;
 	return this;
 }
-	
+
 AttributeDef(String name, String type, String ref, ArrayList loadedFiles) {
 	this.name = name;
 	this.type = type;
@@ -85,6 +87,7 @@ OnFilesAttached() {
 }
 
 saveFiles(loadedFiles, files, type, attributes) {
+    showToast("Files are saving. Please wait.");
 	if (files == null || "".equals(files)) return;
 	if (files.size() == 1 && "None".equals(files.get(0))) return;
 
@@ -96,7 +99,7 @@ saveFiles(loadedFiles, files, type, attributes) {
 	}
 	// add new attributes that are included
 	hasAttachment = false;
-	attachmentCount = 0; 
+	attachmentCount = 0;
 	for (String file : files) {
 		String filename = null;
 		if (!hasFile(loadedFiles, file)) {
@@ -112,18 +115,19 @@ saveFiles(loadedFiles, files, type, attributes) {
 		}
 		attributes.add(createEntityAttribute(type, filename, null, null, null));
 	}
-	
+
 	if (!hasAttachment) {
 		OnFilesAttached();
-	} 
+	}
 }
+
 
 entitySaved = false;
 entityCallback = null;
 
 checkFilesAttached() {
 	if (entityCallback == null) return;
-	
+
 	if (entitySaved && !isAttachingFiles()) {
 		closeBusyDialog();
 		execute(entityCallback);
@@ -138,9 +142,9 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 	entityCallback = callback;
 	
     List attributes = createAttributeList();
-    
+
     for (Object def : attributeDefs) {
-    	
+
     	// name, text, vocab, measure, certainty
     	if ("freetext".equals(def.type)) {
     		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, def.saveCertainty? getFieldCertainty(def.ref) : null));
@@ -154,7 +158,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		List pairs = getFieldValue(def.ref);
     		ArrayList files = new ArrayList();
     		for (NameValuePair pair : pairs) {
-    		
+
     			files.add(pair.getName());
     		}
     		saveFiles(def.loadedFiles, files, def.name, attributes);
@@ -166,14 +170,14 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 	    		geoData.add(new Point(p, null, (PointStyle) null, null));
 	    	}
     	}
-    	
+
     }
-    
+
     saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
-    
+
     entitySaved = true;
     checkFilesAttached();
-    
+
     updateAll();
     return saved_id;
 }
@@ -243,10 +247,10 @@ populateNicheAssociateWithTypes() {
 	ArrayList list = new ArrayList();
 	list.add("StructureContains");
 	list.add("NicheIn");
-	populateDropDown("niche/nicheDetail/AssociateWithType", list);
+	//populateDropDown("niche/nicheDetail/AssociateWithType", list);
 }
 
-populateNicheAssociateWithTypes();
+//populateNicheAssociateWithTypes();
 
 String username = "";
 String device = "";
@@ -280,33 +284,33 @@ makeGallery(String attrib){
 
 newStructure(){
 	structure_id = null;
-	
+
 	structureFiles = getNoneList();
 	structureSketches = getNoneList();
 	structurePictures = new ArrayList();
 	structureVideos = new ArrayList();
 	structureAudios = new ArrayList();
-	
+
 	if (structureAudios.isEmpty()) {
 		structureAudios = getNoneList();
 	}
-	
+
 	if (structureFiles.isEmpty()) {
 		structureFiles = getNoneList();
 	}
-	
+
 	if (structureSketches.isEmpty()) {
 		structureSketches = getNoneList();
 	}
 
     newTabGroup("structure");
-    
+
     populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
     populateVideoGallery("structure/final/VideoGallery", structureVideos);
     populateCheckBoxGroup("structure/final/AudioList",structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
-    
+
     populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
     populateDropDown("structure/info/Form", makeVocab("Form"));
     populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
@@ -318,7 +322,7 @@ newStructure(){
     populateList("structure/finalObservations/StuccoInterior", makeVocab("StuccoInterior"));
     populateList("structure/finalObservations/StuccoExterior", makeVocab("StuccoExterior"));
     populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
-    
+
     setFieldValue("structure/info/Timestamp", getCurrentTime());
     setFieldValue("structure/info/Author", username);
     setFieldValue("structure/info/Device", device);
@@ -327,7 +331,7 @@ newStructure(){
 
 newCorner(){
 	corner_id = null;
-	
+
     newTabGroup("corner");
     populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
@@ -343,7 +347,7 @@ newCorner(){
 
 newStructureWall(){
 	structure_wall_id = null;
-	
+
     newTabGroup("wall");
     populatePictureGallery("wall/structureWall/MasonryType", makeGallery("MasonryType"));
     populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
@@ -358,7 +362,7 @@ newStructureWall(){
 
 newDoorway(){
 	doorway_id = null;
-	
+
     newTabGroup("doorway");
     doorwayPictures = new ArrayList();
     populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
@@ -372,7 +376,7 @@ newDoorway(){
 }
 newNiche(){
 	niche_id = null;
-	
+
     newTabGroup("niche");
     populateList("niche/nicheDetail/NicheForm", makeVocab("NicheForm"));
     populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
@@ -387,7 +391,7 @@ newNiche(){
 }
 newWindow(){
 	window_id = null;
-	
+
     newTabGroup("window");
     populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
     windowPictures = new ArrayList();
@@ -399,7 +403,7 @@ newWindow(){
 
 newLichen(){
 	lichen_id = null;
-	
+
     newTabGroup("lichen");
     lichenPictures = new ArrayList();
     populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
@@ -413,7 +417,7 @@ newLichen(){
 
 newFreeWall(){
 	wall_id = null;
-	
+
     newTabGroup("freeWall");
     populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
     populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
@@ -428,7 +432,7 @@ newFreeWall(){
 
 newFeature(){
 	feature_id = null;
-	
+
     newTabGroup("feature");
     featurePictures = new ArrayList();
     selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
@@ -439,7 +443,7 @@ newFeature(){
 
 newSpecialFind(){
 	special_find_id = null;
-	
+
     newTabGroup("specialFind");
     specialFindPictures = new ArrayList();
     populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
@@ -452,7 +456,7 @@ newSpecialFind(){
 
 newSurfaceCollection(){
 	surface_collection_id = null;
-	
+
     newTabGroup("surfaceCollection");
     populateList("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
     populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
@@ -466,7 +470,7 @@ newSurfaceCollection(){
 
 newLot(){
 	lot_id = null;
-	
+
     newTabGroup("lot");
     populateList("lot/lotDetail/Material", makeVocab("Material"));
     setFieldValue("lot/lotDetail/Timestamp", getCurrentTime());
@@ -487,10 +491,10 @@ newCanal(){
 }
 
 newEntity() {
-	
+
 	type = getFieldValue("control/map/entityType");
 	if (type == null || "".equals(type)) return;
-	
+
 	if ("Structure".equals(type)) {
 		newStructure();
 	} else if ("Wall".equals(type)) {
@@ -575,7 +579,7 @@ OnCornerPictureTaken() {
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
-onEvent("corner/cornerDetail/Update", "click", "saveCorner(corner_id)");
+onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
 cornerSaving = false; 
@@ -588,16 +592,16 @@ saveCorner(id) {
 
 updateCorner(id) {
 	if (id == null || "".equals(id)) id = null;
-    
+
     if (structure_id == null) {
   		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
    		
 	    cornerPictures = new ArrayList();
-	
+
 		ArrayList loadedPictures = new ArrayList();
-		
+
 		if (id != null) {
 			entity = fetchArchEnt(id);
 			for (Object attribute : entity.getAttributes()) {
@@ -607,7 +611,7 @@ updateCorner(id) {
 				}
 			}
 		}
-	    
+
 	   	Object[] attributeDefs = new Object[] {
 	    	AttributeDef("CornerID", "freetext", "corner/cornerDetail/CornerID", false),
 	    	AttributeDef("Timestamp", "freetext", "corner/cornerDetail/Timestamp", false),
@@ -624,16 +628,17 @@ updateCorner(id) {
 	    	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
 	    	AttributeDef("InkaMasonryDescription", "freetext", "corner/cornerDetail/InkaMasonryDescription")
 	    	};
-	    
+
+
 	    saved_id = saveEntity(id, "Corner", attributeDefs, null, "loadCornerFileAttributes(corner_id);");
-	    
+
 	    // save corner to structure if new corner
 	    if (id == null) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
-	    
+
 	    return saved_id;
-	    
+
 	}
 }
 
@@ -654,13 +659,13 @@ OnNichePictureTaken() {
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
-onEvent("niche/nicheDetail/Update", "click", "saveCorner(niche_id)");
+onEvent("niche/nicheDetail/Update", "delayclick", "saveCorner(niche_id)");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
 associateWithNiche() {
 	id = getFieldValue("niche/nicheDetail/AssociateWithList");
-	type = getFieldValue("niche/nicheDetail/AssociateWithType");
+	type = "NicheIn";
 	if (id == null || "".equals(id)) {
 		showWarning("Logic Error", "Please select an id to associate with");
 		return;
@@ -690,7 +695,7 @@ updateNiche(id) {
     nichePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -700,7 +705,7 @@ updateNiche(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("NicheID", "freetext", "niche/nicheDetail/NicheID", false),
     	AttributeDef("Timestamp", "freetext", "niche/nicheDetail/Timestamp", false),
@@ -717,7 +722,8 @@ updateNiche(id) {
     	AttributeDef("NicheDescription", "freetext", "niche/nicheDetail/NicheDescription"),
     	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
     	};
-    
+
+
     return saveEntity(id, "Niche", attributeDefs, null, "loadNicheFileAttributes(niche_id);");
 }
 
@@ -737,9 +743,9 @@ OncanalPictureTaken() {
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
-onEvent("canal/canalDetail/Update", "click", "saveCanal(canal_id)");
+onEvent("canal/canalDetail/Update", "delayclick", "saveCanal(canal_id)");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
-// TODO associate with ?
+
 
 canalSaving = false;
 saveCanal(id) {
@@ -755,7 +761,7 @@ updateCanal(id) {
     canalPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -765,7 +771,7 @@ updateCanal(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("CanalID", "freetext", "canal/canalDetail/CanalID", false),
     	AttributeDef("Timestamp", "freetext", "canal/canalDetail/Timestamp", false),
@@ -775,8 +781,9 @@ updateCanal(id) {
     	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
-    
-    return saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map"), "loadCanalFileAttributes(canal_id);"); 
+
+
+    return saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map"), "loadCanalFileAttributes(canal_id);");
 }
 
 /*** WINDOW ***/
@@ -796,7 +803,7 @@ OnWindowPictureTaken() {
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
-onEvent("window/windowDetail/Update", "click", "saveWindow(window_id)");
+onEvent("window/windowDetail/Update", "delayclick", "saveWindow(window_id)");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
 onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
@@ -827,7 +834,7 @@ updateWindow(id) {
     windowPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -837,7 +844,7 @@ updateWindow(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("WindowID", "freetext", "window/windowDetail/WindowID", false),
     	AttributeDef("Timestamp", "freetext", "window/windowDetail/Timestamp", false),
@@ -850,7 +857,8 @@ updateWindow(id) {
     	AttributeDef("WindowDescription", "freetext", "window/windowDetail/WindowDescription"),
     	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
     	};
-    
+
+
     return saveEntity(id, "Window", attributeDefs, null, "loadWindowFileAttributes(window_id);");
 }
 
@@ -871,9 +879,29 @@ OnspecialFindPictureTaken() {
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
-onEvent("specialFind/findDetail/Update", "click", "saveSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Update", "delayclick", "saveSpecialFind(special_find_id)");
 onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
-// TODO associate with ?
+onEvent("specialFind/findDetail/AssociateWith", "click", "associateWithSpecialFind()");
+
+
+associateWithSpecialFind() {
+    id = getFieldValue("specialFind/findDetail/AssociateWithList");
+    type = "StructureContains";
+    if (id == null || "".equals(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (type == null || "".equals(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (special_find_id == null) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, special_find_id, id);
+}
+
 
 specialFindSaving = false;
 saveSpecialFind(id) {
@@ -889,7 +917,7 @@ updateSpecialFind(id) {
     specialFindPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -899,7 +927,7 @@ updateSpecialFind(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("SpecialFindID", "freetext", "specialFind/findDetail/SpecialFindID", false),
     	AttributeDef("Timestamp", "freetext", "specialFind/findDetail/Timestamp", false),
@@ -909,7 +937,8 @@ updateSpecialFind(id) {
     	AttributeDef("Type", "vocab", "specialFind/findDetail/Type"),
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
     	};
-    
+
+
     return saveEntity(id, "SpecialFind", attributeDefs, getGeometryHighlights("control/map/map"), "loadSpecialFindFileAttributes(special_find_id);");
 }
 
@@ -930,9 +959,28 @@ OnFeaturePictureTaken() {
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
-onEvent("feature/featureDetail/Update", "click", "saveFeature(feature_id)");
+onEvent("feature/featureDetail/Update", "delayclick", "saveFeature(feature_id)");
 onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
-// TODO associate with ?
+onEvent("feature/featureDetail/AssociateWith", "click", "associateWithFeature()");
+
+associateWithFeature() {
+    id = getFieldValue("feature/featureDetail//AssociateWithList");
+    type = "StructureContains";
+    if (id == null || "".equals(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (type == null || "".equals(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (feature_id == null) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, feature_id, id);
+}
+
 
 featureSaving = false;
 saveFeature(id) {
@@ -948,7 +996,7 @@ updateFeature(id) {
     featurePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -958,7 +1006,7 @@ updateFeature(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("FeatureID", "freetext", "feature/featureDetail/FeatureID", false),
     	AttributeDef("Timestamp", "freetext", "feature/featureDetail/Timestamp", false),
@@ -967,7 +1015,8 @@ updateFeature(id) {
     	AttributeDef("Description", "freetext", "feature/featureDetail/Description"),
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
-    
+
+
     return saveEntity(id, "Feature", attributeDefs, getGeometryHighlights("control/map/map"), "loadFeatureFileAttributes(feature_id);");
 }
 
@@ -988,9 +1037,29 @@ OnFreewallPictureTaken() {
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
-onEvent("freeWall/freeWallDetail/Update", "click", "saveFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Update", "delayclick", "saveFreeWall(wall_id)");
 onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
-// TODO associate with ?
+
+onEvent("freeWall/freeWallDetail/AssociateWith", "click", "associateWithFreeWall()");
+
+associateWithFeature() {
+    id = getFieldValue("feature/featureDetail/AssociateWithList");
+    type = "WallWith";
+    if (id == null || "".equals(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (type == null || "".equals(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (wall_id == null) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, wall_id, id);
+}
+
 
 freeWallSaving = false;
 saveFreeWall(id) {
@@ -1006,7 +1075,7 @@ updateFreeWall(id) {
     freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1016,7 +1085,7 @@ updateFreeWall(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("WallID", "freetext", "freeWall/freeWallDetail/WallID", false),
     	AttributeDef("Timestamp", "freetext", "freeWall/freeWallDetail/Timestamp", false),
@@ -1033,8 +1102,10 @@ updateFreeWall(id) {
     	AttributeDef("WallComments", "freetext", "freeWall/freeWallDetail/WallComments"),
     	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
     	};
-    
+
+
     return saveEntity(id, "Wall", attributeDefs, getGeometryHighlights("control/map/map"), "loadWallFileAttributes(wall_id);");
+
 }
 
 /*** DOORWAY ***/
@@ -1073,9 +1144,30 @@ takeDoorywayPoint(){
 onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
-onEvent("doorway/doorDetail/Update", "click", "saveDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Update", "delayclick", "saveDoorway(doorway_id)");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
-// TODO associate with ?
+
+
+onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
+
+associateWithFeature() {
+    id = getFieldValue("doorway/doorDetail/AssociateWithList");
+    type = "DoorwayIn";
+    if (id == null || "".equals(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (type == null || "".equals(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (wall_id == null) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, wall_id, id);
+}
+
 
 doorwaySaving = false;
 saveDoorway(id) {
@@ -1091,7 +1183,7 @@ updateDoorway(id) {
     doorwayPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1101,7 +1193,7 @@ updateDoorway(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("DoorID", "freetext", "doorway/doorDetail/DoorID", false),
     	AttributeDef("Timestamp", "freetext", "doorway/doorDetail/Timestamp", false),
@@ -1120,7 +1212,7 @@ updateDoorway(id) {
     	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
     	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
-    
+
     return saveEntity(id, "Doorway", attributeDefs, getGeometryHighlights("control/map/map"), "loadDoorwayFileAttributes(doorway_id);");
 }
 
@@ -1141,9 +1233,31 @@ OnLichenPictureTaken() {
 
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
 
-onEvent("lichen/lichenDetail/Update", "click", "saveLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Update", "delayclick", "saveLichen(lichen_id)");
 onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
-// TODO associate with ?
+
+onEvent("lichen/lichenDetail/AssociateWith", "click", "associateWithLichen()");
+
+associateWithLichen() {
+    id = getFieldValue("lichen/lichenDetail/AssociateWithList");
+    type = "LichenAttachedTo";
+    if (id == null || "".equals(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (type == null || "".equals(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (lichen_id == null) {
+        showWarning("Logic Error", "Please save lichen before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, lichen_id, id);
+
+    showToast("Successfuly associated.");
+}
+
 
 lichenSaving = false;
 saveLichen(id) {
@@ -1159,7 +1273,7 @@ updateLichen(id) {
     lichenPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1169,7 +1283,7 @@ updateLichen(id) {
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("LichenID", "freetext", "lichen/lichenDetail/LichenID", false),
     	AttributeDef("Timestamp", "freetext", "lichen/lichenDetail/Timestamp", false),
@@ -1184,7 +1298,8 @@ updateLichen(id) {
     	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
     	AttributeDef("", "gps", "lichen/lichenDetail/GPSLong", "lichen/lichenDetail/GPSLat")
     	};
-    
+
+
     return saveEntity(id, "Lichen", attributeDefs, getGeometryHighlights("control/map/map"), "loadLichenFileAttributes(lichen_id);");
 }
 
@@ -1213,10 +1328,11 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 
 String surface_collection_id = null;
 
-onEvent("surfaceCollection/material/Update", "click", "saveSurfaceCollection(surface_collection_id)");
-onEvent("surfaceCollection/description/Update", "click", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/description/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
 onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
-// TODO associate with ?
+
+//TODO Make automatic lot association
 
 surfaceCollectionSaving = false;
 saveSurfaceCollection(id) {
@@ -1242,8 +1358,10 @@ updateSurfaceCollection(id) {
     	AttributeDef("LotLabPriority", "vocab", "surfaceCollection/material/LotLabPriority"),
     	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
     	};
-    
+
+
     return saveEntity(id, "SurfaceCollection", attributeDefs, getGeometryHighlights("control/map/map"), "loadSurfaceCollection(surface_collection_id);");
+
 }
 
 /*** LOT ***/
@@ -1252,7 +1370,7 @@ String lot_id = null;
 
 onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
-// TODO associate with ?
+
 
 lotSaving = false;
 saveLot(id) {
@@ -1264,16 +1382,32 @@ saveLot(id) {
 
 updateLot(id) {
 	if (id == null || "".equals(id)) id = null;
-	
-   	Object[] attributeDefs = new Object[] {
+
+    if (surface_collection_id == null) {
+        showWarning("Logic Error", "Lot cannot be saved as parent surface collection is not saved or loaded.");
+        return null;
+    } else {
+
+   		Object[] attributeDefs = new Object[] {
     	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID", false),
     	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp", false),
     	AttributeDef("Author", "freetext" , "lot/lotDetail/Author", false),
     	AttributeDef("Device", "freetext", "lot/lotDetail/Device", false),
     	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
     	};
-    
-    return saveEntity(id, "Lot", attributeDefs, null, "loadLoat(lot_id);"); 
+
+        saved_id = saveEntity(id, "Lot", attributeDefs, null, "loadLoat(lot_id);");
+
+
+        // save lot to surface collection
+        if (id == null) {
+            saveEntitiesToRel("SurfaceLot", surface_collection_id, saved_id);
+        }
+
+        return saved_id;
+
+    }
+
 }
 
 /*** STRUCTURE WALL ***/
@@ -1293,7 +1427,7 @@ OnStructWallPictureTaken() {
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 
-onEvent("wall/structureWall/Update", "click", "saveStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id)");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 
 structureWallSaving = false;
@@ -1306,16 +1440,16 @@ saveStructureWall(id) {
 
 updateStructureWall(id) {
 	if (id == null || "".equals(id)) id = null;
-	 
+
    	if (structure_id == null) {
   		showWarning("Logic Error", "Structure Wall cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
-   	
+
    		structureWallPictures = new ArrayList();
 
 		ArrayList loadedPictures = new ArrayList();
-		
+
 		if (id != null) {
 			entity = fetchArchEnt(id);
 			for (Object attribute : entity.getAttributes()) {
@@ -1325,7 +1459,7 @@ updateStructureWall(id) {
 				}
 			}
 		}
-	    
+
 	   	Object[] attributeDefs = new Object[] {
 	    	AttributeDef("WallID", "freetext", "wall/structureWall/WallID", false),
 	    	AttributeDef("Timestamp", "freetext", "wall/structureWall/Timestamp", false),
@@ -1346,16 +1480,15 @@ updateStructureWall(id) {
 	    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount", false),
 	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
 	    	};
-	    
+
+
 	    saved_id = saveEntity(id, "StructureWall", attributeDefs, null, "loadStructureWallFileAttributes(structure_wall_id);");
-	    
+
 	    // save structure wall to structure if new structure wall
 	    if (id == null) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
-	    wallCount = Integer.valueOf(getFieldValue("structure/component/WallsTotalCount"));
-	    wallCount += 1;
-	    setFieldValue("structure/component/WallsTotalCount", Integer.toString(wallCount));
+
 	    return saved_id;
    	}
 }
@@ -1432,7 +1565,7 @@ OnAudioRecorded(){
 	if (structureAudios.get(0).equals("None")) {
 		structureAudios.clear();
 	}
-	
+
     audioFilePath = getLastAudioFilePath();
     structureAudios.add(audioFilePath);
     populateCheckBoxGroup("structure/final/AudioList", structureAudios);
@@ -1445,11 +1578,11 @@ onEvent("structure/final/Photo", "click", "takePicture()");
 onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
-onEvent("structure/final/Update", "click", "saveStructure(structure_id)");
-onEvent("structure/info/Update", "click", "saveStructure(structure_id)");
-onEvent("structure/component/Update", "click", "saveStructure(structure_id)");
-onEvent("structure/construction/Update", "click", "saveStructure(structure_id)");
-onEvent("structure/finalObservations/Update", "click", "saveStructure(structure_id)");
+onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/component/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/construction/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/finalObservations/Update", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
@@ -1464,7 +1597,7 @@ saveStructure(id) {
 
 updateStructure(id){
     if (id == null || "".equals(id)) id = null;
-    
+
     structureFiles = getNoneList();
 	structureSketches = getNoneList();
 	structurePictures = new ArrayList();
@@ -1476,7 +1609,7 @@ updateStructure(id){
 	ArrayList loadedPictures = new ArrayList();
 	ArrayList loadedVideos = new ArrayList();
 	ArrayList loadedAudios = new ArrayList();
-	
+
 	if (id != null) {
 		entity = fetchArchEnt(structure_id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1494,7 +1627,7 @@ updateStructure(id){
 			}
 		}
 	}
-    
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID", false),
     	AttributeDef("Description", "freetext", "structure/info/Description"),
@@ -1537,7 +1670,7 @@ updateStructure(id){
     	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos),
     	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
     	};
-    
+
     return saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"), "loadStructureFileAttributes(structure_id);");
 }
 
@@ -1557,6 +1690,18 @@ updateAll(){
 	Object corner = fetchEntityList("Corner");
 	Object niche = fetchEntityList("Niche");
 	Object window = fetchEntityList("Window");
+
+    Object allEntities =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+    Object sWallsAndCorners =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Corner')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+
+
+    Object fWallsAndStructures =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('Wall', 'Structure')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+    Object structureStructureWallFreeWall =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Structure', 'Wall')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+
+
+    Object localStructureWall = fetchAll("select 1, 'TODO'");
+    Object localCorner = fetchAll("select 1, 'TODO'");
+
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
 	populateDropDown("control/data/doorwayList", doorway);
@@ -1566,33 +1711,35 @@ updateAll(){
 	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
 	populateDropDown("control/data/lotList", lot);
 	populateDropDown("control/data/canalList", canal);
-	populateDropDown("structure/load/structureWallList", structureWall);
-	populateDropDown("structure/load/cornerList", corner);
+
+    if (structure_id != null){
+       populateDropDown("structure/load/structureWallList", localStructureWall);
+       populateDropDown("structure/load/cornerList", localCorner);
+
+   }
+
 	populateDropDown("control/data/nicheList", niche);
 	populateDropDown("control/data/windowList", window);
-	
-	// window association dropdown
+
 	populateDropDown("window/windowDetail/AssociateWithList", structureWall);
-	// TODO niche association dropdown (needs structure AND STRUCTURE WALLS)
-	populateDropDown("niche/nicheDetail/AssociateWithList", structure);
-	// TODO free wall association
-	// TODO doorway association
-	// TODO lichen association
-	// TODO canal association
-	// TODO special find association
-	// TODO feature association
-	// TODO surface collection association
-	// TODO lot association
+	populateDropDown("niche/nicheDetail/AssociateWithList", sWallsAndCorners);
+    populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
+    populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
+    populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
+    populateDropDown("specialFind/findDetail/AssociateWithList", structure);
+    populateDropDown("feature/featureDetail/AssociateWithList", structure);
+
+    //TODO make a lot list as structureWallListAbove
 }
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
 	if (structure_id == null || "".equals(structure_id)) return;
-	
+
 	id = structure_id;
 	newStructure();
 	structure_id = id;
-	
+
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
 }
@@ -1603,7 +1750,7 @@ loadStructureFileAttributes(id){
 	structurePictures = new ArrayList();
 	structureVideos = new ArrayList();
 	structureAudios = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1625,25 +1772,25 @@ loadStructureFileAttributes(id){
 			}
 		}
 	}
-	
+
 	if (structureAudios.isEmpty()) {
 		structureAudios = getNoneList();
 	}
-	
+
 	if (structureFiles.isEmpty()) {
 		structureFiles = getNoneList();
 	}
-	
+
 	if (structureSketches.isEmpty()) {
 		structureSketches = getNoneList();
 	}
-	
+
     populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
     populateVideoGallery("structure/final/VideoGallery", structureVideos);
     populateCheckBoxGroup("structure/final/AudioList", structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
-    
+
     selectGallery("structure/final/PhotoGallery", structurePictures);
     selectGallery("structure/final/VideoGallery", structureVideos);
     setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
@@ -1654,18 +1801,18 @@ loadStructureFileAttributes(id){
 loadWall() {
 	wall_id = getFieldValue("control/data/wallList");
 	if (wall_id == null || "".equals(wall_id)) return;
-	
+
 	id = wall_id;
 	newFreeWall();
 	wall_id = id;
-	
+
 	showTabGroup("freeWall", wall_id);
 	loadWallFileAttributes(wall_id);
 }
 
 loadWallFileAttributes(id){
 	freewallPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1679,7 +1826,7 @@ loadWallFileAttributes(id){
 			}
 		}
 	}
-		
+
     populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
     selectGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
 }
@@ -1687,14 +1834,14 @@ loadWallFileAttributes(id){
 loadDoorway() {
 	doorway_id = getFieldValue("control/data/doorwayList");
 	if (doorway_id == null || "".equals(doorway_id)) return;
-	
+
 	id = doorway_id;
 	newDoorway();
 	doorway_id = id;
-	
+
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
-	
+
 	archEntity = fetchArchEnt(doorway_id);
 	geomList = archEntity.getGeometryList();
 	point = geomList.get(0);
@@ -1706,7 +1853,7 @@ loadDoorway() {
 
 loadDoorwayFileAttributes(id){
 	doorwayPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1720,7 +1867,7 @@ loadDoorwayFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
     selectGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
 }
@@ -1728,18 +1875,18 @@ loadDoorwayFileAttributes(id){
 loadFeature() {
 	feature_id = getFieldValue("control/data/featureList");
 	if (feature_id == null || "".equals(feature_id)) return;
-	
+
 	id = feature_id;
 	newFeature();
 	feature_id = id;
-	
+
 	showTabGroup("feature", feature_id);
 	loadFeatureFileAttributes(feature_id);
 }
 
 loadFeatureFileAttributes(id){
 	featurePictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1753,7 +1900,7 @@ loadFeatureFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurePictures);
     selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
 }
@@ -1761,18 +1908,18 @@ loadFeatureFileAttributes(id){
 loadSpecialFind() {
 	special_find_id = getFieldValue("control/data/specialFindList");
 	if (special_find_id == null || "".equals(special_find_id)) return;
-	
+
 	id = special_find_id;
 	newSpecialFind();
 	special_find_id = id;
-	
+
 	showTabGroup("specialFind", special_find_id);
 	loadSpecialFindFileAttributes(special_find_id);
 }
 
 loadSpecialFindFileAttributes(id){
 	specialFindPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1786,7 +1933,7 @@ loadSpecialFindFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
     selectGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
 }
@@ -1794,14 +1941,14 @@ loadSpecialFindFileAttributes(id){
 loadLichen() {
 	lichen_id = getFieldValue("control/data/lichenList");
 	if (lichen_id == null || "".equals(lichen_id)) return;
-	
+
 	id = lichen_id;
 	newLichen();
 	lichen_id = id;
-	
+
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
-	
+
 	archEntity = fetchArchEnt(lichen_id);
 	geomList = archEntity.getGeometryList();
 	point = geomList.get(0);
@@ -1813,7 +1960,7 @@ loadLichen() {
 
 loadLichenFileAttributes(id){
 	lichenPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1827,7 +1974,7 @@ loadLichenFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
     selectGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
 }
@@ -1835,40 +1982,40 @@ loadLichenFileAttributes(id){
 loadSurfaceCollection() {
 	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
 	if (surface_collection_id == null || "".equals(surface_collection_id)) return;
-	
+
 	id = surface_collection_id;
 	newSurfaceCollection();
 	surface_collection_id = id;
-	
+
 	showTabGroup("surfaceCollection", surface_collection_id);
 }
 
 loadLot() {
 	lot_id = getFieldValue("control/data/lotList");
 	if (lot_id == null || "".equals(lot_id)) return;
-	
+
 	id = lot_id;
 	newLot();
 	lot_id = id;
-	
+
 	showTabGroup("lot", lot_id);
 }
 
 loadCanal() {
 	canal_id = getFieldValue("control/data/canalList");
 	if (canal_id == null || "".equals(canal_id)) return;
-	
+
 	id = canal_id;
 	newCanal();
 	canal_id = id;
-	
+
 	showTabGroup("canal", canal_id);
 	loadCanalFileAttributes(canal_id);
 }
 
 loadCanalFileAttributes(id){
 	canalPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1882,7 +2029,7 @@ loadCanalFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
     selectGallery("canal/canalDetail/PhotoGallery", canalPictures);
 }
@@ -1890,18 +2037,18 @@ loadCanalFileAttributes(id){
 loadStructureWall() {
 	structure_wall_id = getFieldValue("structure/load/structureWallList");
 	if (structure_wall_id == null || "".equals(structure_wall_id)) return;
-	
+
 	id = structure_wall_id;
 	newStructureWall();
 	structure_wall_id = id;
-	
+
 	showTabGroup("wall", structure_wall_id);
 	loadStructureWallFileAttributes(structure_wall_id);
 }
 
 loadStructureWallFileAttributes(id){
 	structureWallPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1915,7 +2062,7 @@ loadStructureWallFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
     selectGallery("wall/structureWall/PhotoGallery", structureWallPictures);
 }
@@ -1923,18 +2070,18 @@ loadStructureWallFileAttributes(id){
 loadCorner() {
 	corner_id = getFieldValue("structure/load/cornerList");
 	if (corner_id == null || "".equals(corner_id)) return;
-	
+
 	id = corner_id;
 	newCorner();
 	corner_id = id;
-	
+
 	showTabGroup("corner", corner_id);
 	loadCornerFileAttributes(corner_id);
 }
 
 loadCornerFileAttributes(id){
 	cornerPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1948,7 +2095,7 @@ loadCornerFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
     selectGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
 }
@@ -1956,18 +2103,18 @@ loadCornerFileAttributes(id){
 loadNiche() {
 	niche_id = getFieldValue("control/data/nicheList");
 	if (niche_id == null || "".equals(niche_id)) return;
-	
+
 	id = niche_id;
 	newNiche();
 	niche_id = id;
-	
+
 	showTabGroup("niche", niche_id);
 	loadNicheFileAttributes(niche_id);
 }
 
 loadNicheFileAttributes(id){
 	nichePictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -1981,7 +2128,7 @@ loadNicheFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
     selectGallery("niche/nicheDetail/PhotoGallery", nichePictures);
 }
@@ -1989,18 +2136,18 @@ loadNicheFileAttributes(id){
 loadWindow() {
 	window_id = getFieldValue("control/data/windowList");
 	if (window_id == null || "".equals(window_id)) return;
-	
+
 	id = window_id;
 	newWindow();
 	window_id = id;
-	
+
 	showTabGroup("window", window_id);
 	loadWindowFileAttributes(window_id);
 }
 
 loadWindowFileAttributes(id){
 	windowPictures = new ArrayList();
-	
+
 	if (id != null && !"".equals(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
@@ -2014,7 +2161,7 @@ loadWindowFileAttributes(id){
 			}
 		}
 	}
-	
+
     populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
     selectGallery("window/windowDetail/PhotoGallery", windowPictures);
 }

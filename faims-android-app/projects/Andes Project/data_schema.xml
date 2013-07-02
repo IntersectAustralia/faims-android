@@ -6,23 +6,15 @@
 </RelationshipElement>
 <RelationshipElement name="SurfaceLot" type="bidirectional">
 </RelationshipElement>
-<RelationshipElement name="WallWall" type="bidirectional">
+<RelationshipElement name="WallWith" type="bidirectional">
 </RelationshipElement>
-<RelationshipElement name="WallDoorway" type="hierarchical">
-  <parent>WallContains</parent>
-  <child>DoorwayIn</child>
+<RelationshipElement name="DoorwayIn" type="bidirectional">
 </RelationshipElement>
-<RelationshipElement name="WallWindow" type="hierarchical">
-  <parent>WallContains</parent>
-  <child>WindowIn</child>
+<RelationshipElement name="WindowIn" type="bidirectional">
 </RelationshipElement>
-<RelationshipElement name="NicheIn" type="hierarchical">
-  <parent>ParentContains</parent>
-  <child>NicheIn</child>
+<RelationshipElement name="NicheIn" type="bidirectional">
 </RelationshipElement>
-<RelationshipElement name="LichenAttachedTo" type="hierarchical">
-  <parent>HasLichen</parent>
-  <child>LichenAttachedTo</child>
+<RelationshipElement name="LichenAttachedTo" type="bidirectional">
 </RelationshipElement>
 <RelationshipElement name="StructureContains" type="contains">
 </RelationshipElement>
