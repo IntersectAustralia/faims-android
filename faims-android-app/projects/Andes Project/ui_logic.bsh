@@ -1257,9 +1257,6 @@ updateStructureWall(id) {
 	    if (id == null) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
-	    wallCount = Integer.valueOf(getFieldValue("structure/component/WallsTotalCount"));
-	    wallCount += 1;
-	    setFieldValue("structure/component/WallsTotalCount", Integer.toString(wallCount));
 	    return saved_id;
    	}
 }
