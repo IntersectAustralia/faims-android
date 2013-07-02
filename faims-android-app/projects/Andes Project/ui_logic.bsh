@@ -1,3 +1,15 @@
+/***
+
+Counting stuffs like the number of structure walls in a structure:
+
+select count(distinct uuid) from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) a join archentity using (uuid) join aenttype using (aenttypeid) where relationshipid in (select relationshipid from aentreln where uuid = 1000071372384147406) and aenttypename = 'StructureWall' and a.deleted is null and uuid != 1000071372384147406;
+
+important to use the structure_id and set the type name of the *target* thingo.
+
+Completely untested in app, of course.
+
+***/
+
 /*** MAP ***/
 
 initMap() {
@@ -135,12 +147,12 @@ checkFilesAttached() {
 
 saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 	showToast("Saving record. Please wait.");
-	
+
 	showBusyDialog();
-	
+
 	entitySaved = false;
 	entityCallback = callback;
-	
+
     List attributes = createAttributeList();
 
     for (Object def : attributeDefs) {
@@ -582,7 +594,7 @@ onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
-cornerSaving = false; 
+cornerSaving = false;
 saveCorner(id) {
 	if (cornerSaving) return;
    	cornerSaving = true;
@@ -597,7 +609,7 @@ updateCorner(id) {
   		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
-   		
+
 	    cornerPictures = new ArrayList();
 
 		ArrayList loadedPictures = new ArrayList();
@@ -691,7 +703,7 @@ saveNiche(id) {
 
 updateNiche(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     nichePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -757,7 +769,7 @@ saveCanal(id) {
 
 updateCanal(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     canalPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -830,7 +842,7 @@ saveWindow(id) {
 
 updateWindow(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     windowPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -913,7 +925,7 @@ saveSpecialFind(id) {
 
 updateSpecialFind(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     specialFindPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -992,7 +1004,7 @@ saveFeature(id) {
 
 updateFeature(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     featurePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1071,7 +1083,7 @@ saveFreeWall(id) {
 
 updateFreeWall(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1179,7 +1191,7 @@ saveDoorway(id) {
 
 updateDoorway(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     doorwayPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1269,7 +1281,7 @@ saveLichen(id) {
 
 updateLichen(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
     lichenPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
@@ -1344,7 +1356,7 @@ saveSurfaceCollection(id) {
 
 updateSurfaceCollection(id) {
 	if (id == null || "".equals(id)) id = null;
-	
+
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
     	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp", false),
@@ -1686,7 +1698,9 @@ updateAll(){
 	Object surfaceCollection = fetchEntityList("SurfaceCollection");
 	Object lot = fetchEntityList("Lot");
 	Object canal = fetchEntityList("Canal");
-	Object structureWall = fetchEntityList("StructureWall");
+
+
+
 	Object corner = fetchEntityList("Corner");
 	Object niche = fetchEntityList("Niche");
 	Object window = fetchEntityList("Window");
@@ -1699,8 +1713,9 @@ updateAll(){
     Object structureStructureWallFreeWall =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Structure', 'Wall')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
 
 
-    Object localStructureWall = fetchAll("select 1, 'TODO'");
-    Object localCorner = fetchAll("select 1, 'TODO'");
+    Object localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'StructureWall'  ORDER BY uuid, attributename ASC) group by uuid;");
+
+    Object localCorner = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'Corner'  ORDER BY uuid, attributename ASC) group by uuid;");
 
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
