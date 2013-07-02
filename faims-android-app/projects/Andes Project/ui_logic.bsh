@@ -175,6 +175,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 
 convertListToPairs(list) {
 	ArrayList pairs = new ArrayList();
+	if (list.size() == 1 && "None".equals(list.get(0))) return pairs;
 	for (String s : list) {
 		pairs.add(new NameValuePair(s, "true"));
 	}
@@ -281,6 +282,10 @@ newStructure(){
 	structureVideos = new ArrayList();
 	structureAudios = new ArrayList();
 	
+	if (structureAudios.isEmpty()) {
+		structureAudios = getNoneList();
+	}
+	
 	if (structureFiles.isEmpty()) {
 		structureFiles = getNoneList();
 	}
@@ -293,7 +298,7 @@ newStructure(){
     
     populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
     populateVideoGallery("structure/final/VideoGallery", structureVideos);
-    populateAudioList("structure/attachment/AudioList",structureAudios);
+    populateCheckBoxGroup("structure/final/AudioList",structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
     
@@ -1390,9 +1395,14 @@ recordAudio(){
 }
 
 OnAudioRecorded(){
+	if (structureAudios.get(0).equals("None")) {
+		structureAudios.clear();
+	}
+	
     audioFilePath = getLastAudioFilePath();
     structureAudios.add(audioFilePath);
-    populateAudioList("structure/attachment/AudioList", structureAudios);
+    populateCheckBoxGroup("structure/final/AudioList", structureAudios);
+    setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
 }
 
 onEvent("structure/final/AddAttachment", "click", "attachFile()");
@@ -1487,7 +1497,7 @@ updateStructure(id){
     	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches),
     	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles),
     	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos),
-    	AttributeDef("audio", "files", "structure/attachment/AudioList", loadedAudios)
+    	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
     	};
     
     return saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"), "loadStructureFileAttributes(structure_id);");
@@ -1555,24 +1565,31 @@ loadStructureFileAttributes(id){
 	structurePictures = new ArrayList();
 	structureVideos = new ArrayList();
 	structureAudios = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("Photo".equals(attr.getName())){
-					structurePictures.add(attr.getText());
-				}else if("video".equals(attr.getName())){
-					structureVideos.add(attr.getText());
-				}else if("audio".equals(attr.getName())){
-					structureAudios.add(attr.getText());
-				}else if ("sketchfilename".equals(attr.getName())) {
-					structureSketches.add(attr.getText());
-				}else if ("filename".equals(attr.getName())) {
-					structureFiles.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photo".equals(attr.getName())){
+						structurePictures.add(attr.getText());
+					}else if("video".equals(attr.getName())){
+						structureVideos.add(attr.getText());
+					}else if("audio".equals(attr.getName())){
+						structureAudios.add(attr.getText());
+					}else if ("sketchfilename".equals(attr.getName())) {
+						structureSketches.add(attr.getText());
+					}else if ("filename".equals(attr.getName())) {
+						structureFiles.add(attr.getText());
+					}
 				}
 			}
 		}
+	}
+	
+	if (structureAudios.isEmpty()) {
+		structureAudios = getNoneList();
 	}
 	
 	if (structureFiles.isEmpty()) {
@@ -1585,12 +1602,13 @@ loadStructureFileAttributes(id){
 	
     populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
     populateVideoGallery("structure/final/VideoGallery", structureVideos);
-    populateAudioList("structure/attachment/AudioList", structureAudios);
+    populateCheckBoxGroup("structure/final/AudioList", structureAudios);
     populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
     populateCheckBoxGroup("structure/final/filelist", structureFiles);
     
     selectGallery("structure/final/PhotoGallery", structurePictures);
     selectGallery("structure/final/VideoGallery", structureVideos);
+    setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
     setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
     setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
 }
@@ -1609,17 +1627,21 @@ loadWall() {
 
 loadWallFileAttributes(id){
 	freewallPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("WallPhotos".equals(attr.getName())){
-					freewallPictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("WallPhotos".equals(attr.getName())){
+						freewallPictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+		
     populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
     selectGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
 }
@@ -1646,17 +1668,21 @@ loadDoorway() {
 
 loadDoorwayFileAttributes(id){
 	doorwayPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("DoorPhotos".equals(attr.getName())){
-					doorwaypictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("DoorPhotos".equals(attr.getName())){
+						doorwaypictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
     selectGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
 }
@@ -1675,17 +1701,21 @@ loadFeature() {
 
 loadFeatureFileAttributes(id){
 	featurePictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("Photos".equals(attr.getName())){
-					featurepictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						featurepictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurePictures);
     selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
 }
@@ -1704,17 +1734,21 @@ loadSpecialFind() {
 
 loadSpecialFindFileAttributes(id){
 	specialFindPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("Photos".equals(attr.getName())){
-					specialFindpictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						specialFindpictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
     selectGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
 }
@@ -1741,17 +1775,21 @@ loadLichen() {
 
 loadLichenFileAttributes(id){
 	lichenPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("Photos".equals(attr.getName())){
-					lichenpictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						lichenpictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
     selectGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
 }
@@ -1792,17 +1830,21 @@ loadCanal() {
 
 loadCanalFileAttributes(id){
 	canalPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("Photos".equals(attr.getName())){
-					canalpictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						canalpictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
     selectGallery("canal/canalDetail/PhotoGallery", canalPictures);
 }
@@ -1821,17 +1863,21 @@ loadStructureWall() {
 
 loadStructureWallFileAttributes(id){
 	structureWallPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("WallPhotos".equals(attr.getName())){
-					structureWallPictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("WallPhotos".equals(attr.getName())){
+						structureWallPictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
     selectGallery("wall/structureWall/PhotoGallery", structureWallPictures);
 }
@@ -1850,17 +1896,21 @@ loadCorner() {
 
 loadCornerFileAttributes(id){
 	cornerPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("CornerPhotos".equals(attr.getName())){
-					cornerPictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("CornerPhotos".equals(attr.getName())){
+						cornerPictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
     selectGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
 }
@@ -1879,17 +1929,21 @@ loadNiche() {
 
 loadNicheFileAttributes(id){
 	nichePictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("NichePhotos".equals(attr.getName())){
-					nichePictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("NichePhotos".equals(attr.getName())){
+						nichePictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
     selectGallery("niche/nicheDetail/PhotoGallery", nichePictures);
 }
@@ -1908,17 +1962,21 @@ loadWindow() {
 
 loadWindowFileAttributes(id){
 	windowPictures = new ArrayList();
-	archEntity = fetchArchEnt(id);
-	entityAttributes = archEntity.getAttributes();
-	for(EntityAttribute attr : entityAttributes){
-		if("file".equals(attr.getType())){
-			if(!attr.isDeleted()){
-				if("WindowPhotos".equals(attr.getName())){
-					windowPictures.add(attr.getText());
+	
+	if (id != null && !"".equals(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("WindowPhotos".equals(attr.getName())){
+						windowPictures.add(attr.getText());
+					}
 				}
 			}
 		}
 	}
+	
     populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
     selectGallery("window/windowDetail/PhotoGallery", windowPictures);
 }

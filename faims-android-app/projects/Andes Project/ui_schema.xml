@@ -155,26 +155,23 @@
             <final>
 
 
-              <Photo/>
               <PhotoGallery/>
+              <Photo/>
               <VideoGallery/>
-              <Video/>
+              <Video/> 
               <Audio/>
+              <AudioList/>
               <Sketch/>
               <sketchfilelist/>
               <AddAttachment/>
-              <filelist></filelist>
-              <viewattached></viewattached>
-              
+              <filelist/>
+              <viewattached/>
               
               <Update/>
               <Save/>
               <Clear/>
               <Delete/>
             </final>
-            <attachment>
-              <AudioList/>
-            </attachment>
             <load>
                 <structureWallList/>
               <structureWallLoad/>
@@ -1052,11 +1049,17 @@
         <trigger ref="Audio">
             <label>Record Audio</label>
         </trigger>
-
+		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
+            <label>Audio List:</label>
+            <item>
+                <label>None</label>
+                <value>None</value>
+            </item>
+        </select>
         <trigger ref="Sketch">
           <label>Sketch</label>
         </trigger>
-        <select ref="sketchfilelist" faims_attribute_name="sketchfilename" faims_certainty="false" faims_annotation="false">
+        <select ref="sketchfilelist" faims_certainty="false" faims_annotation="false">
             <label>Sketch File List:</label>
             <item>
                 <label>None</label>
@@ -1066,15 +1069,15 @@
         <trigger ref="AddAttachment">
           <label>Add Attachment</label>
         </trigger>
-		<select ref="filelist" faims_attribute_name="filename" faims_attribute_type="freetext" faims_certainty="false" faims_annotation="false">
-            <label>Attachment File List:</label>
+		<select ref="filelist" faims_certainty="false" faims_annotation="false">
+            <label>Attachments:</label>
             <item>
                 <label>None</label>
                 <value>None</value>
             </item>
         </select>
         <trigger ref="viewattached">
-          <label>View Attachment</label>
+          <label>View Attachments</label>
         </trigger>
         <trigger ref="Update">
           <label>Update Existing Record</label>
@@ -1088,16 +1091,6 @@
         <trigger ref="Delete">
           <label>Delete record</label>
         </trigger>
-      </group>
-      <group ref="attachment" faims_scrollable="false">
-        <label>Audio Attachment</label>
-        <select1 ref="AudioList" appearance="compact" faims_certainty="false">
-          <label>Audio List:</label>
-          <item>
-            <label> </label>
-            <value> </value>
-          </item>
-        </select1>
       </group>
       <group ref="load" faims_scrollable="true">
         <label>Load Structure Items</label>
