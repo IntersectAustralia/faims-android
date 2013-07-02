@@ -477,7 +477,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private Button createTrigger(FormAttribute attribute) {
-		 Button button = new Button(this.activityRef.get());
+		 CustomButton button = new CustomButton(this.activityRef.get());
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;

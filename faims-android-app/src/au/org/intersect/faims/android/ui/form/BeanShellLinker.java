@@ -389,6 +389,18 @@ public class BeanShellLinker {
 										}
 
 									});
+						} else if (view instanceof CustomButton) {
+							view.setOnClickListener(new OnClickListener() {
+
+								@Override
+								public void onClick(View v) {
+									CustomButton button = (CustomButton) v;
+									if (button.canClick()) {
+										execute(code);
+										button.clicked();
+									}
+								}
+							});
 						} else {
 							view.setOnClickListener(new OnClickListener() {
 
@@ -3993,8 +4005,8 @@ public class BeanShellLinker {
 		try {
 			return activity.getCopyFileCount() > 0;
 		} catch (Exception e) {
-			FLog.e("error checking for attached files ", e);
-			showWarning("Logic Error", "Error checking for attached files ");
+			FLog.e("error checking for attached files", e);
+			showWarning("Logic Error", "Error checking for attached files");
 		}
 		return false;
 	}
