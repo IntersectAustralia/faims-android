@@ -816,6 +816,7 @@ updateCanal(id) {
     	AttributeDef("Device", "freetext", "canal/canalDetail/Device", false),
     	AttributeDef("InternalWidth", "measure", "canal/canalDetail/InternalWidth"),
     	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
+    	AttributeDef("Notes", "freetext", "canal/canalDetail/Notes"),
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
 
@@ -857,7 +858,7 @@ associateWithWindow() {
 		showWarning("Logic Error", "Please save record before associating with");
 		return;
 	}
-	saveEntitiesToRel("WallWindow", window_id, id);
+	saveEntitiesToRel("WindowIn", window_id, id);
 }
 
 saveWindow(id) {
@@ -1245,11 +1246,11 @@ associateWithDoorway() {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (isNull(door_id)) {
+    if (isNull(doorway_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
-    saveEntitiesToRel(type, door_id, id);
+    saveEntitiesToRel(type, doorway_id, id);
 }
 
 deleteDoorway(){
@@ -1884,7 +1885,7 @@ updateAllStructure() {
 	Object localStructureWall = new ArrayList();
 	Object localCorner = new ArrayList();
 	
-	if (isNull(structure_id)) {
+	if (!isNull(structure_id)) {
 		localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'StructureWall'  ORDER BY uuid, attributename ASC) group by uuid;");
     	localCorner = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'Corner'  ORDER BY uuid, attributename ASC) group by uuid;");
 	}
@@ -2219,7 +2220,7 @@ loadSurfaceCollection() {
 }
 
 loadLot() {
-	lot_id = getFieldValue("control/data/lotList");
+	lot_id = getFieldValue("surfaceCollection/load/lotList");
 	if (isNull(lot_id)) return;
 
 	id = lot_id;
