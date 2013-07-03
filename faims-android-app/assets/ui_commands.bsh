@@ -921,6 +921,16 @@ getGeometry(String ref, int geomId) {
 	return linker.getGeometry(ref, geomId);
 }
 
+/** 
+  * Get the layer name of the associated geometry on a canvas layer
+  * @param ref the reference to the map view
+  * @geomId the id of the geometry
+  * @return the layer name of the canvas layer the geometry is on
+  */
+getGeometryLayerName(String ref, int geomId) {
+	return linker.getGeometryLayerName(ref, geomId);
+}
+
 /**
   * Draw geometry on the map view that has the reference by specifying the geometry and style. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
@@ -1455,16 +1465,18 @@ String getLastAudioFilePath(){
 }
 
 /**
+  * @return returns true if files are currently being attached
+  */
+isAttachingFiles(){
+	return linker.isAttachingFiles();
+}
+
+//========= MISC ==========
+
+/**
   * Executes a given string of code
   * @param code the string of code to execute
   */
 execute(String code){
 	return linker.execute(code);
-}
-
-/**
-  * @return returns true if files are currently being attached
-  */
-isAttachingFiles(){
-	return linker.isAttachingFiles();
 }

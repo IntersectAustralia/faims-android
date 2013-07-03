@@ -572,6 +572,14 @@ public class CustomMapView extends MapView {
 		geometryIdMap.remove(geomId);
 		geometryIdToLayerMap.remove(geomId);
 	}
+	
+	public String getGeometryLayerName(int geomId) {
+		return getLayerName(geometryIdToLayerMap.get(geomId));
+	}
+	
+	public String getGeometryLayerName(Geometry geom) {
+		return getGeometryLayerName(((GeometryData) geom.userData).geomId);
+	}
 
 	public int getGeometryId(Geometry geom) {
 		if (geom.userData instanceof GeometryData) {

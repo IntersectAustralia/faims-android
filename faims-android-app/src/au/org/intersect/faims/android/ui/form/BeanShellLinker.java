@@ -3244,6 +3244,24 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
+	
+	public String getGeometryLayerName(String ref, int geomId) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+
+				return mapView.getGeometryLayerName(geomId);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error getting geomtry layer name " + ref, e);
+			showWarning("Logic Error", "Error getting geometry layer name " + ref);
+		}
+		return null;
+	}
 
 	public void lockMapView(String ref, boolean lock) {
 		try {

@@ -12,13 +12,15 @@ Completely untested in app, of course.
 
 /*** MAP ***/
 
+DATA_ENTRY_LAYER = "Data Entry";
+
 initMap() {
 	setMapZoom("control/map/map", 15.0f);
 
 	showBaseMap("control/map/map", "Base Map", "files/data/maps/SydneyStreetmap.tif");
 	showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
 
-    createCanvasLayer("control/map/map", "Data Entry");
+    createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
 
 	isEntity = true; // are you loading entities or relationships?
 	queryName = "No Query"; // Name your query
@@ -42,7 +44,12 @@ createGeomId = 0;
 onCreateGeometry() {
 	createGeomId = getMapGeometryCreated();
 	
-	showTabGroup("create");
+	layerName = getGeometryLayerName("control/map/map", createGeomId);
+	if (DATA_ENTRY_LAYER.equals(layerName)) {
+		showTabGroup("create");
+	} else {
+		createGeomId = 0;
+	}
 }
 
 onLoadGeometry() {
@@ -1234,7 +1241,7 @@ deleteDoorway(){
 
 saveDoorway(id) {
 	if (getCreatedGeometry() == null ||
-		(getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong") || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
+		(getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
 		isNull(getFieldValue("doorway/doorDetail/DoorID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1335,8 +1342,8 @@ deleteLichen(){
 
 saveLichen(id) {
 	if (getCreatedGeometry() == null ||
-		(getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong") || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
-		isNull(getFieldValue("lichen/lichenDetail/LichenID")) {
+		(getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
+		isNull(getFieldValue("lichen/lichenDetail/LichenID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
 		return;	
@@ -1415,7 +1422,7 @@ onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()
 
 saveSurfaceCollection(id) {
 	if (getCreatedGeometry() == null ||
-		isNull(getFieldValue("surfaceCollection/description/SurfaceCollectionID")) {
+		isNull(getFieldValue("surfaceCollection/description/SurfaceCollectionID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
 		return;	
@@ -1468,6 +1475,10 @@ deleteLot(){
 }
 
 saveLot(id) {
+	if (isNull(getFieldValue("lot/lotDetail/LotID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;	
+	}
 	lot_id = updateLot(id);
 }
 
@@ -1522,6 +1533,10 @@ onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 
 saveStructureWall(id) {
+	if (isNull(getFieldValue("wall/structureWall/WallID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;	
+	}
 	structure_wall_id = updateStructureWall(id);
 }
 
@@ -1696,7 +1711,7 @@ onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(struc
 
 saveStructure(id) {
 	if (getCreatedGeometry() == null ||
-		isNull(getFieldValue("structure/info/ArchaeologicalElementID")) {
+		isNull(getFieldValue("structure/info/ArchaeologicalElementID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
 		return;	
