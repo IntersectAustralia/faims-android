@@ -139,6 +139,42 @@ public class DatabaseManager {
 		}
 	}
 
+	public void deleteArchEnt(String entity_id) throws jsqlite.Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("entity_id:" + entity_id);
+			
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				if (entity_id != null) {
+					String query = DatabaseQueries.DELETE_ARCH_ENT;
+					st = db.prepare(query);
+					st.bind(1, userId);
+					st.bind(2, entity_id);
+					st.step();
+					st.close();
+					st = null;
+				}
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
 	public String saveArchEnt(String entity_id, String entity_type,
 			String geo_data, List<EntityAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {
@@ -326,6 +362,41 @@ public class DatabaseManager {
 		}
 	}
 	
+	public void deleteRel(String rel_id) throws jsqlite.Exception {
+		synchronized(DatabaseManager.class) {
+			FLog.d("rel_id:" + rel_id);
+			
+			Stmt st = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				
+				if (rel_id != null) {
+					String query = DatabaseQueries.DELETE_RELN;
+					st = db.prepare(query);
+					st.bind(1, userId);
+					st.bind(2, rel_id);
+					st.step();
+					st.close();
+					st = null;
+				}
+			} finally {
+				try {
+					if (st != null) st.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
 	public String saveRel(String rel_id, String rel_type,
 			String geo_data, List<RelationshipAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {

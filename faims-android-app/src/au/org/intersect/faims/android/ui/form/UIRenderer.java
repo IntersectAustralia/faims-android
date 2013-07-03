@@ -437,8 +437,12 @@ public class UIRenderer implements IRestoreActionListener{
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if (!horizontalScrollView.isMulti()) {
-					return horizontalScrollView.getSelectedImageView()
-							.getPicture().getUrl();
+					if(horizontalScrollView.getSelectedImageView() != null){
+						return horizontalScrollView.getSelectedImageView()
+								.getPicture().getId();
+					}else{
+						return "";
+					}
 				} else {
 					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
@@ -671,10 +675,20 @@ public class UIRenderer implements IRestoreActionListener{
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					if(horizontalScrollView.getImageViews() != null){
 						for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-							if(customImageView.getPicture().getUrl().equals(value)){
-								customImageView.setBackgroundColor(Color.BLUE);
-								horizontalScrollView.setSelectedImageView(customImageView);
-								break;
+							if (!horizontalScrollView.isMulti()) {
+								if (customImageView.getPicture().getId().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.setSelectedImageView(customImageView);
+									break;
+								}
+							}else{
+								if (customImageView.getPicture().getUrl().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.setSelectedImageView(customImageView);
+									break;
+								}
 							}
 						};
 					}

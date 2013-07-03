@@ -1283,11 +1283,20 @@ public class BeanShellLinker {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 					for (CustomImageView customImageView : horizontalScrollView
 							.getImageViews()) {
-						if (customImageView.getPicture().getUrl().equals(value)) {
-							customImageView.setBackgroundColor(Color.BLUE);
-							horizontalScrollView
-									.setSelectedImageView(customImageView);
-							break;
+						if (!horizontalScrollView.isMulti()) {
+							if (customImageView.getPicture().getId().equals(value)) {
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView
+										.setSelectedImageView(customImageView);
+								break;
+							}
+						}else{
+							if (customImageView.getPicture().getUrl().equals(value)) {
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView
+										.setSelectedImageView(customImageView);
+								break;
+							}
 						}
 					}
 					;
@@ -1545,8 +1554,12 @@ public class BeanShellLinker {
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if (!horizontalScrollView.isMulti()) {
-					return horizontalScrollView.getSelectedImageView()
-							.getPicture().getUrl();
+					if(horizontalScrollView.getSelectedImageView() != null){
+						return horizontalScrollView.getSelectedImageView()
+								.getPicture().getId();
+					}else{
+						return "";
+					}
 				} else {
 					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
 						List<String> selectedPictures = new ArrayList<String>();
@@ -1668,6 +1681,16 @@ public class BeanShellLinker {
 		return null;
 	}
 
+	public Boolean deleteArchEnt(String entity_id){
+		try {
+			activity.getDatabaseManager().deleteArchEnt(entity_id);
+			return true;
+		} catch (jsqlite.Exception e) {
+			FLog.e("can not delete arch entity with the supplied id", e);
+		}
+		return false;
+	}
+
 	public String saveRel(String rel_id, String rel_type,
 			List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
 		try {
@@ -1682,6 +1705,16 @@ public class BeanShellLinker {
 		return null;
 	}
 
+	public Boolean deleteRel(String rel_id){
+		try {
+			activity.getDatabaseManager().deleteRel(rel_id);
+			return true;
+		} catch (jsqlite.Exception e) {
+			FLog.e("can not delete relationship with the supplied id", e);
+		}
+		return false;
+	}
+	
 	public boolean addReln(String entity_id, String rel_id, String verb) {
 		try {
 			return activity.getDatabaseManager().addReln(entity_id, rel_id,
