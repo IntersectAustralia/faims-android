@@ -42,6 +42,8 @@ onToolEvent("control/map/map", "load", "onLoadGeometry()");
 
 createGeomId = 0;
 onCreateGeometry() {
+	System.out.println("onCreateGeometry");
+	
 	createGeomId = getMapGeometryCreated();
 	
 	layerName = getGeometryLayerName("control/map/map", createGeomId);
@@ -1257,8 +1259,8 @@ deleteDoorway(){
 }
 
 saveDoorway(id) {
-	if ((id == null && getCreatedGeometry() == null) ||
-		(id == null && getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
+	noGPSGeom = isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat"));
+	if (id == null && (getCreatedGeometry() == null && noGPSGeom) ||
 		isNull(getFieldValue("doorway/doorDetail/DoorID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1363,8 +1365,8 @@ deleteLichen(){
 }
 
 saveLichen(id) {
-	if ((id == null && getCreatedGeometry() == null) ||
-		(id == null && getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
+	noGPSGeom = isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat"));
+	if ((id == null && getCreatedGeometry() == null && noGPSGeom) ||
 		isNull(getFieldValue("lichen/lichenDetail/LichenID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1381,7 +1383,7 @@ updateLichen(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
-	enitty = null;
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1467,7 +1469,7 @@ deleteSurfaceCollection(){
 updateSurfaceCollection(id) {
 	if (isNull(id)) id = null;
 	
-	enitty = null;
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 	}
