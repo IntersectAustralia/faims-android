@@ -35,6 +35,33 @@ initMap() {
 
 initMap();
 
+onToolEvent("control/map/map", "create", "onCreateGeometry()");
+onToolEvent("control/map/map", "load", "onLoadGeometry()");
+
+createGeomId = -1;
+onCreateGeometry() {
+	createGeomId = getMapGeometryCreated();
+	
+	showTabGroup("create");
+}
+
+onLoadGeometry() {
+	uuid = getMapGeometryLoaded();
+	isEntity = "entity".equals(getMapGeometryLoadedType());
+	
+	// TODO need to fix fetchArchEnt to return entity type
+}
+
+getCreatedGeometry() {
+	if (createGeomId < 0) return null;
+	
+	geom = getGeometry("control/map/map", createGeomId);
+	
+	ArrayList list = new ArrayList();
+	list.add(geom);
+	return list;
+}
+
 /*** MISC ***/
 
 AttributeDef(String name, String type, String ref) {
@@ -189,8 +216,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 
     entitySaved = true;
     checkFilesAttached();
-
-    updateAll();
+    
     return saved_id;
 }
 
@@ -232,37 +258,12 @@ getDefaultUsersList() {
 
 usersList = getDefaultUsersList();
 
-
 populateListForUsers(){
     populateDropDown("user/tab1/users", getDefaultUsersList());
     populateList("user/tab1/devices", fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = 'Device' "));
 }
 
 populateListForUsers();
-
-populateListForEntityTypes() {
-	ArrayList list = new ArrayList();
-	list.add("Structure");
-	list.add("Wall");
-	list.add("Doorway");
-	list.add("Feature");
-	list.add("Special Find");
-	list.add("Lichen");
-	list.add("Surface Collection");
-	list.add("Canal");
-	populateDropDown("control/map/entityType", list);
-}
-
-populateListForEntityTypes();
-
-populateNicheAssociateWithTypes() {
-	ArrayList list = new ArrayList();
-	list.add("StructureContains");
-	list.add("NicheIn");
-	//populateDropDown("niche/nicheDetail/AssociateWithType", list);
-}
-
-//populateNicheAssociateWithTypes();
 
 String username = "";
 String device = "";
@@ -293,6 +294,8 @@ makeGallery(String attrib){
     Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"'");
     return a;
 }
+
+/*** CONTROL ***/
 
 newStructure(){
 	structure_id = null;
@@ -502,33 +505,15 @@ newCanal(){
     setFieldValue("canal/canalDetail/Device", device);
 }
 
-newEntity() {
+onEvent("create/tab1/structure", "click", "newStructure()");
+onEvent("create/tab1/wall", "click", "newFreeWall()");
+onEvent("create/tab1/doorway", "click", "newDoorway()");
+onEvent("create/tab1/feature", "click", "newFeature()");
+onEvent("create/tab1/specialFind", "click", "newSpecialFind()");
+onEvent("create/tab1/lichen", "click", "newLichen()");
+onEvent("create/tab1/surfaceCollection", "click", "newSurfaceCollection()");
+onEvent("create/tab1/canal", "click", "newCanal()");
 
-	type = getFieldValue("control/map/entityType");
-	if (type == null || "".equals(type)) return;
-
-	if ("Structure".equals(type)) {
-		newStructure();
-	} else if ("Wall".equals(type)) {
-		newFreeWall();
-	} else if ("Doorway".equals(type)) {
-		newDoorway();
-	} else if ("Feature".equals(type)) {
-		newFeature();
-	} else if ("Special Find".equals(type)) {
-		newSpecialFind();
-	} else if ("Lichen".equals(type)) {
-		newLichen();
-	} else if ("Surface Collection".equals(type)) {
-		newSurfaceCollection();
-	} else if ("Canal".equals(type)) {
-		newCanal();
-	}
-
-}
-
-onEvent("control", "show", "updateAll()");
-onEvent("control/map/create", "click", "newEntity()");
 onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
 onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
 onEvent("control/gps/startsync", "click", "startSync()");
@@ -552,16 +537,12 @@ stopSync() {
 }
 
 syncStarted() {
-    //showToast("starting sync");
 }
 
 syncCompleted() {
-    //showToast("completed sync");
-    updateAll();
 }
 
 syncFailed() {
-    //showToast("failed sync");
 }
 
 onEvent("structure/component/AddCorner", "click", "newCorner()");
@@ -795,7 +776,7 @@ updateCanal(id) {
     	};
 
 
-    return saveEntity(id, "Canal", attributeDefs, getGeometryHighlights("control/map/map"), "loadCanalFileAttributes(canal_id);");
+    return saveEntity(id, "Canal", attributeDefs, getCreatedGeometry(), "loadCanalFileAttributes(canal_id);");
 }
 
 /*** WINDOW ***/
@@ -951,7 +932,7 @@ updateSpecialFind(id) {
     	};
 
 
-    return saveEntity(id, "SpecialFind", attributeDefs, getGeometryHighlights("control/map/map"), "loadSpecialFindFileAttributes(special_find_id);");
+    return saveEntity(id, "SpecialFind", attributeDefs, getCreatedGeometry(), "loadSpecialFindFileAttributes(special_find_id);");
 }
 
 /*** FEATURES ***/
@@ -1029,7 +1010,7 @@ updateFeature(id) {
     	};
 
 
-    return saveEntity(id, "Feature", attributeDefs, getGeometryHighlights("control/map/map"), "loadFeatureFileAttributes(feature_id);");
+    return saveEntity(id, "Feature", attributeDefs, getCreatedGeometry(), "loadFeatureFileAttributes(feature_id);");
 }
 
 /*** FREEWALL ***/
@@ -1116,7 +1097,7 @@ updateFreeWall(id) {
     	};
 
 
-    return saveEntity(id, "Wall", attributeDefs, getGeometryHighlights("control/map/map"), "loadWallFileAttributes(wall_id);");
+    return saveEntity(id, "Wall", attributeDefs, getCreatedGeometry(), "loadWallFileAttributes(wall_id);");
 
 }
 
@@ -1225,7 +1206,7 @@ updateDoorway(id) {
     	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
 
-    return saveEntity(id, "Doorway", attributeDefs, getGeometryHighlights("control/map/map"), "loadDoorwayFileAttributes(doorway_id);");
+    return saveEntity(id, "Doorway", attributeDefs, getCreatedGeometry(), "loadDoorwayFileAttributes(doorway_id);");
 }
 
 /*** LICHEN ***/
@@ -1312,7 +1293,7 @@ updateLichen(id) {
     	};
 
 
-    return saveEntity(id, "Lichen", attributeDefs, getGeometryHighlights("control/map/map"), "loadLichenFileAttributes(lichen_id);");
+    return saveEntity(id, "Lichen", attributeDefs, getCreatedGeometry(), "loadLichenFileAttributes(lichen_id);");
 }
 
 takeLichenPoint(){
@@ -1372,7 +1353,7 @@ updateSurfaceCollection(id) {
     	};
 
 
-    return saveEntity(id, "SurfaceCollection", attributeDefs, getGeometryHighlights("control/map/map"), "loadSurfaceCollection(surface_collection_id);");
+    return saveEntity(id, "SurfaceCollection", attributeDefs, getCreatedGeometry(), "loadSurfaceCollection(surface_collection_id);");
 
 }
 
@@ -1683,10 +1664,55 @@ updateStructure(id){
     	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
     	};
 
-    return saveEntity(id, "Structure", attributeDefs, getGeometryHighlights("control/map/map"), "loadStructureFileAttributes(structure_id);");
+    return saveEntity(id, "Structure", attributeDefs, getCreatedGeometry(), "loadStructureFileAttributes(structure_id);");
 }
 
 /*** LOAD ***/
+
+updateAllSpecialFind() {
+	Object structure = fetchEntityList("Structure");
+	populateDropDown("specialFind/findDetail/AssociateWithList", structure);
+}
+
+updateAllStructure() {
+	if (structure_id == null || "".equals(structure_id)) return;
+	
+	Object localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'StructureWall'  ORDER BY uuid, attributename ASC) group by uuid;");
+    Object localCorner = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'Corner'  ORDER BY uuid, attributename ASC) group by uuid;");
+
+	populateDropDown("structure/load/structureWallList", localStructureWall);
+    populateDropDown("structure/load/cornerList", localCorner);
+}
+
+updateAllWindow() {
+	Object structureWallFreeWall =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Wall')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+	populateDropDown("window/windowDetail/AssociateWithList", localStructureWall);
+}
+
+updateAllNiche() {
+	Object sWallsAndCorners =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Corner')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+	populateDropDown("niche/nicheDetail/AssociateWithList", sWallsAndCorners);
+}
+
+updateAllFreeWall() {
+	Object fWallsAndStructures =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('Wall', 'Structure')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");   
+	populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
+}
+
+updateAllDoorway() {
+	Object structureStructureWallFreeWall =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Structure', 'Wall')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+	populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
+}
+
+updateAllLichen() {
+	Object allEntities =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
+    populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
+}
+
+updateAllFeature() {
+	Object structure = fetchEntityList("Structure");
+	populateDropDown("feature/featureDetail/AssociateWithList", structure);
+}
 
 updateAll(){
 	Object structure = fetchEntityList("Structure");
@@ -1696,27 +1722,10 @@ updateAll(){
 	Object specialFind = fetchEntityList("SpecialFind");
 	Object lichen = fetchEntityList("Lichen");
 	Object surfaceCollection = fetchEntityList("SurfaceCollection");
-	Object lot = fetchEntityList("Lot");
 	Object canal = fetchEntityList("Canal");
-
-
-
-	Object corner = fetchEntityList("Corner");
 	Object niche = fetchEntityList("Niche");
 	Object window = fetchEntityList("Window");
-
-    Object allEntities =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
-    Object sWallsAndCorners =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Corner')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
-
-
-    Object fWallsAndStructures =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('Wall', 'Structure')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
-    Object structureStructureWallFreeWall =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and aenttypename IN ('StructureWall', 'Structure', 'Wall')) USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL  GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULl  ORDER BY uuid, attributename ASC) group by uuid;");
-
-
-    Object localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'StructureWall'  ORDER BY uuid, attributename ASC) group by uuid;");
-
-    Object localCorner = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'Corner'  ORDER BY uuid, attributename ASC) group by uuid;");
-
+	
 	populateDropDown("control/data/structureList", structure);
 	populateDropDown("control/data/wallList", wall);
 	populateDropDown("control/data/doorwayList", doorway);
@@ -1724,28 +1733,21 @@ updateAll(){
 	populateDropDown("control/data/specialFindList", specialFind);
 	populateDropDown("control/data/lichenList", lichen);
 	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
-	populateDropDown("control/data/lotList", lot);
 	populateDropDown("control/data/canalList", canal);
-
-    if (structure_id != null){
-       populateDropDown("structure/load/structureWallList", localStructureWall);
-       populateDropDown("structure/load/cornerList", localCorner);
-
-   }
-
 	populateDropDown("control/data/nicheList", niche);
 	populateDropDown("control/data/windowList", window);
-
-	populateDropDown("window/windowDetail/AssociateWithList", structureWall);
-	populateDropDown("niche/nicheDetail/AssociateWithList", sWallsAndCorners);
-    populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
-    populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
-    populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
-    populateDropDown("specialFind/findDetail/AssociateWithList", structure);
-    populateDropDown("feature/featureDetail/AssociateWithList", structure);
-
-    //TODO make a lot list as structureWallListAbove
 }
+
+onEvent("control", "show", "updateAll()");
+onEvent("feature", "show", "updateAllFeature()");
+onEvent("lichen", "show", "updateAllLichen()");
+onEvent("doorway", "show", "updateAllDoorway()");
+onEvent("freeWall", "show", "updateAllFreeWall()");
+onEvent("niche", "show", "updateAllNiche()");
+onEvent("window", "show", "updateAllWindow()");
+onEvent("wall", "show", "updateAllStructureWall()");
+onEvent("structure", "show", "updateAllStructure()");
+onEvent("specialFind", "show", "updateAllSpecialFind()");
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
@@ -2188,9 +2190,9 @@ onEvent("control/data/featureLoad", "click", "loadFeature()");
 onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
 onEvent("control/data/lichenLoad", "click", "loadLichen()");
 onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
-onEvent("control/data/lotLoad", "click", "loadLot()");
 onEvent("control/data/canalLoad", "click", "loadCanal()");
-onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
-onEvent("structure/load/cornerLoad", "click", "loadCorner()");
 onEvent("control/data/nicheLoad", "click", "loadNiche()");
 onEvent("control/data/windowLoad", "click", "loadWindow()");
+onEvent("surfaceCollection/load/lotLoad", "click", "loadLot()");
+onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
+onEvent("structure/load/cornerLoad", "click", "loadCorner()");

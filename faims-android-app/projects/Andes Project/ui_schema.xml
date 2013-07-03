@@ -20,6 +20,11 @@
               <login/>
             </tab1>
           </user>
+          <create>
+              <tab1>
+                  <entities/>
+              </tab1>
+          </create>
           <control>
             <map>
               <map/>
@@ -45,14 +50,10 @@
             <data>
               <structureList/>
               <structureLoad/>
-              <doorwayList/>
-              <doorwayLoad/>
-              <nicheList/>
-              <nicheLoad/>
-              <windowList/>
-              <windowLoad/>
               <wallList/>
               <wallLoad/>
+              <doorwayList/>
+              <doorwayLoad/>
               <featureList/>
               <featureLoad/>
               <specialFindList/>
@@ -61,10 +62,12 @@
               <lichenLoad/>
               <surfaceCollectionList/>
               <surfaceCollectionLoad/>
-              <lotList/>
-              <lotLoad/>
               <canalList/>
               <canalLoad/>
+              <nicheList/>
+              <nicheLoad/>
+              <windowList/>
+              <windowLoad/>
             </data>
             <gps>
               <connectexternal/>
@@ -511,10 +514,10 @@
               <NewLot/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
             </material>
-            <lotLoad>
-              <lotLoadList/>
-              <lotLoadButton/>
-            </lotLoad>
+            <load>
+              <lotList/>
+              <lotLoad/>
+            </load>
           </surfaceCollection>
           <lot>
             <lotDetail>
@@ -645,6 +648,36 @@
         </trigger>
       </group>
     </group>
+    <group ref="create">
+        <label></label>
+        <group ref="tab1">
+            <label>Create Record For</label>
+            <trigger ref="structure">
+                <label>Create Structure</label>
+            </trigger>
+            <trigger ref="wall">
+                <label>Create Wall</label>
+            </trigger>
+            <trigger ref="doorway">
+                <label>Create Doorway</label>
+            </trigger>
+            <trigger ref="feature">
+                <label>Create Feature</label>
+            </trigger>
+            <trigger ref="specialFind">
+                <label>Create Special Find</label>
+            </trigger>
+            <trigger ref="lichen">
+                <label>Create Lichen</label>
+            </trigger>
+            <trigger ref="surfaceCollection">
+                <label>Create Surface Collection</label>
+            </trigger>
+            <trigger ref="canal">
+                <label>Create Canal</label>
+            </trigger>
+        </group>
+    </group>
     <group ref="control">
       <label>Maps and Controls</label>
       <group ref="map" faims_scrollable="false">
@@ -652,25 +685,6 @@
         <input ref="map" faims_map="true" faims_certainty="false">
           <label> </label>
         </input>
-        <group ref="mapContainer" faims_style="orientation">
-          <label/>
-          <group ref="child1" faims_style="even">
-            <label/>
-            <trigger ref="create">
-              <label>Create</label>
-            </trigger>
-          </group>
-          <group ref="child2" faims_style="even">
-            <label/>
-            <select1 ref="entityType" faims_certainty="false">
-              <label>Type</label>
-              <item>
-                <label>dummy</label>
-                <value>dummy</value>
-              </item>
-            </select1>
-          </group>
-        </group>
       </group>
       <group ref="data">
         <label>Loading Data</label>
@@ -684,36 +698,6 @@
         <trigger ref="structureLoad">
           <label>Load Structure</label>
         </trigger>
-        <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
-          <label>Doorways</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="doorwayLoad">
-          <label>Load Doorway</label>
-        </trigger>
-        <select1 ref="nicheList" faims_certainty="false" faims_annotation="false">
-          <label>Niches</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="nicheLoad">
-          <label>Load Niche</label>
-        </trigger>
-        <select1 ref="windowList" faims_certainty="false" faims_annotation="false">
-          <label>Windows</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="windowLoad">
-          <label>Load Window</label>
-        </trigger>
         <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
           <label>Walls</label>
           <item>
@@ -723,6 +707,16 @@
         </select1>
         <trigger ref="wallLoad">
           <label>Load Wall</label>
+        </trigger>
+        <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
+          <label>Doorways</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="doorwayLoad">
+          <label>Load Doorway</label>
         </trigger>
         <select1 ref="featureList" faims_certainty="false" faims_annotation="false">
           <label>Features</label>
@@ -764,16 +758,6 @@
         <trigger ref="surfaceCollectionLoad">
           <label>Load Surface Collection</label>
         </trigger>
-        <select1 ref="lotList" faims_certainty="false" faims_annotation="false">
-          <label>Lots</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="lotLoad">
-          <label>Load Lot</label>
-        </trigger>
         <select1 ref="canalList" faims_certainty="false" faims_annotation="false">
           <label>Canals</label>
           <item>
@@ -783,6 +767,26 @@
         </select1>
         <trigger ref="canalLoad">
           <label>Load Canal</label>
+        </trigger>
+        <select1 ref="nicheList" faims_certainty="false" faims_annotation="false">
+          <label>Niches</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="nicheLoad">
+          <label>Load Niche</label>
+        </trigger>
+        <select1 ref="windowList" faims_certainty="false" faims_annotation="false">
+          <label>Windows</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="windowLoad">
+          <label>Load Window</label>
         </trigger>
       </group>
       <group ref="gps">
@@ -1899,16 +1903,16 @@
         </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
       </group>
-      <group ref="lotLoad">
+      <group ref="load">
         <label>Load Lots</label>
-        <select1 ref="lotLoadList" faims_certainty="false" faims_annotation="false">
+        <select1 ref="lotList" faims_certainty="false" faims_annotation="false">
           <label>Lots</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="lotLoadButton">
+        <trigger ref="lotLoad">
           <label>Load Lot</label>
         </trigger>
       </group>
