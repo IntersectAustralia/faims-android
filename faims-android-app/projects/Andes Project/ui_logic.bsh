@@ -227,7 +227,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
 	    		geoData.add(new Point(p, null, (PointStyle) null, null));
 	    	}
     	}
-
+    	
     }
 
     saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
@@ -619,7 +619,7 @@ updateCorner(id) {
 	    cornerPictures = new ArrayList();
 
 		ArrayList loadedPictures = new ArrayList();
-
+		
 		if (!isNull(id)) {
 			entity = fetchArchEnt(id);
 			for (Object attribute : entity.getAttributes()) {
@@ -778,7 +778,7 @@ deleteCanal(){
 }
 
 saveCanal(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("canal/canalDetail/CanalID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -795,6 +795,7 @@ updateCanal(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -815,7 +816,11 @@ updateCanal(id) {
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
 
-    return saveEntity(id, "Canal", attributeDefs, getCreatedGeometry(), "loadCanalFileAttributes(canal_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Canal", attributeDefs, data, "loadCanalFileAttributes(canal_id);");
 }
 
 /*** WINDOW ***/
@@ -948,7 +953,7 @@ deleteSpecialFind(){
 }
 
 saveSpecialFind(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("specialFind/findDetail/SpecialFindID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -965,6 +970,7 @@ updateSpecialFind(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -985,8 +991,11 @@ updateSpecialFind(id) {
     	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
     	};
 
-
-    return saveEntity(id, "SpecialFind", attributeDefs, getCreatedGeometry(), "loadSpecialFindFileAttributes(special_find_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "SpecialFind", attributeDefs, data, "loadSpecialFindFileAttributes(special_find_id);");
 }
 
 /*** FEATURES ***/
@@ -1036,7 +1045,7 @@ deleteFeature(){
 }
 
 saveFeature(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("feature/featureDetail/FeatureID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1053,6 +1062,7 @@ updateFeature(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1072,8 +1082,11 @@ updateFeature(id) {
     	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
     	};
 
-
-    return saveEntity(id, "Feature", attributeDefs, getCreatedGeometry(), "loadFeatureFileAttributes(feature_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Feature", attributeDefs, data, "loadFeatureFileAttributes(feature_id);");
 }
 
 /*** FREEWALL ***/
@@ -1124,7 +1137,7 @@ deleteFreeWall(){
 }
 
 saveFreeWall(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("freeWall/freeWallDetail/WallID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1140,7 +1153,8 @@ updateFreeWall(id) {
     freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
-
+	
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1168,8 +1182,11 @@ updateFreeWall(id) {
     	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
     	};
 
-
-    return saveEntity(id, "Wall", attributeDefs, getCreatedGeometry(), "loadWallFileAttributes(wall_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Wall", attributeDefs, data, "loadWallFileAttributes(wall_id);");
 
 }
 
@@ -1240,8 +1257,8 @@ deleteDoorway(){
 }
 
 saveDoorway(id) {
-	if (getCreatedGeometry() == null ||
-		(getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
+	if ((id == null && getCreatedGeometry() == null) ||
+		(id == null && getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
 		isNull(getFieldValue("doorway/doorDetail/DoorID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1258,6 +1275,7 @@ updateDoorway(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1288,7 +1306,11 @@ updateDoorway(id) {
     	};
 
 	// TODO update the doorway count in the structure wall and in structure
-    return saveEntity(id, "Doorway", attributeDefs, getCreatedGeometry(), "loadDoorwayFileAttributes(doorway_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Doorway", attributeDefs, data, "loadDoorwayFileAttributes(doorway_id);");
 }
 
 /*** LICHEN ***/
@@ -1341,8 +1363,8 @@ deleteLichen(){
 }
 
 saveLichen(id) {
-	if (getCreatedGeometry() == null ||
-		(getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
+	if ((id == null && getCreatedGeometry() == null) ||
+		(id == null && getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
 		isNull(getFieldValue("lichen/lichenDetail/LichenID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1359,6 +1381,7 @@ updateLichen(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
+	enitty = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1384,8 +1407,11 @@ updateLichen(id) {
     	AttributeDef("", "gps", "lichen/lichenDetail/GPSLong", "lichen/lichenDetail/GPSLat")
     	};
 
-
-    return saveEntity(id, "Lichen", attributeDefs, getCreatedGeometry(), "loadLichenFileAttributes(lichen_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Lichen", attributeDefs, data, "loadLichenFileAttributes(lichen_id);");
 }
 
 takeLichenPoint(){
@@ -1421,7 +1447,7 @@ onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()
 
 
 saveSurfaceCollection(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("surfaceCollection/description/SurfaceCollectionID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1440,6 +1466,11 @@ deleteSurfaceCollection(){
 
 updateSurfaceCollection(id) {
 	if (isNull(id)) id = null;
+	
+	enitty = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+	}
 
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
@@ -1455,8 +1486,11 @@ updateSurfaceCollection(id) {
     	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
     	};
 
-
-    return saveEntity(id, "SurfaceCollection", attributeDefs, getCreatedGeometry(), "loadSurfaceCollection(surface_collection_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "SurfaceCollection", attributeDefs, data, "loadSurfaceCollection(surface_collection_id);");
 
 }
 
@@ -1710,7 +1744,7 @@ onEvent("structure/final/Delete", "click", "deleteStructure()");
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
 
 saveStructure(id) {
-	if (getCreatedGeometry() == null ||
+	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("structure/info/ArchaeologicalElementID"))) {
 		
 		showWarning("Logic Error", "Cannot save record without geometry or id");
@@ -1762,6 +1796,7 @@ updateStructure(id){
 	ArrayList loadedVideos = new ArrayList();
 	ArrayList loadedAudios = new ArrayList();
 
+	entity = null;
 	if (!isNull(id)) {
 		entity = fetchArchEnt(structure_id);
 		for (Object attribute : entity.getAttributes()) {
@@ -1823,7 +1858,11 @@ updateStructure(id){
     	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
     	};
 
-    return saveEntity(id, "Structure", attributeDefs, getCreatedGeometry(), "loadStructureFileAttributes(structure_id);");
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Structure", attributeDefs, data, "loadStructureFileAttributes(structure_id);");
 }
 
 /*** LOAD ***/
