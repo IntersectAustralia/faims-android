@@ -455,6 +455,7 @@ newFreeWall(){
 
     newTabGroup("freeWall");
     populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
+    populateList("freeWall/freeWallDetail/WallClass", makeVocab("WallClass"));
     populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
     populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
     freewallPictures = new ArrayList();
@@ -1022,7 +1023,7 @@ onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
 onEvent("feature/featureDetail/AssociateWith", "click", "associateWithFeature()");
 
 associateWithFeature() {
-    id = getFieldValue("feature/featureDetail//AssociateWithList");
+    id = getFieldValue("feature/featureDetail/AssociateWithList");
     type = "StructureContains";
     if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
@@ -1113,8 +1114,8 @@ onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
 
 onEvent("freeWall/freeWallDetail/AssociateWith", "click", "associateWithFreeWall()");
 
-associateWithFeature() {
-    id = getFieldValue("feature/featureDetail/AssociateWithList");
+associateWithFreeWall() {
+    id = getFieldValue("freeWall/freeWallDetail/AssociateWithList");
     type = "WallWith";
     if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
@@ -1233,7 +1234,7 @@ onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
 
 onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
 
-associateWithFeature() {
+associateWithDoorway() {
     id = getFieldValue("doorway/doorDetail/AssociateWithList");
     type = "DoorwayIn";
     if (isNull(id)) {
@@ -1244,11 +1245,11 @@ associateWithFeature() {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (isNull(wall_id)) {
+    if (isNull(door_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
-    saveEntitiesToRel(type, wall_id, id);
+    saveEntitiesToRel(type, door_id, id);
 }
 
 deleteDoorway(){
@@ -1492,7 +1493,7 @@ updateSurfaceCollection(id) {
 	if (entity != null) {
 		data = entity.getGeometryList();
 	}
-    return saveEntity(id, "SurfaceCollection", attributeDefs, data, "loadSurfaceCollection(surface_collection_id);");
+    return saveEntity(id, "SurfaceCollection", attributeDefs, data, "");
 
 }
 
@@ -1534,7 +1535,7 @@ updateLot(id) {
     	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
     	};
 
-        saved_id = saveEntity(id, "Lot", attributeDefs, null, "loadLoat(lot_id);");
+        saved_id = saveEntity(id, "Lot", attributeDefs, null, "");
 
 
         // save lot to surface collection
