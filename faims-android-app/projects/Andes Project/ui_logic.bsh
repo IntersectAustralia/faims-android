@@ -38,7 +38,7 @@ initMap();
 onToolEvent("control/map/map", "create", "onCreateGeometry()");
 onToolEvent("control/map/map", "load", "onLoadGeometry()");
 
-createGeomId = -1;
+createGeomId = 0;
 onCreateGeometry() {
 	createGeomId = getMapGeometryCreated();
 	
@@ -53,7 +53,7 @@ onLoadGeometry() {
 }
 
 getCreatedGeometry() {
-	if (createGeomId < 0) return null;
+	if (createGeomId <= 0) return null;
 	
 	geom = getGeometry("control/map/map", createGeomId);
 	
@@ -62,7 +62,18 @@ getCreatedGeometry() {
 	return list;
 }
 
+clearCreatedGeometry() {
+	if (createGeomId <= 0) return;
+	
+	clearGeometry("control/map/map", createGeomId);
+	createGeomId = 0;
+}
+
 /*** MISC ***/
+
+isNull(v) {
+	return v == null || "".equals(v);
+}
 
 AttributeDef(String name, String type, String ref) {
 	return AttributeDef(name, type, ref, true);
@@ -126,7 +137,7 @@ OnFilesAttached() {
 }
 
 saveFiles(loadedFiles, files, type, attributes) {
-	if (files == null || "".equals(files)) return;
+	if (isNull(files)) return;
 	if (files.size() == 1 && "None".equals(files.get(0))) return;
 
 	// delete attributes that are not included
@@ -202,7 +213,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		}
     		saveFiles(def.loadedFiles, files, def.name, attributes);
     	} else if ("gps".equals(def.type)) {
-    		if (!("".equals(getFieldValue(def.ref1)) || "".equals(getFieldValue(def.ref2)))) {
+    		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
 	    		geoData = new ArrayList();
 	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
 	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
@@ -576,20 +587,24 @@ onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
 saveCorner(id) {
+	if (isNull(getFieldValue("corner/cornerDetail/CornerID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;	
+	}
 	corner_id = updateCorner(id);
 }
 
 deleteCorner(){
-	if (corner_id != null) {
+	if (!isNull(corner_id)) {
 		deleteArchEnt(corner_id);
 		cancelTabGroup("corner", false);
 	}
 }
 
 updateCorner(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
-    if (structure_id == null) {
+    if (isNull(structure_id)) {
   		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
@@ -598,7 +613,7 @@ updateCorner(id) {
 
 		ArrayList loadedPictures = new ArrayList();
 
-		if (id != null) {
+		if (!isNull(id)) {
 			entity = fetchArchEnt(id);
 			for (Object attribute : entity.getAttributes()) {
 				System.out.println(attribute.toString());
@@ -629,7 +644,7 @@ updateCorner(id) {
 	    saved_id = saveEntity(id, "Corner", attributeDefs, null, "loadCornerFileAttributes(corner_id);");
 
 	    // save corner to structure if new corner
-	    if (id == null) {
+	    if (isNull(id)) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
 
@@ -662,15 +677,15 @@ onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 associateWithNiche() {
 	id = getFieldValue("niche/nicheDetail/AssociateWithList");
 	type = "NicheIn";
-	if (id == null || "".equals(id)) {
+	if (isNull(id)) {
 		showWarning("Logic Error", "Please select an id to associate with");
 		return;
 	}
-	if (type == null || "".equals(type)) {
+	if (isNull(type)) {
 		showWarning("Logic Error", "Please select a type to associate with");
 		return;
 	}
-	if (niche_id == null) {
+	if (isNull(niche_id)) {
 		showWarning("Logic Error", "Please save record before associating with");
 		return;
 	}
@@ -678,24 +693,28 @@ associateWithNiche() {
 }
 
 saveNiche(id) {
+	if (isNull(getFieldValue("niche/nicheDetail/NicheID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;	
+	}
 	niche_id = updateNiche(id);
 }
 
 deleteNiche(){
-	if (niche_id != null) {
+	if (!isNull(niche_id)) {
 		deleteArchEnt(niche_id);
 		cancelTabGroup("niche", false);
 	}
 }
 
 updateNiche(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     nichePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -745,24 +764,31 @@ onEvent("canal/canalDetail/Update", "delayclick", "saveCanal(canal_id)");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 
 deleteCanal(){
-	if (canal_id != null) {
+	if (!isNull(canal_id)) {
 		deleteArchEnt(canal_id);
 		cancelTabGroup("canal", false);
 	}
 }
 
 saveCanal(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("canal/canalDetail/CanalID"))) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	canal_id = updateCanal(id);
+	clearCreatedGeometry();
 }
 
 updateCanal(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     canalPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -781,7 +807,6 @@ updateCanal(id) {
     	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
     	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
     	};
-
 
     return saveEntity(id, "Canal", attributeDefs, getCreatedGeometry(), "loadCanalFileAttributes(canal_id);");
 }
@@ -809,11 +834,11 @@ onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
 associateWithWindow() {
 	id = getFieldValue("window/windowDetail/AssociateWithList");
-	if (id == null || "".equals(id)) {
+	if (isNull(id)) {
 		showWarning("Logic Error", "Please select an id to associate with");
 		return;
 	}
-	if (window_id == null) {
+	if (isNull(window_id)) {
 		showWarning("Logic Error", "Please save record before associating with");
 		return;
 	}
@@ -821,24 +846,28 @@ associateWithWindow() {
 }
 
 saveWindow(id) {
+	if (isNull(getFieldValue("window/windowDetail/WindowID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;	
+	}
 	window_id = updateWindow(id);
 }
 
 deleteWindow(){
-	if (window_id != null) {
+	if (!isNull(window_id)) {
 		deleteArchEnt(window_id);
 		cancelTabGroup("window", false);
 	}
 }
 
 updateWindow(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     windowPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -889,15 +918,15 @@ onEvent("specialFind/findDetail/AssociateWith", "click", "associateWithSpecialFi
 associateWithSpecialFind() {
     id = getFieldValue("specialFind/findDetail/AssociateWithList");
     type = "StructureContains";
-    if (id == null || "".equals(id)) {
+    if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
         return;
     }
-    if (type == null || "".equals(type)) {
+    if (isNull(type)) {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (special_find_id == null) {
+    if (isNull(special_find_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
@@ -905,24 +934,31 @@ associateWithSpecialFind() {
 }
 
 deleteSpecialFind(){
-	if (special_find_id != null) {
+	if (!isNull(special_find_id)) {
 		deleteArchEnt(special_find_id);
 		cancelTabGroup("specialFind", false);
 	}
 }
 
 saveSpecialFind(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("specialFind/findDetail/SpecialFindID"))) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	special_find_id = updateSpecialFind(id);
+	clearCreatedGeometry();
 }
 
 updateSpecialFind(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     specialFindPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -970,15 +1006,15 @@ onEvent("feature/featureDetail/AssociateWith", "click", "associateWithFeature()"
 associateWithFeature() {
     id = getFieldValue("feature/featureDetail//AssociateWithList");
     type = "StructureContains";
-    if (id == null || "".equals(id)) {
+    if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
         return;
     }
-    if (type == null || "".equals(type)) {
+    if (isNull(type)) {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (feature_id == null) {
+    if (isNull(feature_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
@@ -986,24 +1022,31 @@ associateWithFeature() {
 }
 
 deleteFeature(){
-	if (feature_id != null) {
+	if (!isNull(feature_id)) {
 		deleteArchEnt(feature_id);
 		cancelTabGroup("feature", false);
 	}
 }
 
 saveFeature(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("feature/featureDetail/FeatureID"))) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	feature_id = updateFeature(id);
+	clearCreatedGeometry();
 }
 
 updateFeature(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     featurePictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -1051,15 +1094,15 @@ onEvent("freeWall/freeWallDetail/AssociateWith", "click", "associateWithFreeWall
 associateWithFeature() {
     id = getFieldValue("feature/featureDetail/AssociateWithList");
     type = "WallWith";
-    if (id == null || "".equals(id)) {
+    if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
         return;
     }
-    if (type == null || "".equals(type)) {
+    if (isNull(type)) {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (wall_id == null) {
+    if (isNull(wall_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
@@ -1067,24 +1110,31 @@ associateWithFeature() {
 }
 
 deleteFreeWall(){
-	if (wall_id != null) {
+	if (!isNull(wall_id)) {
 		deleteArchEnt(wall_id);
 		cancelTabGroup("freeWall", false);
 	}
 }
 
 saveFreeWall(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("freeWall/freeWallDetail/WallID"))) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	wall_id = updateFreeWall(id);
+	clearCreatedGeometry();
 }
 
 updateFreeWall(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     freewallPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -1160,15 +1210,15 @@ onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
 associateWithFeature() {
     id = getFieldValue("doorway/doorDetail/AssociateWithList");
     type = "DoorwayIn";
-    if (id == null || "".equals(id)) {
+    if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
         return;
     }
-    if (type == null || "".equals(type)) {
+    if (isNull(type)) {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (wall_id == null) {
+    if (isNull(wall_id)) {
         showWarning("Logic Error", "Please save record before associating with");
         return;
     }
@@ -1176,24 +1226,32 @@ associateWithFeature() {
 }
 
 deleteDoorway(){
-	if (doorway_id != null) {
+	if (!isNull(doorway_id)) {
 		deleteArchEnt(doorway_id);
 		cancelTabGroup("doorway", false);
 	}
 }
 
 saveDoorway(id) {
+	if (getCreatedGeometry() == null ||
+		(getCreatedGeometry() != null && (isNull(getFieldValue("doorway/doorDetail/GPSLong") || isNull(getFieldValue("doorway/doorDetail/GPSLat")))) ||
+		isNull(getFieldValue("doorway/doorDetail/DoorID"))) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	doorway_id = updateDoorway(id);
+	clearCreatedGeometry();
 }
 
 updateDoorway(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     doorwayPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -1251,15 +1309,15 @@ onEvent("lichen/lichenDetail/AssociateWith", "click", "associateWithLichen()");
 associateWithLichen() {
     id = getFieldValue("lichen/lichenDetail/AssociateWithList");
     type = "LichenAttachedTo";
-    if (id == null || "".equals(id)) {
+    if (isNull(id)) {
         showWarning("Logic Error", "Please select an id to associate with");
         return;
     }
-    if (type == null || "".equals(type)) {
+    if (isNull(type)) {
         showWarning("Logic Error", "Please select a type to associate with");
         return;
     }
-    if (lichen_id == null) {
+    if (isNull(lichen_id)) {
         showWarning("Logic Error", "Please save lichen before associating with");
         return;
     }
@@ -1269,24 +1327,32 @@ associateWithLichen() {
 }
 
 deleteLichen(){
-	if (lichen_id != null) {
+	if (!isNull(lichen_id)) {
 		deleteArchEnt(lichen_id);
 		cancelTabGroup("lichen", false);
 	}
 }
 
 saveLichen(id) {
+	if (getCreatedGeometry() == null ||
+		(getCreatedGeometry() != null && (isNull(getFieldValue("lichen/lichenDetail/GPSLong") || isNull(getFieldValue("lichen/lichenDetail/GPSLat")))) ||
+		isNull(getFieldValue("lichen/lichenDetail/LichenID")) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	lichen_id = updateLichen(id);
+	clearCreatedGeometry();
 }
 
 updateLichen(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
     lichenPictures = new ArrayList();
 
 	ArrayList loadedPictures = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -1348,18 +1414,25 @@ onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()
 
 
 saveSurfaceCollection(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("surfaceCollection/description/SurfaceCollectionID")) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	surface_collection_id = updateSurfaceCollection(id);
+	clearCreatedGeometry();
 }
 
 deleteSurfaceCollection(){
-	if (surface_collection_id != null) {
+	if (!isNull(surface_collection_id)) {
 		deleteArchEnt(surface_collection_id);
 		cancelTabGroup("surfaceCollection", false);
 	}
 }
 
 updateSurfaceCollection(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
@@ -1388,7 +1461,7 @@ onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
-	if (lot_id != null) {
+	if (!isNull(lot_id)) {
 		deleteArchEnt(lot_id);
 		cancelTabGroup("lot", false);
 	}
@@ -1399,9 +1472,9 @@ saveLot(id) {
 }
 
 updateLot(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
-    if (surface_collection_id == null) {
+    if (isNull(surface_collection_id)) {
         showWarning("Logic Error", "Lot cannot be saved as parent surface collection is not saved or loaded.");
         return null;
     } else {
@@ -1418,7 +1491,7 @@ updateLot(id) {
 
 
         // save lot to surface collection
-        if (id == null) {
+        if (isNull(id)) {
             saveEntitiesToRel("SurfaceLot", surface_collection_id, saved_id);
         }
 
@@ -1465,16 +1538,16 @@ setDoorwayCountForStructureWall(value){
 }
 
 deleteStructureWall(){
-	if (structure_wall_id != null) {
+	if (!isNull(structure_wall_id)) {
 		deleteArchEnt(structure_wall_id);
 		cancelTabGroup("wall", false);
 	}
 }
 
 updateStructureWall(id) {
-	if (id == null || "".equals(id)) id = null;
+	if (isNull(id)) id = null;
 
-   	if (structure_id == null) {
+   	if (isNull(structure_id)) {
   		showWarning("Logic Error", "Structure Wall cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
@@ -1483,7 +1556,7 @@ updateStructureWall(id) {
 
 		ArrayList loadedPictures = new ArrayList();
 
-		if (id != null) {
+		if (!isNull(id)) {
 			entity = fetchArchEnt(id);
 			for (Object attribute : entity.getAttributes()) {
 				System.out.println(attribute.toString());
@@ -1518,7 +1591,7 @@ updateStructureWall(id) {
 	    saved_id = saveEntity(id, "StructureWall", attributeDefs, null, "loadStructureWallFileAttributes(structure_wall_id);");
 
 	    // save structure wall to structure if new structure wall
-	    if (id == null) {
+	    if (isNull(id)) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
 	    
@@ -1622,7 +1695,14 @@ onEvent("structure/final/Delete", "click", "deleteStructure()");
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
 
 saveStructure(id) {
+	if (getCreatedGeometry() == null ||
+		isNull(getFieldValue("structure/info/ArchaeologicalElementID")) {
+		
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;	
+	}
 	structure_id = updateStructure(id);
+	clearCreatedGeometry();
 }
 
 setTotalWallsRecordedForStructure(value){
@@ -1646,14 +1726,14 @@ setDoorwaysRecordedForStructure(value){
 }
 
 deleteStructure(){
-	if (structure_id != null) {
+	if (!isNull(structure_id)) {
 		deleteArchEnt(structure_id);
 		cancelTabGroup("structure", false);
 	}
 }
 
 updateStructure(id){
-    if (id == null || "".equals(id)) id = null;
+    if (isNull(id)) id = null;
 
     structureFiles = getNoneList();
 	structureSketches = getNoneList();
@@ -1667,7 +1747,7 @@ updateStructure(id){
 	ArrayList loadedVideos = new ArrayList();
 	ArrayList loadedAudios = new ArrayList();
 
-	if (id != null) {
+	if (!isNull(id)) {
 		entity = fetchArchEnt(structure_id);
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
@@ -1739,7 +1819,7 @@ updateAllSpecialFind() {
 }
 
 updateAllStructure() {
-	if (structure_id == null || "".equals(structure_id)) return;
+	if (isNull(structure_id)) return;
 	
 	Object localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'StructureWall'  ORDER BY uuid, attributename ASC) group by uuid;");
     Object localCorner = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename  FROM aentvalue  JOIN attributekey USING (attributeid)  join archentity USING (uuid)  join aenttype USING (aenttypeid)  join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)  JOIN (SELECT uuid, attributeid, valuetimestamp  FROM aentvalue  JOIN archentity USING (uuid)  WHERE archentity.deleted is NULL and uuid in (select uuid from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) where relationshipid in (select relationshipid from aentreln join relationship using (relationshipid) join relntype using (relntypeid) where uuid = "+structure_id+" and relntypeName = 'StructureContains') and deleted is null and uuid != "+structure_id+") GROUP BY uuid, attributeid  HAVING MAX(ValueTimestamp)  AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)  WHERE aentvalue.deleted is NULL and aenttypename = 'Corner'  ORDER BY uuid, attributename ASC) group by uuid;");
@@ -1815,7 +1895,7 @@ onEvent("specialFind", "show", "updateAllSpecialFind()");
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
-	if (structure_id == null || "".equals(structure_id)) return;
+	if (isNull(structure_id)) return;
 
 	id = structure_id;
 	newStructure();
@@ -1832,7 +1912,7 @@ loadStructureFileAttributes(id){
 	structureVideos = new ArrayList();
 	structureAudios = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -1881,7 +1961,7 @@ loadStructureFileAttributes(id){
 
 loadWall() {
 	wall_id = getFieldValue("control/data/wallList");
-	if (wall_id == null || "".equals(wall_id)) return;
+	if (isNull(wall_id)) return;
 
 	id = wall_id;
 	newFreeWall();
@@ -1894,7 +1974,7 @@ loadWall() {
 loadWallFileAttributes(id){
 	freewallPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -1914,7 +1994,7 @@ loadWallFileAttributes(id){
 
 loadDoorway() {
 	doorway_id = getFieldValue("control/data/doorwayList");
-	if (doorway_id == null || "".equals(doorway_id)) return;
+	if (isNull(doorway_id)) return;
 
 	id = doorway_id;
 	newDoorway();
@@ -1937,7 +2017,7 @@ loadDoorway() {
 loadDoorwayFileAttributes(id){
 	doorwayPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -1957,7 +2037,7 @@ loadDoorwayFileAttributes(id){
 
 loadFeature() {
 	feature_id = getFieldValue("control/data/featureList");
-	if (feature_id == null || "".equals(feature_id)) return;
+	if (isNull(feature_id)) return;
 
 	id = feature_id;
 	newFeature();
@@ -1970,7 +2050,7 @@ loadFeature() {
 loadFeatureFileAttributes(id){
 	featurePictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -1990,7 +2070,7 @@ loadFeatureFileAttributes(id){
 
 loadSpecialFind() {
 	special_find_id = getFieldValue("control/data/specialFindList");
-	if (special_find_id == null || "".equals(special_find_id)) return;
+	if (isNull(special_find_id)) return;
 
 	id = special_find_id;
 	newSpecialFind();
@@ -2003,7 +2083,7 @@ loadSpecialFind() {
 loadSpecialFindFileAttributes(id){
 	specialFindPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2023,7 +2103,7 @@ loadSpecialFindFileAttributes(id){
 
 loadLichen() {
 	lichen_id = getFieldValue("control/data/lichenList");
-	if (lichen_id == null || "".equals(lichen_id)) return;
+	if (isNull(lichen_id)) return;
 
 	id = lichen_id;
 	newLichen();
@@ -2044,7 +2124,7 @@ loadLichen() {
 loadLichenFileAttributes(id){
 	lichenPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2064,7 +2144,7 @@ loadLichenFileAttributes(id){
 
 loadSurfaceCollection() {
 	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
-	if (surface_collection_id == null || "".equals(surface_collection_id)) return;
+	if (isNull(surface_collection_id)) return;
 
 	id = surface_collection_id;
 	newSurfaceCollection();
@@ -2075,7 +2155,7 @@ loadSurfaceCollection() {
 
 loadLot() {
 	lot_id = getFieldValue("control/data/lotList");
-	if (lot_id == null || "".equals(lot_id)) return;
+	if (isNull(lot_id)) return;
 
 	id = lot_id;
 	newLot();
@@ -2086,7 +2166,7 @@ loadLot() {
 
 loadCanal() {
 	canal_id = getFieldValue("control/data/canalList");
-	if (canal_id == null || "".equals(canal_id)) return;
+	if (isNull(canal_id)) return;
 
 	id = canal_id;
 	newCanal();
@@ -2099,7 +2179,7 @@ loadCanal() {
 loadCanalFileAttributes(id){
 	canalPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2119,7 +2199,7 @@ loadCanalFileAttributes(id){
 
 loadStructureWall() {
 	structure_wall_id = getFieldValue("structure/load/structureWallList");
-	if (structure_wall_id == null || "".equals(structure_wall_id)) return;
+	if (isNull(structure_wall_id)) return;
 
 	id = structure_wall_id;
 	newStructureWall();
@@ -2132,7 +2212,7 @@ loadStructureWall() {
 loadStructureWallFileAttributes(id){
 	structureWallPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2152,7 +2232,7 @@ loadStructureWallFileAttributes(id){
 
 loadCorner() {
 	corner_id = getFieldValue("structure/load/cornerList");
-	if (corner_id == null || "".equals(corner_id)) return;
+	if (isNull(corner_id)) return;
 
 	id = corner_id;
 	newCorner();
@@ -2165,7 +2245,7 @@ loadCorner() {
 loadCornerFileAttributes(id){
 	cornerPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2185,7 +2265,7 @@ loadCornerFileAttributes(id){
 
 loadNiche() {
 	niche_id = getFieldValue("control/data/nicheList");
-	if (niche_id == null || "".equals(niche_id)) return;
+	if (isNull(niche_id)) return;
 
 	id = niche_id;
 	newNiche();
@@ -2198,7 +2278,7 @@ loadNiche() {
 loadNicheFileAttributes(id){
 	nichePictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){
@@ -2218,7 +2298,7 @@ loadNicheFileAttributes(id){
 
 loadWindow() {
 	window_id = getFieldValue("control/data/windowList");
-	if (window_id == null || "".equals(window_id)) return;
+	if (isNull(window_id)) return;
 
 	id = window_id;
 	newWindow();
@@ -2231,7 +2311,7 @@ loadWindow() {
 loadWindowFileAttributes(id){
 	windowPictures = new ArrayList();
 
-	if (id != null && !"".equals(id)) {
+	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
 		for(EntityAttribute attr : entityAttributes){

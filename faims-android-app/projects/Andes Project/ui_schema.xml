@@ -22,7 +22,14 @@
           </user>
           <create>
               <tab1>
-                  <entities/>
+                  <structure/>
+                  <wall/>
+                  <doorway/>
+                  <feature/>
+                  <specialFind/>
+                  <lichen/>
+                  <surfaceCollection/>
+                  <canal/>
               </tab1>
           </create>
           <control>
