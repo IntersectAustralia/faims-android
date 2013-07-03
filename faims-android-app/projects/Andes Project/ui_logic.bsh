@@ -575,12 +575,15 @@ onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
-cornerSaving = false;
 saveCorner(id) {
-	if (cornerSaving) return;
-   	cornerSaving = true;
 	corner_id = updateCorner(id);
-    cornerSaving = false;
+}
+
+deleteCorner(){
+	if (corner_id != null) {
+		deleteArchEnt(corner_id);
+		cancelTabGroup("corner", false);
+	}
 }
 
 updateCorner(id) {
@@ -652,7 +655,7 @@ OnNichePictureTaken() {
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
-onEvent("niche/nicheDetail/Update", "delayclick", "saveCorner(niche_id)");
+onEvent("niche/nicheDetail/Update", "delayclick", "saveNiche(niche_id)");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
@@ -674,12 +677,15 @@ associateWithNiche() {
 	saveEntitiesToRel(type, niche_id, id);
 }
 
-nicheSaving = false;
 saveNiche(id) {
-	if (nicheSaving) return;
-	nicheSaving = true;
 	niche_id = updateNiche(id);
-	nicheSaving = false;
+}
+
+deleteNiche(){
+	if (niche_id != null) {
+		deleteArchEnt(niche_id);
+		cancelTabGroup("niche", false);
+	}
 }
 
 updateNiche(id) {
@@ -715,8 +721,7 @@ updateNiche(id) {
     	AttributeDef("NicheDescription", "freetext", "niche/nicheDetail/NicheDescription"),
     	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
     	};
-
-
+    // TODO update the niche count in structure wall and niches recorded in the structure
     return saveEntity(id, "Niche", attributeDefs, null, "loadNicheFileAttributes(niche_id);");
 }
 
@@ -739,13 +744,15 @@ onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
 onEvent("canal/canalDetail/Update", "delayclick", "saveCanal(canal_id)");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 
+deleteCanal(){
+	if (canal_id != null) {
+		deleteArchEnt(canal_id);
+		cancelTabGroup("canal", false);
+	}
+}
 
-canalSaving = false;
 saveCanal(id) {
-	if (canalSaving) return;
-	canalSaving = true;
 	canal_id = updateCanal(id);
-	canalSaving = false;
 }
 
 updateCanal(id) {
@@ -813,12 +820,15 @@ associateWithWindow() {
 	saveEntitiesToRel("WallWindow", window_id, id);
 }
 
-windowSaving = false;
 saveWindow(id) {
-	if (windowSaving) return;
-	windowSaving = true;
 	window_id = updateWindow(id);
-	windowSaving = false;
+}
+
+deleteWindow(){
+	if (window_id != null) {
+		deleteArchEnt(window_id);
+		cancelTabGroup("window", false);
+	}
 }
 
 updateWindow(id) {
@@ -850,8 +860,7 @@ updateWindow(id) {
     	AttributeDef("WindowDescription", "freetext", "window/windowDetail/WindowDescription"),
     	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
     	};
-
-
+    // TODO update the window count on structure wall and window recorded on structure
     return saveEntity(id, "Window", attributeDefs, null, "loadWindowFileAttributes(window_id);");
 }
 
@@ -895,13 +904,15 @@ associateWithSpecialFind() {
     saveEntitiesToRel(type, special_find_id, id);
 }
 
+deleteSpecialFind(){
+	if (special_find_id != null) {
+		deleteArchEnt(special_find_id);
+		cancelTabGroup("specialFind", false);
+	}
+}
 
-specialFindSaving = false;
 saveSpecialFind(id) {
-	if (specialFindSaving) return;
-	specialFindSaving = true;
 	special_find_id = updateSpecialFind(id);
-	specialFindSaving = false;
 }
 
 updateSpecialFind(id) {
@@ -974,13 +985,15 @@ associateWithFeature() {
     saveEntitiesToRel(type, feature_id, id);
 }
 
+deleteFeature(){
+	if (feature_id != null) {
+		deleteArchEnt(feature_id);
+		cancelTabGroup("feature", false);
+	}
+}
 
-featureSaving = false;
 saveFeature(id) {
-	if (featureSaving) return;
-	featureSaving = true;
 	feature_id = updateFeature(id);
-	featureSaving = false;
 }
 
 updateFeature(id) {
@@ -1053,13 +1066,15 @@ associateWithFeature() {
     saveEntitiesToRel(type, wall_id, id);
 }
 
+deleteFreeWall(){
+	if (wall_id != null) {
+		deleteArchEnt(wall_id);
+		cancelTabGroup("freeWall", false);
+	}
+}
 
-freeWallSaving = false;
 saveFreeWall(id) {
-	if (freeWallSaving) return;
-	freeWallSaving = true;
 	wall_id = updateFreeWall(id);
-	freeWallSaving = false;
 }
 
 updateFreeWall(id) {
@@ -1140,7 +1155,6 @@ onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 onEvent("doorway/doorDetail/Update", "delayclick", "saveDoorway(doorway_id)");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
 
-
 onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
 
 associateWithFeature() {
@@ -1161,13 +1175,15 @@ associateWithFeature() {
     saveEntitiesToRel(type, wall_id, id);
 }
 
+deleteDoorway(){
+	if (doorway_id != null) {
+		deleteArchEnt(doorway_id);
+		cancelTabGroup("doorway", false);
+	}
+}
 
-doorwaySaving = false;
 saveDoorway(id) {
-	if (doorwaySaving) return;
-	doorwaySaving = true;
 	doorway_id = updateDoorway(id);
-	doorwaySaving = false;
 }
 
 updateDoorway(id) {
@@ -1206,6 +1222,7 @@ updateDoorway(id) {
     	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
 
+	// TODO update the doorway count in the structure wall and in structure
     return saveEntity(id, "Doorway", attributeDefs, getCreatedGeometry(), "loadDoorwayFileAttributes(doorway_id);");
 }
 
@@ -1251,13 +1268,15 @@ associateWithLichen() {
     showToast("Successfuly associated.");
 }
 
+deleteLichen(){
+	if (lichen_id != null) {
+		deleteArchEnt(lichen_id);
+		cancelTabGroup("lichen", false);
+	}
+}
 
-lichenSaving = false;
 saveLichen(id) {
-	if (lichenSaving) return;
-	lichenSaving = true;
 	lichen_id = updateLichen(id);
-	lichenSaving = false;
 }
 
 updateLichen(id) {
@@ -1327,12 +1346,16 @@ onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()
 
 //TODO Make automatic lot association
 
-surfaceCollectionSaving = false;
+
 saveSurfaceCollection(id) {
-	if (surfaceCollectionSaving) return;
-	surfaceCollectionSaving = true;
 	surface_collection_id = updateSurfaceCollection(id);
-	surfaceCollectionSaving = false;
+}
+
+deleteSurfaceCollection(){
+	if (surface_collection_id != null) {
+		deleteArchEnt(surface_collection_id);
+		cancelTabGroup("surfaceCollection", false);
+	}
 }
 
 updateSurfaceCollection(id) {
@@ -1364,13 +1387,15 @@ String lot_id = null;
 onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
+deleteLot(){
+	if (lot_id != null) {
+		deleteArchEnt(lot_id);
+		cancelTabGroup("lot", false);
+	}
+}
 
-lotSaving = false;
 saveLot(id) {
-	if (lotSaving) return;
-	lotSaving = true;
 	lot_id = updateLot(id);
-	lotSaving = false;
 }
 
 updateLot(id) {
@@ -1423,12 +1448,27 @@ onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id)");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 
-structureWallSaving = false;
 saveStructureWall(id) {
-	if (structureWallSaving) return;
-	structureWallSaving = true;
 	structure_wall_id = updateStructureWall(id);
-	structureWallSaving = false;
+}
+
+setWindowCountForStructureWall(value){
+    setFieldValue("wall/structureWall/WindowCount",value);
+}
+
+setNicheCountForStructureWall(value){
+    setFieldValue("wall/structureWall/NicheCount",value);
+}
+
+setDoorwayCountForStructureWall(value){
+    setFieldValue("wall/structureWall/DoorwayCount",value);
+}
+
+deleteStructureWall(){
+	if (structure_wall_id != null) {
+		deleteArchEnt(structure_wall_id);
+		cancelTabGroup("wall", false);
+	}
 }
 
 updateStructureWall(id) {
@@ -1481,7 +1521,8 @@ updateStructureWall(id) {
 	    if (id == null) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
 	    }
-
+	    
+	    // TODO update the structure wall count in the structure
 	    return saved_id;
    	}
 }
@@ -1580,12 +1621,35 @@ onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
 
-structureSaving = false;
 saveStructure(id) {
-	if (structureSaving) return;
-	structureSaving = true;
 	structure_id = updateStructure(id);
-	structureSaving = false;
+}
+
+setTotalWallsRecordedForStructure(value){
+    setFieldValue("structure/component/WallsTotalCount",value);
+}
+
+setTotalGabledWallsRecordedForStructure(value){
+    setFieldValue("structure/component/WallsGabledCount",value);
+}
+
+setWindowsRecordedForStructure(value){
+    setFieldValue("structure/component/WindowCount",value);
+}
+
+setNichesRecordedForStructure(value){
+    setFieldValue("structure/component/NicheCount",value);
+}
+
+setDoorwaysRecordedForStructure(value){
+    setFieldValue("structure/component/DoorwayCount",value);
+}
+
+deleteStructure(){
+	if (structure_id != null) {
+		deleteArchEnt(structure_id);
+		cancelTabGroup("structure", false);
+	}
 }
 
 updateStructure(id){
@@ -1861,11 +1925,13 @@ loadDoorway() {
 
 	archEntity = fetchArchEnt(doorway_id);
 	geomList = archEntity.getGeometryList();
-	point = geomList.get(0);
-	p = point.getMapPos();
-	p = convertFromProjToProj(getProjectSrid(), "4326", p);
-	setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
-	setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
+	if(geomList != null){
+		point = geomList.get(0);
+		p = point.getMapPos();
+		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
+		setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
+	}
 }
 
 loadDoorwayFileAttributes(id){

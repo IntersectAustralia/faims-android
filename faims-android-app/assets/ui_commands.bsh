@@ -276,6 +276,24 @@ saveRel(String rel_id, String rel_type, List geo_data, List attributes) {
 }
 
 /**
+  * Delete an arch entity from the database
+  * @param entity_id the id of the arch entity to be deleted
+  * @return boolean value true if deleted, false if not
+  */
+deleteArchEnt(String entity_id){
+	return linker.deleteArchEnt(entity_id);
+}
+
+/**
+  * Delete a relationship from the database
+  * @param rel_id the id of the relationship to be deleted
+  * @return boolean value true if deleted, false if not
+  */
+deleteRel(String rel_id){
+	return linker.deleteRel(rel_id);
+}
+
+/**
   * Add an arch entity to the relationship by specifying the verb as the relation.
   * @param entity_id the id of the arch entity to be associated with relationship
   * @param rel_id the id of the relationship to be associated to

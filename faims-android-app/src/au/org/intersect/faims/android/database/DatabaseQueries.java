@@ -112,10 +112,10 @@ public final class DatabaseQueries {
 			"          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp\n" +
 			"                  FROM aentvalue\n" +
 			"                  JOIN archentity USING (uuid)\n" +
-			"                 WHERE archentity.deleted is NULL\n" +
 			"              GROUP BY uuid, attributeid\n" +
 			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" +
 			"          WHERE aentvalue.deleted is NULl\n" +
+			"          and archentity.deleted is NULL\n" +
 			"       ORDER BY uuid, attributename ASC)\n" +
 			"group by uuid;";
 	}
@@ -137,10 +137,10 @@ public final class DatabaseQueries {
 			"    JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp, max(relntimestamp) as relntimestamp, relntypeid\n" +
 			"             FROM relnvalue\n" +
 			"             JOIN relationship USING (relationshipid)\n" +
-			"            WHERE relationship.deleted is NULL\n" +
 			"         GROUP BY relationshipid, attributeid\n" +
 			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" +
 			"   WHERE relnvalue.deleted is NULL\n" +
+			"   and relationship.deleted is NULL\n" +
 			"ORDER BY relationshipid, attributename asc)\n" +
 			"group by relationshipid;";
 	}
@@ -213,6 +213,24 @@ public final class DatabaseQueries {
 
 	public static final String COUNT_RELN =
 		"select count(RelationshipID) from Relationship where RelationshipID = ?;";
+
+	public static final String DELETE_ARCH_ENT =
+		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parentTimestamp) "+
+			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', aentTimestamp "+
+			"from (select uuid, max(aenttimestamp) as aenttimestamp " +
+			"from archentity "+
+			"where uuid = ? "+
+			"group by uuid) "+
+			"JOIN archentity using (uuid, aenttimestamp);";
+
+	public static final String DELETE_RELN =
+		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parentTimestamp) "+
+			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', RelnTimestamp "+
+			"from (select relationshipid, max(relntimestamp) as RelnTimestamp "+
+			"from relationship "+
+			"where relationshipID = ? "+
+			"group by relationshipid "+
+			") JOIN relationship using (relationshipid, relntimestamp); ";
 
 	public static final String DUMP_DATABASE_TO(String path){
 		return "attach database '" + path + "' as export;" +

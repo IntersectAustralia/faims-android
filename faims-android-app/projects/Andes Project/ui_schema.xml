@@ -854,7 +854,7 @@
           <label>Total Walls Recorded:</label>
         </input>
         <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Total Gabeled Walls Recorded:</label>
+          <label>Total Gabled Walls Recorded:</label>
         </input>
         <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Windows Recorded:</label>
