@@ -184,10 +184,14 @@ entitySaved = false;
 entityCallback = null;
 
 checkFilesAttached() {
-	if (entityCallback == null) return;
+	if (entityCallback == null){
+		showToast("Finish saving record.");
+		return;
+	}
 
 	if (entitySaved && !isAttachingFiles()) {
 		closeBusyDialog();
+		showToast("Finish saving record.");
 		execute(entityCallback);
 	}
 }
@@ -700,6 +704,7 @@ associateWithNiche() {
 		return;
 	}
 	saveEntitiesToRel(type, niche_id, id);
+	showToast("Successfuly associated.");
 }
 
 saveNiche(id) {
@@ -859,6 +864,7 @@ associateWithWindow() {
 		return;
 	}
 	saveEntitiesToRel("WindowIn", window_id, id);
+	showToast("Successfuly associated.");
 }
 
 saveWindow(id) {
@@ -947,6 +953,7 @@ associateWithSpecialFind() {
         return;
     }
     saveEntitiesToRel(type, special_find_id, id);
+    showToast("Successfuly associated.");
 }
 
 deleteSpecialFind(){
@@ -1039,6 +1046,7 @@ associateWithFeature() {
         return;
     }
     saveEntitiesToRel(type, feature_id, id);
+    showToast("Successfuly associated.");
 }
 
 deleteFeature(){
@@ -1131,6 +1139,7 @@ associateWithFreeWall() {
         return;
     }
     saveEntitiesToRel(type, wall_id, id);
+    showToast("Successfuly associated.");
 }
 
 deleteFreeWall(){
@@ -1251,6 +1260,7 @@ associateWithDoorway() {
         return;
     }
     saveEntitiesToRel(type, doorway_id, id);
+    showToast("Successfuly associated.");
 }
 
 deleteDoorway(){
@@ -2128,10 +2138,6 @@ loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
 	if (isNull(structure_id)) return;
 
-	id = structure_id;
-	newStructure();
-	structure_id = id;
-
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
 }
@@ -2194,10 +2200,6 @@ loadWall() {
 	wall_id = getFieldValue("control/data/wallList");
 	if (isNull(wall_id)) return;
 
-	id = wall_id;
-	newFreeWall();
-	wall_id = id;
-
 	showTabGroup("freeWall", wall_id);
 	loadWallFileAttributes(wall_id);
 }
@@ -2226,10 +2228,6 @@ loadWallFileAttributes(id){
 loadDoorway() {
 	doorway_id = getFieldValue("control/data/doorwayList");
 	if (isNull(doorway_id)) return;
-
-	id = doorway_id;
-	newDoorway();
-	doorway_id = id;
 
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
@@ -2270,10 +2268,6 @@ loadFeature() {
 	feature_id = getFieldValue("control/data/featureList");
 	if (isNull(feature_id)) return;
 
-	id = feature_id;
-	newFeature();
-	feature_id = id;
-
 	showTabGroup("feature", feature_id);
 	loadFeatureFileAttributes(feature_id);
 }
@@ -2303,10 +2297,6 @@ loadSpecialFind() {
 	special_find_id = getFieldValue("control/data/specialFindList");
 	if (isNull(special_find_id)) return;
 
-	id = special_find_id;
-	newSpecialFind();
-	special_find_id = id;
-
 	showTabGroup("specialFind", special_find_id);
 	loadSpecialFindFileAttributes(special_find_id);
 }
@@ -2335,10 +2325,6 @@ loadSpecialFindFileAttributes(id){
 loadLichen() {
 	lichen_id = getFieldValue("control/data/lichenList");
 	if (isNull(lichen_id)) return;
-
-	id = lichen_id;
-	newLichen();
-	lichen_id = id;
 
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
@@ -2377,10 +2363,6 @@ loadSurfaceCollection() {
 	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
 	if (isNull(surface_collection_id)) return;
 
-	id = surface_collection_id;
-	newSurfaceCollection();
-	surface_collection_id = id;
-
 	showTabGroup("surfaceCollection", surface_collection_id);
 }
 
@@ -2388,20 +2370,12 @@ loadLot() {
 	lot_id = getFieldValue("surfaceCollection/load/lotList");
 	if (isNull(lot_id)) return;
 
-	id = lot_id;
-	newLot();
-	lot_id = id;
-
 	showTabGroup("lot", lot_id);
 }
 
 loadCanal() {
 	canal_id = getFieldValue("control/data/canalList");
 	if (isNull(canal_id)) return;
-
-	id = canal_id;
-	newCanal();
-	canal_id = id;
 
 	showTabGroup("canal", canal_id);
 	loadCanalFileAttributes(canal_id);
@@ -2432,10 +2406,6 @@ loadStructureWall() {
 	structure_wall_id = getFieldValue("structure/load/structureWallList");
 	if (isNull(structure_wall_id)) return;
 
-	id = structure_wall_id;
-	newStructureWall();
-	structure_wall_id = id;
-
 	showTabGroup("wall", structure_wall_id);
 	loadStructureWallFileAttributes(structure_wall_id);
 }
@@ -2464,10 +2434,6 @@ loadStructureWallFileAttributes(id){
 loadCorner() {
 	corner_id = getFieldValue("structure/load/cornerList");
 	if (isNull(corner_id)) return;
-
-	id = corner_id;
-	newCorner();
-	corner_id = id;
 
 	showTabGroup("corner", corner_id);
 	loadCornerFileAttributes(corner_id);
@@ -2498,10 +2464,6 @@ loadNiche() {
 	niche_id = getFieldValue("control/data/nicheList");
 	if (isNull(niche_id)) return;
 
-	id = niche_id;
-	newNiche();
-	niche_id = id;
-
 	showTabGroup("niche", niche_id);
 	loadNicheFileAttributes(niche_id);
 }
@@ -2530,10 +2492,6 @@ loadNicheFileAttributes(id){
 loadWindow() {
 	window_id = getFieldValue("control/data/windowList");
 	if (isNull(window_id)) return;
-
-	id = window_id;
-	newWindow();
-	window_id = id;
 
 	showTabGroup("window", window_id);
 	loadWindowFileAttributes(window_id);
