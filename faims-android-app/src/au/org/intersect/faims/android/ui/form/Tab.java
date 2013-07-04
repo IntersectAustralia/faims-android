@@ -906,10 +906,15 @@ public class Tab implements Parcelable{
 				layout.setCurrentAnnotation("");
 				View child0 = layout.getChildAt(0);
 				
-				if (child0 instanceof RadioGroup){
-					RadioGroup rg = (RadioGroup) child0;
-					rg.clearCheck();
-					valueReference.put(layout.getRef(), "");
+				if (child0 instanceof HorizontalScrollView) {
+					
+					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
+					View child1 = horizontalScrollView.getChildAt(0);
+					if(child1 instanceof RadioGroup){
+						RadioGroup rg = (RadioGroup) child1;
+						rg.clearCheck();
+						valueReference.put(layout.getRef(), "");
+					}
 				}else if (child0 instanceof CheckBox){
 					for(int i = 0; i < layout.getChildCount(); ++i){
 						View view = layout.getChildAt(i);

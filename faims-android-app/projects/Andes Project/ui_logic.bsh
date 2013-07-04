@@ -2141,7 +2141,21 @@ onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
 	if (isNull(structure_id)) return;
+	populateCheckBoxGroup("structure/final/AudioList",structureAudios);
+    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+    populateCheckBoxGroup("structure/final/filelist", structureFiles);
 
+    populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
+    populateDropDown("structure/info/Form", makeVocab("Form"));
+    populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
+    populateList("structure/construction/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/construction/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/construction/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/construction/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/construction/Classification", makeVocab("Classification"));
+    populateList("structure/finalObservations/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/finalObservations/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
 }
@@ -2203,7 +2217,10 @@ loadStructureFileAttributes(id){
 loadWall() {
 	wall_id = getFieldValue("control/data/wallList");
 	if (isNull(wall_id)) return;
-
+	populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
+    populateList("freeWall/freeWallDetail/WallClass", makeVocab("WallClass"));
+    populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
+    populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
 	showTabGroup("freeWall", wall_id);
 	loadWallFileAttributes(wall_id);
 }
@@ -2233,6 +2250,9 @@ loadDoorway() {
 	doorway_id = getFieldValue("control/data/doorwayList");
 	if (isNull(doorway_id)) return;
 
+	populateList("doorway/doorDetail/DoorMasonry", makeVocab("DoorMasonry"));
+    populateList("doorway/doorDetail/DoorHeightPreservation", makeVocab("DoorHeightPreservation"));
+    populateList("doorway/doorDetail/DoorPosition", makeVocab("DoorPosition"));
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
 
@@ -2300,7 +2320,7 @@ loadFeatureFileAttributes(id){
 loadSpecialFind() {
 	special_find_id = getFieldValue("control/data/specialFindList");
 	if (isNull(special_find_id)) return;
-
+	populateList("specialFind/findDetail/Type", makeVocab("Type"));
 	showTabGroup("specialFind", special_find_id);
 	loadSpecialFindFileAttributes(special_find_id);
 }
@@ -2329,7 +2349,9 @@ loadSpecialFindFileAttributes(id){
 loadLichen() {
 	lichen_id = getFieldValue("control/data/lichenList");
 	if (isNull(lichen_id)) return;
-
+	populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
+    populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
+    populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
 
@@ -2366,14 +2388,17 @@ loadLichenFileAttributes(id){
 loadSurfaceCollection() {
 	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
 	if (isNull(surface_collection_id)) return;
-
+    populateList("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
+    populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
+    populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
+    populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
 	showTabGroup("surfaceCollection", surface_collection_id);
 }
 
 loadLot() {
 	lot_id = getFieldValue("surfaceCollection/load/lotList");
 	if (isNull(lot_id)) return;
-
+	populateList("lot/lotDetail/Material", makeVocab("Material"));
 	showTabGroup("lot", lot_id);
 }
 
@@ -2409,7 +2434,10 @@ loadCanalFileAttributes(id){
 loadStructureWall() {
 	structure_wall_id = getFieldValue("structure/load/structureWallList");
 	if (isNull(structure_wall_id)) return;
-
+	populatePictureGallery("wall/structureWall/MasonryType", makeGallery("MasonryType"));
+	populateList("wall/structureWall/InkaMasonry", makeVocab("InkaMasonry"));
+	populateList("wall/structureWall/Gable", makeVocab("Gable"));
+	populateList("wall/structureWall/WallHeightPreservation", makeVocab("WallHeightPreservation"));
 	showTabGroup("wall", structure_wall_id);
 	loadStructureWallFileAttributes(structure_wall_id);
 }
@@ -2438,7 +2466,9 @@ loadStructureWallFileAttributes(id){
 loadCorner() {
 	corner_id = getFieldValue("structure/load/cornerList");
 	if (isNull(corner_id)) return;
-
+	populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
+    populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
+    populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
 	showTabGroup("corner", corner_id);
 	loadCornerFileAttributes(corner_id);
 }
@@ -2467,7 +2497,10 @@ loadCornerFileAttributes(id){
 loadNiche() {
 	niche_id = getFieldValue("control/data/nicheList");
 	if (isNull(niche_id)) return;
-
+	populateList("niche/nicheDetail/NicheForm", makeVocab("NicheForm"));
+	populateList("niche/nicheDetail/NicheHeightPreservation", makeVocab("NicheHeightPreservation"));
+	populateList("niche/nicheDetail/NicheWidthLoc", makeVocab("NicheWidthLoc"));
+	populateList("niche/nicheDetail/NicheAltar", makeVocab("NicheAltar"));
 	showTabGroup("niche", niche_id);
 	loadNicheFileAttributes(niche_id);
 }
@@ -2496,7 +2529,7 @@ loadNicheFileAttributes(id){
 loadWindow() {
 	window_id = getFieldValue("control/data/windowList");
 	if (isNull(window_id)) return;
-
+	populateList("window/windowDetail/WindowHeightPreservation", makeVocab("WindowHeightPreservation"));
 	showTabGroup("window", window_id);
 	loadWindowFileAttributes(window_id);
 }
