@@ -635,6 +635,7 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				Collection<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
 				while(stmt.step()){
+					if (stmt.column_string(7) != null) continue; // don't return deleted attributes
 					EntityAttribute archAttribute = new EntityAttribute();
 					archAttribute.setName(stmt.column_string(1));
 					archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
@@ -642,7 +643,7 @@ public class DatabaseManager {
 					archAttribute.setText(stmt.column_string(4));
 					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
 					archAttribute.setType(stmt.column_string(6));
-					archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
+					//archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
 					archAttribute.setDirty(stmt.column_string(8) != null ? true : false);
 					archAttribute.setDirtyReason(stmt.column_string(9));
 					attributes.add(archAttribute);
@@ -708,13 +709,14 @@ public class DatabaseManager {
 				stmt.bind(1, id);
 				Collection<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
 				while(stmt.step()){
+					if (stmt.column_string(6) != null) continue; // don't return deleted attributes
 					RelationshipAttribute relAttribute = new RelationshipAttribute();
 					relAttribute.setName(stmt.column_string(1));
 					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
 					relAttribute.setText(stmt.column_string(3));
 					relAttribute.setCertainty(stmt.column_string(4));
 					relAttribute.setType(stmt.column_string(5));
-					relAttribute.setDeleted(stmt.column_string(6) != null ? true : false);
+					//relAttribute.setDeleted(stmt.column_string(6) != null ? true : false);
 					relAttribute.setDirty(stmt.column_string(7) != null ? true : false);
 					relAttribute.setDirtyReason(stmt.column_string(8));
 					attributes.add(relAttribute);

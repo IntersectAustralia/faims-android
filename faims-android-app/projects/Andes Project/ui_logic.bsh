@@ -140,17 +140,9 @@ AttributeDef(String name, String type, String ref1, String ref2) {
 	return this;
 }
 
-getLoadedFileName(filename) {
-	if (filename == null) return "";
-	if (filename.indexOf("_") > 0) {
-		filename = filename.substring(filename.indexOf("_") + 1);
-	}
-	return filename;
-}
-
 hasFile(files, filename) {
 	for (String f : files) {
-		if (getLoadedFileName(f).equals(getLoadedFileName(filename))) return true;
+		if (f.equals(filename)) return true;
 	}
 	return false;
 }
@@ -175,15 +167,18 @@ OnFilesAttached() {
 }
 
 saveFiles(loadedFiles, files, type, attributes) {
-	if (isNull(files)) return;
+	if (isNull(files)) {
+		files = new ArrayList();
+	}
 	if (files.size() == 1 && "None".equals(files.get(0))) return;
 
 	// delete attributes that are not included
 	for (String file : loadedFiles) {
 		if (!hasFile(files, file)) {
-			attributes.add(createEntityAttribute(type, file, null, null, null, true));
+			attributes.add(createEntityAttribute(type, stripAttachedFilePath(file), null, null, null, true));
 		}
 	}
+	
 	// add new attributes that are included
 	hasAttachment = false;
 	attachmentCount = 0;
@@ -194,13 +189,13 @@ saveFiles(loadedFiles, files, type, attributes) {
 			filename = attachFile(file, true, null, "OnFilesAttached()");
 		} else {
 			for (String f : loadedFiles) {
-				if (getLoadedFileName(f).equals(getLoadedFileName(file))) {
+				if (f.equals(file)) {
 					filename = f;
 					break;
 				}
 			}
 		}
-		attributes.add(createEntityAttribute(type, filename, null, null, null));
+		attributes.add(createEntityAttribute(type, stripAttachedFilePath(filename), null, null, null));
 	}
 
 	if (!hasAttachment) {

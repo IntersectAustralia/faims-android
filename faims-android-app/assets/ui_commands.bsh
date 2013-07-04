@@ -1478,6 +1478,13 @@ getAttachedFilePath(String file) {
 	return linker.getAttachedFilePath(file);
 }
 
+/**
+  * @return returns the full path to attached file
+  */
+stripAttachedFilePath(String file) {
+	return linker.stripAttachedFilePath(file);
+}
+
 //========= MISC ==========
 
 /**

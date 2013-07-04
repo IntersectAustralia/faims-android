@@ -3982,4 +3982,14 @@ public class BeanShellLinker {
 		return null;
 	}
 	
+	public String stripAttachedFilePath(String file) {
+		try {
+			return file.replace(activity.getProjectDir(), "");
+		} catch (Exception e) {
+			FLog.e("error stripping attached file path", e);
+			showWarning("Logic Error", "Error stripping attached file path");
+		}
+		return null;
+	}
+	
 }
