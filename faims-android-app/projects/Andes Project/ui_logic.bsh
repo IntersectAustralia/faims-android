@@ -178,7 +178,7 @@ saveFiles(loadedFiles, files, type, attributes) {
 			attributes.add(createEntityAttribute(type, stripAttachedFilePath(file), null, null, null, true));
 		}
 	}
-	
+
 	// add new attributes that are included
 	hasAttachment = false;
 	attachmentCount = 0;
@@ -2479,6 +2479,7 @@ loadCorner() {
 	if (isNull(corner_id)) return;
 	populateDropDown("corner/cornerDetail/CornerExteriorForm", makeVocab("CornerExteriorForm"));
     populateDropDown("corner/cornerDetail/CornerInteriorForm", makeVocab("CornerInteriorForm"));
+    populateList("corner/cornerDetail/InkaMasonry", makeVocab("InkaMasonry"));
     populatePictureGallery("corner/cornerDetail/MasonryType", makeGallery("MasonryType"));
 	showTabGroup("corner", corner_id);
 	loadCornerFileAttributes(corner_id);
