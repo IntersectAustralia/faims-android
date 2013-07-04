@@ -234,7 +234,9 @@ public class FollowTool extends HighlightTool {
 	private void drawBuffer() {
 		try {
 			if (buffer != null) {
+				List<Geometry> geomList = mapView.getHighlights();
 				mapView.clearGeometry(buffer);
+				mapView.setHighlights(geomList);
 				buffer = null;
 			}
 			
