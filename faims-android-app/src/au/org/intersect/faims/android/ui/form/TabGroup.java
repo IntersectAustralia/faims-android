@@ -95,8 +95,10 @@ public class TabGroup extends Fragment {
 			executeCommands(this.onShowCommands);
 		}
 		
-		this.actionListener.restoreViewValuesForTabGroup(this);
-		this.actionListener.restoreTabsForTabGroup(this);
+		if(savedInstanceState != null && !savedInstanceState.isEmpty()){
+			this.actionListener.restoreViewValuesForTabGroup(this);
+			this.actionListener.restoreTabsForTabGroup(this);
+		}
 		
 		// Solves a prob the back button gives us with the TabHost already having a parent
 		if (tabHost.getParent() != null){
