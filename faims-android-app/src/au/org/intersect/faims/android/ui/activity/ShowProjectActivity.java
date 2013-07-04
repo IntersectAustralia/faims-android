@@ -484,8 +484,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		restoreFrom(savedInstanceState);
+//		restoreFrom(savedInstanceState);
 		super.onRestoreInstanceState(savedInstanceState);
+//		savedInstanceState.clear();
 	}
 
 	@Override
@@ -1285,7 +1286,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		saveTo(outState);
+//		outState.clear();
+//		saveTo(outState);
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
