@@ -828,7 +828,7 @@ public class Tab implements Parcelable{
 	                    		}
 	                    	}else{
 	                    		CustomImageView selectedImageView = (CustomImageView) v;
-		                        horizontalScrollView.setSelectedImageView(selectedImageView);
+		                        horizontalScrollView.addSelectedImageView(selectedImageView);
 		                        for (CustomImageView view : galleryImages) {
 		                            if (view.equals(selectedImageView)) {
 		                                view.setBackgroundColor(Color.BLUE);
@@ -944,7 +944,6 @@ public class Tab implements Parcelable{
 						customImageView.setBackgroundColor(Color.LTGRAY);
 					}
 				}
-				horizontalScrollView.setSelectedImageView(null);
 				horizontalScrollView.removeSelectedImageViews();
 				Button dirtyButton = dirtyButtonMap.get(horizontalScrollView.getRef());
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);

@@ -1367,6 +1367,17 @@ showFileBrowser(String callback) {
 /**
   * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
   * the file will be available on the other devices syncing to the server. If not, the file\n
+  * will only available on the server.
+  * @param filepath the path of the file to be synced
+  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  */
+attachFile(String filePath, boolean sync) {
+	return linker.attachFile(filePath, sync, null, null);
+}
+
+/**
+  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
+  * the file will be available on the other devices syncing to the server. If not, the file\n
   * will only available on the server. If the dir is defined, it will create the dir in the app/server folder.
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
@@ -1403,17 +1414,6 @@ viewArchEntAttachedFiles(String id){
   */
 viewRelAttachedFiles(String id){
 	linker.viewRelAttachedFiles(id);
-}
-
-/**
-  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
-  * the file will be available on the other devices syncing to the server. If not, the file\n
-  * will only available on the server.
-  * @param filepath the path of the file to be synced
-  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
-  */
-attachFile(String filePath, boolean sync) {
-	return linker.attachFile(filePath, sync, null);
 }
 
 /**
@@ -1469,6 +1469,13 @@ String getLastAudioFilePath(){
   */
 isAttachingFiles(){
 	return linker.isAttachingFiles();
+}
+
+/**
+  * @return returns the full path to attached file
+  */
+getAttachedFilePath(String file) {
+	return linker.getAttachedFilePath(file);
 }
 
 //========= MISC ==========

@@ -80,6 +80,34 @@ clearCreatedGeometry() {
 
 /*** MISC ***/
 
+addToPictureGallery(ref, picture, pictures) {
+	pictures.add(picture);
+    selectedPictures = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedPictures = new ArrayList();
+    	selectedPictures.add(picture);
+    } else {
+    	selectedPictures = getFieldValue(ref);
+    	selectedPictures.add(picture);
+    }
+    populateCameraPictureGallery(ref, pictures);
+    setFieldValue(ref, selectedPictures);
+}
+
+addToVideoGallery(ref, video, videos) {
+	videos.add(video);
+    selectedVideos = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedVideos = new ArrayList();
+    	selectedVideos.add(video);
+    } else {
+    	selectedVideos = getFieldValue(ref);
+    	selectedVideos.add(video);
+    }
+    populateVideoGallery(ref, videos);
+    setFieldValue(ref, selectedVideos);
+}
+
 isNull(v) {
 	return v == null || "".equals(v);
 }
@@ -113,6 +141,7 @@ AttributeDef(String name, String type, String ref1, String ref2) {
 }
 
 getLoadedFileName(filename) {
+	if (filename == null) return "";
 	if (filename.indexOf("_") > 0) {
 		filename = filename.substring(filename.indexOf("_") + 1);
 	}
@@ -217,7 +246,6 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		List pairs = getFieldValue(def.ref);
     		ArrayList files = new ArrayList();
     		for (NameValuePair pair : pairs) {
-
     			files.add(pair.getName());
     		}
     		saveFiles(def.loadedFiles, files, def.name, attributes);
@@ -587,8 +615,7 @@ takeCornerPicture() {
 
 OnCornerPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    cornerPictures.add(pictureFilepath);
-    populateCameraPictureGallery("corner/cornerDetail/PhotoGallery", cornerPictures);
+    addToPictureGallery("corner/cornerDetail/PhotoGallery", pictureFilepath, cornerPictures);
 }
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
@@ -628,7 +655,7 @@ updateCorner(id) {
 			for (Object attribute : entity.getAttributes()) {
 				System.out.println(attribute.toString());
 				if ("CornerPhotos".equals(attribute.getName())) {
-					loadedPictures.add(attribute.getText());
+					loadedPictures.add(getAttachedFilePath(attribute.getText()));
 				}
 			}
 		}
@@ -674,8 +701,7 @@ takeNichePicture() {
 
 OnNichePictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    nichePictures.add(pictureFilepath);
-    populateCameraPictureGallery("niche/nicheDetail/PhotoGallery", nichePictures);
+    addToPictureGallery("niche/nicheDetail/PhotoGallery", pictureFilepath, nichePictures);
 }
 
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
@@ -729,7 +755,7 @@ updateNiche(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("NichePhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -765,8 +791,7 @@ takecanalPicture() {
 
 OncanalPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    canalPictures.add(pictureFilepath);
-    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
+    addToPictureGallery("canal/canalDetail/PhotoGallery", pictureFilepath, canalPictures);
 }
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
@@ -804,7 +829,7 @@ updateCanal(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -837,8 +862,7 @@ takeWindowPicture() {
 
 OnWindowPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    windowPictures.add(pictureFilepath);
-    populateCameraPictureGallery("window/windowDetail/PhotoGallery", windowPictures);
+    addToPictureGallery("window/windowDetail/PhotoGallery", pictureFilepath, windowPictures);
 }
 
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
@@ -887,7 +911,7 @@ updateWindow(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("WindowPhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -919,8 +943,7 @@ takespecialFindPicture() {
 
 OnspecialFindPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    specialFindPictures.add(pictureFilepath);
-    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
+    addToPictureGallery("specialFind/findDetail/PhotoGallery", pictureFilepath, specialFindPictures);
 }
 
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
@@ -979,7 +1002,7 @@ updateSpecialFind(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -1012,8 +1035,7 @@ takeFeaturePicture() {
 
 OnFeaturePictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    featurePictures.add(pictureFilepath);
-    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurePictures);
+    addToPictureGallery("feature/featureDetail/PhotoGallery", pictureFilepath, featurePictures);
 }
 
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
@@ -1071,7 +1093,7 @@ updateFeature(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -1103,8 +1125,7 @@ takeFreewallPicture() {
 
 OnFreewallPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    freewallPictures.add(pictureFilepath);
-    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
+    addToPictureGallery("freeWall/freeWallDetail/PhotoGallery", pictureFilepath, freewallPictures);
 }
 
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
@@ -1163,7 +1184,7 @@ updateFreeWall(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("WallPhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -1204,8 +1225,7 @@ takeDoorwayPicture() {
 
 OnDoorwayPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    doorwayPictures.add(pictureFilepath);
-    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
+    addToPictureGallery("doorway/doorDetail/PhotoGallery", pictureFilepath, doorwayPictures);
 }
 
 takeDoorywayPoint(){
@@ -1284,7 +1304,7 @@ updateDoorway(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("DoorPhotos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -1327,8 +1347,7 @@ takeLichenPicture() {
 
 OnLichenPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    lichenPictures.add(pictureFilepath);
-    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
+    addToPictureGallery("lichen/lichenDetail/PhotoGallery", pictureFilepath, lichenPictures);
 }
 
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
@@ -1390,7 +1409,7 @@ updateLichen(id) {
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photos".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			}
 		}
 	}
@@ -1560,8 +1579,7 @@ takeStructWallPicture() {
 
 OnStructWallPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    structureWallPictures.add(pictureFilepath);
-    populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
+    addToPictureGallery("wall/structureWall/PhotoGallery", pictureFilepath, structureWallPictures);
 }
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
@@ -1613,7 +1631,7 @@ updateStructureWall(id) {
 			for (Object attribute : entity.getAttributes()) {
 				System.out.println(attribute.toString());
 				if ("WallPhotos".equals(attribute.getName())) {
-					loadedPictures.add(attribute.getText());
+					loadedPictures.add(getAttachedFilePath(attribute.getText()));
 				}
 			}
 		}
@@ -1702,8 +1720,7 @@ takePicture() {
 
 OnPictureTaken() {
     pictureFilepath = getLastPictureFilePath();
-    structurePictures.add(pictureFilepath);
-    populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
+    addToPictureGallery("structure/final/PhotoGallery", pictureFilepath, structurePictures);
 }
 
 takeVideo() {
@@ -1712,8 +1729,7 @@ takeVideo() {
 
 OnVideoTaken() {
     videoFilepath = getLastVideoFilePath();
-    structureVideos.add(videoFilepath);
-    populateVideoGallery("structure/final/VideoGallery", structureVideos);
+    addToVideoGallery("structure/final/VideoGallery", videoFilepath, structureVideos);
 }
 
 recordAudio(){
@@ -1805,13 +1821,13 @@ updateStructure(id){
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photo".equals(attribute.getName())) {
-				loadedPictures.add(attribute.getText());
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
 			} else if ("sketchfilename".equals(attribute.getName())) {
 				loadedSketches.add(attribute.getText());
 			} else if ("filename".equals(attribute.getName())) {
 				loadedFiles.add(attribute.getText());
 			} else if ("video".equals(attribute.getName())) {
-				loadedVideos.add(attribute.getText());
+				loadedVideos.add(getAttachedFilePath(attribute.getText()));
 			} else if ("audio".equals(attribute.getName())) {
 				loadedAudios.add(attribute.getText());
 			}
@@ -1984,9 +2000,9 @@ loadStructureFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("Photo".equals(attr.getName())){
-						structurePictures.add(attr.getText());
+						structurePictures.add(getAttachedFilePath(attr.getText()));
 					}else if("video".equals(attr.getName())){
-						structureVideos.add(attr.getText());
+						structureVideos.add(getAttachedFilePath(attr.getText()));
 					}else if("audio".equals(attr.getName())){
 						structureAudios.add(attr.getText());
 					}else if ("sketchfilename".equals(attr.getName())) {
@@ -2046,7 +2062,7 @@ loadWallFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("WallPhotos".equals(attr.getName())){
-						freewallPictures.add(attr.getText());
+						freewallPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2089,7 +2105,7 @@ loadDoorwayFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("DoorPhotos".equals(attr.getName())){
-						doorwaypictures.add(attr.getText());
+						doorwayPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2122,7 +2138,7 @@ loadFeatureFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("Photos".equals(attr.getName())){
-						featurepictures.add(attr.getText());
+						featurePictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2155,7 +2171,7 @@ loadSpecialFindFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("Photos".equals(attr.getName())){
-						specialFindpictures.add(attr.getText());
+						specialFindPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2196,7 +2212,7 @@ loadLichenFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("Photos".equals(attr.getName())){
-						lichenpictures.add(attr.getText());
+						lichenPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2251,7 +2267,7 @@ loadCanalFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("Photos".equals(attr.getName())){
-						canalpictures.add(attr.getText());
+						canalPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2284,7 +2300,7 @@ loadStructureWallFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("WallPhotos".equals(attr.getName())){
-						structureWallPictures.add(attr.getText());
+						structureWallPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2317,7 +2333,7 @@ loadCornerFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("CornerPhotos".equals(attr.getName())){
-						cornerPictures.add(attr.getText());
+						cornerPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2350,7 +2366,7 @@ loadNicheFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("NichePhotos".equals(attr.getName())){
-						nichePictures.add(attr.getText());
+						nichePictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}
@@ -2383,7 +2399,7 @@ loadWindowFileAttributes(id){
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("WindowPhotos".equals(attr.getName())){
-						windowPictures.add(attr.getText());
+						windowPictures.add(getAttachedFilePath(attr.getText()));
 					}
 				}
 			}

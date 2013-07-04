@@ -576,37 +576,39 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
-		// after taking picture using camera
-		/*if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-			Bitmap photo = (Bitmap) data.getExtras().get("data");
-			this.renderer.getCurrentImageView().setImageBitmap(photo);
-			this.renderer.clearCurrentImageView();
-		}*/
-		switch(requestCode) {
-			case FILE_BROWSER_REQUEST_CODE:
-			case RASTER_FILE_BROWSER_REQUEST_CODE:
-			case SPATIAL_FILE_BROWSER_REQUEST_CODE:
-				if (data != null) {
-					@SuppressWarnings("unchecked")
-					List<LocalFile> files = (List<LocalFile>)
-			                data.getSerializableExtra(FileChooserActivity._Results);
-					if (files != null && files.size() > 0) {
-						fm.selectFile(requestCode, files.get(0));
+		try {
+			if (resultCode == RESULT_CANCELED) {
+				FLog.d("result cancelled");
+				return;
+			}
+			
+			switch(requestCode) {
+				case FILE_BROWSER_REQUEST_CODE:
+				case RASTER_FILE_BROWSER_REQUEST_CODE:
+				case SPATIAL_FILE_BROWSER_REQUEST_CODE:
+					if (data != null) {
+						@SuppressWarnings("unchecked")
+						List<LocalFile> files = (List<LocalFile>)
+				                data.getSerializableExtra(FileChooserActivity._Results);
+						if (files != null && files.size() > 0) {
+							fm.selectFile(requestCode, files.get(0));
+						}
 					}
-				}
-				break;
-			case CAMERA_REQUEST_CODE:
-				if (resultCode == RESULT_OK) {
-					this.linker.executeCameraCallBack();
-				}
-				break;
-			case VIDEO_REQUEST_CODE:
-				if(resultCode == RESULT_OK){
-					Uri uri = data.getData();
-					this.linker.setLastVideoFilePath(getRealPathFromURI(uri));
-					this.linker.executeVideoCallBack();
-				}
+					break;
+				case CAMERA_REQUEST_CODE:
+					if (resultCode == RESULT_OK) {
+						this.linker.executeCameraCallBack();
+					}
+					break;
+				case VIDEO_REQUEST_CODE:
+					if(resultCode == RESULT_OK){
+						Uri uri = data.getData();
+						this.linker.setLastVideoFilePath(getRealPathFromURI(uri));
+						this.linker.executeVideoCallBack();
+					}
+			}
+		} catch (Exception e) {
+			FLog.e("error on activity result", e);
 		}
 	}
 	

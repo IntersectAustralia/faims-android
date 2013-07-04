@@ -11,7 +11,6 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 	private String attributeName;
 	private String attributeType;
 	private String ref;
-	private CustomImageView selectedImageView;
 	private List<CustomImageView> selectedImageViews;
 	private List<CustomImageView> imageViews;
 	private float certainty = 1;
@@ -56,14 +55,6 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 
 	public void setRef(String ref) {
 		this.ref = ref;
-	}
-
-	public CustomImageView getSelectedImageView() {
-		return selectedImageView;
-	}
-
-	public void setSelectedImageView(CustomImageView selectedImageView) {
-		this.selectedImageView = selectedImageView;
 	}
 
 	public List<CustomImageView> getImageViews() {

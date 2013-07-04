@@ -1287,19 +1287,18 @@ public class BeanShellLinker {
 							if (customImageView.getPicture().getId().equals(value)) {
 								customImageView.setBackgroundColor(Color.BLUE);
 								horizontalScrollView
-										.setSelectedImageView(customImageView);
+									.addSelectedImageView(customImageView);
 								break;
 							}
 						}else{
 							if (customImageView.getPicture().getUrl().equals(value)) {
 								customImageView.setBackgroundColor(Color.BLUE);
 								horizontalScrollView
-										.setSelectedImageView(customImageView);
+									.addSelectedImageView(customImageView);
 								break;
 							}
 						}
 					}
-					;
 				} else {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
@@ -1307,12 +1306,12 @@ public class BeanShellLinker {
 			}
 
 			else if (valueObj instanceof List<?>) {
-
-				@SuppressWarnings("unchecked")
-				List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
-
+				
 				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
+					
+					@SuppressWarnings("unchecked")
+					List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
 
 					for (NameValuePair pair : valueList) {
 						for (int i = 0; i < ll.getChildCount(); ++i) {
@@ -1327,6 +1326,30 @@ public class BeanShellLinker {
 																pair.getName()))) {
 									cb.setChecked("true".equals(pair.getValue()));
 									break;
+								}
+							}
+						}
+					}
+				} else if (obj instanceof CustomHorizontalScrollView) {
+					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					
+					@SuppressWarnings("unchecked")
+					List<String> valueList = (List<String>) valueObj;
+					
+					for (String value : valueList) {
+						for (CustomImageView customImageView : horizontalScrollView
+								.getImageViews()) {
+							if (!horizontalScrollView.isMulti()) {
+								if (customImageView.getPicture().getId().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.addSelectedImageView(customImageView);
+								}
+							}else{
+								if (customImageView.getPicture().getUrl().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.addSelectedImageView(customImageView);
 								}
 							}
 						}
@@ -1554,8 +1577,8 @@ public class BeanShellLinker {
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if (!horizontalScrollView.isMulti()) {
-					if(horizontalScrollView.getSelectedImageView() != null){
-						return horizontalScrollView.getSelectedImageView()
+					if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
+						return horizontalScrollView.getSelectedImageViews().get(0)
 								.getPicture().getId();
 					}else{
 						return "";
@@ -1933,7 +1956,7 @@ public class BeanShellLinker {
 								}
 							} else {
 								horizontalScrollView
-										.setSelectedImageView(selectedImageView);
+										.addSelectedImageView(selectedImageView);
 								for (ImageView view : galleryImages) {
 									if (view.equals(selectedImageView)) {
 										view.setBackgroundColor(Color.BLUE);
@@ -1983,59 +2006,13 @@ public class BeanShellLinker {
 
 			if (obj instanceof HorizontalScrollView) {
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				List<String> selectedPicturePath = new ArrayList<String>();
-				if (horizontalScrollView.getSelectedImageViews() != null) {
-					for (CustomImageView imageView : horizontalScrollView
-							.getSelectedImageViews()) {
-						String path = imageView
-								.getPicture()
-								.getUrl()
-								.contains(
-										Environment
-												.getExternalStorageDirectory()
-												.getPath()) ? imageView
-								.getPicture().getUrl() : activity
-								.getProjectDir()
-								+ "/"
-								+ imageView.getPicture().getUrl();
-						selectedPicturePath.add(path);
-					}
-					if (!pictures.isEmpty()) {
-						String path = pictures
-								.get(pictures.size() - 1)
-								.getUrl()
-								.contains(
-										Environment
-												.getExternalStorageDirectory()
-												.getPath()) ? pictures.get(
-								pictures.size() - 1).getUrl() : activity
-								.getProjectDir()
-								+ "/"
-								+ pictures.get(pictures.size() - 1).getUrl();
-						selectedPicturePath.add(path);
-					}
-				} else {
-					for (Picture picture : pictures) {
-						String path = picture.getUrl().contains(
-								Environment.getExternalStorageDirectory()
-										.getPath()) ? picture.getUrl()
-								: activity.getProjectDir() + "/"
-										+ picture.getUrl();
-						selectedPicturePath.add(path);
-					}
-				}
-
 				horizontalScrollView.removeSelectedImageViews();
 				LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView
 						.getChildAt(0);
 				galleriesLayout.removeAllViews();
 				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
 				for (Picture picture : pictures) {
-					String path = picture.getUrl()
-							.contains(
-									Environment.getExternalStorageDirectory()
-											.getPath()) ? picture.getUrl()
-							: activity.getProjectDir() + "/" + picture.getUrl();
+					String path = picture.getUrl();
 					File pictureFile = new File(path);
 					if (pictureFile.exists()) {
 						LinearLayout galleryLayout = new LinearLayout(
@@ -2047,12 +2024,7 @@ public class BeanShellLinker {
 								400, 400);
 						gallery.setImageBitmap(decodeFile(new File(path), 400,
 								400));
-						if (!selectedPicturePath.isEmpty()
-								&& selectedPicturePath.contains(path)) {
-							gallery.setBackgroundColor(Color.BLUE);
-						} else {
-							gallery.setBackgroundColor(Color.LTGRAY);
-						}
+						gallery.setBackgroundColor(Color.LTGRAY);
 						gallery.setPadding(10, 10, 10, 10);
 						gallery.setLayoutParams(layoutParams);
 						gallery.setPicture(picture);
@@ -2112,14 +2084,6 @@ public class BeanShellLinker {
 						galleryImages.add(gallery);
 						galleryLayout.addView(gallery);
 						galleriesLayout.addView(galleryLayout);
-						if (!selectedPicturePath.isEmpty()) {
-							if (selectedPicturePath.contains(path)) {
-								horizontalScrollView
-										.addSelectedImageView(gallery);
-							}
-						} else {
-							horizontalScrollView.addSelectedImageView(gallery);
-						}
 					}
 				}
 				horizontalScrollView.setImageViews(galleryImages);
@@ -2197,58 +2161,13 @@ public class BeanShellLinker {
 
 			if (obj instanceof HorizontalScrollView) {
 				final CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				List<String> selectedPicturePath = new ArrayList<String>();
-				if (horizontalScrollView.getSelectedImageViews() != null) {
-					for (CustomImageView imageView : horizontalScrollView
-							.getSelectedImageViews()) {
-						String path = imageView
-								.getPicture()
-								.getUrl()
-								.contains(
-										Environment
-												.getExternalStorageDirectory()
-												.getPath()) ? imageView
-								.getPicture().getUrl() : activity
-								.getProjectDir()
-								+ "/"
-								+ imageView.getPicture().getUrl();
-						selectedPicturePath.add(path);
-					}
-					if (!pictures.isEmpty()) {
-						String path = pictures
-								.get(pictures.size() - 1)
-								.getUrl()
-								.contains(
-										Environment
-												.getExternalStorageDirectory()
-												.getPath()) ? pictures.get(
-								pictures.size() - 1).getUrl() : activity
-								.getProjectDir()
-								+ "/"
-								+ pictures.get(pictures.size() - 1).getUrl();
-						selectedPicturePath.add(path);
-					}
-				} else {
-					for (Picture picture : pictures) {
-						String path = picture.getUrl().contains(
-								Environment.getExternalStorageDirectory()
-										.getPath()) ? picture.getUrl()
-								: activity.getProjectDir() + "/"
-										+ picture.getUrl();
-						selectedPicturePath.add(path);
-					}
-				}
 				horizontalScrollView.removeSelectedImageViews();
 				LinearLayout galleriesLayout = (LinearLayout) horizontalScrollView
 						.getChildAt(0);
 				galleriesLayout.removeAllViews();
 				final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
 				for (Picture picture : pictures) {
-					String path = picture.getUrl()
-							.contains(
-									Environment.getExternalStorageDirectory()
-											.getPath()) ? picture.getUrl()
-							: activity.getProjectDir() + "/" + picture.getUrl();
+					String path = picture.getUrl();
 					File videoFile = new File(path);
 					if (videoFile.exists()) {
 						LinearLayout galleryLayout = new LinearLayout(
@@ -2261,12 +2180,7 @@ public class BeanShellLinker {
 						Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
 								path, MediaStore.Images.Thumbnails.MINI_KIND);
 						gallery.setImageBitmap(thumbnail);
-						if (!selectedPicturePath.isEmpty()
-								&& selectedPicturePath.contains(path)) {
-							gallery.setBackgroundColor(Color.BLUE);
-						} else {
-							gallery.setBackgroundColor(Color.LTGRAY);
-						}
+						gallery.setBackgroundColor(Color.LTGRAY);
 						gallery.setPadding(10, 10, 10, 10);
 						gallery.setLayoutParams(layoutParams);
 						gallery.setPicture(picture);
@@ -2326,14 +2240,6 @@ public class BeanShellLinker {
 						galleryImages.add(gallery);
 						galleryLayout.addView(gallery);
 						galleriesLayout.addView(galleryLayout);
-						if (!selectedPicturePath.isEmpty()) {
-							if (selectedPicturePath.contains(path)) {
-								horizontalScrollView
-										.addSelectedImageView(gallery);
-							}
-						} else {
-							horizontalScrollView.addSelectedImageView(gallery);
-						}
 					}
 				}
 				horizontalScrollView.setImageViews(galleryImages);
@@ -3696,14 +3602,9 @@ public class BeanShellLinker {
 
 	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
 		try {
-			filePath = filePath
-					.contains(
-							Environment.getExternalStorageDirectory()
-									.getPath()) ? filePath
-					: activity.getProjectDir() + "/" + filePath;
 			File file = new File(filePath);
 			if (!file.exists()) {
-				showWarning("Logic Error", "Attach file cannot find file.");
+				showWarning("Logic Error", "Attach file cannot find file " + filePath);
 				return null;
 			}
 
@@ -4069,6 +3970,16 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error checking for attached files");
 		}
 		return false;
+	}
+	
+	public String getAttachedFilePath(String file) {
+		try {
+			return activity.getProjectDir() + "/" + file;
+		} catch (Exception e) {
+			FLog.e("error getting attached file path", e);
+			showWarning("Logic Error", "Error getting attached file path");
+		}
+		return null;
 	}
 	
 }

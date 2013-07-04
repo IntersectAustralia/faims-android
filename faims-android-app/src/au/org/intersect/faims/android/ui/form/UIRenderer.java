@@ -437,8 +437,8 @@ public class UIRenderer implements IRestoreActionListener{
 			} else if (obj instanceof CustomHorizontalScrollView) {
 				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
 				if (!horizontalScrollView.isMulti()) {
-					if(horizontalScrollView.getSelectedImageView() != null){
-						return horizontalScrollView.getSelectedImageView()
+					if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
+						return horizontalScrollView.getSelectedImageViews().get(0)
 								.getPicture().getId();
 					}else{
 						return "";
@@ -592,158 +592,169 @@ public class UIRenderer implements IRestoreActionListener{
 		}
 	}
 
-	private void setFieldValue(String ref, Object valueObj) {
-		try{
+	public void setFieldValue(String ref, Object valueObj) {
+		try {
 			Object obj = getViewByRef(ref);
-			
+
 			if (valueObj instanceof Number) {
 				valueObj = valueObj.toString();
 			}
-			
-			if (valueObj instanceof String){
-				
+
+			if (valueObj instanceof String) {
+
 				String value = (String) valueObj;
-				value = arch16n.substituteValue(value);
-				
-				if (obj instanceof TextView){
+				value = activityRef.get().getArch16n().substituteValue(value);
+
+				if (obj instanceof TextView) {
 					TextView tv = (TextView) obj;
 					tv.setText(value);
-				}
-				else if (obj instanceof Spinner){
+				} else if (obj instanceof Spinner) {
 					Spinner spinner = (Spinner) obj;
-					
-					for( int i = 0; i < spinner.getAdapter().getCount(); ++i ){
-						NameValuePair pair = (NameValuePair) spinner.getItemAtPosition(i);
-						if (value.equalsIgnoreCase(pair.getValue())){
+
+					for (int i = 0; i < spinner.getAdapter().getCount(); ++i) {
+						NameValuePair pair = (NameValuePair) spinner
+								.getItemAtPosition(i);
+						if (value.equalsIgnoreCase(pair.getValue())) {
 							spinner.setSelection(i);
 							break;
 						}
 					}
-				}
-				else if (obj instanceof LinearLayout){
+				} else if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
-					
+
 					View child0 = ll.getChildAt(0);
-					
+
 					if (child0 instanceof HorizontalScrollView) {
-						
 						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
 						View child1 = horizontalScrollView.getChildAt(0);
 						if(child1 instanceof RadioGroup){
 							RadioGroup rg = (RadioGroup) child1;
 							List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
-							for(int i = 0; i < rg.getChildCount(); ++i){
+							for (int i = 0; i < rg.getChildCount(); ++i) {
 								View view = rg.getChildAt(i);
-								if (view instanceof CustomRadioButton){
+								if (view instanceof CustomRadioButton) {
 									buttons.add((CustomRadioButton) view);
 								}
 							}
 							rg.removeAllViews();
 							for (CustomRadioButton rb : buttons) {
-								CustomRadioButton radioButton = new CustomRadioButton(rg.getContext());
-	                            radioButton.setText(rb.getText());
-	                            radioButton.setValue(rb.getValue());
-	                            if (rb.getValue().toString().equalsIgnoreCase(value)){
-	                            	radioButton.setChecked(true);
+								CustomRadioButton radioButton = new CustomRadioButton(
+										rg.getContext());
+								radioButton.setText(rb.getText());
+								radioButton.setValue(rb.getValue());
+								if (rb.getValue().toString()
+										.equalsIgnoreCase(value)) {
+									radioButton.setChecked(true);
 								}
-	                            rg.addView(radioButton);
-	                        	
-	                        }
+								rg.addView(radioButton);
+	
+							}
 						}
-						
-					}else if (child0 instanceof CheckBox){
-						for(int i = 0; i < ll.getChildCount(); ++i){
+
+					} else if (child0 instanceof CheckBox) {
+						for (int i = 0; i < ll.getChildCount(); ++i) {
 							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox){
+							if (view instanceof CustomCheckBox) {
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(value)){
+								if (cb.getValue().toString()
+										.equalsIgnoreCase(value)) {
 									cb.setChecked(true);
 									break;
 								}
 							}
 						}
+					} else {
+						FLog.w("cannot find view " + ref);
 					}
-				}
-				else if (obj instanceof DatePicker) {
+				} else if (obj instanceof DatePicker) {
 					DatePicker date = (DatePicker) obj;
 					DateUtil.setDatePicker(date, value);
-				} 
-				else if (obj instanceof TimePicker) {
+				} else if (obj instanceof TimePicker) {
 					TimePicker time = (TimePicker) obj;
 					DateUtil.setTimePicker(time, value);
-				}else if (obj instanceof CustomHorizontalScrollView){
+				} else if (obj instanceof CustomHorizontalScrollView) {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					if(horizontalScrollView.getImageViews() != null){
-						for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-							if (!horizontalScrollView.isMulti()) {
-								if (customImageView.getPicture().getId().equals(value)) {
-									customImageView.setBackgroundColor(Color.BLUE);
-									horizontalScrollView
-											.setSelectedImageView(customImageView);
-									break;
-								}
-							}else{
-								if (customImageView.getPicture().getUrl().equals(value)) {
-									customImageView.setBackgroundColor(Color.BLUE);
-									horizontalScrollView
-											.setSelectedImageView(customImageView);
-									break;
-								}
+					for (CustomImageView customImageView : horizontalScrollView
+							.getImageViews()) {
+						if (!horizontalScrollView.isMulti()) {
+							if (customImageView.getPicture().getId().equals(value)) {
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView
+									.addSelectedImageView(customImageView);
+								break;
 							}
-						};
+						}else{
+							if (customImageView.getPicture().getUrl().equals(value)) {
+								customImageView.setBackgroundColor(Color.BLUE);
+								horizontalScrollView
+									.addSelectedImageView(customImageView);
+								break;
+							}
+						}
 					}
-				}
-				else
-				{
-					// TODO show warning
+				} else {
+					FLog.w("cannot find view " + ref);
 				}
 			}
-			
-			else if (valueObj instanceof List<?>){
+
+			else if (valueObj instanceof List<?>) {
 				
-				if (obj instanceof LinearLayout){
+				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
+					
 					@SuppressWarnings("unchecked")
 					List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
-					for(NameValuePair pair : valueList){
-						for(int i = 0; i < ll.getChildCount(); ++i){
+
+					for (NameValuePair pair : valueList) {
+						for (int i = 0; i < ll.getChildCount(); ++i) {
 							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox){
+							if (view instanceof CustomCheckBox) {
 								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString().equalsIgnoreCase(arch16n.substituteValue(pair.getName()))){
+								if (cb.getValue()
+										.toString()
+										.equalsIgnoreCase(
+												activityRef.get().getArch16n()
+														.substituteValue(
+																pair.getName()))) {
 									cb.setChecked("true".equals(pair.getValue()));
 									break;
 								}
 							}
 						}
 					}
-				}else if(obj instanceof CustomHorizontalScrollView){
+				} else if (obj instanceof CustomHorizontalScrollView) {
 					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
+					
 					@SuppressWarnings("unchecked")
-					List<String> values = (List<String>) valueObj;
-					for (CustomImageView customImageView : horizontalScrollView.getImageViews()) {
-						for(String value : values){
-							if(customImageView.getPicture().getUrl().equals(value)){
-								customImageView.setBackgroundColor(Color.BLUE);
-								horizontalScrollView.addSelectedImageView(customImageView);
-								break;
+					List<String> valueList = (List<String>) valueObj;
+					
+					for (String value : valueList) {
+						for (CustomImageView customImageView : horizontalScrollView
+								.getImageViews()) {
+							if (!horizontalScrollView.isMulti()) {
+								if (customImageView.getPicture().getId().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.addSelectedImageView(customImageView);
+								}
+							}else{
+								if (customImageView.getPicture().getUrl().equals(value)) {
+									customImageView.setBackgroundColor(Color.BLUE);
+									horizontalScrollView
+											.addSelectedImageView(customImageView);
+								}
 							}
 						}
-					};
+					}
+				} else {
+					FLog.w("cannot find view " + ref);
 				}
-				else
-				{
-					// TODO show warning
-				}
+			} else {
+				FLog.w("cannot set field value " + ref + " = "
+						+ valueObj);
 			}
-			else
-			{
-				// TODO show warning
-			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field value",e);
-			// TODO show warning
+		} catch (Exception e) {
+			FLog.e("error setting field value " + ref, e);
 		}
 	}
 
