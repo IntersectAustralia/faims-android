@@ -1207,6 +1207,11 @@ public class CustomMapView extends MapView {
 	public List<Geometry> getHighlights() {
 		return highlightGeometryList;
 	}
+	
+	public void setHighlights(List<Geometry> geomList) {
+		highlightGeometryList.clear();
+		highlightGeometryList.addAll(geomList);
+	}
 
 	public void updateHighlights() throws Exception {
 		if (highlightGeometryList.isEmpty()) return;
