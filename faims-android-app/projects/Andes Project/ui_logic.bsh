@@ -434,7 +434,9 @@ newDoorway(){
     setFieldValue("doorway/doorDetail/Timestamp", getCurrentTime());
     setFieldValue("doorway/doorDetail/Author", username);
     setFieldValue("doorway/doorDetail/Device", device);
-
+    
+    // set gps fields if geometry selected
+	setDoorwayGPSFieldsFromPoint(getCreatedGeometry());
 }
 newNiche(){
 	niche_id = null;
@@ -475,6 +477,9 @@ newLichen(){
     setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
     setFieldValue("lichen/lichenDetail/Author", username);
     setFieldValue("lichen/lichenDetail/Device", device);
+    
+     // set gps fields if geometry selected
+	setLichenGPSFieldsFromPoint(getCreatedGeometry());
 }
 
 newFreeWall(){
@@ -2267,9 +2272,17 @@ loadDoorway() {
 	showTabGroup("doorway", doorway_id);
 	loadDoorwayFileAttributes(doorway_id);
 
-	archEntity = fetchArchEnt(doorway_id);
+	setDoorwayGPSFields(doorway_id);
+}
+
+setDoorwayGPSFields(id) {
+	archEntity = fetchArchEnt(id);
 	geomList = archEntity.getGeometryList();
-	if(geomList != null){
+	setDoorwayGPSFieldsFromPoint(geomList);
+}
+
+setDoorwayGPSFieldsFromPoint(geomList) {
+	if (geomList != null) {
 		point = geomList.get(0);
 		p = point.getMapPos();
 		p = convertFromProjToProj(getProjectSrid(), "4326", p);
@@ -2366,13 +2379,23 @@ loadLichen() {
 	showTabGroup("lichen", lichen_id);
 	loadLichenFileAttributes(lichen_id);
 
+	setLichenGPSFields(lichen_id);
+}
+
+setLichenGPSFields(id) {
 	archEntity = fetchArchEnt(lichen_id);
 	geomList = archEntity.getGeometryList();
-	point = geomList.get(0);
-	p = point.getMapPos();
-	p = convertFromProjToProj(getProjectSrid(), "4326", p);
-	setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
-	setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
+	setLichenGPSFieldsFromPoint(geomList);
+}
+
+setLichenGPSFieldsFromPoint(geomList) {
+	if (geomList != null) {
+		point = geomList.get(0);
+		p = point.getMapPos();
+		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
+		setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
+	}
 }
 
 loadLichenFileAttributes(id){
