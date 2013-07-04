@@ -308,7 +308,21 @@ public class EditTool extends HighlightTool {
 			public void onClick(View v) {
 				try {
 					List<Geometry> selection = EditTool.this.mapView.getHighlights();
-					EditTool.this.mapView.clearGeometryList(selection);
+					
+					for (Geometry geom : selection) {
+						if(geom.userData != null){
+							GeometryData data = (GeometryData) geom.userData;
+							if(GeometryData.Type.ENTITY.equals(data.type)){
+								EditTool.this.mapView.deleteGeometry(geom);
+							}else if(GeometryData.Type.RELATIONSHIP.equals(data.type)){
+								EditTool.this.mapView.deleteGeometry(geom);
+							}else if (GeometryData.Type.LEGACY.equals(data.type)) {
+								// ignore
+							} else {
+								EditTool.this.mapView.clearGeometry(geom);
+							}
+						}
+					}
 				} catch (Exception e) {
 					FLog.e(e.getMessage(), e);
 					showError(e.getMessage());

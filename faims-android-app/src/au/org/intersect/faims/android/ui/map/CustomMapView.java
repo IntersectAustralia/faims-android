@@ -981,6 +981,7 @@ public class CustomMapView extends MapView {
 		if (layer == null) {
 			throw new MapException("Layer does not exist");
 		}
+		
 		layer.removeGeometry(geom);
 
 		removeGeometry(geom);
@@ -991,7 +992,8 @@ public class CustomMapView extends MapView {
 	public void clearGeometryList(List<? extends Geometry> geomList)
 			throws Exception {
 		for (Object geom : geomList) {
-			clearGeometry((Geometry) geom);
+			Geometry geometry = (Geometry) geom;
+			clearGeometry(geometry);
 		}
 	}
 
@@ -1281,6 +1283,24 @@ public class CustomMapView extends MapView {
 			this.updateRenderer();
 		} catch (Exception e) {
 			FLog.e("error saving geometry", e);
+		}
+	}
+	
+	public void deleteGeometry(Geometry geom) {
+		try {
+			GeometryData data = (GeometryData) geom.userData;
+			
+			if (data.id == null) return;
+			
+			if (data.type == GeometryData.Type.ENTITY) {
+				activityRef.get().getDatabaseManager().deleteArchEnt(data.id);
+			} else if (data.type == GeometryData.Type.RELATIONSHIP) {
+				activityRef.get().getDatabaseManager().deleteRel(data.id);
+			}
+			clearHighlights();
+			this.updateRenderer();
+		} catch (Exception e) {
+			FLog.e("error deleting geometry", e);
 		}
 	}
 
