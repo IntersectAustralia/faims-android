@@ -351,19 +351,7 @@ newStructure(){
 	structureSketches = getNoneList();
 	structurePictures = new ArrayList();
 	structureVideos = new ArrayList();
-	structureAudios = new ArrayList();
-
-	if (structureAudios.isEmpty()) {
-		structureAudios = getNoneList();
-	}
-
-	if (structureFiles.isEmpty()) {
-		structureFiles = getNoneList();
-	}
-
-	if (structureSketches.isEmpty()) {
-		structureSketches = getNoneList();
-	}
+	structureAudios = getNoneList();
 
     newTabGroup("structure");
 
@@ -1693,7 +1681,7 @@ ArrayList structureFiles = getNoneList();
 ArrayList structureSketches = getNoneList();
 ArrayList structurePictures = new ArrayList();
 ArrayList structureVideos = new ArrayList();
-ArrayList structureAudios = new ArrayList();
+ArrayList structureAudios = getNoneList();
 
 String structure_id = null;
 
@@ -1818,7 +1806,7 @@ updateStructure(id){
 	structureSketches = getNoneList();
 	structurePictures = new ArrayList();
 	structureVideos = new ArrayList();
-	structureAudios = new ArrayList();
+	structureAudios = getNoneList();
 
 	ArrayList loadedSketches = new ArrayList();
 	ArrayList loadedFiles = new ArrayList();
