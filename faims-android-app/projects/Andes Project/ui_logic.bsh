@@ -1519,7 +1519,7 @@ updateSurfaceCollection(id) {
 
 String lot_id = null;
 
-onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
+onEvent("lot/lotDetail/Update", "click", "saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
@@ -2272,10 +2272,14 @@ setDoorwayGPSFields(id) {
 setDoorwayGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
-		p = point.getMapPos();
-		p = convertFromProjToProj(getProjectSrid(), "4326", p);
-		setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
-		setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
+		if (point instanceof Point) {
+			p = point.getMapPos();
+			p = convertFromProjToProj(getProjectSrid(), "4326", p);
+			setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
+			setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
+		} else {
+			showWarning("Logic Error", "Doorway must use a point");
+		} 
 	}
 }
 
@@ -2379,10 +2383,14 @@ setLichenGPSFields(id) {
 setLichenGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
-		p = point.getMapPos();
-		p = convertFromProjToProj(getProjectSrid(), "4326", p);
-		setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
-		setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
+		if (point instanceof Point) {
+			p = point.getMapPos();
+			p = convertFromProjToProj(getProjectSrid(), "4326", p);
+			setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
+			setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
+		} else {
+			showWarning("Logic Error", "Lichen must use a point");
+		} 
 	}
 }
 
