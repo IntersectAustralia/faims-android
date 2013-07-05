@@ -288,6 +288,29 @@ selectGallery(ref, list) {
 	}
 }
 
+saveCounter(attributeName, countEntityType, entityId) {
+	value = fetchOne(
+		"select count(distinct uuid)\n" + 
+		"from (select uuid, relationshipid, deleted \n" + 
+		"	from aentreln \n" + 
+		"	join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp \n" + 
+		"		from aentreln \n" + 
+		"		group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp)\n" + 
+		"	group by uuid, relationshipid) a \n" + 
+		"join archentity using (uuid) \n" + 
+		"join aenttype using (aenttypeid) \n" + 
+		"where relationshipid in (select relationshipid \n" + 
+		"	from aentreln \n" + 
+		"	where uuid = " + entityId + ") and aenttypename = '" + countEntityType + "' and a.deleted is null and uuid != " + entityId + ";");
+	System.out.println("Count:" + value);
+	if (value == null || value.isEmpty()) {
+		showWarning("Logic Error", "Error saving association");
+	} else {
+		fetchOne(
+			"insert into AEntValue (uuid, userid, AttributeID, Measure, ValueTimestamp, FreeText) values ("+entityId+", "+userId+", (select AttributeID from AttributeKey where AttributeName = '"+attributeName+"'), "+value.get(0)+", CURRENT_TIMESTAMP, '');");
+	}
+}
+
 /*** USER ***/
 
 getDefaultUsersList() {
@@ -313,6 +336,7 @@ populateListForUsers(){
 populateListForUsers();
 
 String username = "";
+String userId = "";
 String device = "";
 
 login(){
@@ -324,6 +348,7 @@ login(){
 	    device = deviceResult.get(0);
 	    setUser(user);
 	    username = userResult.get(1) + " " + userResult.get(2);
+	    userId = userResult.get(0);
 	    showTabGroup("control");
 	} else {
         showWarning("Logic Error", "Please Choose Device");
@@ -1662,6 +1687,7 @@ updateStructureWall(id) {
 	    // save structure wall to structure if new structure wall
 	    if (isNull(id)) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
+	    	saveCounter("WallsTotalCount", "StructureWall", structure_id);
 	    }
 
 	    // TODO update the structure wall count in the structure
@@ -1896,6 +1922,10 @@ updateAllSpecialFind() {
 }
 
 updateAllStructure() {
+	if (!isNull(structure_id)) {
+		showTabGroup("structure", structure_id);
+	}
+
 	Object localStructureWall = new ArrayList();
 	Object localCorner = new ArrayList();
 
@@ -2131,6 +2161,18 @@ updateAll(){
 	populateDropDown("control/data/windowList", window);
 }
 
+updateAllStructureWall() {
+	if (!isNull(structure_wall_id)) {
+		showTabGroup("wall", structure_wall_id);
+	}
+}
+
+updateAllCorner() {
+	if (!isNull(corner_id)) {
+		showTabGroup("corner", corner_id);
+	}
+}
+
 onEvent("control", "show", "updateAll()");
 onEvent("feature", "show", "updateAllFeature()");
 onEvent("lichen", "show", "updateAllLichen()");
@@ -2141,6 +2183,8 @@ onEvent("window", "show", "updateAllWindow()");
 onEvent("structure", "show", "updateAllStructure()");
 onEvent("specialFind", "show", "updateAllSpecialFind()");
 onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
+onEvent("wall", "show", "updateAllStructureWall()");
+onEvent("corner", "show", "updateAllCorner()");
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
