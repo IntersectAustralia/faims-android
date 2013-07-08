@@ -1503,4 +1503,115 @@ public class DatabaseManager {
 			}
 		}
 	}
+	
+	public int countVisibleEntities(List<MapPos> list, String userQuery) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (uuid, aenttimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = DatabaseQueries.COUNT_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
+				stmt = db.prepare(query);
+				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
+				stmt.step();
+				int count = stmt.column_int(0);
+				stmt.close();
+				stmt = null;
+				return count;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public int countVisibleRelationships(List<MapPos> list, String userQuery) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (relationshipid, relntimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = DatabaseQueries.COUNT_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
+				stmt = db.prepare(query);
+				stmt.bind(1, WKTUtil.geometryToWKT(new Polygon(list, (Label) null, (PolygonStyle) null, (Object) null)));
+				stmt.step();
+				int count = stmt.column_int(0);
+				stmt.close();
+				stmt = null;
+				return count;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public int countVisibleObjectsLegacy(
+			String dbPath, String tableName, String idColumn, String geometryColumn, List<MapPos> list) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				db = new jsqlite.Database();
+				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = "select count(" + idColumn + ") from " + tableName + " where MBRIntersects(BuildMBR(?, ?, ?, ?), transform(" + geometryColumn + ", 4326));";
+				stmt = db.prepare(query);
+				
+				stmt.bind(1, list.get(0).x);
+				stmt.bind(2, list.get(0).y);
+				stmt.bind(3, list.get(2).x);
+				stmt.bind(4, list.get(2).y);
+				stmt.step();
+				int count = stmt.column_int(0);
+				stmt.close();
+				stmt = null;
+				return count;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
 }

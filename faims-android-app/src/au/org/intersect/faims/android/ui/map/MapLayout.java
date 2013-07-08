@@ -22,6 +22,7 @@ public class MapLayout extends LinearLayout {
 	private ScaleBarView scaleView;
 	private CustomMapView mapView;
 	private RelativeLayout toolsView;
+	private RelativeLayout layersView;
 	private EditView editView;
 	private RelativeLayout container;
 	private Button layerButton;
@@ -53,6 +54,8 @@ public class MapLayout extends LinearLayout {
 		scaleView = new ScaleBarView(activity);
 		
 		toolsView = new RelativeLayout(activity);
+
+		layersView = new RelativeLayout(activity);
 		
 		mapView = new CustomMapView(activity, this);
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -142,6 +145,10 @@ public class MapLayout extends LinearLayout {
 		return toolsView;
 	}
 	
+	public RelativeLayout getLayersView() {
+		return layersView;
+	}
+	
 	public void setMapView(CustomMapView value) {
 		mapView = value;
 		indexViews();
@@ -157,6 +164,7 @@ public class MapLayout extends LinearLayout {
 		if (northView != null) container.addView(northView);
 		if (scaleView != null) container.addView(scaleView);
 		if (toolsView != null) container.addView(toolsView);
+		if (layersView != null) container.addView(layersView);
 	}
 	
 	private Button createLayerButton() {

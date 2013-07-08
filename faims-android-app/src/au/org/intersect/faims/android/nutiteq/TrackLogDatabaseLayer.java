@@ -41,7 +41,7 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 	    }
 		
 		try {
-			ArrayList<MapPos> pts = getMapBoundaries();
+			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			if (type == Type.GPS_TRACK) {
 				Vector<Geometry> objects = new Vector<Geometry>();
 				for(Entry<User, Boolean> user : users.entrySet()){

@@ -147,6 +147,14 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		}
 	}
 	
+	public int getMaxObjects() {
+		return maxObjects;
+	}
+	
+	public void setMaxObjects(int value) {
+		this.maxObjects = value;
+	}
+	
 	  public void add(Geometry element) {
 	    throw new UnsupportedOperationException();
 	  }

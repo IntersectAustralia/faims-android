@@ -20,8 +20,6 @@ import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
 	
-	protected static final int BOUNDARY_PADDING = 20;
-	
 	public enum Type {
 		ENTITY,
 		RELATIONSHIP,
@@ -73,6 +71,10 @@ public class DatabaseLayer extends GeometryLayer {
 	    }
 	    
 	    hideGeometryList = new ArrayList<String>();
+	}
+	
+	public Type getType() {
+		return type;
 	}
 
 	public String getName() {
@@ -135,6 +137,14 @@ public class DatabaseLayer extends GeometryLayer {
 		}
 	}
 	
+	public int getMaxObjects() {
+		return maxObjects;
+	}
+	
+	public void setMaxObjects(int value) {
+		this.maxObjects = value;
+	}
+	
 	@Override
 	public void calculateVisibleElements(Envelope envelope, int zoom) {
 		if (zoom < minZoom) {
@@ -143,7 +153,7 @@ public class DatabaseLayer extends GeometryLayer {
 	    }
 		
 		try {
-			ArrayList<MapPos> pts = getMapBoundaries();
+			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			Vector<Geometry> objectTemp = null;
 			Vector<Geometry> objects = new Vector<Geometry>();
 			
@@ -223,21 +233,6 @@ public class DatabaseLayer extends GeometryLayer {
 		}
 		return getGeometryStyle(geom);
 	}
-	
-	protected ArrayList<MapPos> getMapBoundaries() {
-			MapPos p1 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
-			MapPos p2 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, -BOUNDARY_PADDING), mapView, false));
-			MapPos p3 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(mapView.getWidth() + BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
-			MapPos p4 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, mapView.getHeight() + BOUNDARY_PADDING), mapView, false));
-			MapPos p5 = p1;
-			ArrayList<MapPos> pts = new ArrayList<MapPos>();
-			pts.add(p1);
-			pts.add(p2);
-			pts.add(p3);
-			pts.add(p4);
-			pts.add(p5);
-			return pts;
-		}
 
 	public void hideGeometry(String id) {
 		hideGeometryList.add(id);

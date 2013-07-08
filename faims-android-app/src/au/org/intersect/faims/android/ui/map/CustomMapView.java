@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
@@ -42,6 +43,7 @@ import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -94,6 +96,8 @@ import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class CustomMapView extends MapView {
 
+	private static final int MAP_OVERLAY_DELAY = 500;
+	
 	public class InternalMapListener extends MapListener {
 
 		@Override
@@ -199,6 +203,8 @@ public class CustomMapView extends MapView {
 
 	private RelativeLayout toolsView;
 
+	private RelativeLayout layersView;
+
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
 
@@ -284,6 +290,8 @@ public class CustomMapView extends MapView {
 	private int vertexLayerId;
 
 	private boolean projectionProper;
+
+	private MapText layerDisplayText;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -313,6 +321,7 @@ public class CustomMapView extends MapView {
 		this.northView = mapLayout.getNorthView();
 		this.scaleView = mapLayout.getScaleView();
 		this.toolsView = mapLayout.getToolsView();
+		this.layersView = mapLayout.getLayersView();
 		
 		this.drawView.setMapView(this);
 		this.editView.setMapView(this);
@@ -365,6 +374,8 @@ public class CustomMapView extends MapView {
 		} catch (Exception e) {
 			FLog.e("error checking for proper projection", e);
 		}
+        
+        createLayersView();
 	}
 
 	public CustomMapView(Context context) {
@@ -458,22 +469,21 @@ public class CustomMapView extends MapView {
 			for (Geometry geom : canvas.getGeometryList()) {
 				removeGeometry(geom);
 			}
-		}
-		
-		if (layer == selectedLayer) {
-			this.selectedLayer = null;
-			updateLayers();
-		}
-		
-		// remove associated text layer
-		if (layer instanceof CustomSpatialiteLayer) {
+		} else if (layer instanceof CustomSpatialiteLayer) {
+			// remove associated text layer
 			removeLayer(((CustomSpatialiteLayer) layer).getTextLayer());
 		} else if (layer instanceof DatabaseLayer) {
+			// remove associated text layer
 			removeLayer(((DatabaseLayer) layer).getTextLayer());
 		} else if ((layer instanceof GdalMapLayer) && layer == baseLayer) {
 			this.getLayers().removeLayer(currentPositionLayer);
 			currentPositionLayer = null;
 			gpsMarker = null;
+		}
+		
+		if (layer == selectedLayer) {
+			this.selectedLayer = null;
+			updateLayers();
 		}
 		
 	}
@@ -606,7 +616,7 @@ public class CustomMapView extends MapView {
 		CustomMapView.registerLicense(LICENSE, context);
 		Bitmap logo = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.ic_launcher);
-		CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.2f);
+		CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.1f);
 	}
 
 	public void updateMapOverlay() {
@@ -1432,7 +1442,7 @@ public class CustomMapView extends MapView {
 					Thread.sleep(1000);
 					while(CustomMapView.this.canRunThreads()) {
 						activityRef.get().runOnUiThread(new Runnable() {
-							
+
 							@Override
 							public void run() {
 								CustomMapView.this.updateMapOverlay();
@@ -1441,10 +1451,12 @@ public class CustomMapView extends MapView {
 								if (toolsEnabled && currentTool != null) {
 									currentTool.onMapUpdate();
 								}
+								// update layers view
+								updateLayersView();
 							}
 							
 						});
-						Thread.sleep(500);
+						Thread.sleep(MAP_OVERLAY_DELAY);
 					}
 					
 					FLog.d("stopping map overlay thread");
@@ -2141,6 +2153,117 @@ public class CustomMapView extends MapView {
 
 	public boolean isProperProjection() {
 		return projectionProper;
+	}
+	
+	private void createLayersView() {
+		layerDisplayText = new MapText(this.getContext());
+		layerDisplayText.setBackgroundColor(Color.WHITE);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.alignWithParent = true;
+		params.addRule(RelativeLayout.ALIGN_LEFT);
+		params.addRule(RelativeLayout.ALIGN_BOTTOM);
+		params.bottomMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
+		params.leftMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
+		layerDisplayText.setLayoutParams(params);
+		layersView.addView(layerDisplayText);
+	}
+	
+	private void updateLayersView() {
+		boolean hasMaxVisible = false;
+		List<Layer> layers = this.getAllLayers();
+		for (Layer layer : layers) {
+			if (!layer.isVisible()) continue;
+			
+			if (layer instanceof CustomSpatialiteLayer) {
+				CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
+				if (spatialLayer.getVisibleElements() != null && spatialLayer.getVisibleElements().size() >= spatialLayer.getMaxObjects()) {
+					hasMaxVisible = true;
+					break;
+				}
+			} else if (layer instanceof DatabaseLayer) {
+				DatabaseLayer dbLayer = (DatabaseLayer) layer;
+				if (dbLayer.getVisibleElements() != null && dbLayer.getVisibleElements().size() >= dbLayer.getMaxObjects()) {
+					hasMaxVisible = true;
+					break;
+				}
+			}
+		}
+		if (hasMaxVisible) {
+			layerDisplayText.setText("Warning: display vectors could be hidden");
+			layerDisplayText.setVisibility(View.VISIBLE);
+		} else {
+			layerDisplayText.setVisibility(View.GONE);
+		}
+	}
+	
+	// TODO: this operation is too expensive and sometimes interfers with rendering cycle
+	/*
+	private void updateLayerCounter() {
+		try {
+			int totalVisibleCount = 0;
+			int visibleCount = 0;
+			List<Layer> layers = this.getAllLayers();
+			List<MapPos> pts = getMapBoundaryPts();
+			for (Layer layer : layers) {
+				if (!layer.isVisible()) continue;
+				
+				if (layer instanceof CustomSpatialiteLayer) {
+					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
+					if (spatialLayer.getVisibleElements() != null) {
+						visibleCount += spatialLayer.getVisibleElements().size();
+						totalVisibleCount += databaseManager.countVisibleObjectsLegacy(spatialLayer.getDbPath(), spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), pts);
+					}
+				} else if (layer instanceof DatabaseLayer) {
+					DatabaseLayer dbLayer = (DatabaseLayer) layer;
+					if (dbLayer.getVisibleElements() != null) {
+						visibleCount += dbLayer.getVisibleElements().size();
+						if (dbLayer.getType() == DatabaseLayer.Type.ENTITY) {
+							totalVisibleCount += databaseManager.countVisibleEntities(pts, dbLayer.getQuerySQL());
+						} else if (dbLayer.getType() == DatabaseLayer.Type.RELATIONSHIP){
+							totalVisibleCount += databaseManager.countVisibleRelationships(pts, dbLayer.getQuerySQL());
+						}
+					}
+				} else if (layer instanceof CanvasLayer) {
+					CanvasLayer canvasLayer = (CanvasLayer) layer;
+					if (canvasLayer.getVisibleElements() != null) {
+						visibleCount += canvasLayer.getVisibleElements().size();
+						totalVisibleCount += canvasLayer.getVisibleElements().size();
+					}
+				}
+			}
+			if (layerDisplayText == null) {
+				layerDisplayText = new MapText(this.getContext());
+				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				params.alignWithParent = true;
+				params.addRule(RelativeLayout.ALIGN_LEFT);
+				params.addRule(RelativeLayout.ALIGN_BOTTOM);
+				params.bottomMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
+				params.leftMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
+				layerDisplayText.setLayoutParams(params);
+				layersView.addView(layerDisplayText);
+			}
+			layerDisplayText.setText("vector visible: " + visibleCount + "/" + totalVisibleCount);
+		} catch (Exception e) {
+			FLog.e("error updating layer view", e);
+		}
+	}
+	*/
+	
+	protected static final int BOUNDARY_PADDING = 20;
+	
+	public ArrayList<MapPos> getMapBoundaryPts() {
+		MapPos p1 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), this, false));
+		MapPos p2 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(getWidth() + BOUNDARY_PADDING, -BOUNDARY_PADDING), this, false));
+		MapPos p3 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(getWidth() + BOUNDARY_PADDING, getHeight() + BOUNDARY_PADDING), this, false));
+		MapPos p4 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, getHeight() + BOUNDARY_PADDING), this, false));
+		MapPos p5 = p1;
+		ArrayList<MapPos> pts = new ArrayList<MapPos>();
+		pts.add(p1);
+		pts.add(p2);
+		pts.add(p3);
+		pts.add(p4);
+		pts.add(p5);
+		return pts;
 	}
 
 }
