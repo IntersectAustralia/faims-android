@@ -42,9 +42,9 @@ public class DatabaseLayer extends GeometryLayer {
 	protected String querySql;
 	protected CustomMapView mapView;
 	protected String userid;
-	private ArrayList<String> hideGeometryList;
-	private boolean renderAll;
-	private boolean hasRendered;
+	protected ArrayList<String> hideGeometryList;
+	protected boolean renderAll;
+	protected boolean hasRendered;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, GeometryStyle pointStyle,

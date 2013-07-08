@@ -40,6 +40,9 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 	        return;
 	    }
 		
+		if (renderAll && hasRendered) return;
+	    hasRendered = true;
+		
 		try {
 			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			if (type == Type.GPS_TRACK) {
