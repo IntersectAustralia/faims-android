@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -42,6 +43,8 @@ public class DatabaseLayer extends GeometryLayer {
 	protected CustomMapView mapView;
 	protected String userid;
 	private ArrayList<String> hideGeometryList;
+	private boolean renderAll;
+	private boolean hasRendered;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, GeometryStyle pointStyle,
@@ -152,6 +155,9 @@ public class DatabaseLayer extends GeometryLayer {
 	        return;
 	    }
 		
+		if (renderAll && hasRendered) return;
+	    hasRendered = true;
+		
 		try {
 			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			Vector<Geometry> objectTemp = null;
@@ -160,17 +166,15 @@ public class DatabaseLayer extends GeometryLayer {
 			GeometryData.Type dataType;
 			if (type == Type.ENTITY) {
 				dataType = GeometryData.Type.ENTITY;
-				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, maxObjects);
+				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
 				dataType = GeometryData.Type.RELATIONSHIP;
-				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, maxObjects);
+				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
 			}else {
 				throw new Exception("database layer has no type");
 			}
 			
 		    createElementsInLayer(zoom, objectTemp, objects, dataType);
-		    
-		    //FLog.d("visible objects " + objects.size());
 		    
 		    setVisibleElementsList(objects);
 		} catch (Exception e) {
@@ -180,6 +184,7 @@ public class DatabaseLayer extends GeometryLayer {
 	
 	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
 			Vector<Geometry> objects, GeometryData.Type dataType) {
+		
 		// apply styles, create new objects for these
 		for(Geometry object: objectTemp){
 		    
@@ -240,6 +245,11 @@ public class DatabaseLayer extends GeometryLayer {
 	
 	public void clearHiddenList() {
 		hideGeometryList.clear();
+	}
+
+	public void renderAllVectors(boolean value) {
+		renderAll = value;
+		hasRendered = false;
 	}
 
 }

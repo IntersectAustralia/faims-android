@@ -307,6 +307,11 @@ public class EditTool extends HighlightTool {
 			@Override
 			public void onClick(View v) {
 				try {
+					if (hasLegacyGeometry()) {
+						showError("Cannot edit legacy geometry");
+						return;
+					}
+					
 					List<Geometry> selection = EditTool.this.mapView.getHighlights();
 					
 					for (Geometry geom : selection) {
@@ -410,6 +415,11 @@ public class EditTool extends HighlightTool {
 				List<Geometry> selection = mapView.getHighlights();
 				if (selection.size() != 1) {
 					showError("Please select only one geometry to edit");
+					return;
+				}
+				
+				if (hasLegacyGeometry()) {
+					showError("Cannot edit legacy geometry");
 					return;
 				}
 				

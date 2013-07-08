@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
 
@@ -40,6 +41,8 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	private String[] userColumns;
 	
 	private CustomMapView mapView;
+	private boolean renderAll;
+	private boolean hasRendered;
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, CustomMapView mapView, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
@@ -155,6 +158,11 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		this.maxObjects = value;
 	}
 	
+	public void renderAllVectors(boolean value) {
+		renderAll = value;
+		hasRendered = false;
+	}
+	
 	  public void add(Geometry element) {
 	    throw new UnsupportedOperationException();
 	  }
@@ -173,11 +181,14 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	        setVisibleElementsList(null);
 	      return;
 	    }
-	
+	    
+	    if (renderAll && hasRendered) return;
+	    hasRendered = true;
+	    
 	    MapPos bottomLeft = projection.fromInternal(envelope.getMinX(), envelope.getMinY());
 	    MapPos topRight = projection.fromInternal(envelope.getMaxX(), envelope.getMaxY());
 	    Vector<Geometry> objectTemp = spatialLite.qrySpatiaLiteGeom(new Envelope(bottomLeft.x, topRight.x,
-	        bottomLeft.y, topRight.y), maxObjects, dbLayer, userColumns);
+	        bottomLeft.y, topRight.y), renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects, dbLayer, userColumns);
 	    
 	    Vector<Geometry> objects = new Vector<Geometry>();
 	    

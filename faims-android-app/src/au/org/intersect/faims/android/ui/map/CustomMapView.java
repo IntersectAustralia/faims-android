@@ -20,8 +20,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
@@ -97,6 +99,8 @@ import com.nutiteq.vectorlayers.MarkerLayer;
 public class CustomMapView extends MapView {
 
 	private static final int MAP_OVERLAY_DELAY = 500;
+	
+	private static final int BOUNDARY_PADDING = 20;
 	
 	public class InternalMapListener extends MapListener {
 
@@ -293,6 +297,8 @@ public class CustomMapView extends MapView {
 
 	private MapText layerDisplayText;
 	
+	private ToggleButton layerDisplayButton;
+	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
 		
@@ -376,6 +382,11 @@ public class CustomMapView extends MapView {
 		}
         
         createLayersView();
+        
+        // setup default constraints
+        getConstraints().setMapBounds(null);
+		getConstraints().setRotatable(true);
+		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 	}
 
 	public CustomMapView(Context context) {
@@ -781,7 +792,7 @@ public class CustomMapView extends MapView {
 		validateLayerName(layerName);
 
 		CustomOgrLayer ogrLayer = new CustomOgrLayer(nextLayerId(), layerName,
-				new EPSG3857(), file, null, FaimsSettings.MAX_VECTOR_OBJECTS,
+				new EPSG3857(), file, null, FaimsSettings.DEFAULT_VECTOR_OBJECTS,
 				pointStyleSet, lineStyleSet, polygonStyleSet);
 		// ogrLayer.printSupportedDrivers();
 		// ogrLayer.printLayerDetails(table);
@@ -814,7 +825,7 @@ public class CustomMapView extends MapView {
 		CustomSpatialiteLayer spatialLayer = new CustomSpatialiteLayer(
 				nextLayerId(), layerName, new EPSG3857(), this, file, tablename,
 				"Geometry", labelColumns,
-				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyle, lineStyle,
+				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle,
 				polygonStyle);
 		this.getLayers().addLayer(spatialLayer);
 		
@@ -849,7 +860,7 @@ public class CustomMapView extends MapView {
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
-				FaimsSettings.MAX_VECTOR_OBJECTS, pointStyle, lineStyle, polygonStyle);
+				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
 		if (textStyleSet != null) {
@@ -873,7 +884,7 @@ public class CustomMapView extends MapView {
 		validateLayerName(layerName);
 		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,  databaseManager,
-				FaimsSettings.MAX_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
+				FaimsSettings.DEFAULT_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
 		if (textStyleSet != null) {
@@ -2156,16 +2167,76 @@ public class CustomMapView extends MapView {
 	}
 	
 	private void createLayersView() {
-		layerDisplayText = new MapText(this.getContext());
-		layerDisplayText.setBackgroundColor(Color.WHITE);
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.HORIZONTAL);
 		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.alignWithParent = true;
 		params.addRule(RelativeLayout.ALIGN_LEFT);
 		params.addRule(RelativeLayout.ALIGN_BOTTOM);
 		params.bottomMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
 		params.leftMargin = (int) ScaleUtil.getDip(activityRef.get(), 10);
-		layerDisplayText.setLayoutParams(params);
-		layersView.addView(layerDisplayText);
+		layout.setLayoutParams(params);
+		layersView.addView(layout);
+		
+		layerDisplayText = new MapText(this.getContext());
+		layerDisplayText.setBackgroundColor(Color.WHITE);
+		layerDisplayText.setVisibility(View.GONE);
+		layout.addView(layerDisplayText);
+		
+		layerDisplayButton = new ToggleButton(this.getContext());
+		layerDisplayButton.setTextOn("Back");
+		layerDisplayButton.setTextOff("View all vectors");
+		layerDisplayButton.setVisibility(View.GONE);
+		layerDisplayButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				updateLayerDisplayText();
+				if (layerDisplayButton.isChecked()) {
+					MapPos p1 = GeometryUtil.transformVertex(new MapPos(getWidth()/2, getHeight()/2), CustomMapView.this, false);
+					Bounds bounds = new Bounds(p1.x, p1.y, p1.x, p1.y);
+					getConstraints().setMapBounds(bounds);
+					getConstraints().setRotatable(false);
+					getConstraints().setZoomRange(new Range(getZoom(), getZoom()));
+					
+					List<Layer> layers = getAllLayers();
+					for (Layer layer : layers) {
+						if (layer instanceof CustomSpatialiteLayer) {
+							((CustomSpatialiteLayer) layer).renderAllVectors(true);
+						} else if (layer instanceof DatabaseLayer) {
+							((DatabaseLayer) layer).renderAllVectors(true);
+						}
+					}
+				} else {
+					getConstraints().setMapBounds(null);
+					getConstraints().setRotatable(true);
+					getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+					
+					List<Layer> layers = getAllLayers();
+					for (Layer layer : layers) {
+						if (layer instanceof CustomSpatialiteLayer) {
+							((CustomSpatialiteLayer) layer).renderAllVectors(false);
+						} else if (layer instanceof DatabaseLayer) {
+							((DatabaseLayer) layer).renderAllVectors(false);
+						}
+					}
+				}
+				updateRenderer();
+			}
+			
+		});
+		layerDisplayButton.setChecked(false);
+		updateLayerDisplayText();
+		
+		layout.addView(layerDisplayButton);
+	}
+	
+	public void updateLayerDisplayText() {
+		if (layerDisplayButton.isChecked()) {
+			layerDisplayText.setText("Press back to enable scrolling");
+		} else {
+			layerDisplayText.setText("Warning: display vectors could be hidden");
+		}
 	}
 	
 	private void updateLayersView() {
@@ -2189,10 +2260,11 @@ public class CustomMapView extends MapView {
 			}
 		}
 		if (hasMaxVisible) {
-			layerDisplayText.setText("Warning: display vectors could be hidden");
 			layerDisplayText.setVisibility(View.VISIBLE);
+			layerDisplayButton.setVisibility(View.VISIBLE);
 		} else {
 			layerDisplayText.setVisibility(View.GONE);
+			layerDisplayButton.setVisibility(View.GONE);
 		}
 	}
 	
@@ -2248,8 +2320,6 @@ public class CustomMapView extends MapView {
 		}
 	}
 	*/
-	
-	protected static final int BOUNDARY_PADDING = 20;
 	
 	public ArrayList<MapPos> getMapBoundaryPts() {
 		MapPos p1 = GeometryUtil.convertToWgs84(GeometryUtil.transformVertex(new MapPos(-BOUNDARY_PADDING, -BOUNDARY_PADDING), this, false));

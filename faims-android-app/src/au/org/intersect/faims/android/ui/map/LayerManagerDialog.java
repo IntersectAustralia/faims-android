@@ -32,6 +32,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -307,6 +308,18 @@ public class LayerManagerDialog extends AlertDialog {
 						}
 					});
 					layout.addView(showLabelsButton);
+					
+					Button configButton = new Button(context);
+					configButton.setText("Config");
+					configButton.setOnClickListener(new View.OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							d.dismiss();
+							config(layer);
+						}
+					});
+					layout.addView(configButton);
 				} else if (layer instanceof DatabaseLayer) {
 					final ToggleButton showLabelsButton = new ToggleButton(context);
 					showLabelsButton.setTextOn("Hide Labels");
@@ -337,6 +350,17 @@ public class LayerManagerDialog extends AlertDialog {
 						});
 						layout.addView(userTrackLogButton);
 					}
+					Button configButton = new Button(context);
+					configButton.setText("Config");
+					configButton.setOnClickListener(new View.OnClickListener() {
+
+						@Override
+						public void onClick(View arg0) {
+							d.dismiss();
+							config(layer);
+						}
+					});
+					layout.addView(configButton);
 				}
 				
 				d.show();
@@ -1215,6 +1239,63 @@ public class LayerManagerDialog extends AlertDialog {
 	        public void onClick(DialogInterface dialog, int id) {
 	           // ignore
 	        }
+	    });
+		
+		builder.create().show();
+	}
+	
+	private void config(final Layer layer) {
+		ScrollView scrollView = new ScrollView(this.getContext());
+		LinearLayout layout = new LinearLayout(this.getContext());
+		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
+		
+		TextView vectorLimitLabel = new TextView(this.getContext());
+		vectorLimitLabel.setText("Max vector limit:");
+		layout.addView(vectorLimitLabel);
+		
+		final EditText vectorLimitText = new EditText(LayerManagerDialog.this.getContext());
+		if (layer instanceof CustomSpatialiteLayer) {
+			vectorLimitText.setText("" + ((CustomSpatialiteLayer) layer).getMaxObjects());
+		} else if (layer instanceof DatabaseLayer) {
+			vectorLimitText.setText("" + ((DatabaseLayer) layer).getMaxObjects());
+		}
+		layout.addView(vectorLimitText);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
+		builder.setTitle("Layer Config");
+		builder.setView(scrollView);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				try {
+					int limit = Integer.parseInt(vectorLimitText.getText().toString());
+					if (limit <= 0) {
+						throw new Exception("Limit must be greater than 0");
+					} else if (limit >= FaimsSettings.MAX_VECTOR_OBJECTS) {
+						throw new Exception("Limit must be less than " + FaimsSettings.MAX_VECTOR_OBJECTS);
+					}
+					if (layer instanceof CustomSpatialiteLayer) {
+						((CustomSpatialiteLayer) layer).setMaxObjects(limit);
+					} else if (layer instanceof DatabaseLayer) {
+						((DatabaseLayer) layer).setMaxObjects(limit);
+					}
+					mapView.updateRenderer();
+				} catch (Exception e) {
+					FLog.e("error setting config", e);
+					showErrorDialog(e.getMessage());
+				}
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				// ignore
+			}
+	        
 	    });
 		
 		builder.create().show();
