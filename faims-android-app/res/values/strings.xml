@@ -49,6 +49,9 @@
     <string name="download_database_title">Downloading Database</string>
     <string name="download_database_message">please wait..</string>
     
+    <string name="load_project_title">Loading project</string>
+    <string name="load_project_message">please wait..</string>
+
     <string name="download_database_failure_title">Could not download database</string>
     <string name="download_database_failure_message">Would you like to try again?</string>
     
