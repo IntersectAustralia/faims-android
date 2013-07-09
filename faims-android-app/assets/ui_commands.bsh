@@ -742,8 +742,7 @@ showShapeLayer(String ref, String layerName, String filename, GeometryStyle poin
   * @param polygonStyle the styling to polygons appearing in the layer
   * @param textStyle the styling to all text labels appearing in the layer
   */
-showSpatialLayer(String ref, String layerName, String filename, String tableName, String idColumn, String labelColumn, 
-	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+showSpatialLayer(String ref, String layerName, String filename, String tableName, String idColumn, String labelColumn, GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 	linker.showSpatialLayer(ref, layerName, filename, tableName, idColumn, labelColumn, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
@@ -760,8 +759,7 @@ showSpatialLayer(String ref, String layerName, String filename, String tableName
   * @param polygonStyle the styling to polygons appearing in the layer
   * @param textStyle the styling to all text labels appearing in the layer
   */
-showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,
-	GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
+showDatabaseLayer(String ref, String layerName, boolean isEntity, String queryName, String querySql,GeometryStyle pointStyle, GeometryStyle lineStyle, GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 	linker.showDatabaseLayer(ref, layerName, isEntity, queryName, querySql, pointStyle, lineStyle, polygonStyle, textStyle);
 }
 
