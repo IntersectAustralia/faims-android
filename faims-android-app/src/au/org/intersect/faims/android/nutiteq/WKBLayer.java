@@ -65,7 +65,7 @@ public class WKBLayer extends GeometryLayer {
 			Label lineLabel = new DefaultLabel("Line");
 			Label polyLabel = new DefaultLabel("Polygon");
 			while (true) {
-				Geometry[] geoms = WkbRead.readWkb(byteIn, null);
+				Geometry[] geoms = WkbRead.readWkb(byteIn, (Object) null);
 				if (geoms == null) break;
 
 				for (int i = 0; i < geoms.length; i++) {

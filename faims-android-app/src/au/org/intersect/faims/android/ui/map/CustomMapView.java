@@ -725,7 +725,7 @@ public class CustomMapView extends MapView {
         }
 		
 		// center map 
-		double[][] boundaries = gdalLayer.getBoundaries();
+		double[][] boundaries = gdalLayer.getBoundary();
 		setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
 		
 		orderLayers();
@@ -764,7 +764,7 @@ public class CustomMapView extends MapView {
 	}
 	
 	protected void setMapBounds(CustomGdalMapLayer gdalLayer){
-		double[][] bound = gdalLayer.getBoundaries();
+		double[][] bound = gdalLayer.getBoundary();
 		MapPos p1 = GeometryUtil.convertFromWgs84(new MapPos(bound[0][0], bound[0][1]));
 		MapPos p2 = GeometryUtil.convertFromWgs84(new MapPos(bound[3][0], bound[3][1]));
 		Bounds bounds = new Bounds(p1.x, p1.y, p2.x, p2.y);

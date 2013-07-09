@@ -1355,7 +1355,7 @@ public class LayerManagerDialog extends AlertDialog {
 			fileSizeEditText.setText(file.length()/(1024 * 1024) + " MB");
 			layout.addView(fileSizeEditText);
 
-			double[][] originalBounds = gdalMapLayer.getBoundaries();
+			double[][] originalBounds = gdalMapLayer.getBoundary();
 			
 			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
 			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
