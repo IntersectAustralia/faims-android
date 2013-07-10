@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.services;
 
+import java.io.File;
+
 import android.content.Intent;
 import android.os.Environment;
 import au.org.intersect.faims.android.R;
@@ -8,6 +10,7 @@ import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.util.FileUtil;
 
 public class UpdateProjectDataService extends DownloadService {
 
@@ -19,6 +22,7 @@ public class UpdateProjectDataService extends DownloadService {
 	protected DownloadResult doDownload(Intent intent) {
 		try {
 			Project project = (Project) intent.getExtras().get("project");
+			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 			
 			FLog.d("update project data for project " + project.name);
 			
@@ -28,12 +32,13 @@ public class UpdateProjectDataService extends DownloadService {
 			DownloadResult result = downloadDataDirectory(intent);
 			
 			if (downloadStopped) {
+				FileUtil.deleteDirectory(new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)));
 				FLog.d("update project data cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				
+				FileUtil.deleteDirectory(new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)));
 				FLog.d("update project data directory failure");
 				return result;
 			}
