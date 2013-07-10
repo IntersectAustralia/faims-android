@@ -15,6 +15,10 @@ public class ogr implements ogrConstants {
     ogrJNI.UseExceptions();
   }
 
+  public static void nativePipeSTDERRToLogcat() {
+      ogrJNI.nativePipeSTDERRToLogcat();
+    }
+  
   public static void DontUseExceptions() {
     ogrJNI.DontUseExceptions();
   }
@@ -76,6 +80,11 @@ public class ogr implements ogrConstants {
 
   public static Geometry ForceToPolygon(Geometry geom_in) {
     long cPtr = ogrJNI.ForceToPolygon(Geometry.getCPtr(geom_in), geom_in);
+    return (cPtr == 0) ? null : new Geometry(cPtr, true);
+  }
+
+  public static Geometry ForceToLineString(Geometry geom_in) {
+    long cPtr = ogrJNI.ForceToLineString(Geometry.getCPtr(geom_in), geom_in);
     return (cPtr == 0) ? null : new Geometry(cPtr, true);
   }
 

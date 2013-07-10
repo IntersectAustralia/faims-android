@@ -51,8 +51,22 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 	public String getGdalSource() {
 		return gdalSource;
 	}
+	
+	private double[][] boundsWgs84(Dataset data,SpatialReference layerProjection) {
+        double[][] corners= new double[4][2];
+        
+        corners[0] = corner(data, layerProjection, 0.0, 0.0);
+        corners[1] = corner(data, layerProjection, 0.0, data
+                .getRasterYSize());
+        corners[2] = corner(data,layerProjection, data
+                .getRasterXSize(), 0.0);
+        corners[3] = corner(data, layerProjection, data
+                .getRasterXSize(), data.getRasterYSize());
+        
+        return corners; 
+    }
 
-	public double[][] getBoundaries() {
+	public double[][] getBoundary() {
 		Dataset originalData = gdal.Open(this.getGdalSource(), gdalconstConstants.GA_ReadOnly);
 		// get original bounds in Wgs84
 		SpatialReference hLatLong = new SpatialReference(osr.SRS_WKT_WGS84);

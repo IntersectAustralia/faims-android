@@ -32,14 +32,13 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 				maxObjects, pointStyle, lineStyle, polygonStyle);
 		this.users = users;
 	}
-
+	
+	public void toggleUser(User user, boolean isChecked){
+		users.put(user, isChecked);
+	}
+	
 	@Override
-	public void calculateVisibleElements(Envelope envelope, int zoom) {
-		if (zoom < minZoom) {
-	        setVisibleElementsList(null);
-	        return;
-	    }
-		
+	public void loadData(Envelope envelope, int zoom) {
 		if (renderAll && hasRendered) return;
 	    hasRendered = true;
 		
@@ -71,9 +70,5 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 		} catch (Exception e) {
 			FLog.e("error rendering track log layer", e);
 		}
-	}
-
-	public void toggleUser(User user, boolean isChecked){
-		users.put(user, isChecked);
 	}
 }

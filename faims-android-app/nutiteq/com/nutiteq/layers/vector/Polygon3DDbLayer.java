@@ -17,6 +17,12 @@ import com.nutiteq.style.Polygon3DStyle;
 import com.nutiteq.style.StyleSet;
 import com.nutiteq.vectorlayers.Polygon3DLayer;
 
+/**
+ * Simple layer of 3D Polygons, reads data from Spatialite table with 2D polygons
+ * 
+ * @author jaak
+ *
+ */
 public class Polygon3DDbLayer extends Polygon3DLayer {
   private static final float DEFAULT_HEIGHT = 2.0f;
   private SpatialLiteDb spatialLite;
@@ -30,16 +36,17 @@ public class Polygon3DDbLayer extends Polygon3DLayer {
   private int maxObjects;
 
   /**
-   * Simple layer of 3D Polygons, reads data from Spatialite table with 2D polygons
- * @param dbPath Spatialite format database
- * @param tableName table with data
- * @param geomColumnName column in table with geometry
- * @param heightColumnName column in table with heigth in meters
- * @param heightFactor multiply height with this number to make it visible
- * @param maxObjects limit number of loaded objects, set to 500 e.g. to avoid out of memory
- * @param styleSet Polygon3DStyle styleset for visualisation
- */
-public Polygon3DDbLayer(String dbPath, String tableName, String geomColumnName, String heightColumnName,
+   * Default constructor.
+   * 
+   * @param dbPath Spatialite format database
+   * @param tableName table with data
+   * @param geomColumnName column in table with geometry
+   * @param heightColumnName column in table with heigth in meters
+   * @param heightFactor multiply height with this number to make it visible
+   * @param maxObjects limit number of loaded objects, set to 500 e.g. to avoid out of memory
+   * @param styleSet Polygon3DStyle styleset for visualisation
+   */
+  public Polygon3DDbLayer(String dbPath, String tableName, String geomColumnName, String heightColumnName,
       float heightFactor, int maxObjects, StyleSet<Polygon3DStyle> styleSet) {
     super(new EPSG3857());
     this.styleSet = styleSet;
@@ -48,10 +55,11 @@ public Polygon3DDbLayer(String dbPath, String tableName, String geomColumnName, 
     this.maxObjects = maxObjects;
     minZoom = styleSet.getFirstNonNullZoomStyleZoom();
     spatialLite = new SpatialLiteDb(dbPath);
-    Vector<DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
-    for (DBLayer dbLayer : dbLayers) {
-      if (dbLayer.table.compareTo(tableName) == 0 && dbLayer.geomColumn.compareTo(geomColumnName) == 0) {
-        this.dbLayer = dbLayer;
+    Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
+    for (String layerKey : dbLayers.keySet()) {
+      DBLayer layer = dbLayers.get(layerKey);
+      if (layer.table.compareTo(tableName) == 0 && layer.geomColumn.compareTo(geomColumnName) == 0) {
+        this.dbLayer = layer;
         break;
       }
     }
@@ -61,10 +69,12 @@ public Polygon3DDbLayer(String dbPath, String tableName, String geomColumnName, 
     }
   }
 
+  @Override
   public void add(Polygon3D element) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void remove(Polygon3D element) {
     throw new UnsupportedOperationException();
   }
@@ -84,7 +94,7 @@ public Polygon3DDbLayer(String dbPath, String tableName, String geomColumnName, 
     MapPos topRight = projection.fromInternal(envelope.getMaxX(), envelope.getMaxY());
 
     List<Geometry> visibleElementslist = spatialLite.qrySpatiaLiteGeom(new Envelope(bottomLeft.x, topRight.x,
-        bottomLeft.y, topRight.y), maxObjects, dbLayer, new String[] { heightColumnName });
+        bottomLeft.y, topRight.y), maxObjects, dbLayer, new String[] { heightColumnName }, 0, 0);
 
     long start = System.currentTimeMillis();
     List<Polygon3D> newVisibleElementsList = new LinkedList<Polygon3D>();

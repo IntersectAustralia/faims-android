@@ -87,6 +87,12 @@ public class GdalMapLayer extends RasterLayer {
         super(projection, minZoom, maxZoom, id, gdalSource);
         
         this.mapView = mapView;
+        
+        gdal.SetConfigOption("CPL_LOG", "/sdcard/gdaldebug.log");
+        gdal.SetConfigOption("CPL_DEBUG", "ON");
+        
+        gdal.PushErrorHandler("CPLLoggingErrorHandler");
+        
         gdal.AllRegister();
         
         // debug print list all enabled drivers
@@ -381,7 +387,7 @@ public class GdalMapLayer extends RasterLayer {
         return new Envelope(corner[1][0],corner[2][0],corner[1][1],corner[2][1]);
     }
 
-    public double[][] boundsWgs84(Dataset data,SpatialReference layerProjection) {
+    private double[][] boundsWgs84(Dataset data,SpatialReference layerProjection) {
         double[][] corners= new double[4][2];
         
         corners[0] = corner(data, layerProjection, 0.0, 0.0);

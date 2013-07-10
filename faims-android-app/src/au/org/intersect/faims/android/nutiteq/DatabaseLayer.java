@@ -17,10 +17,11 @@ import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.projections.Projection;
+import com.nutiteq.tasks.Task;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
-	
+
 	public enum Type {
 		ENTITY,
 		RELATIONSHIP,
@@ -59,23 +60,23 @@ public class DatabaseLayer extends GeometryLayer {
 		this.type = type;
 		this.dbmgr = dbmgr;
 		this.pointStyle = pointStyle;
-	    this.lineStyle = lineStyle;
-	    this.polygonStyle = polygonStyle;
-	    this.maxObjects = maxObjects;
-	    
-	    if (pointStyle != null) {
-	      minZoom = pointStyle.toPointStyleSet().getFirstNonNullZoomStyleZoom();
-	    }
-	    if (lineStyle != null) {
-	      minZoom = lineStyle.toLineStyleSet().getFirstNonNullZoomStyleZoom();
-	    }
-	    if (polygonStyle != null) {
-	      minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
-	    }
-	    
-	    hideGeometryList = new ArrayList<String>();
+		this.lineStyle = lineStyle;
+		this.polygonStyle = polygonStyle;
+		this.maxObjects = maxObjects;
+
+		if (pointStyle != null) {
+			minZoom = pointStyle.toPointStyleSet().getFirstNonNullZoomStyleZoom();
+		}
+		if (lineStyle != null) {
+			minZoom = lineStyle.toLineStyleSet().getFirstNonNullZoomStyleZoom();
+		}
+		if (polygonStyle != null) {
+			minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
+		}
+
+		hideGeometryList = new ArrayList<String>();
 	}
-	
+
 	public Type getType() {
 		return type;
 	}
@@ -83,7 +84,7 @@ public class DatabaseLayer extends GeometryLayer {
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String layerName) {
 		this.name = layerName;
 	}
@@ -91,15 +92,15 @@ public class DatabaseLayer extends GeometryLayer {
 	public int getLayerId() {
 		return this.layerId;
 	}
-	
+
 	public String getQueryName() {
 		return queryName;
 	}
-	
+
 	public String getQuerySQL() {
 		return querySql;
 	}
-	
+
 	public DatabaseTextLayer getTextLayer() {
 		return textLayer;
 	}
@@ -112,18 +113,18 @@ public class DatabaseLayer extends GeometryLayer {
 	public boolean getTextVisible() {
 		return textVisible;
 	}
-	
+
 	public void setTextVisible(boolean visible) {
 		this.textVisible = visible;
 		updateTextLayer();
 	}
-	
+
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		updateTextLayer();
 	}
-	
+
 	public String getUserid() {
 		return userid;
 	}
@@ -139,79 +140,55 @@ public class DatabaseLayer extends GeometryLayer {
 			this.textLayer.setVisible(false);
 		}
 	}
-	
+
 	public int getMaxObjects() {
 		return maxObjects;
 	}
-	
+
 	public void setMaxObjects(int value) {
 		this.maxObjects = value;
 	}
-	
+
 	@Override
 	public void calculateVisibleElements(Envelope envelope, int zoom) {
 		if (zoom < minZoom) {
-	        setVisibleElementsList(null);
-	        return;
-	    }
-		
-		if (renderAll && hasRendered) return;
-	    hasRendered = true;
-		
-		try {
-			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
-			Vector<Geometry> objectTemp = null;
-			Vector<Geometry> objects = new Vector<Geometry>();
-			
-			GeometryData.Type dataType;
-			if (type == Type.ENTITY) {
-				dataType = GeometryData.Type.ENTITY;
-				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
-			} else if (type == Type.RELATIONSHIP) {
-				dataType = GeometryData.Type.RELATIONSHIP;
-				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
-			}else {
-				throw new Exception("database layer has no type");
-			}
-			
-		    createElementsInLayer(zoom, objectTemp, objects, dataType);
-		    
-		    setVisibleElementsList(objects);
-		} catch (Exception e) {
-			FLog.e("error rendering database layer", e);
+			setVisibleElementsList(null);
+			return;
 		}
+
+		executeVisibilityCalculationTask(new LoadDataTask(envelope,zoom));
 	}
-	
+
 	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
 			Vector<Geometry> objects, GeometryData.Type dataType) {
-		
+
 		// apply styles, create new objects for these
 		for(Geometry object: objectTemp){
-		    
-		    Geometry newObject = null;
-		    String[] userData = (String[]) object.userData;
-		    GeometryStyle style = getGeometryStyle(object, userData[0]);
-		    GeometryData geomData = new GeometryData(userData[0], dataType, userData[1], style, layerId);
-		    
-		    if (hideGeometryList.contains(geomData.id)) continue; 
-		    
-		    if(object instanceof Point){
-	            newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
-	        }else if(object instanceof Line){
-	            newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
-	        }else if(object instanceof Polygon){
-	            newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
-	        }
-		    
-		    Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
-		    
-		    transformedObject.attachToLayer(this);
-		    transformedObject.setActiveStyle(zoom);
-		    
-		    objects.add(transformedObject);
+
+			Geometry newObject = null;
+			String[] userData = (String[]) object.userData;
+			GeometryStyle style = getGeometryStyle(object, userData[0]);
+			GeometryData geomData = new GeometryData(userData[0], dataType, userData[1], style, layerId);
+
+			if (hideGeometryList.contains(geomData.id)) continue; 
+
+			if(object instanceof Point){
+				newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
+			}else if(object instanceof Line){
+				newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
+			}else if(object instanceof Polygon){
+				newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
+			}
+
+			Geometry transformedObject = GeometryUtil.convertGeometryFromWgs84(newObject);
+
+			transformedObject.attachToLayer(this);
+			transformedObject.setActiveStyle(zoom);
+
+			objects.add(transformedObject);
 		}
 	}
-	
+
 	protected GeometryStyle getGeometryStyle(Geometry geom) {
 		if (geom instanceof Point) {
 			return pointStyle;
@@ -242,7 +219,7 @@ public class DatabaseLayer extends GeometryLayer {
 	public void hideGeometry(String id) {
 		hideGeometryList.add(id);
 	}
-	
+
 	public void clearHiddenList() {
 		hideGeometryList.clear();
 	}
@@ -250,6 +227,58 @@ public class DatabaseLayer extends GeometryLayer {
 	public void renderAllVectors(boolean value) {
 		renderAll = value;
 		hasRendered = false;
+	}
+
+	protected class LoadDataTask implements Task {
+		final Envelope envelope;
+		final int zoom;
+
+		LoadDataTask(Envelope envelope, int zoom) {
+			this.envelope = envelope;
+			this.zoom = zoom;
+		}
+
+		@Override
+		public void run() {
+			loadData(envelope, zoom);
+		}
+
+		@Override
+		public boolean isCancelable() {
+			return true;
+		}
+
+		@Override
+		public void cancel() {
+		}
+	}
+
+	public void loadData(Envelope envelope, int zoom) {
+		if (renderAll && hasRendered) return;
+		hasRendered = true;
+
+		try {
+			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
+			Vector<Geometry> objectTemp = null;
+			Vector<Geometry> objects = new Vector<Geometry>();
+
+			GeometryData.Type dataType;
+			if (type == Type.ENTITY) {
+				dataType = GeometryData.Type.ENTITY;
+				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
+			} else if (type == Type.RELATIONSHIP) {
+				dataType = GeometryData.Type.RELATIONSHIP;
+				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
+			}else {
+				throw new Exception("database layer has no type");
+			}
+
+			createElementsInLayer(zoom, objectTemp, objects, dataType);
+
+			setVisibleElementsList(objects);
+		} catch (Exception e) {
+			FLog.e("error rendering database layer", e);
+		}
 	}
 
 }
