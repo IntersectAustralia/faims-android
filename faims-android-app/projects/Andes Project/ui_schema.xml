@@ -101,6 +101,26 @@
               <FormDescription/>
               <Update/>
             </info>
+
+            <construction>
+              <ConstructionQuality/>
+              <!-- radiobutton 1(baja),2,3,4,5(alta) -->
+              <ConstructionPeriod/>
+              <!-- Intermedio Tardio,Horizonte Tardio,Colonial Temprano,Colonial Tardio,Otro -->
+              <ConstructionPeriodDescription/>
+              <Modifications/>
+              <!-- radiobutton
+                <Yes/>,No,Not observable -->
+              <ModificationDescription/>
+              <PrincipalFunction/>
+              <!-- dropdown of 7 values
+                <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
+              <PrincipalFunctionDescription/>
+              <Classification/>
+              <Update/>
+              <!--  dropdown of 10 values
+                <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
+            </construction>
             <component>
               <WallsTotalCount/>
               <!-- Derivable number but can be included if desired -->
@@ -122,25 +142,6 @@
               <Update/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
             </component>
-            <construction>
-              <ConstructionQuality/>
-              <!-- radiobutton 1(baja),2,3,4,5(alta) -->
-              <ConstructionPeriod/>
-              <!-- Intermedio Tardio,Horizonte Tardio,Colonial Temprano,Colonial Tardio,Otro -->
-              <ConstructionPeriodDescription/>
-              <Modifications/>
-              <!-- radiobutton
-                <Yes/>,No,Not observable -->
-              <ModificationDescription/>
-              <PrincipalFunction/>
-              <!-- dropdown of 7 values
-                <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
-              <PrincipalFunctionDescription/>
-              <Classification/>
-              <Update/>
-              <!--  dropdown of 10 values
-                <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
-            </construction>
             <finalObservations>
               <StuccoInterior/>
               <!-- radiobutton?-->
@@ -215,6 +216,7 @@
               <PhotoGallery/>
               <AddNiche/>
               <!-- {Button: “Add Niche”}               -->
+              <Duplicate/>
               <Update/>
               <Delete/>
             </cornerDetail>
@@ -260,6 +262,7 @@
               <!-- real number or Not observable-->
               <WallPhotos/>
               <PhotoGallery/>
+              <Duplicate/>
               <NewWindow/>
               <NewNiche/>
               <NewLichen/>
@@ -1162,6 +1165,9 @@
           <label>Add Niche</label>
         </trigger>
         <!-- {Button: “Add Niche”}               -->
+        <trigger ref="Duplicate">
+          <label>Duplicate Record</label>
+        </trigger>
         <trigger ref="Update">
           <label>Save Record</label>
         </trigger>
@@ -1271,6 +1277,9 @@
           <label>New Lichen</label>
         </trigger>
         <!-- {button}-->
+          <trigger ref="Duplicate">
+          <label>Duplicate Record</label>
+        </trigger>
         <trigger ref="Update">
           <label>Save Record</label>
         </trigger>

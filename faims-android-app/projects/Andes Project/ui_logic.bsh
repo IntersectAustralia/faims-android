@@ -392,6 +392,7 @@ newCorner(){
     setFieldValue("corner/cornerDetail/Timestamp", getCurrentTime());
     setFieldValue("corner/cornerDetail/Author", username);
     setFieldValue("corner/cornerDetail/Device", device);
+    makeCornerNum();
 
 }
 
@@ -408,6 +409,7 @@ newStructureWall(){
     setFieldValue("wall/structureWall/Device", device);
     structureWallPictures = new ArrayList();
     populateCameraPictureGallery("wall/structureWall/PhotoGallery", structureWallPictures);
+    makeStructureWallNum();
 }
 
 newDoorway(){
@@ -614,6 +616,7 @@ OnCornerPictureTaken() {
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
+onEvent("corner/cornerDetail/Duplicate", "delayclick", "duplicateCorner(corner_id)");
 onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 
@@ -623,6 +626,39 @@ saveCorner(id) {
 		return;
 	}
 	corner_id = updateCorner(id);
+}
+
+
+duplicateCorner(id) {
+    if (isNull(getFieldValue("corner/cornerDetail/CornerID"))) {
+        showWarning("Logic Error", "Cannot save record without id");
+        return;
+    }
+    corner_id = updateCorner(id);
+    corner_id = null;
+
+    makeCornerNum();
+
+}
+makeCornerNum(){
+if (!isNull(structure_id)){
+    cornerNum = fetchOne("select count(distinct uuid)+1 "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = "+structure_id+") "+
+                    "and aenttypename = 'Corner' "+
+                    "and a.deleted is null "+
+                    "and uuid != "+structure_id+"; ");
+
+    setFieldValue("corner/cornerDetail/CornerID", getFieldValue("structure/info/ArchaeologicalElementID") + " Corner: " +cornerNum.toString());}
+
 }
 
 deleteCorner(){
@@ -1585,6 +1621,7 @@ OnStructWallPictureTaken() {
 }
 
 onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
+onEvent("wall/structureWall/Duplicate", "delayclick", "duplicateStructureWall(structure_wall_id)");
 
 onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id)");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
@@ -1607,6 +1644,38 @@ setNicheCountForStructureWall(value){
 
 setDoorwayCountForStructureWall(value){
     setFieldValue("wall/structureWall/DoorwayCount",value);
+}
+
+duplicateStructureWall(id) {
+    if (isNull(getFieldValue("wall/structureWall/WallID"))) {
+        showWarning("Logic Error", "Cannot save record without id");
+        return;
+    }
+    structure_wall_id = updateStructureWall(id);
+    structure_wall_id = null;
+
+    makeStructureWallNum();
+
+}
+makeStructureWallNum(){
+if (!isNull(structure_id)){
+    wallNum = fetchOne("select count(distinct uuid)+1 "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = "+structure_id+") "+
+                    "and aenttypename = 'StructureWall' "+
+                    "and a.deleted is null "+
+                    "and uuid != "+structure_id+"; ");
+
+    setFieldValue("wall/structureWall/WallID", getFieldValue("structure/info/ArchaeologicalElementID") + " Wall: " +wallNum.toString());}
+
 }
 
 deleteStructureWall(){
