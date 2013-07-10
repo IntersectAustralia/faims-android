@@ -592,7 +592,7 @@ syncFailed() {
 
 onEvent("structure/component/AddCorner", "click", "newCorner()");
 onEvent("structure/component/AddWall", "click", "newStructureWall()");
-onEvent("structure/component/AddDoorway", "click", "newDoorway()");
+//onEvent("structure/component/AddDoorway", "click", "newDoorway()");
 onEvent("structure/component/AddNiche", "click", "newNiche()");
 onEvent("wall/structureWall/NewNiche", "click", "newNiche()");
 onEvent("wall/structureWall/NewWindow", "click", "newWindow()");
@@ -1817,7 +1817,7 @@ OnAudioRecorded(){
     populateCheckBoxGroup("structure/final/AudioList", structureAudios);
     setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
 }
-
+onFocus("structure/info/ArchaeologicalElementID", null, "duplicateEAID()");
 onEvent("structure/final/AddAttachment", "click", "attachFile()");
 onEvent("structure/final/Sketch", "click", "attachSketchFile()");
 onEvent("structure/final/Photo", "click", "takePicture()");
@@ -1832,7 +1832,19 @@ onEvent("structure/finalObservations/Update", "delayclick", "saveStructure(struc
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
+duplicateEAID(){
+    eaid = getFieldValue("structure/info/ArchaeologicalElementID");
+    setFieldValue("structure/component/EAidDupe", eaid);
+    setFieldValue("structure/construction/EAidDupe", eaid);
+    setFieldValue("structure/finalObservations/EAidDupe", eaid);
+    setFieldValue("structure/final/EAidDupe", eaid);
+    setFieldValue("wall/structureWall/EAidDupe", eaid);
+    setFieldValue("window/windowDetail/EAidDupe", eaid);
+    setFieldValue("niche/nicheDetail/EAidDupe", eaid);
+    setFieldValue("corner/cornerDetail/EAidDupe", eaid);
 
+
+}
 saveStructure(id) {
 	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("structure/info/ArchaeologicalElementID"))) {
@@ -2254,6 +2266,7 @@ loadStructure() {
     populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
+    duplicateEAID();
 }
 
 loadStructureFileAttributes(id){

@@ -103,6 +103,7 @@
             </info>
 
             <construction>
+              <EAidDupe/>
               <ConstructionQuality/>
               <!-- radiobutton 1(baja),2,3,4,5(alta) -->
               <ConstructionPeriod/>
@@ -122,6 +123,7 @@
                 <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
             </construction>
             <component>
+              <EAidDupe/>
               <WallsTotalCount/>
               <!-- Derivable number but can be included if desired -->
               <!--<WallsGabledCount/>-->
@@ -137,12 +139,13 @@
               <!-- Number or Not observable -->
               <AddWall/>
               <AddCorner/>
-              <AddDoorway/>
+              <!--<AddDoorway/>-->
               <AddNiche/>
               <Update/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
             </component>
             <finalObservations>
+              <EAidDupe/>
               <StuccoInterior/>
               <!-- radiobutton?-->
               <!--Yes,No,Not observable-->
@@ -166,6 +169,7 @@
               <Update/>
             </finalObservations>
             <final>
+              <EAidDupe/>
               <PhotoGallery/>
               <Photo/>
               <VideoGallery/>
@@ -181,6 +185,7 @@
               <Delete/>
             </final>
             <load>
+              <EAidDupe/>
               <structureWallList/>
               <structureWallLoad/>
               <cornerList/>
@@ -189,6 +194,7 @@
           </structure>
           <corner>
             <cornerDetail>
+              <EAidDupe/>
               <CornerID/>
               <Timestamp/>
               <Author/>
@@ -223,6 +229,7 @@
           </corner>
           <wall>
             <structureWall>
+              <EAidDupe/>
               <WallID/>
               <Timestamp/>
               <Author/>
@@ -274,6 +281,7 @@
           </wall>
           <window>
             <windowDetail>
+              <EAidDupe/>
               <WindowID/>
               <Timestamp/>
               <Author/>
@@ -298,6 +306,7 @@
           </window>
           <niche>
             <nicheDetail>
+              <EAidDupe/>
               <NicheID/>
               <Timestamp/>
               <Author/>
@@ -863,6 +872,10 @@
       </group>
       <group ref="component">
         <label>Component Tab</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>EA ID:</label>
+        </input>
+
         <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Walls Recorded:</label>
         </input>
@@ -894,9 +907,9 @@
         <trigger ref="AddCorner">
           <label>Add Corner to structure</label>
         </trigger>
-        <trigger ref="AddDoorway">
+        <!--<trigger ref="AddDoorway">
           <label>Add Doorway to structure</label>
-        </trigger>
+        </trigger>-->
         <trigger ref="AddNiche">
           <label>Add Niche to structure</label>
         </trigger>
@@ -906,6 +919,9 @@
       </group>
       <group ref="construction">
         <label>Construction Tab</label>
+           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>EA ID:</label>
+        </input>
         <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
           <label>Construction Quality:</label>
           <item>
@@ -913,6 +929,7 @@
             <value>dummy</value>
           </item>
         </select1>
+
         <select1 appearance="full" ref="ConstructionPeriod" faims_attribute_name="ConstructionPeriod" faims_attribute_type="vocab">
           <label>Construction Period:</label>
           <item>
@@ -956,6 +973,9 @@
         </group>
       <group ref="finalObservations">
         <label>Final Observations</label>
+           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>EA ID:</label>
+        </input>
         <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
           <label>Stucco Interior:</label>
           <item>
@@ -1007,6 +1027,9 @@
         </group>
       <group ref="final">
         <label>Attachments and Saving</label>
+           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>EA ID:</label>
+        </input>
         <trigger ref="Photo">
           <label>Take picture</label>
         </trigger>
@@ -1095,6 +1118,9 @@
       <label>Corner Detail</label>
       <group ref="cornerDetail">
         <label>Corner of a Structure</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Last Loaded EA ID:</label>
+        </input>
         <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext" faims_certainty="false">
           <label>CornerID:</label>
         </input>
@@ -1180,6 +1206,9 @@
       <label>Wall Detail</label>
       <group ref="structureWall">
         <label>Wall of a Structure</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Last Loaded EA ID:</label>
+        </input>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Wall ID:</label>
         </input>
@@ -1399,6 +1428,9 @@
       <label>Niche Detail</label>
       <group ref="nicheDetail">
         <label>Niche Detail</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Last Loaded EA ID:</label>
+        </input>
         <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Niche ID:</label>
         </input>
@@ -1995,6 +2027,9 @@
       <label>Window Detail</label>
       <group ref="windowDetail">
         <label>Window Detail</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Last Loaded EA ID:</label>
+        </input>
         <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
           <label>Window ID:</label>
         </input>
