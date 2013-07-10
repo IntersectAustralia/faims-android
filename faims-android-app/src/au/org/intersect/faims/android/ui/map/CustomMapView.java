@@ -2261,10 +2261,10 @@ public class CustomMapView extends MapView {
 		}
 		if (hasMaxVisible) {
 			layerDisplayText.setVisibility(View.VISIBLE);
-			layerDisplayButton.setVisibility(View.VISIBLE);
+			//layerDisplayButton.setVisibility(View.VISIBLE);
 		} else {
 			layerDisplayText.setVisibility(View.GONE);
-			layerDisplayButton.setVisibility(View.GONE);
+			//layerDisplayButton.setVisibility(View.GONE);
 		}
 	}
 	
