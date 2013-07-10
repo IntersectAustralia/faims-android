@@ -62,6 +62,14 @@
             ></service>
         
         <service
+            android:name="au.org.intersect.faims.android.services.UpdateProjectSettingService"
+            ></service>
+        
+        <service
+            android:name="au.org.intersect.faims.android.services.UpdateProjectDataService"
+            ></service>
+        
+        <service
             android:name="au.org.intersect.faims.android.services.DownloadDatabaseService"
             ></service>
         
