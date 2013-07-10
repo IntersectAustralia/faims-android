@@ -15,10 +15,10 @@ Completely untested in app, of course.
 DATA_ENTRY_LAYER = "Data Entry";
 
 initMap() {
-	setMapZoom("control/map/map", 15.0f);
+	setMapZoom("control/map/map", 19.0f);
 
-	showBaseMap("control/map/map", "Base Map", "files/data/maps/SydneyStreetmap.tif");
-	showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
+	showBaseMap("control/map/map", "Base Map", "files/data/maps/andes.tif");
+	//showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
 
     createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
 
@@ -288,29 +288,6 @@ selectGallery(ref, list) {
 	}
 }
 
-saveCounter(attributeName, countEntityType, entityId) {
-	value = fetchOne(
-		"select count(distinct uuid)\n" + 
-		"from (select uuid, relationshipid, deleted \n" + 
-		"	from aentreln \n" + 
-		"	join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp \n" + 
-		"		from aentreln \n" + 
-		"		group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp)\n" + 
-		"	group by uuid, relationshipid) a \n" + 
-		"join archentity using (uuid) \n" + 
-		"join aenttype using (aenttypeid) \n" + 
-		"where relationshipid in (select relationshipid \n" + 
-		"	from aentreln \n" + 
-		"	where uuid = " + entityId + ") and aenttypename = '" + countEntityType + "' and a.deleted is null and uuid != " + entityId + ";");
-	System.out.println("Count:" + value);
-	if (value == null || value.isEmpty()) {
-		showWarning("Logic Error", "Error saving association");
-	} else {
-		fetchOne(
-			"insert into AEntValue (uuid, userid, AttributeID, Measure, ValueTimestamp, FreeText) values ("+entityId+", "+userId+", (select AttributeID from AttributeKey where AttributeName = '"+attributeName+"'), "+value.get(0)+", CURRENT_TIMESTAMP, '');");
-	}
-}
-
 /*** USER ***/
 
 getDefaultUsersList() {
@@ -336,7 +313,6 @@ populateListForUsers(){
 populateListForUsers();
 
 String username = "";
-String userId = "";
 String device = "";
 
 login(){
@@ -348,7 +324,6 @@ login(){
 	    device = deviceResult.get(0);
 	    setUser(user);
 	    username = userResult.get(1) + " " + userResult.get(2);
-	    userId = userResult.get(0);
 	    showTabGroup("control");
 	} else {
         showWarning("Logic Error", "Please Choose Device");
@@ -363,7 +338,7 @@ makeVocab(String attrib){
 }
 
 makeGallery(String attrib){
-    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"'");
+    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabname" );
     return a;
 }
 
@@ -447,7 +422,7 @@ newDoorway(){
     setFieldValue("doorway/doorDetail/Timestamp", getCurrentTime());
     setFieldValue("doorway/doorDetail/Author", username);
     setFieldValue("doorway/doorDetail/Device", device);
-    
+
     // set gps fields if geometry selected
 	setDoorwayGPSFieldsFromPoint(getCreatedGeometry());
 }
@@ -485,12 +460,14 @@ newLichen(){
     lichenPictures = new ArrayList();
     populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
     populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
+    populatePictureGallery("lichen/lichenDetail/LichenQuality", makeGallery("LichenQuality"));
+
     populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
     populateList("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
     setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
     setFieldValue("lichen/lichenDetail/Author", username);
     setFieldValue("lichen/lichenDetail/Device", device);
-    
+
      // set gps fields if geometry selected
 	setLichenGPSFieldsFromPoint(getCreatedGeometry());
 }
@@ -1445,7 +1422,7 @@ updateLichen(id) {
     	AttributeDef("Device", "freetext", "lichen/lichenDetail/Device", false),
     	AttributeDef("Size", "measure", "lichen/lichenDetail/Size"),
     	AttributeDef("Substrate", "vocab", "lichen/lichenDetail/Substrate"),
-    	AttributeDef("Quality", "freetext", "lichen/lichenDetail/Quality"),
+    	AttributeDef("LichenQuality", "freetext", "lichen/lichenDetail/LichenQuality"),
     	AttributeDef("Aspect", "vocab", "lichen/lichenDetail/Aspect"),
     	AttributeDef("InsideOutside", "vocab", "lichen/lichenDetail/InsideOutside"),
     	AttributeDef("Comments", "freetext", "lichen/lichenDetail/Comments"),
@@ -1523,6 +1500,7 @@ updateSurfaceCollection(id) {
     	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp", false),
     	AttributeDef("Author", "freetext" , "surfaceCollection/description/Author", false),
     	AttributeDef("Device", "freetext", "surfaceCollection/description/Device", false),
+        AttributeDef("Radius", "measure", "surfaceCollection/description/Radius"),
     	AttributeDef("SurfaceCollectionContext", "vocab", "surfaceCollection/description/SurfaceCollectionContext"),
     	AttributeDef("ContextDescription", "freetext", "surfaceCollection/description/ContextDescription"),
     	AttributeDef("DiagnosticsPresent", "vocab", "surfaceCollection/material/DiagnosticsPresent"),
@@ -1544,7 +1522,7 @@ updateSurfaceCollection(id) {
 
 String lot_id = null;
 
-onEvent("lot/lotDetail/Update", "click", "saveLot(lot_id)");
+onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
@@ -1687,7 +1665,6 @@ updateStructureWall(id) {
 	    // save structure wall to structure if new structure wall
 	    if (isNull(id)) {
 	    	saveEntitiesToRel("StructureContains", structure_id, saved_id);
-	    	saveCounter("WallsTotalCount", "StructureWall", structure_id);
 	    }
 
 	    // TODO update the structure wall count in the structure
@@ -1798,11 +1775,25 @@ saveStructure(id) {
 	clearCreatedGeometry();
 }
 
-setTotalWallsRecordedForStructure(value){
-    setFieldValue("structure/component/WallsTotalCount",value);
+setTotalWallsRecordedForStructure(structure_id){
+    value = fetchOne("select count(distinct uuid) "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = 1000021372913849491) "+
+                    "and aenttypename = 'Corner' "+
+                    "and a.deleted is null "+
+                    "and uuid != 1000021372913849491; ");
+    //setFieldValue("structure/component/WallsTotalCount",value);
 }
 
-setTotalGabledWallsRecordedForStructure(value){
+setTotalGabledWallsRecordedForStructure(structure_id){
     setFieldValue("structure/component/WallsGabledCount",value);
 }
 
@@ -1842,7 +1833,7 @@ updateStructure(id){
 
 	entity = null;
 	if (!isNull(id)) {
-		entity = fetchArchEnt(structure_id);
+		entity = fetchArchEnt(structure_id); // IS THIS A BUG?
 		for (Object attribute : entity.getAttributes()) {
 			System.out.println(attribute.toString());
 			if ("Photo".equals(attribute.getName())) {
@@ -1857,7 +1848,10 @@ updateStructure(id){
 				loadedAudios.add(attribute.getText());
 			}
 		}
+        setTotalWallsRecordedForStructure(id);
 	}
+
+
 
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID", false),
@@ -1876,7 +1870,7 @@ updateStructure(id){
     	AttributeDef("Classification", "vocab", "structure/construction/Classification"),
     	AttributeDef("ConstructionQuality", "vocab", "structure/construction/ConstructionQuality"),
     	AttributeDef("WallsTotalCount", "measure", "structure/component/WallsTotalCount", false),
-    	AttributeDef("WallsGabledCount", "measure", "structure/component/WallsGabledCount", false),
+    	//AttributeDef("WallsGabledCount", "measure", "structure/component/WallsGabledCount", false),
     	AttributeDef("WallsInternalPartition", "vocab", "structure/component/WallsInternalPartition"),
     	AttributeDef("PartitionDescription", "freetext", "structure/component/PartitionDescription"),
     	AttributeDef("StuccoInterior", "vocab", "structure/finalObservations/StuccoInterior"),
@@ -1922,10 +1916,6 @@ updateAllSpecialFind() {
 }
 
 updateAllStructure() {
-	if (!isNull(structure_id)) {
-		showTabGroup("structure", structure_id);
-	}
-
 	Object localStructureWall = new ArrayList();
 	Object localCorner = new ArrayList();
 
@@ -2000,6 +1990,9 @@ updateAllStructure() {
 
 	populateDropDown("structure/load/structureWallList", localStructureWall);
     populateDropDown("structure/load/cornerList", localCorner);
+
+    setTotalWallsRecordedForStructure(structure_id);
+
 }
 
 updateAllWindow() {
@@ -2161,18 +2154,6 @@ updateAll(){
 	populateDropDown("control/data/windowList", window);
 }
 
-updateAllStructureWall() {
-	if (!isNull(structure_wall_id)) {
-		showTabGroup("wall", structure_wall_id);
-	}
-}
-
-updateAllCorner() {
-	if (!isNull(corner_id)) {
-		showTabGroup("corner", corner_id);
-	}
-}
-
 onEvent("control", "show", "updateAll()");
 onEvent("feature", "show", "updateAllFeature()");
 onEvent("lichen", "show", "updateAllLichen()");
@@ -2183,8 +2164,6 @@ onEvent("window", "show", "updateAllWindow()");
 onEvent("structure", "show", "updateAllStructure()");
 onEvent("specialFind", "show", "updateAllSpecialFind()");
 onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
-onEvent("wall", "show", "updateAllStructureWall()");
-onEvent("corner", "show", "updateAllCorner()");
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
@@ -2316,14 +2295,10 @@ setDoorwayGPSFields(id) {
 setDoorwayGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
-		if (point instanceof Point) {
-			p = point.getMapPos();
-			p = convertFromProjToProj(getProjectSrid(), "4326", p);
-			setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
-			setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
-		} else {
-			showWarning("Logic Error", "Doorway must use a point");
-		} 
+		p = point.getMapPos();
+		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
+		setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
 	}
 }
 
@@ -2427,14 +2402,10 @@ setLichenGPSFields(id) {
 setLichenGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
-		if (point instanceof Point) {
-			p = point.getMapPos();
-			p = convertFromProjToProj(getProjectSrid(), "4326", p);
-			setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
-			setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
-		} else {
-			showWarning("Logic Error", "Lichen must use a point");
-		} 
+		p = point.getMapPos();
+		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
+		setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
 	}
 }
 

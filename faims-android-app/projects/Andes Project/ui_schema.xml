@@ -104,7 +104,7 @@
             <component>
               <WallsTotalCount/>
               <!-- Derivable number but can be included if desired -->
-              <WallsGabledCount/>
+              <!--<WallsGabledCount/>-->
               <!-- Derivable number but can be included if desired -->
               <WallsInternalPartition/>
               <!-- radiobutton ,1,2,3,4,More,No observable -->
@@ -211,6 +211,7 @@
               <!-- max preserved -->
               <CornerDescription/>
               <CornerPhotos/>
+
               <PhotoGallery/>
               <AddNiche/>
               <!-- {Button: “Add Niche”}               -->
@@ -337,7 +338,7 @@
               <!-- in mm with two decimals-->
               <Substrate/>
               <!--Andesite,Basal,Tuff,Otro-->
-              <Quality/>
+              <LichenQuality/>
               <Aspect/>
               <!--Horizontal,Vertical,Angled,Other-->
               <InsideOutside/>
@@ -494,6 +495,7 @@
               <Author/>
               <Device/>
               <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Radius/>
               <SurfaceCollectionContext/>
               <!-- dropdown of 18 values-->
               <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
@@ -550,7 +552,7 @@
       <bind nodeset="/faims/structure/info/PreservationDescription" type="string"/>
       <bind nodeset="/faims/structure/info/FormDescription" type="string"/>
       <bind nodeset="/faims/structure/component/WallsTotalCount" type="decimal"/>
-      <bind nodeset="/faims/structure/component/WallsGabledCount" type="decimal"/>
+      <!--<bind nodeset="/faims/structure/component/WallsGabledCount" type="decimal"/>-->
       <bind nodeset="/faims/structure/component/WindowCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/NicheCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/DoorwayCount" type="decimal"/>
@@ -577,7 +579,7 @@
       <bind nodeset="/faims/wall/structureWall/DoorwayCount" type="decimal"/>
       <bind nodeset="/faims/corner/cornerDetail/MasonryDescription" type="string"/>
       <bind nodeset="/faims/corner/cornerDetail/InkaMasonryDescription" type="string"/>
-      <bind nodeset="/faims/corner/cornerDetail/CornerNicheCount" type="decimal"/>
+      <bind nodeset="/faims/corner/cornerDetail/NicheCount" type="decimal"/>
       <bind nodeset="/faims/corner/cornerDetail/CornerHeight" type="decimal"/>
       <bind nodeset="/faims/corner/cornerDetail/CornerDescription" type="string"/>
       <bind nodeset="/faims/doorway/doorDetail/DoorOrientation" type="decimal"/>
@@ -598,7 +600,7 @@
       <bind nodeset="/faims/window/windowDetail/WindowDescription" type="string"/>
       <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
       <bind nodeset="/faims/lichen/lichenDetail/Size" type="decimal"/>
-      <bind nodeset="/faims/lichen/lichenDetail/Comment" type="string"/>
+      <bind nodeset="/faims/lichen/lichenDetail/Comments" type="string"/>
       <bind nodeset="/faims/lichen/lichenDetail/GPSLong" type="decimal"/>
       <bind nodeset="/faims/lichen/lichenDetail/GPSLat" type="decimal"/>
       <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
@@ -606,12 +608,13 @@
       <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
       <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
-      <bind nodeset="/faims/freeWall/freeWallDetail/WallComment" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallComments" type="string"/>
       <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
       <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
       <bind nodeset="/faims/specialFind/findDetail/Description" type="string"/>
       <bind nodeset="/faims/surfaceCollection/description/ContextDescription" type="string"/>
+      <bind nodeset="/faims/surfaceCollection/description/Radius" type="decimal"/>
       <bind nodeset="/faims/surfaceCollection/material/Comments" type="string"/>
       <bind nodeset="/faims/surfaceCollection/material/LotNumbers" type="string"/>
     </model>
@@ -860,9 +863,9 @@
         <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Walls Recorded:</label>
         </input>
-        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        <!--<input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Gabled Walls Recorded:</label>
-        </input>
+        </input>-->
         <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Windows Recorded:</label>
         </input>
@@ -1507,9 +1510,13 @@
             <value>dummy</value>
           </item>
         </select1>
-        <input ref="Quality" faims_attribute_name="Quality" faims_attribute_type="freetext">
+        <select1 type="image" ref="LichenQuality" faims_attribute_name="LichenQuality" faims_attribute_type="freetext">
           <label>Quality:</label>
-        </input>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
         <select1 appearance="full" ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="vocab">
           <label>Aspect:</label>
           <item>
@@ -1844,6 +1851,9 @@
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>Device:</label>
+        </input>
+        <input ref="Radius" faims_attribute_name="Radius" faims_attribute_type="measure">
+          <label>Radius:</label>
         </input>
         <select1 appearance="full" ref="SurfaceCollectionContext" faims_attribute_name="SurfaceCollectionContext" faims_attribute_type="vocab">
           <label>Surface Collection Context:</label>
