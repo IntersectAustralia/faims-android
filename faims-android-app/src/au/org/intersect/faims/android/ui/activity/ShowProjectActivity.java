@@ -41,6 +41,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -383,8 +384,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	private int pathLength;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_show_project);
 		
 		// inject faimsClient and serverDiscovery
@@ -406,9 +408,27 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowProjectActivity.this, getProjectDir());
 		
-		renderUI(savedInstanceState);
+		busyDialog = new BusyDialog(this, getString(R.string.load_project_title), getString(R.string.load_project_message), null);
+		busyDialog.show();
+		
+		new AsyncTask<Void,Void,Void>() {
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				renderUI(savedInstanceState);
+				busyDialog.dismiss();
+			}
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				preRenderUI();
+				return null;
+			};
+			
+			
+		}.execute();
 	}
-	
+
 	public GPSDataManager getGPSDataManager() {
 		return gpsDataManager;
 	}
@@ -711,26 +731,41 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		this.pathValid = value;
 	}
 	
-	protected void renderUI(Bundle savedInstanceState) {
+	protected void preRenderUI() {
 		try {
-			FLog.d("loading schema: " + projectDir + "/ui_schema.xml");
-			
 			// Read, validate and parse the xforms
 			ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
 			
 			arch16n.generatePropertiesMap();
+			
+			// bind the logic to the ui
+			FLog.d("Binding logic to the UI");
+			linker = new BeanShellLinker(ShowProjectActivity.this, ProjectUtil.getProject(projectKey));
+			linker.sourceFromAssets("ui_commands.bsh");
+		} catch (Exception e) {
+			FLog.e("error pre rendering ui", e);
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			
+			builder.setTitle(getString(R.string.render_ui_failure_title));
+			builder.setMessage(getString(R.string.render_ui_failure_message));
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			        	   ShowProjectActivity.this.finish();
+			           }
+			       });
+			builder.create().show();
+		}
+	}
 	
+	protected void renderUI(Bundle savedInstanceState) {
+		try {
 			// render the ui definition
 			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
 			ShowProjectActivity.this.renderer.createUI(FaimsSettings.projectsDir + projectKey);
 			if(savedInstanceState == null){
 				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 			}
-			
-			// bind the logic to the ui
-			FLog.d("Binding logic to the UI");
-			linker = new BeanShellLinker(ShowProjectActivity.this, ProjectUtil.getProject(projectKey));
-			linker.sourceFromAssets("ui_commands.bsh");
 			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
 		} catch (Exception e) {
 			FLog.e("error rendering ui", e);
