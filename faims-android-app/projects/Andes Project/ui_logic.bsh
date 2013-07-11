@@ -37,6 +37,7 @@ onCreateGeometry() {
 	layerName = getGeometryLayerName("control/map/map", createGeomId);
 	if (DATA_ENTRY_LAYER.equals(layerName)) {
 		showTabGroup("create");
+
 	} else {
 		createGeomId = 0;
 	}
