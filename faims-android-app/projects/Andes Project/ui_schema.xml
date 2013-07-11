@@ -99,11 +99,7 @@
               <Form/>
               <!-- Cuadrangular,Ovoide,Circular,Otro -->
               <FormDescription/>
-              <Update/>
-            </info>
 
-            <construction>
-              <EAidDupe/>
               <ConstructionQuality/>
               <!-- radiobutton 1(baja),2,3,4,5(alta) -->
               <ConstructionPeriod/>
@@ -121,31 +117,7 @@
               <Update/>
               <!--  dropdown of 10 values
                 <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
-            </construction>
-            <component>
-              <EAidDupe/>
-              <WallsTotalCount/>
-              <!-- Derivable number but can be included if desired -->
-              <!--<WallsGabledCount/>-->
-              <!-- Derivable number but can be included if desired -->
-              <WallsInternalPartition/>
-              <!-- radiobutton ,1,2,3,4,More,No observable -->
-              <PartitionDescription/>
-              <WindowCount/>
-              <!-- Number or Not observable -->
-              <NicheCount/>
-              <!-- Number or Not observable -->
-              <DoorwayCount/>
-              <!-- Number or Not observable -->
-              <AddWall/>
-              <AddCorner/>
-              <!--<AddDoorway/>-->
-              <!--<AddNiche/>-->
-              <Update/>
-              <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
-            </component>
-            <finalObservations>
-              <EAidDupe/>
+
               <StuccoInterior/>
               <!-- radiobutton?-->
               <!--Yes,No,Not observable-->
@@ -166,8 +138,31 @@
               <Disturbances/>
               <!--No evidente,Pocos,Varios-->
               <OtherArchitecturalDetails/>
+              
               <Update/>
-            </finalObservations>
+            </info>
+            <component>
+              <EAidDupe/>
+              <WallsTotalCount/>
+              <!-- Derivable number but can be included if desired -->
+              <WallsGabledCount/>
+              <!-- Derivable number but can be included if desired -->
+              <WallsInternalPartition/>
+              <!-- radiobutton ,1,2,3,4,More,No observable -->
+              <PartitionDescription/>
+              <WindowCount/>
+              <!-- Number or Not observable -->
+              <NicheCount/>
+              <!-- Number or Not observable -->
+              <DoorwayCount/>
+              <!-- Number or Not observable -->
+              <AddWall/>
+              <AddCorner/>
+              <AddDoorway/>
+              <AddNiche/>
+              <Update/>
+              <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
+            </component>
             <final>
               <EAidDupe/>
               <PhotoGallery/>
@@ -569,17 +564,17 @@
       <bind nodeset="/faims/structure/component/NicheCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/DoorwayCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/PartitionDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/ConstructionPeriodDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/ModificationDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/PrincipalFunctionDescription" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/FloorRemainsDescription" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/LongAxis" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/ShortAxis" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/Diameter" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/SurfaceCondition" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetails" type="string"/>
+      <bind nodeset="/faims/structure/info/ConstructionPeriodDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/ModificationDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/PrincipalFunctionDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/FloorRemainsDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/LongAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/ShortAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/Diameter" type="decimal"/>
+      <bind nodeset="/faims/structure/info/SurfaceCondition" type="string"/>
+      <bind nodeset="/faims/structure/info/ModernUse" type="string"/>
+      <bind nodeset="/faims/structure/info/Disturbances" type="string"/>
+      <bind nodeset="/faims/structure/info/OtherArchitecturalDetails" type="string"/>
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/InkaMasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/WallThickness" type="decimal"/>
@@ -866,62 +861,7 @@
         <input ref="FormDescription" faims_attribute_name="FormDescription" faims_attribute_type="freetext">
           <label>{Form Description:}</label>
         </input>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
-      </group>
-      <group ref="component">
-        <label>{Component Tab}</label>
-        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{EA ID:}</label>
-        </input>
 
-        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{Total Walls Recorded:}</label>
-        </input>
-        <!--<input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{Total Gabled Walls Recorded:}</label>
-        </input>-->
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{Windows Recorded:}</label>
-        </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{Niches Recorded:}</label>
-        </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{Doorways Recorded:}</label>
-        </input>
-        <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
-          <label>{Number of Internal Partitions:}</label>
-          <item>
-            <label>{dummy}</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
-          <label>{Partition Description:}</label>
-        </input>
-        <trigger ref="AddWall">
-          <label>{Add Wall to structure}</label>
-        </trigger>
-        <trigger ref="AddCorner">
-          <label>{Add Corner to structure}</label>
-        </trigger>
-        <!--<trigger ref="AddDoorway">
-          <label>{Add Doorway to structure}</label>
-        </trigger>-->
-        <!--<trigger ref="AddNiche">
-          <label>{Add Niche to structure}</label>
-        </trigger>-->
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
-      </group>
-      <group ref="construction">
-        <label>{Construction Tab}</label>
-           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{EA ID:}</label>
-        </input>
         <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
           <label>{Construction Quality:}</label>
           <item>
@@ -967,15 +907,7 @@
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
-        </group>
-      <group ref="finalObservations">
-        <label>{Final Observations}</label>
-           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>{EA ID:}</label>
-        </input>
+
         <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
           <label>{Stucco Interior:}</label>
           <item>
@@ -1021,10 +953,57 @@
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>{Other Architectural Detail:}</label>
         </input>
+        
         <trigger ref="Update">
           <label>{Save Record}</label>
         </trigger>
-        </group>
+      </group>
+      <group ref="component">
+        <label>Component Tab</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>{EA ID:}</label>
+        </input>
+        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Total Walls Recorded:</label>
+        </input>
+        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Total Gabled Walls Recorded:</label>
+        </input>
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Windows Recorded:</label>
+        </input>
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Niches Recorded:</label>
+        </input>
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>Doorways Recorded:</label>
+        </input>
+        <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
+          <label>Number of Internal Partitions:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
+          <label>Partition Description:</label>
+        </input>
+        <trigger ref="AddWall">
+          <label>Add Wall to structure</label>
+        </trigger>
+        <trigger ref="AddCorner">
+          <label>Add Corner to structure</label>
+        </trigger>
+        <trigger ref="AddDoorway">
+          <label>Add Doorway to structure</label>
+        </trigger>
+        <trigger ref="AddNiche">
+          <label>Add Niche to structure</label>
+        </trigger>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
+      </group>
       <group ref="final">
         <label>{Attachments and Saving}</label>
            <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
