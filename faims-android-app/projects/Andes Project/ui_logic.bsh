@@ -314,16 +314,8 @@ saveCounter(attributeName, countEntityType, entityId) {
 /*** USER ***/
 
 getDefaultUsersList() {
-    fetchOne("delete from user;");
-    fetchOne("insert into user values(1, 'Adela', 'Sobotkova');");
-    fetchOne("insert into user values(2, 'Brian', 'Ballsun-Stanton');");
-    fetchOne("insert into user values(3, 'Oliver', 'Brown');");
-    fetchOne("insert into user values(4, 'Matthew', 'Kelly');");
-    fetchOne("insert into user values(5, 'Penny', 'Crook');");
-    fetchOne("insert into user values(6, 'Shawn', 'Ross');");
-    fetchOne("insert into user values(7, 'Anita', 'Yousif');");
-    users = fetchAll("select userid, fname ||' ' || lname from user");
-    return users;
+	users = fetchAll("select userid, fname ||' ' || lname from user");
+	return users;
 }
 
 usersList = getDefaultUsersList();

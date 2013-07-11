@@ -1,38 +1,17 @@
-createUser(id, firstname, lastname) {
-	user = new User(id, firstname, lastname);
-	return user;
-}
-
-toUsersList(users) {
-	users_array = new ArrayList();
-	for (User user : users) {
-		ua = new ArrayList();
-		ua.add(user.getUserId());
-		ua.add(user.getFirstName() + " " + user.getLastName());
-		users_array.add(ua);
-	}
-	return users_array;
-}
-
 getDefaultUsersList() {
-	users = new ArrayList();
-	users.add(createUser("1", "Test", "User 1"));
-	users.add(createUser("2", "Test", "User 2"));
-	users.add(createUser("3", "Test", "User 3"));
-	users.add(createUser("4", "Test", "User 4"));
-	users.add(createUser("5", "Test", "User 5"));
+	users = fetchAll("select userid, fname ||' ' || lname from user");
 	return users;
 }
 
 usersList = getDefaultUsersList();
 
 populateListForUsers(){
-	populateList("user/tab1/users", toUsersList(usersList));
+	populateList("user/tab1/users", usersList);
 }
 
 login(){
-	User user = (User) usersList.get(Integer.parseInt(getListItemValue())-1);
-	
+	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
 	setUser(user);
 	showTabGroup("menu");
 }
@@ -409,9 +388,11 @@ updateAll() {
 	Object relationships = fetchRelationshipList("abovebelow");
 	Object values = getFieldValue("tabgroup1/tab1/location");
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");
 	populateDropDown("tabgroup1/tab3/entities", entities);
 	populateDropDown("tabgroup2/tab2/relationships", relationships);
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateList("user/tab1/users", usersList);
 	setFieldValue("tabgroup1/tab1/location",values);
 }
 

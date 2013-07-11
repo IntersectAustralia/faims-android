@@ -327,6 +327,10 @@ public final class DatabaseQueries {
 				"         vocabid, attributeid, vocabname, SemanticMapURL,PictureURL) \n" + 
 				"  select vocabid, attributeid, vocabname, SemanticMapURL,PictureURL\n" + 
 				"  from import.vocabulary;\n" + 
+				"insert or replace into user (\n" + 
+				"         userid, fname, lname) \n" + 
+				"  select userid, fname, lname\n" + 
+				"  from import.user;\n" + 
 				"detach database import;";
 	}
 
