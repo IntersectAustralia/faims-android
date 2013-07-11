@@ -209,7 +209,7 @@ private static String dbname;
 			st.step();
 			Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
                     new ByteArrayInputStream(Utils
-                            .hexStringToByteArray(st.column_string(0))), null));
+                            .hexStringToByteArray(st.column_string(0))), (Object) null));
 			if (gs != null) {
 	            return (Polygon) gs[0];
 			}
@@ -321,7 +321,7 @@ private static String dbname;
 			st.step();
 			Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
                     new ByteArrayInputStream(Utils
-                            .hexStringToByteArray(st.column_string(0))), null));
+                            .hexStringToByteArray(st.column_string(0))), (Object) null));
 			if (gs != null) {
 	            return (Geometry) gs[0];
 			}

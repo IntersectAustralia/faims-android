@@ -661,7 +661,7 @@ public class DatabaseManager {
 				if(stmt.step()){
 					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(1))), null));
+		                            .hexStringToByteArray(stmt.column_string(1))), (Object) null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -731,7 +731,7 @@ public class DatabaseManager {
 				if(stmt.step()){
 					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(1))), null));
+		                            .hexStringToByteArray(stmt.column_string(1))), (Object) null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -897,7 +897,7 @@ public class DatabaseManager {
 					String response = stmt.column_string(1);
 					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(2))), null));
+		                            .hexStringToByteArray(stmt.column_string(2))), (Object) null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -949,7 +949,7 @@ public class DatabaseManager {
 					String response = stmt.column_string(1);
 					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
 		                    new ByteArrayInputStream(Utils
-		                            .hexStringToByteArray(stmt.column_string(2))), null));
+		                            .hexStringToByteArray(stmt.column_string(2))), (Object) null));
 					if (gs != null) {
 			            for (int i = 0; i < gs.length; i++) {
 			            	Geometry g = gs[i];
@@ -1117,6 +1117,46 @@ public class DatabaseManager {
 				} catch (Exception e) {
 					FLog.e("error closing database", e);
 				}
+			}
+		}
+	}
+	
+	public void debugVersion() {
+		jsqlite.Database db = null;
+		try {
+			
+			db = new jsqlite.Database();
+			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			
+			db.exec("select spatialite_version(), sqlite_version(), proj4_version(), geos_version(), lwgeom_version();", new Callback() {
+				@Override
+				public void columns(String[] coldata) {
+					FLog.d("Columns: " + Arrays.toString(coldata));
+				}
+
+				@Override
+				public void types(String[] types) {
+					FLog.d("Types: " + Arrays.toString(types));
+				}
+
+				@Override
+				public boolean newrow(String[] rowdata) {
+					FLog.d("Row: " + Arrays.toString(rowdata));
+
+					return false;
+				}
+			});
+			
+		} catch (Exception e) {
+			FLog.e("error dumping database", e);
+		} finally {
+			try {
+				if (db != null) {
+					db.close();
+					db = null;
+				}
+			} catch (Exception e) {
+				FLog.e("error closing database", e);
 			}
 		}
 	}

@@ -364,14 +364,14 @@ newStructure(){
     populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
     populateDropDown("structure/info/Form", makeVocab("Form"));
     populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
-    populateList("structure/construction/ConstructionQuality", makeVocab("ConstructionQuality"));
-    populateList("structure/construction/ConstructionPeriod", makeVocab("ConstructionPeriod"));
-    populateList("structure/construction/Modifications", makeVocab("Modifications"));
-    populateDropDown("structure/construction/PrincipalFunction", makeVocab("PrincipalFunction"));
-    populateDropDown("structure/construction/Classification", makeVocab("Classification"));
-    populateList("structure/finalObservations/StuccoInterior", makeVocab("StuccoInterior"));
-    populateList("structure/finalObservations/StuccoExterior", makeVocab("StuccoExterior"));
-    populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
+    populateList("structure/info/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/info/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/info/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/info/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/info/Classification", makeVocab("Classification"));
+    populateList("structure/info/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/info/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/info/RoofForm", makeVocab("RoofForm"));
 
     setFieldValue("structure/info/Timestamp", getCurrentTime());
     setFieldValue("structure/info/Author", username);
@@ -1758,8 +1758,6 @@ onEvent("structure/final/Audio", "click", "recordAudio()");
 onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/component/Update", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/construction/Update", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/finalObservations/Update", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
@@ -1861,34 +1859,34 @@ updateStructure(id){
     	AttributeDef("Device", "freetext", "structure/info/Device", false),
     	AttributeDef("Form", "vocab", "structure/info/Form",true),
     	AttributeDef("FormDescription", "freetext", "structure/info/FormDescription",true),
-    	AttributeDef("ConstructionPeriod", "vocab", "structure/construction/ConstructionPeriod"),
-    	AttributeDef("ConstructionPeriodDescription", "freetext", "structure/construction/ConstructionPeriodDescription"),
-    	AttributeDef("Modifications", "vocab", "structure/construction/Modifications"),
-    	AttributeDef("ModificationDescription", "freetext", "structure/construction/ModificationDescription"),
-    	AttributeDef("PrincipalFunction", "vocab", "structure/construction/PrincipalFunction"),
-    	AttributeDef("PrincipalFunctionDescription", "freetext", "structure/construction/PrincipalFunctionDescription"),
-    	AttributeDef("Classification", "vocab", "structure/construction/Classification"),
-    	AttributeDef("ConstructionQuality", "vocab", "structure/construction/ConstructionQuality"),
+    	AttributeDef("ConstructionPeriod", "vocab", "structure/info/ConstructionPeriod"),
+    	AttributeDef("ConstructionPeriodDescription", "freetext", "structure/info/ConstructionPeriodDescription"),
+    	AttributeDef("Modifications", "vocab", "structure/info/Modifications"),
+    	AttributeDef("ModificationDescription", "freetext", "structure/info/ModificationDescription"),
+    	AttributeDef("PrincipalFunction", "vocab", "structure/info/PrincipalFunction"),
+    	AttributeDef("PrincipalFunctionDescription", "freetext", "structure/info/PrincipalFunctionDescription"),
+    	AttributeDef("Classification", "vocab", "structure/info/Classification"),
+    	AttributeDef("ConstructionQuality", "vocab", "structure/info/ConstructionQuality"),
     	AttributeDef("WallsTotalCount", "measure", "structure/component/WallsTotalCount", false),
     	//AttributeDef("WallsGabledCount", "measure", "structure/component/WallsGabledCount", false),
     	AttributeDef("WallsInternalPartition", "vocab", "structure/component/WallsInternalPartition"),
     	AttributeDef("PartitionDescription", "freetext", "structure/component/PartitionDescription"),
-    	AttributeDef("StuccoInterior", "vocab", "structure/finalObservations/StuccoInterior"),
-    	AttributeDef("StuccoExterior", "vocab", "structure/finalObservations/StuccoExterior"),
+    	AttributeDef("StuccoInterior", "vocab", "structure/info/StuccoInterior"),
+    	AttributeDef("StuccoExterior", "vocab", "structure/info/StuccoExterior"),
     	AttributeDef("WindowCount", "measure", "structure/component/WindowCount", false),
     	AttributeDef("DoorwayCount", "measure", "structure/component/DoorwayCount", false),
     	AttributeDef("NicheCount", "measure", "structure/component/NicheCount", false),
-    	AttributeDef("FloorRemainsDescription", "freetext", "structure/finalObservations/FloorRemainsDescription"),
-    	AttributeDef("RoofForm", "vocab", "structure/finalObservations/RoofForm"),
-    	AttributeDef("LongAxis", "measure", "structure/finalObservations/LongAxis"),
-    	AttributeDef("ShortAxis", "measure", "structure/finalObservations/ShortAxis"),
-    	AttributeDef("Diameter", "measure", "structure/finalObservations/Diameter"),
+    	AttributeDef("FloorRemainsDescription", "freetext", "structure/info/FloorRemainsDescription"),
+    	AttributeDef("RoofForm", "vocab", "structure/info/RoofForm"),
+    	AttributeDef("LongAxis", "measure", "structure/info/LongAxis"),
+    	AttributeDef("ShortAxis", "measure", "structure/info/ShortAxis"),
+    	AttributeDef("Diameter", "measure", "structure/info/Diameter"),
     	AttributeDef("Preservation", "vocab", "structure/info/Preservation"),
     	AttributeDef("PreservationDescription", "freetext", "structure/info/PreservationDescription"),
-    	AttributeDef("SurfaceCondition", "freetext", "structure/finalObservations/SurfaceCondition"),
-    	AttributeDef("ModernUse", "freetext", "structure/finalObservations/ModernUse"),
-    	AttributeDef("Disturbances", "freetext", "structure/finalObservations/Disturbances"),
-    	AttributeDef("OtherArchitecturalDetails", "freetext", "structure/finalObservations/OtherArchitecturalDetails"),
+    	AttributeDef("SurfaceCondition", "freetext", "structure/info/SurfaceCondition"),
+    	AttributeDef("ModernUse", "freetext", "structure/info/ModernUse"),
+    	AttributeDef("Disturbances", "freetext", "structure/info/Disturbances"),
+    	AttributeDef("OtherArchitecturalDetails", "freetext", "structure/info/OtherArchitecturalDetails"),
     	AttributeDef("Photo", "files", "structure/final/PhotoGallery", loadedPictures),
     	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches),
     	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles),
@@ -2175,14 +2173,14 @@ loadStructure() {
     populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
     populateDropDown("structure/info/Form", makeVocab("Form"));
     populateList("structure/component/WallsInternalPartition", makeVocab("WallsInternalPartition"));
-    populateList("structure/construction/ConstructionQuality", makeVocab("ConstructionQuality"));
-    populateList("structure/construction/ConstructionPeriod", makeVocab("ConstructionPeriod"));
-    populateList("structure/construction/Modifications", makeVocab("Modifications"));
-    populateDropDown("structure/construction/PrincipalFunction", makeVocab("PrincipalFunction"));
-    populateDropDown("structure/construction/Classification", makeVocab("Classification"));
-    populateList("structure/finalObservations/StuccoInterior", makeVocab("StuccoInterior"));
-    populateList("structure/finalObservations/StuccoExterior", makeVocab("StuccoExterior"));
-    populateDropDown("structure/finalObservations/RoofForm", makeVocab("RoofForm"));
+    populateList("structure/info/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/info/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/info/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/info/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/info/Classification", makeVocab("Classification"));
+    populateList("structure/info/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/info/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/info/RoofForm", makeVocab("RoofForm"));
 	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
 }
