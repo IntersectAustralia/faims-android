@@ -1,15 +1,3 @@
-/***
-
-Counting stuffs like the number of structure walls in a structure:
-
-select count(distinct uuid) from (select uuid, relationshipid, deleted from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) a join archentity using (uuid) join aenttype using (aenttypeid) where relationshipid in (select relationshipid from aentreln where uuid = 1000071372384147406) and aenttypename = 'StructureWall' and a.deleted is null and uuid != 1000071372384147406;
-
-important to use the structure_id and set the type name of the *target* thingo.
-
-Completely untested in app, of course.
-
-***/
-
 /*** MAP ***/
 
 DATA_ENTRY_LAYER = "Data Entry";
@@ -635,56 +623,69 @@ newCornerNiche(id){
 
 recalcComponents(){
     if (!isNull(structure_id)){
-         Object windowNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'WindowIn'; ");
+         Object windowNum = fetchOne(""+
+"select count(distinct relationshipid) "+
+"from aentreln join relationship using (relationshipid) "+
+"join relntype using (relntypeid) "+
+"join archentity using (uuid) join (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+"where uuid in (select uuid "+
+"                 from aentreln join (select relationshipid "+
+"                                      from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+"                                                            from aentreln "+
+"                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+"                                     where uuid ="+structure_id+" "+
+"                                  group by relationshipid) using (relationshipid) "+
+"               where uuid !="+structure_id+" "+
+"                 and deleted is null) "+
+"and relntypename = 'WindowIn' "+
+"and archentity.deleted is null; ");
         Object structureWallNum = fetchOne("select count(distinct uuid) "+
                     " from (select uuid, relationshipid, deleted "+
                     "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+structure_id+") "+
                     "and aenttypename = 'StructureWall' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+structure_id+"; ");
-         Object nicheNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'NicheIn'; ");
-         Object doorwayNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'DoorwayIn'; ");
+         Object nicheNum = fetchOne(""+
+"select count(distinct relationshipid) "+
+"from aentreln join relationship using (relationshipid) "+
+"join relntype using (relntypeid) "+
+"join archentity using (uuid) join (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+"where uuid in (select uuid "+
+"                 from aentreln join (select relationshipid "+
+"                                      from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+"                                                            from aentreln "+
+"                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+"                                     where uuid ="+structure_id+" "+
+"                                  group by relationshipid) using (relationshipid) "+
+"               where uuid !="+structure_id+" "+
+"                 and deleted is null) "+
+"and relntypename = 'NicheIn' "+
+"and archentity.deleted is null; ");
+         Object doorwayNum = fetchOne(""+
+"select count(distinct relationshipid) "+
+"from aentreln join relationship using (relationshipid) "+
+"join relntype using (relntypeid) "+
+"join archentity using (uuid) join (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+"where uuid in (select uuid "+
+"                 from aentreln join (select relationshipid "+
+"                                      from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+"                                                            from aentreln "+
+"                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+"                                     where uuid ="+structure_id+" "+
+"                                  group by relationshipid) using (relationshipid) "+
+"               where uuid !="+structure_id+" "+
+"                 and deleted is null) "+
+"and relntypename = 'DoorwayIn' "+
+"and archentity.deleted is null; ");
 
 
     setFieldValue("structure/component/WindowCount", Integer.valueOf(windowNum.get(0)));
@@ -748,13 +749,14 @@ if (!isNull(structure_id)){
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+structure_id+") "+
                     "and aenttypename = 'Corner' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+structure_id+"; ");
 
     setFieldValue("corner/cornerDetail/CornerID", getFieldValue("structure/info/ArchaeologicalElementID") + " Corner: " +cornerNum.get(0));}
@@ -763,9 +765,13 @@ if (!isNull(structure_id)){
 
 deleteCorner(){
 	if (!isNull(corner_id)) {
-		deleteArchEnt(corner_id);
-		cancelTabGroup("corner", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Corner!", "reallyDeleteCorner()", "doNotDelete()");
 	}
+}
+
+reallyDeleteCorner(){
+    deleteArchEnt(corner_id);
+    cancelTabGroup("corner", false);
 }
 
 updateCorner(id) {
@@ -830,13 +836,14 @@ recalcCorner(){
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+corner_id+") "+
                     "and aenttypename = 'Niche' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+corner_id+"; ");
 
 
@@ -907,9 +914,13 @@ saveNiche(id) {
 
 deleteNiche(){
 	if (!isNull(niche_id)) {
-		deleteArchEnt(niche_id);
-		cancelTabGroup("niche", false);
+		showAlert("Confirm Deletion", "Press OK to Delete this Niche!", "reallyDeleteNiche()", "doNotDelete()");
 	}
+}
+
+reallyDeleteNiche(){
+    deleteArchEnt(niche_id);
+    cancelTabGroup("niche", false);
 }
 
 updateNiche(id) {
@@ -979,13 +990,14 @@ makeWindowNum(parent_id, parent_string){
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+parent_id+") "+
                     "and aenttypename = 'Window' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+parent_id+"; ");
 
     setFieldValue("window/windowDetail/WindowID", parent_string + " Window: " +fooNum.get(0));}
@@ -999,13 +1011,14 @@ makeNicheNum(parent_id, parent_string){
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+parent_id+") "+
                     "and aenttypename = 'Niche' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+parent_id+"; ");
 
     setFieldValue("niche/nicheDetail/NicheID", parent_string + " Niche: " +fooNum.get(0));}
@@ -1031,11 +1044,17 @@ onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 
 deleteCanal(){
 	if (!isNull(canal_id)) {
-		deleteArchEnt(canal_id);
-		cancelTabGroup("canal", false);
+		showAlert("Confirm Deletion", "Press OK to Delete this Niche!", "reallyDeleteCanal()", "doNotDelete()");
+
 	}
 }
 
+
+
+reallyDeleteCanal(){
+    deleteArchEnt(canal_id);
+    cancelTabGroup("canal", false);
+}
 saveCanal(id) {
 	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("canal/canalDetail/CanalID"))) {
@@ -1127,9 +1146,12 @@ saveWindow(id) {
 
 deleteWindow(){
 	if (!isNull(window_id)) {
-		deleteArchEnt(window_id);
-		cancelTabGroup("window", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Window!", "reallyDeleteWindow()", "doNotDelete()");
 	}
+}
+reallyDeleteWindow(){
+    deleteArchEnt(window_id);
+    cancelTabGroup("window", false);
 }
 
 updateWindow(id) {
@@ -1216,11 +1238,13 @@ associateWithSpecialFind() {
 
 deleteSpecialFind(){
 	if (!isNull(special_find_id)) {
-		deleteArchEnt(special_find_id);
-		cancelTabGroup("specialFind", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Special Find!", "reallyDeleteSpecialFind()", "doNotDelete()");
 	}
 }
-
+reallyDeleteSpecialFind(){
+    deleteArchEnt(special_find_id);
+    cancelTabGroup("specialFind", false);
+}
 saveSpecialFind(id) {
 	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("specialFind/findDetail/SpecialFindID"))) {
@@ -1308,9 +1332,12 @@ associateWithFeature() {
 
 deleteFeature(){
 	if (!isNull(feature_id)) {
-		deleteArchEnt(feature_id);
-		cancelTabGroup("feature", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Feature!", "reallyDeleteFeature()", "doNotDelete()");
 	}
+}
+reallyDeleteFeature(){
+        deleteArchEnt(feature_id);
+        cancelTabGroup("feature", false);
 }
 
 saveFeature(id) {
@@ -1400,9 +1427,12 @@ associateWithFreeWall() {
 
 deleteFreeWall(){
 	if (!isNull(wall_id)) {
-		deleteArchEnt(wall_id);
-		cancelTabGroup("freeWall", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Free Wall!", "reallyDeleteFreeWall()", "doNotDelete()");
 	}
+}
+reallyDeleteFreeWall(){
+    deleteArchEnt(wall_id);
+    cancelTabGroup("freeWall", false);
 }
 
 saveFreeWall(id) {
@@ -1520,10 +1550,13 @@ associateWithDoorway() {
 
 deleteDoorway(){
 	if (!isNull(doorway_id)) {
-		deleteArchEnt(doorway_id);
-		cancelTabGroup("doorway", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Doorway!", "reallyDeleteDoorway()", "doNotDelete()");
 	}
 }
+reallyDeleteDoorway(){
+        deleteArchEnt(doorway_id);
+        cancelTabGroup("doorway", false);
+    }
 
 saveDoorway(id) {
 	noGPSGeom = isNull(getFieldValue("doorway/doorDetail/GPSLong")) || isNull(getFieldValue("doorway/doorDetail/GPSLat"));
@@ -1625,11 +1658,13 @@ associateWithLichen() {
 
 deleteLichen(){
 	if (!isNull(lichen_id)) {
-		deleteArchEnt(lichen_id);
-		cancelTabGroup("lichen", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Lichen!", "reallyDeleteLichen()", "doNotDelete()");
 	}
 }
-
+reallyDeleteLichen(){
+    deleteArchEnt(lichen_id);
+    cancelTabGroup("lichen", false);
+}
 saveLichen(id) {
 	noGPSGeom = isNull(getFieldValue("lichen/lichenDetail/GPSLong")) || isNull(getFieldValue("lichen/lichenDetail/GPSLat"));
 	if ((id == null && getCreatedGeometry() == null && noGPSGeom) ||
@@ -1727,11 +1762,15 @@ saveSurfaceCollection(id) {
 
 deleteSurfaceCollection(){
 	if (!isNull(surface_collection_id)) {
-		deleteArchEnt(surface_collection_id);
-		cancelTabGroup("surfaceCollection", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Surface Collection!", "reallyDeleteSurfaceCollection()", "doNotDelete()");
+
+
 	}
 }
-
+reallyDeleteSurfaceCollection(){
+    deleteArchEnt(surface_collection_id);
+    cancelTabGroup("surfaceCollection", false);
+}
 updateSurfaceCollection(id) {
 	if (isNull(id)) id = null;
 
@@ -1772,9 +1811,14 @@ onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
 	if (!isNull(lot_id)) {
-		deleteArchEnt(lot_id);
-		cancelTabGroup("lot", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Lot!", "reallyDeleteLot()", "doNotDelete()");
+
+
 	}
+}
+reallyDeleteLot(){
+    deleteArchEnt(lot_id);
+    cancelTabGroup("lot", false);
 }
 
 saveLot(id) {
@@ -1869,30 +1913,36 @@ duplicateStructureWall(id) {
 }
 makeStructureWallNum(){
 if (!isNull(structure_id)){
-    wallNum = fetchOne("select count(distinct uuid)+1 "+
+    Object wallNum = fetchOne("select count(distinct uuid)+1 "+
                     " from (select uuid, relationshipid, deleted "+
                     "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
                     "join archentity using (uuid) "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
                     "                          from aentreln "+
                     "                          where uuid = "+structure_id+") "+
                     "and aenttypename = 'StructureWall' "+
                     "and a.deleted is null "+
+                    "and archentity.deleted is null "+
                     "and uuid != "+structure_id+"; ");
 
-    setFieldValue("wall/structureWall/WallID", getFieldValue("structure/info/ArchaeologicalElementID") + " Wall: " +wallNum.get(0));}
-
+    setFieldValue("wall/structureWall/WallID", getFieldValue("structure/info/ArchaeologicalElementID") + " Wall: " +wallNum.get(0));
+    }
 }
 
 deleteStructureWall(){
 	if (!isNull(structure_wall_id)) {
-		deleteArchEnt(structure_wall_id);
-		cancelTabGroup("wall", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Structure Wall!", "reallyDeleteStructureWall()", "doNotDelete()");
+
 	}
+}
+reallyDeleteStructureWall(){
+    deleteArchEnt(structure_wall_id);
+    cancelTabGroup("wall", false);
 }
 
 updateStructureWall(id) {
@@ -2121,47 +2171,17 @@ saveStructure(id) {
 	clearCreatedGeometry();
 }
 
-setTotalWallsRecordedForStructure(structure_id){
-    value = fetchOne("select count(distinct uuid) "+
-                    " from (select uuid, relationshipid, deleted "+
-                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                    "                             from aentreln "+
-                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                    "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
-                    "join aenttype using (aenttypeid) "+
-                    "where relationshipid in (select relationshipid "+
-                    "                          from aentreln "+
-                    "                          where uuid = 1000021372913849491) "+
-                    "and aenttypename = 'Corner' "+
-                    "and a.deleted is null "+
-                    "and uuid != 1000021372913849491; ");
-    //setFieldValue("structure/component/WallsTotalCount",value);
-}
-
-setTotalGabledWallsRecordedForStructure(structure_id){
-    setFieldValue("structure/component/WallsGabledCount",value);
-}
-
-setWindowsRecordedForStructure(value){
-    setFieldValue("structure/component/WindowCount",value);
-}
-
-setNichesRecordedForStructure(value){
-    setFieldValue("structure/component/NicheCount",value);
-}
-
-setDoorwaysRecordedForStructure(value){
-    setFieldValue("structure/component/DoorwayCount",value);
-}
-
 deleteStructure(){
 	if (!isNull(structure_id)) {
-		deleteArchEnt(structure_id);
-		cancelTabGroup("structure", false);
+        showAlert("Confirm Deletion", "Press OK to Delete this Structure!", "reallyDeleteStructure()", "doNotDelete()");
+
+
 	}
 }
-
+reallyDeleteStructure(){
+    deleteArchEnt(structure_id);
+    cancelTabGroup("structure", false);
+}
 updateStructure(id){
     if (isNull(id)) id = null;
 
@@ -2194,7 +2214,7 @@ updateStructure(id){
 				loadedAudios.add(attribute.getText());
 			}
 		}
-        setTotalWallsRecordedForStructure(id);
+
 	}
 
 
@@ -2266,7 +2286,7 @@ updateAllStructure() {
 	Object localCorner = new ArrayList();
 
 	if (!isNull(structure_id)) {
-		localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+		localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
 "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
 "            FROM aentvalue\n"+
 "            JOIN attributekey USING (attributeid)\n"+
@@ -2300,7 +2320,7 @@ updateAllStructure() {
 "group by uuid\n"+
 "order by valuetimestamp desc, uuid, attributename;\n");
 
-    	localCorner =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+    	localCorner =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
 "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
 "            FROM aentvalue\n"+
 "            JOIN attributekey USING (attributeid)\n"+
@@ -2332,13 +2352,13 @@ updateAllStructure() {
 "                GROUP BY uuid, attributeid\n"+
 "        ORDER BY valuetimestamp desc, uuid, attributename ASC)\n"+
 "group by uuid\n"+
-"order by uuid, attributename;\n");
+"order by valuetimestamp desc, uuid, attributename;\n");
 	}
 
 	populateDropDown("structure/load/structureWallList", localStructureWall);
     populateDropDown("structure/load/cornerList", localCorner);
 
-    setTotalWallsRecordedForStructure(structure_id);
+
 
 }
 /*
@@ -2395,7 +2415,7 @@ updateAllNiche() {
 }
 */
 updateAllFreeWall() {
-	Object fWallsAndStructures =  fetchAll("select '', '' union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+	Object fWallsAndStructures =  fetchAll("select '', '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
         "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
         "         join archentity USING (uuid)\n"+
@@ -2416,12 +2436,12 @@ updateAllFreeWall() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by substr(uuid,7) desc;\n");
+        "group by uuid order by valuetimestamp desc;\n");
 	populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
 }
 
 updateAllDoorway() {
-	Object structureStructureWallFreeWall =  fetchAll("select '' as uuid, '' union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+	Object structureStructureWallFreeWall =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
         "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
         "         join archentity USING (uuid)\n"+
@@ -2442,13 +2462,13 @@ updateAllDoorway() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by substr(uuid,7) desc;\n");
+        "group by uuid order by valuetimestamp desc;\n");
 
 	populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
 }
 
 updateAllLichen() {
-	Object allEntities =  fetchAll("select '' as uuid, '' union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+	Object allEntities =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
         "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
         "         join archentity USING (uuid)\n"+
@@ -2468,12 +2488,12 @@ updateAllLichen() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by substr(uuid,7) desc;\n");
+        "group by uuid order by valuetimestamp desc;\n");
     populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
 }
 
 updateAllFeature() {
-	Object structure =  fetchAll("select '' as uuid, '' union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+	Object structure =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
         "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
         "         join archentity USING (uuid)\n"+
@@ -2494,7 +2514,7 @@ updateAllFeature() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by substr(uuid,7) desc;\n");
+        "group by uuid order by valuetimestamp desc;\n");
 	populateDropDown("feature/featureDetail/AssociateWithList", structure);
 }
 
@@ -2983,3 +3003,7 @@ onEvent("control/data/windowLoad", "click", "loadWindow()");
 onEvent("surfaceCollection/load/lotLoad", "click", "loadLot()");
 onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
 onEvent("structure/load/cornerLoad", "click", "loadCorner()");
+
+doNotDelete(){
+    showToast("Delete Cancelled.");
+}
