@@ -301,21 +301,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
-						getString(R.string.confirm_update_project_data_title),
-						getString(R.string.confirm_update_project_data_message) + " " + selectedItem + "?",
-						new IDialogListener() {
-
-							@Override
-							public void handleDialogResponse(
-									DialogResultCode resultCode) {
-								if (resultCode == DialogResultCode.SELECT_YES) {
-									updateProjectDataArchive();
-								}
-							}
-					
-				});
-				choiceDialog.show();
+				updateProjectDataArchive();
 			}
 		});
 		
@@ -323,21 +309,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
-						getString(R.string.confirm_update_project_setting_title),
-						getString(R.string.confirm_update_project_setting_message) + " " + selectedItem + "?",
-						new IDialogListener() {
-
-							@Override
-							public void handleDialogResponse(
-									DialogResultCode resultCode) {
-								if (resultCode == DialogResultCode.SELECT_YES) {
-									updateProjectSettingArchive();
-								}
-							}
-					
-				});
-				choiceDialog.show();
+				updateProjectSettingArchive();
 			}
 		});
 		builder.create().show();
