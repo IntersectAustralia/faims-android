@@ -2098,8 +2098,6 @@ onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(struc
 duplicateEAID(){
     eaid = getFieldValue("structure/info/ArchaeologicalElementID");
     setFieldValue("structure/component/EAidDupe", eaid);
-    setFieldValue("structure/construction/EAidDupe", eaid);
-    setFieldValue("structure/finalObservations/EAidDupe", eaid);
     setFieldValue("structure/final/EAidDupe", eaid);
     setFieldValue("wall/structureWall/EAidDupe", eaid);
     setFieldValue("window/windowDetail/EAidDupe", eaid);

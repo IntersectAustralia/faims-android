@@ -142,6 +142,7 @@
               <Update/>
             </info>
             <component>
+              <EAidDupe/>
               <WallsTotalCount/>
               <!-- Derivable number but can be included if desired -->
               <WallsGabledCount/>
@@ -959,6 +960,9 @@
       </group>
       <group ref="component">
         <label>Component Tab</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>{EA ID:}</label>
+        </input>
         <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Walls Recorded:</label>
         </input>
