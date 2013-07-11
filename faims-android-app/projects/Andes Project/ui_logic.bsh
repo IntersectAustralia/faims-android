@@ -1919,7 +1919,6 @@ if (!isNull(structure_id)){
                     "                             from aentreln "+
                     "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
                     "        group by uuid, relationshipid ) a "+
-                    "join archentity using (uuid) "+
                     "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
                     "join aenttype using (aenttypeid) "+
                     "where relationshipid in (select relationshipid "+
@@ -2005,43 +2004,51 @@ updateStructureWall(id) {
 
 recalcStructureWall(){
     if (!isNull(structure_wall_id)){
-         Object windowNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_wall_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_wall_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'WindowIn'; ");
-
-         Object nicheNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_wall_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_wall_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'NicheIn'; ");
-         Object doorwayNum = fetchOne("select count(distinct relationshipid) from aentreln join relationship using (relationshipid) join relntype using (relntypeid) "+
-                                    "where uuid in ( "+
-                                    "select uuid "+
-                                    "  from aentreln join (select relationshipid "+
-                                    "                        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
-                                    "                                                        from aentreln "+
-                                    "                                                        group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
-                                    "                        where uuid = "+structure_wall_id+" "+
-                                    "                      group by relationshipid) using (relationshipid) "+
-                                    "where uuid != "+structure_wall_id+" "+
-                                    "and deleted is null) "+
-                                    "and relntypename = 'DoorwayIn'; ");
+         Object windowNum = fetchOne("select count(distinct uuid) "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = "+structure_wall_id+") "+
+                    "and aenttypename = 'Window' "+
+                    "and a.deleted is null "+
+                    "and archentity.deleted is null "+
+                    "and uuid != "+structure_wall_id+"; ");
+         Object nicheNum = fetchOne("select count(distinct uuid) "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = "+structure_wall_id+") "+
+                    "and aenttypename = 'Niche' "+
+                    "and a.deleted is null "+
+                    "and archentity.deleted is null "+
+                    "and uuid != "+structure_wall_id+"; ");
+         Object doorwayNum = fetchOne("select count(distinct uuid) "+
+                    " from (select uuid, relationshipid, deleted "+
+                    "        from aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp "+
+                    "                             from aentreln "+
+                    "                             group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp) "+
+                    "        group by uuid, relationshipid ) a "+
+                    "join archentity using (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp) "+
+                    "join aenttype using (aenttypeid) "+
+                    "where relationshipid in (select relationshipid "+
+                    "                          from aentreln "+
+                    "                          where uuid = "+structure_wall_id+") "+
+                    "and aenttypename = 'Doorway' "+
+                    "and a.deleted is null "+
+                    "and archentity.deleted is null "+
+                    "and uuid != "+structure_wall_id+"; ");
 
 
     setFieldValue("wall/structureWall/WindowCount", Integer.valueOf(windowNum.get(0)));

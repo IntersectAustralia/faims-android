@@ -138,7 +138,7 @@
               <Disturbances/>
               <!--No evidente,Pocos,Varios-->
               <OtherArchitecturalDetails/>
-              
+
               <Update/>
             </info>
             <component>
@@ -232,7 +232,7 @@
               <!-- real number, 1,2,3,4 or so-->
               <MasonryType/>
               <!-- picture dictionary-->
-              <DuplicateFromCorner/>
+              <!--<DuplicateFromCorner/>-->
               <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
               <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
               <MasonryDescription/>
@@ -953,7 +953,7 @@
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>{Other Architectural Detail:}</label>
         </input>
-        
+
         <trigger ref="Update">
           <label>{Save Record}</label>
         </trigger>
@@ -1207,9 +1207,9 @@
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="DuplicateFromCorner">
+        <!--<trigger ref="DuplicateFromCorner">
           <label>{Duplicate From Corner}</label>
-        </trigger>
+        </trigger>-->
         <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
         <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
