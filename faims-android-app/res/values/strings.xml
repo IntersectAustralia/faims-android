@@ -37,6 +37,24 @@
     <string name="download_busy_project_error_title">Project archive in progress</string>
     <string name="download_busy_project_error_message">Please wait till project has finished archiving on the server and try again.</string>
     
+    <string name="confirm_update_project_setting_title">Update Project Setting</string>
+    <string name="confirm_update_project_setting_message">Would you like to update project setting for</string>
+    
+    <string name="confirm_update_project_data_title">Update Project Data</string>
+    <string name="confirm_update_project_data_message">Would you like to update project data for</string>
+    
+    <string name="update_project_title">Updating Project</string>
+    <string name="update_project_message">please wait..</string>
+    
+    <string name="update_project_failure_title">Could not update project</string>
+    <string name="update_project_failure_message">Would you like to try again?</string>
+    
+    <string name="update_project_error_title">Project is too big</string>
+    <string name="update_project_error_message">Error storage limit reached.</string>
+    
+    <string name="update_busy_project_error_title">Project archive in progress</string>
+    <string name="update_busy_project_error_message">Please wait till project has finished archiving on the server and try again.</string>
+
     <string name="render_project_title">Show Project</string>
     <string name="render_project_message">Do you want to render project?</string>
     
