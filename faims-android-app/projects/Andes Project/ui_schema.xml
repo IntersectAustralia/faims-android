@@ -99,6 +99,46 @@
               <Form/>
               <!-- Cuadrangular,Ovoide,Circular,Otro -->
               <FormDescription/>
+              
+              <ConstructionQuality/>
+              <!-- radiobutton 1(baja),2,3,4,5(alta) -->
+              <ConstructionPeriod/>
+              <!-- Intermedio Tardio,Horizonte Tardio,Colonial Temprano,Colonial Tardio,Otro -->
+              <ConstructionPeriodDescription/>
+              <Modifications/>
+              <!-- radiobutton
+                <Yes/>,No,Not observable -->
+              <ModificationDescription/>
+              <PrincipalFunction/>
+              <!-- dropdown of 7 values
+                <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
+              <PrincipalFunctionDescription/>
+              <Classification/>
+              <Update/>
+              <!--  dropdown of 10 values
+                <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
+                
+              <StuccoInterior/>
+              <!-- radiobutton?-->
+              <!--Yes,No,Not observable-->
+              <StuccoExterior/>
+              <!-- radiobutton?-->
+              <!--Yes,No,Not observable-->
+              <FloorRemainsDescription/>
+              <RoofForm/>
+              <!--Hastial dos aguas,Hastial un agua,Sin hastial,Otro,No observable-->
+              <LongAxis/>
+              <!-- number-->
+              <ShortAxis/>
+              <!-- number-->
+              <Diameter/>
+              <!-- number-->
+              <SurfaceCondition/>
+              <ModernUse/>
+              <Disturbances/>
+              <!--No evidente,Pocos,Varios-->
+              <OtherArchitecturalDetails/>
+              
               <Update/>
             </info>
             <component>
@@ -122,48 +162,6 @@
               <Update/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
             </component>
-            <construction>
-              <ConstructionQuality/>
-              <!-- radiobutton 1(baja),2,3,4,5(alta) -->
-              <ConstructionPeriod/>
-              <!-- Intermedio Tardio,Horizonte Tardio,Colonial Temprano,Colonial Tardio,Otro -->
-              <ConstructionPeriodDescription/>
-              <Modifications/>
-              <!-- radiobutton
-                <Yes/>,No,Not observable -->
-              <ModificationDescription/>
-              <PrincipalFunction/>
-              <!-- dropdown of 7 values
-                <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
-              <PrincipalFunctionDescription/>
-              <Classification/>
-              <Update/>
-              <!--  dropdown of 10 values
-                <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
-            </construction>
-            <finalObservations>
-              <StuccoInterior/>
-              <!-- radiobutton?-->
-              <!--Yes,No,Not observable-->
-              <StuccoExterior/>
-              <!-- radiobutton?-->
-              <!--Yes,No,Not observable-->
-              <FloorRemainsDescription/>
-              <RoofForm/>
-              <!--Hastial dos aguas,Hastial un agua,Sin hastial,Otro,No observable-->
-              <LongAxis/>
-              <!-- number-->
-              <ShortAxis/>
-              <!-- number-->
-              <Diameter/>
-              <!-- number-->
-              <SurfaceCondition/>
-              <ModernUse/>
-              <Disturbances/>
-              <!--No evidente,Pocos,Varios-->
-              <OtherArchitecturalDetails/>
-              <Update/>
-            </finalObservations>
             <final>
               <PhotoGallery/>
               <Photo/>
@@ -555,17 +553,17 @@
       <bind nodeset="/faims/structure/component/NicheCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/DoorwayCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/PartitionDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/ConstructionPeriodDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/ModificationDescription" type="string"/>
-      <bind nodeset="/faims/structure/construction/PrincipalFunctionDescription" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/FloorRemainsDescription" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/LongAxis" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/ShortAxis" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/Diameter" type="decimal"/>
-      <bind nodeset="/faims/structure/finalObservations/SurfaceCondition" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/ModernUse" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/Disturbances" type="string"/>
-      <bind nodeset="/faims/structure/finalObservations/OtherArchitecturalDetails" type="string"/>
+      <bind nodeset="/faims/structure/info/ConstructionPeriodDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/ModificationDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/PrincipalFunctionDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/FloorRemainsDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/LongAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/ShortAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/Diameter" type="decimal"/>
+      <bind nodeset="/faims/structure/info/SurfaceCondition" type="string"/>
+      <bind nodeset="/faims/structure/info/ModernUse" type="string"/>
+      <bind nodeset="/faims/structure/info/Disturbances" type="string"/>
+      <bind nodeset="/faims/structure/info/OtherArchitecturalDetails" type="string"/>
       <bind nodeset="/faims/wall/structureWall/MasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/InkaMasonryDescription" type="string"/>
       <bind nodeset="/faims/wall/structureWall/WallThickness" type="decimal"/>
@@ -851,6 +849,98 @@
         <input ref="FormDescription" faims_attribute_name="FormDescription" faims_attribute_type="freetext">
           <label>Form Description:</label>
         </input>
+        
+        <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
+          <label>Construction Quality:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="ConstructionPeriod" faims_attribute_name="ConstructionPeriod" faims_attribute_type="vocab">
+          <label>Construction Period:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="ConstructionPeriodDescription" faims_attribute_name="ConstructionPeriodDescription" faims_attribute_type="freetext">
+          <label>Construction Period Description:</label>
+        </input>
+        <select1 appearance="full" ref="Modifications" faims_attribute_name="Modifications" faims_attribute_type="vocab">
+          <label>Modifications:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="ModificationDescription" faims_attribute_name="ModificationDescription" faims_attribute_type="freetext">
+          <label>Modification Description:</label>
+        </input>
+        <select1 ref="PrincipalFunction" faims_attribute_name="PrincipalFunction" faims_attribute_type="vocab">
+          <label>Principal Function:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="PrincipalFunctionDescription" faims_attribute_name="PrincipalFunctionDescription" faims_attribute_type="freetext">
+          <label>Principal Function Description:</label>
+        </input>
+        <select1 ref="Classification" faims_attribute_name="Classification" faims_attribute_type="vocab">
+          <label>Classification:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        
+        <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
+          <label>Stucco Interior:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="StuccoExterior" faims_attribute_name="StuccoExterior" faims_attribute_type="vocab">
+          <label>Stucco Exterior:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="FloorRemainsDescription" faims_attribute_name="FloorRemainsDescription" faims_attribute_type="freetext">
+          <label>Floor Remains Description:</label>
+        </input>
+        <select1 ref="RoofForm" faims_attribute_name="RoofForm" faims_attribute_type="vocab">
+          <label>Roof Form:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="LongAxis" faims_attribute_name="LongAxis" faims_attribute_type="measure">
+          <label>Long Axis:</label>
+        </input>
+        <input ref="ShortAxis" faims_attribute_name="ShortAxis" faims_attribute_type="measure">
+          <label>Short Axis:</label>
+        </input>
+        <input ref="Diameter" faims_attribute_name="Diameter" faims_attribute_type="measure">
+          <label>Diameter:</label>
+        </input>
+        <input ref="SurfaceCondition" faims_attribute_name="SurfaceCondition" faims_attribute_type="freetext">
+          <label>Surface Condition:</label>
+        </input>
+        <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="freetext">
+          <label>Modern Use:</label>
+        </input>
+        <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
+          <label>Disturbances:</label>
+        </input>
+        <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
+          <label>Other Architectural Detail:</label>
+        </input>
+        
         <trigger ref="Update">
           <label>Save Record</label>
         </trigger>
@@ -898,107 +988,6 @@
           <label>Save Record</label>
         </trigger>
       </group>
-      <group ref="construction">
-        <label>Construction Tab</label>
-        <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
-          <label>Construction Quality:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <select1 appearance="full" ref="ConstructionPeriod" faims_attribute_name="ConstructionPeriod" faims_attribute_type="vocab">
-          <label>Construction Period:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="ConstructionPeriodDescription" faims_attribute_name="ConstructionPeriodDescription" faims_attribute_type="freetext">
-          <label>Construction Period Description:</label>
-        </input>
-        <select1 appearance="full" ref="Modifications" faims_attribute_name="Modifications" faims_attribute_type="vocab">
-          <label>Modifications:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="ModificationDescription" faims_attribute_name="ModificationDescription" faims_attribute_type="freetext">
-          <label>Modification Description:</label>
-        </input>
-        <select1 ref="PrincipalFunction" faims_attribute_name="PrincipalFunction" faims_attribute_type="vocab">
-          <label>Principal Function:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="PrincipalFunctionDescription" faims_attribute_name="PrincipalFunctionDescription" faims_attribute_type="freetext">
-          <label>Principal Function Description:</label>
-        </input>
-        <select1 ref="Classification" faims_attribute_name="Classification" faims_attribute_type="vocab">
-          <label>Classification:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <trigger ref="Update">
-          <label>Save Record</label>
-        </trigger>
-        </group>
-      <group ref="finalObservations">
-        <label>Final Observations</label>
-        <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
-          <label>Stucco Interior:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <select1 appearance="full" ref="StuccoExterior" faims_attribute_name="StuccoExterior" faims_attribute_type="vocab">
-          <label>Stucco Exterior:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="FloorRemainsDescription" faims_attribute_name="FloorRemainsDescription" faims_attribute_type="freetext">
-          <label>Floor Remains Description:</label>
-        </input>
-        <select1 ref="RoofForm" faims_attribute_name="RoofForm" faims_attribute_type="vocab">
-          <label>Roof Form:</label>
-          <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="LongAxis" faims_attribute_name="LongAxis" faims_attribute_type="measure">
-          <label>Long Axis:</label>
-        </input>
-        <input ref="ShortAxis" faims_attribute_name="ShortAxis" faims_attribute_type="measure">
-          <label>Short Axis:</label>
-        </input>
-        <input ref="Diameter" faims_attribute_name="Diameter" faims_attribute_type="measure">
-          <label>Diameter:</label>
-        </input>
-        <input ref="SurfaceCondition" faims_attribute_name="SurfaceCondition" faims_attribute_type="freetext">
-          <label>Surface Condition:</label>
-        </input>
-        <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="freetext">
-          <label>Modern Use:</label>
-        </input>
-        <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
-          <label>Disturbances:</label>
-        </input>
-        <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
-          <label>Other Architectural Detail:</label>
-        </input>
-        <trigger ref="Update">
-          <label>Save Record</label>
-        </trigger>
-        </group>
       <group ref="final">
         <label>Attachments and Saving</label>
         <trigger ref="Photo">
