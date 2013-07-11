@@ -140,7 +140,7 @@
               <AddWall/>
               <AddCorner/>
               <!--<AddDoorway/>-->
-              <AddNiche/>
+              <!--<AddNiche/>-->
               <Update/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
             </component>
@@ -272,7 +272,7 @@
               <Duplicate/>
               <NewWindow/>
               <NewNiche/>
-              <NewLichen/>
+              <!--<NewLichen/>-->
               <Update/>
               <Delete/>
               <!-- {Button: “Add Window to this wall”, “Add Niche to this wall”, “Add Lichen to this wall”, “Save”, “Delete”,”Load”} -->
@@ -637,1457 +637,1457 @@
       <group ref="orientation">
         <label/>
         <input ref="orientation">
-          <label>horizontal</label>
+          <label>{horizontal}</label>
         </input>
       </group>
       <group ref="even">
         <label/>
         <input ref="layout_weight">
-          <label>1</label>
+          <label>{1}</label>
         </input>
       </group>
     </group>
     <group ref="user">
-      <label>User and Device List</label>
+      <label>{User and Device List}</label>
       <group ref="tab1">
-        <label>User and Device List</label>
+        <label>{User and Device List}</label>
         <select1 ref="users">
-          <label>Users:</label>
+          <label>{Users:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 ref="devices" appearance="full">
-          <label>Devices:</label>
+          <label>{Devices:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="login">
-          <label>Start Recording</label>
+          <label>{Start Recording}</label>
         </trigger>
       </group>
     </group>
     <group ref="create">
-        <label></label>
+        <label>{}</label>
         <group ref="tab1">
-            <label>Create Record For</label>
+            <label>{Create Record For}</label>
             <trigger ref="structure">
-                <label>Create Structure</label>
+                <label>{Create Structure}</label>
             </trigger>
             <trigger ref="wall">
-                <label>Create Wall</label>
+                <label>{Create Wall}</label>
             </trigger>
             <trigger ref="doorway">
-                <label>Create Doorway</label>
+                <label>{Create Doorway}</label>
             </trigger>
             <trigger ref="feature">
-                <label>Create Feature</label>
+                <label>{Create Feature}</label>
             </trigger>
             <trigger ref="specialFind">
-                <label>Create Special Find</label>
+                <label>{Create Special Find}</label>
             </trigger>
             <trigger ref="lichen">
-                <label>Create Lichen</label>
+                <label>{Create Lichen}</label>
             </trigger>
             <trigger ref="surfaceCollection">
-                <label>Create Surface Collection</label>
+                <label>{Create Surface Collection}</label>
             </trigger>
             <trigger ref="canal">
-                <label>Create Canal</label>
+                <label>{Create Canal}</label>
             </trigger>
         </group>
     </group>
     <group ref="control">
-      <label>Maps and Controls</label>
+      <label>{Maps and Controls}</label>
       <group ref="map" faims_scrollable="false">
-        <label>Map</label>
+        <label>{Map}</label>
         <input ref="map" faims_map="true" faims_certainty="false">
-          <label> </label>
+          <label>{ }</label>
         </input>
       </group>
       <group ref="data">
-        <label>Loading Data</label>
+        <label>{Loading Data}</label>
         <select1 ref="structureList" faims_certainty="false" faims_annotation="false">
-          <label>Structures</label>
+          <label>{Structures}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="structureLoad">
-          <label>Load Structure</label>
+          <label>{Load Structure}</label>
         </trigger>
         <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
-          <label>Walls</label>
+          <label>{Walls}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="wallLoad">
-          <label>Load Wall</label>
+          <label>{Load Wall}</label>
         </trigger>
         <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
-          <label>Doorways</label>
+          <label>{Doorways}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="doorwayLoad">
-          <label>Load Doorway</label>
+          <label>{Load Doorway}</label>
         </trigger>
         <select1 ref="featureList" faims_certainty="false" faims_annotation="false">
-          <label>Features</label>
+          <label>{Features}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="featureLoad">
-          <label>Load Feature</label>
+          <label>{Load Feature}</label>
         </trigger>
         <select1 ref="specialFindList" faims_certainty="false" faims_annotation="false">
-          <label>Special Finds</label>
+          <label>{Special Finds}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="specialFindLoad">
-          <label>Load Special Find</label>
+          <label>{Load Special Find}</label>
         </trigger>
         <select1 ref="lichenList" faims_certainty="false" faims_annotation="false">
-          <label>Lichens</label>
+          <label>{Lichens}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="lichenLoad">
-          <label>Load Lichen</label>
+          <label>{Load Lichen}</label>
         </trigger>
         <select1 ref="surfaceCollectionList" faims_certainty="false" faims_annotation="false">
-          <label>Surface Collections</label>
+          <label>{Surface Collections}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="surfaceCollectionLoad">
-          <label>Load Surface Collection</label>
+          <label>{Load Surface Collection}</label>
         </trigger>
         <select1 ref="canalList" faims_certainty="false" faims_annotation="false">
-          <label>Canals</label>
+          <label>{Canals}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="canalLoad">
-          <label>Load Canal</label>
+          <label>{Load Canal}</label>
         </trigger>
         <select1 ref="nicheList" faims_certainty="false" faims_annotation="false">
-          <label>Niches</label>
+          <label>{Niches}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="nicheLoad">
-          <label>Load Niche</label>
+          <label>{Load Niche}</label>
         </trigger>
         <select1 ref="windowList" faims_certainty="false" faims_annotation="false">
-          <label>Windows</label>
+          <label>{Windows}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="windowLoad">
-          <label>Load Window</label>
+          <label>{Load Window}</label>
         </trigger>
       </group>
       <group ref="gps">
-        <label>Communications Control Tab</label>
+        <label>{Communications Control Tab}</label>
         <trigger ref="connectexternal">
-          <label>Connect to External GPS</label>
+          <label>{Connect to External GPS}</label>
         </trigger>
         <trigger ref="connectinternal">
-          <label>Connect to Internal GPS</label>
+          <label>{Connect to Internal GPS}</label>
         </trigger>
         <trigger ref="startsync">
-          <label>Start Synching</label>
+          <label>{Start Synching}</label>
         </trigger>
         <trigger ref="stopsync">
-          <label>Stop Synching</label>
+          <label>{Stop Synching}</label>
         </trigger>
       </group>
     </group>
     <group ref="structure" faims_archent_type="Structure">
-      <label>Structure Detail</label>
+      <label>{Structure Detail}</label>
       <group ref="info">
-        <label>Structure Information</label>
+        <label>{Structure Information}</label>
         <input ref="ArchaeologicalElementID" faims_attribute_name="ArchaeologicalElementID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Archaeological Element ID:</label>
+          <label>{Archaeological Element ID:}</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
-          <label>Structure Description:</label>
+          <label>{Structure Description:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <select1 ref="Preservation" faims_attribute_name="Preservation" faims_attribute_type="vocab">
-          <label>Preservation:</label>
+          <label>{Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="PreservationDescription" faims_attribute_name="PreservationDescription" faims_attribute_type="freetext">
-          <label>Preservation Description:</label>
+          <label>{Preservation Description:}</label>
         </input>
         <select1 ref="Form" faims_attribute_name="Form" faims_attribute_type="vocab">
-          <label>Form:</label>
+          <label>{Form:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="FormDescription" faims_attribute_name="FormDescription" faims_attribute_type="freetext">
-          <label>Form Description:</label>
+          <label>{Form Description:}</label>
         </input>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
       </group>
       <group ref="component">
-        <label>Component Tab</label>
+        <label>{Component Tab}</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>EA ID:</label>
+          <label>{EA ID:}</label>
         </input>
 
         <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Total Walls Recorded:</label>
+          <label>{Total Walls Recorded:}</label>
         </input>
         <!--<input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Total Gabled Walls Recorded:</label>
+          <label>{Total Gabled Walls Recorded:}</label>
         </input>-->
         <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Windows Recorded:</label>
+          <label>{Windows Recorded:}</label>
         </input>
         <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Niches Recorded:</label>
+          <label>{Niches Recorded:}</label>
         </input>
         <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Doorways Recorded:</label>
+          <label>{Doorways Recorded:}</label>
         </input>
         <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
-          <label>Number of Internal Partitions:</label>
+          <label>{Number of Internal Partitions:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
-          <label>Partition Description:</label>
+          <label>{Partition Description:}</label>
         </input>
         <trigger ref="AddWall">
-          <label>Add Wall to structure</label>
+          <label>{Add Wall to structure}</label>
         </trigger>
         <trigger ref="AddCorner">
-          <label>Add Corner to structure</label>
+          <label>{Add Corner to structure}</label>
         </trigger>
         <!--<trigger ref="AddDoorway">
-          <label>Add Doorway to structure</label>
+          <label>{Add Doorway to structure}</label>
         </trigger>-->
-        <trigger ref="AddNiche">
-          <label>Add Niche to structure</label>
-        </trigger>
+        <!--<trigger ref="AddNiche">
+          <label>{Add Niche to structure}</label>
+        </trigger>-->
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
       </group>
       <group ref="construction">
-        <label>Construction Tab</label>
+        <label>{Construction Tab}</label>
            <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>EA ID:</label>
+          <label>{EA ID:}</label>
         </input>
         <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
-          <label>Construction Quality:</label>
+          <label>{Construction Quality:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
 
         <select1 appearance="full" ref="ConstructionPeriod" faims_attribute_name="ConstructionPeriod" faims_attribute_type="vocab">
-          <label>Construction Period:</label>
+          <label>{Construction Period:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="ConstructionPeriodDescription" faims_attribute_name="ConstructionPeriodDescription" faims_attribute_type="freetext">
-          <label>Construction Period Description:</label>
+          <label>{Construction Period Description:}</label>
         </input>
         <select1 appearance="full" ref="Modifications" faims_attribute_name="Modifications" faims_attribute_type="vocab">
-          <label>Modifications:</label>
+          <label>{Modifications:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="ModificationDescription" faims_attribute_name="ModificationDescription" faims_attribute_type="freetext">
-          <label>Modification Description:</label>
+          <label>{Modification Description:}</label>
         </input>
         <select1 ref="PrincipalFunction" faims_attribute_name="PrincipalFunction" faims_attribute_type="vocab">
-          <label>Principal Function:</label>
+          <label>{Principal Function:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="PrincipalFunctionDescription" faims_attribute_name="PrincipalFunctionDescription" faims_attribute_type="freetext">
-          <label>Principal Function Description:</label>
+          <label>{Principal Function Description:}</label>
         </input>
         <select1 ref="Classification" faims_attribute_name="Classification" faims_attribute_type="vocab">
-          <label>Classification:</label>
+          <label>{Classification:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         </group>
       <group ref="finalObservations">
-        <label>Final Observations</label>
+        <label>{Final Observations}</label>
            <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>EA ID:</label>
+          <label>{EA ID:}</label>
         </input>
         <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
-          <label>Stucco Interior:</label>
+          <label>{Stucco Interior:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 appearance="full" ref="StuccoExterior" faims_attribute_name="StuccoExterior" faims_attribute_type="vocab">
-          <label>Stucco Exterior:</label>
+          <label>{Stucco Exterior:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="FloorRemainsDescription" faims_attribute_name="FloorRemainsDescription" faims_attribute_type="freetext">
-          <label>Floor Remains Description:</label>
+          <label>{Floor Remains Description:}</label>
         </input>
         <select1 ref="RoofForm" faims_attribute_name="RoofForm" faims_attribute_type="vocab">
-          <label>Roof Form:</label>
+          <label>{Roof Form:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="LongAxis" faims_attribute_name="LongAxis" faims_attribute_type="measure">
-          <label>Long Axis:</label>
+          <label>{Long Axis:}</label>
         </input>
         <input ref="ShortAxis" faims_attribute_name="ShortAxis" faims_attribute_type="measure">
-          <label>Short Axis:</label>
+          <label>{Short Axis:}</label>
         </input>
         <input ref="Diameter" faims_attribute_name="Diameter" faims_attribute_type="measure">
-          <label>Diameter:</label>
+          <label>{Diameter:}</label>
         </input>
         <input ref="SurfaceCondition" faims_attribute_name="SurfaceCondition" faims_attribute_type="freetext">
-          <label>Surface Condition:</label>
+          <label>{Surface Condition:}</label>
         </input>
         <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="freetext">
-          <label>Modern Use:</label>
+          <label>{Modern Use:}</label>
         </input>
         <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
-          <label>Disturbances:</label>
+          <label>{Disturbances:}</label>
         </input>
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
-          <label>Other Architectural Detail:</label>
+          <label>{Other Architectural Detail:}</label>
         </input>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         </group>
       <group ref="final">
-        <label>Attachments and Saving</label>
+        <label>{Attachments and Saving}</label>
            <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>EA ID:</label>
+          <label>{EA ID:}</label>
         </input>
         <trigger ref="Photo">
-          <label>Take picture</label>
+          <label>{Take picture}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Video">
-          <label>Take video</label>
+          <label>{Take video}</label>
         </trigger>
         <select ref="VideoGallery" type="image">
-          <label>Video Gallery:</label>
+          <label>{Video Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Audio">
-          <label>Record Audio</label>
+          <label>{Record Audio}</label>
         </trigger>
 		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
-            <label>Audio List:</label>
+            <label>{Audio List:}</label>
             <item>
-                <label>None</label>
+                <label>{None}</label>
                 <value>None</value>
             </item>
         </select>
         <trigger ref="Sketch">
-          <label>Sketch</label>
+          <label>{Sketch}</label>
         </trigger>
         <select ref="sketchfilelist" faims_certainty="false" faims_annotation="false">
-            <label>Sketch File List:</label>
+            <label>{Sketch File List:}</label>
             <item>
-                <label>None</label>
+                <label>{None}</label>
                 <value>None</value>
             </item>
         </select>
         <trigger ref="AddAttachment">
-          <label>Add Attachment</label>
+          <label>{Add Attachment}</label>
         </trigger>
 		<select ref="filelist" faims_certainty="false" faims_annotation="false">
-            <label>Attachments:</label>
+            <label>{Attachments:}</label>
             <item>
-                <label>None</label>
+                <label>{None}</label>
                 <value>None</value>
             </item>
         </select>
         <trigger ref="viewattached">
-          <label>View Attachments</label>
+          <label>{View Attachments}</label>
         </trigger>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
       </group>
       <group ref="load" faims_scrollable="true">
-        <label>Load Structure Items</label>
+        <label>{Load Structure Items}</label>
         <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
-          <label>Structure Walls</label>
+          <label>{Structure Walls}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="structureWallLoad">
-          <label>Load Structure Walls</label>
+          <label>{Load Structure Walls}</label>
         </trigger>
         <select1 ref="cornerList" faims_certainty="false" faims_annotation="false">
-          <label>Corners</label>
+          <label>{Corners}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="cornerLoad">
-          <label>Load Corner</label>
+          <label>{Load Corner}</label>
         </trigger>
       </group>
     </group>
     <group ref="corner" faims_archent_type="Corner">
-      <label>Corner Detail</label>
+      <label>{Corner Detail}</label>
       <group ref="cornerDetail">
-        <label>Corner of a Structure</label>
+        <label>{Corner of a Structure}</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Last Loaded EA ID:</label>
+          <label>{Last Loaded EA ID:}</label>
         </input>
         <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>CornerID:</label>
+          <label>{CornerID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <select1 ref="CornerExteriorForm" faims_attribute_name="CornerExteriorForm" faims_attribute_type="vocab">
-          <label>Corner Exterior Form:</label>
+          <label>{Corner Exterior Form:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 ref="CornerInteriorForm" faims_attribute_name="CornerInteriorForm" faims_attribute_type="vocab">
-          <label>Corner Interior Form:</label>
+          <label>{Corner Interior Form:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
-          <label>Masonry Type:</label>
+          <label>{Masonry Type:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>Masonry Description:</label>
+          <label>{Masonry Description:}</label>
         </input>
         <select1 appearance="full" ref="InkaMasonry" faims_attribute_name="InkaMasonry" faims_attribute_type="vocab">
-          <label>Inka Masonry:</label>
+          <label>{Inka Masonry:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
-          <label>Inka Masonry Description:</label>
+          <label>{Inka Masonry Description:}</label>
         </input>
         <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Niche Count:</label>
+          <label>{Niche Count:}</label>
         </input>
         <!--Only include following attributes if no walls are preserved -->
         <input ref="CornerHeight" faims_attribute_name="CornerHeight" faims_attribute_type="measure">
-          <label>Corner Height:</label>
+          <label>{Corner Height:}</label>
         </input>
         <input ref="CornerDescription" faims_attribute_name="CornerDescription" faims_attribute_type="freetext">
-          <label>Corner Description:</label>
+          <label>{Corner Description:}</label>
         </input>
         <trigger ref="CornerPhotos">
-          <label>Corner Photos</label>
+          <label>{Corner Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="AddNiche">
-          <label>Add Niche</label>
+          <label>{Add Niche}</label>
         </trigger>
         <!-- {Button: “Add Niche”}               -->
         <trigger ref="Duplicate">
-          <label>Duplicate Record</label>
+          <label>{Duplicate Record}</label>
         </trigger>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
       </group>
     </group>
     <group ref="wall" faims_archent_type="StructureWall">
-      <label>Wall Detail</label>
+      <label>{Wall Detail}</label>
       <group ref="structureWall">
-        <label>Wall of a Structure</label>
+        <label>{Wall of a Structure}</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Last Loaded EA ID:</label>
+          <label>{Last Loaded EA ID:}</label>
         </input>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Wall ID:</label>
+          <label>{Wall ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
-          <label>MasonryType:</label>
+          <label>{MasonryType:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="DuplicateFromCorner">
-          <label>Duplicate From Corner</label>
+          <label>{Duplicate From Corner}</label>
         </trigger>
         <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
         <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>Masonry Description:</label>
+          <label>{Masonry Description:}</label>
         </input>
         <select1 appearance="full" ref="InkaMasonry" faims_attribute_name="InkaMasonry" faims_attribute_type="vocab">
-          <label>Inka Masonry:</label>
+          <label>{Inka Masonry:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Yes,No-->
         <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
-          <label>Inka Masonry Description:</label>
+          <label>{Inka Masonry Description:}</label>
         </input>
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
-          <label>Wall Thickness:</label>
+          <label>{Wall Thickness:}</label>
         </input>
         <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
-          <label>Wall Height:</label>
+          <label>{Wall Height:}</label>
         </input>
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
-          <label>Wall Height Preservation:</label>
+          <label>{Wall Height Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- <Complete/>,Max preserved -->
         <select1 appearance="full" ref="Gable" faims_attribute_name="Gable" faims_attribute_type="vocab">
-          <label>Gable:</label>
+          <label>{Gable:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- Yes,No,Not observable   -->
         <input ref="GableHeight" faims_attribute_name="GableHeight" faims_attribute_type="measure">
-          <label>Gable Height:</label>
+          <label>{Gable Height:}</label>
         </input>
         <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
-          <label>Gable Distance:</label>
+          <label>{Gable Distance:}</label>
         </input>
         <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Window Count:</label>
+          <label>{Window Count:}</label>
         </input>
         <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Niche Count:</label>
+          <label>{Niche Count:}</label>
         </input>
         <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Doorway Count:</label>
+          <label>{Doorway Count:}</label>
         </input>
         <trigger ref="WallPhotos">
-          <label>Wall Photos</label>
+          <label>{Wall Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="NewWindow">
-          <label>New Window</label>
+          <label>{New Window}</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="NewNiche">
-          <label>New Niche</label>
+          <label>{New Niche}</label>
         </trigger>
         <!-- {button}-->
-        <trigger ref="NewLichen">
-          <label>New Lichen</label>
-        </trigger>
+        <!--<trigger ref="NewLichen">
+          <label>{New Lichen}</label>
+        </trigger>-->
         <!-- {button}-->
           <trigger ref="Duplicate">
-          <label>Duplicate Record</label>
+          <label>{Duplicate Record}</label>
         </trigger>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {Button: “Add Window to this wall”, “Add Niche to this wall”, “Add Lichen to this wall”, “Save”, “Delete”,”Load”} -->
       </group>
     </group>
     <group ref="doorway" faims_archent_type="Doorway">
-      <label>Doorway Detail</label>
+      <label>{Doorway Detail}</label>
       <group ref="doorDetail">
-        <label>Doorway Detail</label>
+        <label>{Doorway Detail}</label>
         <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Door ID:</label>
+          <label>{Door ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="DoorOrientation" faims_attribute_name="DoorOrientation" faims_attribute_type="measure">
-          <label>Door Orientation:</label>
+          <label>{Door Orientation:}</label>
         </input>
         <select1 appearance="full" ref="DoorPosition" faims_attribute_name="DoorPosition" faims_attribute_type="vocab">
-          <label>Door Position:</label>
+          <label>{Door Position:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 appearance="full" ref="DoorMasonry" faims_attribute_name="DoorMasonry" faims_attribute_type="vocab">
-          <label>Door Masonry:</label>
+          <label>{Door Masonry:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="DoorHeight" faims_attribute_name="DoorHeight" faims_attribute_type="measure">
-          <label>DoorHeight:</label>
+          <label>{DoorHeight:}</label>
         </input>
         <select1 appearance="full" ref="DoorHeightPreservation" faims_attribute_name="DoorHeightPreservation" faims_attribute_type="vocab">
-          <label>Door Height Preservation:</label>
+          <label>{Door Height Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- <Complete/>,Max preserved -->
         <input ref="DoorTopWidth" faims_attribute_name="DoorTopWidth" faims_attribute_type="measure">
-          <label>Door Top Width:</label>
+          <label>{Door Top Width:}</label>
         </input>
         <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="measure">
-          <label>Door Base Width:</label>
+          <label>{Door Base Width:}</label>
         </input>
         <input ref="DoorOtherWidth" faims_attribute_name="DoorOtherWidth" faims_attribute_type="measure">
-          <label>Door Other Width:</label>
+          <label>{Door Other Width:}</label>
         </input>
         <input ref="DoorOtherWidthHeight" faims_attribute_name="DoorOtherWidthHeight" faims_attribute_type="measure">
-          <label>Door Other Width Height:</label>
+          <label>{Door Other Width Height:}</label>
         </input>
         <input ref="DoorDescription" faims_attribute_name="DoorDescription" faims_attribute_type="freetext">
-          <label>Door Description:</label>
+          <label>{Door Description:}</label>
         </input>
         <trigger ref="DoorPhotos">
-          <label>Door Photos</label>
+          <label>{Door Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
-          <label>GPS Long:</label>
+          <label>{GPS Long:}</label>
         </input>
         <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
-          <label>GPS Lat:</label>
+          <label>{GPS Lat:}</label>
         </input>
         <trigger ref="TakePoint">
-          <label>Take Point</label>
+          <label>{Take Point}</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-          <label>Associate With Type:</label>
+          <label>{Associate With Type:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>-->
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>
         <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
     <group ref="niche" faims_archent_type="Niche">
-      <label>Niche Detail</label>
+      <label>{Niche Detail}</label>
       <group ref="nicheDetail">
-        <label>Niche Detail</label>
+        <label>{Niche Detail}</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Last Loaded EA ID:</label>
+          <label>{Last Loaded EA ID:}</label>
         </input>
         <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Niche ID:</label>
+          <label>{Niche ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="NichePosition" faims_attribute_name="NichePosition" faims_attribute_type="freetext">
-          <label>Niche Position:</label>
+          <label>{Niche Position:}</label>
         </input>
         <select1 appearance="full" ref="NicheForm" faims_attribute_name="NicheForm" faims_attribute_type="vocab">
-          <label>Niche Form:</label>
+          <label>{Niche Form:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <input ref="NicheHeight" faims_attribute_name="NicheHeight" faims_attribute_type="measure">
-          <label>Niche Height:</label>
+          <label>{Niche Height:}</label>
         </input>
         <select1 appearance="full" ref="NicheHeightPreservation" faims_attribute_name="NicheHeightPreservation" faims_attribute_type="vocab">
-          <label>Niche Height Preservation:</label>
+          <label>{Niche Height Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- <Complete/>,Max complete -->
         <select1 appearance="full" ref="NicheWidthLoc" faims_attribute_name="NicheWidthLoc" faims_attribute_type="vocab">
-          <label>Niche Width Loc:</label>
+          <label>{Niche Width Loc:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- <Bottom/>,Top -->
         <input ref="NicheWidth" faims_attribute_name="NicheWidth" faims_attribute_type="measure">
-          <label>Niche Width:</label>
+          <label>{Niche Width:}</label>
         </input>
         <input ref="NicheDepth" faims_attribute_name="NicheDepth" faims_attribute_type="measure">
-          <label>Niche Depth:</label>
+          <label>{Niche Depth:}</label>
         </input>
         <select1 appearance="full" ref="NicheAltar" faims_attribute_name="NicheAltar" faims_attribute_type="vocab">
-          <label>Niche Altar:</label>
+          <label>{Niche Altar:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Yes,No-->
         <input ref="NicheDescription" faims_attribute_name="NicheDescription" faims_attribute_type="freetext">
-          <label>Niche Description:</label>
+          <label>{Niche Description:}</label>
         </input>
         <trigger ref="NichePhotos">
-          <label>Niche Photos</label>
+          <label>{Niche Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
-        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
-            <value>dummy</value>
-          </item>
-        </select1>
-        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-          <label>Associate With Type:</label>
-          <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>-->
-        <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
-        </trigger>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>{Associate With Type:}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
+        <!--<trigger ref="AssociateWith">
+          <label>{AssociateWith}</label>
+        </trigger>-->
         <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
     <group ref="lichen" faims_archent_type="Lichen">
-      <label>Lichen Detail</label>
+      <label>{Lichen Detail}</label>
       <group ref="lichenDetail">
-        <label>Lichen Detail</label>
+        <label>{Lichen Detail}</label>
         <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>LichenID:</label>
+          <label>{LichenID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="Size" faims_attribute_name="Size" faims_attribute_type="measure">
-          <label>Size:</label>
+          <label>{Size:}</label>
         </input>
         <select1 appearance="full" ref="Substrate" faims_attribute_name="Substrate" faims_attribute_type="vocab">
-          <label>Substrate:</label>
+          <label>{Substrate:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 type="image" ref="LichenQuality" faims_attribute_name="LichenQuality" faims_attribute_type="freetext">
-          <label>Quality:</label>
+          <label>{Quality:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 appearance="full" ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="vocab">
-          <label>Aspect:</label>
+          <label>{Aspect:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 appearance="full" ref="InsideOutside" faims_attribute_name="InsideOutside" faims_attribute_type="vocab">
-          <label>InsideOutside:</label>
+          <label>{InsideOutside:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Interior Wall Surface,Exterior Wall Surface,Wall Fall Surface,Doorway,Wall top,Other-->
         <input ref="Comments" faims_attribute_name="Comments" faims_attribute_type="freetext">
-          <label>Comments:</label>
+          <label>{Comments:}</label>
         </input>
         <trigger ref="Photos">
-          <label>Photos</label>
+          <label>{Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
-          <label>GPS Long:</label>
+          <label>{GPS Long:}</label>
         </input>
         <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
-          <label>GPS Lat:</label>
+          <label>{GPS Lat:}</label>
         </input>
         <trigger ref="TakePoint">
-          <label>TakePoint</label>
+          <label>{TakePoint}</label>
         </trigger>
         <!-- {button}-->
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-            <label>Associate With Type:</label>
+            <label>{Associate With Type:}</label>
             <item>
-                <label>dummy</label>
+                <label>{dummy}</label>
                 <value>dummy</value>
             </item>
         </select1>-->
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>
         <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
     <group ref="feature" faims_archent_type="Feature">
-      <label>Feature Detail</label>
+      <label>{Feature Detail}</label>
       <group ref="featureDetail">
-        <label>Features</label>
+        <label>{Features}</label>
         <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Feature ID:</label>
+          <label>{Feature ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
-          <label>Description:</label>
+          <label>{Description:}</label>
         </input>
         <trigger ref="Photos">
-          <label>Photos</label>
+          <label>{Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>
         <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
       </group>
     </group>
     <group ref="freeWall" faims_archent_type="Wall">
-      <label>Free Standing Wall Detail</label>
+      <label>{Free Standing Wall Detail}</label>
       <group ref="freeWallDetail">
-        <label>Free Standing Wall</label>
+        <label>{Free Standing Wall}</label>
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Wall ID:</label>
+          <label>{Wall ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="WallDescription" faims_attribute_name="WallDescription" faims_attribute_type="freetext">
-          <label>Wall Description:</label>
+          <label>{Wall Description:}</label>
         </input>
         <select1 appearance="full" ref="WallClass" faims_attribute_name="WallClass" faims_attribute_type="vocab">
-          <label>Wall Class:</label>
+          <label>{Wall Class:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Delimitación de manzana,División interna de manzana,División de grupo patio,  Muro de contención,Muro de plataforma,Escalera,Otro,No Definido-->
         <select1 appearance="full" ref="WallPreservation" faims_attribute_name="WallPreservation" faims_attribute_type="vocab">
-          <label>Wall Preservation:</label>
+          <label>{Wall Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
-          <label>Masonry Type:</label>
+          <label>{Masonry Type:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable -->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
-          <label>Masonry Description:</label>
+          <label>{Masonry Description:}</label>
         </input>
         <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
-          <label>Wall Height Preservation:</label>
+          <label>{Wall Height Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- Complete,Max complete-->
         <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
-          <label>Wall Height:</label>
+          <label>{Wall Height:}</label>
         </input>
         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
-          <label>Wall Thickness:</label>
+          <label>{Wall Thickness:}</label>
         </input>
         <input ref="WallComments" faims_attribute_name="WallComments" faims_attribute_type="freetext">
-          <label>Wall Comments:</label>
+          <label>{Wall Comments:}</label>
         </input>
         <trigger ref="Photos">
-          <label>Photos</label>
+          <label>{Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>
         <!-- {button}-->
       </group>
     </group>
     <group ref="canal" faims_archent_type="Canal">
-      <label>Canal Detail</label>
+      <label>{Canal Detail}</label>
       <group ref="canalDetail">
-        <label>Canal Detail</label>
+        <label>{Canal Detail}</label>
         <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>CanalID:</label>
+          <label>{CanalID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="InternalWidth" faims_attribute_name="InternalWidth" faims_attribute_type="measure">
-          <label>Internal Width:</label>
+          <label>{Internal Width:}</label>
         </input>
         <input ref="ExternalWidth" faims_attribute_name="ExternalWidth" faims_attribute_type="measure">
-          <label>External Width:</label>
+          <label>{External Width:}</label>
         </input>
         <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext">
-          <label>Notes:</label>
+          <label>{Notes:}</label>
         </input>
         <trigger ref="Photos">
-          <label>Photos</label>
+          <label>{Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
+            <label>{Associate With List:}</label>
             <item>
-                <label>dummy</label>
+                <label>{dummy}</label>
                 <value>dummy</value>
             </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
       </group>
     </group>
     <group ref="specialFind" faims_archent_type="SpecialFind">
-      <label>Special Find</label>
+      <label>{Special Find}</label>
       <group ref="findDetail">
-        <label>Special Find Detail</label>
+        <label>{Special Find Detail}</label>
         <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Special Find ID:</label>
+          <label>{Special Find ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
-          <label>Description:</label>
+          <label>{Description:}</label>
         </input>
         <select1 appearance="full" ref="Type" faims_attribute_name="Type" faims_attribute_type="vocab">
-          <label>Type:</label>
+          <label>{Type:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Ceramic,Litico,Vidrio,Metal,Otro-->
         <trigger ref="Photos">
-          <label>Photos</label>
+          <label>{Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>
         <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
       </group>
     </group>
     <group ref="surfaceCollection" faims_archent_type="SurfaceCollection">
-      <label>Surface Collection</label>
+      <label>{Surface Collection}</label>
       <group ref="description">
-        <label>Collection Description</label>
+        <label>{Collection Description}</label>
         <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Surface Collection ID:</label>
+          <label>{Surface Collection ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="Radius" faims_attribute_name="Radius" faims_attribute_type="measure">
-          <label>Radius:</label>
+          <label>{Radius:}</label>
         </input>
         <select1 appearance="full" ref="SurfaceCollectionContext" faims_attribute_name="SurfaceCollectionContext" faims_attribute_type="vocab">
-          <label>Surface Collection Context:</label>
+          <label>{Surface Collection Context:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
         <input ref="ContextDescription" faims_attribute_name="ContextDescription" faims_attribute_type="freetext">
-          <label>Context Description:</label>
+          <label>{Context Description:}</label>
         </input>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         </group>
       <group ref="material">
-        <label>Material Description</label>
+        <label>{Material Description}</label>
         <select1 appearance="full" ref="DiagnosticsPresent" faims_attribute_name="DiagnosticsPresent" faims_attribute_type="vocab">
-          <label>Diagnostics Present:</label>
+          <label>{Diagnostics Present:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
         <select1 appearance="full" ref="MaterialDensity" faims_attribute_name="MaterialDensity" faims_attribute_type="vocab">
-          <label>Material Density:</label>
+          <label>{Material Density:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
         <input ref="Comments" faims_attribute_name="Comments" faims_attribute_type="freetext">
-          <label>Comments:</label>
+          <label>{Comments:}</label>
         </input>
         <select1 appearance="full" ref="LotLabPriority" faims_attribute_name="LotLabPriority" faims_attribute_type="vocab">
-          <label>Lot Lab Priority:</label>
+          <label>{Lot Lab Priority:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Baja prioridad,Mediana prioridad,Alta prioridad-->
         <input ref="LotNumbers" faims_attribute_name="LotNumbers" faims_attribute_type="freetext">
-          <label>Lot Numbers:</label>
+          <label>{Lot Numbers:}</label>
         </input>
         <trigger ref="Lot">
-          <label>Create Lot</label>
+          <label>{Create Lot}</label>
         </trigger>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
+            <label>{Associate With List:}</label>
             <item>
-                <label>dummy</label>
+                <label>{dummy}</label>
                 <value>dummy</value>
             </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
       </group>
       <group ref="load">
-        <label>Load Lots</label>
+        <label>{Load Lots}</label>
         <select1 ref="lotList" faims_certainty="false" faims_annotation="false">
-          <label>Lots</label>
+          <label>{Lots}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="lotLoad">
-          <label>Load Lot</label>
+          <label>{Load Lot}</label>
         </trigger>
       </group>
     </group>
     <group ref="lot" faims_archent_type="Lot">
-      <label>Lot Description</label>
+      <label>{Lot Description}</label>
       <group ref="lotDetail">
-        <label>Lot Description</label>
+        <label>{Lot Description}</label>
         <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>LotID:</label>
+          <label>{LotID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <select1 appearance="full" ref="Material" faims_attribute_name="Material" faims_attribute_type="vocab">
-          <label>Material:</label>
+          <label>{Material:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!--Cerámica,Metal,Vidrio,Otro,-->
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
         <!-- {button}-->
         <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>Associate With List:</label>
+            <label>{Associate With List:}</label>
             <item>
-                <label>dummy</label>
+                <label>{dummy}</label>
                 <value>dummy</value>
             </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>Associate With</label>
+          <label>{Associate With}</label>
         </trigger>-->
         <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
       </group>
     </group>
     <group ref="window" faims_archent_type="Window">
-      <label>Window Detail</label>
+      <label>{Window Detail}</label>
       <group ref="windowDetail">
-        <label>Window Detail</label>
+        <label>{Window Detail}</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
-          <label>Last Loaded EA ID:</label>
+          <label>{Last Loaded EA ID:}</label>
         </input>
         <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
-          <label>Window ID:</label>
+          <label>{Window ID:}</label>
         </input>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Timestamp:</label>
+          <label>{Timestamp:}</label>
         </input>
         <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Author:</label>
+          <label>{Author:}</label>
         </input>
         <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-          <label>Device:</label>
+          <label>{Device:}</label>
         </input>
         <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">
-          <label>Window Position:</label>
+          <label>{Window Position:}</label>
         </input>
         <input ref="WindowHeight" faims_attribute_name="WindowHeight" faims_attribute_type="measure">
-          <label>Window Height:</label>
+          <label>{Window Height:}</label>
         </input>
         <select1 appearance="full" ref="WindowHeightPreservation" faims_attribute_name="WindowHeightPreservation" faims_attribute_type="vocab">
-          <label>Window Height Preservation:</label>
+          <label>{Window Height Preservation:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <!-- <Complete/>,Max complete -->
         <input ref="WindowWidth" faims_attribute_name="WindowWidth" faims_attribute_type="measure">
-          <label>Window Width:</label>
+          <label>{Window Width:}</label>
         </input>
         <input ref="WindowDescription" faims_attribute_name="WindowDescription" faims_attribute_type="freetext">
-          <label>Window Description:</label>
+          <label>{Window Description:}</label>
         </input>
         <trigger ref="WindowPhotos">
-          <label>Window Photos</label>
+          <label>{Window Photos}</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
-          <label>Gallery:</label>
+          <label>{Gallery:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
         <trigger ref="Update">
-          <label>Save Record</label>
+          <label>{Save Record}</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete record</label>
+          <label>{Delete record}</label>
         </trigger>
-        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-          <label>Associate With List:</label>
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate With List:}</label>
           <item>
-            <label>dummy</label>
+            <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select1>
         <trigger ref="AssociateWith">
-          <label>AssociateWith</label>
-        </trigger>
+          <label>{AssociateWith}</label>
+        </trigger>-->
         <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
