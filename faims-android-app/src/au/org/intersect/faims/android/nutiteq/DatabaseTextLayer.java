@@ -23,6 +23,7 @@ public class DatabaseTextLayer extends TextLayer {
 	private DatabaseLayer databaseLayer;
 	private StyleSet<TextStyle> styleSet;
 	private int minZoom;
+	private Vector<Text> objects;
 
 	public DatabaseTextLayer(Projection projection, DatabaseLayer databaseLayer, StyleSet<TextStyle> styleSet) {
 		super(projection);
@@ -35,8 +36,13 @@ public class DatabaseTextLayer extends TextLayer {
 	
 	@Override
 	public void calculateVisibleElements(Envelope envelope, int zoom) {
-	    
-	    if (zoom < minZoom) {
+		if (objects != null) {
+			 setVisibleElementsList(objects);
+		}
+	}
+	
+	public void calculateVisibleElementsCustom(Envelope envelope, int zoom) {
+		if (zoom < minZoom) {
 	        setVisibleElementsList(null);
 	      return;
 	    }
@@ -47,7 +53,7 @@ public class DatabaseTextLayer extends TextLayer {
 	    	return;
 	    }
 	    
-	    Vector<Text> objects = new Vector<Text>();
+	    objects = new Vector<Text>();
 	    
 	    for(Geometry geom: geometries){
 	        
@@ -80,7 +86,6 @@ public class DatabaseTextLayer extends TextLayer {
 	    }
 	    
 	    setVisibleElementsList(objects);
-
-	  }
+	}
 
 }

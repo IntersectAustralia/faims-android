@@ -155,13 +155,11 @@ public class CustomMapView extends MapView {
 		@Override
 		public void onBackgroundTasksStarted() {
 			activityRef.get().setProgressBarIndeterminateVisibility(true);
-			FLog.d("background task started");
 		}
 
 		@Override
 		public void onBackgroundTasksFinished() {
 			activityRef.get().setProgressBarIndeterminateVisibility(false);
-			FLog.d("background task finished");
 		}
 	}
 

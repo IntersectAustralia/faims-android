@@ -276,8 +276,17 @@ public class DatabaseLayer extends GeometryLayer {
 			createElementsInLayer(zoom, objectTemp, objects, dataType);
 
 			setVisibleElementsList(objects);
+			
 		} catch (Exception e) {
 			FLog.e("error rendering database layer", e);
+		}
+		
+		if (textLayer != null) {
+			try {
+				textLayer.calculateVisibleElementsCustom(envelope, zoom);
+			} catch (Exception e) {
+				FLog.e("error updating text layer", e);
+			}
 		}
 	}
 

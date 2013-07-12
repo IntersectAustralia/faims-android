@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
 
@@ -44,7 +45,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	private CustomMapView mapView;
 	private boolean renderAll;
 	private boolean hasRendered;
-	
+
 	private int autoSimplifyPixels;
 	private int screenWidth;
 
@@ -263,48 +264,59 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		if (renderAll && hasRendered) return;
 		hasRendered = true;
 
-		MapPos bottomLeft = projection.fromInternal(envelope.getMinX(), envelope.getMinY());
-		MapPos topRight = projection.fromInternal(envelope.getMaxX(), envelope.getMaxY());
-		Vector<Geometry> objectTemp = spatialLite.qrySpatiaLiteGeom(new Envelope(bottomLeft.x, topRight.x,
-				bottomLeft.y, topRight.y), renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects, dbLayer, userColumns, autoSimplifyPixels, screenWidth);
+		try {
+			MapPos bottomLeft = projection.fromInternal(envelope.getMinX(), envelope.getMinY());
+			MapPos topRight = projection.fromInternal(envelope.getMaxX(), envelope.getMaxY());
+			Vector<Geometry> objectTemp = spatialLite.qrySpatiaLiteGeom(new Envelope(bottomLeft.x, topRight.x,
+					bottomLeft.y, topRight.y), renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects, dbLayer, userColumns, autoSimplifyPixels, screenWidth);
 
-		Vector<Geometry> objects = new Vector<Geometry>();
+			Vector<Geometry> objects = new Vector<Geometry>();
 
-		// apply styles, create new objects for these
-		for(Geometry object: objectTemp){
-			GeometryData geomData = null;
-			GeometryStyle style = null;
+			// apply styles, create new objects for these
+			for(Geometry object: objectTemp){
+				GeometryData geomData = null;
+				GeometryStyle style = null;
 
-			if (userColumns != null) {
-				@SuppressWarnings("unchecked")
-				final Map<String, String> userData = (Map<String, String>) object.userData;
-				// note: the id column is not unique so adding prepending db path + table name
-				String id = dbPath + ":" + tableName + ":" + userData.get(userColumns[0]);
-				String label = userData.get(userColumns[1]);
-				style = getGeometryStyle(object, id);
-				geomData = new GeometryData(id, GeometryData.Type.LEGACY, label, style, layerId);
-			} else {
-				style = getGeometryStyle(object);
+				if (userColumns != null) {
+					@SuppressWarnings("unchecked")
+					final Map<String, String> userData = (Map<String, String>) object.userData;
+					// note: the id column is not unique so adding prepending db path + table name
+					String id = dbPath + ":" + tableName + ":" + userData.get(userColumns[0]);
+					String label = userData.get(userColumns[1]);
+					style = getGeometryStyle(object, id);
+					geomData = new GeometryData(id, GeometryData.Type.LEGACY, label, style, layerId);
+				} else {
+					style = getGeometryStyle(object);
+				}
+
+				Geometry newObject = null;
+
+				if(object instanceof Point){
+					newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
+				}else if(object instanceof Line){
+					newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
+				}else if(object instanceof Polygon){
+					newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
+				}
+
+				newObject.attachToLayer(this);
+				newObject.setActiveStyle(zoom);
+
+				objects.add(newObject);
 			}
 
-			Geometry newObject = null;
-
-			if(object instanceof Point){
-				newObject = new Point(((Point) object).getMapPos(), null, style.toPointStyleSet(), geomData);
-			}else if(object instanceof Line){
-				newObject = new Line(((Line) object).getVertexList(), null, style.toLineStyleSet(), geomData);
-			}else if(object instanceof Polygon){
-				newObject = new Polygon(((Polygon) object).getVertexList(), ((Polygon) object).getHolePolygonList(), null, style.toPolygonStyleSet(), geomData);
-			}
-
-			newObject.attachToLayer(this);
-			newObject.setActiveStyle(zoom);
-
-			objects.add(newObject);
+			setVisibleElementsList(objects);
+		} catch (Exception e) {
+			FLog.e("error rendering spatialite layer", e);
 		}
 
-		setVisibleElementsList(objects);
-
+		if (textLayer != null) {
+			try {
+				textLayer.calculateVisibleElementsCustom(envelope, zoom);
+			} catch (Exception e) {
+				FLog.e("error updating text layer", e);
+			}
+		}
 	}
 
 }
