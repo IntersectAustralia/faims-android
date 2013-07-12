@@ -404,6 +404,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		setupSync();
 		setupWifiBroadcast();
 		setupProject();
+		setProgressBarIndeterminateVisibility(false);
 		
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowProjectActivity.this, getProjectDir());

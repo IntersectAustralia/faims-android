@@ -146,7 +146,7 @@
               <Disturbances/>
               <!--No evidente,Pocos,Varios-->
               <OtherArchitecturalDetails/>
-              
+
               <Update/>
             </info>
             <component>
@@ -240,7 +240,7 @@
               <!-- real number, 1,2,3,4 or so-->
               <MasonryType/>
               <!-- picture dictionary-->
-              <DuplicateFromCorner/>
+              <!--<DuplicateFromCorner/>-->
               <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
               <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
               <MasonryDescription/>
@@ -864,6 +864,9 @@
         <input ref="ArchaeologicalElementID" faims_attribute_name="ArchaeologicalElementID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Archaeological Element ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
           <label>{Structure Description:}</label>
         </input>
@@ -988,16 +991,17 @@
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>{Other Architectural Detail:}</label>
         </input>
-        
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
+
       </group>
       <group ref="component">
         <label>Component Tab</label>
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{EA ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>Save Record</label>
+        </trigger>
         <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>Total Walls Recorded:</label>
         </input>
@@ -1035,15 +1039,16 @@
         <trigger ref="AddNiche">
           <label>Add Niche to structure</label>
         </trigger>
-        <trigger ref="Update">
-          <label>Save Record</label>
-        </trigger>
+
       </group>
       <group ref="final">
         <label>{Attachments and Saving}</label>
            <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{EA ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <trigger ref="Photo">
           <label>{Take picture}</label>
         </trigger>
@@ -1097,9 +1102,7 @@
         <trigger ref="viewattached">
           <label>{View Attachments}</label>
         </trigger>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1135,9 +1138,13 @@
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Last Loaded EA ID:}</label>
         </input>
+
         <input ref="CornerID" faims_attribute_name="CornerID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{CornerID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>{Timestamp:}</label>
         </input>
@@ -1208,9 +1215,7 @@
         <trigger ref="Duplicate">
           <label>{Duplicate Record}</label>
         </trigger>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1223,9 +1228,13 @@
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Last Loaded EA ID:}</label>
         </input>
+
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Wall ID:}</label>
         </input>
+          <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>{Timestamp:}</label>
         </input>
@@ -1242,9 +1251,9 @@
             <value>dummy</value>
           </item>
         </select1>
-        <trigger ref="DuplicateFromCorner">
+        <!--<trigger ref="DuplicateFromCorner">
           <label>{Duplicate From Corner}</label>
-        </trigger>
+        </trigger>-->
         <!-- {Button to pull the info for this and the next 3 attributes from Corner if identical} -->
         <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
@@ -1323,9 +1332,7 @@
           <trigger ref="Duplicate">
           <label>{Duplicate Record}</label>
         </trigger>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1339,6 +1346,9 @@
         <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Door ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>{Timestamp:}</label>
         </input>
@@ -1411,9 +1421,7 @@
           <label>{Take Point}</label>
         </trigger>
         <!-- {button}-->
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1448,6 +1456,9 @@
         <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Niche ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>{Timestamp:}</label>
         </input>
@@ -1513,9 +1524,7 @@
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1546,6 +1555,9 @@
         <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{LichenID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
           <label>{Timestamp:}</label>
         </input>
@@ -1610,9 +1622,7 @@
           <label>{TakePoint}</label>
         </trigger>
         <!-- {button}-->
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1644,6 +1654,9 @@
         <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Feature ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -1666,9 +1679,7 @@
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1693,6 +1704,9 @@
         <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Wall ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -1759,9 +1773,7 @@
           </item>
         </select>
         <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1786,6 +1798,9 @@
         <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{CanalID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -1814,9 +1829,7 @@
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1841,6 +1854,9 @@
         <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Special Find ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -1871,9 +1887,7 @@
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -1898,6 +1912,9 @@
         <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Surface Collection ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -1921,12 +1938,13 @@
         <input ref="ContextDescription" faims_attribute_name="ContextDescription" faims_attribute_type="freetext">
           <label>{Context Description:}</label>
         </input>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         </group>
       <group ref="material">
         <label>{Material Description}</label>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <select1 appearance="full" ref="DiagnosticsPresent" faims_attribute_name="DiagnosticsPresent" faims_attribute_type="vocab">
           <label>{Diagnostics Present:}</label>
           <item>
@@ -1960,9 +1978,7 @@
         <trigger ref="Lot">
           <label>{Create Lot}</label>
         </trigger>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -2000,6 +2016,9 @@
         <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{LotID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -2017,9 +2036,7 @@
           </item>
         </select1>
         <!--Cerámica,Metal,Vidrio,Otro,-->
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
@@ -2044,9 +2061,13 @@
         <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Last Loaded EA ID:}</label>
         </input>
+
         <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
           <label>{Window ID:}</label>
         </input>
+        <trigger ref="Update">
+          <label>{Save Record}</label>
+        </trigger>
         <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
           <label>{Timestamp:}</label>
         </input>
@@ -2086,9 +2107,7 @@
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="Update">
-          <label>{Save Record}</label>
-        </trigger>
+
         <trigger ref="Delete">
           <label>{Delete record}</label>
         </trigger>
