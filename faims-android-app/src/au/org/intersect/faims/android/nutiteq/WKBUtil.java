@@ -23,7 +23,9 @@ public class WKBUtil {
 		if (geom instanceof Polygon) {
 			Polygon p = (Polygon) geom;
 			LinkedList<MapPos> list = new LinkedList<MapPos>(p.getVertexList());
-			list.removeLast();
+			if (list.get(0).equals(list.get(list.size()-1))) {
+				list.removeLast();
+			}
 			return new Polygon(list, new ArrayList<List<MapPos>>(), p.getLabel(), p.getStyleSet(), p.userData);
 		} else {
 			return geom;
