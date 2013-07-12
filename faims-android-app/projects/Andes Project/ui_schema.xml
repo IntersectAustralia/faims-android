@@ -722,15 +722,15 @@
         <input ref="map" faims_map="true" faims_certainty="false">
           <label/>
         </input>
-        <group ref="mapContainer">
+        <group ref="mapContainer" faims_style="orientation">
             <label/>
-            <group ref="child1">
+            <group ref="child1" faims_style="even">
                 <label/>
                 <trigger ref="clear">
                     <label>Clear</label>
                 </trigger>
             </group>
-            <group ref="child2">
+            <group ref="child2" faims_style="even">
                 <label/>
                 <trigger ref="create">
                     <label>Create</label>
