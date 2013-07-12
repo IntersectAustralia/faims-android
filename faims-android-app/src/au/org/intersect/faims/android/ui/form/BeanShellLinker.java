@@ -3091,18 +3091,13 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void clearGeometryList(String ref, List<Integer> geomList) {
+	public void clearGeometryList(String ref, List<Geometry> geomList) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-
-				ArrayList<Geometry> gl = new ArrayList<Geometry>();
-				for (Integer id : geomList) {
-					gl.add(mapView.getGeometry(id));
-				}
-
-				mapView.clearGeometryList(gl);
+				
+				mapView.clearGeometryList(geomList);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

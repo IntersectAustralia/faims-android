@@ -13,6 +13,7 @@ Completely untested in app, of course.
 /*** MAP ***/
 
 DATA_ENTRY_LAYER = "Data Entry";
+DATA_ENTRY_LAYER_ID = 0;
 
 initMap() {
 	setMapZoom("control/map/map", 19.0f);
@@ -20,7 +21,7 @@ initMap() {
 	showBaseMap("control/map/map", "Base Map", "files/data/maps/andes.tif");
 	//showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
 
-    createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
 
 	isEntity = true; // are you loading entities or relationships?
 	queryName = "No Query"; // Name your query
@@ -37,45 +38,37 @@ initMap() {
 
 initMap();
 
-onToolEvent("control/map/map", "create", "onCreateGeometry()");
-onToolEvent("control/map/map", "load", "onLoadGeometry()");
+onEvent("control/map/clear", "click", "onClearMap()");
+onEvent("control/map/create", "click", "onCreateMap()");
 
-createGeomId = 0;
-onCreateGeometry() {
-	System.out.println("onCreateGeometry");
+onClearMap() {
+	clearGeometryList("control/map/map", getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID));
+}
 
-	createGeomId = getMapGeometryCreated();
-
-	layerName = getGeometryLayerName("control/map/map", createGeomId);
-	if (DATA_ENTRY_LAYER.equals(layerName)) {
-		showTabGroup("create");
+onCreateMap() {
+	List geomList = getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+	if (geomList == null || geomList.size() == 0) {
+		showWarning("Logic Error", "No geometry found on data entry layer");
+	} else if (geomList.size() > 1) {
+		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
 	} else {
-		createGeomId = 0;
+		Geometry geom = geomList.get(0);
+		if (geom instanceof Point) {
+			showTabGroup("createPoint");
+		} else if (geom instanceof Line) {
+			showTabGroup("createLine");
+		} else if (geom instanceof Polygon) {
+			showTabGroup("createPolygon");
+		}
 	}
 }
 
-onLoadGeometry() {
-	uuid = getMapGeometryLoaded();
-	isEntity = "entity".equals(getMapGeometryLoadedType());
-
-	// TODO need to fix fetchArchEnt to return entity type
-}
-
 getCreatedGeometry() {
-	if (createGeomId <= 0) return null;
-
-	geom = getGeometry("control/map/map", createGeomId);
-
-	ArrayList list = new ArrayList();
-	list.add(geom);
-	return list;
+	return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
 }
 
 clearCreatedGeometry() {
-	if (createGeomId <= 0) return;
-
-	clearGeometry("control/map/map", createGeomId);
-	createGeomId = 0;
+	onClearMap();
 }
 
 /*** MISC ***/
@@ -550,14 +543,14 @@ newCanal(){
     setFieldValue("canal/canalDetail/Device", device);
 }
 
-onEvent("create/tab1/structure", "click", "newStructure()");
-onEvent("create/tab1/wall", "click", "newFreeWall()");
-onEvent("create/tab1/doorway", "click", "newDoorway()");
-onEvent("create/tab1/feature", "click", "newFeature()");
-onEvent("create/tab1/specialFind", "click", "newSpecialFind()");
-onEvent("create/tab1/lichen", "click", "newLichen()");
-onEvent("create/tab1/surfaceCollection", "click", "newSurfaceCollection()");
-onEvent("create/tab1/canal", "click", "newCanal()");
+onEvent("createPolygon/tab1/structure", "click", "newStructure()");
+onEvent("createLine/tab1/wall", "click", "newFreeWall()");
+onEvent("createPoint/tab1/doorway", "click", "newDoorway()");
+onEvent("createPolygon/tab1/feature", "click", "newFeature()");
+onEvent("createPoint/tab1/specialFind", "click", "newSpecialFind()");
+onEvent("createPoint/tab1/lichen", "click", "newLichen()");
+onEvent("createPolygon/tab1/surfaceCollection", "click", "newSurfaceCollection()");
+onEvent("createLine/tab1/canal", "click", "newCanal()");
 
 onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
 onEvent("control/gps/connectinternal", "click", "startInternalGPS()");

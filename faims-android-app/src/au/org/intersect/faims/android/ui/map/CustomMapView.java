@@ -1029,7 +1029,8 @@ public class CustomMapView extends MapView {
 			throws Exception {
 		for (Object geom : geomList) {
 			Geometry geometry = (Geometry) geom;
-			clearGeometry(geometry);
+			GeometryData data = (GeometryData) geometry.userData;
+			clearGeometry(data.geomId);
 		}
 	}
 

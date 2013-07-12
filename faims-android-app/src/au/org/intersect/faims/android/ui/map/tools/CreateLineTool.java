@@ -170,7 +170,7 @@ public class CreateLineTool extends BaseGeometryTool {
 					
 					// make point color solid
 					try {
-						pointsList.add(mapView.drawPoint(layer, gpsPoint, createGuidePointStyle()));
+						pointsList.add(mapView.drawPoint(mapView.getVertexLayerId(), gpsPoint, createGuidePointStyle()));
 					} catch (Exception e) {
 						FLog.e("error drawing point", e);
 						showError(e.getMessage());
@@ -241,7 +241,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		
 		// make point color solid
 		try {
-			pointsList.add(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createGuidePointStyle()));
+			pointsList.add(mapView.drawPoint(mapView.getVertexLayerId(), (new EPSG3857()).toWgs84(x, y), createGuidePointStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
 			showError(e.getMessage());

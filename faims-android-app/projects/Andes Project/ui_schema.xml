@@ -20,27 +20,35 @@
               <login/>
             </tab1>
           </user>
-          <create>
+          <createPoint>
               <tab1>
-                  <structure/>
-                  <wall/>
                   <doorway/>
-                  <feature/>
                   <specialFind/>
                   <lichen/>
-                  <surfaceCollection/>
+              </tab1>
+          </createPoint>
+          <createLine>
+              <tab1>
+                  <wall/>
                   <canal/>
               </tab1>
-          </create>
+          </createLine>
+          <createPolygon>
+              <tab1>
+                  <structure/>
+                  <feature/>
+                  <surfaceCollection/>
+              </tab1>
+          </createPolygon>
           <control>
             <map>
               <map/>
               <mapContainer>
                 <child1>
-                  <create/>
+                  <clear/>
                 </child1>
                 <child2>
-                  <entityType/>
+                  <create/>
                 </child2>
               </mapContainer>
             </map>
@@ -632,13 +640,13 @@
       <group ref="orientation">
         <label/>
         <input ref="orientation">
-          <label>{horizontal}</label>
+          <label>horizontal</label>
         </input>
       </group>
       <group ref="even">
         <label/>
         <input ref="layout_weight">
-          <label>{1}</label>
+          <label>1</label>
         </input>
       </group>
     </group>
@@ -665,21 +673,12 @@
         </trigger>
       </group>
     </group>
-    <group ref="create">
-        <label>{}</label>
+    <group ref="createPoint">
+        <label/>
         <group ref="tab1">
             <label>{Create Record For}</label>
-            <trigger ref="structure">
-                <label>{Create Structure}</label>
-            </trigger>
-            <trigger ref="wall">
-                <label>{Create Wall}</label>
-            </trigger>
             <trigger ref="doorway">
                 <label>{Create Doorway}</label>
-            </trigger>
-            <trigger ref="feature">
-                <label>{Create Feature}</label>
             </trigger>
             <trigger ref="specialFind">
                 <label>{Create Special Find}</label>
@@ -687,11 +686,32 @@
             <trigger ref="lichen">
                 <label>{Create Lichen}</label>
             </trigger>
-            <trigger ref="surfaceCollection">
-                <label>{Create Surface Collection}</label>
+        </group>
+    </group>
+    <group ref="createLine">
+        <label/>
+        <group ref="tab1">
+            <label>{Create Record For}</label>
+            <trigger ref="wall">
+                <label>{Create Wall}</label>
             </trigger>
             <trigger ref="canal">
                 <label>{Create Canal}</label>
+            </trigger>
+        </group>
+    </group>
+    <group ref="createPolygon">
+        <label/>
+        <group ref="tab1">
+            <label>{Create Record For}</label>
+            <trigger ref="structure">
+                <label>{Create Structure}</label>
+            </trigger>
+            <trigger ref="feature">
+                <label>{Create Feature}</label>
+            </trigger>
+            <trigger ref="surfaceCollection">
+                <label>{Create Surface Collection}</label>
             </trigger>
         </group>
     </group>
@@ -700,8 +720,23 @@
       <group ref="map" faims_scrollable="false">
         <label>{Map}</label>
         <input ref="map" faims_map="true" faims_certainty="false">
-          <label>{ }</label>
+          <label/>
         </input>
+        <group ref="mapContainer">
+            <label/>
+            <group ref="child1">
+                <label/>
+                <trigger ref="clear">
+                    <label>Clear</label>
+                </trigger>
+            </group>
+            <group ref="child2">
+                <label/>
+                <trigger ref="create">
+                    <label>Create</label>
+                </trigger>
+            </group>
+        </group>
       </group>
       <group ref="data">
         <label>{Loading Data}</label>
