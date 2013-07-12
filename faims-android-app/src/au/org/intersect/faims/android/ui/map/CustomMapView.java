@@ -147,8 +147,14 @@ public class CustomMapView extends MapView {
 						arg1, arg2, arg3);
 			}
 			if (CustomMapView.this.toolsEnabled && CustomMapView.this.currentTool != null) {
-				CustomMapView.this.currentTool.onVectorElementClicked(arg0,
-						arg1, arg2, arg3);
+				if (CustomMapView.this.currentTool instanceof CreatePointTool ||
+						CustomMapView.this.currentTool instanceof CreateLineTool ||
+						CustomMapView.this.currentTool instanceof CreatePolygonTool) {
+					CustomMapView.this.currentTool.onMapClicked(arg1, arg2, arg3);
+				} else {
+					CustomMapView.this.currentTool.onVectorElementClicked(arg0,
+							arg1, arg2, arg3);
+				}
 			}
 		}
 

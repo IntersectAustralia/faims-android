@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.nutiteq;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
@@ -24,12 +25,14 @@ public class CanvasLayer extends GeometryLayer {
 	private Quadtree<Geometry> objects;
 	private Stack<Geometry> geomBuffer;
 	protected int layerId;
+	private ArrayList<Geometry> objectsList;
 	
 	public CanvasLayer(int layerId, String name, Projection projection) {
 		super(projection);
 		this.name = name;
 		this.layerId = layerId;
 		objects = new Quadtree<Geometry>(Const.UNIT_SIZE / 10000.0);
+		objectsList = new ArrayList<Geometry>();
 		geomBuffer = new Stack<Geometry>();
 	}
 	
@@ -54,8 +57,23 @@ public class CanvasLayer extends GeometryLayer {
 			for (Geometry geom : objList) {
 				geom.setActiveStyle(zoom);
 			}
-			setVisibleElementsList(objList);
+			reOrderAndSetVisibleElementsList(objList);
 		}
+	}
+	
+	private void reOrderAndSetVisibleElementsList(List<Geometry> visibleList) {
+		// order visible elements based on objects list order
+		
+		LinkedList<Geometry> geomList = new LinkedList<Geometry>();
+		for (Geometry geom : objectsList) {
+			if (visibleList.contains(geom)) {
+				geomList.push(geom);
+			}
+		}
+		
+		FLog.d(geomList.toString());
+		
+		setVisibleElementsList(geomList);
 	}
 	
 	private void updateRenderList(Geometry geom) {
@@ -67,7 +85,7 @@ public class CanvasLayer extends GeometryLayer {
 			g.setActiveStyle(g.getStyleSet().getFirstNonNullZoomStyleZoom());
 		}
 		
-		setVisibleElementsList(newVisibleElementsList); 
+		reOrderAndSetVisibleElementsList(newVisibleElementsList);
 		
 		// Update renderer
 		Components components = getComponents();
@@ -107,6 +125,7 @@ public class CanvasLayer extends GeometryLayer {
 		geom.attachToLayer(this);
 		
 		objects.insert(geom.getInternalState().envelope, geom);
+		objectsList.add(geom);
 		
 		updateRenderList(geom);
 		
@@ -115,6 +134,7 @@ public class CanvasLayer extends GeometryLayer {
 	
 	public void removeGeometry(Geometry geom) {
 		objects.remove(geom.getInternalState().envelope, geom);
+		objectsList.remove(geom);
 		
 		geomBuffer.add(geom); // Issue with removing objects when object is still 
 							  // in visible list so buffering objects to be removed later
@@ -128,6 +148,6 @@ public class CanvasLayer extends GeometryLayer {
 	}
 
 	public List<Geometry> getGeometryList() {
-		return objects.getAll();
+		return objectsList;
 	}
 }
