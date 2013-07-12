@@ -858,7 +858,7 @@ clearGeometry(String ref, int geomId) {
 }
 
 /**
-  * Clear a list of geometries from the map view that has the reference by specifying the list of geometry id.\n
+  * Clear a list of geometries from the map view that has the reference by specifying the list of geometry.\n
   * If the map view reference is not found, there will be a logic error dialog appearing.
   * @param ref the reference to the map view
   * @param geomList the list of id of the geometries to be cleared, will show logic error dialog if not found
