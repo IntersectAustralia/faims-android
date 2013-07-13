@@ -281,15 +281,24 @@ selectGallery(ref, list) {
 
 getDefaultUsersList() {
     fetchOne("delete from user;");
-    fetchOne("insert into user values(1, 'Adela', 'Sobotkova');");
-    fetchOne("insert into user values(2, 'Brian', 'Ballsun-Stanton');");
-    fetchOne("insert into user values(3, 'Oliver', 'Brown');");
-    fetchOne("insert into user values(4, 'Matthew', 'Kelly');");
-    fetchOne("insert into user values(5, 'Penny', 'Crook');");
-    fetchOne("insert into user values(6, 'Shawn', 'Ross');");
-    fetchOne("insert into user values(7, 'Anita', 'Yousif');");
+    fetchOne("INSERT INTO user VALUES(1, 'Steve', 'Wernke');");
+    fetchOne("INSERT INTO user VALUES(2, 'Gabriela', 'Oré Menéndez');");
+    fetchOne("INSERT INTO user VALUES(3, 'Carla', 'Hernández Garavito');");
+    fetchOne("INSERT INTO user VALUES(4, 'Teddy', 'Abel Traslaviña Arias');");
+    fetchOne("INSERT INTO user VALUES(5, 'Ryan', 'Smith');");
+    fetchOne("INSERT INTO user VALUES(6, 'Will', 'McCollum');");
+    fetchOne("INSERT INTO user VALUES(7, 'Hali', 'Thurber');");
+    fetchOne("INSERT INTO user VALUES(8, 'Scotti', 'Norman');");
+    fetchOne("INSERT INTO user VALUES(9, 'Diana', 'Carhuanina');");
+    fetchOne("INSERT INTO user VALUES(10, 'Arlen', 'Talaverano');");
+    fetchOne("INSERT INTO user VALUES(11, 'Lilian', 'Abrigo');");
+    fetchOne("INSERT INTO user VALUES(12, 'Silvana', 'Zegarra');");
+    fetchOne("INSERT INTO user VALUES(13, 'Mariella', 'Cabrera Boza');");
+    fetchOne("INSERT INTO user VALUES(14, 'Steve', 'Yerka');");
     users = fetchAll("select userid, fname ||' ' || lname from user");
     return users;
+
+
 }
 
 usersList = getDefaultUsersList();
@@ -719,6 +728,7 @@ onEvent("corner/cornerDetail/CornerPhotos", "click", "takeCornerPicture()");
 
 onEvent("corner/cornerDetail/Duplicate", "delayclick", "duplicateCorner(corner_id)");
 onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
+onEvent("corner/cornerDetail/Update2", "delayclick", "saveCorner(corner_id)");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 onEvent("corner", "show", "recalcCorner()");
 
@@ -876,6 +886,7 @@ OnNichePictureTaken() {
 onEvent("niche/nicheDetail/NichePhotos", "click", "takeNichePicture()");
 
 onEvent("niche/nicheDetail/Update", "delayclick", "saveNiche(niche_id)");
+onEvent("niche/nicheDetail/Update2", "delayclick", "saveNiche(niche_id)");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 //onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 /*
@@ -1041,6 +1052,7 @@ OncanalPictureTaken() {
 
 onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
 onEvent("canal/canalDetail/Update", "delayclick", "saveCanal(canal_id)");
+onEvent("canal/canalDetail/Update2", "delayclick", "saveCanal(canal_id)");
 onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
 
 deleteCanal(){
@@ -1120,6 +1132,7 @@ OnWindowPictureTaken() {
 onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
 
 onEvent("window/windowDetail/Update", "delayclick", "saveWindow(window_id)");
+onEvent("window/windowDetail/Update2", "delayclick", "saveWindow(window_id)");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
 //onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
 
@@ -1214,6 +1227,7 @@ OnspecialFindPictureTaken() {
 onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
 
 onEvent("specialFind/findDetail/Update", "delayclick", "saveSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Update2", "delayclick", "saveSpecialFind(special_find_id)");
 onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
 onEvent("specialFind/findDetail/AssociateWith", "click", "associateWithSpecialFind()");
 
@@ -1309,6 +1323,7 @@ OnFeaturePictureTaken() {
 onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
 
 onEvent("feature/featureDetail/Update", "delayclick", "saveFeature(feature_id)");
+onEvent("feature/featureDetail/Update2", "delayclick", "saveFeature(feature_id)");
 onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
 onEvent("feature/featureDetail/AssociateWith", "click", "associateWithFeature()");
 
@@ -1403,6 +1418,7 @@ OnFreewallPictureTaken() {
 onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
 
 onEvent("freeWall/freeWallDetail/Update", "delayclick", "saveFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Update2", "delayclick", "saveFreeWall(wall_id)");
 onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
 
 onEvent("freeWall/freeWallDetail/AssociateWith", "click", "associateWithFreeWall()");
@@ -1526,6 +1542,7 @@ onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
 onEvent("doorway/doorDetail/TakePoint", "click", "takeDoorywayPoint()");
 
 onEvent("doorway/doorDetail/Update", "delayclick", "saveDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Update2", "delayclick", "saveDoorway(doorway_id)");
 onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
 
 onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
@@ -1633,6 +1650,7 @@ OnLichenPictureTaken() {
 onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
 
 onEvent("lichen/lichenDetail/Update", "delayclick", "saveLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Update2", "delayclick", "saveLichen(lichen_id)");
 onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
 
 onEvent("lichen/lichenDetail/AssociateWith", "click", "associateWithLichen()");
@@ -1744,7 +1762,9 @@ onEvent("lichen/lichenDetail/TakePoint", "click", "takeLichenPoint()");
 String surface_collection_id = null;
 
 onEvent("surfaceCollection/material/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Update2", "delayclick", "saveSurfaceCollection(surface_collection_id)");
 onEvent("surfaceCollection/description/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/description/Update2", "delayclick", "saveSurfaceCollection(surface_collection_id)");
 onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
 
 //TODO Make automatic lot association
@@ -1808,6 +1828,7 @@ updateSurfaceCollection(id) {
 String lot_id = null;
 
 onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
+onEvent("lot/lotDetail/Update2", "click", "lot_id = saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
@@ -1878,6 +1899,7 @@ onEvent("wall/structureWall/WallPhotos", "click", "takeStructWallPicture()");
 onEvent("wall/structureWall/Duplicate", "delayclick", "duplicateStructureWall(structure_wall_id)");
 
 onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Update2", "delayclick", "saveStructureWall(structure_wall_id)");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 onEvent("wall", "show", "recalcStructureWall()");
 
@@ -2148,8 +2170,11 @@ onEvent("structure/final/Video", "click", "takeVideo()");
 onEvent("structure/final/Audio", "click", "recordAudio()");
 
 onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/final/Update2", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/info/Update2", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/component/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/component/Update2", "delayclick", "saveStructure(structure_id)");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
@@ -2979,7 +3004,7 @@ loadWindowFileAttributes(id){
 	if (!isNull(id)) {
 		archEntity = fetchArchEnt(id);
 		entityAttributes = archEntity.getAttributes();
-		for(EntityAttribute attr : entityAttributes){
+		for(EntityAttribute attr : entityAttributes)  {
 			if("file".equals(attr.getType())){
 				if(!attr.isDeleted()){
 					if("WindowPhotos".equals(attr.getName())){

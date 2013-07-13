@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
-<dataSchema name="ArchitecturalSurvey" preparer="Brian Ballsun-Stanton">
+<?xml.stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="ArchitecturalSurvey" preparer="Brian Ballsun.Stanton">
 
 <RelationshipElement name="InSurface" type="bidirectional">
 </RelationshipElement>
@@ -45,18 +45,18 @@
 			<term>{Cuadrangular}</term>
 			<term>{Ovoide}</term>
 			<term>{Circular}</term>
-			<term>{Otro}</term>
+			<term>{zOtro}</term>
 		</lookup>
 	</property>
 	<property type="string" name="FormDescription" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="ConstructionPeriod" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Intermedio Tardio}</term>
-			<term>{Horizonte Tardio}</term>
-			<term>{Colonial Temprano}</term>
-			<term>{Colonial Tardio}</term>
-			<term>{Otro}</term>
+			<term>{Intermedio.Tardio}</term>
+			<term>{Horizonte.Tardio}</term>
+			<term>{Colonial.Temprano}</term>
+			<term>{Colonial.Tardio}</term>
+			<term>{zOtro}</term>
 		</lookup>
 	</property>
 	<property type="string" name="ConstructionPeriodDescription" minCardinality="1" maxCardinality="n">
@@ -65,7 +65,7 @@
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="ModificationDescription" minCardinality="1" maxCardinality="n">
@@ -77,8 +77,8 @@
 			<term>{Ritual}</term>
 			<term>{Administrativa}</term>
 			<term>{Funeraria}</term>
-			<term>{Otro}</term>
-			<term>{No definido}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Definido}</term>
 		</lookup>
 	</property>
 	<property type="string" name="PrincipalFunctionDescription" minCardinality="1" maxCardinality="n">
@@ -90,22 +90,22 @@
 			<term>{Iglesia}</term>
 			<term>{Capilla}</term>
 			<term>{Kallanka}</term>
-			<term>{Posible casa de kuraka}</term>
+			<term>{Posible.Casa.De.Kuraka}</term>
 			<term>{Hospital}</term>
 			<term>{Cabildo}</term>
 			<term>{Carcel}</term>
-			<term>{Casa de servicio}</term>
-			<term>{Estructura asociada}</term>
-			<term>{Otro}</term>
+			<term>{Casa.De.Servicio}</term>
+			<term>{Estructura.Asociada}</term>
+			<term>{zOtro}</term>
 		</lookup>
 	</property>
 	<property type="string" name="ConstructionQuality" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{1(baja)}</term>
+			<term>{1baja}</term>
 			<term>{2}</term>
 			<term>{3}</term>
 			<term>{4}</term>
-			<term>{5(alta)}</term>
+			<term>{5alta}</term>
 		</lookup>
 	</property>
 	<property type="string" name="WallsTotalCount" minCardinality="1" maxCardinality="n">
@@ -119,8 +119,8 @@
 			<term>{2}</term>
 			<term>{3}</term>
 			<term>{4}</term>
-			<term>{More}</term>
-			<term>{No observable}</term>
+			<term>{zMore}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="PartitionDescription" minCardinality="1" maxCardinality="n">
@@ -129,14 +129,14 @@
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="StuccoExterior" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="WindowCount" minCardinality="1" maxCardinality="n">
@@ -149,11 +149,11 @@
 	</property>
 	<property type="string" name="RoofForm" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Hastial dos aguas}</term>
-			<term>{Hastial un agua}</term>
-			<term>{Sin hastial}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{Hastial.Dos.Aguas}</term>
+			<term>{Hastial.Un.Agua}</term>
+			<term>{Sin.Hastial}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="LongAxis" minCardinality="1" maxCardinality="n">
@@ -164,11 +164,11 @@
 	</property>
 	<property type="string" name="Preservation" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{0-20%}</term>
-			<term>{21-40%}</term>
-			<term>{41-60%}</term>
-			<term>{61-80%}</term>
-			<term>{81-100%}</term>
+			<term>{0.20}</term>
+			<term>{21.40}</term>
+			<term>{41.60}</term>
+			<term>{61.80}</term>
+			<term>{81.100}</term>
 		</lookup>
 	</property>
 	<property type="string" name="PreservationDescription" minCardinality="1" maxCardinality="n">
@@ -179,7 +179,7 @@
 	</property>
 	<property type="string" name="Disturbances" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{No evidente}</term>
+			<term>{zNo.Evidente}</term>
 			<term>{Pocos}</term>
 			<term>{Varios}</term>
 		</lookup>
@@ -222,22 +222,22 @@
 	</property>
 	<property type="string" name="CornerExteriorForm" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Redondeada-bloques}</term>
-			<term>{Redondeada-amarrada}</term>
-			<term>{Redondeada-mixta}</term>
-			<term>{Angular-bloques}</term>
-			<term>{Angular-amarrada}</term>
-			<term>{Angular-mixta}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{Redondeada.bloques}</term>
+			<term>{Redondeada.amarrada}</term>
+			<term>{Redondeada.mixta}</term>
+			<term>{Angular.bloques}</term>
+			<term>{Angular.amarrada}</term>
+			<term>{Angular.mixta}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="CornerInteriorForm" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Redondeada}</term>
 			<term>{Angular}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="NicheCount" minCardinality="1" maxCardinality="n">
@@ -250,23 +250,23 @@
   </property>
   <property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term pictureURL="files/data/masonry/Type1a.jpg">Tipo 01a</term>
-			<term pictureURL="files/data/masonry/Type1b.jpg">Tipo 01b</term>
-			<term pictureURL="files/data/masonry/Type2.jpg">Tipo 02</term>
-			<term pictureURL="files/data/masonry/Type3.jpg">Tipo 03</term>
-			<term pictureURL="files/data/masonry/Type4a.jpg">Tipo 04a</term>
-			<term pictureURL="files/data/masonry/Type4b.jpg">Tipo 04b</term>
-			<term pictureURL="files/data/masonry/Type5.jpg">Tipo 05</term>
-			<term pictureURL="files/data/masonry/Type6.jpg">Tipo 06</term>
-			<term pictureURL="files/data/masonry/Type7.jpg">Tipo 07</term>
-			<term pictureURL="files/data/masonry/Type8.jpg">Tipo 08</term>
-			<term pictureURL="files/data/masonry/Type10.jpg">Tipo 10</term>
-			<term pictureURL="files/data/masonry/Type11a.jpg">Tipo 11a</term>
-			<term pictureURL="files/data/masonry/Type11b.jpg">Tipo 11b</term>
-			<term pictureURL="files/data/masonry/Type12.jpg">Tipo 12</term>
-			<term pictureURL="files/data/masonry/Type13.jpg">Tipo 13</term>
-			<term>{ Otro}</term>
-			<term>{ No observable}</term>
+			<term pictureURL="files/data/masonry/Type1a.jpg">{Tipo.01a}</term>
+			<term pictureURL="files/data/masonry/Type1b.jpg">{Tipo.01b}</term>
+			<term pictureURL="files/data/masonry/Type2.jpg">{Tipo.02}</term>
+			<term pictureURL="files/data/masonry/Type3.jpg">{Tipo.03}</term>
+			<term pictureURL="files/data/masonry/Type4a.jpg">{Tipo.04a}</term>
+			<term pictureURL="files/data/masonry/Type4b.jpg">{Tipo.04b}</term>
+			<term pictureURL="files/data/masonry/Type5.jpg">{Tipo.05}</term>
+			<term pictureURL="files/data/masonry/Type6.jpg">{Tipo.06}</term>
+			<term pictureURL="files/data/masonry/Type7.jpg">{Tipo.07}</term>
+			<term pictureURL="files/data/masonry/Type8.jpg">{Tipo.08}</term>
+			<term pictureURL="files/data/masonry/Type10.jpg">{Tipo.10}</term>
+			<term pictureURL="files/data/masonry/Type11a.jpg">{Tipo.11a}</term>
+			<term pictureURL="files/data/masonry/Type11b.jpg">{Tipo.11b}</term>
+			<term pictureURL="files/data/masonry/Type12.jpg">{Tipo.12}</term>
+			<term>{Tipo.13}</term>
+			<term pictureURL="files/data/masonry/Otro.png">{zOtro}</term>
+			<term pictureURL="files/data/masonry/noobservable.png">{zNoObservable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
@@ -275,7 +275,7 @@
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="InkaMasonryDescription" minCardinality="1" maxCardinality="n">
@@ -303,23 +303,23 @@
 	</property>
 	<property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term pictureURL="files/data/masonry/Type1a.jpg">Tipo 1a</term>
-			<term pictureURL="files/data/masonry/Type1b.jpg">Tipo 1b</term>
-			<term pictureURL="files/data/masonry/Type2.jpg">Tipo 2</term>
-			<term pictureURL="files/data/masonry/Type3.jpg">Tipo 3</term>
-			<term pictureURL="files/data/masonry/Type4a.jpg">Tipo 4a</term>
-			<term pictureURL="files/data/masonry/Type4b.jpg">Tipo 4b</term>
-			<term pictureURL="files/data/masonry/Type5.jpg">Tipo 5</term>
-			<term pictureURL="files/data/masonry/Type6.jpg">Tipo 6</term>
-			<term pictureURL="files/data/masonry/Type7.jpg">Tipo 7</term>
-			<term pictureURL="files/data/masonry/Type8.jpg">Tipo 8</term>
-			<term pictureURL="files/data/masonry/Type10.jpg">Tipo 10</term>
-			<term pictureURL="files/data/masonry/Type11a.jpg">Tipo 11a</term>
-			<term pictureURL="files/data/masonry/Type11b.jpg">Tipo 11b</term>
-			<term pictureURL="files/data/masonry/Type12.jpg">Tipo 12</term>
-			<term pictureURL="files/data/masonry/Type13.jpg">Tipo 13</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term pictureURL="files/data/masonry/Type1a.jpg">{Tipo.01a}</term>
+			<term pictureURL="files/data/masonry/Type1b.jpg">{Tipo.01b}</term>
+			<term pictureURL="files/data/masonry/Type2.jpg">{Tipo.02}</term>
+			<term pictureURL="files/data/masonry/Type3.jpg">{Tipo.03}</term>
+			<term pictureURL="files/data/masonry/Type4a.jpg">{Tipo.04a}</term>
+			<term pictureURL="files/data/masonry/Type4b.jpg">{Tipo.04b}</term>
+			<term pictureURL="files/data/masonry/Type5.jpg">{Tipo.05}</term>
+			<term pictureURL="files/data/masonry/Type6.jpg">{Tipo.06}</term>
+			<term pictureURL="files/data/masonry/Type7.jpg">{Tipo.07}</term>
+			<term pictureURL="files/data/masonry/Type8.jpg">{Tipo.08}</term>
+			<term pictureURL="files/data/masonry/Type10.jpg">{Tipo.10}</term>
+			<term pictureURL="files/data/masonry/Type11a.jpg">{Tipo.11a}</term>
+			<term pictureURL="files/data/masonry/Type11b.jpg">{Tipo.11b}</term>
+			<term pictureURL="files/data/masonry/Type12.jpg">{Tipo.12}</term>
+			<term pictureURL="files/data/masonry/Type13.jpg">{Tipo.13}</term>
+			<term>{zOtro}</term>
+			<term>{zNoObservable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
@@ -328,7 +328,7 @@
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="InkaMasonryDescription" minCardinality="1" maxCardinality="n">
@@ -340,14 +340,14 @@
 	<property type="string" name="WallHeightPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Complete}</term>
-			<term>{Max Preserved}</term>
+			<term>{Max.Preserved}</term>
 		</lookup>
   </property>
   <property type="string" name="Gable" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Yes}</term>
 			<term>{No}</term>
-			<term>{Not observable}</term>
+			<term>{zNot.Observable}</term>
 		</lookup>
   </property>
 	<property type="string" name="GableHeight" minCardinality="1" maxCardinality="n">
@@ -387,23 +387,23 @@
 	</property>
 	<property type="string" name="WallClass" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Delimitación de manzana}</term>
-			<term>{División interna de manzana}</term>
-			<term>{División de grupo patio}</term>
-			<term>{Muro de contención}</term>
-			<term>{Muro de plataforma}</term>
+			<term>{Delimitaci_n.De.Manzana}</term>
+			<term>{Divisi_n.Interna.De.Manzana}</term>
+			<term>{Divisi_n.De.Grupo.Patio}</term>
+			<term>{Muro.De.Contenci_n}</term>
+			<term>{Muro.De.Plataforma}</term>
 			<term>{Escalera}</term>
-			<term>{Otro}</term>
-			<term>{No Definido}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Definido}</term>
 		</lookup>
 	</property>
 	<property type="string" name="WallPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{0-20%}</term>
-			<term>{21-40%}</term>
-			<term>{41-60%}</term>
-			<term>{61-80%}</term>
-			<term>{81-100%}</term>
+			<term>{0.20}</term>
+			<term>{21.40}</term>
+			<term>{41.60}</term>
+			<term>{61.80}</term>
+			<term>{81.100}</term>
 		</lookup>
 	</property>
 	<property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
@@ -421,8 +421,8 @@
 			<term>{Tipo 11}</term>
 			<term>{Tipo 12}</term>
 			<term>{Tipo 13}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
@@ -432,7 +432,7 @@
 	<property type="string" name="WallHeightPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Complete}</term>
-			<term>{Max Preserved}</term>
+			<term>{Max.Preserved}</term>
 		</lookup>
 	</property>
 	<property type="string" name="WallThickness" minCardinality="1" maxCardinality="n">
@@ -466,11 +466,10 @@
 	</property>
 	<property type="string" name="DoorPosition" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Eje largo}</term>
-			<term>{Eje corto}</term>
-			<term>{Circular (No aplicable)}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{Eje.Largo}</term>
+			<term>{Eje.Corto}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="DoorMasonry" minCardinality="1" maxCardinality="n">
@@ -478,8 +477,8 @@
 			<term>{Bloques}</term>
 			<term>{Ligada}</term>
 			<term>{Mixta}</term>
-			<term>{Otro}</term>
-			<term>{No observable}</term>
+			<term>{zOtro}</term>
+			<term>{zNo.Observable}</term>
 		</lookup>
 	</property>
 	<property type="string" name="DoorHeight" minCardinality="1" maxCardinality="n">
@@ -487,7 +486,7 @@
 	<property type="string" name="DoorHeightPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Complete}</term>
-			<term>{Max preserved}</term>
+			<term>{Max.Preserved}</term>
 		</lookup>
 	</property>
 	<property type="string" name="DoorTopWidth" minCardinality="1" maxCardinality="n">
@@ -532,7 +531,7 @@
 	<property type="string" name="WindowHeightPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Complete}</term>
-			<term>{Max preserved}</term>
+			<term>{Max.Preserved}</term>
 		</lookup>
 	</property>
 	<property type="string" name="WindowDescription" minCardinality="1" maxCardinality="n">
@@ -585,7 +584,7 @@
 	<property type="string" name="NicheHeightPreservation" minCardinality="1" maxCardinality="n">
 		<lookup>
 			<term>{Complete}</term>
-			<term>{Max preserved}</term>
+			<term>{Max.Preserved}</term>
 		</lookup>
 	</property>
 	<property type="string" name="NicheAltar" minCardinality="1" maxCardinality="n">
@@ -626,16 +625,22 @@
 			<term>{Andesite}</term>
 			<term>{Basal}</term>
 			<term>{Tuff}</term>
-			<term>{Otro}</term>
+			<term>{zOtro}</term>
 		</lookup>
 	</property>
 	<property type="string" name="LichenQuality" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term pictureURL="files/data/lichen/01Lichen.jpg">Tipo 1</term>
-			<term pictureURL="files/data/lichen/02Lichen.jpg">Tipo 2</term>
-			<term pictureURL="files/data/lichen/03Lichen.jpg">Tipo 3</term>
-			<term pictureURL="files/data/lichen/04Lichen.jpg">Tipo 4</term>
-			<term pictureURL="files/data/lichen/05Lichen.jpg">Tipo 5</term>
+			<term pictureURL="files/data/lichen/01aLichen.jpg">{Tipo.1a}</term>
+			<term pictureURL="files/data/lichen/01bLichen.jpg">{Tipo.1b}</term>
+			<term pictureURL="files/data/lichen/01cLichen.jpg">{Tipo.1c}</term>
+			<term pictureURL="files/data/lichen/02aLichen.jpg">{Tipo.2a}</term>
+			<term pictureURL="files/data/lichen/02bLichen.jpg">{Tipo.2b}</term>
+			<term pictureURL="files/data/lichen/02cLichen.jpg">{Tipo.2c}</term>
+			<term pictureURL="files/data/lichen/03aLichen.jpg">{Tipo.3a}</term>
+			<term pictureURL="files/data/lichen/03bLichen.jpg">{Tipo.3b}</term>
+			<term pictureURL="files/data/lichen/03cLichen.jpg">{Tipo.3c}</term>
+			<term pictureURL="files/data/lichen/04Lichen.jpg">{Tipo.4}</term>
+			<term pictureURL="files/data/lichen/05Lichen.jpg">{Tipo.5}</term>
 		</lookup>
 	</property>
 	<property type="string" name="Aspect" minCardinality="1" maxCardinality="n">
@@ -648,11 +653,11 @@
 	</property>
 	<property type="string" name="InsideOutside" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Interior Wall Surface}</term>
-			<term>{Exterior Wall Surface}</term>
-			<term>{Wall Fall Surface}</term>
+			<term>{Interior.Wall.Surface}</term>
+			<term>{Exterior.Wall.Surface}</term>
+			<term>{Wall.Fall.Surface}</term>
 			<term>{Doorway}</term>
-			<term>{Wall top}</term>
+			<term>{Wall.Top}</term>
 			<term>{Other}</term>
 		</lookup>
 	</property>
@@ -718,7 +723,7 @@
 			<term>{Litico}</term>
 			<term>{Vidrio}</term>
 			<term>{Metal}</term>
-			<term>{Otro}</term>
+			<term>{zOtro}</term>
 		</lookup>
 	</property>
 	<property type="file" name="Photos" minCardinality="1" maxCardinality="n">
@@ -773,51 +778,51 @@
 	</property>
 	<property type="string" name="SurfaceCollectionContext" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Superficie interna de estructura}</term>
-			<term>{Superficie al aire libre – patio}</term>
-			<term>{Superficie al aire libre – calle}</term>
-			<term>{Superficie al aire libre – manzana}</term>
-			<term>{Superficie al aire libre – sin rasgos}</term>
-			<term>{Superficie al aire libre – adyacente a tumba}</term>
-			<term>{Superficie interior de tumba}</term>
-			<term>{Superficie interior de rasgo no definido}</term>
-			<term>{Caída de muro}</term>
-			<term>{Muro de estructura (argamasa)}</term>
-			<term>{Muro de estructura (suelta)}</term>
-			<term>{Muro de estructura (encima)}</term>
-			<term>{Hornacina (suelta)}</term>
-			<term>{Muro de manzana (argamasa)}</term>
-			<term>{Muro de patio}</term>
-			<term>{Otro muro (argamasa)}</term>
-			<term>{Otro muro (suelta)}</term>
-			<term>{Otro-descripción}</term>
+			<term>{Superficie.Interna.De.Estructura}</term>
+			<term>{Superficie.Al.Aire.Libre.patio}</term>
+			<term>{Superficie.Al.Aire.Libre.calle}</term>
+			<term>{Superficie.Al.Aire.Libre.manzana}</term>
+			<term>{Superficie.Al.Aire.Libre.sin.rasgos}</term>
+			<term>{Superficie.Al.Aire.Libre.adyacente.a.tumba}</term>
+			<term>{Superficie.Interior.De.Tumba}</term>
+			<term>{Superficie.Interior.De.Rasgo.No.Definido}</term>
+			<term>{Caída.De.Muro}</term>
+			<term>{Muro.De.Estructura argamasa}</term>
+			<term>{Muro.De.Estructura suelta}</term>
+			<term>{Muro.De.Estructura encima}</term>
+			<term>{Hornacina.suelta}</term>
+			<term>{Muro.De.Manzana argamasa}</term>
+			<term>{Muro.De.Patio}</term>
+			<term>{zOtro.Muro.argamasa}</term>
+			<term>{zOtro.Muro.suelta}</term>
+			<term>{zOtro.descripci_n}</term>
 		</lookup>
 	</property>
 	<property type="string" name="ContextDescription" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="DiagnosticsPresent" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{0-No presente}</term>
-			<term>{1-Baja densidad}</term>
-			<term>{2-Mediana densidad}</term>
-			<term>{3-Alta densidad}</term>
+			<term>{0.No.Presente}</term>
+			<term>{1.Baja.Densidad}</term>
+			<term>{2.Mediana.Densidad}</term>
+			<term>{3.Alta.Densidad}</term>
 		</lookup>
 	</property>
 	<property type="string" name="MaterialDensity" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{0-No presente}</term>
-			<term>{1-Baja densidad}</term>
-			<term>{2-Mediana densidad}</term>
-			<term>{3-Alta densidad}</term>
+			<term>{0.No.Presente}</term>
+			<term>{1.Baja.Densidad}</term>
+			<term>{2.Mediana.Densidad}</term>
+			<term>{3.Alta.Densidad}</term>
 		</lookup>
 	</property>
 	<property type="string" name="Comments" minCardinality="1" maxCardinality="n">
 	</property>
 	<property type="string" name="LotLabPriority" minCardinality="1" maxCardinality="n">
 		<lookup>
-			<term>{Baja prioridad}</term>
-			<term>{Mediana prioridad}</term>
-			<term>{Alta prioridad}</term>
+			<term>{Baja.Prioridad}</term>
+			<term>{Mediana.Prioridad}</term>
+			<term>{Alta.Prioridad}</term>
 		</lookup>
 	</property>
 	<property type="string" name="LotNumbers" minCardinality="1" maxCardinality="n">
@@ -848,7 +853,7 @@
 			<term>{Cerámica}</term>
 			<term>{Metal}</term>
 			<term>{Vidrio}</term>
-			<term>{Otro}</term>
+			<term>{zOtro}</term>
 		</lookup>
   </property>
 </ArchaeologicalElement>
