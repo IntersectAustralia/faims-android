@@ -1,0 +1,2176 @@
+/*** MAP ***/
+
+DATA_ENTRY_LAYER = "Data Entry";
+
+initMap() {
+	setMapZoom("control/map/map", 19.0f);
+
+	showBaseMap("control/map/map", "Base Map", "files/data/maps/andes.tif");
+	//showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
+
+    createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
+	isEntity = true; // are you loading entities or relationships?
+	queryName = "No Query"; // Name your query
+	querySQL = null; // Add your select sql query here note: it should have first column return the uuid or relationshipid
+
+	// define database layer styles for points, lines, polygons and text
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+
+	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
+
+initMap();
+
+onToolEvent("control/map/map", "create", "onCreateGeometry()");
+onToolEvent("control/map/map", "load", "onLoadGeometry()");
+
+createGeomId = 0;
+onCreateGeometry() {
+	System.out.println("onCreateGeometry");
+
+	createGeomId = getMapGeometryCreated();
+
+	layerName = getGeometryLayerName("control/map/map", createGeomId);
+	if (DATA_ENTRY_LAYER.equals(layerName)) {
+		showTabGroup("create");
+
+	} else {
+		createGeomId = 0;
+	}
+}
+
+onLoadGeometry() {
+	uuid = getMapGeometryLoaded();
+	isEntity = "entity".equals(getMapGeometryLoadedType());
+
+	// TODO need to fix fetchArchEnt to return entity type
+}
+
+getCreatedGeometry() {
+	if (createGeomId <= 0) return null;
+
+	geom = getGeometry("control/map/map", createGeomId);
+
+	ArrayList list = new ArrayList();
+	list.add(geom);
+	return list;
+}
+
+clearCreatedGeometry() {
+	if (createGeomId <= 0) return;
+
+	clearGeometry("control/map/map", createGeomId);
+	createGeomId = 0;
+}
+
+/*** MISC ***/
+
+addToPictureGallery(ref, picture, pictures) {
+	pictures.add(picture);
+    selectedPictures = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedPictures = new ArrayList();
+    	selectedPictures.add(picture);
+    } else {
+    	selectedPictures = getFieldValue(ref);
+    	selectedPictures.add(picture);
+    }
+    populateCameraPictureGallery(ref, pictures);
+    setFieldValue(ref, selectedPictures);
+}
+
+addToVideoGallery(ref, video, videos) {
+	videos.add(video);
+    selectedVideos = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedVideos = new ArrayList();
+    	selectedVideos.add(video);
+    } else {
+    	selectedVideos = getFieldValue(ref);
+    	selectedVideos.add(video);
+    }
+    populateVideoGallery(ref, videos);
+    setFieldValue(ref, selectedVideos);
+}
+
+isNull(v) {
+	return v == null || "".equals(v);
+}
+
+AttributeDef(String name, String type, String ref) {
+	return AttributeDef(name, type, ref, true);
+}
+
+AttributeDef(String name, String type, String ref, boolean saveCertainty) {
+	this.name = name;
+	this.type = type;
+	this.ref = ref;
+	this.saveCertainty = saveCertainty;
+	return this;
+}
+
+AttributeDef(String name, String type, String ref, ArrayList loadedFiles) {
+	this.name = name;
+	this.type = type;
+	this.ref = ref;
+	this.loadedFiles = loadedFiles;
+	return this;
+}
+
+AttributeDef(String name, String type, String ref1, String ref2) {
+	this.name = name;
+	this.type = type;
+	this.ref1 = ref1;
+	this.ref2 = ref2;
+	return this;
+}
+
+hasFile(files, filename) {
+	for (String f : files) {
+		if (f.equals(filename)) return true;
+	}
+	return false;
+}
+
+Dialog d = null;
+
+showBusyDialog() {
+	if (d == null) {
+		d = showBusy("Message", "Please wait while attachments are copied.");
+	}
+}
+
+closeBusyDialog() {
+	if (d != null) {
+		d.dismiss();
+		d = null;
+	}
+}
+
+OnFilesAttached() {
+	checkFilesAttached();
+}
+
+saveFiles(loadedFiles, files, type, attributes) {
+	if (isNull(files)) {
+		files = new ArrayList();
+	}
+	if (files.size() == 1 && "None".equals(files.get(0))) return;
+
+	// delete attributes that are not included
+	for (String file : loadedFiles) {
+		if (!hasFile(files, file)) {
+			attributes.add(createEntityAttribute(type, stripAttachedFilePath(file), null, null, null, true));
+		}
+	}
+
+	// add new attributes that are included
+	hasAttachment = false;
+	attachmentCount = 0;
+	for (String file : files) {
+		String filename = null;
+		if (!hasFile(loadedFiles, file)) {
+			hasAttachment = true;
+			filename = attachFile(file, true, null, "OnFilesAttached()");
+		} else {
+			for (String f : loadedFiles) {
+				if (f.equals(file)) {
+					filename = f;
+					break;
+				}
+			}
+		}
+		attributes.add(createEntityAttribute(type, stripAttachedFilePath(filename), null, null, null));
+	}
+
+	if (!hasAttachment) {
+		OnFilesAttached();
+	}
+}
+
+
+entitySaved = false;
+entityCallback = null;
+
+checkFilesAttached() {
+	if (entityCallback == null){
+		showToast("Finish saving record.");
+		return;
+	}
+
+	if (entitySaved && !isAttachingFiles()) {
+		closeBusyDialog();
+		showToast("Finish saving record.");
+		execute(entityCallback);
+	}
+}
+
+saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
+	showToast("Saving record. Please wait.");
+
+	showBusyDialog();
+
+	entitySaved = false;
+	entityCallback = callback;
+
+    List attributes = createAttributeList();
+
+    for (Object def : attributeDefs) {
+
+    	// name, text, vocab, measure, certainty
+    	if ("freetext".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("measure".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("vocab".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("files".equals(def.type)) {
+    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
+    	} else if ("attachments".equals(def.type)) {
+    		List pairs = getFieldValue(def.ref);
+    		ArrayList files = new ArrayList();
+    		for (NameValuePair pair : pairs) {
+    			files.add(pair.getName());
+    		}
+    		saveFiles(def.loadedFiles, files, def.name, attributes);
+    	} else if ("gps".equals(def.type)) {
+    		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
+	    		geoData = new ArrayList();
+	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
+	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
+	    		geoData.add(new Point(p, null, (PointStyle) null, null));
+	    	}
+    	}
+
+    }
+
+    saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
+
+    entitySaved = true;
+    checkFilesAttached();
+
+    return saved_id;
+}
+
+convertListToPairs(list) {
+	ArrayList pairs = new ArrayList();
+	if (list.size() == 1 && "None".equals(list.get(0))) return pairs;
+	for (String s : list) {
+		pairs.add(new NameValuePair(s, "true"));
+	}
+	return pairs;
+}
+
+saveEntitiesToRel(type, entity1, entity2) {
+	rel_id = saveRel(null, type, null, null);
+	addReln(entity1, rel_id, null);
+	addReln(entity2, rel_id, null);
+}
+
+selectGallery(ref, list) {
+	for (String s : list) {
+		setFieldValue(ref, s);
+	}
+}
+
+/*** USER ***/
+
+getDefaultUsersList() {
+    fetchOne("delete from user;");
+    fetchOne("INSERT INTO user VALUES(1, 'Steve', 'Wernke');");
+    fetchOne("INSERT INTO user VALUES(2, 'Gabriela', 'Oré Menéndez');");
+    fetchOne("INSERT INTO user VALUES(3, 'Carla', 'Hernández Garavito');");
+    fetchOne("INSERT INTO user VALUES(4, 'Teddy', 'Abel Traslaviña Arias');");
+    fetchOne("INSERT INTO user VALUES(5, 'Ryan', 'Smith');");
+    fetchOne("INSERT INTO user VALUES(6, 'Will', 'McCollum');");
+    fetchOne("INSERT INTO user VALUES(7, 'Hali', 'Thurber');");
+    fetchOne("INSERT INTO user VALUES(8, 'Scotti', 'Norman');");
+    fetchOne("INSERT INTO user VALUES(9, 'Diana', 'Carhuanina');");
+    fetchOne("INSERT INTO user VALUES(10, 'Arlen', 'Talaverano');");
+    fetchOne("INSERT INTO user VALUES(11, 'Lilian', 'Abrigo');");
+    fetchOne("INSERT INTO user VALUES(12, 'Silvana', 'Zegarra');");
+    fetchOne("INSERT INTO user VALUES(13, 'Mariella', 'Cabrera Boza');");
+    fetchOne("INSERT INTO user VALUES(14, 'Steve', 'Yerka');");
+    users = fetchAll("select userid, fname ||' ' || lname from user");
+    return users;
+
+
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+    populateDropDown("user/tab1/users", getDefaultUsersList());
+    populateList("user/tab1/devices", fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = 'Device' "));
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+
+    if (getFieldValue("user/tab1/devices") != ""){
+	    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
+	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
+	    device = deviceResult.get(0);
+	    setUser(user);
+	    username = userResult.get(1) + " " + userResult.get(2);
+	    showTabGroup("control");
+	} else {
+        showWarning("Logic Error", "Please Choose Device");
+    }
+}
+
+onEvent("user/tab1/login", "click", "login()");
+
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
+    return a;
+}
+
+makeGallery(String attrib){
+    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabname" );
+    return a;
+}
+
+/*** CONTROL ***/
+
+newStructure(){
+	structure_id = null;
+
+	structureFiles = getNoneList();
+	structureSketches = getNoneList();
+	structurePictures = new ArrayList();
+	structureVideos = new ArrayList();
+	structureAudios = getNoneList();
+
+    newTabGroup("structure");
+
+    populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
+    populateVideoGallery("structure/final/VideoGallery", structureVideos);
+    populateCheckBoxGroup("structure/final/AudioList",structureAudios);
+    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+    populateCheckBoxGroup("structure/final/filelist", structureFiles);
+
+    populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
+    populateDropDown("structure/info/Form", makeVocab("Form"));
+    populateList("structure/info/WallsInternalPartition", makeVocab("WallsInternalPartition"));
+    populateList("structure/info/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/info/InkaMasonry", makeVocab("InkaMasonry"));
+    populateList("structure/info/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/info/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/info/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/info/Classification", makeVocab("Classification"));
+    populateList("structure/info/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/info/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/info/RoofForm", makeVocab("RoofForm"));
+
+    setFieldValue("structure/info/Timestamp", getCurrentTime());
+    setFieldValue("structure/info/Author", username);
+    setFieldValue("structure/info/Device", device);
+
+
+    populateDropDown("structure/info/CornerExteriorForm", makeVocab("CornerExteriorForm"));
+    populateDropDown("structure/info/CornerInteriorForm", makeVocab("CornerInteriorForm"));
+
+    populatePictureGallery("structure/info/MasonryType", makeGallery("MasonryType"));
+
+    populateList("structure/info/DoorPosition", makeVocab("DoorPosition"));
+    populateList("structure/info/DoorMasonry", makeVocab("DoorMasonry"));
+    populateList("structure/info/DoorPreservation", makeVocab("DoorPreservation"));
+    populateList("structure/info/WindowsPresent", makeVocab("WindowsPresent"));
+    populateList("structure/info/NicheAltar", makeVocab("NicheAltar"));
+
+
+
+}
+
+
+newDoorway(){
+	doorway_id = null;
+
+    newTabGroup("doorway");
+    doorwayPictures = new ArrayList();
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
+    
+    populateDropDown("doorway/doorDetail/TypeOfDoorway", makeVocab("TypeOfDoorway"));
+    setFieldValue("doorway/doorDetail/Timestamp", getCurrentTime());
+    setFieldValue("doorway/doorDetail/Author", username);
+    setFieldValue("doorway/doorDetail/Device", device);
+
+    // set gps fields if geometry selected
+	//setDoorwayGPSFieldsFromPoint(getCreatedGeometry());
+}
+String niche_parent_id;
+
+
+newLichen(){
+	lichen_id = null;
+
+    newTabGroup("lichen");
+    lichenPictures = new ArrayList();
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
+    populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
+    populatePictureGallery("lichen/lichenDetail/LichenQuality", makeGallery("LichenQuality"));
+
+    populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
+    populateDropDown("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
+    setFieldValue("lichen/lichenDetail/Timestamp", getCurrentTime());
+    setFieldValue("lichen/lichenDetail/Author", username);
+    setFieldValue("lichen/lichenDetail/Device", device);
+
+     // set gps fields if geometry selected
+	//setLichenGPSFieldsFromPoint(getCreatedGeometry());
+}
+
+newFreeWall(){
+	wall_id = null;
+
+    newTabGroup("freeWall");
+    populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
+    populateDropDown("freeWall/freeWallDetail/WallClass", makeVocab("WallClass"));
+    populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
+    populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+    freewallPictures = new ArrayList();
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
+    setFieldValue("freeWall/freeWallDetail/Timestamp", getCurrentTime());
+    setFieldValue("freeWall/freeWallDetail/Author", username);
+    setFieldValue("freeWall/freeWallDetail/Device", device);
+
+}
+
+newFeature(){
+	feature_id = null;
+
+    newTabGroup("feature");
+    featurePictures = new ArrayList();
+    selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
+    setFieldValue("feature/featureDetail/Timestamp", getCurrentTime());
+    setFieldValue("feature/featureDetail/Author", username);
+    setFieldValue("feature/featureDetail/Device", device);
+}
+
+newSpecialFind(){
+	special_find_id = null;
+
+    newTabGroup("specialFind");
+    specialFindPictures = new ArrayList();
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
+    populateList("specialFind/findDetail/Type", makeVocab("Type"));
+    setFieldValue("specialFind/findDetail/Timestamp", getCurrentTime());
+    setFieldValue("specialFind/findDetail/Author", username);
+    setFieldValue("specialFind/findDetail/Device", device);
+
+}
+
+newSurfaceCollection(){
+	surface_collection_id = null;
+
+    newTabGroup("surfaceCollection");
+    populateDropDown("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
+    populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
+    populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
+    populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
+    setFieldValue("surfaceCollection/description/Timestamp", getCurrentTime());
+    setFieldValue("surfaceCollection/description/Author", username);
+    setFieldValue("surfaceCollection/description/Device", device);
+
+}
+
+newLot(){
+	lot_id = null;
+
+    newTabGroup("lot");
+    populateList("lot/lotDetail/Material", makeVocab("Material"));
+    setFieldValue("lot/lotDetail/Timestamp", getCurrentTime());
+    setFieldValue("lot/lotDetail/Author", username);
+    setFieldValue("lot/lotDetail/Device", device);
+
+}
+
+newCanal(){
+	canal_id = null;
+
+    newTabGroup("canal");
+    canalPictures = new ArrayList();
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
+    setFieldValue("canal/canalDetail/Timestamp", getCurrentTime());
+    setFieldValue("canal/canalDetail/Author", username);
+    setFieldValue("canal/canalDetail/Device", device);
+}
+
+onEvent("create/tab1/structure", "click", "newStructure()");
+onEvent("create/tab1/wall", "click", "newFreeWall()");
+onEvent("create/tab1/doorway", "click", "newDoorway()");
+onEvent("create/tab1/feature", "click", "newFeature()");
+onEvent("create/tab1/specialFind", "click", "newSpecialFind()");
+onEvent("create/tab1/lichen", "click", "newLichen()");
+onEvent("create/tab1/surfaceCollection", "click", "newSurfaceCollection()");
+onEvent("create/tab1/canal", "click", "newCanal()");
+
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+setGPSUpdateInterval(4);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+
+}
+
+syncStarted() {
+}
+
+syncCompleted() {
+}
+
+syncFailed() {
+}
+
+
+onEvent("surfaceCollection/material/Lot", "click", "newLot()");
+
+
+
+/*** CANAL ***/
+
+ArrayList canalPictures = new ArrayList();
+String canal_id = null;
+
+takecanalPicture() {
+    openCamera("OncanalPictureTaken()");
+}
+
+OncanalPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("canal/canalDetail/PhotoGallery", pictureFilepath, canalPictures);
+}
+
+onEvent("canal/canalDetail/Photos", "click", "takecanalPicture()");
+onEvent("canal/canalDetail/Update", "delayclick", "saveCanal(canal_id)");
+onEvent("canal/canalDetail/Update2", "delayclick", "saveCanal(canal_id)");
+onEvent("canal/canalDetail/Delete", "click", "deleteCanal()");
+
+deleteCanal(){
+	if (!isNull(canal_id)) {
+		showAlert("Confirm Deletion", "Press OK to Delete this Niche!", "reallyDeleteCanal()", "doNotDelete()");
+
+	}
+}
+
+
+
+reallyDeleteCanal(){
+    deleteArchEnt(canal_id);
+    cancelTabGroup("canal", false);
+}
+saveCanal(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("canal/canalDetail/CanalID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	canal_id = updateCanal(id);
+	clearCreatedGeometry();
+}
+
+updateCanal(id) {
+	if (isNull(id)) id = null;
+
+    canalPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("CanalID", "freetext", "canal/canalDetail/CanalID", false),
+    	AttributeDef("Timestamp", "freetext", "canal/canalDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "canal/canalDetail/Author", false),
+    	AttributeDef("Device", "freetext", "canal/canalDetail/Device", false),
+    	AttributeDef("InternalWidth", "measure", "canal/canalDetail/InternalWidth"),
+    	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
+    	AttributeDef("Notes", "freetext", "canal/canalDetail/Notes"),
+    	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Canal", attributeDefs, data, "loadCanalFileAttributes(canal_id);");
+}
+
+/*** WINDOW ***/
+
+String window_id = null;
+ArrayList windowPictures = new ArrayList();
+
+takeWindowPicture() {
+    openCamera("OnWindowPictureTaken()");
+}
+
+OnWindowPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("window/windowDetail/PhotoGallery", pictureFilepath, windowPictures);
+}
+
+onEvent("window/windowDetail/WindowPhotos", "click", "takeWindowPicture()");
+
+onEvent("window/windowDetail/Update", "delayclick", "saveWindow(window_id)");
+onEvent("window/windowDetail/Update2", "delayclick", "saveWindow(window_id)");
+onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
+
+
+associateWithWindow() {
+	id = getFieldValue("window/windowDetail/AssociateWithList");
+	if (isNull(id)) {
+		showWarning("Logic Error", "Please select an id to associate with");
+		return;
+	}
+	if (isNull(window_id)) {
+		showWarning("Logic Error", "Please save record before associating with");
+		return;
+	}
+	saveEntitiesToRel("WindowIn", window_id, id);
+	showToast("Successfuly associated.");
+}
+
+
+saveWindow(id) {
+	if (isNull(getFieldValue("window/windowDetail/WindowID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;
+	}
+	window_id = updateWindow(id);
+}
+
+deleteWindow(){
+	if (!isNull(window_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Window!", "reallyDeleteWindow()", "doNotDelete()");
+	}
+}
+reallyDeleteWindow(){
+    deleteArchEnt(window_id);
+    cancelTabGroup("window", false);
+}
+
+updateWindow(id) {
+	if (isNull(id)) id = null;
+
+    windowPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("WindowPhotos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("WindowID", "freetext", "window/windowDetail/WindowID", false),
+    	AttributeDef("Timestamp", "freetext", "window/windowDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "window/windowDetail/Author", false),
+    	AttributeDef("Device", "freetext", "window/windowDetail/Device", false),
+    	AttributeDef("WindowPosition", "freetext", "window/windowDetail/WindowPosition"),
+    	AttributeDef("WindowHeight", "measure", "window/windowDetail/WindowHeight"),
+    	AttributeDef("WindowWidth", "measure", "window/windowDetail/WindowWidth"),
+    	AttributeDef("WindowHeightPreservation", "vocab", "window/windowDetail/WindowHeightPreservation"),
+    	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
+    	};
+    // TODO update the window count on structure wall and window recorded on structure
+    saved_id = saveEntity(id, "Window", attributeDefs, null, "loadWindowFileAttributes(window_id);");
+
+
+
+        // save corner to structure if new corner
+        if (isNull(id)) {
+            saveEntitiesToRel("WindowIn", parent_window_id, saved_id);
+        }
+
+        return saved_id;
+}
+
+/*** SPECIAL FIND ***/
+
+String special_find_id = null;
+ArrayList specialFindPictures = new ArrayList();
+
+takespecialFindPicture() {
+    openCamera("OnspecialFindPictureTaken()");
+}
+
+OnspecialFindPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("specialFind/findDetail/PhotoGallery", pictureFilepath, specialFindPictures);
+}
+
+onEvent("specialFind/findDetail/Photos", "click", "takespecialFindPicture()");
+
+onEvent("specialFind/findDetail/Update", "delayclick", "saveSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Update2", "delayclick", "saveSpecialFind(special_find_id)");
+onEvent("specialFind/findDetail/Delete", "click", "deleteSpecialFind()");
+onEvent("specialFind/findDetail/AssociateWith", "click", "associateWithSpecialFind()");
+
+
+associateWithSpecialFind() {
+    id = getFieldValue("specialFind/findDetail/AssociateWithList");
+    type = "StructureContains";
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (isNull(special_find_id)) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, special_find_id, id);
+    showToast("Successfuly associated.");
+}
+
+deleteSpecialFind(){
+	if (!isNull(special_find_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Special Find!", "reallyDeleteSpecialFind()", "doNotDelete()");
+	}
+}
+reallyDeleteSpecialFind(){
+    deleteArchEnt(special_find_id);
+    cancelTabGroup("specialFind", false);
+}
+saveSpecialFind(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("specialFind/findDetail/SpecialFindID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	special_find_id = updateSpecialFind(id);
+	clearCreatedGeometry();
+}
+
+updateSpecialFind(id) {
+	if (isNull(id)) id = null;
+
+    specialFindPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("SpecialFindID", "freetext", "specialFind/findDetail/SpecialFindID", false),
+    	AttributeDef("Timestamp", "freetext", "specialFind/findDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "specialFind/findDetail/Author", false),
+    	AttributeDef("Device", "freetext", "specialFind/findDetail/Device", false),
+    	AttributeDef("Description", "freetext", "specialFind/findDetail/Description"),
+    	AttributeDef("Type", "vocab", "specialFind/findDetail/Type"),
+    	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "SpecialFind", attributeDefs, data, "loadSpecialFindFileAttributes(special_find_id);");
+}
+
+/*** FEATURES ***/
+
+String feature_id = null;
+ArrayList featurePictures = new ArrayList();
+
+takeFeaturePicture() {
+    openCamera("OnFeaturePictureTaken()");
+}
+
+OnFeaturePictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("feature/featureDetail/PhotoGallery", pictureFilepath, featurePictures);
+}
+
+onEvent("feature/featureDetail/Photos", "click", "takeFeaturePicture()");
+
+onEvent("feature/featureDetail/Update", "delayclick", "saveFeature(feature_id)");
+onEvent("feature/featureDetail/Update2", "delayclick", "saveFeature(feature_id)");
+onEvent("feature/featureDetail/Delete", "click", "deleteFeature()");
+onEvent("feature/featureDetail/AssociateWith", "click", "associateWithFeature()");
+
+associateWithFeature() {
+    id = getFieldValue("feature/featureDetail/AssociateWithList");
+    type = "StructureContains";
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (isNull(feature_id)) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, feature_id, id);
+    showToast("Successfuly associated.");
+}
+
+deleteFeature(){
+	if (!isNull(feature_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Feature!", "reallyDeleteFeature()", "doNotDelete()");
+	}
+}
+reallyDeleteFeature(){
+        deleteArchEnt(feature_id);
+        cancelTabGroup("feature", false);
+}
+
+saveFeature(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("feature/featureDetail/FeatureID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	feature_id = updateFeature(id);
+	clearCreatedGeometry();
+}
+
+updateFeature(id) {
+	if (isNull(id)) id = null;
+
+    featurePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("FeatureID", "freetext", "feature/featureDetail/FeatureID", false),
+    	AttributeDef("Timestamp", "freetext", "feature/featureDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "feature/featureDetail/Author", false),
+    	AttributeDef("Device", "freetext", "feature/featureDetail/Device", false),
+    	AttributeDef("Description", "freetext", "feature/featureDetail/Description"),
+    	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Feature", attributeDefs, data, "loadFeatureFileAttributes(feature_id);");
+}
+
+/*** FREEWALL ***/
+
+String wall_id = null;
+ArrayList freewallPictures = new ArrayList();
+
+takeFreewallPicture() {
+    openCamera("OnFreewallPictureTaken()");
+}
+
+OnFreewallPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("freeWall/freeWallDetail/PhotoGallery", pictureFilepath, freewallPictures);
+}
+
+onEvent("freeWall/freeWallDetail/Photos", "click", "takeFreewallPicture()");
+
+onEvent("freeWall/freeWallDetail/Update", "delayclick", "saveFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Update2", "delayclick", "saveFreeWall(wall_id)");
+onEvent("freeWall/freeWallDetail/Delete", "click", "deleteFreeWall()");
+
+onEvent("freeWall/freeWallDetail/AssociateWith", "click", "associateWithFreeWall()");
+
+associateWithFreeWall() {
+    id = getFieldValue("freeWall/freeWallDetail/AssociateWithList");
+    type = "WallWith";
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (isNull(wall_id)) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, wall_id, id);
+    showToast("Successfuly associated.");
+}
+
+deleteFreeWall(){
+	if (!isNull(wall_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Free Wall!", "reallyDeleteFreeWall()", "doNotDelete()");
+	}
+}
+reallyDeleteFreeWall(){
+    deleteArchEnt(wall_id);
+    cancelTabGroup("freeWall", false);
+}
+
+saveFreeWall(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("freeWall/freeWallDetail/WallID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	wall_id = updateFreeWall(id);
+	clearCreatedGeometry();
+}
+
+updateFreeWall(id) {
+	if (isNull(id)) id = null;
+
+    freewallPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("WallPhotos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("WallID", "freetext", "freeWall/freeWallDetail/WallID", false),
+    	AttributeDef("Timestamp", "freetext", "freeWall/freeWallDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "freeWall/freeWallDetail/Author", false),
+    	AttributeDef("Device", "freetext", "freeWall/freeWallDetail/Device", false),
+    	AttributeDef("WallDescription", "freetext", "freeWall/freeWallDetail/WallDescription"),
+    	AttributeDef("WallClass", "vocab", "freeWall/freeWallDetail/WallClass"),
+    	AttributeDef("WallPreservation", "vocab", "freeWall/freeWallDetail/WallPreservation"),
+    	AttributeDef("MasonryType", "vocab", "freeWall/freeWallDetail/MasonryType"),
+    	AttributeDef("MasonryDescription", "freetext", "freeWall/freeWallDetail/MasonryDescription"),
+    	AttributeDef("WallHeight", "measure", "freeWall/freeWallDetail/WallHeight"),
+    	AttributeDef("WallHeightPreservation", "vocab", "freeWall/freeWallDetail/WallHeightPreservation"),
+    	AttributeDef("WallThickness", "measure", "freeWall/freeWallDetail/WallThickness"),
+    	AttributeDef("WallComments", "freetext", "freeWall/freeWallDetail/WallComments"),
+    	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Wall", attributeDefs, data, "loadWallFileAttributes(wall_id);");
+
+}
+
+/*** DOORWAY ***/
+
+String doorway_id = null;
+ArrayList doorwayPictures = new ArrayList();
+
+takeDoorwayPicture() {
+    openCamera("OnDoorwayPictureTaken()");
+}
+
+OnDoorwayPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("doorway/doorDetail/PhotoGallery", pictureFilepath, doorwayPictures);
+}
+
+onEvent("doorway/doorDetail/DoorPhotos", "click", "takeDoorwayPicture()");
+
+onEvent("doorway/doorDetail/Update", "delayclick", "saveDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Update2", "delayclick", "saveDoorway(doorway_id)");
+onEvent("doorway/doorDetail/Delete", "click", "deleteDoorway()");
+
+onEvent("doorway/doorDetail/AssociateWith", "click", "associateWithDoorway()");
+
+associateWithDoorway() {
+    id = getFieldValue("doorway/doorDetail/AssociateWithList");
+    type = "DoorwayIn";
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (isNull(doorway_id)) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, doorway_id, id);
+    showToast("Successfuly associated.");
+}
+
+deleteDoorway(){
+	if (!isNull(doorway_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Doorway!", "reallyDeleteDoorway()", "doNotDelete()");
+	}
+}
+reallyDeleteDoorway(){
+        deleteArchEnt(doorway_id);
+        cancelTabGroup("doorway", false);
+    }
+
+saveDoorway(id) {
+	
+	if (id == null && (getCreatedGeometry() == null) ||
+		isNull(getFieldValue("doorway/doorDetail/DoorID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	doorway_id = updateDoorway(id);
+	clearCreatedGeometry();
+}
+
+updateDoorway(id) {
+	if (isNull(id)) id = null;
+
+    doorwayPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("DoorPhotos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("DoorID", "freetext", "doorway/doorDetail/DoorID", false),
+    	AttributeDef("Timestamp", "freetext", "doorway/doorDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "doorway/doorDetail/Author", false),
+    	AttributeDef("Device", "freetext", "doorway/doorDetail/Device", false),
+    	AttributeDef("TypeOfDoorway", "vocab", "doorway/doorDetail/TypeOfDoorway"),
+    	AttributeDef("DoorDescription", "freetext", "doorway/doorDetail/DoorDescription"),
+        AttributeDef("DoorBaseWidth", "measure", "doorway/doorDetail/DoorBaseWidth"),
+    	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
+    	
+    	};
+
+	// TODO update the doorway count in the structure wall and in structure
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Doorway", attributeDefs, data, "loadDoorwayFileAttributes(doorway_id);");
+}
+
+/*** LICHEN ***/
+
+String lichen_id = null;
+ArrayList lichenPictures = new ArrayList();
+
+takeLichenPicture() {
+    openCamera("OnLichenPictureTaken()");
+}
+
+OnLichenPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("lichen/lichenDetail/PhotoGallery", pictureFilepath, lichenPictures);
+}
+
+onEvent("lichen/lichenDetail/Photos", "click", "takeLichenPicture()");
+
+onEvent("lichen/lichenDetail/Update", "delayclick", "saveLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Update2", "delayclick", "saveLichen(lichen_id)");
+onEvent("lichen/lichenDetail/Delete", "click", "deleteLichen()");
+
+onEvent("lichen/lichenDetail/AssociateWith", "click", "associateWithLichen()");
+
+associateWithLichen() {
+    id = getFieldValue("lichen/lichenDetail/AssociateWithList");
+    type = "LichenAttachedTo";
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(type)) {
+        showWarning("Logic Error", "Please select a type to associate with");
+        return;
+    }
+    if (isNull(lichen_id)) {
+        showWarning("Logic Error", "Please save lichen before associating with");
+        return;
+    }
+    saveEntitiesToRel(type, lichen_id, id);
+
+    showToast("Successfuly associated.");
+}
+
+deleteLichen(){
+	if (!isNull(lichen_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Lichen!", "reallyDeleteLichen()", "doNotDelete()");
+	}
+}
+reallyDeleteLichen(){
+    deleteArchEnt(lichen_id);
+    cancelTabGroup("lichen", false);
+}
+saveLichen(id) {
+	
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("lichen/lichenDetail/LichenID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	lichen_id = updateLichen(id);
+	clearCreatedGeometry();
+}
+
+updateLichen(id) {
+	if (isNull(id)) id = null;
+
+    lichenPictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("LichenID", "freetext", "lichen/lichenDetail/LichenID", false),
+    	AttributeDef("Timestamp", "freetext", "lichen/lichenDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "lichen/lichenDetail/Author", false),
+    	AttributeDef("Device", "freetext", "lichen/lichenDetail/Device", false),
+    	AttributeDef("Size", "measure", "lichen/lichenDetail/Size"),
+    	AttributeDef("Substrate", "vocab", "lichen/lichenDetail/Substrate"),
+    	AttributeDef("LichenQuality", "freetext", "lichen/lichenDetail/LichenQuality"),
+    	AttributeDef("Aspect", "vocab", "lichen/lichenDetail/Aspect"),
+    	AttributeDef("InsideOutside", "vocab", "lichen/lichenDetail/InsideOutside"),
+    	AttributeDef("Comments", "freetext", "lichen/lichenDetail/Comments"),
+    	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Lichen", attributeDefs, data, "loadLichenFileAttributes(lichen_id);");
+}
+
+
+/*** SURFACE COLLECTION ***/
+
+String surface_collection_id = null;
+
+onEvent("surfaceCollection/material/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Update2", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/description/Update", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/description/Update2", "delayclick", "saveSurfaceCollection(surface_collection_id)");
+onEvent("surfaceCollection/material/Delete", "click", "deleteSurfaceCollection()");
+
+//fooo
+onEvent("surfaceCollection/description/AssociateWith", "delayclick", "associateWithSurfaceCollection()");
+
+
+
+associateWithSurfaceCollection() {
+    id = getFieldValue("surfaceCollection/description/AssociateWithList");
+    if (isNull(id)) {
+        showWarning("Logic Error", "Please select an id to associate with");
+        return;
+    }
+    if (isNull(surface_collection_id)) {
+        showWarning("Logic Error", "Please save record before associating with");
+        return;
+    }
+    saveEntitiesToRel("StructureContains", surface_collection_id, id);
+    showToast("Successfuly associated.");
+
+}
+
+
+//TODO Make automatic lot association
+
+
+saveSurfaceCollection(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("surfaceCollection/description/SurfaceCollectionID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	surface_collection_id = updateSurfaceCollection(id);
+	clearCreatedGeometry();
+}
+
+deleteSurfaceCollection(){
+	if (!isNull(surface_collection_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Surface Collection!", "reallyDeleteSurfaceCollection()", "doNotDelete()");
+
+
+	}
+}
+reallyDeleteSurfaceCollection(){
+    deleteArchEnt(surface_collection_id);
+    cancelTabGroup("surfaceCollection", false);
+}
+updateSurfaceCollection(id) {
+	if (isNull(id)) id = null;
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+	}
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("SurfaceCollectionID", "freetext", "surfaceCollection/description/SurfaceCollectionID", false),
+    	AttributeDef("Timestamp", "freetext", "surfaceCollection/description/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "surfaceCollection/description/Author", false),
+    	AttributeDef("Device", "freetext", "surfaceCollection/description/Device", false),
+        AttributeDef("Radius", "measure", "surfaceCollection/description/Radius"),
+    	AttributeDef("SurfaceCollectionContext", "vocab", "surfaceCollection/description/SurfaceCollectionContext"),
+    	AttributeDef("ContextDescription", "freetext", "surfaceCollection/description/ContextDescription"),
+    	AttributeDef("DiagnosticsPresent", "vocab", "surfaceCollection/material/DiagnosticsPresent"),
+    	AttributeDef("MaterialDensity", "vocab", "surfaceCollection/material/MaterialDensity"),
+    	AttributeDef("Comments", "freetext", "surfaceCollection/material/Comments"),
+    	AttributeDef("LotLabPriority", "vocab", "surfaceCollection/material/LotLabPriority"),
+    	AttributeDef("LotNumbers", "freetext", "surfaceCollection/material/LotNumbers")
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "SurfaceCollection", attributeDefs, data, "");
+
+}
+
+/*** LOT ***/
+
+String lot_id = null;
+
+onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
+onEvent("lot/lotDetail/Update2", "click", "lot_id = saveLot(lot_id)");
+onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
+
+deleteLot(){
+	if (!isNull(lot_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Lot!", "reallyDeleteLot()", "doNotDelete()");
+
+
+	}
+}
+reallyDeleteLot(){
+    deleteArchEnt(lot_id);
+    cancelTabGroup("lot", false);
+}
+
+saveLot(id) {
+	if (isNull(getFieldValue("lot/lotDetail/LotID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;
+	}
+	lot_id = updateLot(id);
+}
+
+updateLot(id) {
+	if (isNull(id)) id = null;
+
+    if (isNull(surface_collection_id)) {
+        showWarning("Logic Error", "Lot cannot be saved as parent surface collection is not saved or loaded.");
+        return null;
+    } else {
+
+   		Object[] attributeDefs = new Object[] {
+    	AttributeDef("LotID", "freetext", "lot/lotDetail/LotID", false),
+    	AttributeDef("Timestamp", "freetext", "lot/lotDetail/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "lot/lotDetail/Author", false),
+    	AttributeDef("Device", "freetext", "lot/lotDetail/Device", false),
+    	AttributeDef("Material", "vocab", "lot/lotDetail/Material")
+    	};
+
+        saved_id = saveEntity(id, "Lot", attributeDefs, null, "");
+
+
+        // save lot to surface collection
+        if (isNull(id)) {
+            saveEntitiesToRel("SurfaceLot", surface_collection_id, saved_id);
+        }
+
+        return saved_id;
+
+    }
+
+}
+
+/*** STRUCTURE ***/
+
+getNoneList() {
+	list = new ArrayList();
+	list.add("None");
+	return list;
+}
+
+ArrayList structureFiles = getNoneList();
+ArrayList structureSketches = getNoneList();
+ArrayList structurePictures = new ArrayList();
+ArrayList structureVideos = new ArrayList();
+ArrayList structureAudios = getNoneList();
+
+String structure_id = null;
+
+attachFile() {
+    showFileBrowser("setFilename()");
+}
+
+setFilename() {
+	if (structureFiles.get(0).equals("None")) {
+		structureFiles.clear();
+	}
+
+	structureFiles.add(getLastSelectedFilepath());
+	populateCheckBoxGroup("structure/final/filelist", structureFiles);
+	setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
+}
+
+attachSketchFile() {
+    showFileBrowser("setSketchFilename()");
+}
+
+setSketchFilename() {
+	if (structureSketches.get(0).equals("None")) {
+		structureSketches.clear();
+	}
+
+    structureSketches.add(getLastSelectedFilepath());
+	populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+	setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
+}
+
+takePicture() {
+    openCamera("OnPictureTaken()");
+}
+
+OnPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("structure/final/PhotoGallery", pictureFilepath, structurePictures);
+}
+
+takeVideo() {
+    openVideo("OnVideoTaken()");
+}
+
+OnVideoTaken() {
+    videoFilepath = getLastVideoFilePath();
+    addToVideoGallery("structure/final/VideoGallery", videoFilepath, structureVideos);
+}
+
+recordAudio(){
+    recordAudio("OnAudioRecorded()");
+}
+
+OnAudioRecorded(){
+	if (structureAudios.get(0).equals("None")) {
+		structureAudios.clear();
+	}
+
+    audioFilePath = getLastAudioFilePath();
+    structureAudios.add(audioFilePath);
+    populateCheckBoxGroup("structure/final/AudioList", structureAudios);
+    setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
+}
+onFocus("structure/info/ArchaeologicalElementID", null, "duplicateEAID()");
+onEvent("structure/final/AddAttachment", "click", "attachFile()");
+onEvent("structure/final/Sketch", "click", "attachSketchFile()");
+onEvent("structure/final/Photo", "click", "takePicture()");
+onEvent("structure/final/Video", "click", "takeVideo()");
+onEvent("structure/final/Audio", "click", "recordAudio()");
+
+onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/final/Update2", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/info/Update2", "delayclick", "saveStructure(structure_id)");
+
+onEvent("structure/final/Delete", "click", "deleteStructure()");
+
+onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
+duplicateEAID(){
+    eaid = getFieldValue("structure/info/ArchaeologicalElementID");
+    setFieldValue("structure/final/EAidDupe", eaid);
+
+
+}
+
+saveStructure(id) {
+	if ((id == null && getCreatedGeometry() == null) ||
+		isNull(getFieldValue("structure/info/ArchaeologicalElementID"))) {
+
+		showWarning("Logic Error", "Cannot save record without geometry or id");
+		return;
+	}
+	structure_id = updateStructure(id);
+	clearCreatedGeometry();
+}
+
+deleteStructure(){
+	if (!isNull(structure_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Structure!", "reallyDeleteStructure()", "doNotDelete()");
+
+
+	}
+}
+reallyDeleteStructure(){
+    deleteArchEnt(structure_id);
+    cancelTabGroup("structure", false);
+}
+updateStructure(id){
+    if (isNull(id)) id = null;
+
+    structureFiles = getNoneList();
+	structureSketches = getNoneList();
+	structurePictures = new ArrayList();
+	structureVideos = new ArrayList();
+	structureAudios = getNoneList();
+
+	ArrayList loadedSketches = new ArrayList();
+	ArrayList loadedFiles = new ArrayList();
+	ArrayList loadedPictures = new ArrayList();
+	ArrayList loadedVideos = new ArrayList();
+	ArrayList loadedAudios = new ArrayList();
+
+	entity = null;
+	if (!isNull(id)) {
+		entity = fetchArchEnt(structure_id); // IS THIS A BUG?
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photo".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			} else if ("sketchfilename".equals(attribute.getName())) {
+				loadedSketches.add(attribute.getText());
+			} else if ("filename".equals(attribute.getName())) {
+				loadedFiles.add(attribute.getText());
+			} else if ("video".equals(attribute.getName())) {
+				loadedVideos.add(getAttachedFilePath(attribute.getText()));
+			} else if ("audio".equals(attribute.getName())) {
+				loadedAudios.add(attribute.getText());
+			}
+		}
+
+	}
+
+
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("ArchaeologicalElementID", "freetext", "structure/info/ArchaeologicalElementID", false),
+    	AttributeDef("Description", "freetext", "structure/info/Description"),
+    	AttributeDef("Timestamp", "freetext", "structure/info/Timestamp", false),
+    	AttributeDef("Author", "freetext" , "structure/info/Author", false),
+    	AttributeDef("Device", "freetext", "structure/info/Device", false),
+    	AttributeDef("Form", "vocab", "structure/info/Form",true),
+    	AttributeDef("FormDescription", "freetext", "structure/info/FormDescription",true),
+        AttributeDef("CornerExteriorForm", "vocab", "structure/info/CornerExteriorForm",true),
+        AttributeDef("CornerInteriorForm", "vocab", "structure/info/CornerInteriorForm",true),
+    	AttributeDef("ConstructionPeriod", "vocab", "structure/info/ConstructionPeriod"),
+    	AttributeDef("ConstructionPeriodDescription", "freetext", "structure/info/ConstructionPeriodDescription"),
+    	AttributeDef("Modifications", "vocab", "structure/info/Modifications"),
+    	AttributeDef("ModificationDescription", "freetext", "structure/info/ModificationDescription"),
+    	AttributeDef("PrincipalFunction", "vocab", "structure/info/PrincipalFunction"),
+    	AttributeDef("PrincipalFunctionDescription", "freetext", "structure/info/PrincipalFunctionDescription"),
+    	AttributeDef("Classification", "vocab", "structure/info/Classification"),
+    	AttributeDef("ConstructionQuality", "vocab", "structure/info/ConstructionQuality"),
+    	
+        AttributeDef("InkaMasonry", "vocab", "structure/info/InkaMasonry"),
+        AttributeDef("InkaMasonryDescription", "freetext", "structure/info/InkaMasonryDescription"),
+        
+        AttributeDef("DoorOrientation", "measure", "structure/info/DoorOrientation"),
+        AttributeDef("DoorPosition", "vocab", "structure/info/DoorPosition"),
+        AttributeDef("DoorMasonry", "vocab", "structure/info/DoorMasonry"),
+        AttributeDef("DoorHeight", "measure", "structure/info/DoorHeight"),
+
+        AttributeDef("DoorTopWidth", "measure", "structure/info/DoorTopWidth"),
+        AttributeDef("DoorBaseWidth", "measure", "structure/info/DoorBaseWidth"),
+        AttributeDef("DoorOtherWidth", "measure", "structure/info/DoorOtherWidth"),
+        AttributeDef("DoorOtherWidthHeight", "measure", "structure/info/DoorOtherWidthHeight"),
+
+        AttributeDef("DoorPreservation", "vocab", "structure/info/DoorPreservation"),
+        AttributeDef("DoorJambHeight", "measure", "structure/info/DoorJambHeight"),
+        AttributeDef("WallThickness", "measure", "structure/info/WallThickness"),
+
+        AttributeDef("WindowDescription", "freetext", "structure/info/WindowDescription"),
+        AttributeDef("WindowsPresent", "vocab", "structure/info/WindowsPresent"),
+
+
+
+        AttributeDef("MasonryType", "vocab", "structure/info/MasonryType"),
+        AttributeDef("MasonryDescription", "freetext", "structure/info/MasonryDescription"),
+    	AttributeDef("WallsInternalPartition", "vocab", "structure/info/WallsInternalPartition"),
+    	AttributeDef("PartitionDescription", "freetext", "structure/info/PartitionDescription"),
+    	AttributeDef("StuccoInterior", "vocab", "structure/info/StuccoInterior"),
+    	AttributeDef("StuccoExterior", "vocab", "structure/info/StuccoExterior"),
+        AttributeDef("WallHeight", "measure", "structure/info/WallHeight", true),
+        AttributeDef("WallHeightMax", "measure", "structure/info/WallHeightMax", true),
+        AttributeDef("GableWallHeight", "measure", "structure/info/GableWallHeight", true),
+        AttributeDef("GableWallMaxPreservedHeight", "measure", "structure/info/GableWallMaxPreservedHeight", true),
+        AttributeDef("GableDistance", "measure", "structure/info/GableDistance", true),
+    	
+    	AttributeDef("NicheCount", "measure", "structure/info/NicheCount"),
+        
+        AttributeDef("NicheWall1", "measure", "structure/info/NicheWall1"),
+        AttributeDef("NicheCorner1", "measure", "structure/info/NicheCorner1"),
+        AttributeDef("NicheWall2", "measure", "structure/info/NicheWall2"),
+        AttributeDef("NicheCorner2", "measure", "structure/info/NicheCorner2"),
+        AttributeDef("NicheWall3", "measure", "structure/info/NicheWall3"),
+        AttributeDef("NicheCorner3", "measure", "structure/info/NicheCorner3"),
+        AttributeDef("NicheWall4", "measure", "structure/info/NicheWall4"),
+        AttributeDef("NicheCorner4", "measure", "structure/info/NicheCorner4"),
+        AttributeDef("NicheWall5", "measure", "structure/info/NicheWall5"),
+        
+        AttributeDef("NicheAltar", "vocab", "structure/info/NicheAltar"),
+        AttributeDef("NicheDescription", "freetext", "structure/info/NicheDescription"),
+
+    	AttributeDef("FloorRemainsDescription", "freetext", "structure/info/FloorRemainsDescription"),
+    	AttributeDef("RoofForm", "vocab", "structure/info/RoofForm"),
+    	AttributeDef("LongAxis", "measure", "structure/info/LongAxis"),
+    	AttributeDef("ShortAxis", "measure", "structure/info/ShortAxis"),
+    	AttributeDef("Diameter", "measure", "structure/info/Diameter"),
+    	AttributeDef("Preservation", "vocab", "structure/info/Preservation"),
+    	AttributeDef("PreservationDescription", "freetext", "structure/info/PreservationDescription"),
+    	AttributeDef("SurfaceCondition", "freetext", "structure/info/SurfaceCondition"),
+    	AttributeDef("ModernUse", "freetext", "structure/info/ModernUse"),
+    	AttributeDef("Disturbances", "freetext", "structure/info/Disturbances"),
+    	AttributeDef("OtherArchitecturalDetails", "freetext", "structure/info/OtherArchitecturalDetails"),
+    	AttributeDef("Photo", "files", "structure/final/PhotoGallery", loadedPictures),
+    	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches),
+    	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles),
+    	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos),
+    	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
+    	};
+
+	data = getCreatedGeometry();
+	if (entity != null) {
+		data = entity.getGeometryList();
+	}
+    return saveEntity(id, "Structure", attributeDefs, data, "loadStructureFileAttributes(structure_id);");
+}
+
+/*** LOAD ***/
+
+updateAllSurfaceCollection() {
+	Object lot = fetchEntityList("Lot");
+	populateDropDown("surfaceCollection/load/lotList", lot);
+
+
+    Object structure =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('Structure')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid order by valuetimestamp desc;\n");
+    populateDropDown("surfaceCollection/description/AssociateWithList", structure);
+
+
+
+
+}
+
+updateAllSpecialFind() {
+	Object structure = fetchEntityList("Structure");
+	populateDropDown("specialFind/findDetail/AssociateWithList", structure);
+}
+
+
+
+
+/*
+updateAllWindow() {
+	Object structureWallFreeWall =   fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('StructureWall', 'Wall')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid;\n");
+	populateDropDown("window/windowDetail/AssociateWithList", structureWallFreeWall);
+}*/
+/*
+updateAllNiche() {
+	Object sWallsAndCorners =   fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('StructureWall', 'Corner')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid;\n");
+	populateDropDown("niche/nicheDetail/AssociateWithList", sWallsAndCorners);
+}
+*/
+updateAllFreeWall() {
+	Object fWallsAndStructures =  fetchAll("select '', '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('Structure', 'Wall')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid order by valuetimestamp desc;\n");
+	populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
+}
+
+updateAllDoorway() {
+	Object structureStructureWallFreeWall =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('StructureWall', 'Structure', 'Wall')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid order by valuetimestamp desc;\n");
+
+	populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
+}
+
+updateAllLichen() {
+	Object allEntities =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid order by valuetimestamp desc;\n");
+    populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
+}
+
+updateAllFeature() {
+	Object structure =  fetchAll("select '' as uuid, '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
+        "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
+        "         FROM aentvalue  JOIN attributekey USING (attributeid)\n"+
+        "         join archentity USING (uuid)\n"+
+        "         join aenttype USING (aenttypeid)\n"+
+        "         join (select attributeid, aenttypeid\n"+
+        "                 from idealaent join aenttype using (aenttypeid)\n"+
+        "                 where isIdentifier is 'true'\n"+
+        "                 and aenttypename IN ('Structure')\n"+
+        "                 ) USING (attributeid, aenttypeid)\n"+
+        "         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+        "         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp\n"+
+        "               FROM aentvalue\n"+
+        "                GROUP BY uuid, attributeid)\n"+
+        "         USING (uuid, attributeid, valuetimestamp)\n"+
+        "         JOIN (SELECT uuid, max(aenttimestamp) as aenttimestamp\n"+
+        "               FROM archentity\n"+
+        "               group by uuid) USING (uuid, aenttimestamp)\n"+
+        "         WHERE aentvalue.deleted is NULL\n"+
+        "           and archentity.deleted is NULL\n"+
+        "         ORDER BY uuid, attributename ASC)\n"+
+        "group by uuid order by valuetimestamp desc;\n");
+	populateDropDown("feature/featureDetail/AssociateWithList", structure);
+}
+
+updateAll(){
+	Object structure = fetchEntityList("Structure");
+	Object wall = fetchEntityList("Wall");
+	Object doorway = fetchEntityList("Doorway");
+	Object feature = fetchEntityList("Feature");
+	Object specialFind = fetchEntityList("SpecialFind");
+	Object lichen = fetchEntityList("Lichen");
+	Object surfaceCollection = fetchEntityList("SurfaceCollection");
+	Object canal = fetchEntityList("Canal");
+	
+
+	populateDropDown("control/data/structureList", structure);
+	populateDropDown("control/data/wallList", wall);
+	populateDropDown("control/data/doorwayList", doorway);
+	populateDropDown("control/data/featureList", feature);
+	populateDropDown("control/data/specialFindList", specialFind);
+	populateDropDown("control/data/lichenList", lichen);
+	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
+	populateDropDown("control/data/canalList", canal);
+	
+}
+
+onEvent("control", "show", "updateAll()");
+onEvent("feature", "show", "updateAllFeature()");
+onEvent("lichen", "show", "updateAllLichen()");
+onEvent("doorway", "show", "updateAllDoorway()");
+onEvent("freeWall", "show", "updateAllFreeWall()");
+
+onEvent("specialFind", "show", "updateAllSpecialFind()");
+onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
+
+loadStructure() {
+	structure_id = getFieldValue("control/data/structureList");
+	if (isNull(structure_id)) return;
+	populateCheckBoxGroup("structure/final/AudioList",structureAudios);
+    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+    populateCheckBoxGroup("structure/final/filelist", structureFiles);
+
+    populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
+    populateVideoGallery("structure/final/VideoGallery", structureVideos);
+    populateCheckBoxGroup("structure/final/AudioList",structureAudios);
+    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+    populateCheckBoxGroup("structure/final/filelist", structureFiles);
+    populateList("structure/info/InkaMasonry", makeVocab("InkaMasonry"));
+    populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
+    populateDropDown("structure/info/Form", makeVocab("Form"));
+    populateList("structure/info/WallsInternalPartition", makeVocab("WallsInternalPartition"));
+    populateList("structure/info/ConstructionQuality", makeVocab("ConstructionQuality"));
+    populateList("structure/info/ConstructionPeriod", makeVocab("ConstructionPeriod"));
+    populateList("structure/info/Modifications", makeVocab("Modifications"));
+    populateDropDown("structure/info/PrincipalFunction", makeVocab("PrincipalFunction"));
+    populateDropDown("structure/info/Classification", makeVocab("Classification"));
+    populateList("structure/info/StuccoInterior", makeVocab("StuccoInterior"));
+    populateList("structure/info/StuccoExterior", makeVocab("StuccoExterior"));
+    populateDropDown("structure/info/RoofForm", makeVocab("RoofForm"));
+
+    setFieldValue("structure/info/Timestamp", getCurrentTime());
+    setFieldValue("structure/info/Author", username);
+    setFieldValue("structure/info/Device", device);
+
+
+    populateDropDown("structure/info/CornerExteriorForm", makeVocab("CornerExteriorForm"));
+    populateDropDown("structure/info/CornerInteriorForm", makeVocab("CornerInteriorForm"));
+
+    populatePictureGallery("structure/info/MasonryType", makeGallery("MasonryType"));
+
+    populateList("structure/info/DoorPosition", makeVocab("DoorPosition"));
+    populateList("structure/info/DoorMasonry", makeVocab("DoorMasonry"));
+    populateList("structure/info/DoorPreservation", makeVocab("DoorPreservation"));
+    populateList("structure/info/WindowsPresent", makeVocab("WindowsPresent"));
+    populateList("structure/info/NicheAltar", makeVocab("NicheAltar"));
+
+	showTabGroup("structure", structure_id);
+	loadStructureFileAttributes(structure_id);
+    duplicateEAID();
+}
+
+loadStructureFileAttributes(id){
+	structureFiles = new ArrayList();
+	structureSketches = new ArrayList();
+	structurePictures = new ArrayList();
+	structureVideos = new ArrayList();
+	structureAudios = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photo".equals(attr.getName())){
+						structurePictures.add(getAttachedFilePath(attr.getText()));
+					}else if("video".equals(attr.getName())){
+						structureVideos.add(getAttachedFilePath(attr.getText()));
+					}else if("audio".equals(attr.getName())){
+						structureAudios.add(attr.getText());
+					}else if ("sketchfilename".equals(attr.getName())) {
+						structureSketches.add(attr.getText());
+					}else if ("filename".equals(attr.getName())) {
+						structureFiles.add(attr.getText());
+					}
+				}
+			}
+		}
+	}
+
+	if (structureAudios.isEmpty()) {
+		structureAudios = getNoneList();
+	}
+
+	if (structureFiles.isEmpty()) {
+		structureFiles = getNoneList();
+	}
+
+	if (structureSketches.isEmpty()) {
+		structureSketches = getNoneList();
+	}
+
+    populateCameraPictureGallery("structure/final/PhotoGallery", structurePictures);
+    populateVideoGallery("structure/final/VideoGallery", structureVideos);
+    populateCheckBoxGroup("structure/final/AudioList", structureAudios);
+    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
+    populateCheckBoxGroup("structure/final/filelist", structureFiles);
+
+    selectGallery("structure/final/PhotoGallery", structurePictures);
+    selectGallery("structure/final/VideoGallery", structureVideos);
+    setFieldValue("structure/final/AudioList", convertListToPairs(structureAudios));
+    setFieldValue("structure/final/sketchfilelist", convertListToPairs(structureSketches));
+    setFieldValue("structure/final/filelist", convertListToPairs(structureFiles));
+}
+
+loadWall() {
+	wall_id = getFieldValue("control/data/wallList");
+	if (isNull(wall_id)) return;
+	populatePictureGallery("freeWall/freeWallDetail/MasonryType", makeGallery("MasonryType"));
+    populateDropDown("freeWall/freeWallDetail/WallClass", makeVocab("WallClass"));
+    populateList("freeWall/freeWallDetail/WallPreservation", makeVocab("WallPreservation"));
+    populateList("freeWall/freeWallDetail/WallHeightPreservation", makeVocab("WallHeightPreservation"));
+	showTabGroup("freeWall", wall_id);
+	loadWallFileAttributes(wall_id);
+}
+
+loadWallFileAttributes(id){
+	freewallPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("WallPhotos".equals(attr.getName())){
+						freewallPictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
+    selectGallery("freeWall/freeWallDetail/PhotoGallery", freewallPictures);
+}
+
+loadDoorway() {
+	doorway_id = getFieldValue("control/data/doorwayList");
+	if (isNull(doorway_id)) return;
+    populateDropDown("doorway/doorDetail/TypeOfDoorway", makeVocab("TypeOfDoorway"));
+
+
+	showTabGroup("doorway", doorway_id);
+	loadDoorwayFileAttributes(doorway_id);
+
+	
+}
+
+
+loadDoorwayFileAttributes(id){
+	doorwayPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("DoorPhotos".equals(attr.getName())){
+						doorwayPictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
+    selectGallery("doorway/doorDetail/PhotoGallery", doorwayPictures);
+}
+
+loadFeature() {
+	feature_id = getFieldValue("control/data/featureList");
+	if (isNull(feature_id)) return;
+
+	showTabGroup("feature", feature_id);
+	loadFeatureFileAttributes(feature_id);
+}
+
+loadFeatureFileAttributes(id){
+	featurePictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						featurePictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("feature/featureDetail/PhotoGallery", featurePictures);
+    selectGallery("feature/featureDetail/PhotoGallery", featurePictures);
+}
+
+loadSpecialFind() {
+	special_find_id = getFieldValue("control/data/specialFindList");
+	if (isNull(special_find_id)) return;
+	populateList("specialFind/findDetail/Type", makeVocab("Type"));
+	showTabGroup("specialFind", special_find_id);
+	loadSpecialFindFileAttributes(special_find_id);
+}
+
+loadSpecialFindFileAttributes(id){
+	specialFindPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						specialFindPictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
+    selectGallery("specialFind/findDetail/PhotoGallery", specialFindPictures);
+}
+
+loadLichen() {
+	lichen_id = getFieldValue("control/data/lichenList");
+	if (isNull(lichen_id)) return;
+	populateList("lichen/lichenDetail/Substrate", makeVocab("Substrate"));
+    populateList("lichen/lichenDetail/Aspect", makeVocab("Aspect"));
+    populateDropDown("lichen/lichenDetail/InsideOutside", makeVocab("InsideOutside"));
+	showTabGroup("lichen", lichen_id);
+	loadLichenFileAttributes(lichen_id);
+
+}
+
+
+
+loadLichenFileAttributes(id){
+	lichenPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						lichenPictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
+    selectGallery("lichen/lichenDetail/PhotoGallery", lichenPictures);
+}
+
+loadSurfaceCollection() {
+	surface_collection_id = getFieldValue("control/data/surfaceCollectionList");
+	if (isNull(surface_collection_id)) return;
+    populateDropDown("surfaceCollection/description/SurfaceCollectionContext", makeVocab("SurfaceCollectionContext"));
+    populateList("surfaceCollection/material/DiagnosticsPresent", makeVocab("DiagnosticsPresent"));
+    populateList("surfaceCollection/material/MaterialDensity", makeVocab("MaterialDensity"));
+    populateList("surfaceCollection/material/LotLabPriority", makeVocab("LotLabPriority"));
+	showTabGroup("surfaceCollection", surface_collection_id);
+}
+
+loadLot() {
+	lot_id = getFieldValue("surfaceCollection/load/lotList");
+	if (isNull(lot_id)) return;
+	populateList("lot/lotDetail/Material", makeVocab("Material"));
+	showTabGroup("lot", lot_id);
+}
+
+loadCanal() {
+	canal_id = getFieldValue("control/data/canalList");
+	if (isNull(canal_id)) return;
+
+	showTabGroup("canal", canal_id);
+	loadCanalFileAttributes(canal_id);
+}
+
+loadCanalFileAttributes(id){
+	canalPictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						canalPictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("canal/canalDetail/PhotoGallery", canalPictures);
+    selectGallery("canal/canalDetail/PhotoGallery", canalPictures);
+}
+
+
+
+
+onEvent("control/data/structureLoad", "click", "loadStructure()");
+onEvent("control/data/wallLoad", "click", "loadWall()");
+onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
+onEvent("control/data/featureLoad", "click", "loadFeature()");
+onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
+onEvent("control/data/lichenLoad", "click", "loadLichen()");
+onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
+onEvent("control/data/canalLoad", "click", "loadCanal()");
+
+onEvent("surfaceCollection/load/lotLoad", "click", "loadLot()");
+
+doNotDelete(){
+    showToast("Delete Cancelled.");
+}
