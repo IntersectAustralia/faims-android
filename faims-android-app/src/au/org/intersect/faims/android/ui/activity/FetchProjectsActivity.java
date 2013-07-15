@@ -329,6 +329,10 @@ public class FetchProjectsActivity extends RoboActivity {
     	// kill all services
 		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
 		stopService(intent);
+		Intent dataIntent = new Intent(FetchProjectsActivity.this, UpdateProjectDataService.class);
+		stopService(dataIntent);
+		Intent serviceIntent = new Intent(FetchProjectsActivity.this, UpdateProjectSettingService.class);
+		stopService(serviceIntent);
     }
 
     @Override
