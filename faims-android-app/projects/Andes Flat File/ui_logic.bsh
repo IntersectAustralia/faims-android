@@ -6,21 +6,32 @@ initMap() {
 	setMapZoom("control/map/map", 19.0f);
 
 	showBaseMap("control/map/map", "Base Map", "files/data/maps/andes.tif");
-	//showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
+	showRasterMap("control/map/map", "Raster Map", "files/data/maps/Clip_Mawchu_mosaic_warped.tif");
 
-    createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
 
 	isEntity = true; // are you loading entities or relationships?
 	queryName = "No Query"; // Name your query
 	querySQL = null; // Add your select sql query here note: it should have first column return the uuid or relationshipid
 
 	// define database layer styles for points, lines, polygons and text
+    //Colors: http://developer.android.com/reference/android/graphics/Color.html
 	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
 	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
 	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
 	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
 
 	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Canales", "files/data/maps/legacy_shapefiles.sqlite", "Canales_09_04", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Datums", "files/data/maps/legacy_shapefiles.sqlite", "Datums", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Hallazgos", "files/data/maps/legacy_shapefiles.sqlite", "Hallazgos_08_06_1", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Muros", "files/data/maps/legacy_shapefiles.sqlite", "Muros_09_04_merged", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Rasgos", "files/data/maps/legacy_shapefiles.sqlite", "Rasgos_09_04_merged", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "TS_Merged", "files/data/maps/legacy_shapefiles.sqlite", "TS_merged_2013_07_05", "PK_UID", "Name", ps, ls, pos, ts);
+    showSpatialLayer("control/map/map", "Lichenometry", "files/data/maps/legacy_shapefiles.sqlite", "Lichenometry_09_04_03_P", "PK_UID", "Name", ps, ls, pos, ts);
+
+    createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
 }
 
 initMap();

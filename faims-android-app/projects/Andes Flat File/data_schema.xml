@@ -378,7 +378,29 @@
         <term>{81.100}</term>
       </lookup>
     </property>
-   
+    <property type="string" name="MasonryType" minCardinality="1" maxCardinality="n">
+      <lookup>
+        <term pictureURL="files/data/masonry/Type1a.jpg">{Tipo.01a}</term>
+        <term pictureURL="files/data/masonry/Type1b.jpg">{Tipo.01b}</term>
+        <term pictureURL="files/data/masonry/Type2.jpg">{Tipo.02}</term>
+        <term pictureURL="files/data/masonry/Type3.jpg">{Tipo.03}</term>
+        <term pictureURL="files/data/masonry/Type4a.jpg">{Tipo.04a}</term>
+        <term pictureURL="files/data/masonry/Type4b.jpg">{Tipo.04b}</term>
+        <term pictureURL="files/data/masonry/Type5.jpg">{Tipo.05}</term>
+        <term pictureURL="files/data/masonry/Type6.jpg">{Tipo.06}</term>
+        <term pictureURL="files/data/masonry/Type7.jpg">{Tipo.07}</term>
+        <term pictureURL="files/data/masonry/Type8.jpg">{Tipo.08}</term>
+        <term pictureURL="files/data/masonry/Type10.jpg">{Tipo.10}</term>
+        <term pictureURL="files/data/masonry/Type11a.jpg">{Tipo.11a}</term>
+        <term pictureURL="files/data/masonry/Type11b.jpg">{Tipo.11b}</term>
+        <term pictureURL="files/data/masonry/Type12.jpg">{Tipo.12}</term>
+        <term>{Tipo.13}</term>
+        <term pictureURL="files/data/masonry/Otro.png">{zOtro}</term>
+        <term pictureURL="files/data/masonry/noobservable.png">{zNoObservable}</term>
+      </lookup>
+    </property>
+    <property type="string" name="MasonryDescription" minCardinality="1" maxCardinality="n">
+    </property>
     
     <property type="string" name="WallHeight" minCardinality="1" maxCardinality="n">
     </property>
