@@ -139,29 +139,30 @@ public class Tab implements Parcelable{
     	
 		if (attribute.controlType != Constants.CONTROL_TRIGGER &&
 				!(attribute.controlType == Constants.CONTROL_SELECT_MULTI && "image".equalsIgnoreCase(attribute.questionType))) {
-			LinearLayout fieldLinearLayout = new LinearLayout(this.activityRef.get());
-	    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
-	    	
-            TextView textView = createLabel(attribute);
-            fieldLinearLayout.addView(textView);
-            linearLayout.addView(fieldLinearLayout);
-                
-    		if(attribute.certainty && (isArchEnt || isRelationship)){
-    			certaintyButton = createCertaintyButton();
-    			fieldLinearLayout.addView(certaintyButton);
-    		}
-    		
-    		if(attribute.annotation && (isArchEnt || isRelationship) && !FREETEXT.equals(attribute.type)){
-    			annotationButton = createAnnotationButton();
-    			fieldLinearLayout.addView(annotationButton);
-    		}
-    		
-    		if (isArchEnt || isRelationship) {
-	    		dirtyButton = createDirtyButton();
-	    		dirtyButton.setVisibility(View.GONE);
-	    		fieldLinearLayout.addView(dirtyButton);
-	    		dirtyButtonMap.put(ref, dirtyButton);
-    		}
+	    	if(!attribute.questionText.isEmpty()){
+	    		LinearLayout fieldLinearLayout = new LinearLayout(this.activityRef.get());
+		    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+	            TextView textView = createLabel(attribute);
+	            fieldLinearLayout.addView(textView);
+	            linearLayout.addView(fieldLinearLayout);
+
+	            if(attribute.certainty && (isArchEnt || isRelationship)){
+	    			certaintyButton = createCertaintyButton();
+	    			fieldLinearLayout.addView(certaintyButton);
+	    		}
+	    		
+	    		if(attribute.annotation && (isArchEnt || isRelationship) && !FREETEXT.equals(attribute.type)){
+	    			annotationButton = createAnnotationButton();
+	    			fieldLinearLayout.addView(annotationButton);
+	    		}
+	    		
+	    		if (isArchEnt || isRelationship) {
+		    		dirtyButton = createDirtyButton();
+		    		dirtyButton.setVisibility(View.GONE);
+		    		fieldLinearLayout.addView(dirtyButton);
+		    		dirtyButtonMap.put(ref, dirtyButton);
+	    		}
+	    	}
         }
 		
 		viewReference.put(viewName, ref);
