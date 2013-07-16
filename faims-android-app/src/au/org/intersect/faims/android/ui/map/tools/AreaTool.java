@@ -58,7 +58,6 @@ public class AreaTool extends HighlightTool {
 		
 		public void setShowKm(boolean value) {
 			showKm = value;
-			invalidate();
 		}
 		
 	}

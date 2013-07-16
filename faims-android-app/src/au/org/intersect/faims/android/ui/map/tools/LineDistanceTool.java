@@ -59,7 +59,6 @@ public class LineDistanceTool extends HighlightTool {
 		
 		public void setShowKm(boolean value) {
 			showKm = value;
-			invalidate();
 		}
 		
 	}
