@@ -44,7 +44,7 @@ public class EditTool extends HighlightTool {
 
 	private PolygonStyleDialog polygonStyleDialog;
 
-	private MapToggleButton vertexButton;
+	private MapToggleButton editVertexButton;
 
 	protected float vertexSize = 0.2f;
 
@@ -58,7 +58,7 @@ public class EditTool extends HighlightTool {
 		lockButton = createLockButton(context);
 		propertiesButton = createPropertiesButton(context);
 		deleteButton = createDeleteButton(context);
-		vertexButton = createVertexButton(context);
+		editVertexButton = createEditVertexButton(context);
 		
 		updateLayout();
 	}
@@ -90,11 +90,11 @@ public class EditTool extends HighlightTool {
 		if (lockButton != null) layout.addView(lockButton);
 		if (propertiesButton != null) layout.addView(propertiesButton);
 		if (deleteButton != null) layout.addView(deleteButton);
-		if (vertexButton != null) layout.addView(vertexButton);
+		if (editVertexButton != null) layout.addView(editVertexButton);
 	}
 	
 	public void resetVertexGeometry() {
-		vertexButton.setChecked(false);
+		editVertexButton.setChecked(false);
 		try {
 			if (EditTool.this.vertexGeometry != null) {
 				for (Geometry geom : EditTool.this.vertexGeometry) {
@@ -130,7 +130,7 @@ public class EditTool extends HighlightTool {
 		EditTool.this.vertexGeometryToPointsMap = null;
 	}
 	
-	private MapToggleButton createVertexButton(final Context context) {
+	private MapToggleButton createEditVertexButton(final Context context) {
 		final MapToggleButton button = new MapToggleButton(context);
 		button.setTextOn("Join");
 		button.setTextOff("Break");
@@ -142,12 +142,12 @@ public class EditTool extends HighlightTool {
 				try {
 					if (EditTool.this.mapView.hasTransformGeometry()) {
 						showError("Please clear locked geometry before joining");
-						button.setChecked(false);
+						button.setChecked(!button.isChecked());
 						return;
 					}
 					if (hasLegacyGeometry()) {
 						showError("Cannot edit legacy geometry");
-						button.setChecked(false);
+						button.setChecked(!button.isChecked());
 						return;
 					}
 					
@@ -266,7 +266,7 @@ public class EditTool extends HighlightTool {
 			public void onClick(View v) {
 				if (hasLegacyGeometry()) {
 					showError("Cannot edit legacy geometry");
-					button.setChecked(false);
+					button.setChecked(!button.isChecked());
 					return;
 				}
 				updateLock();
