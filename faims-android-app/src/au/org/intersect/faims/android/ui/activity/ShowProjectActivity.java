@@ -18,6 +18,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -383,6 +384,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private int pathLength;
 
+	private boolean delayStopSync;
+
+	private boolean syncStarted = false;
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -554,10 +559,35 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				renderer.invalidateListViews(currentTabGroup);
 				renderer.setCurrentTabGroup(currentTabGroup);
 			}
+			super.onBackPressed();
+		}else{
+			if(syncStarted){
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Stop Syncing");
+				builder.setMessage("Syncing is still in progress. Do you want to exit the activity and stop the sync?");
+				builder.setPositiveButton("Yes", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						syncStarted = false;
+						stopSync();
+						ShowProjectActivity.super.onBackPressed();
+					}
+				});
+				builder.setNegativeButton("No", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Do nothing
+					}
+				});
+				builder.show();
+			}else{
+				super.onBackPressed();
+			}
 		}
-		super.onBackPressed();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -565,7 +595,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		isActivityShowing = true;
 		
 		if (activityData.isSyncEnabled()) {
-			startSync();
+			if (syncActive) {
+				delayStopSync = false;
+			} else {
+				startSync();
+			}
 		}
 		if(gpsDataManager.isExternalGPSStarted()){
 			gpsDataManager.startExternalGPSListener();
@@ -584,7 +618,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		isActivityShowing = false;
 		
-		if (syncActive) {
+		if (syncStarted) {
+			stopSyncAfterCompletion();
+		}else{
 			stopSync();
 		}
 		
@@ -1031,8 +1067,34 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	public void disableSync() {
 		if (!activityData.isSyncEnabled()) return;
-		activityData.setSyncEnabled(false);
-		stopSync();
+		if(syncStarted){
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Stop Syncing");
+			builder.setMessage("Syncing is still in progress. Do you want to stop the sync?");
+			builder.setPositiveButton("Yes", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					activityData.setSyncEnabled(false);
+					syncStarted = false;
+					stopSync();
+				}
+			});
+			builder.setNegativeButton("No", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+			builder.show();
+		}else{
+			activityData.setSyncEnabled(false);
+			stopSync();
+		}
+	}
+	
+	public void stopSyncAfterCompletion() {
+		delayStopSync = true;
 	}
 	
 	public void stopSync() {
@@ -1203,7 +1265,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		for (SyncListener listener : listeners) {
 			listener.handleStart();
 		}
-		
+		syncStarted = true;
 		setSyncIndicatorColor(SyncIndicatorColor.ORANGE);
 	}
 	
@@ -1213,14 +1275,24 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 		
 		setSyncIndicatorColor(SyncIndicatorColor.GREEN);
+		syncStarted = false;
+		if (delayStopSync) {
+			delayStopSync = false;
+			stopSync();
+		}
 	}
 	
 	public void callSyncFailure() {
 		for (SyncListener listener : listeners) {
 			listener.handleFailure();
 		}
-		
+		syncStarted = false;
 		setSyncIndicatorColor(SyncIndicatorColor.RED);
+		
+		if (delayStopSync) {
+			delayStopSync = false;
+			stopSync();
+		}
 	}
 
 	public void setSyncMinInterval(float value) {
