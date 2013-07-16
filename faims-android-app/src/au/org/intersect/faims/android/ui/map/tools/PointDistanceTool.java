@@ -70,7 +70,6 @@ public class PointDistanceTool extends HighlightTool {
 		
 		public void setShowKm(boolean value) {
 			showKm = value;
-			invalidate();
 		}
 		
 	}

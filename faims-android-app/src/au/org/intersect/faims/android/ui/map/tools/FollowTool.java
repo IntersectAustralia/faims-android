@@ -107,7 +107,6 @@ public class FollowTool extends HighlightTool {
 		
 		public void setShowKm(boolean value) {
 			showKm = value;
-			invalidate();
 		}
 
 		public void setColors(int color, int targetColor) {
