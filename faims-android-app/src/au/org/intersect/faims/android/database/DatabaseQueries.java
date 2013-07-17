@@ -3,23 +3,62 @@ package au.org.intersect.faims.android.database;
 public final class DatabaseQueries {
 
 	public static final String INSERT_INTO_ARCHENTITY = 
-		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, parentTimeStamp) " +
-			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, ? " +
-			"FROM aenttype " + 
+		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, isforked, aenttimestamp) " +
+			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, parent.isforked, parent.aenttimestamp " +
+			"FROM aenttype " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       aenttimestamp\n" + 
+			"FROM archentity\n" + 
+			"JOIN\n" + 
+			"  (SELECT uuid,\n" + 
+			"          max(aenttimestamp) AS aenttimestamp\n" + 
+			"   FROM archentity\n" + 
+			"   GROUP BY uuid) USING (uuid,\n" + 
+			"                         aenttimestamp)\n" + 
+			"WHERE uuid = ?) parent\n" +
 			"WHERE aenttypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_ARCHENTITY = 
-			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn)\n" + 
-			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326)\n" + 
-			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid);";
+			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, isforked, aenttimestamp)\n" + 
+			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326), parent.isforked, parent.aenttimestamp\n" + 
+			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid) " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       aenttimestamp\n" + 
+			"FROM archentity\n" + 
+			"JOIN\n" + 
+			"  (SELECT uuid,\n" + 
+			"          max(aenttimestamp) AS aenttimestamp\n" + 
+			"   FROM archentity\n" + 
+			"   GROUP BY uuid) USING (uuid,\n" + 
+			"                         aenttimestamp)\n" + 
+			"WHERE uuid = ?) parent;";
 
 	public static final String GET_ARCH_ENT_PARENT_TIMESTAMP =
 		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
 
 	public static final String INSERT_INTO_AENTVALUE = 
-		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, parentTimeStamp, ValueTimestamp, deleted) " +
-			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, ? " +
-			"FROM AttributeKey " + 
+		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted, isforked, valuetimestamp) " +
+			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, parent.isforked, parent.valuetimestamp " +
+			"FROM AttributeKey " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       valuetimestamp\n" + 
+			"FROM aentvalue\n" +
+			"JOIN attributekey using (attributeid)\n" +
+			"JOIN\n" + 
+			"  (SELECT uuid,\n" + 
+			"          attributeid,\n" + 
+			"          MAX(valuetimestamp) AS valuetimestamp\n" + 
+			"   FROM aentvalue\n" + 
+			"   GROUP BY uuid,\n" + 
+			"            attributeid) USING (uuid,\n" + 
+			"                                attributeid,\n" + 
+			"                                valuetimestamp)\n" + 
+			"WHERE uuid = ?\n" + 
+			"\n" + 
+			"  AND attributeName = ? COLLATE NOCASE) parent\n" +
 			"WHERE attributeName = ? COLLATE NOCASE;";
 
 	public static final String GET_AENT_VALUE_PARENT_TIMESTAMP =
@@ -28,15 +67,37 @@ public final class DatabaseQueries {
 			"WHERE uuid = ? group by attributeid;";
 
 	public static final String INSERT_INTO_RELATIONSHIP = 
-		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, parentTimeStamp) " +
-			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, ?" +
+		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, isforked, relntimestamp) " +
+			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, parent.isforked, parent.relntimestamp" +
 			"FROM relntype " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       relntimestamp\n" + 
+			"FROM relationship\n" + 
+			"JOIN\n" + 
+			"  (SELECT relationshipid,\n" + 
+			"          max(relntimestamp) AS relntimestamp\n" + 
+			"   FROM relationship\n" + 
+			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
+			"                                   relntimestamp)\n" + 
+			"WHERE relationshipid = ?) parent\n" +
 			"WHERE relntypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_RELATIONSHIP = 
-			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn)\n" + 
-			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326)\n" + 
-			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid);";
+			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn, isforked, relntimestamp)\n" + 
+			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326), parent.isforked, parent.relntimestamp\n" + 
+			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid) " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       relntimestamp\n" + 
+			"FROM relationship\n" + 
+			"JOIN\n" + 
+			"  (SELECT relationshipid,\n" + 
+			"          max(relntimestamp) AS relntimestamp\n" + 
+			"   FROM relationship\n" + 
+			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
+			"                                   relntimestamp)\n" + 
+			"WHERE relationshipid = ?) parent;";
 	
 	public static final String GET_RELATIONSHIP_PARENT_TIMESTAMP =
 		"SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;";
@@ -47,9 +108,24 @@ public final class DatabaseQueries {
 			"WHERE relationshipid = ? group by attributeid;";
 
 	public static final String INSERT_INTO_RELNVALUE = 
-		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, parentTimeStamp, RelnValueTimestamp, deleted) " +
-			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, ? " +
-			"FROM AttributeKey " + 
+		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted, isforked, relnvaluetimestamp) " +
+			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, parent.isforked, parent.relnvaluetimestamp" +
+			"FROM AttributeKey " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       relnvaluetimestamp\n" + 
+			"FROM relnvalue\n" + 
+			"JOIN attributekey using (attributeid)\n" +
+			"JOIN\n" + 
+			"  (SELECT relationshipid, attributeid, MAX(relnvaluetimestamp) AS relnvaluetimestamp\n" + 
+			"   FROM relnvalue\n" + 
+			"   GROUP BY relationshipid,\n" + 
+			"            attributeid) USING (relationshipid,\n" + 
+			"                                attributeid,\n" + 
+			"                                relnvaluetimestamp)\n" + 
+			"WHERE relationshipid = ?\n" + 
+			"\n" + 
+			"  AND attributeName = ?) parent\n" +
 			"WHERE attributeName = ? COLLATE NOCASE;";
 
 	public static final String CHECK_VALID_AENT = 
@@ -63,8 +139,23 @@ public final class DatabaseQueries {
 			"WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
 
 	public static final String INSERT_AENT_RELN = 
-		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp) " +
-			"VALUES (?, ?, ?, ?, ?);";
+		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, isforked, aentrelntimestamp) " +
+			"SELECT ?, ?, ?, ?, ?, parent.isforked, parent.aentrelntimestamp\n" +
+			"FROM (\n" + 
+			"SELECT isforked,\n" + 
+			"       aentrelntimestamp\n" + 
+			"FROM aentreln\n" + 
+			"JOIN\n" + 
+			"  (SELECT uuid,\n" + 
+			"          relationshipid,\n" + 
+			"          max(AEntRelnTimestamp) AS AEntRelnTimestamp\n" + 
+			"   FROM aentreln\n" + 
+			"   GROUP BY uuid,\n" + 
+			"            relationshipid) USING (uuid,\n" + 
+			"                                   relationshipid,\n" + 
+			"                                   AEntRelnTimestamp)\n" + 
+			"WHERE uuid = ?\n" + 
+			"  AND relationshipid = ?) parent";
 
 	public static final String FETCH_AENT_VALUE = 
 		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, aentdirty, aentdirtyreason FROM " +
@@ -258,19 +349,41 @@ public final class DatabaseQueries {
 		"select count(RelationshipID) from Relationship where RelationshipID = ?;";
 
 	public static final String DELETE_ARCH_ENT =
-		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parentTimestamp) "+
-			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', aentTimestamp "+
+		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, aenttimestamp) "+
+			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.aenttimestamp "+
 			"from (select uuid, max(aenttimestamp) as aenttimestamp " +
 			"from archentity "+
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       aenttimestamp\n" + 
+			"FROM archentity\n" + 
+			"JOIN\n" + 
+			"  (SELECT uuid,\n" + 
+			"          max(aenttimestamp) AS aenttimestamp\n" + 
+			"   FROM archentity\n" + 
+			"   GROUP BY uuid) USING (uuid,\n" + 
+			"                         aenttimestamp)\n" + 
+			"WHERE uuid = ?) parent\n" +
 			"where uuid = ? "+
 			"group by uuid) "+
 			"JOIN archentity using (uuid, aenttimestamp);";
 
 	public static final String DELETE_RELN =
-		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parentTimestamp) "+
-			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', RelnTimestamp "+
+		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, relntimestamp) "+
+			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.relntimestamp "+
 			"from (select relationshipid, max(relntimestamp) as RelnTimestamp "+
-			"from relationship "+
+			"FROM relntype " +
+			", (\n" + 
+			"SELECT isforked,\n" + 
+			"       relntimestamp\n" + 
+			"FROM relationship\n" + 
+			"JOIN\n" + 
+			"  (SELECT relationshipid,\n" + 
+			"          max(relntimestamp) AS relntimestamp\n" + 
+			"   FROM relationship\n" + 
+			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
+			"                                   relntimestamp)\n" + 
+			"WHERE relationshipid = ?) parent\n" +
 			"where relationshipID = ? "+
 			"group by relationshipid "+
 			") JOIN relationship using (relationshipid, relntimestamp); ";
