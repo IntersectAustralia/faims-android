@@ -30,6 +30,7 @@ createOption(id, name) {
 options = new ArrayList();
 options.add(createOption("entity", "Create Entity"));
 options.add(createOption("relationship", "Create Relationship"));
+options.add(createOption("add", "Add Relationship Member"));
 options.add(createOption("controls", "Controls"));
 
 populateList("menu/tab1/options", options);
@@ -40,6 +41,8 @@ onClickOption() {
 		showTabGroup("tabgroup1");
 	} else if ("relationship".equals(value)) {
 		showTabGroup("tabgroup2");
+	} else if ("add".equals(value)) {
+		showTabGroup("tabgroup4");
 	} else {
 		showTabGroup("tabgroup3");
 	}
@@ -394,6 +397,9 @@ updateAll() {
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 	populateList("user/tab1/users", usersList);
 	setFieldValue("tabgroup1/tab1/location",values);
+	
+	populateDropDown("tabgroup4/tab1/entities", entities);
+	populateDropDown("tabgroup4/tab1/relationships", relationships);
 }
 
 onEvent("tabgroup2/tab1/save", "click", "saveRel()");
@@ -428,3 +434,17 @@ onEvent("tabgroup3/tab1/start", "click", "setFileSyncEnabled(true)");
 onEvent("tabgroup3/tab1/stop", "click", "setFileSyncEnabled(false)");
 
 setFieldValue("tabgroup1/tab1/sync", "0");
+
+onEvent("tabgroup4/tab1/add", "click", "onAddMember()");
+
+onAddMember() {
+	eid = getFieldValue("tabgroup4/tab1/entities");
+	rid = getFieldValue("tabgroup4/tab1/relationships");
+	if (eid == null || "".equals(eid) || rid == null || "".equals(rid)) return;
+	
+	verb = getFieldValue("tabgroup4/tab1/verb");
+	
+	addReln(eid, rid, verb);
+	
+	showToast("Added relationship member");
+}

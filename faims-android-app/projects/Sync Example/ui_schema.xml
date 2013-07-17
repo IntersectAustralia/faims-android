@@ -89,6 +89,14 @@
                   <stop></stop>
               </tab1>
           </tabgroup3>
+          <tabgroup4>
+              <tab1>
+                  <entities></entities>
+                  <relationships></relationships>
+                  <verb></verb>
+                  <add></add>
+              </tab1>
+          </tabgroup4>
         </faims>
       </instance>
 
@@ -312,6 +320,32 @@
               <label>Disable File Sync</label>
           </trigger>
       </group>
+    </group>
+    <group ref="tabgroup4">
+        <label></label>
+        <group ref="tab1">
+            <label>Add Entity Member</label>
+            <select1 ref="entities">
+                <label>Entities</label>
+                <item>
+	            	<label>dummy</label>
+	            	<value>dummy</value>
+	          	</item>
+            </select1>
+            <select1 ref="relationships">
+                <label>Relationships</label>
+                <item>
+	            	<label>dummy</label>
+	            	<value>dummy</value>
+	          	</item>
+            </select1>
+            <input ref="verb">
+                <label>Verb</label>
+            </input>
+            <trigger ref="add">
+              <label>Add member</label>
+          	</trigger>
+        </group>
     </group>
   </h:body>
 </h:html>
