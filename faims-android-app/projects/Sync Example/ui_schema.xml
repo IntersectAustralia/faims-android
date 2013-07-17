@@ -60,7 +60,7 @@
                       <clear></clear>
                     </child3>
                   </container2>
-                  
+                  <delete></delete>
               </tab1>
               <tab2>
                   <audiolist></audiolist>
@@ -77,6 +77,7 @@
                   <save></save>
                   <update></update>
                   <clear></clear>
+                  <delete></delete>
               </tab1>
               <tab2>
                   <relationships></relationships>
@@ -238,6 +239,9 @@
             </trigger>
           </group>
         </group>
+        <trigger ref="delete">
+          <label>Delete</label>
+        </trigger>
       </group>
       <group ref="tab2" faims_scrollable="false">
         <label>Audio List</label>
@@ -285,6 +289,9 @@
         </trigger>
         <trigger ref="clear">
             <label>Clear</label>
+        </trigger>
+        <trigger ref="delete">
+          <label>Delete</label>
         </trigger>
       </group>
       <group ref="tab2">
