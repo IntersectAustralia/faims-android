@@ -281,6 +281,13 @@ clearEntity() {
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
 
+deleteEntity(){
+	if (entity_id == null || "".equals(entity_id)) return;
+	deleteArchEnt(entity_id);
+	entity_id = null;
+    cancelTabGroup("tabgroup1", false);
+}
+
 ArrayList pictures = new ArrayList();
 
 takePicture() {
@@ -325,6 +332,7 @@ onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
 onEvent("tabgroup1/tab1/update", "click", "updateEntity()");
+onEvent("tabgroup1/tab1/delete", "click", "deleteEntity()");
 
 setFilename() {
 	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
@@ -359,7 +367,7 @@ loadRel() {
 	
 }
 
-updateRel(rel_id) {
+updateRel() {
 	if (rel_id == null || "".equals(rel_id)) rel_id = null;
 
 	List attributes = createAttributeList();
@@ -405,7 +413,15 @@ updateAll() {
 onEvent("tabgroup2/tab1/save", "click", "saveRel()");
 onEvent("tabgroup2/tab1/clear", "click", "clearRel()");
 onEvent("tabgroup2/tab2/load", "click", "loadRel()");
-onEvent("tabgroup2/tab1/update", "click", "updateRel(getFieldValue(\"tabgroup2/tab2/relationships\"))");
+onEvent("tabgroup2/tab1/update", "click", "updateRel()");
+onEvent("tabgroup2/tab1/delete", "click", "deleteRel()");
+
+deleteRel(){
+	if (rel_id == null || "".equals(rel_id)) return;
+	deleteRel(rel_id);
+	rel_id = null;
+    cancelTabGroup("tabgroup2", false);
+}
 
 initRel() {
 	clearRel();
