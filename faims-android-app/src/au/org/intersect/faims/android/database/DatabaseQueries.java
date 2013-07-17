@@ -3,10 +3,10 @@ package au.org.intersect.faims.android.database;
 public final class DatabaseQueries {
 
 	public static final String INSERT_INTO_ARCHENTITY = 
-		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, isforked, aenttimestamp) " +
+		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, isforked, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, parent.isforked, parent.aenttimestamp " +
 			"FROM aenttype " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       aenttimestamp\n" + 
 			"FROM archentity\n" + 
@@ -20,10 +20,10 @@ public final class DatabaseQueries {
 			"WHERE aenttypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_ARCHENTITY = 
-			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, isforked, aenttimestamp)\n" + 
+			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, isforked, parenttimestamp)\n" + 
 			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326), parent.isforked, parent.aenttimestamp\n" + 
 			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid) " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       aenttimestamp\n" + 
 			"FROM archentity\n" + 
@@ -39,10 +39,10 @@ public final class DatabaseQueries {
 		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
 
 	public static final String INSERT_INTO_AENTVALUE = 
-		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted, isforked, valuetimestamp) " +
+		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted, isforked, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, parent.isforked, parent.valuetimestamp " +
 			"FROM AttributeKey " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       valuetimestamp\n" + 
 			"FROM aentvalue\n" +
@@ -67,10 +67,10 @@ public final class DatabaseQueries {
 			"WHERE uuid = ? group by attributeid;";
 
 	public static final String INSERT_INTO_RELATIONSHIP = 
-		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, isforked, relntimestamp) " +
-			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, parent.isforked, parent.relntimestamp" +
+		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, isforked, parenttimestamp) " +
+			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, parent.isforked, parent.relntimestamp " +
 			"FROM relntype " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       relntimestamp\n" + 
 			"FROM relationship\n" + 
@@ -84,10 +84,10 @@ public final class DatabaseQueries {
 			"WHERE relntypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_RELATIONSHIP = 
-			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn, isforked, relntimestamp)\n" + 
+			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn, isforked, parenttimestamp)\n" + 
 			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326), parent.isforked, parent.relntimestamp\n" + 
 			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid) " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       relntimestamp\n" + 
 			"FROM relationship\n" + 
@@ -108,10 +108,10 @@ public final class DatabaseQueries {
 			"WHERE relationshipid = ? group by attributeid;";
 
 	public static final String INSERT_INTO_RELNVALUE = 
-		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted, isforked, relnvaluetimestamp) " +
-			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, parent.isforked, parent.relnvaluetimestamp" +
+		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted, isforked, parenttimestamp) " +
+			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, parent.isforked, parent.relnvaluetimestamp " +
 			"FROM AttributeKey " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       relnvaluetimestamp\n" + 
 			"FROM relnvalue\n" + 
@@ -139,9 +139,9 @@ public final class DatabaseQueries {
 			"WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
 
 	public static final String INSERT_AENT_RELN = 
-		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, isforked, aentrelntimestamp) " +
+		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, isforked, parenttimestamp) " +
 			"SELECT ?, ?, ?, ?, ?, parent.isforked, parent.aentrelntimestamp\n" +
-			"FROM (\n" + 
+			"FROM (SELECT 1) LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       aentrelntimestamp\n" + 
 			"FROM aentreln\n" + 
@@ -349,11 +349,11 @@ public final class DatabaseQueries {
 		"select count(RelationshipID) from Relationship where RelationshipID = ?;";
 
 	public static final String DELETE_ARCH_ENT =
-		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, aenttimestamp) "+
-			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.aenttimestamp "+
+		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, parenttimestamp) "+
+			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.aenttimestamp " +
 			"from (select uuid, max(aenttimestamp) as aenttimestamp " +
 			"from archentity "+
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       aenttimestamp\n" + 
 			"FROM archentity\n" + 
@@ -369,11 +369,11 @@ public final class DatabaseQueries {
 			"JOIN archentity using (uuid, aenttimestamp);";
 
 	public static final String DELETE_RELN =
-		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, relntimestamp) "+
-			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.relntimestamp "+
+		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, parenttimestamp) "+
+			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.relntimestamp " +
 			"from (select relationshipid, max(relntimestamp) as RelnTimestamp "+
 			"FROM relntype " +
-			", (\n" + 
+			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       relntimestamp\n" + 
 			"FROM relationship\n" + 
