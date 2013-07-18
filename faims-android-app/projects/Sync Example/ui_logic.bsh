@@ -352,8 +352,8 @@ initEntity() {
 String rel_id;
 
 saveRel() {
-	
-	rel_id = updateRel(null);
+	rel_id = null;
+	rel_id = updateRel();
 	
 }
 
