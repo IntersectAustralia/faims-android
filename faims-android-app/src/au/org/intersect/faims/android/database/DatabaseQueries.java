@@ -353,6 +353,9 @@ public final class DatabaseQueries {
 			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.aenttimestamp " +
 			"from (select uuid, max(aenttimestamp) as aenttimestamp " +
 			"from archentity "+
+			"where uuid = ? "+
+			"group by uuid) "+
+			"JOIN archentity using (uuid, aenttimestamp) "+
 			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       aenttimestamp\n" + 
@@ -363,16 +366,16 @@ public final class DatabaseQueries {
 			"   FROM archentity\n" + 
 			"   GROUP BY uuid) USING (uuid,\n" + 
 			"                         aenttimestamp)\n" + 
-			"WHERE uuid = ?) parent\n" +
-			"where uuid = ? "+
-			"group by uuid) "+
-			"JOIN archentity using (uuid, aenttimestamp);";
+			"WHERE uuid = ?) parent;";
 
 	public static final String DELETE_RELN =
 		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, isforked, parenttimestamp) "+
 			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.isforked, parent.relntimestamp " +
 			"from (select relationshipid, max(relntimestamp) as RelnTimestamp "+
-			"FROM relntype " +
+			"FROM relationship " +
+			"where relationshipID = ? "+
+			"group by relationshipid "+
+			") JOIN relationship using (relationshipid, relntimestamp) "+
 			"LEFT OUTER JOIN (\n" + 
 			"SELECT isforked,\n" + 
 			"       relntimestamp\n" + 
@@ -383,10 +386,7 @@ public final class DatabaseQueries {
 			"   FROM relationship\n" + 
 			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
 			"                                   relntimestamp)\n" + 
-			"WHERE relationshipid = ?) parent\n" +
-			"where relationshipID = ? "+
-			"group by relationshipid "+
-			") JOIN relationship using (relationshipid, relntimestamp); ";
+			"WHERE relationshipid = ?) parent;";
 
 	public static final String DUMP_DATABASE_TO(String path){
 		return "attach database '" + path + "' as export;" +
