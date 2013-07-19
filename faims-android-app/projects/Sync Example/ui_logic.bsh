@@ -111,6 +111,11 @@ loadFileAttributes(id){
 	videos.clear();
 	audios.clear();
 	archEntity = fetchArchEnt(id);
+	
+	if (archEntity.isForked()) {
+		showToast("Entity contains conflicts");
+	}
+	
 	entityAttributes = archEntity.getAttributes();
 	for(EntityAttribute attr : entityAttributes){
 		if("file".equals(attr.getType())){
@@ -364,6 +369,12 @@ loadRel() {
 	if (rel_id == null || "".equals(rel_id)) return;
 	
 	showTab("tabgroup2/tab1", rel_id);
+	
+	rel = fetchRel(rel_id);
+	
+	if (rel.isForked()) {
+		showToast("Relationship contains conflicts");
+	}
 	
 }
 

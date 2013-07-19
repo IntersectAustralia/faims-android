@@ -639,8 +639,24 @@ public class DatabaseManager {
 				}
 				stmt.close();
 				stmt = null;
+				
+				// check if forked
+				stmt = db.prepare(DatabaseQueries.IS_ARCH_ENTITY_FORKED);
+				stmt.bind(1, id);
+				stmt.step();
+				boolean isforked = stmt.column_string(0) != null && Integer.parseInt(stmt.column_string(0)) > 0;
+				stmt.close();
+				stmt = null;
+				if (!isforked) {
+					stmt = db.prepare(DatabaseQueries.IS_AENTVALUE_FORKED);
+					stmt.bind(1, id);
+					stmt.step();
+					isforked = stmt.column_string(0) != null && Integer.parseInt(stmt.column_string(0)) > 0;
+					stmt.close();
+					stmt = null;
+				}
 	
-				ArchEntity archEntity = new ArchEntity(id, null, attributes, geomList);
+				ArchEntity archEntity = new ArchEntity(id, null, attributes, geomList, isforked);
 				
 				return archEntity;
 			} finally {
@@ -710,7 +726,23 @@ public class DatabaseManager {
 				stmt.close();
 				stmt = null;
 				
-				Relationship relationship = new Relationship(id, null, attributes, geomList);
+				// check if forked
+				stmt = db.prepare(DatabaseQueries.IS_RELATIONSHIP_FORKED);
+				stmt.bind(1, id);
+				stmt.step();
+				boolean isforked = stmt.column_string(0) != null && Integer.parseInt(stmt.column_string(0)) > 0;
+				stmt.close();
+				stmt = null;
+				if (!isforked) {
+					stmt = db.prepare(DatabaseQueries.IS_RELNVALUE_FORKED);
+					stmt.bind(1, id);
+					stmt.step();
+					isforked = stmt.column_string(0) != null && Integer.parseInt(stmt.column_string(0)) > 0;
+					stmt.close();
+					stmt = null;
+				}
+				
+				Relationship relationship = new Relationship(id, null, attributes, geomList, isforked);
 	
 				return relationship;
 			} finally {
@@ -1622,4 +1654,5 @@ public class DatabaseManager {
 			}
 		}
 	}
+	
 }

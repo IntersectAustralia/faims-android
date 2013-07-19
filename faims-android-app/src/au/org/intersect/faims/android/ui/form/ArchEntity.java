@@ -15,11 +15,14 @@ public class ArchEntity {
 
 	private String id;
 
-	public ArchEntity(String id, String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList){
+	private boolean forked;
+
+	public ArchEntity(String id, String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList, boolean forked){
 		this.id = id;
 		this.type = type;
 		this.attributes = attributes;
 		this.geometryList = geometryList;
+		this.forked = forked;
 	}
 	
 	public String getId() {
@@ -40,5 +43,9 @@ public class ArchEntity {
 	
 	public void setGeometryList(List<Geometry> geomList) {
 		geometryList = geomList;
+	}
+	
+	public boolean isForked() {
+		return forked;
 	}
 }

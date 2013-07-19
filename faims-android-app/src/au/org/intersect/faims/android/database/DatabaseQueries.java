@@ -477,4 +477,16 @@ public final class DatabaseQueries {
 				" where deleted is null\n" +
 				" and geospatialcolumn is not null\n" +
 				" and st_intersects(GeomFromText(?, 4326), geospatialcolumn)";
+	
+	public static String IS_ARCH_ENTITY_FORKED = 
+			"select count(isforked) from archentity where uuid = ?;";
+	
+	public static String IS_AENTVALUE_FORKED = 
+			"select count(isforked) from aentvalue where uuid = ?;";
+	
+	public static String IS_RELATIONSHIP_FORKED = 
+			"select count(isforked) from relationship where relationshipid = ?;";
+	
+	public static String IS_RELNVALUE_FORKED = 
+			"select count(isforked) from relnvalue where relationshipid = ?;";
 }

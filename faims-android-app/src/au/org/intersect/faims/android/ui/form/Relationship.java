@@ -15,11 +15,14 @@ public class Relationship {
 
 	private String id;
 
-	public Relationship(String id, String type, Collection<RelationshipAttribute> attributes, List<Geometry> geomList){
+	private boolean forked;
+
+	public Relationship(String id, String type, Collection<RelationshipAttribute> attributes, List<Geometry> geomList, boolean forked){
 		this.id = id;
 		this.type = type;
 		this.attributes = attributes;
 		this.geometryList = geomList;
+		this.forked = forked;
 	}
 	
 	public String getId() {
@@ -40,5 +43,9 @@ public class Relationship {
 	
 	public void setGeometryList(List<Geometry> geomList) {
 		geometryList = geomList;
+	}
+	
+	public boolean isForked() {
+		return forked;
 	}
 }
