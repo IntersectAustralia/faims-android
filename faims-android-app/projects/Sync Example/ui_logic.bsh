@@ -346,11 +346,11 @@ initEntity() {
 	clearEntity();
 }
 
-String rel_id;
+String rel_id = null;
 
 saveRel() {
 	
-	rel_id = updateRel(null);
+	rel_id = updateRel();
 	
 }
 
