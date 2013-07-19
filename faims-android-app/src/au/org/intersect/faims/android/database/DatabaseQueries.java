@@ -119,7 +119,7 @@ public final class DatabaseQueries {
 			"                                relnvaluetimestamp)\n" + 
 			"WHERE relationshipid = ?\n" + 
 			"\n" + 
-			"  AND attributeName = ?) parent\n" +
+			"  AND attributeName = ? COLLATE NOCASE) parent\n" +
 			"WHERE attributeName = ? COLLATE NOCASE;";
 
 	public static final String CHECK_VALID_AENT = 
