@@ -18,4 +18,13 @@ public class CustomImageView extends ImageView{
 	public void setPicture(Picture picture) {
 		this.picture = picture;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof CustomImageView){
+			CustomImageView other = (CustomImageView) o;
+			return getPicture().equals(other.getPicture());
+		}
+		return super.equals(o);
+	}
 }
