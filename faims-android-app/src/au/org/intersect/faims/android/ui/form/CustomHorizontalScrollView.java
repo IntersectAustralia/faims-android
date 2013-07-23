@@ -115,12 +115,16 @@ public class CustomHorizontalScrollView extends HorizontalScrollView{
 		if(this.selectedImageViews == null){
 			this.selectedImageViews = new ArrayList<CustomImageView>();
 		}
-		this.selectedImageViews.add(imageView);
+		if(!this.selectedImageViews.contains(imageView)){
+			this.selectedImageViews.add(imageView);
+		}
 	}
 	
 	public void removeSelectedImageView(CustomImageView imageView){
 		if(this.selectedImageViews != null){
-			this.selectedImageViews.remove(imageView);
+			if(this.selectedImageViews.contains(imageView)){
+				this.selectedImageViews.remove(imageView);
+			}
 		}
 	}
 	

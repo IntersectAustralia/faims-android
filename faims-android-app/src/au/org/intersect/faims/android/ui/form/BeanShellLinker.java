@@ -1956,10 +1956,12 @@ public class BeanShellLinker {
 								}
 							} else {
 								horizontalScrollView
-										.addSelectedImageView(selectedImageView);
+										.removeSelectedImageViews();
 								for (ImageView view : galleryImages) {
 									if (view.equals(selectedImageView)) {
 										view.setBackgroundColor(Color.BLUE);
+										horizontalScrollView
+											.addSelectedImageView(selectedImageView);
 									} else {
 										view.setBackgroundColor(Color.LTGRAY);
 									}

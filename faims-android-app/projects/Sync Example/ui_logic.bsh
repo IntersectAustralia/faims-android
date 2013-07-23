@@ -393,7 +393,6 @@ updateRel() {
 	}
 	
 	String id = saveRel(rel_id, "abovebelow", null, attributes);
-	
 	updateAll();
 	
 	return id;
@@ -444,8 +443,8 @@ int relCount;
 init() {
     updateAll();
 	startSync();
-	entityCount = fetchEntityList("small").size() + 1;
-	relCount = fetchRelationshipList("abovebelow").size() + 1;
+	entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
+	relCount = Integer.valueOf(fetchOne("select count(distinct(relationshipid)) from relationship;").get(0)) + 1;
 }
 
 cleanup() {
