@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -222,9 +223,27 @@ public class DatabaseManager {
 				st.close();
 				st = null;
 				
+				HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 				// save entity attributes
 				if (attributes != null) {
 					for (EntityAttribute attribute : attributes) {
+						String parenttimestamp = null;
+						if (cacheTimestamps.containsKey(attribute.getName())) {
+							parenttimestamp = cacheTimestamps.get(attribute.getName());
+						} else {
+							query = DatabaseQueries.GET_AENTVALUE_PARENT_TIMESTAMP;
+							st = db.prepare(query);
+							st.bind(1, uuid);
+							st.bind(2, attribute.getName());
+							if (st.step()) {
+								parenttimestamp = st.column_string(0);
+							}
+							st.close();
+							st = null;
+							
+							cacheTimestamps.put(attribute.getName(), parenttimestamp);
+						}
+						
 						query = DatabaseQueries.INSERT_INTO_AENTVALUE;
 						st = db.prepare(query);
 						st.bind(1, uuid);
@@ -235,9 +254,8 @@ public class DatabaseManager {
 						st.bind(6, attribute.getCertainty());
 						st.bind(7, currentTimestamp);
 						st.bind(8, attribute.isDeleted() ? "true" : null);
-						st.bind(9, uuid);
+						st.bind(9, parenttimestamp);
 						st.bind(10, attribute.getName());
-						st.bind(11, attribute.getName());
 						st.step();
 						st.close();
 						st = null;
@@ -430,9 +448,27 @@ public class DatabaseManager {
 				st.close();
 				st = null;
 				
+				HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 				// save relationship attributes
 				if (attributes != null) {
 					for (RelationshipAttribute attribute : attributes) {
+						String parenttimestamp = null;
+						if (cacheTimestamps.containsKey(attribute.getName())) {
+							parenttimestamp = cacheTimestamps.get(attribute.getName());
+						} else {
+							query = DatabaseQueries.GET_RELNVALUE_PARENT_TIMESTAMP;
+							st = db.prepare(query);
+							st.bind(1, uuid);
+							st.bind(2, attribute.getName());
+							if (st.step()) {
+								parenttimestamp = st.column_string(0);
+							}
+							st.close();
+							st = null;
+							
+							cacheTimestamps.put(attribute.getName(), parenttimestamp);
+						}
+						
 						query = DatabaseQueries.INSERT_INTO_RELNVALUE;
 						st = db.prepare(query);
 						st.bind(1, uuid);
@@ -442,9 +478,8 @@ public class DatabaseManager {
 						st.bind(5, attribute.getCertainty());
 						st.bind(6, currentTimestamp);
 						st.bind(7, attribute.isDeleted() ? "true" : null);
-						st.bind(8, uuid);
+						st.bind(8, parenttimestamp);
 						st.bind(9, attribute.getName());
-						st.bind(10, attribute.getName());
 						st.step();
 						st.close();
 						st = null;

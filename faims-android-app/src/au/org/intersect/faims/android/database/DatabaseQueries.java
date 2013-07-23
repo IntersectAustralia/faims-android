@@ -35,33 +35,15 @@ public final class DatabaseQueries {
 
 	public static final String GET_ARCH_ENT_PARENT_TIMESTAMP =
 		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
+	
+	public static final String GET_AENTVALUE_PARENT_TIMESTAMP =
+		"SELECT max(valuetimestamp) FROM aentvalue JOIN attributekey using (attributeid) WHERE uuid = ? and attributename = ? COLLATE NOCASE group by uuid, attributeid;";
 
 	public static final String INSERT_INTO_AENTVALUE = 
 		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted, parenttimestamp) " +
-			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, parent.valuetimestamp " +
+			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT valuetimestamp\n" + 
-			"FROM aentvalue\n" +
-			"JOIN attributekey using (attributeid)\n" +
-			"JOIN\n" + 
-			"  (SELECT uuid,\n" + 
-			"          attributeid,\n" + 
-			"          MAX(valuetimestamp) AS valuetimestamp\n" + 
-			"   FROM aentvalue\n" + 
-			"   GROUP BY uuid,\n" + 
-			"            attributeid) USING (uuid,\n" + 
-			"                                attributeid,\n" + 
-			"                                valuetimestamp)\n" + 
-			"WHERE uuid = ?\n" + 
-			"\n" + 
-			"  AND attributeName = ? COLLATE NOCASE) parent\n" +
 			"WHERE attributeName = ? COLLATE NOCASE;";
-
-	public static final String GET_AENT_VALUE_PARENT_TIMESTAMP =
-		"SELECT attributename, max(valuetimestamp) FROM aentvalue " +
-			"JOIN attributekey using (attributeid) " +
-			"WHERE uuid = ? group by attributeid;";
 
 	public static final String INSERT_INTO_RELATIONSHIP = 
 		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, parenttimestamp) " +
@@ -96,30 +78,14 @@ public final class DatabaseQueries {
 	
 	public static final String GET_RELATIONSHIP_PARENT_TIMESTAMP =
 		"SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;";
-
-	public static final String GET_RELN_VALUE_PARENT_TIMESTAMP =
-		"SELECT attributename, max(relnvaluetimestamp) FROM relnvalue " +
-			"JOIN attributekey using (attributeid) " +
-			"WHERE relationshipid = ? group by attributeid;";
-
+	
+	public static final String GET_RELNVALUE_PARENT_TIMESTAMP =
+			"SELECT max(relnvaluetimestamp) FROM relnvalue JOIN attributekey using (attributeid) WHERE relationshipid = ? and attributename = ? COLLATE NOCASE group by relationshipid, attributeid;";
+	
 	public static final String INSERT_INTO_RELNVALUE = 
 		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted, parenttimestamp) " +
-			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, parent.relnvaluetimestamp " +
+			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT relnvaluetimestamp\n" + 
-			"FROM relnvalue\n" + 
-			"JOIN attributekey using (attributeid)\n" +
-			"JOIN\n" + 
-			"  (SELECT relationshipid, attributeid, MAX(relnvaluetimestamp) AS relnvaluetimestamp\n" + 
-			"   FROM relnvalue\n" + 
-			"   GROUP BY relationshipid,\n" + 
-			"            attributeid) USING (relationshipid,\n" + 
-			"                                attributeid,\n" + 
-			"                                relnvaluetimestamp)\n" + 
-			"WHERE relationshipid = ?\n" + 
-			"\n" + 
-			"  AND attributeName = ? COLLATE NOCASE) parent\n" +
 			"WHERE attributeName = ? COLLATE NOCASE;";
 
 	public static final String CHECK_VALID_AENT = 
