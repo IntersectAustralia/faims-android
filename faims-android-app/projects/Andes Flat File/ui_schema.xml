@@ -1,0 +1,1949 @@
+<?xml version="1.0" encoding="utf-8"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Andes Architecture Survey</h:title>
+    <model>
+      <instance>
+        <faims id="Andes">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+          </style>
+          <user>
+            <tab1>
+              <users/>
+              <devices/>
+              <login/>
+            </tab1>
+          </user>
+          <create>
+              <tab1>
+                  <structure/>
+                  <wall/>
+                  <doorway/>
+                  <feature/>
+                  <specialFind/>
+                  <lichen/>
+                  <surfaceCollection/>
+                  <canal/>
+              </tab1>
+          </create>
+          <control>
+            <map>
+              <map/>
+              <mapContainer>
+                <child1>
+                  <create/>
+                </child1>
+                <child2>
+                  <entityType/>
+                </child2>
+              </mapContainer>
+            </map>
+            <buttonholder>
+              <Structure/>
+              <Wall/>
+              <Doorway/>
+              <Feature/>
+              <SpecialFind/>
+              <Lichen/>
+              <SurfaceCollection/>
+              <Canal/>
+            </buttonholder>
+            <data>
+              <structureList/>
+              <structureLoad/>
+              <wallList/>
+              <wallLoad/>
+              <doorwayList/>
+              <doorwayLoad/>
+              <featureList/>
+              <featureLoad/>
+              <specialFindList/>
+              <specialFindLoad/>
+              <lichenList/>
+              <lichenLoad/>
+              <surfaceCollectionList/>
+              <surfaceCollectionLoad/>
+              <canalList/>
+              <canalLoad/>
+              
+
+            </data>
+            <gps>
+              <connectexternal/>
+              <connectinternal/>
+              <startsync/>
+              <stopsync/>
+            </gps>
+          </control>
+          <structure>
+            <info>
+              <ArchaeologicalElementID/>
+              <Description/>
+              <Timestamp/>
+              <!-- figure out how to make readonly -->
+              <Author/>
+              <!--  make dropdown: Author1,Author2,Author3,Author4,Author5,Author6,Author7,Author8 -->
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Preservation/>
+              <!--  0-20%,21-40%,41-60%,61-80%,81-100% -->
+              <PreservationDescription/>
+              <Form/>
+              <!-- Cuadrangular,Ovoide,Circular,Otro -->
+              <FormDescription/>
+              <CornerExteriorForm/>
+              <!-- Redondeada-bloques,Redondeada-amarrada,Redondeada-mixta,Angular-bloques,Angular-amarrada,Angular-mixta,Otro,No observable -->
+              <CornerInteriorForm/>
+              <!-- Redondeada,Angular,Otro,No observable -->
+
+             
+              <ConstructionPeriod/>
+              <!-- Intermedio Tardio,Horizonte Tardio,Colonial Temprano,Colonial Tardio,Otro -->
+              <ConstructionPeriodDescription/>
+              <Modifications/>
+              <!-- radiobutton
+                <Yes/>,No,Not observable -->
+              <ModificationDescription/>
+              <PrincipalFunction/>
+              <!-- dropdown of 7 values
+                <Domestica/>,Almacenaje,Ritual,Administrativa,Funeraria,Otro,No definido -->
+              <PrincipalFunctionDescription/>
+              <Classification/>
+              <ConstructionQuality/>
+              <!-- radiobutton 1(baja),2,3,4,5(alta) -->
+              <Update/>
+              <Update2/>
+              <InkaMasonry/>
+              <!--  radiobutton
+                <Yes/>,No -->
+              <InkaMasonryDescription/>
+              <!--  dropdown of 10 values
+                <Casa/>,Chullpa,Iglesia,Capilla,Kallanka,Posible casa de kuraka,Hospital,Cabildo,Carcel,Casa de servicio,Estructura asociada,Otro    -->
+
+              <StuccoInterior/>
+              <!-- radiobutton?-->
+              <!--Yes,No,Not observable-->
+              <StuccoExterior/>
+              <!-- radiobutton?-->
+              <!--Yes,No,Not observable-->
+              <FloorRemainsDescription/>
+              <WallsInternalPartition/>
+              <!-- radiobutton ,1,2,3,4,More,No observable -->
+              <PartitionDescription/>
+              <MasonryType/>
+              <!-- picture dictionary of 13 values-->
+              <!-- Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable -->
+              <MasonryDescription/>
+
+
+
+              <RoofForm/>
+              <!--Hastial dos aguas,Hastial un agua,Sin hastial,Otro,No observable-->
+              <LongAxis/>
+              <!-- number-->
+              <ShortAxis/>
+              <!-- number-->
+              <Diameter/>
+              <!-- number-->
+              <SurfaceCondition/>
+              <ModernUse/>
+              <Disturbances/>
+              <!--No evidente,Pocos,Varios-->
+              <OtherArchitecturalDetails/>
+
+              <WallHeight/>
+              <WallHeightMax/>
+              <GableWallHeight/>
+              <GableWallMaxPreservedHeight/>
+              <GableDistance/>
+
+              <DoorOrientation/>
+              <!-- degrees from north-->
+              <DoorPosition/>
+              <!--Eje largo,Eje corto,Circular (No aplicable),Otro,No observable-->
+              <DoorMasonry/>
+              <!--Bloques,Ligada,Mixta,Otro,No observable-->
+              <DoorPreservation/>
+              <DoorJambHeight/>
+              <DoorHeight/>
+              <!-- number-->
+
+              <DoorTopWidth/>
+              <!-- number-->
+              <DoorBaseWidth/>
+              <!-- number-->
+              <DoorOtherWidth/>
+              <!-- number-->
+              <DoorOtherWidthHeight/>
+              <!-- number-->
+              <WallThickness/>
+
+              <WindowDescription/>
+
+              <WindowsPresent/>
+              <NicheCount/>
+              <NicheWall1/>
+              <NicheCorner1/>
+              <NicheWall2/>
+              <NicheCorner2/>
+              <NicheWall3/>
+              <NicheCorner3/>
+              <NicheWall4/>
+              <NicheCorner4/>
+              <NicheWall5/>
+
+              <NicheAltar/>
+              <!-- radiobutton-->
+              <!--Yes,No-->
+              <NicheDescription/>
+
+            </info>
+           
+            <final>
+              <EAidDupe/>
+              <PhotoGallery/>
+              <Photo/>
+              <VideoGallery/>
+              <Video/>
+              <Audio/>
+              <AudioList/>
+              <Sketch/>
+              <sketchfilelist/>
+              <AddAttachment/>
+              <filelist/>
+              <viewattached/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+            </final>
+            
+          </structure>
+         
+          <window>
+            <windowDetail>
+              <EAidDupe/>
+              <WindowID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <WindowPosition/>
+              <WindowHeight/>
+              <!-- number-->
+              <WindowHeightPreservation/>
+              <!-- radiobutton-->
+              <!-- <Complete/>,Max complete -->
+              <WindowWidth/>
+              <!-- number-->
+              
+              <WindowPhotos/>
+              <PhotoGallery/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <AssociateWith/>
+              <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
+            </windowDetail>
+          </window>
+          <niche>
+            <nicheDetail>
+              <EAidDupe/>
+              <NicheID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <NichePosition/>
+              <NicheForm/>
+              <!--Square,Rectangular,Trapezoidal, Other-->
+              <NicheHeight/>
+              <!-- number-->
+              <NicheHeightPreservation/>
+              <!-- radiobutton-->
+              <!-- <Complete/>,Max complete -->
+              <NicheWidthLoc/>
+              <!-- radiobutton-->
+              <!-- <Bottom/>,Top -->
+              <NicheWidth/>
+              <!-- number-->
+              <NicheDepth/>
+              <!-- number-->
+              <NicheAltar/>
+              <!-- radiobutton-->
+              <!--Yes,No-->
+              <NicheDescription/>
+              <NichePhotos/>
+              <PhotoGallery/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <!--<AssociateWithType/>-->
+              <AssociateWith/>
+              <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
+            </nicheDetail>
+          </niche>
+          <lichen>
+            <lichenDetail>
+              <LichenID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <Size/>
+              <!-- in mm with two decimals-->
+              <Substrate/>
+              <!--Andesite,Basal,Tuff,Otro-->
+              <LichenQuality/>
+              <Aspect/>
+              <!--Horizontal,Vertical,Angled,Other-->
+              <InsideOutside/>
+              <!-- dropdown-->
+              <!--Interior Wall Surface,Exterior Wall Surface,Wall Fall Surface,Doorway,Wall top,Other-->
+              <Comments/>
+              <Photos/>
+              <PhotoGallery/>
+           
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <!--<AssociateWithType/>-->
+              <AssociateWith/>
+              <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
+            </lichenDetail>
+          </lichen>
+          <feature>
+            <featureDetail>
+              <FeatureID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Description/>
+              <Photos/>
+              <PhotoGallery/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <AssociateWith/>
+              <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
+            </featureDetail>
+          </feature>
+          <freeWall>
+            <freeWallDetail>
+              <WallID/>
+              <!-- 4digit EA code-->
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <WallDescription/>
+              <WallClass/>
+              <!-- dropdown of 7 values + no observable-->
+              <!--Delimitación de manzana,División interna de manzana,División de grupo patio,  Muro de contención,Muro de plataforma,Escalera,Otro,No Definido-->
+              <WallPreservation/>
+              <!--0-20%,21-40%,41-60%,61-80%,81-100%-->
+              <MasonryType/>
+              <!-- picture dictionary of 13 values-->
+              <!-- Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable -->
+              <MasonryDescription/>
+              <WallHeight/>
+              <!-- number-->
+              <WallHeightPreservation/>
+              <!-- radiobutton: (1) complete, (2) max preserved-->
+              <!-- Complete,Max complete-->
+              <WallThickness/>
+              <!-- number-->
+              <WallComments/>
+              <Photos/>
+              <PhotoGallery/>
+              <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <AssociateWith/>
+            </freeWallDetail>
+          </freeWall>
+          <canal>
+            <canalDetail>
+              <CanalID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <InternalWidth/>
+              <ExternalWidth/>
+              <Notes/>
+              <Photos/>
+              <PhotoGallery/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <!--<AssociateWithList/>
+              <AssociateWith/>-->
+              <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
+            </canalDetail>
+          </canal>
+          <doorway>
+            <doorDetail>
+              <DoorID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              
+              <DoorBaseWidth/>
+              <DoorDescription/>
+              <TypeOfDoorway/>
+
+
+
+              <DoorDescription/>
+              <DoorPhotos/>
+              <PhotoGallery/>
+              
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <!--<AssociateWithType/>-->
+              <AssociateWith/>
+              <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
+            </doorDetail>
+          </doorway>
+          <specialFind>
+            <findDetail>
+              <SpecialFindID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Description/>
+              <Type/>
+              <!-- dropdown-->
+              <!--Ceramic,Litico,Vidrio,Metal,Otro-->
+              <Photos/>
+              <PhotoGallery/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <AssociateWith/>
+              <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
+            </findDetail>
+          </specialFind>
+          <surfaceCollection>
+            <description>
+              <SurfaceCollectionID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Radius/>
+              <SurfaceCollectionContext/>
+              <!-- dropdown of 18 values-->
+              <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
+              <ContextDescription/>
+              <Update/>
+              <Update2/>
+              <AssociateWithList/>
+              <AssociateWith/>
+            </description>
+            <material>
+              <DiagnosticsPresent/>
+              <!-- range of four points ( in a dropdown or radiobutton)-->
+              <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
+              <MaterialDensity/>
+              <!-- range of four points ( in a dropdown or radiobutton)-->
+              <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
+              <Comments/>
+              <LotLabPriority/>
+              <!-- radiobutton, range of three ( in a dropdown or radiobutton)-->
+              <!--Baja prioridad,Mediana prioridad,Alta prioridad-->
+              <LotNumbers/>
+              <!-- textbox-->
+              <Lot/>
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <!--<AssociateWithList/>
+              <AssociateWith/>-->
+              <NewLot/>
+              <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
+            </material>
+            <load>
+              <lotList/>
+              <lotLoad/>
+            </load>
+          </surfaceCollection>
+          <lot>
+            <lotDetail>
+              <LotID/>
+              <Timestamp/>
+              <Author/>
+              <Device/>
+              <!--Llama,Vizcacha,Condor,Puma,Cuy,Alpaca,Vicuna,Guanaco,Taruca-->
+              <Material/>
+              <!-- dropdown of 4 values-->
+              <!--Cerámica,Metal,Vidrio,Otro,-->
+              <Update/>
+              <Update2/>
+              <Delete/>
+              <AssociateWithList/>
+              <AssociateWith/>
+              <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
+            </lotDetail>
+          </lot>
+        </faims>
+      </instance>
+      <bind nodeset="/faims/structure/info/ArchaeologicalElementID" type="decimal"/>
+      <bind nodeset="/faims/structure/info/Description" type="string"/>
+      <bind nodeset="/faims/structure/info/PreservationDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/FormDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/GableDistance" type="decimal"/>
+      <bind nodeset="/faims/structure/info/WallHeight" type="decimal"/>
+      <bind nodeset="/faims/structure/info/WallHeightMax" type="decimal"/>
+      <bind nodeset="/faims/structure/info/GableWallHeight" type="decimal"/>
+      <bind nodeset="/faims/structure/info/GableWallMaxPreservedHeight" type="decimal"/>
+
+
+     <bind nodeset="/faims/structure/info/DoorOrientation" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorHeight" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorJambHeight" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorTopWidth" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorBaseWidth" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorOtherWidth" type="decimal"/>
+      <bind nodeset="/faims/structure/info/DoorOtherWidthHeight" type="decimal"/>
+
+
+      <bind nodeset="/faims/structure/info/NicheWall1" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheCorner1" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheWall2" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheCorner2" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheWall3" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheCorner3" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheWall4" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheCorner4" type="decimal"/>
+      <bind nodeset="/faims/structure/info/NicheWall5" type="decimal"/>
+      
+      <bind nodeset="/faims/structure/info/NicheDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/InkaMasonryDescription" type="string"/>
+
+      <bind nodeset="/faims/structure/info/WallThickness" type="decimal"/>
+
+      
+      
+      <bind nodeset="/faims/structure/info/NicheCount" type="decimal"/>
+      
+      <bind nodeset="/faims/structure/info/PartitionDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/ConstructionPeriodDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/ModificationDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/PrincipalFunctionDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/FloorRemainsDescription" type="string"/>
+      <bind nodeset="/faims/structure/info/LongAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/ShortAxis" type="decimal"/>
+      <bind nodeset="/faims/structure/info/Diameter" type="decimal"/>
+      <bind nodeset="/faims/structure/info/SurfaceCondition" type="string"/>
+      <bind nodeset="/faims/structure/info/ModernUse" type="string"/>
+      <bind nodeset="/faims/structure/info/Disturbances" type="string"/>
+      <bind nodeset="/faims/structure/info/OtherArchitecturalDetails" type="string"/>
+      <bind nodeset="/faims/structure/info/MasonryDescription" type="string"/>
+
+    
+      <bind nodeset="/faims/structure/info/WindowDescription" type="string"/>
+
+      <bind nodeset="/faims/doorway/doorDetail/DoorDescription" type="string"/>
+
+     
+              
+      <bind nodeset="/faims/doorway/doorDetail/DoorBaseWidth" type="decimal"/>
+      
+
+      <bind nodeset="/faims/lichen/lichenDetail/LichenID" type="decimal"/>
+      <bind nodeset="/faims/lichen/lichenDetail/Size" type="decimal"/>
+      <bind nodeset="/faims/lichen/lichenDetail/Comments" type="string"/>
+  
+
+      <bind nodeset="/faims/feature/featureDetail/Description" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallDescription" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/MasonryDescription" type="string"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallHeight" type="decimal"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallThickness" type="decimal"/>
+      <bind nodeset="/faims/freeWall/freeWallDetail/WallComments" type="string"/>
+      <bind nodeset="/faims/canal/canalDetail/InternalWidth" type="decimal"/>
+      <bind nodeset="/faims/canal/canalDetail/ExternalWidth" type="decimal"/>
+      <bind nodeset="/faims/canal/canalDetail/Notes" type="string"/>
+      <bind nodeset="/faims/specialFind/findDetail/Description" type="string"/>
+      <bind nodeset="/faims/surfaceCollection/description/ContextDescription" type="string"/>
+      <bind nodeset="/faims/surfaceCollection/description/Radius" type="decimal"/>
+      <bind nodeset="/faims/surfaceCollection/material/Comments" type="string"/>
+      <bind nodeset="/faims/surfaceCollection/material/LotNumbers" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>{horizontal}</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label></label>
+        </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>{User.And.Device.List}</label>
+      <group ref="tab1">
+        <label>{User.And.Device.List}</label>
+        <select1 ref="users">
+          <label>{Users}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 ref="devices" appearance="full">
+          <label>{Devices}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="login">
+          <label>{Start.Recording}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="create">
+        <label></label>
+        <group ref="tab1">
+            <label>{Create.Record.For}</label>
+            <trigger ref="structure">
+                <label>{Create.Structure}</label>
+            </trigger>
+            <trigger ref="wall">
+                <label>{Create.Wall}</label>
+            </trigger>
+            <trigger ref="doorway">
+                <label>{Create.Doorway}</label>
+            </trigger>
+            <trigger ref="feature">
+                <label>{Create.Feature}</label>
+            </trigger>
+            <trigger ref="specialFind">
+                <label>{Create.Special.Find}</label>
+            </trigger>
+            <trigger ref="lichen">
+                <label>{Create.Lichen}</label>
+            </trigger>
+            <trigger ref="surfaceCollection">
+                <label>{Create.Surface.Collection}</label>
+            </trigger>
+            <trigger ref="canal">
+                <label>{Create.Canal}</label>
+            </trigger>
+        </group>
+    </group>
+    <group ref="control">
+      <label>{Maps.And.Controls}</label>
+      <group ref="map" faims_scrollable="false">
+        <label>{Map}</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+          <label></label>
+        </input>
+      </group>
+      <group ref="data">
+        <label>{Loading.Data}</label>
+        <select1 ref="structureList" faims_certainty="false" faims_annotation="false">
+          <label>{Structures}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="structureLoad">
+          <label>{Load.Structure}</label>
+        </trigger>
+        <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
+          <label>{Walls}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="wallLoad">
+          <label>{Load.Wall}</label>
+        </trigger>
+        <select1 ref="doorwayList" faims_certainty="false" faims_annotation="false">
+          <label>{Doorways}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="doorwayLoad">
+          <label>{Load.Doorway}</label>
+        </trigger>
+        <select1 ref="featureList" faims_certainty="false" faims_annotation="false">
+          <label>{Features}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="featureLoad">
+          <label>{Load.Feature}</label>
+        </trigger>
+        <select1 ref="specialFindList" faims_certainty="false" faims_annotation="false">
+          <label>{Special.Finds}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="specialFindLoad">
+          <label>{Load.Special.Find}</label>
+        </trigger>
+        <select1 ref="lichenList" faims_certainty="false" faims_annotation="false">
+          <label>{Lichens}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="lichenLoad">
+          <label>{Load.Lichen}</label>
+        </trigger>
+        <select1 ref="surfaceCollectionList" faims_certainty="false" faims_annotation="false">
+          <label>{Surface.Collections}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="surfaceCollectionLoad">
+          <label>{Load.Surface.Collection}</label>
+        </trigger>
+        <select1 ref="canalList" faims_certainty="false" faims_annotation="false">
+          <label>{Canals}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="canalLoad">
+          <label>{Load.Canal}</label>
+        </trigger>
+       
+      </group>
+      <group ref="gps">
+        <label>{Communications.Control.Tab}</label>
+        <trigger ref="connectexternal">
+          <label>{Connect.To.External.GPS}</label>
+        </trigger>
+        <trigger ref="connectinternal">
+          <label>{Connect.To.Internal.GPS}</label>
+        </trigger>
+        <trigger ref="startsync">
+          <label>{Start.Synching}</label>
+        </trigger>
+        <trigger ref="stopsync">
+          <label>{Stop.Synching}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="structure" faims_archent_type="Structure">
+      <label>{Structure.Detail}</label>
+      <group ref="info">
+        <label>{Structure.Information}</label>
+        <input ref="ArchaeologicalElementID" faims_attribute_name="ArchaeologicalElementID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Archaeological.Element.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
+          <label>{Structure.Description}:</label>
+        </input>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Device}:</label>
+        </input>
+        <select1 ref="Preservation" faims_attribute_name="Preservation" faims_attribute_type="vocab">
+          <label>{Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="PreservationDescription" faims_attribute_name="PreservationDescription" faims_attribute_type="freetext">
+          <label>{Preservation.Description}:</label>
+        </input>
+        <select1 ref="Form" faims_attribute_name="Form" faims_attribute_type="vocab">
+          <label>{Form}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="FormDescription" faims_attribute_name="FormDescription" faims_attribute_type="freetext">
+          <label>{Form.Description}:</label>
+        </input>
+        <select1 ref="CornerExteriorForm" faims_attribute_name="CornerExteriorForm" faims_attribute_type="vocab">
+          <label>{Corner.Exterior.Form}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 ref="CornerInteriorForm" faims_attribute_name="CornerInteriorForm" faims_attribute_type="vocab">
+          <label>{Corner.Interior.Form}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="FloorRemainsDescription" faims_attribute_name="FloorRemainsDescription" faims_attribute_type="freetext">
+          <label>{Floor.Remains.Description}:</label>
+        </input>
+
+
+        <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
+          <label>{Number.Of.Internal.Partitions}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
+          <label>{Partition.Description}:</label>
+        </input>
+
+        
+
+        <select1 appearance="full" ref="ConstructionPeriod" faims_attribute_name="ConstructionPeriod" faims_attribute_type="vocab">
+          <label>{Construction.Period}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="ConstructionPeriodDescription" faims_attribute_name="ConstructionPeriodDescription" faims_attribute_type="freetext">
+          <label>{Construction.Period.Description}:</label>
+        </input>
+        <select1 appearance="full" ref="Modifications" faims_attribute_name="Modifications" faims_attribute_type="vocab">
+          <label>{Modifications}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="ModificationDescription" faims_attribute_name="ModificationDescription" faims_attribute_type="freetext">
+          <label>{Modification.Description}:</label>
+        </input>
+        <select1 ref="PrincipalFunction" faims_attribute_name="PrincipalFunction" faims_attribute_type="vocab">
+          <label>{Principal.Function}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="PrincipalFunctionDescription" faims_attribute_name="PrincipalFunctionDescription" faims_attribute_type="freetext">
+          <label>{Principal.Function.Description}:</label>
+        </input>
+        <select1 ref="Classification" faims_attribute_name="Classification" faims_attribute_type="vocab">
+          <label>{Classification}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+
+        <select1 appearance="full" ref="ConstructionQuality" faims_attribute_name="ConstructionQuality" faims_attribute_type="vocab">
+          <label>{Construction.Quality}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="ModernUse" faims_attribute_name="ModernUse" faims_attribute_type="freetext">
+          <label>{Modern.Use}:</label>
+        </input>
+        <input ref="SurfaceCondition" faims_attribute_name="SurfaceCondition" faims_attribute_type="freetext">
+          <label>{Surface.Condition}:</label>
+        </input>        
+        <input ref="Disturbances" faims_attribute_name="Disturbances" faims_attribute_type="freetext">
+          <label>{Disturbances}:</label>
+        </input>
+
+        <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
+          <label>{Masonry.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
+          <label>{Masonry.Description}:</label>
+        </input>
+        <select1 appearance="full" ref="InkaMasonry" faims_attribute_name="InkaMasonry" faims_attribute_type="vocab">
+          <label>{Inka.Masonry}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="InkaMasonryDescription" faims_attribute_name="InkaMasonryDescription" faims_attribute_type="freetext">
+          <label>{Inka.Masonry.Description}:</label>
+        </input>
+        <select1 ref="RoofForm" faims_attribute_name="RoofForm" faims_attribute_type="vocab">
+          <label>{Roof.Form}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="LongAxis" faims_attribute_name="LongAxis" faims_attribute_type="measure">
+          <label>{Long.Axis}:</label>
+        </input>
+        <input ref="ShortAxis" faims_attribute_name="ShortAxis" faims_attribute_type="measure">
+          <label>{Short.Axis}:</label>
+        </input>
+        <input ref="Diameter" faims_attribute_name="Diameter" faims_attribute_type="measure">
+          <label>{Diameter}:</label>
+        </input>
+
+
+
+        <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
+          <label>{Wall.Height}:</label>
+        </input>
+<input ref="WallHeightMax" faims_attribute_name="WallHeightMax" faims_attribute_type="measure">
+          <label>{Wall.Height.Max}:</label>
+        </input>
+        <input ref="GableWallHeight" faims_attribute_name="GableWallHeight" faims_attribute_type="measure">
+          <label>{Gable.Wall.Height}:</label>
+        </input>
+        <input ref="GableWallMaxPreservedHeight" faims_attribute_name="GableWallMaxPreservedHeight" faims_attribute_type="measure">
+          <label>{Gable.Wall.Max.Preserved.Height}:</label>
+        </input>
+
+
+
+
+        <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
+          <label>{Gable.Distance}:</label>
+        </input>
+
+
+        <input ref="DoorOrientation" faims_attribute_name="DoorOrientation" faims_attribute_type="measure">
+          <label>{Door.Orientation}:</label>
+        </input>
+        <select1 appearance="full" ref="DoorPosition" faims_attribute_name="DoorPosition" faims_attribute_type="vocab">
+          <label>{Door.Position}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="DoorMasonry" faims_attribute_name="DoorMasonry" faims_attribute_type="vocab">
+          <label>{Door.Masonry}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="DoorPreservation" faims_attribute_name="DoorPreservation" faims_attribute_type="vocab">
+          <label>{Door.Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="DoorHeight" faims_attribute_name="DoorHeight" faims_attribute_type="measure">
+          <label>{DoorHeight}:</label>
+        </input>
+         <input ref="DoorJambHeight" faims_attribute_name="DoorJambHeight" faims_attribute_type="measure">
+          <label>{Door.Jamb.Height}:</label>
+        </input>
+        <input ref="DoorTopWidth" faims_attribute_name="DoorTopWidth" faims_attribute_type="measure">
+          <label>{Door.Top.Width}:</label>
+        </input>
+        <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="measure">
+          <label>{Door.Base.Width}:</label>
+        </input>
+        <input ref="DoorOtherWidth" faims_attribute_name="DoorOtherWidth" faims_attribute_type="measure">
+          <label>{Door.Other.Width}:</label>
+        </input>
+        <input ref="DoorOtherWidthHeight" faims_attribute_name="DoorOtherWidthHeight" faims_attribute_type="measure">
+          <label>{Door.Other.Width.Height}:</label>
+        </input>
+        <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
+          <label>{Wall.Thickness}:</label>
+        </input>
+
+
+        <select1 appearance="full" ref="StuccoInterior" faims_attribute_name="StuccoInterior" faims_attribute_type="vocab">
+          <label>{Stucco.Interior}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="StuccoExterior" faims_attribute_name="StuccoExterior" faims_attribute_type="vocab">
+          <label>{Stucco.Exterior}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+
+         <select1 appearance="full" ref="WindowsPresent" faims_attribute_name="WindowsPresent" faims_attribute_type="vocab">
+          <label>{Windows.Present}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="WindowDescription" faims_attribute_name="WindowDescription" faims_attribute_type="freetext">
+          <label>{Window.Description}:</label>
+        </input>
+        
+
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure">
+          <label>{Niches.Recorded}:</label>
+        </input>
+
+         <input ref="NicheWall1" faims_attribute_name="NicheWall1" faims_attribute_type="measure">
+          <label>{Niche.Wall1}:</label>
+        </input>
+
+         <input ref="NicheCorner1" faims_attribute_name="NicheCorner1" faims_attribute_type="measure">
+          <label>{Niche.Corner1}:</label>
+        </input>
+
+        <input ref="NicheWall2" faims_attribute_name="NicheWall2" faims_attribute_type="measure">
+          <label>{Niche.Wall2}:</label>
+        </input>
+
+         <input ref="NicheCorner2" faims_attribute_name="NicheCorner2" faims_attribute_type="measure">
+          <label>{Niche.Corner2}:</label>
+        </input>
+
+        <input ref="NicheWall3" faims_attribute_name="NicheWall3" faims_attribute_type="measure">
+          <label>{Niche.Wall3}:</label>
+        </input>
+
+         <input ref="NicheCorner3" faims_attribute_name="NicheCorner3" faims_attribute_type="measure">
+          <label>{Niche.Corner3}:</label>
+        </input>
+
+        <input ref="NicheWall4" faims_attribute_name="NicheWall4" faims_attribute_type="measure">
+          <label>{Niche.Wall4}:</label>
+        </input>
+
+         <input ref="NicheCorner4" faims_attribute_name="NicheCorner4" faims_attribute_type="measure">
+          <label>{Niche.Corner4}:</label>
+        </input>
+
+        <input ref="NicheWall5" faims_attribute_name="NicheWall5" faims_attribute_type="measure">
+          <label>{Niche.Wall5}:</label>
+        </input>
+   
+        <select1 appearance="full" ref="NicheAltar" faims_attribute_name="NicheAltar" faims_attribute_type="vocab">
+          <label>{Niche.Altar}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Yes,No-->
+        <input ref="NicheDescription" faims_attribute_name="NicheDescription" faims_attribute_type="freetext">
+          <label>{Niche.Description}:</label>
+        </input>
+
+
+       
+        
+        <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
+          <label>{Other.Architectural.Detail}:</label>
+        </input>
+<trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+
+      </group>
+      
+      <group ref="final">
+        <label>{Attachments.And.Saving}</label>
+           <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>{EA.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Photo">
+          <label>{Take.Picture}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Video">
+          <label>{Take.Video}</label>
+        </trigger>
+        <select ref="VideoGallery" type="image">
+          <label>{Video.Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Audio">
+          <label>{Record.Audio}</label>
+        </trigger>
+		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
+            <label>{Audio.List}:</label>
+            <item>
+                <label>{None}</label>
+                <value>None</value>
+            </item>
+        </select>
+        <trigger ref="Sketch">
+          <label>{Sketch}</label>
+        </trigger>
+        <select ref="sketchfilelist" faims_certainty="false" faims_annotation="false">
+            <label>{Sketch.File.List}:</label>
+            <item>
+                <label>{None}</label>
+                <value>None</value>
+            </item>
+        </select>
+        <trigger ref="AddAttachment">
+          <label>{Add.Attachment}</label>
+        </trigger>
+		<select ref="filelist" faims_certainty="false" faims_annotation="false">
+            <label>{Attachments}:</label>
+            <item>
+                <label>{None}</label>
+                <value>None</value>
+            </item>
+        </select>
+        <trigger ref="viewattached">
+          <label>{View.Attachments}</label>
+        </trigger>
+<trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+      </group>
+      </group>
+    
+    <group ref="doorway" faims_archent_type="Doorway">
+      <label>{Doorway.Detail}</label>
+      <group ref="doorDetail">
+        <label>{Doorway.Detail}</label>
+        <input ref="DoorID" faims_attribute_name="DoorID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Door.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Device}:</label>
+        </input>
+        
+ <input ref="DoorBaseWidth" faims_attribute_name="DoorBaseWidth" faims_attribute_type="measure">
+          <label>{Door.Base.Width}:</label>
+        </input>
+
+         <select1 ref="TypeOfDoorway" faims_attribute_name="TypeOfDoorway" faims_attribute_type="vocab">
+          <label>{Doorway.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+              
+           
+
+
+        <input ref="DoorDescription" faims_attribute_name="DoorDescription" faims_attribute_type="freetext">
+          <label>{Door.Description}:</label>
+        </input>
+        <trigger ref="DoorPhotos">
+          <label>{Door.Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+       
+        <!-- {button}-->
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
+      </group>
+    </group>
+    <group ref="niche" faims_archent_type="Niche">
+      <label>{Niche.Detail}</label>
+      <group ref="nicheDetail">
+        <label>{Niche.Detail}</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>{Last.Loaded.EA.ID}:</label>
+        </input>
+        <input ref="NicheID" faims_attribute_name="NicheID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Niche.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Device}:</label>
+        </input>
+        <input ref="NichePosition" faims_attribute_name="NichePosition" faims_attribute_type="freetext">
+          <label>{Niche.Position}:</label>
+        </input>
+        <select1 appearance="full" ref="NicheForm" faims_attribute_name="NicheForm" faims_attribute_type="vocab">
+          <label>{Niche.Form}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="NicheHeight" faims_attribute_name="NicheHeight" faims_attribute_type="measure">
+          <label>{Niche.Height}:</label>
+        </input>
+        <select1 appearance="full" ref="NicheHeightPreservation" faims_attribute_name="NicheHeightPreservation" faims_attribute_type="vocab">
+          <label>{Niche.Height.Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!-- <Complete/>,Max complete -->
+        <select1 appearance="full" ref="NicheWidthLoc" faims_attribute_name="NicheWidthLoc" faims_attribute_type="vocab">
+          <label>{Niche.Width.Loc}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!-- <Bottom/>,Top -->
+        <input ref="NicheWidth" faims_attribute_name="NicheWidth" faims_attribute_type="measure">
+          <label>{Niche.Width}:</label>
+        </input>
+        <input ref="NicheDepth" faims_attribute_name="NicheDepth" faims_attribute_type="measure">
+          <label>{Niche.Depth}:</label>
+        </input>
+        <select1 appearance="full" ref="NicheAltar" faims_attribute_name="NicheAltar" faims_attribute_type="vocab">
+          <label>{Niche.Altar}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Yes,No-->
+        <input ref="NicheDescription" faims_attribute_name="NicheDescription" faims_attribute_type="freetext">
+          <label>{Niche.Description}:</label>
+        </input>
+        <trigger ref="NichePhotos">
+          <label>{Niche.Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
+        <!--<trigger ref="AssociateWith">
+          <label>{AssociateWith}</label>
+        </trigger>-->
+        <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
+      </group>
+    </group>
+    <group ref="lichen" faims_archent_type="Lichen">
+      <label>{Lichen.Detail}</label>
+      <group ref="lichenDetail">
+        <label>{Lichen.Detail}</label>
+        <input ref="LichenID" faims_attribute_name="LichenID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{LichenID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true" appearance="compact">
+          <label>{Device}:</label>
+        </input>
+        <input ref="Size" faims_attribute_name="Size" faims_attribute_type="measure">
+          <label>{Size}:</label>
+        </input>
+        <select1 appearance="full" ref="Substrate" faims_attribute_name="Substrate" faims_attribute_type="vocab">
+          <label>{Substrate}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 type="image" ref="LichenQuality" faims_attribute_name="LichenQuality" faims_attribute_type="freetext">
+          <label>{Quality}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 appearance="full" ref="Aspect" faims_attribute_name="Aspect" faims_attribute_type="vocab">
+          <label>{Aspect}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1  ref="InsideOutside" faims_attribute_name="InsideOutside" faims_attribute_type="vocab">
+          <label>{InsideOutside}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Interior Wall Surface,Exterior Wall Surface,Wall Fall Surface,Doorway,Wall top,Other-->
+        <input ref="Comments" faims_attribute_name="Comments" faims_attribute_type="freetext">
+          <label>{Comments}:</label>
+        </input>
+        <trigger ref="Photos">
+          <label>{Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+       
+        <!-- {button}-->
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+            <label>{Associate.With.Type}:</label>
+            <item>
+                <label>{dummy}</label>
+                <value>dummy</value>
+            </item>
+        </select1>-->
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
+      </group>
+    </group>
+    <group ref="feature" faims_archent_type="Feature">
+      <label>{Feature.Detail}</label>
+      <group ref="featureDetail">
+        <label>{Features}</label>
+        <input ref="FeatureID" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Feature.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
+          <label>{Description}:</label>
+        </input>
+        <trigger ref="Photos">
+          <label>{Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        <!--  {Buttons: “Save Feature”,”Load Feature”,“Delete”,”Associate with”) -->
+      </group>
+    </group>
+    <group ref="freeWall" faims_archent_type="Wall">
+      <label>{Free.Standing.Wall.Detail}</label>
+      <group ref="freeWallDetail">
+        <label>{Free.Standing.Wall}</label>
+        <input ref="WallID" faims_attribute_name="WallID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Wall.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <input ref="WallDescription" faims_attribute_name="WallDescription" faims_attribute_type="freetext">
+          <label>{Wall.Description}:</label>
+        </input>
+        <select1 ref="WallClass" faims_attribute_name="WallClass" faims_attribute_type="vocab">
+          <label>{Wall.Class}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+         <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
+          <label>{Wall.Thickness}:</label>
+        </input>
+        <!--Delimitación de manzana,División interna de manzana,División de grupo patio,  Muro de contención,Muro de plataforma,Escalera,Otro,No Definido-->
+        <select1 appearance="full" ref="WallPreservation" faims_attribute_name="WallPreservation" faims_attribute_type="vocab">
+          <label>{Wall.Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <select1 type="image" ref="MasonryType" faims_attribute_name="MasonryType" faims_attribute_type="vocab">
+          <label>{Masonry.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!-- Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable -->
+        <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
+          <label>{Masonry.Description}:</label>
+        </input>
+        <select1 appearance="full" ref="WallHeightPreservation" faims_attribute_name="WallHeightPreservation" faims_attribute_type="vocab">
+          <label>{Wall.Height.Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!-- Complete,Max complete-->
+        <input ref="WallHeight" faims_attribute_name="WallHeight" faims_attribute_type="measure">
+          <label>{Wall.Height}:</label>
+        </input>
+        <input ref="WallThickness" faims_attribute_name="WallThickness" faims_attribute_type="measure">
+          <label>{Wall.Thickness}:</label>
+        </input>
+        <input ref="WallComments" faims_attribute_name="WallComments" faims_attribute_type="freetext">
+          <label>{Wall.Comments}:</label>
+        </input>
+        <trigger ref="Photos">
+          <label>{Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <!-- {Button: “Save Wall”, “Delete Wall”,”Load Wall”,”Associate with”} -->
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        <!-- {button}-->
+      </group>
+    </group>
+    <group ref="canal" faims_archent_type="Canal">
+      <label>{Canal.Detail}</label>
+      <group ref="canalDetail">
+        <label>{Canal.Detail}</label>
+        <input ref="CanalID" faims_attribute_name="CanalID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{CanalID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <input ref="InternalWidth" faims_attribute_name="InternalWidth" faims_attribute_type="measure">
+          <label>{Internal.Width}:</label>
+        </input>
+        <input ref="ExternalWidth" faims_attribute_name="ExternalWidth" faims_attribute_type="measure">
+          <label>{External.Width}:</label>
+        </input>
+        <input ref="Notes" faims_attribute_name="Notes" faims_attribute_type="freetext">
+          <label>{Notes}:</label>
+        </input>
+        <trigger ref="Photos">
+          <label>{Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>{Associate.With.List}:</label>
+            <item>
+                <label>{dummy}</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>-->
+        <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
+      </group>
+    </group>
+    <group ref="specialFind" faims_archent_type="SpecialFind">
+      <label>{Special.Find}</label>
+      <group ref="findDetail">
+        <label>{Special.Find.Detail}</label>
+        <input ref="SpecialFindID" faims_attribute_name="SpecialFindID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Special.Find.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext">
+          <label>{Description}:</label>
+        </input>
+        <select1 appearance="full" ref="Type" faims_attribute_name="Type" faims_attribute_type="vocab">
+          <label>{Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Ceramic,Litico,Vidrio,Metal,Otro-->
+        <trigger ref="Photos">
+          <label>{Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        <!-- {Button: “Save”,”Load”, “Delete”,”Associate with”} -->
+      </group>
+    </group>
+    <group ref="surfaceCollection" faims_archent_type="SurfaceCollection">
+      <label>{Surface.Collection}</label>
+      <group ref="description">
+        <label>{Collection.Description}</label>
+        <input ref="SurfaceCollectionID" faims_attribute_name="SurfaceCollectionID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Surface.Collection.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <input ref="Radius" faims_attribute_name="Radius" faims_attribute_type="measure">
+          <label>{Radius}:</label>
+        </input>
+        <select1 ref="SurfaceCollectionContext" faims_attribute_name="SurfaceCollectionContext" faims_attribute_type="vocab">
+          <label>{Surface.Collection.Context}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Superficie interna de estructura,Superficie al aire libre – patio,Superficie al aire libre – calle,Superficie al aire libre – manzana,Superficie al aire libre – sin rasgos,Superficie al aire libre – adyacente a tumba,Superficie interior de tumba,Superficie interior de rasgo no definido,Caída de muro,Muro de estructura (argamasa),Muro de estructura (suelta),Muro de estructura (encima),Hornacina (suelta),Muro de manzana (argamasa),Muro de patio,Otro muro (argamasa),Otro muro (suelta),Otro-descripción-->
+        <input ref="ContextDescription" faims_attribute_name="ContextDescription" faims_attribute_type="freetext">
+          <label>{Context.Description}:</label>
+        </input>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.Type}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>-->
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>
+        </group>
+      <group ref="material">
+        <label>{Material.Description}</label>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <select1 appearance="full" ref="DiagnosticsPresent" faims_attribute_name="DiagnosticsPresent" faims_attribute_type="vocab">
+          <label>{Diagnostics.Present}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
+        <select1 appearance="full" ref="MaterialDensity" faims_attribute_name="MaterialDensity" faims_attribute_type="vocab">
+          <label>{Material.Density}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--0-No presente,1-Baja densidad,2-Mediana densidad,3-Alta densidad-->
+        <input ref="Comments" faims_attribute_name="Comments" faims_attribute_type="freetext">
+          <label>{Comments}:</label>
+        </input>
+        <select1 appearance="full" ref="LotLabPriority" faims_attribute_name="LotLabPriority" faims_attribute_type="vocab">
+          <label>{Lot.Lab.Priority}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Baja prioridad,Mediana prioridad,Alta prioridad-->
+        <input ref="LotNumbers" faims_attribute_name="LotNumbers" faims_attribute_type="freetext">
+          <label>{Lot.Numbers}:</label>
+        </input>
+        <trigger ref="Lot">
+          <label>{Create.Lot}</label>
+        </trigger>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>{Associate.With.List}:</label>
+            <item>
+                <label>{dummy}</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>-->
+        <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
+      </group>
+      <group ref="load">
+        <label>{Load.Lots}</label>
+        <select1 ref="lotList" faims_certainty="false" faims_annotation="false">
+          <label>{Lots}</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="lotLoad">
+          <label>{Load.Lot}</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="lot" faims_archent_type="Lot">
+      <label>{Lot.Description}</label>
+      <group ref="lotDetail">
+        <label>{Lot.Description}</label>
+        <input ref="LotID" faims_attribute_name="LotID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{LotID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+        <select1 appearance="full" ref="Material" faims_attribute_name="Material" faims_attribute_type="vocab">
+          <label>{Material}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!--Cerámica,Metal,Vidrio,Otro,-->
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!-- {button}-->
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+            <label>{Associate.With.List}:</label>
+            <item>
+                <label>{dummy}</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{Associate.With}</label>
+        </trigger>-->
+        <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
+      </group>
+    </group>
+    <group ref="window" faims_archent_type="Window">
+      <label>{Window.Detail}</label>
+      <group ref="windowDetail">
+        <label>{Window.Detail}</label>
+        <input ref="EAidDupe" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+          <label>{Last.Loaded.EA.ID}:</label>
+        </input>
+
+        <input ref="WindowID" faims_attribute_name="WindowID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>{Window.ID}:</label>
+        </input>
+        <trigger ref="Update">
+          <label>{Save.Record}</label>
+        </trigger>
+        <input ref="Timestamp" faims_attribute_name="Timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Timestamp}:</label>
+        </input>
+        <input ref="Author" faims_attribute_name="Author" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Author}:</label>
+        </input>
+        <input ref="Device" faims_attribute_name="Device" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+          <label>{Device}:</label>
+        </input>
+
+        <input ref="WindowPosition" faims_attribute_name="WindowPosition" faims_attribute_type="freetext">
+          <label>{Window.Position}:</label>
+        </input>
+        <input ref="WindowHeight" faims_attribute_name="WindowHeight" faims_attribute_type="measure">
+          <label>{Window.Height}:</label>
+        </input>
+        <select1 appearance="full" ref="WindowHeightPreservation" faims_attribute_name="WindowHeightPreservation" faims_attribute_type="vocab">
+          <label>{Window.Height.Preservation}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <!-- <Complete/>,Max complete -->
+        <input ref="WindowWidth" faims_attribute_name="WindowWidth" faims_attribute_type="measure">
+          <label>{Window.Width}:</label>
+        </input>
+        
+        <trigger ref="WindowPhotos">
+          <label>{Window.Photos}</label>
+        </trigger>
+        <select ref="PhotoGallery" type="image">
+          <label>{Gallery}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select>
+        <trigger ref="Update2">
+          <label>{Save.Record}</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>{Delete.Record}</label>
+        </trigger>
+        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+          <label>{Associate.With.List}:</label>
+          <item>
+            <label>{dummy}</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="AssociateWith">
+          <label>{AssociateWith}</label>
+        </trigger>-->
+        <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
+      </group>
+    </group>
+  </h:body>
+</h:html>
