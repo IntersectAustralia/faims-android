@@ -139,7 +139,7 @@ public class Tab implements Parcelable{
     	
 		if (attribute.controlType != Constants.CONTROL_TRIGGER &&
 				!(attribute.controlType == Constants.CONTROL_SELECT_MULTI && "image".equalsIgnoreCase(attribute.questionType))) {
-			if(!attribute.questionText.isEmpty()){
+			if(attribute.questionText != null && !attribute.questionText.isEmpty()){
 				LinearLayout fieldLinearLayout = new LinearLayout(this.activityRef.get());
 		    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		    	
