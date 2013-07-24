@@ -752,7 +752,7 @@
                     <label>Create</label>
                 </trigger>
             </group>
-        </group
+        </group>
       </group>
       <group ref="data">
         <label>{Loading.Data}</label>
