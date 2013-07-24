@@ -4,34 +4,14 @@ public final class DatabaseQueries {
 
 	public static final String INSERT_INTO_ARCHENTITY = 
 		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, parenttimestamp) " +
-			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, parent.aenttimestamp " +
+			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, ? " +
 			"FROM aenttype " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT aenttimestamp\n" + 
-			"FROM archentity\n" + 
-			"JOIN\n" + 
-			"  (SELECT uuid,\n" + 
-			"          max(aenttimestamp) AS aenttimestamp\n" + 
-			"   FROM archentity\n" + 
-			"   GROUP BY uuid) USING (uuid,\n" + 
-			"                         aenttimestamp)\n" + 
-			"WHERE uuid = ?) parent\n" +
 			"WHERE aenttypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_ARCHENTITY = 
 			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, parenttimestamp)\n" + 
-			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326), parent.aenttimestamp\n" + 
-			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid) " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT aenttimestamp\n" + 
-			"FROM archentity\n" + 
-			"JOIN\n" + 
-			"  (SELECT uuid,\n" + 
-			"          max(aenttimestamp) AS aenttimestamp\n" + 
-			"   FROM archentity\n" + 
-			"   GROUP BY uuid) USING (uuid,\n" + 
-			"                         aenttimestamp)\n" + 
-			"WHERE uuid = ?) parent;";
+			"SELECT uuid, ?, aenttypeid, GeomFromText(?, 4326), ? " + 
+			"FROM (SELECT uuid, aenttypeid FROM archentity where uuid = ? group by uuid);";
 
 	public static final String GET_ARCH_ENT_PARENT_TIMESTAMP =
 		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
@@ -47,34 +27,14 @@ public final class DatabaseQueries {
 
 	public static final String INSERT_INTO_RELATIONSHIP = 
 		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, parenttimestamp) " +
-			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, parent.relntimestamp " +
+			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, ? " +
 			"FROM relntype " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT relntimestamp\n" + 
-			"FROM relationship\n" + 
-			"JOIN\n" + 
-			"  (SELECT relationshipid,\n" + 
-			"          max(relntimestamp) AS relntimestamp\n" + 
-			"   FROM relationship\n" + 
-			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
-			"                                   relntimestamp)\n" + 
-			"WHERE relationshipid = ?) parent\n" +
 			"WHERE relntypename = ? COLLATE NOCASE;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_RELATIONSHIP = 
 			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn, parenttimestamp)\n" + 
-			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326), parent.relntimestamp\n" + 
-			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid) " +
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT relntimestamp\n" + 
-			"FROM relationship\n" + 
-			"JOIN\n" + 
-			"  (SELECT relationshipid,\n" + 
-			"          max(relntimestamp) AS relntimestamp\n" + 
-			"   FROM relationship\n" + 
-			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
-			"                                   relntimestamp)\n" + 
-			"WHERE relationshipid = ?) parent;";
+			"SELECT relationshipid, ?, relntypeid, GeomFromText(?, 4326), ? " + 
+			"FROM (SELECT relationshipid, relntypeid FROM relationship where relationshipid = ? group by relationshipid);";
 	
 	public static final String GET_RELATIONSHIP_PARENT_TIMESTAMP =
 		"SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;";
@@ -97,24 +57,13 @@ public final class DatabaseQueries {
 		"SELECT count(RelnTypeName) " + 
 			"FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
 			"WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+	
+	public static final String GET_AENT_RELN_PARENT_TIMESTAMP =
+		"SELECT max(aentrelntimestamp) from aentreln where uuid = ? and relationshipid = ? group by uuid, relationshipid;";
 
 	public static final String INSERT_AENT_RELN = 
 		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, parenttimestamp) " +
-			"SELECT ?, ?, ?, ?, ?, parent.aentrelntimestamp\n" +
-			"FROM (SELECT 1) LEFT OUTER JOIN (\n" + 
-			"SELECT aentrelntimestamp\n" + 
-			"FROM aentreln\n" + 
-			"JOIN\n" + 
-			"  (SELECT uuid,\n" + 
-			"          relationshipid,\n" + 
-			"          max(AEntRelnTimestamp) AS AEntRelnTimestamp\n" + 
-			"   FROM aentreln\n" + 
-			"   GROUP BY uuid,\n" + 
-			"            relationshipid) USING (uuid,\n" + 
-			"                                   relationshipid,\n" + 
-			"                                   AEntRelnTimestamp)\n" + 
-			"WHERE uuid = ?\n" + 
-			"  AND relationshipid = ?) parent";
+			"VALUES (?, ?, ?, ?, ?, ?);";
 
 	public static final String FETCH_AENT_VALUE = 
 		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, aentdirty, aentdirtyreason FROM " +
@@ -309,41 +258,21 @@ public final class DatabaseQueries {
 
 	public static final String DELETE_ARCH_ENT =
 		"insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parenttimestamp) "+
-			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.aenttimestamp " +
+			"select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', ? " +
 			"from (select uuid, max(aenttimestamp) as aenttimestamp " +
 			"from archentity "+
 			"where uuid = ? "+
 			"group by uuid) "+
-			"JOIN archentity using (uuid, aenttimestamp) "+
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT aenttimestamp\n" + 
-			"FROM archentity\n" + 
-			"JOIN\n" + 
-			"  (SELECT uuid,\n" + 
-			"          max(aenttimestamp) AS aenttimestamp\n" + 
-			"   FROM archentity\n" + 
-			"   GROUP BY uuid) USING (uuid,\n" + 
-			"                         aenttimestamp)\n" + 
-			"WHERE uuid = ?) parent;";
+			"JOIN archentity using (uuid, aenttimestamp);";
 
 	public static final String DELETE_RELN =
 		"insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, parenttimestamp) "+
-			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', parent.relntimestamp " +
+			"select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', ? " +
 			"from (select relationshipid, max(relntimestamp) as RelnTimestamp "+
 			"FROM relationship " +
 			"where relationshipID = ? "+
 			"group by relationshipid "+
-			") JOIN relationship using (relationshipid, relntimestamp) "+
-			"LEFT OUTER JOIN (\n" + 
-			"SELECT relntimestamp\n" + 
-			"FROM relationship\n" + 
-			"JOIN\n" + 
-			"  (SELECT relationshipid,\n" + 
-			"          max(relntimestamp) AS relntimestamp\n" + 
-			"   FROM relationship\n" + 
-			"   GROUP BY relationshipid) USING (relationshipid,\n" + 
-			"                                   relntimestamp)\n" + 
-			"WHERE relationshipid = ?) parent;";
+			") JOIN relationship using (relationshipid, relntimestamp);";
 
 	public static final String DUMP_DATABASE_TO(String path){
 		return "attach database '" + path + "' as export;" +

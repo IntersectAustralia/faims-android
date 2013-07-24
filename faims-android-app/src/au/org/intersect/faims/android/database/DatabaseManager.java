@@ -149,10 +149,21 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				if (entity_id != null) {
-					String query = DatabaseQueries.DELETE_ARCH_ENT;
+					String parenttimestamp = null;
+					
+					String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
+					st = db.prepare(query);
+					st.bind(1, entity_id);
+					if (st.step()) {
+						parenttimestamp = st.column_string(0);
+					}
+					st.close();
+					st = null;
+					
+					query = DatabaseQueries.DELETE_ARCH_ENT;
 					st = db.prepare(query);
 					st.bind(1, userId);
-					st.bind(2, entity_id);
+					st.bind(2, parenttimestamp);
 					st.bind(3, entity_id);
 					st.step();
 					st.close();
@@ -209,15 +220,26 @@ public class DatabaseManager {
 					uuid = entity_id;
 				}
 				
+				String parenttimestamp = null;
+				
+				String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if (st.step()) {
+					parenttimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
-				String query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
+				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, uuid);
+				st.bind(5, parenttimestamp);
 				st.bind(6, entity_type);
 				st.step();
 				st.close();
@@ -227,7 +249,7 @@ public class DatabaseManager {
 				// save entity attributes
 				if (attributes != null) {
 					for (EntityAttribute attribute : attributes) {
-						String parenttimestamp = null;
+						parenttimestamp = null;
 						if (cacheTimestamps.containsKey(attribute.getName())) {
 							parenttimestamp = cacheTimestamps.get(attribute.getName());
 						} else {
@@ -292,11 +314,22 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				String query = DatabaseQueries.INSERT_AND_UPDATE_INTO_ARCHENTITY;
+				String parenttimestamp = null;
+				
+				String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if (st.step()) {
+					parenttimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
+				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, userId);
 				st.bind(2, geo_data);
-				st.bind(3, uuid);
+				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
 				st.close();
@@ -332,11 +365,22 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				String query = DatabaseQueries.INSERT_AND_UPDATE_INTO_RELATIONSHIP;
+				String parenttimestamp = null;
+				
+				String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if (st.step()) {
+					parenttimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
+				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, userId);
 				st.bind(2, geo_data);
-				st.bind(3, uuid);
+				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
 				st.close();
@@ -373,10 +417,21 @@ public class DatabaseManager {
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
 				if (rel_id != null) {
-					String query = DatabaseQueries.DELETE_RELN;
+					String parenttimestamp = null;
+					
+					String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
+					st = db.prepare(query);
+					st.bind(1, rel_id);
+					if (st.step()) {
+						parenttimestamp = st.column_string(0);
+					}
+					st.close();
+					st = null;
+					
+					query = DatabaseQueries.DELETE_RELN;
 					st = db.prepare(query);
 					st.bind(1, userId);
-					st.bind(2, rel_id);
+					st.bind(2, parenttimestamp);
 					st.bind(3, rel_id);
 					st.step();
 					st.close();
@@ -434,15 +489,26 @@ public class DatabaseManager {
 					uuid = rel_id;
 				}
 				
+				String parenttimestamp = null;
+				
+				String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				if (st.step()) {
+					parenttimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 
-				String query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
+				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
 				st.bind(3, geo_data);
 				st.bind(4, currentTimestamp);
-				st.bind(5, uuid);
+				st.bind(5, parenttimestamp);
 				st.bind(6, rel_type);
 				st.step();
 				st.close();
@@ -452,7 +518,7 @@ public class DatabaseManager {
 				// save relationship attributes
 				if (attributes != null) {
 					for (RelationshipAttribute attribute : attributes) {
-						String parenttimestamp = null;
+						parenttimestamp = null;
 						if (cacheTimestamps.containsKey(attribute.getName())) {
 							parenttimestamp = cacheTimestamps.get(attribute.getName());
 						} else {
@@ -586,18 +652,29 @@ public class DatabaseManager {
 					return false;
 				}
 				
+				String parenttimestamp = null;
+				
+				String query = DatabaseQueries.GET_AENT_RELN_PARENT_TIMESTAMP;
+				st = db.prepare(query);
+				st.bind(1, entity_id);
+				st.bind(2, rel_id);
+				if (st.step()) {
+					parenttimestamp = st.column_string(0);
+				}
+				st.close();
+				st = null;
+				
 				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 				
 				// create new entity relationship
-				String query = DatabaseQueries.INSERT_AENT_RELN;
+				query = DatabaseQueries.INSERT_AENT_RELN;
 				st = db.prepare(query);
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);
 				st.bind(3, userId);
 				st.bind(4, verb);
 				st.bind(5, currentTimestamp);
-				st.bind(6, entity_id);
-				st.bind(7, rel_id);
+				st.bind(6, parenttimestamp); 
 				st.step();
 				st.close();
 				st = null;
