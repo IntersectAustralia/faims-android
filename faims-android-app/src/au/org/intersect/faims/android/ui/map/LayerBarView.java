@@ -78,6 +78,7 @@ public class LayerBarView extends RelativeLayout {
 		RelativeLayout.LayoutParams scaleLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		scaleLayout.alignWithParent = true;
 		scaleLayout.addRule(RelativeLayout.ALIGN_RIGHT);
+		scaleLayout.topMargin = (int) ScaleUtil.getDip(context, 15);
 		scaleView.setLayoutParams(scaleLayout);
 	}
 
