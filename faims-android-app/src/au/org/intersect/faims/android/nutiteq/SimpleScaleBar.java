@@ -35,9 +35,10 @@ public class SimpleScaleBar {
 
 	private int alignment = BOTTOM_RIGHT;
 	private int startx;
+	@SuppressWarnings("unused")
 	private int starty;
-	private int offsetx = 20;
-	private int offsety = 20;
+	private int offsetx = 200;
+	private int offsety = 60;
 	private int endx;
 	//private int endy;
 	private int mapWidthPx;
@@ -164,9 +165,9 @@ public class SimpleScaleBar {
 			int barSize = (int) ScaleUtil.getDip(context, BAR_SIZE);
 			int barBorder = (int) ScaleUtil.getDip(context, BAR_BORDER);
 			int sx = startx;
-			int sy = starty;
+			int sy = offsety;
 			int ex = startx + Math.abs(startx - endx);
-			int ey = starty + barSize;
+			int ey = offsety + barSize;
 			
 			int barEndHeight = 8;
 			g.drawRect(sx, sy - barEndHeight, sx + barBorder, ey, paint);

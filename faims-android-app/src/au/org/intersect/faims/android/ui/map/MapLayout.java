@@ -3,6 +3,9 @@ package au.org.intersect.faims.android.ui.map;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -11,23 +14,21 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.tools.MapTool;
-import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class MapLayout extends LinearLayout {
 
 	private DrawView drawView;
-	private MapNorthView northView;
-	private ScaleBarView scaleView;
 	private CustomMapView mapView;
 	private RelativeLayout toolsView;
 	private RelativeLayout layersView;
 	private EditView editView;
 	private RelativeLayout container;
-	private Button layerButton;
 	private Spinner toolsDropDown;
 	private Button setButton;
+	private LayerBarView layerBarView;
 
 	public MapLayout(Context context) {
 		super(context);
@@ -43,19 +44,11 @@ public class MapLayout extends LinearLayout {
 		
 		editView = new EditView(activity);
 		
-		northView = new MapNorthView(activity);
-		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		northLayout.alignWithParent = true;
-		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		northLayout.topMargin = (int) ScaleUtil.getDip(activity, 10);
-		northLayout.rightMargin = (int) ScaleUtil.getDip(activity, 10);
-		northView.setLayoutParams(northLayout);
-		
-		scaleView = new ScaleBarView(activity);
-		
 		toolsView = new RelativeLayout(activity);
 
 		layersView = new RelativeLayout(activity);
+		
+		layerBarView = new LayerBarView(activity);
 		
 		mapView = new CustomMapView(activity, this);
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -63,14 +56,12 @@ public class MapLayout extends LinearLayout {
 		
 		indexViews();
 		
-		layerButton = createLayerButton();
-		layerButton.setOnClickListener(new OnClickListener() {
-
+		layerBarView.getLayerManagementView().setOnClickListener(new OnClickListener() {
+			
 			@Override
-			public void onClick(View arg0) {
+			public void onClick(View v) {
 				mapView.showLayerManagerDialog();
 			}
-			
 		});
 		
 		setButton = createSetButton();
@@ -102,15 +93,10 @@ public class MapLayout extends LinearLayout {
 		
 		LinearLayout horizontalLayout = new LinearLayout(getContext());
 		horizontalLayout.setOrientation(LinearLayout.HORIZONTAL);
-		horizontalLayout.addView(layerButton);
 		horizontalLayout.addView(setButton);
 		horizontalLayout.addView(toolsDropDown);
 		addView(horizontalLayout);
 		addView(container);
-	}
-	
-	public Button getLayerButton() {
-		return layerButton;
 	}
 	
 	public Button getSetButton() {
@@ -125,16 +111,24 @@ public class MapLayout extends LinearLayout {
 		return drawView;
 	}
 	
+	public LayerBarView getLayerBarView() {
+		return layerBarView;
+	}
+
 	public EditView getEditView() {
 		return editView;
 	}
 
 	public MapNorthView getNorthView() {
-		return northView;
+		return layerBarView.getNorthView();
+	}
+	
+	public Button getLayerInformationView() {
+		return layerBarView.getLayerInformationView();
 	}
 
 	public ScaleBarView getScaleView() {
-		return scaleView;
+		return layerBarView.getScaleView();
 	}
 
 	public CustomMapView getMapView() {
@@ -161,19 +155,9 @@ public class MapLayout extends LinearLayout {
 		if (mapView != null) container.addView(mapView);
 		if (drawView != null) container.addView(drawView);
 		if (editView != null) container.addView(editView);
-		if (northView != null) container.addView(northView);
-		if (scaleView != null) container.addView(scaleView);
+		if (layerBarView != null) container.addView(layerBarView);
 		if (toolsView != null) container.addView(toolsView);
 		if (layersView != null) container.addView(layersView);
-	}
-	
-	private Button createLayerButton() {
-		Button button = new Button(this.getContext());
-		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		layoutParams.weight = 1;
-		button.setLayoutParams(layoutParams);
-        button.setText("Layer Manager Dialog");
-        return button;
 	}
 
 	private Button createSetButton() {
@@ -200,4 +184,15 @@ public class MapLayout extends LinearLayout {
 		return spinner;
 	}
 
+	@Override
+	protected void onConfigurationChanged(Configuration newConfig) {
+		Bitmap logo = BitmapFactory.decodeResource(getContext().getResources(),
+				R.drawable.ic_launcher);
+		if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+			CustomMapView.setWatermark(logo, -1.0f, -0.9f, 0.1f);
+		}else{
+			CustomMapView.setWatermark(logo, -1.0f, -0.7f, 0.1f);
+		}
+		super.onConfigurationChanged(newConfig);
+	}
 }

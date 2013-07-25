@@ -14,7 +14,7 @@ import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.projections.EPSG3857;
 
-public class CreatePointTool extends BaseGeometryTool {
+public class CreatePointTool extends SettingsTool {
 	
 	public static final String NAME = "Create Point";
 	
@@ -41,9 +41,11 @@ public class CreatePointTool extends BaseGeometryTool {
 			layout.addView(settingsButton);
 		}
 		
-		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (plotButton != null) layout.addView(plotButton);
-		if (selectedLayer != null) layout.addView(selectedLayer);
+	}
+	
+	private void showNotCanvasLayerError() {
+		showError("The selected layer is not canvas layer");
 	}
 
 	@Override
@@ -73,15 +75,13 @@ public class CreatePointTool extends BaseGeometryTool {
 			public void onClick(View v) {
 				MapPos gpsPoint = CreatePointTool.this.mapView.getCurrentPosition();
 				if (gpsPoint != null) {
-					CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-					if (layer == null) {
-						setSelectedLayer(null);
-						showError("No layer selected");
+					if(!(mapView.getSelectedLayer() instanceof CanvasLayer)) {
+						showNotCanvasLayerError();
 						return;
 					}
 					
 					try {
-						mapView.notifyGeometryCreated(mapView.drawPoint(layer, gpsPoint, createPointStyle()));
+						mapView.notifyGeometryCreated(mapView.drawPoint(mapView.getSelectedLayer(), gpsPoint, createPointStyle()));
 					} catch (Exception e) {
 						FLog.e("error drawing point", e);
 						showError(e.getMessage());
@@ -97,15 +97,13 @@ public class CreatePointTool extends BaseGeometryTool {
 	
 	@Override
 	public void onMapClicked(double x, double y, boolean z) {
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-		if (layer == null) {
-			setSelectedLayer(null);
-			showError("No layer selected");
+		if(!(mapView.getSelectedLayer() instanceof CanvasLayer)) {
+			showNotCanvasLayerError();
 			return;
 		}
 		
 		try {
-			mapView.notifyGeometryCreated(mapView.drawPoint(layer, (new EPSG3857()).toWgs84(x, y), createPointStyle()));
+			mapView.notifyGeometryCreated(mapView.drawPoint(mapView.getSelectedLayer(), (new EPSG3857()).toWgs84(x, y), createPointStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing point", e);
 			showError(e.getMessage());

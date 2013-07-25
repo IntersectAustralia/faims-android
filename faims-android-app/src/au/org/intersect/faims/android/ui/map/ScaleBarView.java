@@ -30,6 +30,15 @@ public class ScaleBarView extends View {
 		
 		invalidate();
 	}
+	
+	public void refreshMapBoundary(float zoom, int width, int height,
+			double mapWidth) {
+		lastZoom = zoom;
+		
+		bar.reSize(width, height, mapWidth);
+		
+		invalidate();
+	}
 
 	public void setBarWidthRange(int minWidth, int maxWidth) {
 		bar.setBarWidthRange(minWidth, maxWidth);

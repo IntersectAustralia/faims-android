@@ -15,11 +15,15 @@ import javax.microedition.khronos.opengles.GL10;
 import roboguice.RoboGuice;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
@@ -223,6 +227,8 @@ public class CustomMapView extends MapView {
 	private RelativeLayout toolsView;
 
 	private RelativeLayout layersView;
+	
+	private Button layerInformationView;
 
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
@@ -340,6 +346,7 @@ public class CustomMapView extends MapView {
 		this.drawView = mapLayout.getDrawView();
 		this.editView = mapLayout.getEditView();
 		this.northView = mapLayout.getNorthView();
+		this.layerInformationView = mapLayout.getLayerInformationView();
 		this.scaleView = mapLayout.getScaleView();
 		this.toolsView = mapLayout.getToolsView();
 		this.layersView = mapLayout.getLayersView();
@@ -642,7 +649,7 @@ public class CustomMapView extends MapView {
 		CustomMapView.registerLicense(LICENSE, context);
 		Bitmap logo = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.ic_launcher);
-		CustomMapView.setWatermark(logo, -1.0f, -1.0f, 0.1f);
+		CustomMapView.setWatermark(logo, -1.0f, -0.9f, 0.1f);
 	}
 
 	public void updateMapOverlay() {
@@ -660,7 +667,37 @@ public class CustomMapView extends MapView {
 			FLog.e("error updating scalebar", e);
 		}
 	}
+	
+	public void refreshMapOverlay(Configuration newConfig){
+		ViewTreeObserver observer = getViewTreeObserver();
+	    observer.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 
+	        @SuppressWarnings("deprecation")
+			@Override
+	        public void onGlobalLayout() {
+	        	int width = getWidth();
+	    		int height = getHeight();
+
+	    		try {
+	    			scaleView.refreshMapBoundary(getZoom(), width, height, SpatialiteUtil
+	    					.distanceBetween(
+	    							GeometryUtil.convertToWgs84(screenToWorld(0, height, 0)), 
+	    							GeometryUtil.convertToWgs84(screenToWorld(width, height, 0)), 
+	    							GeometryUtil.EPSG4326) / 1000.0);
+	    		} catch (Exception e) {
+	    			FLog.e("error updating scalebar", e);
+	    		}
+	            getViewTreeObserver().removeGlobalOnLayoutListener(this);
+	        }
+	    });
+	}
+
+	@Override
+	protected void onConfigurationChanged(Configuration newConfig) {
+		refreshMapOverlay(newConfig);
+		super.onConfigurationChanged(newConfig);
+	}
+	
 	public void startThread(Runnable runnable) {
 		runnableList.add(runnable);
 
@@ -1050,7 +1087,7 @@ public class CustomMapView extends MapView {
 
 	public void showLayerManagerDialog() {
 		layerManagerDialog = new LayerManagerDialog(this.activityRef.get());
-		layerManagerDialog.setTitle("Layer Manager");
+		layerManagerDialog.setTitle("Select Layer");
 		layerManagerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Done", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -1159,6 +1196,7 @@ public class CustomMapView extends MapView {
 		if (toolsEnabled && currentTool != null) {
 			currentTool.onLayersChanged();
 		}
+		this.layerInformationView.setText(getSelectedLayer() != null? getLayerName(getSelectedLayer()) : "No Layer Selected");
 	}
 
 	public void setMapListener(CustomMapListener customMapListener) {
@@ -1446,7 +1484,6 @@ public class CustomMapView extends MapView {
 	public void setToolsEnabled(boolean value) {
 		toolsEnabled = value;
 		toolsView.setVisibility(value ? View.VISIBLE : View.GONE);
-		mapLayout.getLayerButton().setVisibility(value ? View.VISIBLE : View.GONE);
 		mapLayout.getSetButton().setVisibility(value ? View.VISIBLE : View.GONE);
 		mapLayout.getToolsDropDown().setVisibility(value ? View.VISIBLE : View.GONE);
 		if (currentTool != null) {

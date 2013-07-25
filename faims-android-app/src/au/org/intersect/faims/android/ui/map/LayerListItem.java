@@ -2,15 +2,20 @@ package au.org.intersect.faims.android.ui.map;
 
 import android.content.Context;
 import android.util.TypedValue;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.AbsListView;
-import android.widget.CheckBox;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
+import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
+import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.layers.Layer;
@@ -18,7 +23,8 @@ import com.nutiteq.layers.Layer;
 public class LayerListItem extends LinearLayout {
 
 	private TextView text;
-	private CheckBox showBox;
+	private Layer layer;
+	private EyeButton visibleButton;
 
 	public LayerListItem(Context context) {
 		super(context);
@@ -28,7 +34,8 @@ public class LayerListItem extends LinearLayout {
 		setPadding(size, size, size, size);
 	}
 	
-	public void init(final Layer layer) {
+	public void init(final CustomDragDropListView listView, final Layer layer, final CustomMapView mapView) {
+		this.layer = layer;
 		text = new TextView(this.getContext());
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 		text.setLayoutParams(params);
@@ -38,13 +45,31 @@ public class LayerListItem extends LinearLayout {
 		text.setSingleLine(false);
 		text.setText(getLayerName(layer));
 		
-		showBox = new CheckBox(this.getContext());
-		showBox.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-		showBox.setChecked(layer.isVisible());
-		showBox.setFocusable(false);
+		visibleButton = new EyeButton(this.getContext());
+		visibleButton.setChecked(layer.isVisible());
+		visibleButton.setHighlight(mapView.getSelectedLayer() == layer);
+		visibleButton.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent action) {
+				if(action.getAction() == MotionEvent.ACTION_UP){
+					try {
+						mapView.setLayerVisible(layer, !visibleButton.isChecked());
+						visibleButton.setChecked(!visibleButton.isChecked());
+						mapView.updateLayers();
+					} catch (Exception e) {
+						FLog.e("error setting layer visibility", e);
+						showErrorDialog("Error setting layer visibility");
+					}
+					((BaseAdapter)listView.getAdapter()).notifyDataSetChanged();
+					v.setFocusable(false);
+				}
+				return true;
+			}
+		});
 		
 		addView(text);
-		addView(showBox);
+		addView(visibleButton);
 	}
 	
 	private String getLayerName(Layer layer) {
@@ -63,12 +88,16 @@ public class LayerListItem extends LinearLayout {
 		return layerName;
 	}
 
-	public void toggle() {
-		showBox.toggle();
-	}
-
-	public boolean isChecked() {
-		return showBox.isChecked();
+	public void setItemSelected(boolean selected){
+		setBackgroundResource(selected? android.R.color.holo_blue_dark : 0);
+		visibleButton.setHighlight(selected);
 	}
 	
+	private void showErrorDialog(String message) {
+		new ErrorDialog(this.getContext(), "Layer Manager Error", message).show();
+	}
+
+	public Layer getLayer() {
+		return layer;
+	}
 }

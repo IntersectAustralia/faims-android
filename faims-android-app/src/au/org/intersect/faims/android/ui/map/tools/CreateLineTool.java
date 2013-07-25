@@ -16,10 +16,9 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
-import com.nutiteq.layers.Layer;
 import com.nutiteq.projections.EPSG3857;
 
-public class CreateLineTool extends BaseGeometryTool {
+public class CreateLineTool extends SettingsTool {
 	
 	public static final String NAME = "Create Line";
 
@@ -56,11 +55,9 @@ public class CreateLineTool extends BaseGeometryTool {
 			layout.addView(settingsButton);
 		}
 		
-		if (selectLayerButton != null) layout.addView(selectLayerButton);
 		if (createButton != null) layout.addView(createButton);
 		if (undoButton != null) layout.addView(undoButton);
 		if (plotButton != null) layout.addView(plotButton);
-		if (selectedLayer != null) layout.addView(selectedLayer);
 	}
 	
 	@Override
@@ -76,25 +73,18 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	@Override
-	protected void setSelectedLayer(Layer layer) {
+	public void onLayersChanged() {
 		clearPoints();
-		super.setSelectedLayer(layer);
+		super.onLayersChanged();
 	}
-	
-	private void showLayerNotFoundError() {
+
+	private void showNotCanvasLayerError() {
 		clearPoints();
-		super.setSelectedLayer(null);
-		showError("No layer selected");
+		showError("The selected layer is not canvas layer");
 	}
 	
 	private void clearLastPoint() {
 		if (pointsList.isEmpty()) return;
-		
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-		if (layer == null) {
-			showLayerNotFoundError();
-			return;
-		}
 		
 		Point p = pointsList.removeLast();
 		
@@ -109,12 +99,6 @@ public class CreateLineTool extends BaseGeometryTool {
 	private void clearPoints() {
 		if (pointsList.isEmpty()) return;
 		
-		CanvasLayer layer = (CanvasLayer) lastLayerSelected;
-		if (layer == null) {
-			showLayerNotFoundError();
-			return;
-		}
-		
 		try {
 			mapView.clearGeometryList(pointsList);
 		} catch (Exception e) {
@@ -126,9 +110,8 @@ public class CreateLineTool extends BaseGeometryTool {
 	}
 	
 	private void drawLine() {
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-		if (layer == null) {
-			showLayerNotFoundError();
+		if(!(mapView.getSelectedLayer() instanceof CanvasLayer)) {
+			showNotCanvasLayerError();
 			return;
 		}
 		
@@ -144,7 +127,7 @@ public class CreateLineTool extends BaseGeometryTool {
 		}
 		
 		try {
-			mapView.notifyGeometryCreated(mapView.drawLine(layer, positions, createLineStyle()));
+			mapView.notifyGeometryCreated(mapView.drawLine(mapView.getSelectedLayer(), positions, createLineStyle()));
 		} catch (Exception e) {
 			FLog.e("error drawing line", e);
 			showError(e.getMessage());
@@ -162,9 +145,8 @@ public class CreateLineTool extends BaseGeometryTool {
 			public void onClick(View v) {
 				MapPos gpsPoint = CreateLineTool.this.mapView.getCurrentPosition();
 				if (gpsPoint != null) {
-					CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-					if (layer == null) {
-						showLayerNotFoundError();
+					if(!(mapView.getSelectedLayer() instanceof CanvasLayer)) {
+						showNotCanvasLayerError();
 						return;
 					}
 					
@@ -233,9 +215,8 @@ public class CreateLineTool extends BaseGeometryTool {
 	
 	@Override
 	public void onMapClicked(double x, double y, boolean z) {
-		CanvasLayer layer = (CanvasLayer) mapView.getSelectedLayer();
-		if (layer == null) {
-			showLayerNotFoundError();
+		if(!(mapView.getSelectedLayer() instanceof CanvasLayer)) {
+			showNotCanvasLayerError();
 			return;
 		}
 		

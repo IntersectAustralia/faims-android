@@ -29,7 +29,7 @@ public abstract class SettingsTool extends MapTool {
 			layout.addView(settingsButton);
 		}
 	}
-	
+
 	protected abstract MapButton createSettingsButton(final Context context);
 
 }

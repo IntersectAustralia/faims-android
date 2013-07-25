@@ -10,7 +10,7 @@ public class MapNorthView extends ImageView {
 
 	public MapNorthView(Context context) {
 		super(context);
-		setImageResource(R.drawable.small_north);
+		setImageResource(R.drawable.north_arrow);
 		setMapRotation(0);
 	}
 	

@@ -14,6 +14,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -71,9 +73,9 @@ public class LayerManagerDialog extends AlertDialog {
 			
 			for (Layer layer : layers) {
 				LayerListItem item = new LayerListItem(LayerManagerDialog.this.getContext());
-				item.init(layer);
+				item.init(listView,layer,LayerManagerDialog.this.mapView);
 				itemViews.add(item);
-			} 
+			}
 		}
 		
 		@Override
@@ -92,9 +94,25 @@ public class LayerManagerDialog extends AlertDialog {
 		}
 
 		@Override
-		public View getView(int position, View arg1, ViewGroup arg2) {
-			return itemViews.get(position);
+		public View getView(int position, View view, ViewGroup arg2) {
+			LayerListItem item = (LayerListItem) itemViews.get(position);
+			if(LayerManagerDialog.this.mapView.getSelectedLayer() != null){
+				if(LayerManagerDialog.this.mapView.getSelectedLayer() .equals(item.getLayer())){
+					for(View itemView : itemViews){
+						LayerListItem layerItem = (LayerListItem) itemView;
+						layerItem.setItemSelected(false);
+					}
+					item.setItemSelected(true);
+				}
+			}else{
+				for(View itemView : itemViews){
+					LayerListItem layerItem = (LayerListItem) itemView;
+					layerItem.setItemSelected(false);
+				}
+			}
+			return item;
 		}
+		
 		
 	}
 
@@ -207,7 +225,6 @@ public class LayerManagerDialog extends AlertDialog {
 		
 		createAddButton();
 		createOrderButton();
-		createViewTrackLogButton();
 		createListView();
 		
 		redrawLayers();
@@ -216,27 +233,22 @@ public class LayerManagerDialog extends AlertDialog {
 	private void createListView() {
 		listView = new CustomDragDropListView(this.getContext(),null);
 		listView.setLayoutParams(new LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		listView.setDivider(new ColorDrawable(Color.WHITE));
+		listView.setDividerHeight(1);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
-				try {
-					List<Layer> layers = mapView.getAllLayers();
-					int last = layers.size() - 1;
-					final Layer layer = layers.get(last - position);
-					LayerListItem itemView = (LayerListItem) view;
-					itemView.toggle();
-					mapView.setLayerVisible(layer, itemView.isChecked());
-					mapView.updateLayers();
-				} catch (Exception e) {
-					FLog.e("error setting layer visibility", e);
-					showErrorDialog("Error setting layer visibility");
-				}
+				List<Layer> layers = mapView.getAllLayers();
+				int last = layers.size() - 1;
+				final Layer layer = layers.get(last - position);
+				mapView.setSelectedLayer(layer);
+				mapView.updateLayers();
+				((LayersAdapter)listView.getAdapter()).getView(position, view, listView);
 			}
 			
 		});
-		
 		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
@@ -391,8 +403,8 @@ public class LayerManagerDialog extends AlertDialog {
 	private void createOrderButton(){
 		ToggleButton orderButton = new ToggleButton(this.getContext());
 		orderButton.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
-		orderButton.setTextOn("Order ON");
-		orderButton.setTextOff("Order OFF");
+		orderButton.setTextOn("Re-Order");
+		orderButton.setTextOff("Re-Order");
 		orderButton.setChecked(false);
 		orderButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
@@ -418,29 +430,6 @@ public class LayerManagerDialog extends AlertDialog {
 			}
 		});
 		buttonsLayout.addView(orderButton);
-	}
-	
-	private void createViewTrackLogButton() {
-		Button viewTrackLogButton = new Button(this.getContext());
-		viewTrackLogButton.setText("View Track Log");
-		viewTrackLogButton.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				try {
-					if(mapView.getUserTrackLogLayer() == null){
-						addViewTrackLogLayer();
-					}else{
-						mapView.setLayerVisible(mapView.getUserTrackLogLayer(), true);
-						redrawLayers();
-					}
-				} catch (Exception e) {
-					FLog.e("can not view track log layer",e);
-				}
-			}
-			
-		});
-		buttonsLayout.addView(viewTrackLogButton);
 	}
 
 	public void redrawLayers() {
@@ -536,11 +525,33 @@ public class LayerManagerDialog extends AlertDialog {
 			
 		});
 		
+		Button viewTrackLogButton = new Button(this.getContext());
+		viewTrackLogButton.setText("View Track Log");
+		viewTrackLogButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					d.dismiss();
+					if(mapView.getUserTrackLogLayer() == null){
+						addViewTrackLogLayer();
+					}else{
+						mapView.setLayerVisible(mapView.getUserTrackLogLayer(), true);
+						redrawLayers();
+					}
+				} catch (Exception e) {
+					FLog.e("can not view track log layer",e);
+				}
+			}
+			
+		});
+		
 		layout.addView(loadBaseLayerButton);
 		layout.addView(loadRasterLayerButton);
 		layout.addView(loadSpatialLayerButton);
 		layout.addView(loadDatabaseLayerButton);
 		layout.addView(createLayerButton);
+		layout.addView(viewTrackLogButton);
 		
 		d.show();
 	}
@@ -1227,6 +1238,7 @@ public class LayerManagerDialog extends AlertDialog {
 			public void onClick(DialogInterface arg0, int arg1) {
 				try {
 					mapView.renameLayer(layer, editText.getText().toString());
+					mapView.updateLayers();
 					redrawLayers();
 				} catch (Exception e) {
 					FLog.e(e.getMessage(), e);
