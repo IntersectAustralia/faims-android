@@ -35,14 +35,13 @@ public class SimpleScaleBar {
 
 	private int alignment = BOTTOM_RIGHT;
 	private int startx;
-	@SuppressWarnings("unused")
-	private int starty;
+	//private int starty;
 	private int offsetx = 100;
 	private int offsety = 30;
 	private int endx;
 	//private int endy;
 	private int mapWidthPx;
-	private int mapHeightPx;
+	//private int mapHeightPx;
 	private double mapWidthKm;
 	private int barMinWidth = 40;
 	private int barMaxWidth = 101;
@@ -123,25 +122,25 @@ public class SimpleScaleBar {
 		switch (alignment) {
 		case TOP_LEFT:
 			startx = 0 + offsetx;
-			starty = 0 + offsety;
+			//starty = 0 + offsety;
 			endx = startx + barWidth;
 			//endy = starty;
 			break;
 		case TOP_RIGHT:
 			startx = mapWidthPx - offsetx;
-			starty = 0 + offsety;
+			//starty = 0 + offsety;
 			endx = startx - barWidth;
 			//endy = starty;
 			break;
 		case BOTTOM_LEFT:
 			startx = 0 + offsetx;
-			starty = mapHeightPx - offsety;
+			//starty = mapHeightPx - offsety;
 			endx = startx + barWidth;
 			//endy = starty;
 			break;
 		case BOTTOM_RIGHT:
 			endx = mapWidthPx - offsetx;
-			starty = mapHeightPx - offsety;
+			//starty = mapHeightPx - offsety;
 			startx = endx - barWidth;
 			//endy = starty;
 			break;
@@ -164,10 +163,10 @@ public class SimpleScaleBar {
 			
 			int barSize = (int) ScaleUtil.getDip(context, BAR_SIZE);
 			int barBorder = (int) ScaleUtil.getDip(context, BAR_BORDER);
-			int sx = startx;
+			int sx = offsetx;
 			int sy = offsety;
-			int ex = startx +  Math.abs(startx - endx);
-			int ey = offsety + barSize;
+			int ex = sx + Math.abs(startx - endx);
+			int ey = sy + barSize;
 			
 			int barEndHeight = 8;
 			g.drawRect(sx, sy - barEndHeight, sx + barBorder, ey, paint);
@@ -224,7 +223,7 @@ public class SimpleScaleBar {
 
 	public void reSize(int width, int height, double mapWidth) {
 		this.mapWidthPx = width;
-		this.mapHeightPx = height;
+		//this.mapHeightPx = height;
 		setMapWidth(mapWidth);
 	}
 

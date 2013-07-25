@@ -228,7 +228,7 @@ public class CustomMapView extends MapView {
 
 	private RelativeLayout layersView;
 	
-	private Button layerInformationView;
+	private Button layerInformationButton;
 
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
@@ -346,7 +346,7 @@ public class CustomMapView extends MapView {
 		this.drawView = mapLayout.getDrawView();
 		this.editView = mapLayout.getEditView();
 		this.northView = mapLayout.getNorthView();
-		this.layerInformationView = mapLayout.getLayerInformationView();
+		this.layerInformationButton = mapLayout.getLayerInformationButton();
 		this.scaleView = mapLayout.getScaleView();
 		this.toolsView = mapLayout.getToolsView();
 		this.layersView = mapLayout.getLayersView();
@@ -666,6 +666,8 @@ public class CustomMapView extends MapView {
 		} catch (Exception e) {
 			FLog.e("error updating scalebar", e);
 		}
+		
+		mapLayout.getLayerBarView().refreshLayout();
 	}
 	
 	public void refreshMapOverlay(Configuration newConfig){
@@ -1196,7 +1198,7 @@ public class CustomMapView extends MapView {
 		if (toolsEnabled && currentTool != null) {
 			currentTool.onLayersChanged();
 		}
-		this.layerInformationView.setText(getSelectedLayer() != null? getLayerName(getSelectedLayer()) : "No Layer Selected");
+		this.layerInformationButton.setText(getSelectedLayer() != null? getLayerName(getSelectedLayer()) : "No Layer Selected");
 	}
 
 	public void setMapListener(CustomMapListener customMapListener) {

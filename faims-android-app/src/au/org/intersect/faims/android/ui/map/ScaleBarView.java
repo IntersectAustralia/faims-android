@@ -43,5 +43,9 @@ public class ScaleBarView extends View {
 	public void setBarWidthRange(int minWidth, int maxWidth) {
 		bar.setBarWidthRange(minWidth, maxWidth);
 	}
+
+	public void setOffset(int x, int y) {
+		bar.setOffset(x, y);
+	}
 	
 }

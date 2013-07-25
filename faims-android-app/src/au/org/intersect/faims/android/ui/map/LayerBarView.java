@@ -12,14 +12,16 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class LayerBarView extends RelativeLayout {
 
+	private static final float BAR_HEIGHT = 65.0f;
 	private MapNorthView northView;
 	private ScaleBarView scaleView;
 	private LayerManagementView layerManagementView;
-	private Button layerInformationView;
+	private LinearLayout layerInformationView;
+	private Button layerInformationButton;
 
 	public LayerBarView(Context context) {
 		super(context);
-		RelativeLayout.LayoutParams layerBarLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, (int) ScaleUtil.getDip(getContext(), 65.0f));
+		RelativeLayout.LayoutParams layerBarLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, (int) ScaleUtil.getDip(getContext(), BAR_HEIGHT));
 		layerBarLayout.alignWithParent = true;
 		layerBarLayout.addRule(RelativeLayout.ALIGN_BOTTOM);
 		setLayoutParams(layerBarLayout);
@@ -31,46 +33,41 @@ public class LayerBarView extends RelativeLayout {
 		
 		createLayerManagementView(getContext());
 		
+		createLayerInformationView(getContext());
+		
 		addView(scaleView);
 		addView(northView);
-		addView(layerManagementView);
-		addView(createLayerInformationView(getContext()));
+		
+		LinearLayout layout = new LinearLayout(context);
+		layout.setOrientation(LinearLayout.HORIZONTAL);
+		layout.setGravity(Gravity.CENTER_VERTICAL);
+		layout.addView(layerManagementView);
+		layout.addView(layerInformationView);
+		
+		addView(layout);
 	}
 
-	protected LinearLayout createLayerInformationView(Context context) {
-		LinearLayout layout = new LinearLayout(context);
-		layout.setOrientation(LinearLayout.VERTICAL);
-		RelativeLayout.LayoutParams layerInformationLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		layerInformationLayout.alignWithParent = true;
-		layerInformationLayout.addRule(RelativeLayout.ALIGN_LEFT);
-		layerInformationLayout.topMargin = (int) ScaleUtil.getDip(context, 5);
-		layerInformationLayout.leftMargin = (int) ScaleUtil.getDip(context, 70);
-		layout.setLayoutParams(layerInformationLayout);
+	protected void createLayerInformationView(Context context) {
+		layerInformationView = new LinearLayout(context);
+		layerInformationView.setOrientation(LinearLayout.VERTICAL);
 		
 		TextView text = new TextView(context);
 		text.setText("Current Layer Information:");
 		text.setTextSize(12);
 		text.setTextColor(Color.WHITE);
 
-		layerInformationView = new Button(context);
-		layerInformationView.setBackgroundResource(R.drawable.custom_button);
-		layerInformationView.setText("No layer selected");
-		layerInformationView.setTextColor(Color.WHITE);
-		layerInformationView.setGravity(Gravity.LEFT);
+		layerInformationButton = new Button(context);
+		layerInformationButton.setBackgroundResource(R.drawable.custom_button);
+		layerInformationButton.setText("No layer selected");
+		layerInformationButton.setTextColor(Color.WHITE);
+		layerInformationButton.setGravity(Gravity.LEFT);
 		
-		layout.addView(text);
-		layout.addView(layerInformationView);
-		return layout;
+		layerInformationView.addView(text);
+		layerInformationView.addView(layerInformationButton);
 	}
 
 	protected void createLayerManagementView(Context context) {
 		layerManagementView = new LayerManagementView(context);
-		RelativeLayout.LayoutParams layerManagementLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		layerManagementLayout.alignWithParent = true;
-		layerManagementLayout.addRule(RelativeLayout.ALIGN_LEFT);
-		layerManagementLayout.topMargin = (int) ScaleUtil.getDip(context, 10);
-		layerManagementLayout.leftMargin = (int) ScaleUtil.getDip(context, 10);
-		layerManagementView.setLayoutParams(layerManagementLayout);
 	}
 
 	protected void createScaleView(Context context) {
@@ -78,7 +75,7 @@ public class LayerBarView extends RelativeLayout {
 		RelativeLayout.LayoutParams scaleLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		scaleLayout.alignWithParent = true;
 		scaleLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		scaleLayout.topMargin = (int) ScaleUtil.getDip(context, 15);
+		scaleLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		scaleView.setLayoutParams(scaleLayout);
 	}
 
@@ -87,7 +84,7 @@ public class LayerBarView extends RelativeLayout {
 		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		northLayout.alignWithParent = true;
 		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		northLayout.topMargin = (int) ScaleUtil.getDip(context, 15);
+		northLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		northLayout.rightMargin = (int) ScaleUtil.getDip(context, 15);
 		northView.setLayoutParams(northLayout);
 	}
@@ -104,7 +101,12 @@ public class LayerBarView extends RelativeLayout {
 		return layerManagementView;
 	}
 
-	public Button getLayerInformationView() {
-		return layerInformationView;
+	public Button getLayerInformationButton() {
+		return layerInformationButton;
+	}
+	
+	public void refreshLayout() {
+		int sw = (int) ScaleUtil.getDip(getContext(), 140);
+		scaleView.setOffset(getWidth() - northView.getWidth() - sw, getHeight() / 2);
 	}
 }

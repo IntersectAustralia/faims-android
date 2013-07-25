@@ -123,8 +123,8 @@ public class MapLayout extends LinearLayout {
 		return layerBarView.getNorthView();
 	}
 	
-	public Button getLayerInformationView() {
-		return layerBarView.getLayerInformationView();
+	public Button getLayerInformationButton() {
+		return layerBarView.getLayerInformationButton();
 	}
 
 	public ScaleBarView getScaleView() {
