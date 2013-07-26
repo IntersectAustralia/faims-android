@@ -1136,6 +1136,8 @@ public class CustomMapView extends MapView {
 
 	public void selectTool(String name) {
 		if (currentTool != null) {
+			if (currentTool.toString().equals(name)) return;
+			
 			currentTool.deactivate();
 			currentTool = null;
 		}

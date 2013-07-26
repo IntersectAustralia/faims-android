@@ -41,6 +41,7 @@ public class ToolsBarView extends RelativeLayout {
 	private ToolBarButton configButton;
 	private ArrayList<ToolBarButton> toolButtons;
 	private ArrayList<View> toolGroups;
+	private HashMap<ToolBarButton, String> toolButtonMap;
 	
 	public ToolsBarView(Context context) {
 		super(context);
@@ -67,6 +68,7 @@ public class ToolsBarView extends RelativeLayout {
 		List<MapTool> tools = mapView.getTools();
 		
 		toolMap = new HashMap<String, MapTool>();
+		toolButtonMap = new HashMap<ToolBarButton, String>();
 		
 		for (MapTool tool : tools) {
 			toolMap.put(tool.toString(), tool);
@@ -86,10 +88,12 @@ public class ToolsBarView extends RelativeLayout {
 		
 		ToolBarButton followButton = toolMap.get(FollowTool.NAME).getButton(getContext());
 		toolButtons.add(followButton);
+		toolButtonMap.put(followButton, FollowTool.NAME);
 		toolGroups.add(followButton);
 		
 		ToolBarButton loadButton = toolMap.get(LoadTool.NAME).getButton(getContext());
 		toolButtons.add(loadButton);
+		toolButtonMap.put(loadButton, LoadTool.NAME);
 		toolGroups.add(loadButton);
 		
 		// wrap groups as radio buttons
@@ -120,8 +124,10 @@ public class ToolsBarView extends RelativeLayout {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		ToolBarButton highlightButton = toolMap.get(HighlightTool.NAME).getButton(getContext());
 		toolButtons.add(highlightButton);
+		toolButtonMap.put(highlightButton, HighlightTool.NAME);
 		ToolBarButton editButton = toolMap.get(EditTool.NAME).getButton(getContext());
-		toolButtons.add(highlightButton);
+		toolButtons.add(editButton);
+		toolButtonMap.put(editButton, EditTool.NAME);
 		group.addButton(highlightButton);
 		group.addButton(editButton);
 		toolGroups.add(group);
@@ -131,10 +137,13 @@ public class ToolsBarView extends RelativeLayout {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		ToolBarButton pointButton = toolMap.get(CreatePointTool.NAME).getButton(getContext());
 		toolButtons.add(pointButton);
+		toolButtonMap.put(pointButton, CreatePointTool.NAME);
 		ToolBarButton lineButton = toolMap.get(CreateLineTool.NAME).getButton(getContext());
 		toolButtons.add(lineButton);
+		toolButtonMap.put(lineButton, CreateLineTool.NAME);
 		ToolBarButton polygonButton = toolMap.get(CreatePolygonTool.NAME).getButton(getContext());
 		toolButtons.add(polygonButton);
+		toolButtonMap.put(polygonButton, CreatePolygonTool.NAME);
 		group.addButton(pointButton);
 		group.addButton(lineButton);
 		group.addButton(polygonButton);
@@ -145,12 +154,16 @@ public class ToolsBarView extends RelativeLayout {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		ToolBarButton areaButton = toolMap.get(AreaTool.NAME).getButton(getContext());
 		toolButtons.add(areaButton);
+		toolButtonMap.put(areaButton, AreaTool.NAME);
 		ToolBarButton azimuthButton = toolMap.get(AzimuthTool.NAME).getButton(getContext());
 		toolButtons.add(azimuthButton);
+		toolButtonMap.put(azimuthButton, AzimuthTool.NAME);
 		ToolBarButton pointDistanceButton = toolMap.get(PointDistanceTool.NAME).getButton(getContext());
 		toolButtons.add(pointDistanceButton);
+		toolButtonMap.put(pointDistanceButton, PointDistanceTool.NAME);
 		ToolBarButton lineDistanceButton = toolMap.get(LineDistanceTool.NAME).getButton(getContext());
 		toolButtons.add(lineDistanceButton);
+		toolButtonMap.put(lineDistanceButton, LineDistanceTool.NAME);
 		group.addButton(areaButton);
 		group.addButton(azimuthButton);
 		group.addButton(pointDistanceButton);
@@ -162,16 +175,22 @@ public class ToolsBarView extends RelativeLayout {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		ToolBarButton touchButton = toolMap.get(TouchSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(touchButton);
+		toolButtonMap.put(touchButton, TouchSelectionTool.NAME);
 		ToolBarButton pointSelectionButton = toolMap.get(PointSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(pointSelectionButton);
+		toolButtonMap.put(pointSelectionButton, PointSelectionTool.NAME);
 		ToolBarButton polygonSelectionButton = toolMap.get(PolygonSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(polygonSelectionButton);
+		toolButtonMap.put(polygonSelectionButton, PolygonSelectionTool.NAME);
 		ToolBarButton geometrySelectionButton = toolMap.get(GeometriesIntersectSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(geometrySelectionButton);
+		toolButtonMap.put(geometrySelectionButton, GeometriesIntersectSelectionTool.NAME);
 		ToolBarButton databaseSelectionButton = toolMap.get(DatabaseSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(databaseSelectionButton);
+		toolButtonMap.put(databaseSelectionButton, DatabaseSelectionTool.NAME);
 		ToolBarButton legacySelectionButton = toolMap.get(LegacySelectionTool.NAME).getButton(getContext());
 		toolButtons.add(legacySelectionButton);
+		toolButtonMap.put(legacySelectionButton, LegacySelectionTool.NAME);
 		group.addButton(touchButton);
 		group.addButton(pointSelectionButton);
 		group.addButton(polygonSelectionButton);
@@ -205,6 +224,10 @@ public class ToolsBarView extends RelativeLayout {
 			}
 			
 			b.setChecked(button == b);
+			
+			if (button == b) {
+				mapView.selectTool(toolButtonMap.get(b));
+			}
 		}
 	}
 	
