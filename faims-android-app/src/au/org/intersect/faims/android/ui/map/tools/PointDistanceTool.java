@@ -1,15 +1,11 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Canvas;
-import android.view.View;
-import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.util.MeasurementUtil;
@@ -185,72 +181,7 @@ public class PointDistanceTool extends HighlightTool {
 			FLog.e("error drawing line distance", e);
 		}
 	}
-	
-	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
-		button.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View arg0) {
-				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.setTitle("Style Settings");
-				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
-				if (isEPSG4326)
-					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
-				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = settingsDialog.parseColor("color");
-							float strokeSize = settingsDialog.parseSlider("strokeSize");
-							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal;
-							if (isEPSG4326)
-								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
-							else
-								showDecimal = false;
-							boolean showKm = settingsDialog.parseCheckBox("showKm");
-							
-							mapView.setDrawViewColor(color);
-							mapView.setDrawViewStrokeStyle(strokeSize);
-							mapView.setDrawViewTextSize(textSize);
-							mapView.setEditViewTextSize(textSize);
-							mapView.setShowDecimal(showDecimal);
-							mapView.setShowKm(showKm);
-							
-							PointDistanceTool.this.drawDistance();
-						} catch (Exception e) {
-							FLog.e(e.getMessage(), e);
-							showError(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				settingsDialog = builder.create();
-				settingsDialog.show();
-			}
-				
-		});
-		return button;
-	}
-	
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Point");

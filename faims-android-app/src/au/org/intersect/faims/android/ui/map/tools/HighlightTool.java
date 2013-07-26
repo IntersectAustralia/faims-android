@@ -1,17 +1,19 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
-import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ClearButton;
+import au.org.intersect.faims.android.ui.map.button.SettingsButton;
+import au.org.intersect.faims.android.ui.map.button.ShowDetailsToggleButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
@@ -20,9 +22,9 @@ public class HighlightTool extends SettingsTool {
 	
 	public static final String NAME = "Highlight";
 	
-	protected MapButton clearButton;
+	protected ClearButton clearButton;
 
-	private MapToggleButton detailButton;
+	private ShowDetailsToggleButton detailButton;
 
 	protected SettingsDialog settingsDialog;
 	
@@ -34,7 +36,18 @@ public class HighlightTool extends SettingsTool {
 		super(context, mapView, name);
 		
 		detailButton = createDetailButton(context);
+		RelativeLayout.LayoutParams detailParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		detailParams.alignWithParent = true;
+		detailParams.addRule(RelativeLayout.ALIGN_LEFT);
+		detailButton.setLayoutParams(detailParams);
+		buttons.add(detailButton);
 		clearButton = createClearButton(context);
+		RelativeLayout.LayoutParams clearParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		clearParams.alignWithParent = true;
+		clearParams.addRule(RelativeLayout.ALIGN_LEFT);
+		clearParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		clearButton.setLayoutParams(clearParams);
+		buttons.add(clearButton);
 		
 		updateLayout();
 	}
@@ -49,7 +62,6 @@ public class HighlightTool extends SettingsTool {
 	@Override
 	public void activate() {
 		detailButton.setChecked(false);
-		updateDetailButton();
 		mapView.setDrawViewDetail(false);
 		mapView.setEditViewDetail(false);
 		clearSelection();
@@ -58,7 +70,6 @@ public class HighlightTool extends SettingsTool {
 	@Override
 	public void deactivate() {
 		detailButton.setChecked(false);
-		updateDetailButton();
 		mapView.setDrawViewDetail(false);
 		mapView.setEditViewDetail(false);
 		clearSelection();
@@ -74,13 +85,13 @@ public class HighlightTool extends SettingsTool {
 		}
 	}
 	
-	private MapToggleButton createDetailButton(final Context context) {
-		MapToggleButton button = new MapToggleButton(context);
+	private ShowDetailsToggleButton createDetailButton(final Context context) {
+		ShowDetailsToggleButton button = new ShowDetailsToggleButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				updateDetailButton();
+				detailButton.setChecked(!detailButton.isChecked());
 				mapView.setDrawViewDetail(detailButton.isChecked());
 				mapView.setEditViewDetail(detailButton.isChecked());
 			}
@@ -89,9 +100,8 @@ public class HighlightTool extends SettingsTool {
 		return button;
 	}
 	
-	private MapButton createClearButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Clear");
+	private ClearButton createClearButton(final Context context) {
+		ClearButton button = new ClearButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -133,69 +143,9 @@ public class HighlightTool extends SettingsTool {
 		}
 	}
 	
-	private void updateDetailButton() {
-		detailButton.setText(detailButton.isChecked() ? "Hide Details" : "Show Details");
-	}
-
 	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.setTitle("Style Settings");
-				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
-				if (isEPSG4326)
-					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = settingsDialog.parseColor("color");
-							float strokeSize = settingsDialog.parseSlider("strokeSize");
-							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal;
-							if (isEPSG4326)
-								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
-							else
-								showDecimal = false;
-							
-							mapView.setDrawViewColor(color);
-							mapView.setDrawViewStrokeStyle(strokeSize);
-							mapView.setDrawViewTextSize(textSize);
-							mapView.setEditViewTextSize(textSize);
-							mapView.setShowDecimal(showDecimal);
-						} catch (Exception e) {
-							FLog.e(e.getMessage(), e);
-							showError(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				settingsDialog = builder.create();
-				settingsDialog.show();
-			}
-				
-		});
-		return button;
+	protected SettingsButton createSettingsButton(Context context) {
+		return null;
 	}
 	
 	public ToolBarButton getButton(Context context) {
@@ -205,4 +155,5 @@ public class HighlightTool extends SettingsTool {
 		button.setNormalState(R.drawable.tools_select);
 		return button;
 	}
+	
 }

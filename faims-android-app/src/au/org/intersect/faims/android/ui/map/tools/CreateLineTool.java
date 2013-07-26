@@ -6,14 +6,20 @@ import java.util.LinkedList;
 import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.FinishButton;
+import au.org.intersect.faims.android.ui.map.button.PlotGPSButton;
+import au.org.intersect.faims.android.ui.map.button.SettingsButton;
+import au.org.intersect.faims.android.ui.map.button.UndoButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Point;
@@ -24,17 +30,17 @@ public class CreateLineTool extends SettingsTool {
 	
 	public static final String NAME = "Create Line";
 
-	private MapButton createButton;
+	private FinishButton createButton;
 
 	private LinkedList<Point> pointsList;
 
-	private MapButton undoButton;
+	private UndoButton undoButton;
 	
 	private GeometryStyle style;
 	
 	private LineStyleDialog styleDialog;
 
-	private MapButton plotButton;
+	private PlotGPSButton plotButton;
 
 	public CreateLineTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -42,8 +48,25 @@ public class CreateLineTool extends SettingsTool {
 		style = GeometryStyle.defaultLineStyle();
 		
 		createButton = createCreateButton(context);
+		RelativeLayout.LayoutParams createParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		createParams.alignWithParent = true;
+		createParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		createParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		createButton.setLayoutParams(createParams);
 		undoButton = createUndoButton(context);
+		RelativeLayout.LayoutParams undoParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		undoParams.alignWithParent = true;
+		undoParams.addRule(RelativeLayout.ALIGN_LEFT);
+		undoParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		undoButton.setLayoutParams(undoParams);
+		buttons.add(undoButton);
 		plotButton = createPlotButton(context);
+		RelativeLayout.LayoutParams plotGPSParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		plotGPSParams.alignWithParent = true;
+		plotGPSParams.addRule(RelativeLayout.ALIGN_LEFT);
+		plotGPSParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		plotButton.setLayoutParams(plotGPSParams);
+		buttons.add(plotButton);
 		
 		pointsList = new LinkedList<Point>();
 		
@@ -138,9 +161,8 @@ public class CreateLineTool extends SettingsTool {
 		clearPoints();
 	}
 	
-	private MapButton createPlotButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Plot GPS");
+	private PlotGPSButton createPlotButton(final Context context) {
+		PlotGPSButton button = new PlotGPSButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -168,9 +190,8 @@ public class CreateLineTool extends SettingsTool {
 		return button;
 	}
 	
-	private MapButton createUndoButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Undo");
+	private UndoButton createUndoButton(final Context context) {
+		UndoButton button = new UndoButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -182,9 +203,8 @@ public class CreateLineTool extends SettingsTool {
 		return button;
 	}
 	
-	private MapButton createCreateButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Finish");
+	private FinishButton createCreateButton(final Context context) {
+		FinishButton button = new FinishButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -198,9 +218,8 @@ public class CreateLineTool extends SettingsTool {
 	}
 
 	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
+	protected SettingsButton createSettingsButton(final Context context) {
+		SettingsButton button = new SettingsButton(context);
 		button.setOnClickListener(new OnClickListener() {
 			
 			@Override

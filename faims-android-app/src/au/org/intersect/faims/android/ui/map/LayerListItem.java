@@ -16,6 +16,7 @@ import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
+import au.org.intersect.faims.android.ui.map.button.EyeButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.layers.Layer;

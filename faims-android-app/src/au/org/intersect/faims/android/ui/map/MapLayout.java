@@ -32,7 +32,7 @@ public class MapLayout extends LinearLayout {
 		container = new RelativeLayout(activity);
 		drawView = new DrawView(activity);
 		editView = new EditView(activity);
-		toolsView = new RelativeLayout(activity);
+		toolsView = new ToolView(activity);
 		layersView = new RelativeLayout(activity);
 		
 		mapView = new CustomMapView(activity, this);

@@ -3,20 +3,15 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.List;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.EditText;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.util.MeasurementUtil;
@@ -180,6 +175,7 @@ public class FollowTool extends HighlightTool {
 	public void onMapChanged() {
 		super.onMapChanged();
 		drawDistanceAndBearing();
+		drawBuffer();
 	}
 	
 	@Override
@@ -281,82 +277,6 @@ public class FollowTool extends HighlightTool {
 		} catch (Exception e) {
 			FLog.e("error drawing distance and bearing");
 		}
-	}
-	
-	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.setTitle("Style Settings");
-				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
-				if (isEPSG4326)
-					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
-				builder.addCheckBox("showKm", "Show Km:", mapView.showKm());
-				builder.addTextField("buffer", "Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
-				builder.addTextField("bufferColor", "Buffer Color:", Integer.toHexString(bufferStyle.lineColor));
-				builder.addTextField("targetColor", "Target Color:", Integer.toHexString(targetColor));
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = settingsDialog.parseColor("color");
-							float strokeSize = settingsDialog.parseSlider("strokeSize");
-							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal;
-							if (isEPSG4326)
-								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
-							else
-								showDecimal = false;
-							boolean showKm = settingsDialog.parseCheckBox("showKm");
-							float buffer = Float.parseFloat(((EditText)settingsDialog.getField("buffer")).getText().toString());
-							int bufferColor = settingsDialog.parseColor("bufferColor");
-							int targetColor = settingsDialog.parseColor("targetColor");
-							
-							mapView.setDrawViewColor(color);
-							mapView.setDrawViewStrokeStyle(strokeSize);
-							mapView.setDrawViewTextSize(textSize);
-							mapView.setEditViewTextSize(textSize);
-							mapView.setShowDecimal(showDecimal);
-							mapView.setShowKm(showKm);
-							mapView.setPathBuffer(buffer);
-							
-							FollowTool.this.bufferStyle.lineColor = bufferColor;
-							FollowTool.this.targetColor = targetColor;
-							
-							FollowTool.this.drawDistanceAndBearing();
-							FollowTool.this.drawBuffer();
-						} catch (Exception e) {
-							FLog.e(e.getMessage(), e);
-							showError(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				settingsDialog = builder.create();
-				settingsDialog.show();
-			}
-				
-		});
-		return button;
 	}
 	
 	public ToolBarButton getButton(Context context) {

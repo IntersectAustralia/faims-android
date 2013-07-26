@@ -117,10 +117,23 @@ public class ToolsBarView extends RelativeLayout {
 		configLayout.addRule(RelativeLayout.ALIGN_RIGHT);
 		configLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		configButton.setLayoutParams(configLayout);
+		configButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showConfigDialog();
+			}
+		});
 		
 		refreshLayout();
 	}
 	
+	private void showConfigDialog(){
+		ConfigDialog configDialog = new ConfigDialog(getContext());
+		configDialog.init(mapView);
+		configDialog.show();
+	}
+
 	public void createSelectGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		group.setLabel("Geometry");
