@@ -16,7 +16,7 @@ import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 public class LayerBarView extends RelativeLayout {
 
-	private static final float BAR_HEIGHT = 65.0f;
+	public static final float BAR_HEIGHT = 65.0f;
 	private static final int BAR_COLOR = 0x88000000;
 	
 	private MapNorthView northView;

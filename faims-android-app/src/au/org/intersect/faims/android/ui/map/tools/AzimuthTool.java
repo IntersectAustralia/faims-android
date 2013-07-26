@@ -3,9 +3,11 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
@@ -163,6 +165,14 @@ public class AzimuthTool extends HighlightTool {
 		} catch (Exception e) {
 			FLog.e("error drawing azimuth", e);
 		}
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Azimuth");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
+		return button;
 	}
 
 }

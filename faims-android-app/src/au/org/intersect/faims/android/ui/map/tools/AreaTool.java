@@ -5,11 +5,13 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.view.View;
 import android.view.View.OnClickListener;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
@@ -231,6 +233,14 @@ public class AreaTool extends HighlightTool {
 			}
 				
 		});
+		return button;
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Area");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
 		return button;
 	}
 

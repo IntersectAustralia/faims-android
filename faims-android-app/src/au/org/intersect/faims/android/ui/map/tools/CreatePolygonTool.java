@@ -240,6 +240,7 @@ public class CreatePolygonTool extends SettingsTool {
 	@Override
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Polygon");
 		button.setSelectedState(R.drawable.tools_polygon_s);
 		button.setNormalState(R.drawable.tools_polygon);
 		return button;

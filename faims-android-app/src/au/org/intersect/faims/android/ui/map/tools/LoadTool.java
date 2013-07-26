@@ -1,8 +1,10 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
 import android.content.Context;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
@@ -26,6 +28,14 @@ public class LoadTool extends MapTool {
 				}
 			} 
 		}
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Load");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
+		return button;
 	}
 
 }

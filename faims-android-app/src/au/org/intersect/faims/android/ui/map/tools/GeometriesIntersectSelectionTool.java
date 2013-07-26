@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.VectorElement;
@@ -116,6 +118,14 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {
 		super.onVectorElementClicked(element, arg1, arg2, arg3);
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Intersect");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
+		return button;
 	}
 
 }

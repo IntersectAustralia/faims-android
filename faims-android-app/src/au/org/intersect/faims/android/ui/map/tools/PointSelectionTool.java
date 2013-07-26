@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
@@ -135,6 +137,14 @@ public class PointSelectionTool extends HighlightSelectionTool {
 		if ((element instanceof Point) && (mapView.getHighlights().size() < 1)) {
 			super.onVectorElementClicked(element, arg1, arg2, arg3);
 		}
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Point");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
+		return button;
 	}
 
 }

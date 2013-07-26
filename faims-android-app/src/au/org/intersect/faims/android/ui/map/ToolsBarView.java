@@ -32,7 +32,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToolsBarView extends RelativeLayout {
 	
-	private static final float BAR_HEIGHT = 65.0f;
+	public static final float BAR_HEIGHT = 65.0f;
 	private static final int BAR_COLOR = 0x88000000;
 
 	private CustomMapView mapView;
@@ -111,7 +111,8 @@ public class ToolsBarView extends RelativeLayout {
 		configButton = new ToolBarButton(getContext());
 		configButton.setSelectedState(R.drawable.tools_select_s);
 		configButton.setNormalState(R.drawable.tools_select);
-		RelativeLayout.LayoutParams configLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams configLayout = new RelativeLayout.LayoutParams(
+				new LayoutParams((int) ScaleUtil.getDip(getContext(), ToolsBarView.BAR_HEIGHT), (int) ScaleUtil.getDip(getContext(), ToolsBarView.BAR_HEIGHT)));
 		configLayout.alignWithParent = true;
 		configLayout.addRule(RelativeLayout.ALIGN_RIGHT);
 		configLayout.addRule(RelativeLayout.CENTER_VERTICAL);
@@ -122,6 +123,7 @@ public class ToolsBarView extends RelativeLayout {
 	
 	public void createSelectGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
+		group.setLabel("Geometry");
 		ToolBarButton highlightButton = toolMap.get(HighlightTool.NAME).getButton(getContext());
 		toolButtons.add(highlightButton);
 		toolButtonMap.put(highlightButton, HighlightTool.NAME);
@@ -135,6 +137,7 @@ public class ToolsBarView extends RelativeLayout {
 	
 	public void createCreateGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
+		group.setLabel("Create");
 		ToolBarButton pointButton = toolMap.get(CreatePointTool.NAME).getButton(getContext());
 		toolButtons.add(pointButton);
 		toolButtonMap.put(pointButton, CreatePointTool.NAME);
@@ -152,6 +155,7 @@ public class ToolsBarView extends RelativeLayout {
 	
 	public void createMeasureGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
+		group.setLabel("Measure");
 		ToolBarButton areaButton = toolMap.get(AreaTool.NAME).getButton(getContext());
 		toolButtons.add(areaButton);
 		toolButtonMap.put(areaButton, AreaTool.NAME);
@@ -173,6 +177,7 @@ public class ToolsBarView extends RelativeLayout {
 	
 	public void createSelectionGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
+		group.setLabel("Selection");
 		ToolBarButton touchButton = toolMap.get(TouchSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(touchButton);
 		toolButtonMap.put(touchButton, TouchSelectionTool.NAME);
@@ -232,13 +237,16 @@ public class ToolsBarView extends RelativeLayout {
 	}
 	
 	public void refreshLayout() {
+		this.removeAllViews();
+		this.addView(buttonsLayout);
+		
 		buttonsLayout.removeAllViews();
 		
 		for (View button : toolGroups) {
 			buttonsLayout.addView(button);
 		}
 		
-		addView(configButton);
+		this.addView(configButton);
 	}
 	
 }

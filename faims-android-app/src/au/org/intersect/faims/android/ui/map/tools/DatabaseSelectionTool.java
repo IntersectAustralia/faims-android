@@ -20,10 +20,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
+import au.org.intersect.faims.android.ui.map.ToolBarButton;
 
 public class DatabaseSelectionTool extends SelectionTool {
 
@@ -163,6 +165,14 @@ public class DatabaseSelectionTool extends SelectionTool {
 		});
 		return button;
 		
+	}
+	
+	public ToolBarButton getButton(Context context) {
+		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Database");
+		button.setSelectedState(R.drawable.tools_select_s);
+		button.setNormalState(R.drawable.tools_select);
+		return button;
 	}
 
 }

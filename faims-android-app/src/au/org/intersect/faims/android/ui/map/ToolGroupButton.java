@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.Gravity;
 import android.view.View;
@@ -11,30 +12,55 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToolGroupButton extends RelativeLayout {
 
 	private static final int BAR_COLOR = 0x88000000;
-	public static final int BUTTON_SIZE = 65;
-	public static final int OFFSET = 20;
 	
 	private ArrayList<ToolBarButton> buttons;
 	private ToolBarButton selectedButton;
 	private PopupWindow popupMenu;
 	private LinearLayout popupLayout;
 	private LinearLayout anchor;
-	private ImageView dropDownIndicator;
+	private RelativeLayout holder;
+	private TextView label;
+	private ImageView image;
 
 	public ToolGroupButton(Context context) {
 		super(context);
-		setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		setLayoutParams(new LayoutParams((int) ScaleUtil.getDip(context, ToolsBarView.BAR_HEIGHT), (int) ScaleUtil.getDip(context, ToolsBarView.BAR_HEIGHT)));
+		
+		holder = new RelativeLayout(context);
+		holder.setLayoutParams(new LayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)));
+		addView(holder);
+		
+		this.label = new TextView(context);
+		label.setTextSize(12);
+		label.setTextColor(Color.WHITE);
+		RelativeLayout.LayoutParams labelParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		labelParams.alignWithParent = true;
+		labelParams.addRule(RelativeLayout.ALIGN_TOP);
+		labelParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		label.setLayoutParams(labelParams);
+		holder.addView(label);
+		
+		image = new ImageView(this.getContext());
+		image.setImageResource(R.drawable.dropdown_ic_arrow_normal_holo_light);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		params.alignWithParent = true;
+		params.addRule(RelativeLayout.ALIGN_BOTTOM);
+		params.addRule(RelativeLayout.ALIGN_RIGHT);
+		image.setLayoutParams(params);
+		holder.addView(image);
 		
 		buttons = new ArrayList<ToolBarButton>();
-		
-		dropDownIndicator = new ImageView(this.getContext());
-		dropDownIndicator.setImageResource(R.drawable.dropdown_ic_arrow_normal_holo_light);
+	}
+	
+	public void setLabel(String value) {
+		label.setText(value);
 	}
 	
 	public void setAnchorView(LinearLayout view) {
@@ -100,12 +126,7 @@ public class ToolGroupButton extends RelativeLayout {
 		
 		if (selectedButton != null) {	
 			this.addView(selectedButton);
-			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			params.alignWithParent = true;
-			params.addRule(RelativeLayout.ALIGN_BOTTOM);
-			params.rightMargin = this.getRight() - this.getLeft();
-			dropDownIndicator.setLayoutParams(params);
-			this.addView(dropDownIndicator);
+			this.addView(holder);
 		}
 	}
 

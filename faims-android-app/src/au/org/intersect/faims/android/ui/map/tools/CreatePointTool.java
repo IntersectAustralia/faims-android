@@ -124,6 +124,7 @@ public class CreatePointTool extends SettingsTool {
 	@Override
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Point");
 		button.setSelectedState(R.drawable.tools_point_s);
 		button.setNormalState(R.drawable.tools_point);
 		return button;

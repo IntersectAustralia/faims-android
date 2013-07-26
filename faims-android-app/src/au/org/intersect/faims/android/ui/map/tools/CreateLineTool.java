@@ -251,6 +251,7 @@ public class CreateLineTool extends SettingsTool {
 	@Override
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
+		button.setLabel("Line");
 		button.setSelectedState(R.drawable.tools_line_s);
 		button.setNormalState(R.drawable.tools_line);
 		return button;
