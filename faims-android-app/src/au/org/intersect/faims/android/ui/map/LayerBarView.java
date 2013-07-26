@@ -3,21 +3,28 @@ package au.org.intersect.faims.android.ui.map;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
+import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 public class LayerBarView extends RelativeLayout {
 
 	private static final float BAR_HEIGHT = 65.0f;
+	private static final int BAR_COLOR = 0x88000000;
+	
 	private MapNorthView northView;
 	private ScaleBarView scaleView;
-	private LayerManagementView layerManagementView;
+	private LayerManagerButton layerManagerButton;
 	private LinearLayout layerInformationView;
 	private Button layerInformationButton;
+	private CustomMapView mapView;
 
 	public LayerBarView(Context context) {
 		super(context);
@@ -25,14 +32,11 @@ public class LayerBarView extends RelativeLayout {
 		layerBarLayout.alignWithParent = true;
 		layerBarLayout.addRule(RelativeLayout.ALIGN_BOTTOM);
 		setLayoutParams(layerBarLayout);
-		setBackgroundColor(0x88000000);
+		setBackgroundColor(BAR_COLOR);
 		
 		createNorthView(getContext());
-		
 		createScaleView(getContext());
-		
-		createLayerManagementView(getContext());
-		
+		createLayerManagerButton(getContext());
 		createLayerInformationView(getContext());
 		
 		addView(scaleView);
@@ -41,7 +45,7 @@ public class LayerBarView extends RelativeLayout {
 		LinearLayout layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 		layout.setGravity(Gravity.CENTER_VERTICAL);
-		layout.addView(layerManagementView);
+		layout.addView(layerManagerButton);
 		layout.addView(layerInformationView);
 		
 		addView(layout);
@@ -66,8 +70,8 @@ public class LayerBarView extends RelativeLayout {
 		layerInformationView.addView(layerInformationButton);
 	}
 
-	protected void createLayerManagementView(Context context) {
-		layerManagementView = new LayerManagementView(context);
+	protected void createLayerManagerButton(Context context) {
+		layerManagerButton = new LayerManagerButton(context);
 	}
 
 	protected void createScaleView(Context context) {
@@ -77,6 +81,9 @@ public class LayerBarView extends RelativeLayout {
 		scaleLayout.addRule(RelativeLayout.ALIGN_RIGHT);
 		scaleLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		scaleView.setLayoutParams(scaleLayout);
+		
+		// TODO make this configurable
+		scaleView.setBarWidthRange((int) ScaleUtil.getDip(getContext(), 60), (int) ScaleUtil.getDip(getContext(), 120));
 	}
 
 	protected void createNorthView(Context context) {
@@ -88,25 +95,39 @@ public class LayerBarView extends RelativeLayout {
 		northLayout.rightMargin = (int) ScaleUtil.getDip(context, 15);
 		northView.setLayoutParams(northLayout);
 	}
-
-	public MapNorthView getNorthView() {
-		return northView;
-	}
-
-	public ScaleBarView getScaleView() {
-		return scaleView;
-	}
-
-	public LayerManagementView getLayerManagementView() {
-		return layerManagementView;
-	}
-
-	public Button getLayerInformationButton() {
-		return layerInformationButton;
-	}
 	
-	public void refreshLayout() {
+	public void update() {
+		northView.setMapRotation(mapView.getRotation());
+		
+		int width = mapView.getWidth();
+		int height = mapView.getHeight();
+		
+		try {
+			scaleView.setMapBoundary(mapView.getZoom(), width, height, SpatialiteUtil
+					.distanceBetween(
+							GeometryUtil.convertToWgs84(mapView.screenToWorld(0, height, 0)), 
+							GeometryUtil.convertToWgs84(mapView.screenToWorld(width, height, 0)), 
+							GeometryUtil.EPSG4326) / 1000.0);
+		} catch (Exception e) {
+			FLog.e("error updating scalebar", e);
+		}
+		
 		int sw = (int) ScaleUtil.getDip(getContext(), 140);
 		scaleView.setOffset(getWidth() - northView.getWidth() - sw, getHeight() / 2);
+		
+		layerInformationButton.setText(mapView.getSelectedLayer() != null? mapView.getLayerName(mapView.getSelectedLayer()) : "No Layer Selected");
+	}
+
+	public void setMapView(CustomMapView mapView) {
+		this.mapView = mapView;
+		
+		layerManagerButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				LayerBarView.this.mapView.showLayerManagerDialog();
+			}
+			
+		});
 	}
 }

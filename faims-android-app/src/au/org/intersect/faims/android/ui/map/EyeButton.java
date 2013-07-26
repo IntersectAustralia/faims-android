@@ -16,7 +16,6 @@ public class EyeButton extends ToggleButton {
 	
 	public EyeButton(Context context) {
 		super(context);
-		
 		setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 		setText("");
 		setTextOn("");
@@ -42,7 +41,7 @@ public class EyeButton extends ToggleButton {
 		updateButtonState();
 	}
 
-	private void updateButtonState() {
+	protected void updateButtonState() {
 		if (highlight) {
 			if (isChecked()) {
 				setBackgroundDrawable(blackEye);

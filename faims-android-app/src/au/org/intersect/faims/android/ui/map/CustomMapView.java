@@ -23,7 +23,6 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
@@ -220,16 +219,10 @@ public class CustomMapView extends MapView {
 
 	private EditView editView;
 	
-	private MapNorthView northView;
-
-	private ScaleBarView scaleView;
-
 	private RelativeLayout toolsView;
 
 	private RelativeLayout layersView;
 	
-	private Button layerInformationButton;
-
 	private ArrayList<Runnable> runnableList;
 	private ArrayList<Thread> threadList;
 
@@ -345,20 +338,12 @@ public class CustomMapView extends MapView {
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
 		this.editView = mapLayout.getEditView();
-		this.northView = mapLayout.getNorthView();
-		this.layerInformationButton = mapLayout.getLayerInformationButton();
-		this.scaleView = mapLayout.getScaleView();
 		this.toolsView = mapLayout.getToolsView();
 		this.layersView = mapLayout.getLayersView();
 		
 		this.drawView.setMapView(this);
 		this.editView.setMapView(this);
-		
 		this.editView.setColor(Color.GREEN);
-		
-		// TODO make this configurable
-		scaleView.setBarWidthRange((int) ScaleUtil.getDip(activity, 60),
-				(int) ScaleUtil.getDip(activity, 120));
 
 		initTools();
 
@@ -652,22 +637,8 @@ public class CustomMapView extends MapView {
 		CustomMapView.setWatermark(logo, -1.0f, -0.9f, 0.1f);
 	}
 
-	public void updateMapOverlay() {
-		northView.setMapRotation(this.getRotation());
-		int width = this.getWidth();
-		int height = this.getHeight();
-
-		try {
-			scaleView.setMapBoundary(this.getZoom(), width, height, SpatialiteUtil
-					.distanceBetween(
-							GeometryUtil.convertToWgs84(this.screenToWorld(0, height, 0)), 
-							GeometryUtil.convertToWgs84(this.screenToWorld(width, height, 0)), 
-							GeometryUtil.EPSG4326) / 1000.0);
-		} catch (Exception e) {
-			FLog.e("error updating scalebar", e);
-		}
-		
-		mapLayout.getLayerBarView().refreshLayout();
+	public void updateLayerBar() {
+		mapLayout.getLayerBarView().update();
 	}
 	
 	public void refreshMapOverlay(Configuration newConfig){
@@ -677,18 +648,9 @@ public class CustomMapView extends MapView {
 	        @SuppressWarnings("deprecation")
 			@Override
 	        public void onGlobalLayout() {
-	        	int width = getWidth();
-	    		int height = getHeight();
-
-	    		try {
-	    			scaleView.refreshMapBoundary(getZoom(), width, height, SpatialiteUtil
-	    					.distanceBetween(
-	    							GeometryUtil.convertToWgs84(screenToWorld(0, height, 0)), 
-	    							GeometryUtil.convertToWgs84(screenToWorld(width, height, 0)), 
-	    							GeometryUtil.EPSG4326) / 1000.0);
-	    		} catch (Exception e) {
-	    			FLog.e("error updating scalebar", e);
-	    		}
+	        	updateLayerBar();
+	        	
+	        	// note: this is deprecated in API LEVEL 16 but we support API LEVEL 14
 	            getViewTreeObserver().removeGlobalOnLayoutListener(this);
 	        }
 	    });
@@ -1198,7 +1160,7 @@ public class CustomMapView extends MapView {
 		if (toolsEnabled && currentTool != null) {
 			currentTool.onLayersChanged();
 		}
-		this.layerInformationButton.setText(getSelectedLayer() != null? getLayerName(getSelectedLayer()) : "No Layer Selected");
+		updateLayerBar();
 	}
 
 	public void setMapListener(CustomMapListener customMapListener) {
@@ -1485,16 +1447,7 @@ public class CustomMapView extends MapView {
 	
 	public void setToolsEnabled(boolean value) {
 		toolsEnabled = value;
-		toolsView.setVisibility(value ? View.VISIBLE : View.GONE);
-		mapLayout.getSetButton().setVisibility(value ? View.VISIBLE : View.GONE);
-		mapLayout.getToolsDropDown().setVisibility(value ? View.VISIBLE : View.GONE);
-		if (currentTool != null) {
-			if (value) {
-				currentTool.activate();
-			} else {
-				currentTool.deactivate();
-			}
-		}
+		// TODO should you be able to disable tools?
 	}
 	
 	private void startMapOverlayThread() {
@@ -1511,7 +1464,7 @@ public class CustomMapView extends MapView {
 
 							@Override
 							public void run() {
-								CustomMapView.this.updateMapOverlay();
+								CustomMapView.this.updateLayerBar();
 								CustomMapView.this.updateMapMarker();
 								// update tool
 								if (toolsEnabled && currentTool != null) {

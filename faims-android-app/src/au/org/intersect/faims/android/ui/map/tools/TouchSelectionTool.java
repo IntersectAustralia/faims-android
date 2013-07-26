@@ -9,7 +9,7 @@ import com.nutiteq.geometry.VectorElement;
 
 public class TouchSelectionTool extends SelectionTool {
 
-	private static final String NAME = "Touch Selection";
+	public static final String NAME = "Touch Selection";
 
 	public TouchSelectionTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);

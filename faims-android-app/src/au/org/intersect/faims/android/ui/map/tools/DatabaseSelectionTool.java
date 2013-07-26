@@ -27,7 +27,7 @@ import au.org.intersect.faims.android.ui.map.QueryBuilder;
 
 public class DatabaseSelectionTool extends SelectionTool {
 
-	private static final String NAME = "Query Selection";
+	public static final String NAME = "Query Selection";
 	private MapButton queryButton;
 
 	public DatabaseSelectionTool(Context context, CustomMapView mapView) {

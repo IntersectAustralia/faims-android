@@ -18,7 +18,7 @@ import com.nutiteq.geometry.VectorElement;
 
 public class PointSelectionTool extends HighlightSelectionTool {
 
-	private static final String NAME = "Point Selection";
+	public static final String NAME = "Point Selection";
 	private MapButton settingsButton;
 	protected float distance = 0;
 	protected SettingsDialog settingsDialog;

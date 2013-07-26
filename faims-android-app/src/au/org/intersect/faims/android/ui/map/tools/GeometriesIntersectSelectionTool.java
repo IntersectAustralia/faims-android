@@ -18,7 +18,7 @@ import com.nutiteq.geometry.VectorElement;
 
 public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 
-	private static final String NAME = "Geometries Intersect Selection";
+	public static final String NAME = "Geometries Intersect Selection";
 	private MapButton settingsButton;
 	protected SettingsDialog settingsDialog;
 	private MapButton clearButton;

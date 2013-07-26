@@ -18,7 +18,7 @@ import com.nutiteq.geometry.VectorElement;
 
 public class PolygonSelectionTool extends HighlightSelectionTool {
 
-	private static final String NAME = "Polygon Selection";
+	public static final String NAME = "Polygon Selection";
 	private MapButton settingsButton;
 	protected float distance = 0;
 	protected SettingsDialog settingsDialog;

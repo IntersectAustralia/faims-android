@@ -28,7 +28,7 @@ import au.org.intersect.faims.android.ui.map.QueryBuilder;
 
 public class LegacySelectionTool extends SelectionTool {
 
-	private static final String NAME = "Legacy Selection";
+	public static final String NAME = "Legacy Selection";
 	private MapButton queryButton;
 
 	public LegacySelectionTool(Context context, CustomMapView mapView) {

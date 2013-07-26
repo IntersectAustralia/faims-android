@@ -1,11 +1,11 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
-import com.nutiteq.geometry.Geometry;
-import com.nutiteq.geometry.VectorElement;
-
 import android.content.Context;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+
+import com.nutiteq.geometry.Geometry;
+import com.nutiteq.geometry.VectorElement;
 
 public class LoadTool extends MapTool {
 	
