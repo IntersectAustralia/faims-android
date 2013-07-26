@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolGroupButton;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
 import au.org.intersect.faims.android.ui.map.tools.CreateLineTool;
@@ -126,6 +128,9 @@ public class ToolsBarView extends RelativeLayout {
 		});
 		
 		refreshLayout();
+		
+		// select first button
+		setSelectedButton(toolButtons.get(0));
 	}
 	
 	private void showConfigDialog(){

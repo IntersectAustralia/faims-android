@@ -8,7 +8,7 @@ import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 
 public abstract class MapTool extends CustomMapView.CustomMapListener {
 	

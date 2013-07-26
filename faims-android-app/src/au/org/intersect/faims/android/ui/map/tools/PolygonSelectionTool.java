@@ -13,7 +13,7 @@ import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;

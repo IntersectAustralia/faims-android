@@ -9,10 +9,10 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.ui.map.button.ClearButton;
 import au.org.intersect.faims.android.ui.map.button.SettingsButton;
 import au.org.intersect.faims.android.ui.map.button.ShowDetailsToggleButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.geometry.Geometry;

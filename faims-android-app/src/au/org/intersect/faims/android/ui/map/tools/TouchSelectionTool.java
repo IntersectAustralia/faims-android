@@ -5,7 +5,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 
 import com.nutiteq.geometry.VectorElement;
 

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.map.button.LayerManagerButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
@@ -18,6 +19,7 @@ public class LayerBarView extends RelativeLayout {
 
 	public static final float BAR_HEIGHT = 65.0f;
 	private static final int BAR_COLOR = 0x88000000;
+	private static final int TEXT_COLOR = 0x88FFFFFF;
 	
 	private MapNorthView northView;
 	private ScaleBarView scaleView;
@@ -58,7 +60,7 @@ public class LayerBarView extends RelativeLayout {
 		TextView text = new TextView(context);
 		text.setText("Current Layer Information:");
 		text.setTextSize(12);
-		text.setTextColor(Color.WHITE);
+		text.setTextColor(TEXT_COLOR);
 
 		layerInformationButton = new Button(context);
 		layerInformationButton.setBackgroundResource(R.drawable.custom_button);

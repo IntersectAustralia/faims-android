@@ -20,11 +20,11 @@ import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.ui.map.button.BreakButton;
 import au.org.intersect.faims.android.ui.map.button.DeleteButton;
 import au.org.intersect.faims.android.ui.map.button.LockButton;
 import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;

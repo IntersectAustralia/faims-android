@@ -5,7 +5,6 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.ui.map.ToggleImageButton;
 
 public class LockButton extends ToggleImageButton {
 

@@ -14,10 +14,10 @@ import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
 import au.org.intersect.faims.android.ui.map.button.FinishButton;
 import au.org.intersect.faims.android.ui.map.button.PlotGPSButton;
 import au.org.intersect.faims.android.ui.map.button.SettingsButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 import au.org.intersect.faims.android.ui.map.button.UndoButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 

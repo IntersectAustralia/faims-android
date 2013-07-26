@@ -13,7 +13,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;

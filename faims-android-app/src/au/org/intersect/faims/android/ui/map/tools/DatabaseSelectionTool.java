@@ -25,7 +25,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
-import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 
 public class DatabaseSelectionTool extends SelectionTool {
 
