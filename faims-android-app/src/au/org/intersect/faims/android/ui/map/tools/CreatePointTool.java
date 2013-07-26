@@ -3,14 +3,18 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.ToolBarButton;
+import au.org.intersect.faims.android.ui.map.button.PlotGPSButton;
+import au.org.intersect.faims.android.ui.map.button.SettingsButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.VectorElement;
@@ -24,7 +28,7 @@ public class CreatePointTool extends SettingsTool {
 	
 	private PointStyleDialog styleDialog;
 
-	private MapButton plotButton;
+	private PlotGPSButton plotButton;
 	
 	public CreatePointTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
@@ -32,6 +36,12 @@ public class CreatePointTool extends SettingsTool {
 		style = GeometryStyle.defaultPointStyle();
 		
 		plotButton = createPlotButton(context);
+		RelativeLayout.LayoutParams plotGPSParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		plotGPSParams.alignWithParent = true;
+		plotGPSParams.addRule(RelativeLayout.ALIGN_LEFT);
+		plotGPSParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		plotButton.setLayoutParams(plotGPSParams);
+		buttons.add(plotButton);
 		
 		updateLayout();
 	}
@@ -51,9 +61,8 @@ public class CreatePointTool extends SettingsTool {
 	}
 
 	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
+	protected SettingsButton createSettingsButton(final Context context) {
+		SettingsButton button = new SettingsButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -68,9 +77,8 @@ public class CreatePointTool extends SettingsTool {
 		return button;
 	}
 	
-	private MapButton createPlotButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Plot GPS");
+	private PlotGPSButton createPlotButton(final Context context) {
+		PlotGPSButton button = new PlotGPSButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

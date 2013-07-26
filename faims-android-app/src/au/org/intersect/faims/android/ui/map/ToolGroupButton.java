@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToolGroupButton extends RelativeLayout {
 

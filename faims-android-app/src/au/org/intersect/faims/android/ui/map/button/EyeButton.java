@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.ui.map;
+package au.org.intersect.faims.android.ui.map.button;
 
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;

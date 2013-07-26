@@ -32,7 +32,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToolsBarView extends RelativeLayout {
 	
-	private static final float BAR_HEIGHT = 65.0f;
+	public static final float BAR_HEIGHT = 65.0f;
 	private static final int BAR_COLOR = 0x88000000;
 
 	private CustomMapView mapView;
@@ -116,10 +116,23 @@ public class ToolsBarView extends RelativeLayout {
 		configLayout.addRule(RelativeLayout.ALIGN_RIGHT);
 		configLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		configButton.setLayoutParams(configLayout);
+		configButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showConfigDialog();
+			}
+		});
 		
 		refreshLayout();
 	}
 	
+	private void showConfigDialog(){
+		ConfigDialog configDialog = new ConfigDialog(getContext());
+		configDialog.init(mapView);
+		configDialog.show();
+	}
+
 	public void createSelectGroup() {
 		ToolGroupButton group = new ToolGroupButton(getContext());
 		ToolBarButton highlightButton = toolMap.get(HighlightTool.NAME).getButton(getContext());

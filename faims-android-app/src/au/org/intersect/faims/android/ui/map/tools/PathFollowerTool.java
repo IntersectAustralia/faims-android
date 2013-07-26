@@ -8,8 +8,8 @@ import android.view.View.OnClickListener;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.button.SettingsButton;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.nutiteq.components.MapPos;
@@ -243,9 +243,8 @@ public class PathFollowerTool extends HighlightTool {
 	}
 	
 	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
+	protected SettingsButton createSettingsButton(final Context context) {
+		SettingsButton button = new SettingsButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

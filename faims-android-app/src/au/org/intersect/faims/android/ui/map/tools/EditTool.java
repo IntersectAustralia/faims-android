@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
@@ -16,10 +18,12 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
-import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
-import au.org.intersect.faims.android.ui.form.MapToggleButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.button.BreakButton;
+import au.org.intersect.faims.android.ui.map.button.DeleteButton;
+import au.org.intersect.faims.android.ui.map.button.LockButton;
+import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -32,11 +36,11 @@ public class EditTool extends HighlightTool {
 	
 	public static final String NAME = "Edit";
 	
-	private MapToggleButton lockButton;
+	private LockButton lockButton;
 
-	private MapButton propertiesButton;
+	private PropertiesButton propertiesButton;
 
-	private MapButton deleteButton;
+	private DeleteButton deleteButton;
 
 	private PointStyleDialog pointStyleDialog;
 
@@ -44,9 +48,7 @@ public class EditTool extends HighlightTool {
 
 	private PolygonStyleDialog polygonStyleDialog;
 
-	private MapToggleButton editVertexButton;
-
-	protected float vertexSize = 0.2f;
+	private BreakButton editVertexButton;
 
 	protected List<Geometry> vertexGeometry;
 
@@ -56,9 +58,33 @@ public class EditTool extends HighlightTool {
 		super(context, mapView, NAME);
 		
 		lockButton = createLockButton(context);
+		RelativeLayout.LayoutParams lockParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		lockParams.alignWithParent = true;
+		lockParams.addRule(RelativeLayout.ALIGN_LEFT);
+		lockParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		lockButton.setLayoutParams(lockParams);
+		buttons.add(lockButton);
 		propertiesButton = createPropertiesButton(context);
+		RelativeLayout.LayoutParams propertiesParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		propertiesParams.alignWithParent = true;
+		propertiesParams.addRule(RelativeLayout.ALIGN_LEFT);
+		propertiesParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		propertiesButton.setLayoutParams(propertiesParams);
+		buttons.add(propertiesButton);
 		deleteButton = createDeleteButton(context);
+		RelativeLayout.LayoutParams deleteParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		deleteParams.alignWithParent = true;
+		deleteParams.addRule(RelativeLayout.ALIGN_LEFT);
+		deleteParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		deleteButton.setLayoutParams(deleteParams);
+		buttons.add(deleteButton);
 		editVertexButton = createEditVertexButton(context);
+		RelativeLayout.LayoutParams editVertexParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		editVertexParams.alignWithParent = true;
+		editVertexParams.addRule(RelativeLayout.ALIGN_LEFT);
+		editVertexParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		editVertexButton.setLayoutParams(editVertexParams);
+		buttons.add(editVertexButton);
 		
 		updateLayout();
 	}
@@ -130,10 +156,8 @@ public class EditTool extends HighlightTool {
 		EditTool.this.vertexGeometryToPointsMap = null;
 	}
 	
-	private MapToggleButton createEditVertexButton(final Context context) {
-		final MapToggleButton button = new MapToggleButton(context);
-		button.setTextOn("Join");
-		button.setTextOff("Break");
+	private BreakButton createEditVertexButton(final Context context) {
+		final BreakButton button = new BreakButton(context);
 		button.setChecked(false);
 		button.setOnClickListener(new OnClickListener() {
 
@@ -198,7 +222,7 @@ public class EditTool extends HighlightTool {
 						for (Geometry geom : list) {
 							vertexGeometry.add(geom);
 							GeometryStyle vertexStyle = GeometryStyle.defaultPointStyle();
-							vertexStyle.size = vertexSize;
+							vertexStyle.size = mapView.getVertexSize();
 							GeometryData data = (GeometryData) geom.userData;
 							if (data.id == null) {
 								EditTool.this.mapView.clearGeometry(geom);
@@ -256,16 +280,13 @@ public class EditTool extends HighlightTool {
 		return false;
 	}
 	
-	private MapToggleButton createLockButton(final Context context) {
-		final MapToggleButton button = new MapToggleButton(context);
-		button.setTextOn("UnLock");
-		button.setTextOff("Lock");
+	private LockButton createLockButton(final Context context) {
+		final LockButton button = new LockButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				if (hasLegacyGeometry()) {
-					showError("Cannot edit legacy geometry");
 					button.setChecked(!button.isChecked());
 					return;
 				}
@@ -299,9 +320,8 @@ public class EditTool extends HighlightTool {
 		super.clearSelection();
 	}
 	
-	private MapButton createDeleteButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Delete");
+	private DeleteButton createDeleteButton(final Context context) {
+		DeleteButton button = new DeleteButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -338,75 +358,8 @@ public class EditTool extends HighlightTool {
 		return button;
 	}
 	
-	@Override
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Style Tool");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.setTitle("Style Settings");
-				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-				builder.addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
-				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
-				if (isEPSG4326)
-					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
-				builder.addSlider("vertexSize", "Vertex Size:", vertexSize);
-				
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int color = settingsDialog.parseColor("color");
-							int editColor = settingsDialog.parseColor("editColor");
-							float strokeSize = settingsDialog.parseSlider("strokeSize");
-							float textSize = settingsDialog.parseSlider("textSize");
-							boolean showDecimal;
-							if (isEPSG4326)
-								showDecimal = !settingsDialog.parseCheckBox("showDegrees");
-							else
-								showDecimal = false;
-							float vertexSize = settingsDialog.parseSlider("vertexSize");
-							
-							mapView.setDrawViewColor(color);
-							mapView.setEditViewColor(editColor);
-							mapView.setDrawViewStrokeStyle(strokeSize);
-							mapView.setDrawViewTextSize(textSize);
-							mapView.setEditViewTextSize(textSize);
-							mapView.setShowDecimal(showDecimal);
-							
-							EditTool.this.vertexSize = vertexSize;
-						} catch (Exception e) {
-							showError(e.getMessage());
-						}
-					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
-				});
-				
-				settingsDialog = builder.create();
-				settingsDialog.show();
-			}
-				
-		});
-		return button;
-	}
-	
-	protected MapButton createPropertiesButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Properties");
+	protected PropertiesButton createPropertiesButton(final Context context) {
+		PropertiesButton button = new PropertiesButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

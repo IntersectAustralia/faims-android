@@ -219,6 +219,12 @@ public class CustomMapView extends MapView {
 
 	private EditView editView;
 	
+	private float vertexSize = 0.2f;
+	
+	private int lineColor = Color.GREEN;
+	
+	private int targetColor = Color.RED;
+	
 	private RelativeLayout toolsView;
 
 	private RelativeLayout layersView;
@@ -2344,6 +2350,34 @@ public class CustomMapView extends MapView {
 		pts.add(p4);
 		pts.add(p5);
 		return pts;
+	}
+
+	public float getVertexSize() {
+		return vertexSize;
+	}
+
+	public void setVertexSize(float vertexSize) {
+		this.vertexSize = vertexSize;
+	}
+
+	public MapTool getCurrentTool() {
+		return currentTool;
+	}
+
+	public int getLineColor() {
+		return lineColor;
+	}
+
+	public void setLineColor(int lineColor) {
+		this.lineColor = lineColor;
+	}
+
+	public int getTargetColor() {
+		return targetColor;
+	}
+
+	public void setTargetColor(int targetColor) {
+		this.targetColor = targetColor;
 	}
 
 }
