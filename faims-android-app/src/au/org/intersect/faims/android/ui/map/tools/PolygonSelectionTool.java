@@ -141,8 +141,8 @@ public class PolygonSelectionTool extends HighlightSelectionTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Polygon");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_select_polygon_s);
+		button.setNormalState(R.drawable.tools_select_polygon);
 		return button;
 	}
 

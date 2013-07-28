@@ -170,8 +170,8 @@ public class DatabaseSelectionTool extends SelectionTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Database");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_select_database_s);
+		button.setNormalState(R.drawable.tools_select_database);
 		return button;
 	}
 

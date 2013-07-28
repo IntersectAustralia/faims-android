@@ -167,8 +167,8 @@ public class AreaTool extends HighlightTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Area");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_area);
+		button.setNormalState(R.drawable.tools_area);
 		return button;
 	}
 

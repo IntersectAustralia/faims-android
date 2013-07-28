@@ -170,8 +170,8 @@ public class AzimuthTool extends HighlightTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Azimuth");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_azimuth_s);
+		button.setNormalState(R.drawable.tools_azimuth);
 		return button;
 	}
 

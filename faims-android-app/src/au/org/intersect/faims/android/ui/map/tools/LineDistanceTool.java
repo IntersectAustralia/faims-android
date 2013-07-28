@@ -169,8 +169,8 @@ public class LineDistanceTool extends HighlightTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Line");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_distance_line_s);
+		button.setNormalState(R.drawable.tools_distance_line);
 		return button;
 	}
 	

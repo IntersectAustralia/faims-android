@@ -142,8 +142,8 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Point");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_select_point_s);
+		button.setNormalState(R.drawable.tools_select_point);
 		return button;
 	}
 
