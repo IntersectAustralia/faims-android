@@ -63,28 +63,28 @@ public class EditTool extends HighlightTool {
 		RelativeLayout.LayoutParams lockParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		lockParams.alignWithParent = true;
 		lockParams.addRule(RelativeLayout.ALIGN_LEFT);
-		lockParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		lockParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		lockButton.setLayoutParams(lockParams);
 		buttons.add(lockButton);
 		propertiesButton = createPropertiesButton(context);
 		RelativeLayout.LayoutParams propertiesParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		propertiesParams.alignWithParent = true;
 		propertiesParams.addRule(RelativeLayout.ALIGN_LEFT);
-		propertiesParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		propertiesParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		propertiesButton.setLayoutParams(propertiesParams);
 		buttons.add(propertiesButton);
 		deleteButton = createDeleteButton(context);
 		RelativeLayout.LayoutParams deleteParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		deleteParams.alignWithParent = true;
 		deleteParams.addRule(RelativeLayout.ALIGN_LEFT);
-		deleteParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		deleteParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		deleteButton.setLayoutParams(deleteParams);
 		buttons.add(deleteButton);
 		editVertexButton = createEditVertexButton(context);
 		RelativeLayout.LayoutParams editVertexParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		editVertexParams.alignWithParent = true;
 		editVertexParams.addRule(RelativeLayout.ALIGN_LEFT);
-		editVertexParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		editVertexParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		editVertexButton.setLayoutParams(editVertexParams);
 		buttons.add(editVertexButton);
 		
@@ -218,6 +218,13 @@ public class EditTool extends HighlightTool {
 						EditTool.this.vertexGeometryToPointsMap = null;
 						
 					} else {
+
+						if (mapView.getHighlights().size() == 0) {
+							showError("Pleas select geometry");
+							button.setChecked(!button.isChecked());
+							return;
+						}
+						
 						List<Geometry> list = EditTool.this.mapView.getHighlights();
 						List<Geometry> vertexGeometry = new ArrayList<Geometry>();
 						HashMap<Geometry, ArrayList<Point>> vertexGeometryToPointsMap = new HashMap<Geometry, ArrayList<Point>>();
@@ -539,8 +546,8 @@ public class EditTool extends HighlightTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Edit");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setMutatedSelectedState(R.drawable.ic_menu_edit);
+		button.setNormalState(R.drawable.ic_menu_edit);
 		return button;
 	}
 }

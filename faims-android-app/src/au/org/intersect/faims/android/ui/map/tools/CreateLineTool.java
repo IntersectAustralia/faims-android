@@ -52,19 +52,20 @@ public class CreateLineTool extends SettingsTool {
 		createParams.alignWithParent = true;
 		createParams.addRule(RelativeLayout.ALIGN_RIGHT);
 		createParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		createParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN); 
 		createButton.setLayoutParams(createParams);
 		undoButton = createUndoButton(context);
 		RelativeLayout.LayoutParams undoParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		undoParams.alignWithParent = true;
 		undoParams.addRule(RelativeLayout.ALIGN_LEFT);
-		undoParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		undoParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		undoButton.setLayoutParams(undoParams);
 		buttons.add(undoButton);
 		plotButton = createPlotButton(context);
 		RelativeLayout.LayoutParams plotGPSParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		plotGPSParams.alignWithParent = true;
 		plotGPSParams.addRule(RelativeLayout.ALIGN_LEFT);
-		plotGPSParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		plotGPSParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		plotButton.setLayoutParams(plotGPSParams);
 		buttons.add(plotButton);
 		
@@ -81,8 +82,8 @@ public class CreateLineTool extends SettingsTool {
 		}
 		
 		if (createButton != null) layout.addView(createButton);
-		if (undoButton != null) layout.addView(undoButton);
 		if (plotButton != null) layout.addView(plotButton);
+		if (undoButton != null) layout.addView(undoButton);
 	}
 	
 	@Override

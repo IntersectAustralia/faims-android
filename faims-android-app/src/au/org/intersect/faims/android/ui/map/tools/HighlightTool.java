@@ -39,13 +39,14 @@ public class HighlightTool extends SettingsTool {
 		RelativeLayout.LayoutParams detailParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		detailParams.alignWithParent = true;
 		detailParams.addRule(RelativeLayout.ALIGN_LEFT);
+		detailParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		detailButton.setLayoutParams(detailParams);
 		buttons.add(detailButton);
 		clearButton = createClearButton(context);
 		RelativeLayout.LayoutParams clearParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		clearParams.alignWithParent = true;
 		clearParams.addRule(RelativeLayout.ALIGN_LEFT);
-		clearParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT);
+		clearParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		clearButton.setLayoutParams(clearParams);
 		buttons.add(clearButton);
 		
@@ -86,14 +87,13 @@ public class HighlightTool extends SettingsTool {
 	}
 	
 	private ShowDetailsToggleButton createDetailButton(final Context context) {
-		ShowDetailsToggleButton button = new ShowDetailsToggleButton(context);
+		final ShowDetailsToggleButton button = new ShowDetailsToggleButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				detailButton.setChecked(!detailButton.isChecked());
-				mapView.setDrawViewDetail(detailButton.isChecked());
-				mapView.setEditViewDetail(detailButton.isChecked());
+				mapView.setDrawViewDetail(button.isChecked());
+				mapView.setEditViewDetail(button.isChecked());
 			}
 			
 		});

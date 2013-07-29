@@ -39,7 +39,7 @@ public class ToolGroupButton extends RelativeLayout {
 		addView(holder);
 		
 		this.label = new TextView(context);
-		label.setTextSize(12);
+		label.setTextSize(10);
 		label.setTextColor(TEXT_COLOR);
 		RelativeLayout.LayoutParams labelParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		labelParams.alignWithParent = true;

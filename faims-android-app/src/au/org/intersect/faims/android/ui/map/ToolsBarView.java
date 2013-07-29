@@ -7,6 +7,7 @@ import java.util.List;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
@@ -44,6 +45,7 @@ public class ToolsBarView extends RelativeLayout {
 	private ArrayList<ToolBarButton> toolButtons;
 	private ArrayList<View> toolGroups;
 	private HashMap<ToolBarButton, String> toolButtonMap;
+	private HorizontalScrollView buttonsScroll;
 	
 	public ToolsBarView(Context context) {
 		super(context);
@@ -61,11 +63,14 @@ public class ToolsBarView extends RelativeLayout {
 	
 	private void createToolLayout() {
 		
+		buttonsScroll = new HorizontalScrollView(getContext());
+		addView(buttonsScroll);
+		
 		buttonsLayout = new LinearLayout(getContext());
 		buttonsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		buttonsLayout.setOrientation(LinearLayout.HORIZONTAL);
 		buttonsLayout.setGravity(Gravity.CENTER_VERTICAL);
-		addView(buttonsLayout);
+		buttonsScroll.addView(buttonsLayout);
 		
 		List<MapTool> tools = mapView.getTools();
 		
@@ -111,14 +116,9 @@ public class ToolsBarView extends RelativeLayout {
 		}
 		
 		configButton = new ToolBarButton(getContext());
-		configButton.setSelectedState(R.drawable.tools_select_s);
-		configButton.setNormalState(R.drawable.tools_select);
-		RelativeLayout.LayoutParams configLayout = new RelativeLayout.LayoutParams(
-				new LayoutParams((int) ScaleUtil.getDip(getContext(), ToolsBarView.BAR_HEIGHT), (int) ScaleUtil.getDip(getContext(), ToolsBarView.BAR_HEIGHT)));
-		configLayout.alignWithParent = true;
-		configLayout.addRule(RelativeLayout.ALIGN_RIGHT);
-		configLayout.addRule(RelativeLayout.CENTER_VERTICAL);
-		configButton.setLayoutParams(configLayout);
+		configButton.setLabel("Config");
+		configButton.setSelectedState(R.drawable.style_button);
+		configButton.setNormalState(R.drawable.style_button);
 		configButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -255,16 +255,13 @@ public class ToolsBarView extends RelativeLayout {
 	}
 	
 	public void refreshLayout() {
-		this.removeAllViews();
-		this.addView(buttonsLayout);
-		
 		buttonsLayout.removeAllViews();
 		
 		for (View button : toolGroups) {
 			buttonsLayout.addView(button);
 		}
 		
-		this.addView(configButton);
+		buttonsLayout.addView(configButton);
 	}
 	
 }
