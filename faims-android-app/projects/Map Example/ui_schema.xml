@@ -381,7 +381,7 @@
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="map" faims_map="true" faims_certainty="false">
-            <label>Map:</label>
+            <label></label>
         </input>
         <group ref="container" faims_style="orientation">
             <label></label>
