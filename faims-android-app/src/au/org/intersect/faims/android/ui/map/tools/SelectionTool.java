@@ -3,71 +3,99 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import au.org.intersect.faims.android.ui.form.MapButton;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
+import au.org.intersect.faims.android.ui.map.button.SelectionManagerButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class SelectionTool extends MapTool {
 
-	protected LinearLayout layout;
-	protected MapButton restrictSelection;
-	protected MapButton selectSelection;
-	protected MapButton clearRestrictSelection;
+	protected RelativeLayout layout;
+	protected LinearLayout infoLayout;
+	protected SelectionManagerButton selectionManagerButton;
 	protected MapText restrictedSelection;
 	protected MapText selectedSelection;
 	protected MapText selectionCount;
+	protected List<View> buttons;
+	protected static final int TOP_MARGIN = 85;
+	protected static final int BOTTOM_MARGIN = 85;
+	protected static final int HEIGHT = 65;
 
-	public SelectionTool(Context context, CustomMapView mapView, String name) {
+	public SelectionTool(Context context, final CustomMapView mapView, String name) {
 		super(context, mapView, name);
 		
-		layout = new LinearLayout(context);
-		layout.setOrientation(LinearLayout.VERTICAL);
+		layout = new RelativeLayout(context);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+		params.leftMargin = (int) ScaleUtil.getDip(context, 10);
+		layout.setLayoutParams(params);
 		container.addView(layout);
 		
+		infoLayout = new LinearLayout(context);
+		infoLayout.setOrientation(LinearLayout.VERTICAL);
+		RelativeLayout.LayoutParams infoParams = new RelativeLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
+		infoParams.alignWithParent = true;
+		infoParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		infoParams.addRule(RelativeLayout.ALIGN_TOP);
+		infoParams.topMargin = (int) ScaleUtil.getDip(context, TOP_MARGIN);
+		infoLayout.setLayoutParams(infoParams);
+
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
 		selectedSelection = new MapText(context);
-		selectedSelection.setBackgroundColor(Color.WHITE);
+		selectedSelection.setTextColor(Color.WHITE);
+		selectedSelection.setBackgroundColor(Color.parseColor("#88000000"));	
+		selectedSelection.setLayoutParams(layoutParams);
+		infoLayout.addView(selectedSelection);
 		
 		restrictedSelection = new MapText(context);
-		restrictedSelection.setBackgroundColor(Color.WHITE);
+		restrictedSelection.setTextColor(Color.WHITE);
+		restrictedSelection.setBackgroundColor(Color.parseColor("#88000000"));
+		restrictedSelection.setLayoutParams(layoutParams);
+		infoLayout.addView(restrictedSelection);
 		
 		selectionCount = new MapText(context);
-		selectionCount.setBackgroundColor(Color.WHITE);
+		selectionCount.setTextColor(Color.WHITE);
+		selectionCount.setBackgroundColor(Color.parseColor("#88000000"));
+		selectionCount.setLayoutParams(layoutParams);
+		infoLayout.addView(selectionCount);
 		
-		selectSelection = createSelectButton(context);
-		restrictSelection = createRestrictSelectButton(context);
-		clearRestrictSelection = createClearRestrictSelectButton(context);
-	
+		buttons = new ArrayList<View>();
+		selectionManagerButton = new SelectionManagerButton(context);
+		RelativeLayout.LayoutParams selectionParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		selectionParams.alignWithParent = true;
+		selectionParams.addRule(RelativeLayout.ALIGN_LEFT);
+		selectionParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		selectionManagerButton.setLayoutParams(selectionParams);
+		selectionManagerButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mapView.showSelectionDialog();
+			}
+		});
+		buttons.add(selectionManagerButton);
 		updateLayout();
 	}
 	
 	protected void updateLayout() {
 		if (layout != null) {
 			layout.removeAllViews();
-			layout.addView(selectSelection);
-			layout.addView(restrictSelection);
-			layout.addView(clearRestrictSelection);
-			layout.addView(selectedSelection);
-			layout.addView(restrictedSelection);
-			layout.addView(selectionCount);
+			layout.addView(selectionManagerButton);
+			layout.addView(infoLayout);
 		}
 	}
 	
 	@Override
 	public void activate() {
 		setSelectedSelection(mapView.getSelectedSelection());
-		setRestrictedSelection(mapView.getRestrictedSelection());
+		setRestrictedSelection(mapView.getRestrictedSelections());
 	}
 	
 	@Override
@@ -78,138 +106,22 @@ public class SelectionTool extends MapTool {
 	@Override
 	public void onSelectionChanged() {
 		setSelectedSelection(mapView.getSelectedSelection());
-		setRestrictedSelection(mapView.getRestrictedSelection());
+		setRestrictedSelection(mapView.getRestrictedSelections());
 	}
 	
-	private MapButton createSelectButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Select Selection");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				final List<GeometrySelection> selections = SelectionTool.this.mapView.getSelections();
-				
-				if (selections.isEmpty()) {
-					showError("No selections found");
-				} else {
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle("Select Selection");
-					
-					ArrayList<String> selectionNames = new ArrayList<String>();
-					for (GeometrySelection set : selections) {
-						selectionNames.add(set.getName());
-					}
-					
-					ArrayAdapter<String> adapter = new ArrayAdapter<String>(SelectionTool.this.context, android.R.layout.simple_list_item_1, selectionNames);
-					
-					ListView listView = new ListView(context);
-					listView.setAdapter(adapter);
-					
-					builder.setView(listView);
-					
-					final Dialog d = builder.create();
-					
-					listView.setOnItemClickListener(new OnItemClickListener() {
-	
-						@Override
-						public void onItemClick(AdapterView<?> arg0, View arg1,
-								int position, long arg3) {
-							d.dismiss();
-							setSelectedSelection(selections.get(position));
-						}
-	
-					});
-					
-					d.show();
-				}
-			}
-			
-		});
-		return button;
-	}
-	
-	private MapButton createRestrictSelectButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Select Restricted Selection");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				final List<GeometrySelection> selections = SelectionTool.this.mapView.getSelections();
-				
-				if (selections.isEmpty()) {
-					showError("No restricted selections found");
-				} else {
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle("Select Restricted Selection");
-					
-					ArrayList<String> selectionNames = new ArrayList<String>();
-					for (GeometrySelection set : selections) {
-						selectionNames.add(set.getName());
-					}
-					
-					ArrayAdapter<String> adapter = new ArrayAdapter<String>(SelectionTool.this.context, android.R.layout.simple_list_item_1, selectionNames);
-					
-					ListView listView = new ListView(context);
-					listView.setAdapter(adapter);
-					
-					builder.setView(listView);
-					
-					final Dialog d = builder.create();
-					
-					listView.setOnItemClickListener(new OnItemClickListener() {
-	
-						@Override
-						public void onItemClick(AdapterView<?> arg0, View arg1,
-								int position, long arg3) {
-							d.dismiss();
-							setRestrictedSelection(selections.get(position));
-						}
-
-					});
-					
-					d.show();
-				}
-			}
-			
-		});
-		return button;
-	}
-	
-	private MapButton createClearRestrictSelectButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Clear Restricted Selection");
-		button.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if(mapView.getRestrictedSelection() == null){
-					showError("No restricted selection is selected");
-				}else{
-					mapView.setRestrictedSelection(null);
-					setRestrictedSelection(null);
-				}
-			}
-			
-		});
-		return button;
-	}
-
-	private void setRestrictedSelection(GeometrySelection set) {
-		if(set == null){
+	private void setRestrictedSelection(ArrayList<GeometrySelection> restrictedSelections) {
+		if(restrictedSelections == null || restrictedSelections.isEmpty()){
 			restrictedSelection.setText("No restricted selection selected");
 		}else{
-			if(mapView.getSelectedSelection() == null){
-				showError("No selections found, please select a selection first");
-			}else{
-				if(mapView.getSelectedSelection().equals(set)){
-					showError("Restricted selection can not be the same as the selected selection");
-				}else{
-					mapView.setRestrictedSelection(set);
-					restrictedSelection.setText("Current Restriction: " + set.getName());
+			StringBuilder builder = new StringBuilder();
+			builder.append("Current Restrictions: ");
+			for (GeometrySelection geometrySelection : restrictedSelections) {
+				builder.append(geometrySelection.getName());
+				if(restrictedSelections.indexOf(geometrySelection) < restrictedSelections.size() - 1){
+					builder.append(", ");
 				}
 			}
+			restrictedSelection.setText(builder.toString());
 		}
 		
 	}
@@ -218,21 +130,9 @@ public class SelectionTool extends MapTool {
 			selectedSelection.setText("No selection selected");
 			selectionCount.setVisibility(View.GONE);
 		} else {
-			if(mapView.getRestrictedSelection() != null){
-				if(mapView.getRestrictedSelection().equals(set)){
-					showError("Selected selection can not be the same as the restricted selection");
-				}else{
-					mapView.setSelectedSelection(set);
-					selectedSelection.setText("Current Selection: " + set.getName());
-					selectionCount.setVisibility(View.VISIBLE);
-					selectionCount.setText("Selection Count: " + set.getDataList().size());
-				}
-			}else{
-				mapView.setSelectedSelection(set);
-				selectedSelection.setText("Current Selection: " + set.getName());
-				selectionCount.setVisibility(View.VISIBLE);
-				selectionCount.setText("Selection Count: " + set.getDataList().size());
-			}
+			selectedSelection.setText("Current Selection: " + set.getName());
+			selectionCount.setVisibility(View.VISIBLE);
+			selectionCount.setText("Selection Count: " + set.getDataList().size());
 		}
 	}
 

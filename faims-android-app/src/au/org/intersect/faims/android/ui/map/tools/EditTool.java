@@ -59,13 +59,6 @@ public class EditTool extends HighlightTool {
 	public EditTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
-		lockButton = createLockButton(context);
-		RelativeLayout.LayoutParams lockParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		lockParams.alignWithParent = true;
-		lockParams.addRule(RelativeLayout.ALIGN_LEFT);
-		lockParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
-		lockButton.setLayoutParams(lockParams);
-		buttons.add(lockButton);
 		propertiesButton = createPropertiesButton(context);
 		RelativeLayout.LayoutParams propertiesParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		propertiesParams.alignWithParent = true;
@@ -73,13 +66,23 @@ public class EditTool extends HighlightTool {
 		propertiesParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
 		propertiesButton.setLayoutParams(propertiesParams);
 		buttons.add(propertiesButton);
+
+		lockButton = createLockButton(context);
+		RelativeLayout.LayoutParams lockParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		lockParams.alignWithParent = true;
+		lockParams.addRule(RelativeLayout.ALIGN_LEFT);
+		lockParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		lockButton.setLayoutParams(lockParams);
+		buttons.add(lockButton);
+
 		deleteButton = createDeleteButton(context);
 		RelativeLayout.LayoutParams deleteParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		deleteParams.alignWithParent = true;
 		deleteParams.addRule(RelativeLayout.ALIGN_LEFT);
-		deleteParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		deleteParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		deleteParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN);
 		deleteButton.setLayoutParams(deleteParams);
-		buttons.add(deleteButton);
+
 		editVertexButton = createEditVertexButton(context);
 		RelativeLayout.LayoutParams editVertexParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		editVertexParams.alignWithParent = true;
@@ -115,8 +118,8 @@ public class EditTool extends HighlightTool {
 	@Override
 	protected void updateLayout() {
 		super.updateLayout();
-		if (lockButton != null) layout.addView(lockButton);
 		if (propertiesButton != null) layout.addView(propertiesButton);
+		if (lockButton != null) layout.addView(lockButton);
 		if (deleteButton != null) layout.addView(deleteButton);
 		if (editVertexButton != null) layout.addView(editVertexButton);
 	}

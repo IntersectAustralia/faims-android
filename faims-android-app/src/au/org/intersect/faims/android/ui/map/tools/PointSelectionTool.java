@@ -6,14 +6,19 @@ import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.button.ClearButton;
+import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
@@ -21,10 +26,10 @@ import com.nutiteq.geometry.VectorElement;
 public class PointSelectionTool extends HighlightSelectionTool {
 
 	public static final String NAME = "Point Selection";
-	private MapButton settingsButton;
+	private PropertiesButton settingsButton;
 	protected float distance = 0;
 	protected SettingsDialog settingsDialog;
-	private MapButton clearButton;
+	private ClearButton clearButton;
 	private MapText selectedDistance;
 
 	public PointSelectionTool(Context context, CustomMapView mapView) {
@@ -32,10 +37,26 @@ public class PointSelectionTool extends HighlightSelectionTool {
 		
 		settingsButton = createSettingsButton(context);
 		clearButton = createClearButton(context);
-		selectedDistance = new MapText(context);
-		selectedDistance.setBackgroundColor(Color.WHITE);
-		selectedDistance.setText("Current Distance: " + distance + " m");
+		RelativeLayout.LayoutParams settingsParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		settingsParams.alignWithParent = true;
+		settingsParams.addRule(RelativeLayout.ALIGN_LEFT);
+		settingsParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		settingsButton.setLayoutParams(settingsParams);
+		buttons.add(settingsButton);
+		RelativeLayout.LayoutParams clearParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		clearParams.alignWithParent = true;
+		clearParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		clearParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		clearParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN);
+		clearButton.setLayoutParams(clearParams);
 		
+		selectedDistance = new MapText(context);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
+		selectedDistance.setTextColor(Color.WHITE);
+		selectedDistance.setBackgroundColor(Color.parseColor("#88000000"));
+		selectedDistance.setLayoutParams(layoutParams);
+		selectedDistance.setText("Current Distance: " + distance + " m");
+		infoLayout.addView(selectedDistance);
 		updateLayout();
 	}
 	
@@ -51,20 +72,15 @@ public class PointSelectionTool extends HighlightSelectionTool {
 	protected void updateLayout() {
 		if (settingsButton != null) {
 			layout.removeAllViews();
+			layout.addView(selectionManagerButton);
 			layout.addView(settingsButton);
-			layout.addView(selectSelection);
-			layout.addView(restrictSelection);
-			layout.addView(clearRestrictSelection);
 			layout.addView(clearButton);
-			layout.addView(selectedSelection);
-			layout.addView(restrictedSelection);
-			layout.addView(selectionCount);
+			layout.addView(infoLayout);
 		}
 	}
 	
-	private MapButton createClearButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Clear");
+	private ClearButton createClearButton(final Context context) {
+		ClearButton button = new ClearButton(context);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -76,9 +92,9 @@ public class PointSelectionTool extends HighlightSelectionTool {
 		return button;
 	}
 	
-	protected MapButton createSettingsButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Set Distance");
+	protected PropertiesButton createSettingsButton(final Context context) {
+		PropertiesButton button = new PropertiesButton(context);
+		button.setLabel("Distance");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

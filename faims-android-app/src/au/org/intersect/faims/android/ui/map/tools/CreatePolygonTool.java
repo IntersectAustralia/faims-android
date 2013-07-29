@@ -57,17 +57,16 @@ public class CreatePolygonTool extends SettingsTool {
 		undoButton = createUndoButton(context);
 		RelativeLayout.LayoutParams undoParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		undoParams.alignWithParent = true;
-		undoParams.addRule(RelativeLayout.ALIGN_LEFT);
-		undoParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		undoParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		undoParams.topMargin = (int) ScaleUtil.getDip(context,TOP_MARGIN);
 		undoButton.setLayoutParams(undoParams);
-		buttons.add(undoButton);
 		plotButton = createPlotButton(context);
 		RelativeLayout.LayoutParams plotGPSParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		plotGPSParams.alignWithParent = true;
 		plotGPSParams.addRule(RelativeLayout.ALIGN_LEFT);
-		plotGPSParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		plotGPSParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		plotGPSParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN);
 		plotButton.setLayoutParams(plotGPSParams);
-		buttons.add(plotButton);
 		
 		pointsList = new LinkedList<Point>();
 		

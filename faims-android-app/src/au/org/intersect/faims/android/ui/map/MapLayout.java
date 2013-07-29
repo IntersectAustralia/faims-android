@@ -1,12 +1,8 @@
 package au.org.intersect.faims.android.ui.map;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 
 public class MapLayout extends LinearLayout {
@@ -91,15 +87,4 @@ public class MapLayout extends LinearLayout {
 		if (toolsBarView != null) container.addView(toolsBarView);
 	}
 
-	@Override
-	protected void onConfigurationChanged(Configuration newConfig) {
-		Bitmap logo = BitmapFactory.decodeResource(getContext().getResources(),
-				R.drawable.ic_launcher);
-		if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-			CustomMapView.setWatermark(logo, -1.0f, -0.9f, 0.1f);
-		}else{
-			CustomMapView.setWatermark(logo, -1.0f, -0.7f, 0.1f);
-		}
-		super.onConfigurationChanged(newConfig);
-	}
 }

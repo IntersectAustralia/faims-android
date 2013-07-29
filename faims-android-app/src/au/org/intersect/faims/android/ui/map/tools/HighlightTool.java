@@ -38,17 +38,16 @@ public class HighlightTool extends SettingsTool {
 		detailButton = createDetailButton(context);
 		RelativeLayout.LayoutParams detailParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		detailParams.alignWithParent = true;
-		detailParams.addRule(RelativeLayout.ALIGN_LEFT);
-		detailParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		detailParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		detailParams.topMargin = (int) ScaleUtil.getDip(context, TOP_MARGIN); 
 		detailButton.setLayoutParams(detailParams);
-		buttons.add(detailButton);
 		clearButton = createClearButton(context);
 		RelativeLayout.LayoutParams clearParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		clearParams.alignWithParent = true;
-		clearParams.addRule(RelativeLayout.ALIGN_LEFT);
-		clearParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		clearParams.addRule(RelativeLayout.ALIGN_RIGHT);
+		clearParams.addRule(RelativeLayout.ALIGN_BOTTOM);
+		clearParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN); 
 		clearButton.setLayoutParams(clearParams);
-		buttons.add(clearButton);
 		
 		updateLayout();
 	}
