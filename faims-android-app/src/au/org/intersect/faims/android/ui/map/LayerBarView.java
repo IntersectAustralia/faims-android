@@ -90,12 +90,20 @@ public class LayerBarView extends RelativeLayout {
 
 	protected void createNorthView(Context context) {
 		northView = new MapNorthView(context);
-		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams northLayout = new RelativeLayout.LayoutParams((int) ScaleUtil.getDip(context, 50),(int) ScaleUtil.getDip(context, 50));
 		northLayout.alignWithParent = true;
 		northLayout.addRule(RelativeLayout.ALIGN_RIGHT);
 		northLayout.addRule(RelativeLayout.CENTER_VERTICAL);
 		northLayout.rightMargin = (int) ScaleUtil.getDip(context, 15);
 		northView.setLayoutParams(northLayout);
+		northView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mapView.setRotation(0);
+				northView.setMapRotation(0);
+			}
+		});
 	}
 	
 	public void update() {
