@@ -1455,7 +1455,21 @@ public class CustomMapView extends MapView {
 	
 	public void setToolsEnabled(boolean value) {
 		toolsEnabled = value;
-		// TODO should you be able to disable tools?
+		if (toolsEnabled) {
+			this.mapLayout.getToolsBarView().setVisibility(View.VISIBLE);
+			this.mapLayout.getLayerBarView().setVisibility(View.VISIBLE);
+			this.toolsView.setVisibility(View.VISIBLE);
+			if (currentTool != null) {
+				currentTool.activate();
+			}
+		} else {
+			this.mapLayout.getToolsBarView().setVisibility(View.GONE);
+			this.mapLayout.getLayerBarView().setVisibility(View.GONE);
+			this.toolsView.setVisibility(View.GONE);
+			if (currentTool != null) {
+				currentTool.deactivate();
+			}
+		}
 	}
 	
 	private void startMapOverlayThread() {
