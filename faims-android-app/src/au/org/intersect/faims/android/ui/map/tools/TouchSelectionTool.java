@@ -59,8 +59,8 @@ public class TouchSelectionTool extends SelectionTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Touch");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_select_touch_s);
+		button.setNormalState(R.drawable.tools_select_touch);
 		return button;
 	}
 

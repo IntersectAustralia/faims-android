@@ -134,8 +134,8 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Intersect");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_select_intersect_s);
+		button.setNormalState(R.drawable.tools_select_intersect);
 		return button;
 	}
 

@@ -282,8 +282,8 @@ public class FollowTool extends HighlightTool {
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setLabel("Tracker");
-		button.setSelectedState(R.drawable.tools_select_s);
-		button.setNormalState(R.drawable.tools_select);
+		button.setSelectedState(R.drawable.tools_tracker_s);
+		button.setNormalState(R.drawable.tools_tracker);
 		return button;
 	}
 
