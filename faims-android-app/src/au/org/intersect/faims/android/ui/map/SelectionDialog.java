@@ -40,7 +40,7 @@ public class SelectionDialog extends AlertDialog {
 			
 			for (GeometrySelection set : selections) {
 				SelectionListItem item = new SelectionListItem(SelectionDialog.this.getContext());
-				item.init(set);
+				item.init(listView,set, mapView);
 				itemViews.add(item);
 			} 
 		}
@@ -62,7 +62,22 @@ public class SelectionDialog extends AlertDialog {
 
 		@Override
 		public View getView(int position, View arg1, ViewGroup arg2) {
-			return itemViews.get(position);
+			SelectionListItem item = (SelectionListItem) itemViews.get(position);
+			if(SelectionDialog.this.mapView.getSelectedSelection() != null){
+				if(SelectionDialog.this.mapView.getSelectedSelection() .equals(item.getSelection())){
+					for(View itemView : itemViews){
+						SelectionListItem layerItem = (SelectionListItem) itemView;
+						layerItem.setItemSelected(false);
+					}
+					item.setItemSelected(true);
+				}
+			}else{
+				for(View itemView : itemViews){
+					SelectionListItem layerItem = (SelectionListItem) itemView;
+					layerItem.setItemSelected(false);
+				}
+			}
+			return item;
 		}
 		
 	}
@@ -101,10 +116,16 @@ public class SelectionDialog extends AlertDialog {
 			public void onItemClick(AdapterView<?> arg0, View view, int position,
 					long arg3) {
 				try {
-					List<GeometrySelection> selections = mapView.getSelections();
-					SelectionListItem itemView = (SelectionListItem) view;
-					itemView.toggle();
-					mapView.setSelectionActive(selections.get(position), itemView.isChecked());
+					SelectionListItem item = (SelectionListItem) view;
+					if(!item.isRestricted()){
+						List<GeometrySelection> selections = mapView.getSelections();
+						for(GeometrySelection selection : selections){
+							selection.setActive(false);
+						}
+						mapView.setSelectedSelection(selections.get(position));
+						mapView.setSelectionActive(selections.get(position), true);
+						((SelectionAdapter)listView.getAdapter()).getView(position, view, listView);
+					}
 				} catch (Exception e) {
 					FLog.e(e.getMessage(), e);
 					showErrorDialog(e.getMessage());

@@ -275,7 +275,7 @@ public class CustomMapView extends MapView {
 	private HashMap<String, GeometrySelection> selectionMap;
 
 	private GeometrySelection selectedSelection;
-	private GeometrySelection restrictedSelection;
+	private ArrayList<GeometrySelection> restrictedSelections;
 
 	private HashMap<String, QueryBuilder> selectQueryMap;
 
@@ -640,7 +640,7 @@ public class CustomMapView extends MapView {
 		CustomMapView.registerLicense(LICENSE, context);
 		Bitmap logo = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.ic_launcher);
-		CustomMapView.setWatermark(logo, -1.0f, -0.9f, 0.1f);
+		CustomMapView.setWatermark(logo, 1.0f, 1.0f, 0.1f);
 	}
 
 	public void updateLayerBar() {
@@ -1739,8 +1739,17 @@ public class CustomMapView extends MapView {
 		if (selectedSelection != null && selectedSelection.getName().equals(name)) {
 			selectedSelection = null;
 			updateSelections();
-		}else if(restrictedSelection != null && restrictedSelection.getName().equals(name)){
-			restrictedSelection = null;
+		}else if(restrictedSelections != null){
+			GeometrySelection removedSelection = null;
+			for(GeometrySelection selection : restrictedSelections){
+				if(selection.getName().equals(name)){
+					removedSelection = selection;
+					break;
+				}
+			}
+			if(removedSelection != null){
+				restrictedSelections.remove(removedSelection);
+			}
 			updateSelections();
 		}
 	}
@@ -1766,8 +1775,8 @@ public class CustomMapView extends MapView {
 		return selectedSelection;
 	}
 	
-	public GeometrySelection getRestrictedSelection() {
-		return restrictedSelection;
+	public ArrayList<GeometrySelection> getRestrictedSelections() {
+		return restrictedSelections;
 	} 
 	
 	public void addToSelection(String data){
@@ -1782,8 +1791,15 @@ public class CustomMapView extends MapView {
 		this.selectedSelection = set;
 	}
 	
-	public void setRestrictedSelection(GeometrySelection set) {
-		this.restrictedSelection = set;
+	public void addRestrictedSelection(GeometrySelection set, boolean isAdded) {
+		if(this.restrictedSelections == null){
+			restrictedSelections = new ArrayList<GeometrySelection>();
+		}
+		if(isAdded){
+			this.restrictedSelections.add(set);
+		}else{
+			this.restrictedSelections.remove(set);
+		}
 	}
 	
 	public void updateSelections() {
@@ -1824,17 +1840,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					removeFromSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							removeFromSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					addToSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							addToSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					addToSelection(uuid);
 				}
 			}
@@ -1879,17 +1905,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					removeFromSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							removeFromSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					addToSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							addToSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					addToSelection(uuid);
 				}
 			}
@@ -1933,17 +1969,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					removeFromSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							removeFromSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					addToSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							addToSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					addToSelection(uuid);
 				}
 			}
@@ -1979,17 +2025,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					removeFromSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							removeFromSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					addToSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							addToSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					addToSelection(uuid);
 				}
 			}
@@ -2026,17 +2082,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					removeFromSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							removeFromSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelection()!= null && getRestrictedSelection().hasData(uuid)){
-					addToSelection(uuid);
-				}else if(getRestrictedSelection() == null){
+				if(getRestrictedSelections()!= null){
+					for(GeometrySelection restrictedSelection : restrictedSelections){
+						if(restrictedSelection.hasData(uuid)){
+							addToSelection(uuid);
+							break;
+						}
+					}
+				}else if(getRestrictedSelections() == null){
 					addToSelection(uuid);
 				}
 			}

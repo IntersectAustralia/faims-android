@@ -12,6 +12,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -31,9 +32,11 @@ public class ConfigDialog extends AlertDialog {
 	}
 
 	public void init(final CustomMapView mapView){
+		ScrollView scrollView = new ScrollView(getContext());
 		layout = new LinearLayout(getContext());
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scrollView.addView(layout);
 		addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 		addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
 		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
@@ -49,7 +52,7 @@ public class ConfigDialog extends AlertDialog {
 		addTextField("bufferColor", "Buffer Color:", Integer.toHexString(mapView.getLineColor()));
 		addTextField("targetColor", "Target Color:", Integer.toHexString(mapView.getTargetColor()));
 
-		setView(layout);
+		setView(scrollView);
 		setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

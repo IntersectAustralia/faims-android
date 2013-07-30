@@ -17,26 +17,35 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.form.MapButton;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
+import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class LegacySelectionTool extends SelectionTool {
 
 	public static final String NAME = "Legacy Selection";
-	private MapButton queryButton;
+	private PropertiesButton queryButton;
 
 	public LegacySelectionTool(Context context, CustomMapView mapView) {
 		super(context, mapView, NAME);
 		
 		queryButton = createQueryButton(context);
+		RelativeLayout.LayoutParams queryParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		queryParams.alignWithParent = true;
+		queryParams.addRule(RelativeLayout.ALIGN_LEFT);
+		queryParams.topMargin = (int) ScaleUtil.getDip(context, buttons.size() * HEIGHT + TOP_MARGIN);
+		queryButton.setLayoutParams(queryParams);
+		buttons.add(queryButton);
 		
 		updateLayout();
 	}
@@ -44,19 +53,15 @@ public class LegacySelectionTool extends SelectionTool {
 	protected void updateLayout() {
 		if (queryButton != null) {
 			layout.removeAllViews();
+			layout.addView(selectionManagerButton);
 			layout.addView(queryButton);
-			layout.addView(selectSelection);
-			layout.addView(restrictSelection);
-			layout.addView(clearRestrictSelection);
-			layout.addView(selectedSelection);
-			layout.addView(restrictedSelection);
-			layout.addView(selectionCount);
+			layout.addView(infoLayout);
 		}
 	}
 	
-	private MapButton createQueryButton(final Context context) {
-		MapButton button = new MapButton(context);
-		button.setText("Construct Query");
+	private PropertiesButton createQueryButton(final Context context) {
+		PropertiesButton button = new PropertiesButton(context);
+		button.setLabel("Query");
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override

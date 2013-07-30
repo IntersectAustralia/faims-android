@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
@@ -21,7 +23,7 @@ public class TouchSelectionTool extends SelectionTool {
 	public void onVectorElementClicked(VectorElement element, double arg1,
 			double arg2, boolean arg3) {		
 		GeometrySelection selection = mapView.getSelectedSelection();
-		GeometrySelection restrictedSelection = mapView.getRestrictedSelection();
+		ArrayList<GeometrySelection> restrictedSelections = mapView.getRestrictedSelections();
 		if (selection == null) {
 			showError("No selection selected");
 			return;
@@ -31,12 +33,18 @@ public class TouchSelectionTool extends SelectionTool {
 		if (geomData.id == null) return;
 		
 		String data = geomData.id;
-		if(restrictedSelection!= null && restrictedSelection.hasData(data)){
-			if (selection.hasData(data)) {
-				mapView.removeFromSelection(data);
-			} else {
-				mapView.addToSelection(data);
+		if(restrictedSelections!= null){
+			for (GeometrySelection restrictedSelection : restrictedSelections) {
+				if(restrictedSelection.hasData(data)){
+					if (selection.hasData(data)) {
+						mapView.removeFromSelection(data);
+					} else {
+						mapView.addToSelection(data);
+					}
+					break;
+				}
 			}
+			
 		}else if(restrictedSelection == null){
 			if (selection.hasData(data)) {
 				mapView.removeFromSelection(data);
