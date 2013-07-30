@@ -61,6 +61,11 @@ public class DatabaseManager {
 			FLog.e("error closing database", e);
 		}
 	}
+	
+	private String clean(String s) {
+		if (s != null && "".equals(s.trim())) return null;
+		return s;
+	}
 
 	public double getDistanceBetween(String prevLong, String prevLat, String curLong, String curLat) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {
@@ -237,7 +242,7 @@ public class DatabaseManager {
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, geo_data);
+				st.bind(3, clean(geo_data));
 				st.bind(4, currentTimestamp);
 				st.bind(5, parenttimestamp);
 				st.bind(6, entity_type);
@@ -270,10 +275,10 @@ public class DatabaseManager {
 						st = db.prepare(query);
 						st.bind(1, uuid);
 						st.bind(2, userId);
-						st.bind(3, attribute.getVocab());
-						st.bind(4, attribute.getMeasure());
-						st.bind(5, attribute.getText());
-						st.bind(6, attribute.getCertainty());
+						st.bind(3, clean(attribute.getVocab()));
+						st.bind(4, clean(attribute.getMeasure()));
+						st.bind(5, clean(attribute.getText()));
+						st.bind(6, clean(attribute.getCertainty()));
 						st.bind(7, currentTimestamp);
 						st.bind(8, attribute.isDeleted() ? "true" : null);
 						st.bind(9, parenttimestamp);
@@ -328,7 +333,7 @@ public class DatabaseManager {
 				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, userId);
-				st.bind(2, geo_data);
+				st.bind(2, clean(geo_data));
 				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
@@ -379,7 +384,7 @@ public class DatabaseManager {
 				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, userId);
-				st.bind(2, geo_data);
+				st.bind(2, clean(geo_data));
 				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
@@ -506,7 +511,7 @@ public class DatabaseManager {
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, geo_data);
+				st.bind(3, clean(geo_data));
 				st.bind(4, currentTimestamp);
 				st.bind(5, parenttimestamp);
 				st.bind(6, rel_type);
@@ -539,9 +544,9 @@ public class DatabaseManager {
 						st = db.prepare(query);
 						st.bind(1, uuid);
 						st.bind(2, userId);
-						st.bind(3, attribute.getVocab());
-						st.bind(4, attribute.getText());
-						st.bind(5, attribute.getCertainty());
+						st.bind(3, clean(attribute.getVocab()));
+						st.bind(4, clean(attribute.getText()));
+						st.bind(5, clean(attribute.getCertainty()));
 						st.bind(6, currentTimestamp);
 						st.bind(7, attribute.isDeleted() ? "true" : null);
 						st.bind(8, parenttimestamp);
@@ -672,7 +677,7 @@ public class DatabaseManager {
 				st.bind(1, entity_id);
 				st.bind(2, rel_id);
 				st.bind(3, userId);
-				st.bind(4, verb);
+				st.bind(4, clean(verb));
 				st.bind(5, currentTimestamp);
 				st.bind(6, parenttimestamp); 
 				st.step();
@@ -718,10 +723,10 @@ public class DatabaseManager {
 					if (stmt.column_string(7) != null) continue; // don't return deleted attributes
 					EntityAttribute archAttribute = new EntityAttribute();
 					archAttribute.setName(stmt.column_string(1));
-					archAttribute.setVocab(Integer.toString(stmt.column_int(2)));
-					archAttribute.setMeasure(Double.toString(stmt.column_double(3)));
+					archAttribute.setVocab(stmt.column_string(2));
+					archAttribute.setMeasure(stmt.column_string(3));
 					archAttribute.setText(stmt.column_string(4));
-					archAttribute.setCertainty(Double.toString(stmt.column_double(5)));
+					archAttribute.setCertainty(stmt.column_string(5));
 					archAttribute.setType(stmt.column_string(6));
 					//archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
 					archAttribute.setDirty(stmt.column_string(8) != null ? true : false);
@@ -730,6 +735,7 @@ public class DatabaseManager {
 				}
 				stmt.close();
 				stmt = null;
+				
 				for (EntityAttribute attribute : attributes) {
 					FLog.d(attribute.toString());
 				}
@@ -808,7 +814,7 @@ public class DatabaseManager {
 					if (stmt.column_string(6) != null) continue; // don't return deleted attributes
 					RelationshipAttribute relAttribute = new RelationshipAttribute();
 					relAttribute.setName(stmt.column_string(1));
-					relAttribute.setVocab(Integer.toString(stmt.column_int(2)));
+					relAttribute.setVocab(stmt.column_string(2));
 					relAttribute.setText(stmt.column_string(3));
 					relAttribute.setCertainty(stmt.column_string(4));
 					relAttribute.setType(stmt.column_string(5));
@@ -819,6 +825,10 @@ public class DatabaseManager {
 				}
 				stmt.close();
 				stmt = null;
+				
+				for (RelationshipAttribute attribute : attributes) {
+					FLog.d(attribute.toString());
+				}
 				
 				// get vector geometry
 				stmt = db.prepare(DatabaseQueries.FETCH_RELN_GEOSPATIALCOLUMN);

@@ -1358,11 +1358,6 @@ public class BeanShellLinker {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Cannot find view " + ref);
 				}
-			} else {
-				FLog.w("cannot set field value " + ref + " = "
-						+ valueObj.toString());
-				showWarning("Logic Error", "Cannot set field value " + ref
-						+ " = " + valueObj.toString());
 			}
 		} catch (Exception e) {
 			FLog.e("error setting field value " + ref, e);
@@ -1408,13 +1403,10 @@ public class BeanShellLinker {
 					horizontalScrollView.setCurrentCertainty(value);
 				} else {
 					FLog.w("cannot set field certainty " + ref + " = "
-							+ valueObj.toString());
+							+ valueObj);
 					showWarning("Logic Error", "Cannot set field certainty "
-							+ ref + " = " + valueObj.toString());
+							+ ref + " = " + valueObj);
 				}
-			} else {
-				FLog.w("cannot find view " + ref);
-				showWarning("Logic Error", "Cannot find view " + ref);
 			}
 		} catch (Exception e) {
 			FLog.e("error setting field certainty " + ref, e);
@@ -1448,13 +1440,10 @@ public class BeanShellLinker {
 					horizontalScrollView.setCurrentAnnotation(value);
 				} else {
 					FLog.w("cannot set field annotation " + ref + " = "
-							+ valueObj.toString());
+							+ valueObj);
 					showWarning("Logic Error", "Cannot set field annotation "
-							+ ref + " = " + valueObj.toString());
+							+ ref + " = " + valueObj);
 				}
-			} else {
-				FLog.w("cannot find view " + ref);
-				showWarning("Logic Error", "Cannot find view " + ref);
 			}
 		} catch (Exception e) {
 			FLog.e("error setting field annotation " + ref, e);
