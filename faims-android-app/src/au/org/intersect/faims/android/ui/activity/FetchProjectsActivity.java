@@ -194,8 +194,6 @@ public class FetchProjectsActivity extends RoboActivity {
         setContentView(R.layout.activity_fetch_projects);
         
         serverDiscovery.setApplication(getApplication());
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        serverDiscovery.initiateServerIPAndPort(preferences);
         
         ListView projectList = (ListView) findViewById(R.id.project_list);
         
@@ -214,6 +212,13 @@ public class FetchProjectsActivity extends RoboActivity {
         });
         
         fetchProjectsList();
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        serverDiscovery.initiateServerIPAndPort(preferences);
     }
 
     protected void showDownloadProjectDialog(final String selectedItem) {

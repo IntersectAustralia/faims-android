@@ -44,6 +44,8 @@ public class ServerDiscovery {
 	private String serverPort;
 
 	private Timer timer;
+
+	private boolean serverFixed;
 	
 	public ServerDiscovery() {
 		listenerList = new LinkedList<ServerDiscoveryListener>();
@@ -74,12 +76,17 @@ public class ServerDiscovery {
 	public void setServerPort(String serverPort) {
 		this.serverPort = serverPort;
 	}
+	
+	public void setServerHostFixed(boolean fixed) {
+		this.serverFixed = fixed;
+	}
 
 	public String getServerHost() {
 		return "http://" + serverIP + ":" + serverPort;
 	}
 	
 	public void invalidateServerHost() {
+		if (serverFixed) return;
 		serverIP = null;
 		serverPort = null;
 	}
@@ -303,9 +310,10 @@ public class ServerDiscovery {
 		String serverIP = preferences.getString("pref_server_ip", null);
         String serverPort = preferences.getString("pref_server_port", null);
         serverIP = serverIP == null || serverIP.isEmpty() ? null : serverIP;
-        serverPort = serverPort == null || serverPort.isEmpty() || serverIP.isEmpty() ? null : serverPort;
+        serverPort = serverPort == null || serverPort.isEmpty() || serverIP == null || serverIP.isEmpty() ? null : serverPort;
         setServerIP(serverIP);
         setServerPort(serverPort);
+        setServerHostFixed(isServerHostValid());
 	}
 
 }

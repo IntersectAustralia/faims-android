@@ -594,6 +594,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		isActivityShowing = true;
 		
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        serverDiscovery.initiateServerIPAndPort(preferences);
+		
 		if (activityData.isSyncEnabled()) {
 			if (syncActive) {
 				delayStopSync = false;
