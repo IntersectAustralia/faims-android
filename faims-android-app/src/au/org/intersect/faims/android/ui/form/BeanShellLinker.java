@@ -1872,7 +1872,7 @@ public class BeanShellLinker {
 					ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
 					for (List<String> pictureList : arrayList) {
 						Picture picture = new Picture(pictureList.get(0),
-								pictureList.get(1), pictureList.get(2));
+								activity.getArch16n().substituteValue(pictureList.get(1)), pictureList.get(2));
 						pictures.add(picture);
 					}
 				} catch (Exception e) {
