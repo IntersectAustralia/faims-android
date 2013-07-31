@@ -168,6 +168,7 @@ public final class DatabaseQueries {
 			"                  JOIN archentity USING (uuid)\n"+
 			"              GROUP BY uuid, attributeid\n"+
 			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n"+
+						userQuery +
 			"          WHERE aentvalue.deleted is NULL\n"+
 			"          and archentity.deleted is NULL\n"+
 			"          and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n"+
@@ -188,11 +189,31 @@ public final class DatabaseQueries {
 			"                  JOIN archentity USING (uuid)\n"+
 			"              GROUP BY uuid, attributeid\n"+
 			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n"+
+						userQuery +
 			"          WHERE aentvalue.deleted is NULL\n"+
 			"          and archentity.deleted is NULL\n"+
 			"          and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n"+
 			"       ORDER BY uuid, attributename ASC, valuetimestamp desc)\n"+
 			"group by uuid;";
+	}
+
+	public static final String GET_BOUNDARY_OF_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
+		return "select hex(asbinary(extent(geospatialcolumn)))\n"+
+			"FROM (  SELECT uuid, geospatialcolumn, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n"+
+			"          FROM aentvalue\n"+
+			"          JOIN attributekey USING (attributeid)\n"+
+			"          join archentity USING (uuid)\n"+
+			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)\n"+
+			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+			"          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp\n"+
+			"                  FROM aentvalue\n"+
+			"                  JOIN archentity USING (uuid)\n"+
+			"              GROUP BY uuid, attributeid\n"+
+			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n"+
+						userQuery +
+			"          WHERE aentvalue.deleted is NULL\n"+
+			"          and archentity.deleted is NULL\n"+
+			"       ORDER BY uuid, attributename ASC, valuetimestamp desc);";
 	}
 
 	public static final String FETCH_ALL_VISIBLE_RELN_GEOMETRY(String userQuery){
@@ -215,11 +236,33 @@ public final class DatabaseQueries {
 
 			"               GROUP BY relationshipid, attributeid\n"+
 			"            ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n"+
+						userQuery +
 			"         WHERE relnvalue.deleted is NULL\n"+
 			"         and relationship.deleted is NULL\n"+
 			"                    and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n"+
 			"      ORDER BY relationshipid, attributename asc)\n"+
 			"      group by relationshipid limit ?;";
+	}
+	
+	public static final String GET_BOUNDARY_OF_ALL_VISIBLE_RELN_GEOMETRY(String userQuery){
+		return "select Hex(AsBinary(extent(geospatialcolumn)))\n"+
+			"      from (\n"+
+			"      SELECT relationshipid, geospatialcolumn, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n"+
+			"          FROM relnvalue\n"+
+			"          JOIN attributekey USING (attributeid)\n"+
+			"          JOIN relationship USING (relationshipid)\n"+
+			"          join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true') USING (attributeid, relntypeid)\n"+
+			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
+			"          JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp, max(relntimestamp) as relntimestamp, relntypeid\n"+
+			"                   FROM relnvalue\n"+
+			"                   JOIN relationship USING (relationshipid)\n"+
+
+			"               GROUP BY relationshipid, attributeid\n"+
+			"            ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n"+
+						userQuery +
+			"         WHERE relnvalue.deleted is NULL\n"+
+			"         and relationship.deleted is NULL\n"+
+			"      ORDER BY relationshipid, attributename asc);";
 	}
 	
 	public static final String COUNT_ALL_VISIBLE_RELN_GEOMETRY(String userQuery){
@@ -237,6 +280,7 @@ public final class DatabaseQueries {
 
 			"               GROUP BY relationshipid, attributeid\n"+
 			"            ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n"+
+						userQuery +
 			"         WHERE relnvalue.deleted is NULL\n"+
 			"         and relationship.deleted is NULL\n"+
 			"                    and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n"+

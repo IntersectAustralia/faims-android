@@ -1050,6 +1050,50 @@ public class DatabaseManager {
 		}
 	}
 	
+	public Geometry getBoundaryForVisibleEntityGeometry(String userQuery) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			Geometry result = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (uuid, aenttimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = DatabaseQueries.GET_BOUNDARY_OF_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
+				stmt = db.prepare(query);
+				if(stmt.step()){
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(0))), (Object) null));
+					if (gs != null) {
+						result = GeometryUtil.fromGeometry(gs[0]);
+					}
+				}
+				stmt.close();
+				stmt = null;
+	
+				return result;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
 	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
@@ -1084,6 +1128,50 @@ public class DatabaseManager {
 				stmt = null;
 	
 				return results;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+	
+	public Geometry getBoundaryForVisibleRelnGeometry(String userQuery) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			Geometry result = null;
+			try {
+				if (userQuery == null) {
+					userQuery = "";
+				} else {
+					userQuery =	"JOIN (" + userQuery + ") USING (relationshipid, aenttimestamp)\n";
+				}
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				String query = DatabaseQueries.GET_BOUNDARY_OF_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
+				stmt = db.prepare(query);
+				if(stmt.step()){
+					Geometry[] gs = WKBUtil.cleanGeometry(WkbRead.readWkb(
+		                    new ByteArrayInputStream(Utils
+		                            .hexStringToByteArray(stmt.column_string(0))), (Object) null));
+					if (gs != null) {
+						result = GeometryUtil.fromGeometry(gs[0]);
+					}
+				}
+				stmt.close();
+				stmt = null;
+	
+				return result;
 			} finally {
 				try {
 					if (stmt != null) stmt.close();

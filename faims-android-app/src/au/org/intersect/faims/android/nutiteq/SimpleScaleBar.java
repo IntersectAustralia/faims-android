@@ -50,7 +50,7 @@ public class SimpleScaleBar {
 
 	private boolean visible = true;
 
-	private double scale;
+	public double scale;
 	double[] allowedScales = { 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20,
 			10, 5, 2, 1, 0.500, 0.200, 0.100, 0.050, 0.020 };
 	
@@ -105,9 +105,8 @@ public class SimpleScaleBar {
 
 			for (int i = 0; i < allowedScales.length; i++) {
 				double tempBarWidth = allowedScales[i] * currentScale;
-				
 				if ((tempBarWidth > barMinWidth)
-						& (tempBarWidth <= barMaxWidth)) {
+						&& (tempBarWidth <= barMaxWidth)) {
 					barWidth = (int) tempBarWidth;
 					scale = allowedScales[i];
 					calculatePosition();
@@ -217,7 +216,7 @@ public class SimpleScaleBar {
 		return p;
 	}
 
-	private double round2Places(double a) {
+	public double round2Places(double a) {
 		return Math.ceil(a * 100) / 100;
 	}
 
