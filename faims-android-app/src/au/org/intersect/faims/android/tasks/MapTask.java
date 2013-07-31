@@ -4,7 +4,6 @@ import java.util.Map;
 
 import roboguice.RoboGuice;
 import android.os.AsyncTask;
-import android.widget.Toast;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -40,6 +39,7 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 	private Double min_y = null;
 	private Double max_x = null;
 	private Double max_y = null;
+	private boolean showToast = false;
 
 	public MapTask(CustomMapView mapView, ITaskListener listener){
 		this.mapView = mapView;
@@ -211,16 +211,13 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 		zoomLevel = widthZoomLevel > heightZoomLevel ? heightZoomLevel : widthZoomLevel;
 		if (bestZoom != null && zoomLevel < bestZoom){
 			zoomLevel = Float.valueOf(Double.toString(bestZoom));
-			int duration = Toast.LENGTH_SHORT;
-			Toast toast = Toast.makeText(mapView.getContext(),
-					"insufficient image resolution to zoom to full extend", duration);
-			toast.show();
+			showToast = true;
 		}
 	}
 
 	@Override
 	protected void onPostExecute(Void result) {
-		listener.handleTaskCompleted(new Object());
+		listener.handleTaskCompleted(showToast);
 	}
 
 	public Float getLongitude() {

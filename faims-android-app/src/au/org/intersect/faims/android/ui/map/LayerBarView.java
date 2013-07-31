@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
@@ -85,10 +86,17 @@ public class LayerBarView extends RelativeLayout {
 					public void handleTaskCompleted(Object result) {
 						try {
 							busyDialog.dismiss();
+							boolean showToast = (Boolean) result;
 							if(mapTask.getZoomLevel() != null && mapTask.getLongitude() != null && mapTask.getLatitude() != null){
 								mapView.setMapFocusPoint(mapTask.getLongitude(), mapTask.getLatitude());
 								mapView.setZoom(mapTask.getZoomLevel()); // reducing zoom level by 10% buffer
 								mapView.setRotation(0);
+								if(showToast){
+									int duration = Toast.LENGTH_SHORT;
+									Toast toast = Toast.makeText(getContext(),
+											"insufficient image resolution to zoom to full extend", duration);
+									toast.show();
+								}
 							}
 						} catch (Exception e) {
 							FLog.e("error when zooming to layer", e);
