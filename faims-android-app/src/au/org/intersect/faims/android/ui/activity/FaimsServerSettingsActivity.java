@@ -78,7 +78,7 @@ public class FaimsServerSettingsActivity extends Activity{
 					busyDialog.dismiss();
 					if(result instanceof Boolean){
 						if((Boolean)result){
-							showWarning("Connection test", "Connection test succedded");
+							showWarning("Connection test", "Connection test succeeded");
 						}else{
 							showWarning("Connection test", "There is no server available with the provided ip address and port");
 						}

@@ -78,8 +78,8 @@
     
     <string name="render_ui_failure_title">Error</string>
     <string name="render_ui_failure_message">Failed to load project due to invalid ui schema.</string>
-    <string name="faims_server_setting_title">Faims Server Setting</string>
-    <string name="server_ip_settings_title">Faims Server IP</string>
-    <string name="server_port_settings_title">Faims Server Port</string>
+    <string name="faims_server_setting_title">FAIMS Server Settings</string>
+    <string name="server_ip_settings_title">FAIMS Server IP</string>
+    <string name="server_port_settings_title">FAIMS Server Port</string>
 
 </resources>
