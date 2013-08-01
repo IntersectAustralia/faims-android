@@ -94,7 +94,7 @@ public class LayerBarView extends RelativeLayout {
 								if(showToast){
 									int duration = Toast.LENGTH_SHORT;
 									Toast toast = Toast.makeText(getContext(),
-											"insufficient image resolution to zoom to full extend", duration);
+											"insufficient image resolution to zoom to full extent", duration);
 									toast.show();
 								}
 							}
