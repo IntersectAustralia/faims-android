@@ -33,9 +33,9 @@ import com.nutiteq.utils.WktWriter;
  */
 public class SpatialLiteDb {
     private static final int DEFAULT_SRID = 4326;
-    private static final int SDK_SRID = 3857;
+    protected static final int SDK_SRID = 3857;
 
-    private final Database db;
+    protected final Database db;
     private String dbPath;
     private String sdk_proj4text;
     private String spatialiteVersion;

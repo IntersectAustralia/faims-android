@@ -77,7 +77,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 			minZoom = polygonStyle.toPolygonStyleSet().getFirstNonNullZoomStyleZoom();
 		}
 
-		spatialLite = new SpatialLiteDb(dbPath);
+		spatialLite = new CustomSpatialLiteDb(dbPath);
 		Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
 		for (String layerKey : dbLayers.keySet()) {
 			DBLayer layer = dbLayers.get(layerKey);

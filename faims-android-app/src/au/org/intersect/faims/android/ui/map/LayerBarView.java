@@ -8,9 +8,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.tasks.ITaskListener;
+import au.org.intersect.faims.android.tasks.MapTask;
+import au.org.intersect.faims.android.ui.dialog.BusyDialog;
+import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
+import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.map.button.LayerManagerButton;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
@@ -27,6 +33,8 @@ public class LayerBarView extends RelativeLayout {
 	private LinearLayout layerInformationView;
 	private Button layerInformationButton;
 	private CustomMapView mapView;
+	private BusyDialog busyDialog;
+	protected MapTask mapTask;
 
 	public LayerBarView(Context context) {
 		super(context);
@@ -67,6 +75,37 @@ public class LayerBarView extends RelativeLayout {
 		layerInformationButton.setText("No layer selected");
 		layerInformationButton.setTextColor(Color.WHITE);
 		layerInformationButton.setGravity(Gravity.LEFT);
+		layerInformationButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showBusyDialog();
+				mapTask = new MapTask(mapView, new ITaskListener() {
+					
+					@Override
+					public void handleTaskCompleted(Object result) {
+						try {
+							busyDialog.dismiss();
+							boolean showToast = (Boolean) result;
+							if(mapTask.getZoomLevel() != null && mapTask.getLongitude() != null && mapTask.getLatitude() != null){
+								mapView.setMapFocusPoint(mapTask.getLongitude(), mapTask.getLatitude());
+								mapView.setZoom(mapTask.getZoomLevel()); // reducing zoom level by 10% buffer
+								mapView.setRotation(0);
+								if(showToast){
+									int duration = Toast.LENGTH_SHORT;
+									Toast toast = Toast.makeText(getContext(),
+											"insufficient image resolution to zoom to full extend", duration);
+									toast.show();
+								}
+							}
+						} catch (Exception e) {
+							FLog.e("error when zooming to layer", e);
+						}
+					}
+				});
+				mapTask.execute();
+			}
+		});
 		
 		layerInformationView.addView(text);
 		layerInformationView.addView(layerInformationButton);
@@ -85,7 +124,7 @@ public class LayerBarView extends RelativeLayout {
 		scaleView.setLayoutParams(scaleLayout);
 		
 		// TODO make this configurable
-		scaleView.setBarWidthRange((int) ScaleUtil.getDip(getContext(), 60), (int) ScaleUtil.getDip(getContext(), 120));
+		scaleView.setBarWidthRange(0, (int) ScaleUtil.getDip(getContext(), 120));
 	}
 
 	protected void createNorthView(Context context) {
@@ -139,5 +178,23 @@ public class LayerBarView extends RelativeLayout {
 			}
 			
 		});
+	}
+	
+	protected void showBusyDialog(){
+		busyDialog = new BusyDialog(this.getContext(), 
+			"Snap layer",
+			"Processing layer data",
+			new IDialogListener() {
+
+				@Override
+				public void handleDialogResponse(
+						DialogResultCode resultCode) {
+					if (resultCode == DialogResultCode.CANCEL) {
+						mapTask.cancel(true);
+					}
+				}
+		
+		});
+		busyDialog.show();
 	}
 }

@@ -414,7 +414,6 @@ public class GdalMapLayer extends RasterLayer {
         
         for(Entry<Envelope, GdalDatasetInfo> entry : dataSets.entrySet()){
             Envelope dataBounds = entry.getKey();
-            
             if ((this.showAlways && dataBounds.intersects(requestedTileBounds)) 
                     || (!this.showAlways && dataBounds.contains(requestedTileBounds) && isSuitableZoom(entry.getValue().bestZoom, tile.zoom)) ) {
                 long timeEnd = System.currentTimeMillis();
