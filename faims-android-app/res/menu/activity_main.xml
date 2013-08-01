@@ -1,9 +1,9 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
   <item android:id="@+id/fetch_project_list"
-    android:title="@string/fetch_projects_title"
+    android:title="Fetch Project List"
     android:icon="@drawable/ic_menu_add" 
-    android:showAsAction="ifRoom"/>
+    android:showAsAction="ifRoom" tools:ignore="HardcodedText"/>
   
   <item android:id="@+id/faims_server_setting"
     android:title="@string/faims_server_setting_title"
