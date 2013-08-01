@@ -50,12 +50,15 @@ public class PointSelectionTool extends HighlightSelectionTool {
 		clearParams.bottomMargin = (int) ScaleUtil.getDip(context, BOTTOM_MARGIN);
 		clearButton.setLayoutParams(clearParams);
 		
+		int padding = (int) ScaleUtil.getDip(context, PADDING);
+		
 		selectedDistance = new MapText(context);
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		selectedDistance.setTextColor(Color.WHITE);
 		selectedDistance.setBackgroundColor(Color.parseColor("#88000000"));
 		selectedDistance.setLayoutParams(layoutParams);
 		selectedDistance.setText("Current Distance: " + distance + " m");
+		selectedDistance.setPadding(padding, 0, padding, padding);
 		infoLayout.addView(selectedDistance);
 		updateLayout();
 	}

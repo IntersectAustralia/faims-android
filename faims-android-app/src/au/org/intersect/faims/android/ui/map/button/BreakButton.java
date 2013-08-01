@@ -12,4 +12,9 @@ public class BreakButton extends ToggleToolButton {
 		setSelectedState(R.drawable.tools_break_s);
 	}
 	
+	@Override
+	public void updateChecked() {
+		setLabel(isChecked() ? "Join" : "Break");
+	}
+	
 }

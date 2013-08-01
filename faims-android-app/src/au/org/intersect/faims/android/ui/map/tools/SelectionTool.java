@@ -28,42 +28,50 @@ public class SelectionTool extends MapTool {
 	protected static final int TOP_MARGIN = 85;
 	protected static final int BOTTOM_MARGIN = 85;
 	protected static final int HEIGHT = 65;
+	protected static final int INFO_WIDTH = 225;
+	protected static final int PADDING = 5;
 
 	public SelectionTool(Context context, final CustomMapView mapView, String name) {
 		super(context, mapView, name);
 		
 		layout = new RelativeLayout(context);
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		params.leftMargin = (int) ScaleUtil.getDip(context, 10);
+		params.rightMargin = (int) ScaleUtil.getDip(context, 10);
 		layout.setLayoutParams(params);
 		container.addView(layout);
 		
 		infoLayout = new LinearLayout(context);
 		infoLayout.setOrientation(LinearLayout.VERTICAL);
-		RelativeLayout.LayoutParams infoParams = new RelativeLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams infoParams = new RelativeLayout.LayoutParams((int) ScaleUtil.getDip(context, INFO_WIDTH), LayoutParams.WRAP_CONTENT);
 		infoParams.alignWithParent = true;
 		infoParams.addRule(RelativeLayout.ALIGN_RIGHT);
 		infoParams.addRule(RelativeLayout.ALIGN_TOP);
 		infoParams.topMargin = (int) ScaleUtil.getDip(context, TOP_MARGIN);
 		infoLayout.setLayoutParams(infoParams);
+		
+		int padding = (int) ScaleUtil.getDip(context, PADDING);
 
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int) ScaleUtil.getDip(context, 200), LayoutParams.WRAP_CONTENT);
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		selectedSelection = new MapText(context);
 		selectedSelection.setTextColor(Color.WHITE);
 		selectedSelection.setBackgroundColor(Color.parseColor("#88000000"));	
 		selectedSelection.setLayoutParams(layoutParams);
+		selectedSelection.setPadding(padding, padding, padding, padding);
 		infoLayout.addView(selectedSelection);
 		
 		restrictedSelection = new MapText(context);
 		restrictedSelection.setTextColor(Color.WHITE);
 		restrictedSelection.setBackgroundColor(Color.parseColor("#88000000"));
 		restrictedSelection.setLayoutParams(layoutParams);
+		restrictedSelection.setPadding(padding, 0, padding, padding);
 		infoLayout.addView(restrictedSelection);
 		
 		selectionCount = new MapText(context);
 		selectionCount.setTextColor(Color.WHITE);
 		selectionCount.setBackgroundColor(Color.parseColor("#88000000"));
 		selectionCount.setLayoutParams(layoutParams);
+		selectionCount.setPadding(padding, 0, padding, padding);
 		infoLayout.addView(selectionCount);
 		
 		buttons = new ArrayList<View>();
@@ -111,7 +119,7 @@ public class SelectionTool extends MapTool {
 	
 	private void setRestrictedSelection(ArrayList<GeometrySelection> restrictedSelections) {
 		if(restrictedSelections == null || restrictedSelections.isEmpty()){
-			restrictedSelection.setText("No restricted selection selected");
+			restrictedSelection.setVisibility(View.GONE);
 		}else{
 			StringBuilder builder = new StringBuilder();
 			builder.append("Current Restrictions: ");
@@ -121,6 +129,7 @@ public class SelectionTool extends MapTool {
 					builder.append(", ");
 				}
 			}
+			restrictedSelection.setVisibility(View.VISIBLE);
 			restrictedSelection.setText(builder.toString());
 		}
 		

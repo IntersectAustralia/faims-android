@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
@@ -99,9 +100,21 @@ public class ToggleToolButton extends RelativeLayout {
 		button.setChecked(value);
 	}
 	
+	public void updateChecked() {
+		
+	}
+	
 	@Override
-	public void setOnClickListener(OnClickListener l) {
-		button.setOnClickListener(l);
+	public void setOnClickListener(final OnClickListener l) {
+		button.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				l.onClick(v);
+				updateChecked();
+			}
+			
+		});
 	}
 	
 	@Override

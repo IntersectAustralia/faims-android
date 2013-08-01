@@ -11,4 +11,10 @@ public class LockButton extends ToggleToolButton {
 		setNormalState(R.drawable.lock_button);
 		setMutatedSelectedState(R.drawable.lock_button);
 	}
+	
+	@Override
+	public void updateChecked() {
+		setLabel(isChecked() ? "Unlock" : "Lock");
+	}
+	
 }
