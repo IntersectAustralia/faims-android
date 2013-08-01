@@ -81,5 +81,7 @@
     <string name="faims_server_setting_title">FAIMS Server Settings</string>
     <string name="server_ip_settings_title">FAIMS Server IP</string>
     <string name="server_port_settings_title">FAIMS Server Port</string>
+    
+    <string name="fetch_projects_title">Fetch Project List</string>
 
 </resources>
