@@ -29,6 +29,27 @@
     </property>
   </RelationshipElement>
   
+   <RelationshipElement name="NextTo" type="container">
+    <description>
+      ndicates that one element is next to another element.
+    </description>
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+     <property type="string" name="name">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </RelationshipElement>
+  
   <ArchaeologicalElement type="small">
     <description>
       An small entity

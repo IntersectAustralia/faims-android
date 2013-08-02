@@ -78,6 +78,11 @@ syncFailed() {
 
 onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 
+ArrayList types = new ArrayList();
+types.add("AboveBelow");
+types.add("NextTo");
+populateDropDown("tabgroup2/tab1/type", types);
+
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 
 String entity_id = null;
@@ -380,10 +385,12 @@ loadRel() {
 
 updateRel() {
 	if (rel_id == null || "".equals(rel_id)) rel_id = null;
+	
+	type = getFieldValue("tabgroup2/tab1/type");
 
 	List attributes = createAttributeList();
 	if (rel_id == null) {
-		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+		attributes.add(createRelationshipAttribute("relationship", type + " " + relCount++, null, null));
 	}
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
 	Object values = getFieldValue("tabgroup2/tab1/location");
@@ -392,7 +399,7 @@ updateRel() {
 		attributes.add(createRelationshipAttribute("location", getFieldAnnotation("tabgroup2/tab1/location"), value.getName(), getFieldCertainty("tabgroup2/tab1/location")));
 	}
 	
-	String id = saveRel(rel_id, "abovebelow", null, attributes);
+	String id = saveRel(rel_id, type, null, attributes);
 	updateAll();
 	
 	return id;
@@ -406,7 +413,12 @@ clearRel() {
 
 updateAll() {
 	Object entities = fetchEntityList("small");
-	Object relationships = fetchRelationshipList("abovebelow");
+	Object abovebelow = fetchRelationshipList("abovebelow");
+	Object nextto = fetchRelationshipList("nextto");
+	Object relationships = new ArrayList();
+	if (abovebelow != null) relationships.addAll(abovebelow);
+	if (nextto != null) relationships.addAll(nextto);
+	
 	Object values = getFieldValue("tabgroup1/tab1/location");
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");

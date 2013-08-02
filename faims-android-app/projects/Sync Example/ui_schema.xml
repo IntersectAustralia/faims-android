@@ -72,6 +72,7 @@
           </tabgroup1>
           <tabgroup2>
               <tab1>
+                  <type></type>
                   <name></name>
                   <location></location>
                   <save></save>
@@ -279,6 +280,13 @@
       <label></label>
       <group ref="tab1">
         <label>Save Relationship</label>
+        <select1 ref="type" faims_annotation="false" faims_certainty="false">
+            <label>Type:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
             <label>Name:</label>
         </input>
