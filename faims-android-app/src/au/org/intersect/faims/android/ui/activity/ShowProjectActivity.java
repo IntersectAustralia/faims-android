@@ -583,7 +583,24 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				});
 				builder.show();
 			}else{
-				super.onBackPressed();
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Exit Project");
+				builder.setMessage("Do you want to exit project?");
+				builder.setPositiveButton("Yes", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						ShowProjectActivity.super.onBackPressed();
+					}
+				});
+				builder.setNegativeButton("No", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Do nothing
+					}
+				});
+				builder.show();
 			}
 		}
 	}

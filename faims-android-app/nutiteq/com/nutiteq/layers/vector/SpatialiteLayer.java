@@ -10,7 +10,6 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
-import com.nutiteq.layers.vector.CartoDbVectorLayer.LoadCartoDataTask;
 import com.nutiteq.log.Log;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.style.LineStyle;

@@ -69,10 +69,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show project activity
-				
-				Intent showProjectsIntent = new Intent(activity, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("key", activity.selectedProject.key);
-				activity.startActivityForResult(showProjectsIntent, 1);
+				activity.showProjectActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
@@ -108,10 +105,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show project activity
-				
-				Intent showProjectsIntent = new Intent(activity, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("key", activity.selectedProject.key);
-				activity.startActivityForResult(showProjectsIntent, 1);
+				activity.showProjectActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
@@ -147,10 +141,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show project activity
-				
-				Intent showProjectsIntent = new Intent(activity, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("key", activity.selectedProject.key);
-				activity.startActivityForResult(showProjectsIntent, 1);
+				activity.showProjectActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
@@ -752,5 +743,12 @@ public class FetchProjectsActivity extends RoboActivity {
     		
     	});
     	confirmDialog.show();
+    }
+    
+    private void showProjectActivity() {
+    	Intent showProjectsIntent = new Intent(this, ShowProjectActivity.class);
+		showProjectsIntent.putExtra("key", selectedProject.key);
+		startActivityForResult(showProjectsIntent, 1);
+		finish();
     }
 }
