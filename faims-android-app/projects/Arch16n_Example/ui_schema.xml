@@ -97,15 +97,15 @@
                 <value>supera</value>
             </item>
             <item>
-                <label>Super B</label>
+                <label>{superB}</label>
                 <value>superb</value>
             </item>
             <item>
-                <label>Super C</label>
+                <label>{superC}</label>
                 <value>superc</value>
             </item>
             <item>
-                <label>Super D</label>
+                <label>{superD}</label>
                 <value>superd</value>
             </item>
         </select1>

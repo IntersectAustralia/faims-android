@@ -28,7 +28,7 @@ String entity_id;
 int entityCount;
 
 initialise() {
-	entityCount = fetchEntityList("simpleentity").size() + 1;
+	entityCount = fetchEntityList("simple").size() + 1;
 	refreshEntities();
 	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
 	populateDropDown("tabgroup1/tab1/type", types);
@@ -62,13 +62,13 @@ updateEntity(entity_id) {
 	
 	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, getFieldCertainty("tabgroup1/tab2/supervisor")));
 	
-	String id = saveArchEnt(entity_id, "simpleentity", null, attributes);
+	String id = saveArchEnt(entity_id, "simple", null, attributes);
 	refreshEntities();
 	return id;
 }
 
 refreshEntities() {
-	Object entities = fetchEntityList("simpleentity");
+	Object entities = fetchEntityList("simple");
 
 	populateDropDown("tabgroup1/tab3/entity", entities);
 }

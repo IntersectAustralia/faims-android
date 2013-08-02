@@ -44,53 +44,11 @@
     </property>
   </RelationshipElement>
   
-  <ArchaeologicalElement type="SimpleEntity">
+  <ArchaeologicalElement type="Simple">
     <description>
       An simple entity
     </description>
     <property type="string" name="entity" isIdentifier="true">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="string" name="name">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="integer" name="value">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="date" name="date">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="time" name="time">
-      <bundle>DOI</bundle>
-    </property>
-    <property type="checklist" name="type">
-	  <bundle>DOI</bundle>
-      <lookup>
-        <term>Type A</term>
-        <term>Type B</term>
-        <term>Type C</term>
-        <term>Type D</term>
-      </lookup>
-    </property>
-    <property type="dropdown" name="location">
-      <bundle>DOI</bundle>
-      <lookup>
-        <term>Loc A</term>
-        <term>Loc B</term>
-        <term>Loc C</term>
-        <term>Loc D</term>
-      </lookup>
-    </property>
-    <property type="radiogroup" name="supervisor">
-      <bundle>DOI</bundle>
-    </property>
-  </ArchaeologicalElement>
-  
-  <ArchaeologicalElement type="GpsEntity">
-    <description>
-      An simple entity
-    </description>
-     <property type="string" name="entity" isIdentifier="true">
       <bundle>DOI</bundle>
     </property>
     <property type="string" name="name">
