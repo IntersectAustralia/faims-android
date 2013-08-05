@@ -1269,9 +1269,6 @@ public class BeanShellLinker {
 								}
 							}
 						}
-					} else {
-						FLog.w("cannot find view " + ref);
-						showWarning("Logic Error", "Cannot find view " + ref);
 					}
 				} else if (obj instanceof DatePicker) {
 					DatePicker date = (DatePicker) obj;
@@ -1310,8 +1307,7 @@ public class BeanShellLinker {
 				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
 					
-					@SuppressWarnings("unchecked")
-					List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
+					List<NameValuePair> valueList = convertToNameValuePairs((Collection<?>) valueObj);
 
 					for (NameValuePair pair : valueList) {
 						for (int i = 0; i < ll.getChildCount(); ++i) {
@@ -1553,8 +1549,6 @@ public class BeanShellLinker {
 						return value;
 					}
 				} else {
-					FLog.w("cannot find view " + ref);
-					showWarning("Logic Error", "Cannot find view " + ref);
 					return null;
 				}
 			} else if (obj instanceof DatePicker) {
@@ -1784,6 +1778,39 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error populate drop down " + ref);
 		}
 	}
+	
+	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
+		ArrayList<NameValuePair> pairs = null;
+		try {
+			@SuppressWarnings("unchecked")
+			List<NameValuePair> values = (List<NameValuePair>) valuesObj;
+			pairs = new ArrayList<NameValuePair>();
+			for (NameValuePair p : values) {
+				pairs.add(new NameValuePair(activity.getArch16n()
+						.substituteValue(p.getName()), p.getValue()));
+			}
+		} catch (Exception e) {
+			try {
+				@SuppressWarnings("unchecked")
+				List<List<String>> values = (List<List<String>>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (List<String> list : values) {
+					pairs.add(new NameValuePair(activity.getArch16n()
+							.substituteValue(list.get(1)), list.get(0)));
+				}
+			} catch (Exception ee) {
+				@SuppressWarnings("unchecked")
+				List<String> values = (List<String>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (String value : values) {
+					pairs.add(new NameValuePair(activity.getArch16n()
+							.substituteValue(value), activity.getArch16n()
+							.substituteValue(value)));
+				}
+			}
+		}
+		return pairs;
+	}
 
 	@SuppressWarnings("rawtypes")
 	public void populateList(String ref, Collection valuesObj) {
@@ -1791,44 +1818,14 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 
 			if (valuesObj instanceof ArrayList) {
-				ArrayList<NameValuePair> pairs = null;
-				boolean isList = false;
-				try {
-					@SuppressWarnings("unchecked")
-					ArrayList<String> values = (ArrayList<String>) valuesObj;
-					pairs = new ArrayList<NameValuePair>();
-					for (String s : values) {
-						pairs.add(new NameValuePair(s, s));
-					}
-				} catch (Exception e) {
-					isList = true;
-				}
-
-				if (isList) {
-					@SuppressWarnings("unchecked")
-					ArrayList<List<String>> values = (ArrayList<List<String>>) valuesObj;
-					pairs = new ArrayList<NameValuePair>();
-					for (List<String> list : values) {
-						pairs.add(new NameValuePair(activity.getArch16n()
-								.substituteValue(list.get(1)), list.get(0)));
-					}
-				}
+				ArrayList<NameValuePair> pairs = convertToNameValuePairs(valuesObj);
+				
 				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
-
+					
 					View child0 = ll.getChildAt(0);
-
-					if (child0 instanceof CheckBox) {
-						ll.removeAllViews();
-
-						for (NameValuePair pair : pairs) {
-							CustomCheckBox checkBox = new CustomCheckBox(
-									ll.getContext());
-							checkBox.setText(pair.getName());
-							checkBox.setValue(pair.getValue());
-							ll.addView(checkBox);
-						}
-					} else if (child0 instanceof HorizontalScrollView) {
+					
+					if (child0 instanceof HorizontalScrollView) {
 						
 						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
 						View child1 = horizontalScrollView.getChildAt(0);
@@ -1843,6 +1840,16 @@ public class BeanShellLinker {
 								radioButton.setValue(pair.getValue());
 								rg.addView(radioButton);
 							}
+						}
+					} else {
+						ll.removeAllViews();
+
+						for (NameValuePair pair : pairs) {
+							CustomCheckBox checkBox = new CustomCheckBox(
+									ll.getContext());
+							checkBox.setText(pair.getName());
+							checkBox.setValue(pair.getValue());
+							ll.addView(checkBox);
 						}
 					}
 				} else if (obj instanceof CustomListView) {
@@ -3970,7 +3977,7 @@ public class BeanShellLinker {
 	
 	public String stripAttachedFilePath(String file) {
 		try {
-			return file.replace(activity.getProjectDir(), "");
+			return file.replace(activity.getProjectDir() + "/", "");
 		} catch (Exception e) {
 			FLog.e("error stripping attached file path", e);
 			showWarning("Logic Error", "Error stripping attached file path");

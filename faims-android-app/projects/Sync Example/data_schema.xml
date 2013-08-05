@@ -63,7 +63,7 @@
     <property type="integer" name="value">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="filename">
+    <property type="file" name="file">
       <bundle>DOI</bundle>
     </property>
     <property type="file" name="picture">

@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.form;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -425,7 +426,6 @@ public class UIRenderer implements IRestoreActionListener{
 						return value;
 					}
 				} else {
-					FLog.w("cannot find view " + ref);
 					return null;
 				}
 			} else if (obj instanceof DatePicker) {
@@ -592,6 +592,39 @@ public class UIRenderer implements IRestoreActionListener{
 		}
 	}
 
+	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
+		ArrayList<NameValuePair> pairs = null;
+		try {
+			@SuppressWarnings("unchecked")
+			List<NameValuePair> values = (List<NameValuePair>) valuesObj;
+			pairs = new ArrayList<NameValuePair>();
+			for (NameValuePair p : values) {
+				pairs.add(new NameValuePair(arch16n
+						.substituteValue(p.getName()), p.getValue()));
+			}
+		} catch (Exception e) {
+			try {
+				@SuppressWarnings("unchecked")
+				List<List<String>> values = (List<List<String>>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (List<String> list : values) {
+					pairs.add(new NameValuePair(arch16n
+							.substituteValue(list.get(1)), list.get(0)));
+				}
+			} catch (Exception ee) {
+				@SuppressWarnings("unchecked")
+				List<String> values = (List<String>) valuesObj;
+				pairs = new ArrayList<NameValuePair>();
+				for (String value : values) {
+					pairs.add(new NameValuePair(arch16n
+							.substituteValue(value), arch16n
+							.substituteValue(value)));
+				}
+			}
+		}
+		return pairs;
+	}
+	
 	public void setFieldValue(String ref, Object valueObj) {
 		try {
 			Object obj = getViewByRef(ref);
@@ -603,7 +636,7 @@ public class UIRenderer implements IRestoreActionListener{
 			if (valueObj instanceof String) {
 
 				String value = (String) valueObj;
-				value = activityRef.get().getArch16n().substituteValue(value);
+				value = arch16n.substituteValue(value);
 
 				if (obj instanceof TextView) {
 					TextView tv = (TextView) obj;
@@ -663,8 +696,6 @@ public class UIRenderer implements IRestoreActionListener{
 								}
 							}
 						}
-					} else {
-						FLog.w("cannot find view " + ref);
 					}
 				} else if (obj instanceof DatePicker) {
 					DatePicker date = (DatePicker) obj;
@@ -702,8 +733,7 @@ public class UIRenderer implements IRestoreActionListener{
 				if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
 					
-					@SuppressWarnings("unchecked")
-					List<NameValuePair> valueList = (List<NameValuePair>) valueObj;
+					List<NameValuePair> valueList = convertToNameValuePairs((Collection<?>) valueObj);
 
 					for (NameValuePair pair : valueList) {
 						for (int i = 0; i < ll.getChildCount(); ++i) {
@@ -713,7 +743,7 @@ public class UIRenderer implements IRestoreActionListener{
 								if (cb.getValue()
 										.toString()
 										.equalsIgnoreCase(
-												activityRef.get().getArch16n()
+												arch16n
 														.substituteValue(
 																pair.getName()))) {
 									cb.setChecked("true".equals(pair.getValue()));
@@ -749,9 +779,6 @@ public class UIRenderer implements IRestoreActionListener{
 				} else {
 					FLog.w("cannot find view " + ref);
 				}
-			} else {
-				FLog.w("cannot set field value " + ref + " = "
-						+ valueObj);
 			}
 		} catch (Exception e) {
 			FLog.e("error setting field value " + ref, e);
