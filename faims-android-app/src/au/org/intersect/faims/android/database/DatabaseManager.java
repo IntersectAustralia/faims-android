@@ -101,48 +101,6 @@ public class DatabaseManager {
 			}
 		}
 	}
-	
-	public void saveGPSTrack(List<Geometry> geo_data, String longitude, String latitude, String heading, String accuracy, String type){
-		String currentTimestamp = DateUtil.getCurrentTimestampGMT();
-		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		EntityAttribute user_attribute = new EntityAttribute();
-		user_attribute.setName("gps_user");
-		user_attribute.setText(userId);
-		EntityAttribute timestamp_attribute = new EntityAttribute();
-		timestamp_attribute.setName("gps_timestamp");
-		timestamp_attribute.setText(currentTimestamp);
-		EntityAttribute long_attribute = new EntityAttribute();
-		long_attribute.setName("gps_longitude");
-		long_attribute.setText(longitude);
-		EntityAttribute lat_attribute = new EntityAttribute();
-		lat_attribute.setName("gps_latitude");
-		lat_attribute.setText(latitude);
-		EntityAttribute heading_attribute = new EntityAttribute();
-		heading_attribute.setName("gps_heading");
-		heading_attribute.setText(heading);
-		EntityAttribute accuracy_attribute = new EntityAttribute();
-		accuracy_attribute.setName("gps_accuracy");
-		accuracy_attribute.setText(accuracy);
-		EntityAttribute type_attribute = new EntityAttribute();
-		type_attribute.setName("gps_type");
-		if("time".equals(type)){
-			type_attribute.setText("track using time");
-		}else if("distance".equals(type)){
-			type_attribute.setText("track using distance");
-		}
-		attributes.add(user_attribute);
-		attributes.add(timestamp_attribute);
-		attributes.add(long_attribute);
-		attributes.add(lat_attribute);
-		attributes.add(heading_attribute);
-		attributes.add(accuracy_attribute);
-		attributes.add(type_attribute);
-		try {
-			saveArchEnt(null, "gps_track", WKTUtil.collectionToWKT(geo_data), attributes);
-		} catch (Exception e) {
-			FLog.e("error saving gps track data", e);
-		}
-	}
 
 	public void deleteArchEnt(String entity_id) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {

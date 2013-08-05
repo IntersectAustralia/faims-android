@@ -626,8 +626,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if(gpsDataManager.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		if(gpsDataManager.getTrackingType() != null){
-			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue());
+		if(linker != null && gpsDataManager.getTrackingType() != null){
+			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue(), gpsDataManager.getTrackingExec());
 		}
 	}
 	

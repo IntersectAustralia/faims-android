@@ -9,9 +9,11 @@ populateListForUsers(){
 	populateList("user/tab1/users", usersList);
 }
 
+User user = null;
+
 login(){
 	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
-	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
 	setUser(user);
 	showTabGroup("controls");
 }
@@ -22,9 +24,40 @@ onEvent("user/tab1/users", "click", "login()");
 
 onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
 onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
-onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\",10)");
-onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\",10)");
+onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
 onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
 
 getScreen(id, name) {
 	ArrayList screen = new ArrayList();
