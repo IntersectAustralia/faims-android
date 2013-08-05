@@ -11,5 +11,7 @@
             android:title="@string/server_port_settings_title" />
         <Preference android:key="button"
             android:title="Test connection"/>
+        <Preference android:key="demoButton"
+            android:title="Connect to Demo Server"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -399,8 +399,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		// initialize server discovery
 		serverDiscovery.setApplication(getApplication());
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        serverDiscovery.initiateServerIPAndPort(preferences);
+		
 		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
 		
@@ -609,11 +608,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void onResume() {
 		super.onResume();
 		
-		isActivityShowing = true;
-		
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         serverDiscovery.initiateServerIPAndPort(preferences);
 		
+        isActivityShowing = true;
+        
 		if (activityData.isSyncEnabled()) {
 			if (syncActive) {
 				delayStopSync = false;

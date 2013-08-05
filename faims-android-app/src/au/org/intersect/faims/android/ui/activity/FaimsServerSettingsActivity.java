@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ public class FaimsServerSettingsActivity extends Activity{
 	}
 	
 	@SuppressLint("ValidFragment")
-	private static class FaimsServerSettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener{
+	private class FaimsServerSettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener{
 		
 		private FaimsServerConnectionTestingTask connectionTestingTask;
 		private BusyDialog busyDialog;
@@ -44,7 +45,7 @@ public class FaimsServerSettingsActivity extends Activity{
 			if(value == null || value.isEmpty()){
 				p.setSummary("No IP address selected");
 			}else{
-				p.setSummary("Selected IP address is : " + value);
+				p.setSummary("Selected host is : " + value);
 			}
 			p = findPreference("pref_server_port");
 			value = sp.getString("pref_server_port", null);
@@ -67,6 +68,22 @@ public class FaimsServerSettingsActivity extends Activity{
 					return false;
 				}
 			});
+			Preference demoButton = findPreference("demoButton");
+			demoButton.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+				
+				@Override
+				public boolean onPreferenceClick(Preference preference) {
+					SharedPreferences sp = getPreferenceScreen().getSharedPreferences();
+					String host = getResources().getString(R.string.demo_server_host);
+					String port = getResources().getString(R.string.demo_server_port);
+					SharedPreferences.Editor editor = sp.edit();
+					editor.putString("pref_server_ip", host);
+					editor.putString("pref_server_port", port);
+					editor.commit();
+					connectToDemoServer(sp, host, port);
+					return false;
+				}
+			});
 		}
 
 		protected void testConnection(final SharedPreferences sp, String ipAddress, String port) {
@@ -78,9 +95,33 @@ public class FaimsServerSettingsActivity extends Activity{
 					busyDialog.dismiss();
 					if(result instanceof Boolean){
 						if((Boolean)result){
-							showWarning("Connection test", "Connection test succeeded");
+							showWarning("Settings", "Connection test succeeded");
 						}else{
-							showWarning("Connection test", "There is no server available with the provided ip address and port");
+							showWarning("Settings", "There is no server available with the provided host and port");
+						}
+					}
+					
+				}
+			});
+			connectionTestingTask.execute();
+		}
+		
+		protected void connectToDemoServer(final SharedPreferences sp, String ipAddress, String port) {
+			showBusyTestingConnectionDialog();
+			connectionTestingTask = new FaimsServerConnectionTestingTask(ipAddress, port, new ITaskListener() {
+				
+				@Override
+				public void handleTaskCompleted(Object result) {
+					busyDialog.dismiss();
+					if(result instanceof Boolean){
+						if((Boolean)result){
+							
+							Intent fetchProjectsIntent = new Intent(FaimsServerSettingsActivity.this, FetchProjectsActivity.class);
+							FaimsServerSettingsActivity.this.startActivityForResult(fetchProjectsIntent,1);
+							FaimsServerSettingsActivity.this.finish();
+							
+						}else{
+							showWarning("Settings", "There is no server available with the provided host and port");
 						}
 					}
 					
@@ -91,8 +132,8 @@ public class FaimsServerSettingsActivity extends Activity{
 
 		private void showBusyTestingConnectionDialog() {
 			busyDialog = new BusyDialog(this.getActivity(), 
-					"Connection Testing",
-					"Testing connection",
+					"Settings",
+					"Connecting to server",
 					new IDialogListener() {
 
 						@Override
