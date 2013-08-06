@@ -100,7 +100,12 @@ public class ToolGroupButton extends RelativeLayout {
 		int w = button.getWidth();
 		int h = button.getHeight();
 		
-		popupMenu = new PopupWindow(popupLayout, w, h * popupLayout.getChildCount(), true);
+		int count = 0;
+		for(int i = 0; i < popupLayout.getChildCount(); i++){
+			if (popupLayout.getChildAt(i).getVisibility() == View.VISIBLE) count++;
+		}
+
+		popupMenu = new PopupWindow(popupLayout, w, h * count, true);
 		popupMenu.setOutsideTouchable(true);
 		popupMenu.setTouchable(true);
 		popupMenu.setBackgroundDrawable(new BitmapDrawable(getContext().getResources()));

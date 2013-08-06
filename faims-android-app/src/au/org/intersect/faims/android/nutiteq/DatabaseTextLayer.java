@@ -42,6 +42,8 @@ public class DatabaseTextLayer extends TextLayer {
 	}
 	
 	public void calculateVisibleElementsCustom(Envelope envelope, int zoom) {
+		objects = new Vector<Text>();
+		
 		if (zoom < minZoom) {
 	        setVisibleElementsList(null);
 	      return;
@@ -52,8 +54,6 @@ public class DatabaseTextLayer extends TextLayer {
 	    	setVisibleElementsList(null);
 	    	return;
 	    }
-	    
-	    objects = new Vector<Text>();
 	    
 	    for(Geometry geom: geometries){
 	        
