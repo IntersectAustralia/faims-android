@@ -1649,6 +1649,12 @@ public class BeanShellLinker {
 	public Boolean deleteArchEnt(String entity_id){
 		try {
 			activity.getDatabaseManager().deleteArchEnt(entity_id);
+			for(Tab tab : activity.getUIRenderer().getTabList()){
+				for(CustomMapView mapView : tab.getMapViewList()){
+					mapView.removeFromAllSelections(entity_id);
+					mapView.updateSelections();
+				}
+			}
 			return true;
 		} catch (jsqlite.Exception e) {
 			FLog.e("can not delete arch entity with the supplied id", e);
@@ -1673,6 +1679,12 @@ public class BeanShellLinker {
 	public Boolean deleteRel(String rel_id){
 		try {
 			activity.getDatabaseManager().deleteRel(rel_id);
+			for(Tab tab : activity.getUIRenderer().getTabList()){
+				for(CustomMapView mapView : tab.getMapViewList()){
+					mapView.removeFromAllSelections(rel_id);
+					mapView.updateSelections();
+				}
+			}
 			return true;
 		} catch (jsqlite.Exception e) {
 			FLog.e("can not delete relationship with the supplied id", e);

@@ -143,6 +143,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 				});
 				
 				settingsDialog = builder.create();
+				settingsDialog.setCanceledOnTouchOutside(true);
 				settingsDialog.show();
 			}
 				

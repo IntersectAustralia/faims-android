@@ -1757,7 +1757,7 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
-	private void removeFromAllSelections(String id) {
+	public void removeFromAllSelections(String id) {
 		for(GeometrySelection geometrySelection : selectionMap.values()){
 			geometrySelection.removeData(id);
 		}

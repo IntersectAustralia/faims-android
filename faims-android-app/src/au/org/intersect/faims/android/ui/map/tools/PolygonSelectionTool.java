@@ -142,6 +142,7 @@ public class PolygonSelectionTool extends HighlightSelectionTool {
 				});
 				
 				settingsDialog = builder.create();
+				settingsDialog.setCanceledOnTouchOutside(true);
 				settingsDialog.show();
 			}
 				
