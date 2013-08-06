@@ -48,6 +48,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private String trackingType;
 	
 	private int trackingValue;
+	private String trackingExec;
 	
 	public void init(LocationManager manager){
 		this.locationManager = manager;
@@ -317,6 +318,14 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	public void setTrackingValue(int trackingValue) {
 		this.trackingValue = trackingValue;
 	}
+	
+	public String getTrackingExec() {
+		return trackingExec;
+	}
+
+	public void setTrackingExec(String exec) {
+		this.trackingExec = exec;
+	}
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
@@ -325,6 +334,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		savedInstanceState.putInt("gpsUpdateInterval", gpsUpdateInterval);
 		savedInstanceState.putString("trackingType", trackingType);
 		savedInstanceState.putInt("trackingValue", trackingValue);
+		savedInstanceState.putString("trackingExec", trackingExec);
 	}
 
 	@Override
@@ -334,6 +344,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setGpsUpdateInterval(savedInstanceState.getInt("gpsUpdateInterval"));
 		setTrackingType(savedInstanceState.getString("trackingType"));
 		setTrackingValue(savedInstanceState.getInt("trackingValue"));
+		setTrackingExec(savedInstanceState.getString("trackingExec"));
 	}
 	
 }

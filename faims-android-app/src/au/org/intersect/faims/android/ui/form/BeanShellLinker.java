@@ -38,7 +38,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
-import android.text.format.Time;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -222,9 +221,12 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void startTrackingGPS(final String type, final int value) {
+	public void startTrackingGPS(final String type, final int value, final String callback) {
+		FLog.d("gps tracking is started");
+		
 		this.activity.getGPSDataManager().setTrackingType(type);
 		this.activity.getGPSDataManager().setTrackingValue(value);
+		this.activity.getGPSDataManager().setTrackingExec(callback);
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
@@ -243,27 +245,7 @@ public class BeanShellLinker {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
-							float heading = (Float) getGPSHeading();
-							float accuracy = (Float) getGPSEstimatedAccuracy();
-							Double longitude = currentLocation.getLongitude();
-							Double latitude = currentLocation.getLatitude();
-							if (longitude != null && latitude != null) {
-								List<Geometry> geo_data = new ArrayList<Geometry>();
-								geo_data.add(createGeometryPoint(new MapPos(
-										Float.parseFloat(Double
-												.toString(longitude)), Float
-												.parseFloat(Double
-														.toString(latitude)))));
-								activity.getDatabaseManager().saveGPSTrack(
-										geo_data,
-										Double.toString(currentLocation
-												.getLongitude()),
-										Double.toString(currentLocation
-												.getLatitude()),
-										Float.toString(heading),
-										Float.toString(accuracy), type);
-							}
+							execute(callback);
 						} else {
 							showToast("no gps signal at the moment");
 						}
@@ -278,42 +260,20 @@ public class BeanShellLinker {
 						trackingHandler.postDelayed(this, 1000);
 						if (getGPSPosition() != null) {
 							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
-							float heading = (Float) getGPSHeading();
-							float accuracy = (Float) getGPSEstimatedAccuracy();
 							Double longitude = currentLocation.getLongitude();
 							Double latitude = currentLocation.getLatitude();
 							if (longitude != null && latitude != null) {
-								double distance = 0;
 								if (prevLong != null && prevLat != null) {
 									float[] results = new float[1];
 									Location.distanceBetween(prevLat, prevLong,
 											latitude, longitude, results);
-									distance = results[0];
+									double distance = results[0];
 									if (distance > value) {
-										List<Geometry> geo_data = new ArrayList<Geometry>();
-										Geometry point = createGeometryPoint(new MapPos(
-												Float.parseFloat(Double
-														.toString(longitude)),
-												Float.parseFloat(Double
-														.toString(latitude))));
-										geo_data.add(point);
-										activity.getDatabaseManager()
-												.saveGPSTrack(
-														geo_data,
-														Double.toString(currentLocation
-																.getLongitude()),
-														Double.toString(currentLocation
-																.getLatitude()),
-														Float.toString(heading),
-														Float.toString(accuracy),
-														type);
-										prevLong = longitude;
-										prevLat = latitude;
+										execute(callback);
 									}
-								} else {
-									prevLong = longitude;
-									prevLat = latitude;
 								}
+								prevLong = longitude;
+								prevLat = latitude;
 							}
 						} else {
 							showToast("no gps signal at the moment");
@@ -324,13 +284,14 @@ public class BeanShellLinker {
 			} else {
 				FLog.e("wrong type format is used");
 			}
-			FLog.d("gps tracking is started");
 		} else {
 			showToast("gps tracking has been started, please stop it before starting");
 		}
 	}
 
 	public void stopTrackingGPS() {
+		FLog.d("gps tracking is stopped");
+		
 		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;
@@ -1668,9 +1629,7 @@ public class BeanShellLinker {
 	}
 
 	public String getCurrentTime() {
-		Time timeNow = new Time();
-		timeNow.setToNow();
-		return timeNow.format("%Y-%m-%d %H:%M:%S");
+		return DateUtil.getCurrentTimestampGMT();
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type,

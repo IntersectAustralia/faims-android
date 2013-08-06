@@ -616,9 +616,10 @@ Object getGPSHeading(String gps){
   * Start track log of the GPS and save it to the database so the user can look at the track log in the map view
   * @param type either "distance" or "time"
   * @param value the value of the tracking, if type is "distance", the value will be in meter, if type is "time", the value will be in seconds
+  * @param callback code to execute when interval limit is reached
   */
-startTrackingGPS(String type, int value){
-	linker.startTrackingGPS(type, value);
+startTrackingGPS(String type, int value, String callback){
+	linker.startTrackingGPS(type, value, callback);
 }
 
 /**

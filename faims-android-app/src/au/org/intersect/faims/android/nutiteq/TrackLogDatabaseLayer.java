@@ -63,12 +63,22 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 						createElementsInLayer(zoom, objectTemp, objects, GeometryData.Type.ENTITY);
 					}
 				}
+				
 				setVisibleElementsList(objects);
+				
 			}else {
-				super.calculateVisibleElements(envelope, zoom);
+				super.loadData(envelope, zoom);
 			}
 		} catch (Exception e) {
 			FLog.e("error rendering track log layer", e);
+		}
+		
+		if (textLayer != null) {
+			try {
+				textLayer.calculateVisibleElementsCustom(envelope, zoom);
+			} catch (Exception e) {
+				FLog.e("error updating text layer", e);
+			}
 		}
 	}
 }
