@@ -33,7 +33,7 @@ public class TouchSelectionTool extends SelectionTool {
 		if (geomData.id == null) return;
 		
 		String data = geomData.id;
-		if(restrictedSelections!= null){
+		if(restrictedSelections != null && !restrictedSelections.isEmpty()){
 			for (GeometrySelection restrictedSelection : restrictedSelections) {
 				if(restrictedSelection.hasData(data)){
 					if (selection.hasData(data)) {
@@ -45,7 +45,7 @@ public class TouchSelectionTool extends SelectionTool {
 				}
 			}
 			
-		}else if(restrictedSelection == null){
+		}else{
 			if (selection.hasData(data)) {
 				mapView.removeFromSelection(data);
 			} else {

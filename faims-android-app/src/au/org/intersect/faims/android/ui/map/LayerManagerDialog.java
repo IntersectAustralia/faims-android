@@ -374,7 +374,7 @@ public class LayerManagerDialog extends AlertDialog {
 					});
 					layout.addView(configButton);
 				}
-				
+				d.setCanceledOnTouchOutside(true);
 				d.show();
 				return true;
 			}
@@ -451,6 +451,7 @@ public class LayerManagerDialog extends AlertDialog {
 		
 		builder.setView(scrollView);
 		final Dialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
 		
 		Button loadBaseLayerButton = new Button(getContext());
 		loadBaseLayerButton.setText("Load Base Layer");
@@ -609,8 +610,10 @@ public class LayerManagerDialog extends AlertDialog {
 	           // ignore
 	        }
 	    });
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 		
-		builder.create().show();
 	}
 	
 	private void addRasterLayer(){
@@ -667,7 +670,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 //	private void addShapeLayer(){
@@ -838,7 +843,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	private void addDatabaseLayer(){
@@ -911,7 +918,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	protected void addViewTrackLogLayer() throws Exception {
@@ -954,7 +963,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 
 	private void createUsersTrackLogLayer(String layerName) throws Exception {
@@ -1020,7 +1031,9 @@ public class LayerManagerDialog extends AlertDialog {
 			}
 	        
 	    });
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	private void showOrHideUserListView() {
@@ -1060,7 +1073,9 @@ public class LayerManagerDialog extends AlertDialog {
 			}
 	        
 	    });
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 
 	public Button createPointStyleButton(){
@@ -1174,7 +1189,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 
 	private void removeLayer(final Layer layer) {
@@ -1207,7 +1224,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 
 	private void renameLayer(final Layer layer) {
@@ -1253,7 +1272,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	private void config(final Layer layer) {
@@ -1310,7 +1331,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	private void showMetadata(Layer layer) {
@@ -1465,7 +1488,9 @@ public class LayerManagerDialog extends AlertDialog {
 	        
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 
 	private void showErrorDialog(String message) {

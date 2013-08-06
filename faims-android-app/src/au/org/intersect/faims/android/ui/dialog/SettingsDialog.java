@@ -71,7 +71,7 @@ public class SettingsDialog extends AlertDialog {
 		
 		public Builder addCheckBox(String name, String label, boolean defaultValue) {
 			TextView labelView = new TextView(context);
-			labelView.setText(name);
+			labelView.setText(label);
 			
 			CheckBox box = new CheckBox(context);
 			box.setChecked(defaultValue);

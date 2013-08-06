@@ -82,7 +82,8 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 			@Override
 			public void onClick(View arg0) {
 				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.addCheckBox("remove", "Remove Selection:", false);
+				builder.setTitle("Intersection Tool");
+				builder.addCheckBox("remove", "Remove from selection?", false);
 				
 				builder.setPositiveButton("Run Query", new DialogInterface.OnClickListener() {
 					

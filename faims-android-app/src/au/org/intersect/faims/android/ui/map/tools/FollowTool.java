@@ -175,7 +175,6 @@ public class FollowTool extends HighlightTool {
 	public void onMapChanged() {
 		super.onMapChanged();
 		drawDistanceAndBearing();
-		drawBuffer();
 	}
 	
 	@Override

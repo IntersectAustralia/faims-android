@@ -3835,6 +3835,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addSelectQueryBuilder(name, builder);
+				mapView.setDatabaseToolVisible(true);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -3853,6 +3854,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				String filepath = activity.getProjectDir() + "/" + dbPath;
+				mapView.setLegacyToolVisible(true);
 				mapView.addLegacySelectQueryBuilder(name, filepath, tableName,
 						builder);
 			} else {
@@ -3911,6 +3913,7 @@ public class BeanShellLinker {
 						}
 					});
 				} else if ("load".equals(type)) {
+					mapView.setLoadToolVisible(true);
 					mapView.setLoadCallback(new CustomMapView.LoadCallback() {
 						
 						@Override

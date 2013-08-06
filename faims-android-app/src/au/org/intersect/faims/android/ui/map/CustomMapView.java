@@ -399,7 +399,7 @@ public class CustomMapView extends MapView {
         // setup default constraints
         getConstraints().setMapBounds(null);
 		getConstraints().setRotatable(true);
-		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+//		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 	}
 
 	public CustomMapView(Context context) {
@@ -780,10 +780,10 @@ public class CustomMapView extends MapView {
 		return addLayer(gdalLayer);
 	}
 
-	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
-		double bestzoom = gdalLayer.getBestZoom();
-		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
-	}
+//	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
+//		double bestzoom = gdalLayer.getBestZoom();
+//		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
+//	}
 	
 	protected void setMapBounds(CustomGdalMapLayer gdalLayer){
 		double[][] bound = gdalLayer.getBoundary();
@@ -1350,6 +1350,9 @@ public class CustomMapView extends MapView {
 				activityRef.get().getDatabaseManager().deleteRel(data.id);
 			}
 			clearHighlights();
+			GeometryData geomData = (GeometryData) geom.userData;
+			removeFromAllSelections(geomData.id);
+			updateSelections();
 			this.updateRenderer();
 		} catch (Exception e) {
 			FLog.e("error deleting geometry", e);
@@ -1754,6 +1757,12 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
+	private void removeFromAllSelections(String id) {
+		for(GeometrySelection geometrySelection : selectionMap.values()){
+			geometrySelection.removeData(id);
+		}
+	}
+	
 	public List<GeometrySelection> getSelections() {
 		return new ArrayList<GeometrySelection>(selectionMap.values());
 	}
@@ -1840,27 +1849,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -1905,27 +1914,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -1969,27 +1978,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -2293,7 +2302,7 @@ public class CustomMapView extends MapView {
 					Bounds bounds = new Bounds(p1.x, p1.y, p1.x, p1.y);
 					getConstraints().setMapBounds(bounds);
 					getConstraints().setRotatable(false);
-					getConstraints().setZoomRange(new Range(getZoom(), getZoom()));
+//					getConstraints().setZoomRange(new Range(getZoom(), getZoom()));
 					
 					List<Layer> layers = getAllLayers();
 					for (Layer layer : layers) {
@@ -2306,7 +2315,7 @@ public class CustomMapView extends MapView {
 				} else {
 					getConstraints().setMapBounds(null);
 					getConstraints().setRotatable(true);
-					getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+//					getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 					
 					List<Layer> layers = getAllLayers();
 					for (Layer layer : layers) {
@@ -2458,6 +2467,18 @@ public class CustomMapView extends MapView {
 
 	public void setTargetColor(int targetColor) {
 		this.targetColor = targetColor;
+	}
+
+	public void setLoadToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setLoadToolVisible(value);
+	}
+
+	public void setDatabaseToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setDatabaseToolVisible(value);
+	}
+
+	public void setLegacyToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setLegacyToolVisible(value);
 	}
 
 }

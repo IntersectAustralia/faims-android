@@ -37,20 +37,20 @@ public class ConfigDialog extends AlertDialog {
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(layout);
-		addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-		addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
+		addTextField("color", "Select Tool Color:", Integer.toHexString(mapView.getDrawViewColor()));
+		addTextField("editColor", "Edit Tool Color:", Integer.toHexString(mapView.getEditViewColor()));
 		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-		addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
+		addSlider("textSize", "Details Text Size:", mapView.getDrawViewTextSize());
 		
 		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
 		if (isEPSG4326) {
 			addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 		}
-		addCheckBox("showKm", "Show Km:", mapView.showKm());
+		addCheckBox("showKm", "Display measurements in km:", mapView.showKm());
 		addSlider("vertexSize", "Guide Point Size:", mapView.getVertexSize());
-		addTextField("buffer", "Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
-		addTextField("bufferColor", "Buffer Color:", Integer.toHexString(mapView.getLineColor()));
-		addTextField("targetColor", "Target Color:", Integer.toHexString(mapView.getTargetColor()));
+		addTextField("buffer", "Tracker Tool Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
+		addTextField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getLineColor()));
+		addTextField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
 
 		setView(scrollView);
 		setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
@@ -132,7 +132,7 @@ public class ConfigDialog extends AlertDialog {
 	
 	public void addCheckBox(String name, String label, boolean defaultValue) {
 		TextView labelView = new TextView(getContext());
-		labelView.setText(name);
+		labelView.setText(label);
 		
 		CheckBox box = new CheckBox(getContext());
 		box.setChecked(defaultValue);

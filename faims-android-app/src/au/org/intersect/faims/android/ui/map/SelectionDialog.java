@@ -119,9 +119,6 @@ public class SelectionDialog extends AlertDialog {
 					SelectionListItem item = (SelectionListItem) view;
 					if(!item.isRestricted()){
 						List<GeometrySelection> selections = mapView.getSelections();
-						for(GeometrySelection selection : selections){
-							selection.setActive(false);
-						}
 						mapView.setSelectedSelection(selections.get(position));
 						mapView.setSelectionActive(selections.get(position), true);
 						((SelectionAdapter)listView.getAdapter()).getView(position, view, listView);
@@ -137,7 +134,7 @@ public class SelectionDialog extends AlertDialog {
 		listView.setOnItemLongClickListener(new OnItemLongClickListener() {
 
 			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+			public boolean onItemLongClick(AdapterView<?> arg0, View v,
 					int position, long arg3) {
 				List<GeometrySelection> dataSets = mapView.getSelections();
 				final GeometrySelection set = dataSets.get(position);
@@ -150,6 +147,14 @@ public class SelectionDialog extends AlertDialog {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
 				builder.setView(layout);
+				builder.setPositiveButton("Done", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Close the dialog
+					}
+				});
+
 				final Dialog d = builder.create();
 				
 				Button removeButton = new Button(context);
@@ -179,13 +184,29 @@ public class SelectionDialog extends AlertDialog {
 				Button pointStyleButton = createPointStyleButton(set.getPointStyle());
 				Button lineStyleButton = createLineStyleButton(set.getLineStyle());
 				Button polygonStyleButton = createPolygonStyleButton(set.getPolygonStyle());
+				Button restrictionButton = new Button(context);
+				final SelectionListItem item = (SelectionListItem) v;
+				restrictionButton.setText(item.isRestricted() ? "Remove from restriction" : "Add to restriction");
+				restrictionButton.setOnClickListener(new View.OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						d.dismiss();
+						mapView.addRestrictedSelection(set,!item.isRestricted());
+						item.setRestricted(!item.isRestricted());
+						mapView.updateSelections();
+					}
+				});
 				
 				layout.addView(removeButton);
 				layout.addView(renameButton);
 				layout.addView(pointStyleButton);
 				layout.addView(lineStyleButton);
 				layout.addView(polygonStyleButton);
-				
+				if(!item.isSelected()){
+					layout.addView(restrictionButton);
+				}
+				d.setCanceledOnTouchOutside(true);
 				d.show();
 				return true;
 			}
@@ -255,7 +276,9 @@ public class SelectionDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	public void removeSelection(GeometrySelection set) {
@@ -303,7 +326,9 @@ public class SelectionDialog extends AlertDialog {
 	        }
 	    });
 		
-		builder.create().show();
+		AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
 	}
 	
 	private void showErrorDialog(String message) {
