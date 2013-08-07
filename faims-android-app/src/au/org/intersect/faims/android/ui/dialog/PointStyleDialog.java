@@ -23,7 +23,7 @@ public class PointStyleDialog extends StyleDialog {
 			setTitle("Style Settings");
 			
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
-			addTextField("color", "Point Color:", Integer.toHexString(style.pointColor));
+			addColorField("color", "Point Color:", Integer.toHexString(style.pointColor));
 			addSlider("size", "Point Size:", style.size);
 			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
 			

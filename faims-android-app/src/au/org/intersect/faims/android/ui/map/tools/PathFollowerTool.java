@@ -252,7 +252,7 @@ public class PathFollowerTool extends HighlightTool {
 				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				builder.addColorField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
 				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());

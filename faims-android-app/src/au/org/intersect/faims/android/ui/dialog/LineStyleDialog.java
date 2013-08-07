@@ -23,7 +23,7 @@ public class LineStyleDialog extends StyleDialog {
 			setTitle("Style Settings");
 			
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
-			addTextField("color", "Line Color:", Integer.toHexString(style.lineColor));
+			addColorField("color", "Line Color:", Integer.toHexString(style.lineColor));
 			addSlider("size", "Point Size:", style.size);
 			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
 			addSlider("width", "Line Width:", style.width);

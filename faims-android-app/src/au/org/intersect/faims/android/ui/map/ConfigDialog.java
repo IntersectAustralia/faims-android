@@ -6,7 +6,9 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.CheckBox;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.dialog.ColorPickerDialog;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 
 public class ConfigDialog extends AlertDialog {
@@ -37,8 +40,8 @@ public class ConfigDialog extends AlertDialog {
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(layout);
-		addTextField("color", "Select Tool Color:", Integer.toHexString(mapView.getDrawViewColor()));
-		addTextField("editColor", "Edit Tool Color:", Integer.toHexString(mapView.getEditViewColor()));
+		addColorField("color", "Select Tool Color:", Integer.toHexString(mapView.getDrawViewColor()));
+		addColorField("editColor", "Edit Tool Color:", Integer.toHexString(mapView.getEditViewColor()));
 		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 		addSlider("textSize", "Details Text Size:", mapView.getDrawViewTextSize());
 		
@@ -49,8 +52,8 @@ public class ConfigDialog extends AlertDialog {
 		addCheckBox("showKm", "Display measurements in km:", mapView.showKm());
 		addSlider("vertexSize", "Guide Point Size:", mapView.getVertexSize());
 		addTextField("buffer", "Tracker Tool Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
-		addTextField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getLineColor()));
-		addTextField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
+		addColorField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getLineColor()));
+		addColorField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
 
 		setView(scrollView);
 		setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
@@ -111,6 +114,44 @@ public class ConfigDialog extends AlertDialog {
 		addEditField(name, label, defaultValue, InputType.TYPE_CLASS_TEXT);
 	}
 	
+	public void addColorField(String name, String label, String defaultValue) {
+		TextView labelView = new TextView(getContext());
+		labelView.setText(label);
+		
+		final EditText text = new EditText(getContext());
+		text.setText(defaultValue.toUpperCase(Locale.ENGLISH));
+		text.setOnTouchListener(new View.OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View arg0, MotionEvent action) {
+				if(action.getAction() == MotionEvent.ACTION_UP){
+					ColorPickerDialog colorPickerDialog = new ColorPickerDialog(getContext(), new ColorPickerDialog.OnColorChangedListener() {
+						
+						@Override
+						public void colorChanged(int color) {
+							text.setText(convertText(Integer.toHexString(color)));
+							text.setBackgroundColor(Color.parseColor("#"+convertText(Integer.toHexString(color))));
+						}
+
+					}, Color.parseColor("#"+text.getText().toString()));
+					colorPickerDialog.show();
+				}
+				return false;
+			}
+		});
+		text.setBackgroundColor(Color.parseColor("#"+text.getText().toString()));
+		
+		layout.addView(labelView);
+		layout.addView(text);
+		
+		fields.put(name, text);
+		
+	}
+	
+	private String convertText(String color) {
+		return color.toUpperCase(Locale.ENGLISH);
+	}
+
 	public void addNumberField(String name, String label, String defaultValue) {
 		addEditField(name, label, defaultValue, InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 	}
