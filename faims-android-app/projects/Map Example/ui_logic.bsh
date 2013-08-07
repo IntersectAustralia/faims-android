@@ -923,33 +923,29 @@ private initUIMap() {
 		"    and max(relntimestamp)");
 					
 	addSelectQueryBuilder("tabgroup5/tab1/map", "select entity based on type", createQueryBuilder(
-		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-		" FROM archentity join aenttype using (aenttypeid)\n" + 
-		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-		" where archentity.deleted is null\n" + 
-		"   and lower(aenttypename) = lower('simpleentity')\n" + 
-		"   and aentvalue.deleted is null\n" + 
-		"   and (freetext LIKE '%'||?||'%'\n" + 
-		"        OR measure LIKE '%'||?||'%'\n" + 
-		"        OR vocabname LIKE '%'||?||'%')\n" + 
-		" group by uuid, attributeid\n" + 
-		" having max(valuetimestamp)\n" + 
-		"    and max(aenttimestamp)").
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower('simpleentity') \n" + 
+		"   and (freetext LIKE '%'||?||'%' \n" + 
+		"                OR measure LIKE '%'||?||'%' \n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"   group by uuid").
 					addParameter("freetext", "Simple 1").
 					addParameter("measure", null).
 					addParameter("vocabname", null));
 	addSelectQueryBuilder("tabgroup5/tab1/map", "select relationship based on type", createQueryBuilder(
-		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
-		" FROM relationship join relntype using (relntypeid)\n" + 
-		" JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-		" where relationship.deleted is null\n" + 
-		"   and lower(relntypename) = lower('abovebelow')\n" + 
-		"   and relnvalue.deleted is null\n" + 
-		"   and (freetext LIKE '%'||?||'%'\n" +
-		"        OR vocabname LIKE '%'||?||'%')\n" + 
-		" group by relationshipid, attributeid\n" + 
-		" having max(relnvaluetimestamp)\n" + 
-		"    and max(relntimestamp)").
+		"select relationshipid\n" + 
+		"  FROM latestNonDeletedRelationship\n" + 
+		"  JOIN latestNonDeletedRelnValue using (relationshipid)\n" + 
+		"  JOIN relntype using (relntypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(relntypename) = lower('abovebelow') \n" + 
+		"  and (freetext LIKE '%'||?||'%'\n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"  group by relationshipid").
 					addParameter("freetext", "AboveBelow 1").
 					addParameter("vocabname", null));
 					
