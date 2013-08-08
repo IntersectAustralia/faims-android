@@ -11,6 +11,7 @@ import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -68,7 +69,7 @@ public class ConfigDialog extends AlertDialog {
 					if (isEPSG4326){
 						showDecimal = !parseCheckBox("showDegrees");
 					}else{
-						showDecimal = false;
+						showDecimal = true;
 					}
 					float vertexSize = parseSlider("vertexSize");
 					boolean showKm = parseCheckBox("showKm");
@@ -121,6 +122,7 @@ public class ConfigDialog extends AlertDialog {
 		
 		final EditText text = new EditText(getContext());
 		text.setText(defaultValue.toUpperCase(Locale.ENGLISH));
+		text.setInputType(EditorInfo.TYPE_NULL);
 		text.setOnTouchListener(new View.OnTouchListener() {
 			
 			@Override
