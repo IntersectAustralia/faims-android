@@ -155,7 +155,7 @@ public class EditTool extends HighlightTool {
 			}
 		} catch (Exception e) {
 			FLog.e("error resetting vertex geometry", e);
-			showError("error resetting vertex geometry");
+			showError("Error resetting vertex geometry");
 		}
 		EditTool.this.vertexGeometry = null;
 		EditTool.this.vertexGeometryToPointsMap = null;
