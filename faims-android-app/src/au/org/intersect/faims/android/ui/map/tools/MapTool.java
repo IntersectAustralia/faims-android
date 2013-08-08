@@ -50,6 +50,10 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	public void onMapUpdate() {
 	}
 	
+	public void onConfigChanged() {
+		
+	}
+	
 	public View getUI() {
 		return container;
 	}

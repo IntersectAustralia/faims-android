@@ -157,6 +157,7 @@ public class FollowTool extends HighlightTool {
 		if (!mapView.isProperProjection()) {
 			showError("This tool will not function properly as projection is not a projected coordinate system.");
 		}
+		onConfigChanged();
 	}
 	
 	@Override
@@ -284,6 +285,13 @@ public class FollowTool extends HighlightTool {
 		button.setSelectedState(R.drawable.tools_tracker_s);
 		button.setNormalState(R.drawable.tools_tracker);
 		return button;
+	}
+	
+	@Override
+	public void onConfigChanged() {
+		bufferStyle.lineColor = mapView.getBufferColor();
+		
+		targetColor = mapView.getTargetColor();
 	}
 
 }

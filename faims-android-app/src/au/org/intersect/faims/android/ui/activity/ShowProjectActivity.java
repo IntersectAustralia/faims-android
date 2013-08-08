@@ -761,9 +761,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	    return true;
 	}
 	
+	public void updateActionBar() {
+		invalidateOptionsMenu();
+	}
+	
 	public void setPathVisible(boolean value) {
 		this.pathIndicatorVisible = value;
-		invalidateOptionsMenu();
 	}
 	
 	public void setPathDistance(float value) {

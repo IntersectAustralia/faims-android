@@ -52,7 +52,7 @@ public class ConfigDialog extends AlertDialog {
 		addCheckBox("showKm", "Display measurements in km:", mapView.showKm());
 		addSlider("vertexSize", "Guide Point Size:", mapView.getVertexSize());
 		addTextField("buffer", "Tracker Tool Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
-		addColorField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getLineColor()));
+		addColorField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getBufferColor()));
 		addColorField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
 
 		setView(scrollView);
@@ -87,10 +87,11 @@ public class ConfigDialog extends AlertDialog {
 					mapView.setShowKm(showKm);
 					mapView.setPathBuffer(buffer);
 					
-					mapView.setLineColor(bufferColor);
+					mapView.setBufferColor(bufferColor);
 					mapView.setTargetColor(targetColor);
 					
 					if(mapView.getCurrentTool() != null){
+						mapView.getCurrentTool().onConfigChanged();
 						mapView.getCurrentTool().onMapChanged();
 					}
 				} catch (Exception e) {

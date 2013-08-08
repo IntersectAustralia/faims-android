@@ -179,6 +179,11 @@ public class EditTool extends HighlightTool {
 						button.setChecked(!button.isChecked());
 						return;
 					}
+					if (hasPointGeometry()) {
+						showError("Cannot break point geometry");
+						button.setChecked(!button.isChecked());
+						return;
+					}
 					
 					if (!button.isChecked()) {
 						
@@ -288,6 +293,14 @@ public class EditTool extends HighlightTool {
 		for (Geometry geom : list) {
 			GeometryData data = (GeometryData) geom.userData;
 			if (data.type == GeometryData.Type.LEGACY) return true;
+		}
+		return false;
+	}
+	
+	private boolean hasPointGeometry() {
+		List<Geometry> list = EditTool.this.mapView.getHighlights();
+		for (Geometry geom : list) {
+			if (geom instanceof Point) return true;
 		}
 		return false;
 	}

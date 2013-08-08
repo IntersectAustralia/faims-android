@@ -221,7 +221,7 @@ public class CustomMapView extends MapView {
 	
 	private float vertexSize = 0.2f;
 	
-	private int lineColor = Color.GREEN;
+	private int bufferColor = Color.GREEN;
 	
 	private int targetColor = Color.RED;
 	
@@ -1584,32 +1584,36 @@ public class CustomMapView extends MapView {
 	
 	private void updateActionBar() {
 		if (previousLocation != null && activityRef.get() != null) {
+			
+			if (geomToFollow != null) {
+				
+				try {
+					MapPos currentPoint = getCurrentPosition();
+					if (currentPoint == null) return;
+					
+					MapPos targetPoint = nextPointToFollow(currentPoint, getPathBuffer());
+					
+					Geometry geom = getGeomToFollow();
+					Line line = (geom instanceof Line) ? (Line) geom : null;
+					
+					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, activityRef.get().getProject().getSrid()));
+					activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
+					activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
+					activityRef.get().setPathHeading(previousHeading);
+					activityRef.get().setPathValid(locationValid);
+					activityRef.get().setPathVisible(true);
+				} catch (Exception e) {
+					FLog.e("error updating action bar", e);
+				}
+			} else {
+				activityRef.get().setPathVisible(false);
+			}
+			
 			activityRef.get().runOnUiThread(new Runnable() {
 	
 				@Override
 				public void run() {
-					if (geomToFollow != null) {
-						try {
-							MapPos currentPoint = getCurrentPosition();
-							if (currentPoint == null) return;
-							
-							MapPos targetPoint = nextPointToFollow(currentPoint, getPathBuffer());
-							
-							Geometry geom = getGeomToFollow();
-							Line line = (geom instanceof Line) ? (Line) geom : null;
-							
-							activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, activityRef.get().getProject().getSrid()));
-							activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
-							activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
-							activityRef.get().setPathHeading(previousHeading);
-							activityRef.get().setPathValid(locationValid);
-							activityRef.get().setPathVisible(true);
-						} catch (Exception e) {
-							FLog.e("error updating action bar", e);
-						}
-					} else {
-						activityRef.get().setPathVisible(false);
-					}
+					activityRef.get().updateActionBar();
 				}
 				
 			});
@@ -2453,12 +2457,12 @@ public class CustomMapView extends MapView {
 		return currentTool;
 	}
 
-	public int getLineColor() {
-		return lineColor;
+	public int getBufferColor() {
+		return bufferColor;
 	}
 
-	public void setLineColor(int lineColor) {
-		this.lineColor = lineColor;
+	public void setBufferColor(int bufferColor) {
+		this.bufferColor = bufferColor;
 	}
 
 	public int getTargetColor() {
