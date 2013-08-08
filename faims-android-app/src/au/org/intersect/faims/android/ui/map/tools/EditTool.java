@@ -179,11 +179,6 @@ public class EditTool extends HighlightTool {
 						button.setChecked(!button.isChecked());
 						return;
 					}
-					if (hasPointGeometry()) {
-						showError("Cannot break point geometry");
-						button.setChecked(!button.isChecked());
-						return;
-					}
 					
 					if (!button.isChecked()) {
 						
@@ -226,7 +221,11 @@ public class EditTool extends HighlightTool {
 						EditTool.this.vertexGeometryToPointsMap = null;
 						
 					} else {
-
+						if (hasPointGeometry()) {
+							showError("Cannot break point geometry");
+							button.setChecked(!button.isChecked());
+							return;
+						}
 						if (mapView.getHighlights().size() == 0) {
 							showError("Pleas select geometry");
 							button.setChecked(!button.isChecked());
