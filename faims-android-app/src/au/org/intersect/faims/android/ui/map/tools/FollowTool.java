@@ -255,7 +255,7 @@ public class FollowTool extends HighlightTool {
 
 			targetPoint = mapView.nextPointToFollow(currentPosition, mapView.getPathBuffer());
 			
-			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getActivity().getProject().getSrid());
+			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getProjectSrid());
 			angle = SpatialiteUtil.computeAzimuth(currentPosition, targetPoint);
 		} catch (Exception e) {
 			FLog.e("error calculating distance and bearing", e);

@@ -1392,8 +1392,8 @@ public class LayerManagerDialog extends AlertDialog {
 
 			double[][] originalBounds = gdalMapLayer.getBoundary();
 			
-			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
-			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getActivity().getProject().getSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
+			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getProjectSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
+			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getProjectSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
 			
 	        TextView upperLeftTextView = new TextView(this.getContext());
 	        upperLeftTextView.setText("Upper left boundary:");

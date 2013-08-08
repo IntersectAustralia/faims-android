@@ -318,6 +318,8 @@ public class CustomMapView extends MapView {
 	private MapText layerDisplayText;
 	
 	private ToggleButton layerDisplayButton;
+
+	private String projectSrid;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -374,8 +376,10 @@ public class CustomMapView extends MapView {
 		startMapOverlayThread();
         startGPSLocationThread();
         
+        projectSrid = activityRef.get().getProject().getSrid();
+        
         // set default value for showing point coords as degrees or decimal
-        setShowDecimal(!GeometryUtil.EPSG4326.equals(activityRef.get().getProject().getSrid()));
+        setShowDecimal(!GeometryUtil.EPSG4326.equals(projectSrid));
         
         // create vertex editing canvas
         try {
@@ -389,7 +393,7 @@ public class CustomMapView extends MapView {
         
         // store proper projection result
         try {
-			projectionProper = SpatialiteUtil.isProperProjection(activityRef.get().getProject().getSrid());
+			projectionProper = SpatialiteUtil.isProperProjection(projectSrid);
 		} catch (Exception e) {
 			FLog.e("error checking for proper projection", e);
 		}
@@ -1552,8 +1556,8 @@ public class CustomMapView extends MapView {
 					while(CustomMapView.this.canRunThreads()) {
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
 						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
-						//currentLocation = new GPSLocation(150.89, -33.85, 0);
-						//currentHeading = 26.0f;
+//						currentLocation = new GPSLocation(150.89, -33.85, 0);
+//						currentHeading = 26.0f;
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
 							Float heading = (Float) currentHeading;
@@ -1596,7 +1600,7 @@ public class CustomMapView extends MapView {
 					Geometry geom = getGeomToFollow();
 					Line line = (geom instanceof Line) ? (Line) geom : null;
 					
-					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, activityRef.get().getProject().getSrid()));
+					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, projectSrid));
 					activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
 					activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
 					activityRef.get().setPathHeading(previousHeading);
@@ -1885,6 +1889,10 @@ public class CustomMapView extends MapView {
 		return lastSelectionQuery;
 	}
 
+	public String getProjectSrid() {
+		return projectSrid;
+	}
+
 	public void addLegacySelectQueryBuilder(String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
 		builder.setName(name);
 		builder.setDbPath(dbPath);
@@ -1960,7 +1968,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = activityRef.get().getProject().getSrid();
+		String srid = projectSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance, srid));
@@ -2016,7 +2024,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = activityRef.get().getProject().getSrid();
+		String srid = projectSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance, srid));
@@ -2141,17 +2149,17 @@ public class CustomMapView extends MapView {
 			Point point = new Point(pos, null, (PointStyle) null, null);
 			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
 			MapPos mp = lp;
-			double min = SpatialiteUtil.distanceBetween(pos,  lp, activityRef.get().getProject().getSrid());
+			double min = SpatialiteUtil.distanceBetween(pos,  lp, projectSrid);
 			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
 				MapPos p = line.getVertexList().get(i);
 				ArrayList<MapPos> pts = new ArrayList<MapPos>();
 				pts.add(p);
 				pts.add(lp);
 				Line seg = new Line(pts, null, (LineStyle) null, null);
-				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, activityRef.get().getProject().getSrid())) {
+				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, projectSrid)) {
 					return lp;
 				} else {
-					double d = SpatialiteUtil.distanceBetween(pos, p, activityRef.get().getProject().getSrid());
+					double d = SpatialiteUtil.distanceBetween(pos, p, projectSrid);
 					if (d < min) {
 						min = d;
 						mp = p;
@@ -2177,7 +2185,7 @@ public class CustomMapView extends MapView {
 	private void updateGeomBuffer() {
 		if (geomToFollow != null) {
 			try {
-				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, activityRef.get().getProject().getSrid());
+				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, projectSrid);
 			} catch (Exception e) {
 				FLog.e("error getting geometry buffer", e);
 			}

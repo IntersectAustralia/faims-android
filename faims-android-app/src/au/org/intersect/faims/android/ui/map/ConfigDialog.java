@@ -46,7 +46,7 @@ public class ConfigDialog extends AlertDialog {
 		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 		addSlider("textSize", "Details Text Size:", mapView.getDrawViewTextSize());
 		
-		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getProjectSrid());
 		if (isEPSG4326) {
 			addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 		}

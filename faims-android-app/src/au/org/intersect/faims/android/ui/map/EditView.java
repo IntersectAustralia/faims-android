@@ -1,9 +1,9 @@
 package au.org.intersect.faims.android.ui.map;
 
-import com.nutiteq.components.MapPos;
-
 import android.content.Context;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+
+import com.nutiteq.components.MapPos;
 
 public class EditView extends DrawView {
 
@@ -17,7 +17,7 @@ public class EditView extends DrawView {
 	
 	protected MapPos projectPoint(MapPos p) {
 		p = GeometryUtil.transformVertex(p, mapView, false);
-		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, mapView.getActivity().getProject().getSrid(), p);
+		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, mapView.getProjectSrid(), p);
 	}
 
 }
