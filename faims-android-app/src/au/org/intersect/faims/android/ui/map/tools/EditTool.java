@@ -297,6 +297,15 @@ public class EditTool extends HighlightTool {
 		return false;
 	}
 	
+	private boolean hasDatabaseGeometry() {
+		List<Geometry> list = EditTool.this.mapView.getHighlights();
+		for (Geometry geom : list) {
+			GeometryData data = (GeometryData) geom.userData;
+			if (data.type == GeometryData.Type.ENTITY || data.type == GeometryData.Type.RELATIONSHIP) return true;
+		}
+		return false;
+	}
+	
 	private boolean hasPointGeometry() {
 		List<Geometry> list = EditTool.this.mapView.getHighlights();
 		for (Geometry geom : list) {
@@ -398,6 +407,10 @@ public class EditTool extends HighlightTool {
 				
 				if (hasLegacyGeometry()) {
 					showError("Cannot edit legacy geometry");
+					return;
+				}
+				if (hasDatabaseGeometry()) {
+					showError("Cannot edit database geometry");
 					return;
 				}
 				
