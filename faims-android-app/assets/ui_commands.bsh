@@ -1338,6 +1338,54 @@ String getParticipants(){
 	return linker.getParticipants();
 }
 
+/**
+  * Get the static data for permit issued by
+  * @return permit issued by
+  */
+public String getPermitIssuedBy() {
+	return linker.getPermitIssuedBy();
+}
+
+/**
+  * Get the static data for permit type
+  * @return permit type
+  */
+public String getPermitType() {
+	return linker.getPermitType();
+}
+
+/**
+  * Get the static data for copyright holder
+  * @return copyright holder
+  */
+public String getCopyrightHolder() {
+	return linker.getCopyrightHolder();
+}
+
+/**
+  * Get the static data for client/sponsor
+  * @return client/sponsor
+  */
+public String getClientSponsor() {
+	return linker.getClientSponsor();
+}
+
+/**
+  * Get the static data for land owner
+  * @return land owner
+  */
+public String getLandOwner() {
+	return linker.getLandOwner();
+}
+
+/**
+  * Get the static data for whether containing sensitive data or not
+  * @return true or false
+  */
+public String hasSensitiveData() {
+	return linker.hasSensitiveData();
+}
+
 //========= File attachment Functionalities ==========
 /**
   * Get the name of last selected file from the file browser

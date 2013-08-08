@@ -3463,6 +3463,30 @@ public class BeanShellLinker {
 	public String getParticipants() {
 		return this.project.getParticipants();
 	}
+	
+	public String getPermitIssuedBy() {
+		return this.project.getPermitIssuedBy();
+	}
+
+	public String getPermitType() {
+		return this.project.getPermitType();
+	}
+
+	public String getCopyrightHolder() {
+		return this.project.getCopyrightHolder();
+	}
+
+	public String getClientSponsor() {
+		return this.project.getClientSponsor();
+	}
+
+	public String getLandOwner() {
+		return this.project.getLandOwner();
+	}
+
+	public String hasSensitiveData() {
+		return this.project.hasSensitiveData();
+	}
 
 	public void setSyncMinInterval(float value) {
 		if (value < 0) {
