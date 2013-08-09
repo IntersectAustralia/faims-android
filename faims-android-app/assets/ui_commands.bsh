@@ -124,7 +124,8 @@ cancelTab(String ref, boolean warn){
 
 //========= Dialog Functionalities ==========
 /**
-  * Showing a toast to the user with the given message, the toast will last for about 1 second
+  * Show a toast to the user with the given message, the toast will last for about 1 second.
+  *
   * @param message the message to be shown to the user
   */
 showToast(String message) {
@@ -132,18 +133,20 @@ showToast(String message) {
 }
 
 /**
-  * Showing an alert dialog to the user with the given message and a specific callback for ok and cancel buttons
+  * Show an alert dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
-  * @param okCallback the callback that is executed when OK button is pressed
-  * @param cancelCallback the callback that is executed when cancel button is pressed
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
   */
 showAlert(String title, String message, String okCallback, String cancelCallback){
     linker.showAlert(title, message, okCallback, cancelCallback);
 }
 
 /**
-  * Showing a warning dialog to the user with the given message
+  * Show a warning dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
   */
@@ -152,7 +155,8 @@ showWarning(String title, String message) {
 }
 
 /**
-  * Showing a busy dialog to the user with the given message
+  * Show a busy dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
   */
