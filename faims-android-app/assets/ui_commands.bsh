@@ -23,8 +23,14 @@ import android.app.Dialog;
 
 //========= Persist Functionalities ==========
 /**
-  * Persisting a beanshell object to store the value of the object name when the application is destroyed\n
-  * and restore the value when the application is restored
+  * Sometimes due to the nature of android destroying and restoring the project activity
+  * when it runs low of resources the variable state in the ui logic can be destroyed.
+  *
+  * To overcome this use the following method to define the name of a single logic object
+  * that will saved and restored when the activity is destroyed and restored.
+  *
+  * For more information on how to use this function please look at the cookbook.
+  *
   * @param name the name of the object
   */
 persistObject(String name) {
@@ -33,73 +39,87 @@ persistObject(String name) {
 
 //========= Tab / Tab Group Functionalities ==========
 /**
-  * Showing the tab group with the label and clear all values if there was any value before in the tab group
-  * @param label the label of the tab group
+  * Show the tab group with the following reference and clear all values in the tab group.
+  *
+  * @param ref the reference to the tab group
   */
-newTabGroup(String label) {
-	linker.newTabGroup(label);
+newTabGroup(String ref) {
+	linker.newTabGroup(ref);
 }
 
 /**
-  * Showing the tab with the label and clear all values if there was any value before in the tab
-  * @param label the label of the tab
+  * Show the tab with the following reference and clear all values in the tab.
+  *
+  * @param ref the reference to the tab
   */
-newTab(String label) {
-	linker.newTab(label);
+newTab(String ref) {
+	linker.newTab(ref);
 }
 
 /**
-  * Showing the tab group with the label and keep all values if there was any value before in the tab group
-  * @param label the label of the tab group
+  * Show the tab group with the following reference.
+  *
+  * This will retain all the current values in the tab group.
+  *
+  * @param ref the reference to the tab group
   */
-showTabGroup(String label){
-    linker.showTabGroup(label);
+showTabGroup(String ref){
+    linker.showTabGroup(ref);
 }
 
 /**
-  * Showing the tab group with the label and load values for a given uuid to the tab group
-  * @param id the reference of the tab group
-  * @param uuid the id of the record
+  * Show the tab group with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab group.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship
   */
-showTabGroup(String id, String uuid){
-    linker.showTabGroup(id,uuid);
+showTabGroup(String ref, String id){
+    linker.showTabGroup(ref, id);
 }
 
 /**
-  * Showing the tab with the label and keep all values if there was any value before in the tab
-  * @param label the label of the tab
+  * Show the tab with the following reference.
+  *
+  * This will retain all the current values in the tab.
+  *
+  * @param ref the reference to the tab
   */
-showTab(String label) {
-	linker.showTab(label);
+showTab(String ref) {
+	linker.showTab(ref);
 }
 
 /**
-  * Showing the tab with the label and load values for a given uuid to the tab
-  * @param id the reference of the tab
-  * @param uuid the id of the record
+  * Show the tab with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab.
+  *
+  * @param ref the reference to the tab
+  * @param id the id of the entity or relationship
   */
-showTab(String id, String uuid) {
-	linker.showTab(id, uuid);
+showTab(String ref, String id) {
+	linker.showTab(ref, id);
 }
 
 /**
-  * Cancelling tab group will close the tab group. It will only give warning if the warning is set to be true\n
-  * and if there is any changes in any field in the tab group
-  * @param id the reference of the tab group
-  * @param warn a boolean to set whether a warning dialog should appear or not
+  * Close the tab group with the following reference with an option to show
+  * a warning dialog if there are changes that haven't been saved. 
+  *
+  * @param ref the reference to the tab group
+  * @param warn set to true to show a warning dialog if there are changes that haven't been saved
   */
-cancelTabGroup(String id, boolean warn){
-	linker.cancelTabGroup(id,warn);
+cancelTabGroup(String ref, boolean warn){
+	linker.cancelTabGroup(ref, warn);
 }
 
 /**
-  * Cancelling tab will close the tab. It will only give warning if the warning is set to be true\n
-  * and if there is any changes in any field in the tab
-  * @param id the reference of the tab
-  * @param warn a boolean to set whether a warning dialog should appear or not
+  * Close the tab with the following reference with an option to show
+  * a warning dialog if there are changes that haven't been saved. 
+  *
+  * @param ref the reference to the tab
+  * @param warn set to true to show a warning dialog if there are changes that haven't been saved
   */
-cancelTab(String id, boolean warn){
-	linker.cancelTab(id,warn);
+cancelTab(String ref, boolean warn){
+	linker.cancelTab(ref, warn);
 }
 
 //========= Dialog Functionalities ==========
