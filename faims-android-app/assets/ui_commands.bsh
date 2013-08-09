@@ -166,20 +166,26 @@ showBusy(String title, String message) {
 
 //========= Setter / Getter Functionalities ==========
 /**
-  * Set value to the field that has the reference with given value. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Set the field with the following reference with the given value.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
+  * For more information on how to use this function please look at the cookbook.
+  *
   * @param ref the reference to the field
-  * @param value the value to be set to the field, could be a collection, number, or String
+  * @param value the value to set the field to
   */
 setFieldValue(String ref, Object value){
     linker.setFieldValue(ref, value);
 }
 
 /**
-  * Set certainty to the field that has the reference with given value. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Set the field with the following reference with the given certainty
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
-  * @param value the value to be set to the field, could be a number or String
+  * @param value the value to set the certainty for the field to
   */
 setFieldCertainty(String ref, Object value){
     linker.setFieldCertainty(ref, value);
