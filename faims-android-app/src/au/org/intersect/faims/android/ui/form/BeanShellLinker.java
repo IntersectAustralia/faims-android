@@ -38,7 +38,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
-import android.text.format.Time;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -222,9 +221,12 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void startTrackingGPS(final String type, final int value) {
+	public void startTrackingGPS(final String type, final int value, final String callback) {
+		FLog.d("gps tracking is started");
+		
 		this.activity.getGPSDataManager().setTrackingType(type);
 		this.activity.getGPSDataManager().setTrackingValue(value);
+		this.activity.getGPSDataManager().setTrackingExec(callback);
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
@@ -243,27 +245,7 @@ public class BeanShellLinker {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
-							float heading = (Float) getGPSHeading();
-							float accuracy = (Float) getGPSEstimatedAccuracy();
-							Double longitude = currentLocation.getLongitude();
-							Double latitude = currentLocation.getLatitude();
-							if (longitude != null && latitude != null) {
-								List<Geometry> geo_data = new ArrayList<Geometry>();
-								geo_data.add(createGeometryPoint(new MapPos(
-										Float.parseFloat(Double
-												.toString(longitude)), Float
-												.parseFloat(Double
-														.toString(latitude)))));
-								activity.getDatabaseManager().saveGPSTrack(
-										geo_data,
-										Double.toString(currentLocation
-												.getLongitude()),
-										Double.toString(currentLocation
-												.getLatitude()),
-										Float.toString(heading),
-										Float.toString(accuracy), type);
-							}
+							execute(callback);
 						} else {
 							showToast("no gps signal at the moment");
 						}
@@ -278,42 +260,20 @@ public class BeanShellLinker {
 						trackingHandler.postDelayed(this, 1000);
 						if (getGPSPosition() != null) {
 							GPSLocation currentLocation = (GPSLocation) getGPSPosition();
-							float heading = (Float) getGPSHeading();
-							float accuracy = (Float) getGPSEstimatedAccuracy();
 							Double longitude = currentLocation.getLongitude();
 							Double latitude = currentLocation.getLatitude();
 							if (longitude != null && latitude != null) {
-								double distance = 0;
 								if (prevLong != null && prevLat != null) {
 									float[] results = new float[1];
 									Location.distanceBetween(prevLat, prevLong,
 											latitude, longitude, results);
-									distance = results[0];
+									double distance = results[0];
 									if (distance > value) {
-										List<Geometry> geo_data = new ArrayList<Geometry>();
-										Geometry point = createGeometryPoint(new MapPos(
-												Float.parseFloat(Double
-														.toString(longitude)),
-												Float.parseFloat(Double
-														.toString(latitude))));
-										geo_data.add(point);
-										activity.getDatabaseManager()
-												.saveGPSTrack(
-														geo_data,
-														Double.toString(currentLocation
-																.getLongitude()),
-														Double.toString(currentLocation
-																.getLatitude()),
-														Float.toString(heading),
-														Float.toString(accuracy),
-														type);
-										prevLong = longitude;
-										prevLat = latitude;
+										execute(callback);
 									}
-								} else {
-									prevLong = longitude;
-									prevLat = latitude;
 								}
+								prevLong = longitude;
+								prevLat = latitude;
 							}
 						} else {
 							showToast("no gps signal at the moment");
@@ -324,13 +284,14 @@ public class BeanShellLinker {
 			} else {
 				FLog.e("wrong type format is used");
 			}
-			FLog.d("gps tracking is started");
 		} else {
 			showToast("gps tracking has been started, please stop it before starting");
 		}
 	}
 
 	public void stopTrackingGPS() {
+		FLog.d("gps tracking is stopped");
+		
 		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;
@@ -1668,9 +1629,7 @@ public class BeanShellLinker {
 	}
 
 	public String getCurrentTime() {
-		Time timeNow = new Time();
-		timeNow.setToNow();
-		return timeNow.format("%Y-%m-%d %H:%M:%S");
+		return DateUtil.getCurrentTimestampGMT();
 	}
 
 	public String saveArchEnt(String entity_id, String entity_type,
@@ -1690,6 +1649,12 @@ public class BeanShellLinker {
 	public Boolean deleteArchEnt(String entity_id){
 		try {
 			activity.getDatabaseManager().deleteArchEnt(entity_id);
+			for(Tab tab : activity.getUIRenderer().getTabList()){
+				for(CustomMapView mapView : tab.getMapViewList()){
+					mapView.removeFromAllSelections(entity_id);
+					mapView.updateSelections();
+				}
+			}
 			return true;
 		} catch (jsqlite.Exception e) {
 			FLog.e("can not delete arch entity with the supplied id", e);
@@ -1714,6 +1679,12 @@ public class BeanShellLinker {
 	public Boolean deleteRel(String rel_id){
 		try {
 			activity.getDatabaseManager().deleteRel(rel_id);
+			for(Tab tab : activity.getUIRenderer().getTabList()){
+				for(CustomMapView mapView : tab.getMapViewList()){
+					mapView.removeFromAllSelections(rel_id);
+					mapView.updateSelections();
+				}
+			}
 			return true;
 		} catch (jsqlite.Exception e) {
 			FLog.e("can not delete relationship with the supplied id", e);
@@ -3492,6 +3463,30 @@ public class BeanShellLinker {
 	public String getParticipants() {
 		return this.project.getParticipants();
 	}
+	
+	public String getPermitIssuedBy() {
+		return this.project.getPermitIssuedBy();
+	}
+
+	public String getPermitType() {
+		return this.project.getPermitType();
+	}
+
+	public String getCopyrightHolder() {
+		return this.project.getCopyrightHolder();
+	}
+
+	public String getClientSponsor() {
+		return this.project.getClientSponsor();
+	}
+
+	public String getLandOwner() {
+		return this.project.getLandOwner();
+	}
+
+	public String hasSensitiveData() {
+		return this.project.hasSensitiveData();
+	}
 
 	public void setSyncMinInterval(float value) {
 		if (value < 0) {
@@ -3835,6 +3830,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addSelectQueryBuilder(name, builder);
+				mapView.setDatabaseToolVisible(true);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -3853,6 +3849,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				String filepath = activity.getProjectDir() + "/" + dbPath;
+				mapView.setLegacyToolVisible(true);
 				mapView.addLegacySelectQueryBuilder(name, filepath, tableName,
 						builder);
 			} else {
@@ -3911,6 +3908,7 @@ public class BeanShellLinker {
 						}
 					});
 				} else if ("load".equals(type)) {
+					mapView.setLoadToolVisible(true);
 					mapView.setLoadCallback(new CustomMapView.LoadCallback() {
 						
 						@Override

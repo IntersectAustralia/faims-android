@@ -6,9 +6,12 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -44,6 +47,46 @@ public class SettingsDialog extends AlertDialog {
 			scrollView.addView(layout);
 		}
 		
+		public Builder addColorField(String name, String label, String defaultValue) {
+			TextView labelView = new TextView(context);
+			labelView.setText(label);
+			
+			final EditText text = new EditText(context);
+			text.setText(defaultValue.toUpperCase(Locale.ENGLISH));
+			text.setInputType(EditorInfo.TYPE_NULL);
+			text.setOnTouchListener(new View.OnTouchListener() {
+				
+				@Override
+				public boolean onTouch(View arg0, MotionEvent action) {
+					if(action.getAction() == MotionEvent.ACTION_UP){
+						ColorPickerDialog colorPickerDialog = new ColorPickerDialog(context, new ColorPickerDialog.OnColorChangedListener() {
+							
+							@Override
+							public void colorChanged(int color) {
+								text.setText(convertText(Integer.toHexString(color)));
+								text.setBackgroundColor(Color.parseColor("#"+convertText(Integer.toHexString(color))));
+							}
+
+						}, Color.parseColor("#"+text.getText().toString()));
+						colorPickerDialog.show();
+					}
+					return false;
+				}
+			});
+			text.setBackgroundColor(Color.parseColor("#"+text.getText().toString()));
+			
+			layout.addView(labelView);
+			layout.addView(text);
+			
+			fields.put(name, text);
+			
+			return this;
+		}
+		
+		private String convertText(String color) {
+			return color.toUpperCase(Locale.ENGLISH);
+		}
+		
 		public Builder addTextField(String name, String label, String defaultValue) {
 			return addEditField(name, label, defaultValue, InputType.TYPE_CLASS_TEXT);
 		}
@@ -71,7 +114,7 @@ public class SettingsDialog extends AlertDialog {
 		
 		public Builder addCheckBox(String name, String label, boolean defaultValue) {
 			TextView labelView = new TextView(context);
-			labelView.setText(name);
+			labelView.setText(label);
 			
 			CheckBox box = new CheckBox(context);
 			box.setChecked(defaultValue);

@@ -616,9 +616,10 @@ Object getGPSHeading(String gps){
   * Start track log of the GPS and save it to the database so the user can look at the track log in the map view
   * @param type either "distance" or "time"
   * @param value the value of the tracking, if type is "distance", the value will be in meter, if type is "time", the value will be in seconds
+  * @param callback code to execute when interval limit is reached
   */
-startTrackingGPS(String type, int value){
-	linker.startTrackingGPS(type, value);
+startTrackingGPS(String type, int value, String callback){
+	linker.startTrackingGPS(type, value, callback);
 }
 
 /**
@@ -1335,6 +1336,54 @@ String getContactAndAddress(){
   */
 String getParticipants(){
 	return linker.getParticipants();
+}
+
+/**
+  * Get the static data for permit issued by
+  * @return permit issued by
+  */
+public String getPermitIssuedBy() {
+	return linker.getPermitIssuedBy();
+}
+
+/**
+  * Get the static data for permit type
+  * @return permit type
+  */
+public String getPermitType() {
+	return linker.getPermitType();
+}
+
+/**
+  * Get the static data for copyright holder
+  * @return copyright holder
+  */
+public String getCopyrightHolder() {
+	return linker.getCopyrightHolder();
+}
+
+/**
+  * Get the static data for client/sponsor
+  * @return client/sponsor
+  */
+public String getClientSponsor() {
+	return linker.getClientSponsor();
+}
+
+/**
+  * Get the static data for land owner
+  * @return land owner
+  */
+public String getLandOwner() {
+	return linker.getLandOwner();
+}
+
+/**
+  * Get the static data for whether containing sensitive data or not
+  * @return true or false
+  */
+public String hasSensitiveData() {
+	return linker.hasSensitiveData();
 }
 
 //========= File attachment Functionalities ==========

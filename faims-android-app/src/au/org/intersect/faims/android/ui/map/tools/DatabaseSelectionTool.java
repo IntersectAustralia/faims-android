@@ -164,6 +164,7 @@ public class DatabaseSelectionTool extends SelectionTool {
 					sqlSpinner.setSelection(names.indexOf(mapView.getLastSelectionQuery()));
 				}
 				
+				d.setCanceledOnTouchOutside(true);
 				d.show();
 			}
 			

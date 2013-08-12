@@ -103,10 +103,10 @@ public class PointSelectionTool extends HighlightSelectionTool {
 			@Override
 			public void onClick(View arg0) {
 				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
-				builder.setTitle("Set Distance");
+				builder.setTitle("Point Selection Distance");
 				
 				builder.addTextField("distance", "Distance (m):", Float.toString(distance));
-				builder.addCheckBox("remove", "Remove Selection:", false);
+				builder.addCheckBox("remove", "Remove from selection?", false);
 				
 				builder.setPositiveButton("Run Query", new DialogInterface.OnClickListener() {
 					
@@ -143,6 +143,7 @@ public class PointSelectionTool extends HighlightSelectionTool {
 				});
 				
 				settingsDialog = builder.create();
+				settingsDialog.setCanceledOnTouchOutside(true);
 				settingsDialog.show();
 			}
 				

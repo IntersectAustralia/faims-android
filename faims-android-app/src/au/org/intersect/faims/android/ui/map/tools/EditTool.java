@@ -155,7 +155,7 @@ public class EditTool extends HighlightTool {
 			}
 		} catch (Exception e) {
 			FLog.e("error resetting vertex geometry", e);
-			showError("error resetting vertex geometry");
+			showError("Error resetting vertex geometry");
 		}
 		EditTool.this.vertexGeometry = null;
 		EditTool.this.vertexGeometryToPointsMap = null;
@@ -221,7 +221,11 @@ public class EditTool extends HighlightTool {
 						EditTool.this.vertexGeometryToPointsMap = null;
 						
 					} else {
-
+						if (hasPointGeometry()) {
+							showError("Cannot break point geometry");
+							button.setChecked(!button.isChecked());
+							return;
+						}
 						if (mapView.getHighlights().size() == 0) {
 							showError("Pleas select geometry");
 							button.setChecked(!button.isChecked());
@@ -288,6 +292,23 @@ public class EditTool extends HighlightTool {
 		for (Geometry geom : list) {
 			GeometryData data = (GeometryData) geom.userData;
 			if (data.type == GeometryData.Type.LEGACY) return true;
+		}
+		return false;
+	}
+	
+	private boolean hasDatabaseGeometry() {
+		List<Geometry> list = EditTool.this.mapView.getHighlights();
+		for (Geometry geom : list) {
+			GeometryData data = (GeometryData) geom.userData;
+			if (data.type == GeometryData.Type.ENTITY || data.type == GeometryData.Type.RELATIONSHIP) return true;
+		}
+		return false;
+	}
+	
+	private boolean hasPointGeometry() {
+		List<Geometry> list = EditTool.this.mapView.getHighlights();
+		for (Geometry geom : list) {
+			if (geom instanceof Point) return true;
 		}
 		return false;
 	}
@@ -385,6 +406,10 @@ public class EditTool extends HighlightTool {
 				
 				if (hasLegacyGeometry()) {
 					showError("Cannot edit legacy geometry");
+					return;
+				}
+				if (hasDatabaseGeometry()) {
+					showError("Cannot edit database geometry");
 					return;
 				}
 				

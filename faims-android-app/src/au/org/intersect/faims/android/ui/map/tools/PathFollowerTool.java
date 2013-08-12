@@ -185,7 +185,7 @@ public class PathFollowerTool extends HighlightTool {
 		killFollowerThread = false;
 		currentPoint = p.getMapPos();
 		try {
-			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getActivity().getProject().getSrid());
+			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getProjectSrid());
 		} catch (Exception e) {
 			FLog.e("error gettting geometry buffer", e);
 		}
@@ -202,7 +202,7 @@ public class PathFollowerTool extends HighlightTool {
 						
 							double dx = point.x - currentPoint.x;
 							double dy = point.y - currentPoint.y;
-							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getActivity().getProject().getSrid());
+							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getProjectSrid());
 							
 							double nextStep;
 							if (d == 0) {
@@ -252,10 +252,10 @@ public class PathFollowerTool extends HighlightTool {
 				SettingsDialog.Builder builder = new SettingsDialog.Builder(context);
 				builder.setTitle("Style Settings");
 				
-				builder.addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
+				builder.addColorField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getProjectSrid());
 				if (isEPSG4326)
 					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addSlider("buffer", "Path Buffer", buffer);

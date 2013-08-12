@@ -9,9 +9,11 @@ populateListForUsers(){
 	populateList("user/tab1/users", usersList);
 }
 
+User user = null;
+
 login(){
 	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
-	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
 	setUser(user);
 	showTabGroup("controls");
 }
@@ -22,9 +24,40 @@ onEvent("user/tab1/users", "click", "login()");
 
 onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
 onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
-onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\",10)");
-onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\",10)");
+onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
 onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
 
 getScreen(id, name) {
 	ArrayList screen = new ArrayList();
@@ -890,33 +923,29 @@ private initUIMap() {
 		"    and max(relntimestamp)");
 					
 	addSelectQueryBuilder("tabgroup5/tab1/map", "select entity based on type", createQueryBuilder(
-		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-		" FROM archentity join aenttype using (aenttypeid)\n" + 
-		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-		" where archentity.deleted is null\n" + 
-		"   and lower(aenttypename) = lower('simpleentity')\n" + 
-		"   and aentvalue.deleted is null\n" + 
-		"   and (freetext LIKE '%'||?||'%'\n" + 
-		"        OR measure LIKE '%'||?||'%'\n" + 
-		"        OR vocabname LIKE '%'||?||'%')\n" + 
-		" group by uuid, attributeid\n" + 
-		" having max(valuetimestamp)\n" + 
-		"    and max(aenttimestamp)").
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower('simpleentity') \n" + 
+		"   and (freetext LIKE '%'||?||'%' \n" + 
+		"                OR measure LIKE '%'||?||'%' \n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"   group by uuid").
 					addParameter("freetext", "Simple 1").
 					addParameter("measure", null).
 					addParameter("vocabname", null));
 	addSelectQueryBuilder("tabgroup5/tab1/map", "select relationship based on type", createQueryBuilder(
-		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
-		" FROM relationship join relntype using (relntypeid)\n" + 
-		" JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
-		" where relationship.deleted is null\n" + 
-		"   and lower(relntypename) = lower('abovebelow')\n" + 
-		"   and relnvalue.deleted is null\n" + 
-		"   and (freetext LIKE '%'||?||'%'\n" +
-		"        OR vocabname LIKE '%'||?||'%')\n" + 
-		" group by relationshipid, attributeid\n" + 
-		" having max(relnvaluetimestamp)\n" + 
-		"    and max(relntimestamp)").
+		"select relationshipid\n" + 
+		"  FROM latestNonDeletedRelationship\n" + 
+		"  JOIN latestNonDeletedRelnValue using (relationshipid)\n" + 
+		"  JOIN relntype using (relntypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(relntypename) = lower('abovebelow') \n" + 
+		"  and (freetext LIKE '%'||?||'%'\n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"  group by relationshipid").
 					addParameter("freetext", "AboveBelow 1").
 					addParameter("vocabname", null));
 					

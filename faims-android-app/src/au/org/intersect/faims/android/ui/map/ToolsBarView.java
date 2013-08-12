@@ -46,6 +46,9 @@ public class ToolsBarView extends RelativeLayout {
 	private ArrayList<View> toolGroups;
 	private HashMap<ToolBarButton, String> toolButtonMap;
 	private HorizontalScrollView buttonsScroll;
+	private ToolBarButton legacySelectionButton;
+	private ToolBarButton databaseSelectionButton;
+	private ToolBarButton loadButton;
 	
 	public ToolsBarView(Context context) {
 		super(context);
@@ -98,7 +101,8 @@ public class ToolsBarView extends RelativeLayout {
 		toolButtonMap.put(followButton, FollowTool.NAME);
 		toolGroups.add(followButton);
 		
-		ToolBarButton loadButton = toolMap.get(LoadTool.NAME).getButton(getContext());
+		loadButton = toolMap.get(LoadTool.NAME).getButton(getContext());
+		loadButton.setVisibility(View.GONE);
 		toolButtons.add(loadButton);
 		toolButtonMap.put(loadButton, LoadTool.NAME);
 		toolGroups.add(loadButton);
@@ -208,10 +212,12 @@ public class ToolsBarView extends RelativeLayout {
 		ToolBarButton geometrySelectionButton = toolMap.get(GeometriesIntersectSelectionTool.NAME).getButton(getContext());
 		toolButtons.add(geometrySelectionButton);
 		toolButtonMap.put(geometrySelectionButton, GeometriesIntersectSelectionTool.NAME);
-		ToolBarButton databaseSelectionButton = toolMap.get(DatabaseSelectionTool.NAME).getButton(getContext());
+		databaseSelectionButton = toolMap.get(DatabaseSelectionTool.NAME).getButton(getContext());
+		databaseSelectionButton.setVisibility(View.GONE);
 		toolButtons.add(databaseSelectionButton);
 		toolButtonMap.put(databaseSelectionButton, DatabaseSelectionTool.NAME);
-		ToolBarButton legacySelectionButton = toolMap.get(LegacySelectionTool.NAME).getButton(getContext());
+		legacySelectionButton = toolMap.get(LegacySelectionTool.NAME).getButton(getContext());
+		legacySelectionButton.setVisibility(View.GONE);
 		toolButtons.add(legacySelectionButton);
 		toolButtonMap.put(legacySelectionButton, LegacySelectionTool.NAME);
 		group.addButton(touchButton);
@@ -262,6 +268,18 @@ public class ToolsBarView extends RelativeLayout {
 		}
 		
 		buttonsLayout.addView(configButton);
+	}
+
+	public void setLoadToolVisible(boolean value) {
+		loadButton.setVisibility(value ? View.VISIBLE : View.GONE);
+	}
+
+	public void setDatabaseToolVisible(boolean value) {
+		databaseSelectionButton.setVisibility(value ? View.VISIBLE : View.GONE);
+	}
+
+	public void setLegacyToolVisible(boolean value) {
+		legacySelectionButton.setVisibility(value ? View.VISIBLE : View.GONE);
 	}
 	
 }

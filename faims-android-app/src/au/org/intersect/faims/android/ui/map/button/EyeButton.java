@@ -4,10 +4,9 @@ import android.content.Context;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.widget.LinearLayout;
-import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
 
-public class EyeButton extends ToggleButton {
+public class EyeButton extends ToggleImageButton {
 
 	private boolean highlight;
 	private Drawable blueEye;
@@ -17,9 +16,6 @@ public class EyeButton extends ToggleButton {
 	public EyeButton(Context context) {
 		super(context);
 		setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-		setText("");
-		setTextOn("");
-		setTextOff("");
 		
 		setFocusable(false);
 		
@@ -28,6 +24,8 @@ public class EyeButton extends ToggleButton {
 		greyEye = context.getResources().getDrawable(R.drawable.layer_visible);
 		greyEye = greyEye.mutate();
 		greyEye.setColorFilter(0x4CFFFFFF, Mode.MULTIPLY);
+		
+		setBackgroundResource(R.drawable.custom_button);
 	}
 	
 	public void setHighlight(boolean value) {
@@ -36,23 +34,18 @@ public class EyeButton extends ToggleButton {
 	}
 	
 	@Override
-	public void setChecked(boolean value) {
-		super.setChecked(value);
-		updateButtonState();
-	}
-
 	protected void updateButtonState() {
 		if (highlight) {
 			if (isChecked()) {
-				setBackgroundDrawable(blackEye);
+				setImageDrawable(blackEye);
 			} else {
-				setBackgroundDrawable(blueEye);
+				setImageDrawable(blueEye);
 			}
 		} else {
 			if (isChecked()) {
-				setBackgroundDrawable(blackEye);
+				setImageDrawable(blackEye);
 			} else {
-				setBackgroundDrawable(greyEye);
+				setImageDrawable(greyEye);
 			}
 		}
 	}

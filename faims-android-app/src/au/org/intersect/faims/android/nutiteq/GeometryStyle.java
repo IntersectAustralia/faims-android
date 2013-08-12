@@ -76,7 +76,7 @@ public class GeometryStyle {
 	
 	public static GeometryStyle defaultPointStyle() {
 		GeometryStyle style = new GeometryStyle(12);
-		style.pointColor = 0xAAFF0000;
+		style.pointColor = 0xC0FF0000;
 		style.size = 0.2f;
 		style.pickingSize = 0.6f;
 		return style;
@@ -84,8 +84,8 @@ public class GeometryStyle {
 	
 	public static GeometryStyle defaultLineStyle() {
 		GeometryStyle style = new GeometryStyle(12);
-		style.pointColor = 0xAA00FF00;
-		style.lineColor = 0xAA00FF00;
+		style.pointColor = 0xC000FF00;
+		style.lineColor = 0xC000FF00;
 		style.size = 0.2f;
 		style.pickingSize = 0.6f;
 		style.width = 0.05f;
@@ -96,9 +96,9 @@ public class GeometryStyle {
 	
 	public static GeometryStyle defaultPolygonStyle() {
 		GeometryStyle style = new GeometryStyle(12);
-		style.pointColor = 0XAA0000FF;
-		style.lineColor = 0XAA0000FF;
-		style.polygonColor = 0x440000FF;
+		style.pointColor = 0XC00000FF;
+		style.lineColor = 0XC00000FF;
+		style.polygonColor = 0x800000FF;
 		style.size = 0.2f;
 		style.pickingSize = 0.6f;
 		style.width = 0.05f;

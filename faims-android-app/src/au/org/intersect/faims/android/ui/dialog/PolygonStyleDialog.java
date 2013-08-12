@@ -22,10 +22,10 @@ public class PolygonStyleDialog extends StyleDialog {
 			
 			setTitle("Style Settings");
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
-			addTextField("color", "Polygon Color:", Integer.toHexString(style.polygonColor));
+			addColorField("color", "Polygon Color:", Integer.toHexString(style.polygonColor));
 			addSlider("size", "Point Size:", style.size);
 			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
-			addTextField("strokeColor", "Stroke Color:", Integer.toHexString(style.lineColor));
+			addColorField("strokeColor", "Stroke Color:", Integer.toHexString(style.lineColor));
 			addSlider("width", "Stroke Width:", style.width);
 			addSlider("pickingWidth", "Stroke Picking Width:", style.pickingWidth);
 			addCheckBox("showStroke", "Show Stroke on Polygon:", style.showStroke);

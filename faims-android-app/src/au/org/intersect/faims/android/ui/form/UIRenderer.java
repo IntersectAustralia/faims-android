@@ -592,6 +592,10 @@ public class UIRenderer implements IRestoreActionListener{
 		}
 	}
 
+	public LinkedList<Tab> getTabList() {
+		return tabList;
+	}
+
 	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
 		ArrayList<NameValuePair> pairs = null;
 		try {

@@ -221,7 +221,7 @@ public class CustomMapView extends MapView {
 	
 	private float vertexSize = 0.2f;
 	
-	private int lineColor = Color.GREEN;
+	private int bufferColor = Color.GREEN;
 	
 	private int targetColor = Color.RED;
 	
@@ -318,6 +318,8 @@ public class CustomMapView extends MapView {
 	private MapText layerDisplayText;
 	
 	private ToggleButton layerDisplayButton;
+
+	private String projectSrid;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -374,8 +376,10 @@ public class CustomMapView extends MapView {
 		startMapOverlayThread();
         startGPSLocationThread();
         
+        projectSrid = activityRef.get().getProject().getSrid();
+        
         // set default value for showing point coords as degrees or decimal
-        setShowDecimal(!GeometryUtil.EPSG4326.equals(activityRef.get().getProject().getSrid()));
+        setShowDecimal(!GeometryUtil.EPSG4326.equals(projectSrid));
         
         // create vertex editing canvas
         try {
@@ -389,7 +393,7 @@ public class CustomMapView extends MapView {
         
         // store proper projection result
         try {
-			projectionProper = SpatialiteUtil.isProperProjection(activityRef.get().getProject().getSrid());
+			projectionProper = SpatialiteUtil.isProperProjection(projectSrid);
 		} catch (Exception e) {
 			FLog.e("error checking for proper projection", e);
 		}
@@ -399,7 +403,7 @@ public class CustomMapView extends MapView {
         // setup default constraints
         getConstraints().setMapBounds(null);
 		getConstraints().setRotatable(true);
-		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+//		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 	}
 
 	public CustomMapView(Context context) {
@@ -780,10 +784,10 @@ public class CustomMapView extends MapView {
 		return addLayer(gdalLayer);
 	}
 
-	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
-		double bestzoom = gdalLayer.getBestZoom();
-		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
-	}
+//	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
+//		double bestzoom = gdalLayer.getBestZoom();
+//		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
+//	}
 	
 	protected void setMapBounds(CustomGdalMapLayer gdalLayer){
 		double[][] bound = gdalLayer.getBoundary();
@@ -1350,6 +1354,9 @@ public class CustomMapView extends MapView {
 				activityRef.get().getDatabaseManager().deleteRel(data.id);
 			}
 			clearHighlights();
+			GeometryData geomData = (GeometryData) geom.userData;
+			removeFromAllSelections(geomData.id);
+			updateSelections();
 			this.updateRenderer();
 		} catch (Exception e) {
 			FLog.e("error deleting geometry", e);
@@ -1549,8 +1556,8 @@ public class CustomMapView extends MapView {
 					while(CustomMapView.this.canRunThreads()) {
 						Object currentLocation = CustomMapView.this.gpsDataManager.getGPSPosition();
 						Object currentHeading = CustomMapView.this.gpsDataManager.getGPSHeading();
-						//currentLocation = new GPSLocation(150.89, -33.85, 0);
-						//currentHeading = 26.0f;
+//						currentLocation = new GPSLocation(150.89, -33.85, 0);
+//						currentHeading = 26.0f;
 						if(currentLocation != null){
 							GPSLocation location = (GPSLocation) currentLocation;
 							Float heading = (Float) currentHeading;
@@ -1581,32 +1588,36 @@ public class CustomMapView extends MapView {
 	
 	private void updateActionBar() {
 		if (previousLocation != null && activityRef.get() != null) {
+			
+			if (geomToFollow != null) {
+				
+				try {
+					MapPos currentPoint = getCurrentPosition();
+					if (currentPoint == null) return;
+					
+					MapPos targetPoint = nextPointToFollow(currentPoint, getPathBuffer());
+					
+					Geometry geom = getGeomToFollow();
+					Line line = (geom instanceof Line) ? (Line) geom : null;
+					
+					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, projectSrid));
+					activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
+					activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
+					activityRef.get().setPathHeading(previousHeading);
+					activityRef.get().setPathValid(locationValid);
+					activityRef.get().setPathVisible(true);
+				} catch (Exception e) {
+					FLog.e("error updating action bar", e);
+				}
+			} else {
+				activityRef.get().setPathVisible(false);
+			}
+			
 			activityRef.get().runOnUiThread(new Runnable() {
 	
 				@Override
 				public void run() {
-					if (geomToFollow != null) {
-						try {
-							MapPos currentPoint = getCurrentPosition();
-							if (currentPoint == null) return;
-							
-							MapPos targetPoint = nextPointToFollow(currentPoint, getPathBuffer());
-							
-							Geometry geom = getGeomToFollow();
-							Line line = (geom instanceof Line) ? (Line) geom : null;
-							
-							activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, activityRef.get().getProject().getSrid()));
-							activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
-							activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
-							activityRef.get().setPathHeading(previousHeading);
-							activityRef.get().setPathValid(locationValid);
-							activityRef.get().setPathVisible(true);
-						} catch (Exception e) {
-							FLog.e("error updating action bar", e);
-						}
-					} else {
-						activityRef.get().setPathVisible(false);
-					}
+					activityRef.get().updateActionBar();
 				}
 				
 			});
@@ -1754,6 +1765,12 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
+	public void removeFromAllSelections(String id) {
+		for(GeometrySelection geometrySelection : selectionMap.values()){
+			geometrySelection.removeData(id);
+		}
+	}
+	
 	public List<GeometrySelection> getSelections() {
 		return new ArrayList<GeometrySelection>(selectionMap.values());
 	}
@@ -1840,27 +1857,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -1870,6 +1887,10 @@ public class CustomMapView extends MapView {
 	
 	public String getLastSelectionQuery() {
 		return lastSelectionQuery;
+	}
+
+	public String getProjectSrid() {
+		return projectSrid;
 	}
 
 	public void addLegacySelectQueryBuilder(String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
@@ -1905,27 +1926,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -1947,7 +1968,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = activityRef.get().getProject().getSrid();
+		String srid = projectSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance, srid));
@@ -1969,27 +1990,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -2003,7 +2024,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = activityRef.get().getProject().getSrid();
+		String srid = projectSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance, srid));
@@ -2025,27 +2046,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -2082,27 +2103,27 @@ public class CustomMapView extends MapView {
 		
 		if (remove) {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							removeFromSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					removeFromSelection(uuid);
 				}
 			}
 		} else {
 			for (String uuid : uuids) {
-				if(getRestrictedSelections()!= null){
+				if(getRestrictedSelections() != null && !restrictedSelections.isEmpty()){
 					for(GeometrySelection restrictedSelection : restrictedSelections){
 						if(restrictedSelection.hasData(uuid)){
 							addToSelection(uuid);
 							break;
 						}
 					}
-				}else if(getRestrictedSelections() == null){
+				}else{
 					addToSelection(uuid);
 				}
 			}
@@ -2128,17 +2149,17 @@ public class CustomMapView extends MapView {
 			Point point = new Point(pos, null, (PointStyle) null, null);
 			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
 			MapPos mp = lp;
-			double min = SpatialiteUtil.distanceBetween(pos,  lp, activityRef.get().getProject().getSrid());
+			double min = SpatialiteUtil.distanceBetween(pos,  lp, projectSrid);
 			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
 				MapPos p = line.getVertexList().get(i);
 				ArrayList<MapPos> pts = new ArrayList<MapPos>();
 				pts.add(p);
 				pts.add(lp);
 				Line seg = new Line(pts, null, (LineStyle) null, null);
-				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, activityRef.get().getProject().getSrid())) {
+				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, projectSrid)) {
 					return lp;
 				} else {
-					double d = SpatialiteUtil.distanceBetween(pos, p, activityRef.get().getProject().getSrid());
+					double d = SpatialiteUtil.distanceBetween(pos, p, projectSrid);
 					if (d < min) {
 						min = d;
 						mp = p;
@@ -2164,7 +2185,7 @@ public class CustomMapView extends MapView {
 	private void updateGeomBuffer() {
 		if (geomToFollow != null) {
 			try {
-				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, activityRef.get().getProject().getSrid());
+				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, projectSrid);
 			} catch (Exception e) {
 				FLog.e("error getting geometry buffer", e);
 			}
@@ -2293,7 +2314,7 @@ public class CustomMapView extends MapView {
 					Bounds bounds = new Bounds(p1.x, p1.y, p1.x, p1.y);
 					getConstraints().setMapBounds(bounds);
 					getConstraints().setRotatable(false);
-					getConstraints().setZoomRange(new Range(getZoom(), getZoom()));
+//					getConstraints().setZoomRange(new Range(getZoom(), getZoom()));
 					
 					List<Layer> layers = getAllLayers();
 					for (Layer layer : layers) {
@@ -2306,7 +2327,7 @@ public class CustomMapView extends MapView {
 				} else {
 					getConstraints().setMapBounds(null);
 					getConstraints().setRotatable(true);
-					getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+//					getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 					
 					List<Layer> layers = getAllLayers();
 					for (Layer layer : layers) {
@@ -2444,12 +2465,12 @@ public class CustomMapView extends MapView {
 		return currentTool;
 	}
 
-	public int getLineColor() {
-		return lineColor;
+	public int getBufferColor() {
+		return bufferColor;
 	}
 
-	public void setLineColor(int lineColor) {
-		this.lineColor = lineColor;
+	public void setBufferColor(int bufferColor) {
+		this.bufferColor = bufferColor;
 	}
 
 	public int getTargetColor() {
@@ -2458,6 +2479,18 @@ public class CustomMapView extends MapView {
 
 	public void setTargetColor(int targetColor) {
 		this.targetColor = targetColor;
+	}
+
+	public void setLoadToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setLoadToolVisible(value);
+	}
+
+	public void setDatabaseToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setDatabaseToolVisible(value);
+	}
+
+	public void setLegacyToolVisible(boolean value) {
+		this.mapLayout.getToolsBarView().setLegacyToolVisible(value);
 	}
 
 }

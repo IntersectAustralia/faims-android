@@ -26,7 +26,7 @@ public class TextStyleDialog extends SettingsDialog {
 			setTitle("Style Settings");
 			
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
-			addTextField("color", "Text Color:", Integer.toHexString(style.color));
+			addColorField("color", "Text Color:", Integer.toHexString(style.color));
 			addRange("size", "Text Size:", style.size, 0, 100);
 			
 			setPositiveButton("Ok", new DialogInterface.OnClickListener() {

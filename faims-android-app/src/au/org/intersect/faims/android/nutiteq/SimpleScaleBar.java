@@ -52,7 +52,7 @@ public class SimpleScaleBar {
 
 	public double scale;
 	double[] allowedScales = { 10000, 5000, 2000, 1000, 500, 200, 100, 50, 20,
-			10, 5, 2, 1, 0.500, 0.200, 0.100, 0.050, 0.020 };
+			10, 5, 2, 1, 0.500, 0.200, 0.100, 0.050, 0.020, 0.010, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001 };
 	
 	private Paint white;
 	private Paint black;

@@ -6,9 +6,12 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -19,6 +22,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.ui.dialog.ColorPickerDialog;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 
 public class ConfigDialog extends AlertDialog {
@@ -37,20 +41,20 @@ public class ConfigDialog extends AlertDialog {
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		layout.setOrientation(LinearLayout.VERTICAL);
 		scrollView.addView(layout);
-		addTextField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
-		addTextField("editColor", "Edit Color:", Integer.toHexString(mapView.getEditViewColor()));
+		addColorField("color", "Select Tool Color:", Integer.toHexString(mapView.getDrawViewColor()));
+		addColorField("editColor", "Edit Tool Color:", Integer.toHexString(mapView.getEditViewColor()));
 		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
-		addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
+		addSlider("textSize", "Details Text Size:", mapView.getDrawViewTextSize());
 		
-		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getActivity().getProject().getSrid());
+		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getProjectSrid());
 		if (isEPSG4326) {
 			addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 		}
-		addCheckBox("showKm", "Show Km:", mapView.showKm());
+		addCheckBox("showKm", "Display measurements in km:", mapView.showKm());
 		addSlider("vertexSize", "Guide Point Size:", mapView.getVertexSize());
-		addTextField("buffer", "Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
-		addTextField("bufferColor", "Buffer Color:", Integer.toHexString(mapView.getLineColor()));
-		addTextField("targetColor", "Target Color:", Integer.toHexString(mapView.getTargetColor()));
+		addTextField("buffer", "Tracker Tool Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
+		addColorField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getBufferColor()));
+		addColorField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
 
 		setView(scrollView);
 		setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
@@ -65,7 +69,7 @@ public class ConfigDialog extends AlertDialog {
 					if (isEPSG4326){
 						showDecimal = !parseCheckBox("showDegrees");
 					}else{
-						showDecimal = false;
+						showDecimal = true;
 					}
 					float vertexSize = parseSlider("vertexSize");
 					boolean showKm = parseCheckBox("showKm");
@@ -84,10 +88,11 @@ public class ConfigDialog extends AlertDialog {
 					mapView.setShowKm(showKm);
 					mapView.setPathBuffer(buffer);
 					
-					mapView.setLineColor(bufferColor);
+					mapView.setBufferColor(bufferColor);
 					mapView.setTargetColor(targetColor);
 					
 					if(mapView.getCurrentTool() != null){
+						mapView.getCurrentTool().onConfigChanged();
 						mapView.getCurrentTool().onMapChanged();
 					}
 				} catch (Exception e) {
@@ -111,6 +116,45 @@ public class ConfigDialog extends AlertDialog {
 		addEditField(name, label, defaultValue, InputType.TYPE_CLASS_TEXT);
 	}
 	
+	public void addColorField(String name, String label, String defaultValue) {
+		TextView labelView = new TextView(getContext());
+		labelView.setText(label);
+		
+		final EditText text = new EditText(getContext());
+		text.setText(defaultValue.toUpperCase(Locale.ENGLISH));
+		text.setInputType(EditorInfo.TYPE_NULL);
+		text.setOnTouchListener(new View.OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View arg0, MotionEvent action) {
+				if(action.getAction() == MotionEvent.ACTION_UP){
+					ColorPickerDialog colorPickerDialog = new ColorPickerDialog(getContext(), new ColorPickerDialog.OnColorChangedListener() {
+						
+						@Override
+						public void colorChanged(int color) {
+							text.setText(convertText(Integer.toHexString(color)));
+							text.setBackgroundColor(Color.parseColor("#"+convertText(Integer.toHexString(color))));
+						}
+
+					}, Color.parseColor("#"+text.getText().toString()));
+					colorPickerDialog.show();
+				}
+				return false;
+			}
+		});
+		text.setBackgroundColor(Color.parseColor("#"+text.getText().toString()));
+		
+		layout.addView(labelView);
+		layout.addView(text);
+		
+		fields.put(name, text);
+		
+	}
+	
+	private String convertText(String color) {
+		return color.toUpperCase(Locale.ENGLISH);
+	}
+
 	public void addNumberField(String name, String label, String defaultValue) {
 		addEditField(name, label, defaultValue, InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 	}
@@ -132,7 +176,7 @@ public class ConfigDialog extends AlertDialog {
 	
 	public void addCheckBox(String name, String label, boolean defaultValue) {
 		TextView labelView = new TextView(getContext());
-		labelView.setText(name);
+		labelView.setText(label);
 		
 		CheckBox box = new CheckBox(getContext());
 		box.setChecked(defaultValue);

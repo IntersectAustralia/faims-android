@@ -157,6 +157,7 @@ public class FollowTool extends HighlightTool {
 		if (!mapView.isProperProjection()) {
 			showError("This tool will not function properly as projection is not a projected coordinate system.");
 		}
+		onConfigChanged();
 	}
 	
 	@Override
@@ -175,7 +176,6 @@ public class FollowTool extends HighlightTool {
 	public void onMapChanged() {
 		super.onMapChanged();
 		drawDistanceAndBearing();
-		drawBuffer();
 	}
 	
 	@Override
@@ -255,7 +255,7 @@ public class FollowTool extends HighlightTool {
 
 			targetPoint = mapView.nextPointToFollow(currentPosition, mapView.getPathBuffer());
 			
-			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getActivity().getProject().getSrid());
+			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getProjectSrid());
 			angle = SpatialiteUtil.computeAzimuth(currentPosition, targetPoint);
 		} catch (Exception e) {
 			FLog.e("error calculating distance and bearing", e);
@@ -285,6 +285,13 @@ public class FollowTool extends HighlightTool {
 		button.setSelectedState(R.drawable.tools_tracker_s);
 		button.setNormalState(R.drawable.tools_tracker);
 		return button;
+	}
+	
+	@Override
+	public void onConfigChanged() {
+		bufferStyle.lineColor = mapView.getBufferColor();
+		
+		targetColor = mapView.getTargetColor();
 	}
 
 }

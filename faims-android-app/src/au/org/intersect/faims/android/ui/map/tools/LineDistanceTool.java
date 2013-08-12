@@ -142,7 +142,7 @@ public class LineDistanceTool extends HighlightTool {
 			if (mapView.getHighlights().size() < 1) return;
 			
 			Line line = (Line) mapView.getHighlights().get(0);
-			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), mapView.getActivity().getProject().getSrid());
+			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), mapView.getProjectSrid());
 			
 		} catch (Exception e) {
 			FLog.e("error calculating line distance", e);

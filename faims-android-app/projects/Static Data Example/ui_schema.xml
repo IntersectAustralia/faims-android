@@ -22,8 +22,14 @@
                   <description></description>
                   <permit_no></permit_no>
                   <permit_holder></permit_holder>
+                  <permit_issued_by></permit_issued_by>
+                  <permit_type></permit_type>
                   <contact_address></contact_address>
                   <participants></participants>
+                  <copyright_holder></copyright_holder>
+                  <client_sponsor></client_sponsor>
+                  <land_owner></land_owner>
+                  <has_sensitive_data></has_sensitive_data>
               </tab1>
           </tabgroup1>
         </faims>
@@ -58,7 +64,7 @@
           <label>Project Id:</label>
         </input>
         <input ref="season" faims_read_only="true">
-          <label>Project Season:</label>
+          <label>Project Year:</label>
         </input>
         <input ref="description" faims_read_only="true">
           <label>Project Description:</label>
@@ -69,11 +75,29 @@
         <input ref="permit_holder" faims_read_only="true">
           <label>Permit Holder:</label>
         </input>
+        <input ref="permit_issued_by" faims_read_only="true">
+          <label>Permit Issued by:</label>
+        </input>
+        <input ref="permit_type" faims_read_only="true">
+          <label>Permit Type:</label>
+        </input>
         <input ref="contact_address" faims_read_only="true">
           <label>Contact and Address:</label>
         </input>
         <input ref="participants" faims_read_only="true">
           <label>Participants:</label>
+        </input>
+        <input ref="copyright_holder" faims_read_only="true">
+          <label>Copyright Holder:</label>
+        </input>
+        <input ref="client_sponsor" faims_read_only="true">
+          <label>Client/Sponsor:</label>
+        </input>
+        <input ref="land_owner" faims_read_only="true">
+          <label>Land Owner:</label>
+        </input>
+        <input ref="has_sensitive_data" faims_read_only="true">
+          <label>Has Sensitive Data:</label>
         </input>
       </group>
     </group>
