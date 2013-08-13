@@ -24,7 +24,7 @@ onEvent("user/tab1/users", "click", "login()");
 
 onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
 onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
-onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
 onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
 onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
 

@@ -89,6 +89,9 @@
               <connectinternal/>
               <startsync/>
               <stopsync/>
+              <startTimeLog/>
+              <startDistanceLog/>
+              <stopTrackLog/>
             </gps>
           </control>
           <structure>
@@ -870,6 +873,15 @@
         </trigger>
         <trigger ref="stopsync">
           <label>{Stop.Synching}</label>
+        </trigger>
+        <trigger ref="startTimeLog">
+          <label>{Start.Time.Log}</label>
+        </trigger>
+        <trigger ref="startDistanceLog">
+          <label>{Start.Distance.Log}</label>
+        </trigger>
+        <trigger ref="stopTrackLog">
+          <label>{Stop.Track.Log}</label>
         </trigger>
       </group>
     </group>
