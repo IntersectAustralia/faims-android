@@ -12,10 +12,10 @@ public class FLog {
 	private static final int WARNING = 4;
 	private static final int ERROR = 8;
 	private static final int VERBOSE = 16;
-	//private static final int ALL = 31;
+	private static final int ALL = 31;
 	
-	//private static int enableLevel = ALL; // use this for debug builds
-	private static int enableLevel = WARNING | ERROR | VERBOSE; // use this for release builds
+	private static int enableLevel = ALL; // use this for debug builds
+	//private static int enableLevel = WARNING | ERROR | VERBOSE; // use this for release builds
 	
 	private static boolean hasLevel(int type) {
 		return (enableLevel & type) == type;
