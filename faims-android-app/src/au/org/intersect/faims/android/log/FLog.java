@@ -7,48 +7,73 @@ public class FLog {
 	
 	private static final String TAG = "FAIMS";
 	
+	private static final int DEBUG = 1;
+	private static final int INFO = 2;
+	private static final int WARNING = 4;
+	private static final int ERROR = 8;
+	private static final int VERBOSE = 16;
+	private static final int ALL = 31;
+	
+	private static int enableLevel = ALL; // use this for debug builds
+	//private static int enableLevel = WARNING | ERROR | VERBOSE; // use this for release builds
+	
+	private static boolean hasLevel(int type) {
+		return (enableLevel & type) == type;
+	}
+	
 	public static int c() {
-		return Log.d(TAG, formatMsg());
+		if (hasLevel(DEBUG)) return Log.d(TAG, formatMsg());
+		return -1;
 	}
 	
 	public static int d(String msg) {
-		return Log.d(TAG, formatMsg(msg));
+		if (hasLevel(DEBUG)) return Log.d(TAG, formatMsg(msg));
+		return -1;
 	}
 	
 	public static int d(String msg, Throwable tr) {
-		return Log.d(TAG, formatMsg(msg), tr);
+		if (hasLevel(DEBUG)) Log.d(TAG, formatMsg(msg), tr);
+		return -1;
 	}
 	
 	public static int e(String msg) {
-		return Log.e(TAG, formatMsg(msg));
+		if (hasLevel(ERROR)) return Log.e(TAG, formatMsg(msg));
+		return -1;
 	}
 	
 	public static int e(String msg, Throwable tr) {
-		return Log.e(TAG, formatMsg(msg), tr);
+		if (hasLevel(ERROR)) return Log.e(TAG, formatMsg(msg), tr);
+		return -1;
 	}
 	
 	public static int i(String msg) {
-		return Log.i(TAG, formatMsg(msg));
+		if (hasLevel(INFO)) return Log.i(TAG, formatMsg(msg));
+		return -1;
 	}
 	
 	public static int i(String msg, Throwable tr) {
-		return Log.i(TAG, formatMsg(msg), tr);
+		if (hasLevel(INFO)) return Log.i(TAG, formatMsg(msg), tr);
+		return -1;
 	}
 	
 	public static int v(String msg) {
-		return Log.v(TAG, formatMsg(msg));
+		if (hasLevel(VERBOSE)) return Log.v(TAG, formatMsg(msg));
+		return -1;
 	}
 	
 	public static int v(String msg, Throwable tr) {
-		return Log.v(TAG, formatMsg(msg), tr);
+		if (hasLevel(VERBOSE)) return Log.v(TAG, formatMsg(msg), tr);
+		return -1;
 	}
 	
 	public static int w(String msg) {
-		return Log.w(TAG, formatMsg(msg));
+		if (hasLevel(WARNING)) return Log.w(TAG, formatMsg(msg));
+		return -1;
 	}
 	
 	public static int w(String msg, Throwable tr) {
-		return Log.w(TAG, formatMsg(msg), tr);
+		if (hasLevel(WARNING)) return Log.w(TAG, formatMsg(msg), tr);
+		return -1;
 	}
 	
 	private static String formatMsg() {
