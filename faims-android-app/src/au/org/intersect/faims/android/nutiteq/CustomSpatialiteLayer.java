@@ -81,8 +81,8 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
 		for (String layerKey : dbLayers.keySet()) {
 			DBLayer layer = dbLayers.get(layerKey);
-			if (layer.table.compareTo(tableName) == 0
-					&& layer.geomColumn.compareTo(geomColumnName) == 0) {
+			if (layer.table.equalsIgnoreCase(tableName)
+					&& layer.geomColumn.equalsIgnoreCase(geomColumnName)) {
 				this.dbLayer = layer;
 				break;
 			}

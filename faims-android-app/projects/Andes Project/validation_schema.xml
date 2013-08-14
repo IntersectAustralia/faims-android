@@ -1,0 +1,32 @@
+<ValidationSchema>
+
+	<ArchaeologicalElement type='Structure'>
+
+		<property name='ArchaeologicalElementID'>
+		    
+		    <validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+
+			<validator type='querychecker'>
+                <query><![CDATA[select length(coalesce(?, '')) < 10, 'Field value is too long']]></query>
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'ArchaeologicalElementID';" />
+			</validator>
+
+		</property>
+
+		<property name='Description'>
+		    <validator type='evaluator' cmd='spell.sh ?'>
+				<param type='field' value='freetext' />
+			</validator>
+		</property>
+
+		<property name='WallsTotalCount'>
+		    <validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+			</validator>
+		</property>
+
+	</ArchaeologicalElement>
+
+</ValidationSchema>

@@ -1,30 +1,84 @@
 /*** MAP ***/
 
-DATA_ENTRY_LAYER = "Data Entry";
+DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
+
+initStatic() {
+	setFieldValue("control/static/name", getProjectName());
+	setFieldValue("control/static/id", getProjectId());
+	setFieldValue("control/static/season", getProjectSeason());
+	setFieldValue("control/static/description", getProjectDescription());
+	setFieldValue("control/static/permit_no", getPermitNo());
+	setFieldValue("control/static/permit_holder", getPermitHolder());
+	setFieldValue("control/static/contact_address", getContactAndAddress());
+	setFieldValue("control/static/participants", getParticipants());
+	setFieldValue("control/static/permit_issued_by", getPermitIssuedBy());
+	setFieldValue("control/static/permit_type", getPermitType());
+	setFieldValue("control/static/copyright_holder", getCopyrightHolder());
+	setFieldValue("control/static/client_sponsor", getClientSponsor());
+	setFieldValue("control/static/land_owner", getLandOwner());
+	setFieldValue("control/static/has_sensitive_data", hasSensitiveData());
+}
+
+initStatic();
 
 initMap() {
 	setMapZoom("control/map/map", 19.0f);
 
-	showBaseMap("control/map/map", "Base Map", "files/data/maps/andes.tif");
-	//showRasterMap("control/map/map", "Raster Map", "files/data/maps/map2.tif");
+	showBaseMap("control/map/map", "Base Layer", "files/data/maps/andes.tif");
 
     DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
 
-	isEntity = true; // are you loading entities or relationships?
-	queryName = "No Query"; // Name your query
-	querySQL = null; // Add your select sql query here note: it should have first column return the uuid or relationshipid
+	isEntity = true;
+	queryName = "All entities";
+	querySQL =
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) != lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)";
+	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
 
+	addTrackLogLayerQuery("control/map/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+		
+	addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower(?) \n" + 
+		"   group by uuid").addParameter("Type", "Structure"));
+		
+	addLegacySelectQueryBuilder("control/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
+		createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
+					
 	// define database layer styles for points, lines, polygons and text
 	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
 	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
 	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
 	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
 
-	showDatabaseLayer("control/map/map", "Database Example", isEntity, queryName, querySQL, ps, ls, pos, ts);
+	showDatabaseLayer("control/map/map", "Entity Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
 }
 
 initMap();
+
+onToolEvent("control/map/map", "load", "onLoadData()");
+
+onLoadData() {
+	id = getMapGeometryLoaded();
+	is_entity = "entity".equals(getMapGeometryLoadedType());
+	
+	showToast("To load entity please use load tab");
+}
 
 onEvent("control/map/clear", "click", "onClearMap()");
 onEvent("control/map/create", "click", "onCreateMap()");
@@ -140,11 +194,12 @@ AttributeDef(String name, String type, String ref, boolean saveCertainty) {
 	return this;
 }
 
-AttributeDef(String name, String type, String ref, ArrayList loadedFiles) {
+AttributeDef(String name, String type, String ref, ArrayList loadedFiles, boolean sync) {
 	this.name = name;
 	this.type = type;
 	this.ref = ref;
 	this.loadedFiles = loadedFiles;
+	this.sync = sync;
 	return this;
 }
 
@@ -182,7 +237,7 @@ OnFilesAttached() {
 	checkFilesAttached();
 }
 
-saveFiles(loadedFiles, files, type, attributes) {
+saveFiles(loadedFiles, files, type, attributes, sync) {
 	if (isNull(files)) {
 		files = new ArrayList();
 	}
@@ -197,12 +252,11 @@ saveFiles(loadedFiles, files, type, attributes) {
 
 	// add new attributes that are included
 	hasAttachment = false;
-	attachmentCount = 0;
 	for (String file : files) {
 		String filename = null;
 		if (!hasFile(loadedFiles, file)) {
 			hasAttachment = true;
-			filename = attachFile(file, true, null, "OnFilesAttached()");
+			filename = attachFile(file, sync, null, "OnFilesAttached()");
 		} else {
 			for (String f : loadedFiles) {
 				if (f.equals(file)) {
@@ -256,14 +310,14 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     	} else if ("vocab".equals(def.type)) {
     		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
     	} else if ("files".equals(def.type)) {
-    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes);
+    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes, def.sync);
     	} else if ("attachments".equals(def.type)) {
     		List pairs = getFieldValue(def.ref);
     		ArrayList files = new ArrayList();
     		for (NameValuePair pair : pairs) {
     			files.add(pair.getName());
     		}
-    		saveFiles(def.loadedFiles, files, def.name, attributes);
+    		saveFiles(def.loadedFiles, files, def.name, attributes, def.sync);
     	} else if ("gps".equals(def.type)) {
     		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
 	    		geoData = new ArrayList();
@@ -828,7 +882,7 @@ updateCorner(id) {
 	    	AttributeDef("NicheCount", "measure", "corner/cornerDetail/NicheCount", false),
 	    	AttributeDef("CornerHeight", "measure", "corner/cornerDetail/CornerHeight"),
 	    	AttributeDef("CornerDescription", "freetext", "corner/cornerDetail/CornerDescription"),
-	    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures),
+	    	AttributeDef("CornerPhotos", "files", "corner/cornerDetail/PhotoGallery", loadedPictures, true),
 	    	AttributeDef("MasonryType", "vocab", "corner/cornerDetail/MasonryType"),
 	    	AttributeDef("MasonryDescription", "freetext", "corner/cornerDetail/MasonryDescription"),
 	    	AttributeDef("InkaMasonry", "vocab", "corner/cornerDetail/InkaMasonry"),
@@ -977,7 +1031,7 @@ updateNiche(id) {
     	AttributeDef("NicheHeightPreservation", "vocab", "niche/nicheDetail/NicheHeightPreservation"),
     	AttributeDef("NicheAltar", "vocab", "niche/nicheDetail/NicheAltar"),
     	AttributeDef("NicheDescription", "freetext", "niche/nicheDetail/NicheDescription"),
-    	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("NichePhotos", "files", "niche/nicheDetail/PhotoGallery", loadedPictures, true)
     	};
     // TODO update the niche count in structure wall and niches recorded in the structure
     saved_id= saveEntity(id, "Niche", attributeDefs, null, "loadNicheFileAttributes(niche_id);");
@@ -1116,7 +1170,7 @@ updateCanal(id) {
     	AttributeDef("InternalWidth", "measure", "canal/canalDetail/InternalWidth"),
     	AttributeDef("ExternalWidth", "measure", "canal/canalDetail/ExternalWidth"),
     	AttributeDef("Notes", "freetext", "canal/canalDetail/Notes"),
-    	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("Photos", "files", "canal/canalDetail/PhotoGallery", loadedPictures, true)
     	};
 
 	data = getCreatedGeometry();
@@ -1206,7 +1260,7 @@ updateWindow(id) {
     	AttributeDef("WindowWidth", "measure", "window/windowDetail/WindowWidth"),
     	AttributeDef("WindowHeightPreservation", "vocab", "window/windowDetail/WindowHeightPreservation"),
     	AttributeDef("WindowDescription", "freetext", "window/windowDetail/WindowDescription"),
-    	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("WindowPhotos", "files", "window/windowDetail/PhotoGallery", loadedPictures, true)
     	};
     // TODO update the window count on structure wall and window recorded on structure
     saved_id = saveEntity(id, "Window", attributeDefs, null, "loadWindowFileAttributes(window_id);");
@@ -1307,7 +1361,7 @@ updateSpecialFind(id) {
     	AttributeDef("Device", "freetext", "specialFind/findDetail/Device", false),
     	AttributeDef("Description", "freetext", "specialFind/findDetail/Description"),
     	AttributeDef("Type", "vocab", "specialFind/findDetail/Type"),
-    	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("Photos", "files", "specialFind/findDetail/PhotoGallery", loadedPictures, true)
     	};
 
 	data = getCreatedGeometry();
@@ -1402,7 +1456,7 @@ updateFeature(id) {
     	AttributeDef("Author", "freetext" , "feature/featureDetail/Author", false),
     	AttributeDef("Device", "freetext", "feature/featureDetail/Device", false),
     	AttributeDef("Description", "freetext", "feature/featureDetail/Description"),
-    	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("Photos", "files", "feature/featureDetail/PhotoGallery", loadedPictures, true)
     	};
 
 	data = getCreatedGeometry();
@@ -1506,7 +1560,7 @@ updateFreeWall(id) {
     	AttributeDef("WallHeightPreservation", "vocab", "freeWall/freeWallDetail/WallHeightPreservation"),
     	AttributeDef("WallThickness", "measure", "freeWall/freeWallDetail/WallThickness"),
     	AttributeDef("WallComments", "freetext", "freeWall/freeWallDetail/WallComments"),
-    	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures)
+    	AttributeDef("WallPhotos", "files", "freeWall/freeWallDetail/PhotoGallery", loadedPictures, true)
     	};
 
 	data = getCreatedGeometry();
@@ -1632,7 +1686,7 @@ updateDoorway(id) {
     	AttributeDef("DoorOtherWidth", "measure", "doorway/doorDetail/DoorOtherWidth"),
     	AttributeDef("DoorOtherWidthHeight", "measure", "doorway/doorDetail/DoorOtherWidthHeight"),
     	AttributeDef("DoorDescription", "freetext", "doorway/doorDetail/DoorDescription"),
-    	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures),
+    	AttributeDef("DoorPhotos", "files", "doorway/doorDetail/PhotoGallery", loadedPictures, true),
     	AttributeDef("", "gps", "doorway/doorDetail/GPSLong", "doorway/doorDetail/GPSLat")
     	};
 
@@ -1736,7 +1790,7 @@ updateLichen(id) {
     	AttributeDef("Aspect", "vocab", "lichen/lichenDetail/Aspect"),
     	AttributeDef("InsideOutside", "vocab", "lichen/lichenDetail/InsideOutside"),
     	AttributeDef("Comments", "freetext", "lichen/lichenDetail/Comments"),
-    	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures),
+    	AttributeDef("Photos", "files", "lichen/lichenDetail/PhotoGallery", loadedPictures, true),
     	AttributeDef("", "gps", "lichen/lichenDetail/GPSLong", "lichen/lichenDetail/GPSLat")
     	};
 
@@ -2018,7 +2072,7 @@ updateStructureWall(id) {
 	    	AttributeDef("WindowCount", "measure", "wall/structureWall/WindowCount", false),
 	    	AttributeDef("NicheCount", "measure", "wall/structureWall/NicheCount", false),
 	    	AttributeDef("DoorwayCount", "measure", "wall/structureWall/DoorwayCount", false),
-	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures),
+	    	AttributeDef("WallPhotos", "files", "wall/structureWall/PhotoGallery", loadedPictures, true),
 	    	};
 
 
@@ -2295,11 +2349,11 @@ updateStructure(id){
     	AttributeDef("ModernUse", "freetext", "structure/info/ModernUse"),
     	AttributeDef("Disturbances", "freetext", "structure/info/Disturbances"),
     	AttributeDef("OtherArchitecturalDetails", "freetext", "structure/info/OtherArchitecturalDetails"),
-    	AttributeDef("Photo", "files", "structure/final/PhotoGallery", loadedPictures),
-    	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches),
-    	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles),
-    	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos),
-    	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios)
+    	AttributeDef("Photo", "files", "structure/final/PhotoGallery", loadedPictures, true),
+    	AttributeDef("sketchfilename", "attachments", "structure/final/sketchfilelist", loadedSketches, false),
+    	AttributeDef("filename", "attachments", "structure/final/filelist", loadedFiles, false),
+    	AttributeDef("video", "files", "structure/final/VideoGallery", loadedVideos, false),
+    	AttributeDef("audio", "attachments", "structure/final/AudioList", loadedAudios, false)
     	};
 
 	data = getCreatedGeometry();

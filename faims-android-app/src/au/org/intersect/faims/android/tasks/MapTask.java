@@ -133,8 +133,8 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 		DBLayer dbLayer = null;
 		for (String layerKey : dbLayers.keySet()) {
 			DBLayer layer = dbLayers.get(layerKey);
-			if (layer.table.compareTo(customSpatialiteLayer.getTableName()) == 0
-					&& layer.geomColumn.compareTo(customSpatialiteLayer.getGeometryColumn()) == 0) {
+			if (layer.table.equalsIgnoreCase(customSpatialiteLayer.getTableName())
+					&& layer.geomColumn.equalsIgnoreCase(customSpatialiteLayer.getGeometryColumn())) {
 				dbLayer = layer;
 				break;
 			}

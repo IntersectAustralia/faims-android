@@ -121,7 +121,7 @@
 				<param type='field' value='certainty' />
 			</validator>
 
-		    <validator type='typechecker' datatype='rel'>
+		    <validator type='typechecker' datatype='real'>
 				<param type='field' value='measure' />
 			</validator>
 
