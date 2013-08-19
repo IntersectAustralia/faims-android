@@ -18,7 +18,7 @@ import com.nutiteq.style.PointStyle;
 public class GeometryUtil {
 
 	public static final String EPSG4326 = "4326";
-	public static final String EPSG3785 = "3785";
+	public static final String EPSG3857 = "3857";
 
 	public static Geometry fromGeometry(Geometry geom) {
 		if (geom instanceof Point) {

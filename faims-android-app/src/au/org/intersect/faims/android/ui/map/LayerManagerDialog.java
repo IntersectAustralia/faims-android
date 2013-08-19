@@ -1060,7 +1060,7 @@ public class LayerManagerDialog extends AlertDialog {
 					mapView.putUserCheckList(itemView.getUser(),false);
 					trackLogDatabaseLayer.toggleUser(itemView.getUser(), false);
 				}
-				mapView.updateRenderer();
+				mapView.refreshMap();
 			}
 		});
 
@@ -1314,7 +1314,7 @@ public class LayerManagerDialog extends AlertDialog {
 					} else if (layer instanceof DatabaseLayer) {
 						((DatabaseLayer) layer).setMaxObjects(limit);
 					}
-					mapView.updateRenderer();
+					mapView.refreshMap();
 				} catch (Exception e) {
 					FLog.e("error setting config", e);
 					showErrorDialog(e.getMessage());

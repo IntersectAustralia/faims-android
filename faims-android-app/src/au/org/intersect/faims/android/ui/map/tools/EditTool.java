@@ -151,7 +151,6 @@ public class EditTool extends HighlightTool {
 						}
 					}
 				}
-				mapView.updateRenderer();
 			}
 		} catch (Exception e) {
 			FLog.e("error resetting vertex geometry", e);
@@ -215,7 +214,6 @@ public class EditTool extends HighlightTool {
 							}
 								
 						}
-						mapView.updateRenderer();
 						
 						EditTool.this.vertexGeometry = null;
 						EditTool.this.vertexGeometryToPointsMap = null;
@@ -270,7 +268,6 @@ public class EditTool extends HighlightTool {
 								vertexGeometryToPointsMap.put(geom, geometryPoints);
 							}
 							mapView.clearHighlights();
-							mapView.updateRenderer();
 							
 							EditTool.this.vertexGeometry = vertexGeometry;
 							EditTool.this.vertexGeometryToPointsMap = vertexGeometryToPointsMap;

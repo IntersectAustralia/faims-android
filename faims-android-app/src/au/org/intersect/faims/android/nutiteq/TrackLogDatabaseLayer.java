@@ -39,9 +39,6 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 	
 	@Override
 	public void loadData(Envelope envelope, int zoom) {
-		if (renderAll && hasRendered) return;
-	    hasRendered = true;
-		
 		try {
 			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			if (type == Type.GPS_TRACK) {
@@ -74,11 +71,8 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 		}
 		
 		if (textLayer != null) {
-			try {
-				textLayer.calculateVisibleElementsCustom(envelope, zoom);
-			} catch (Exception e) {
-				FLog.e("error updating text layer", e);
-			}
+			textLayer.renderOnce();
+			textLayer.calculateVisibleElements(envelope, zoom);
 		}
 	}
 }

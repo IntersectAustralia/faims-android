@@ -43,11 +43,12 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	private String[] userColumns;
 
 	private CustomMapView mapView;
-	private boolean renderAll;
-	private boolean hasRendered;
 
 	private int autoSimplifyPixels;
 	private int screenWidth;
+	
+	private boolean renderAll;
+	private boolean renderOnce;
 
 	public CustomSpatialiteLayer(int layerId, String name, Projection proj, CustomMapView mapView, String dbPath,
 			String tableName, String geomColumnName, String[] userColumns,
@@ -168,17 +169,20 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		this.maxObjects = value;
 	}
 
-	public void renderAllVectors(boolean value) {
-		renderAll = value;
-		hasRendered = false;
-	}
-
 	public void add(Geometry element) {
 		throw new UnsupportedOperationException();
 	}
 
 	public void remove(Geometry element) {
 		throw new UnsupportedOperationException();
+	}
+	
+	public void renderAllVectors(boolean value) {
+		renderAll = value;
+	}
+	
+	public void renderOnce() {
+		renderOnce = true;
 	}
 
 	@Override
@@ -192,7 +196,10 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 			return;
 		}
 
-		executeVisibilityCalculationTask(new LoadDataTask(envelope,zoom));
+		if (renderOnce) {
+			renderOnce = false;
+			executeVisibilityCalculationTask(new LoadDataTask(envelope,zoom));
+		}
 	}
 
 	protected GeometryStyle getGeometryStyle(Geometry geom) {
@@ -261,9 +268,8 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	}
 
 	public void loadData(Envelope envelope, int zoom) {
-		if (renderAll && hasRendered) return;
-		hasRendered = true;
-
+		//long time = System.currentTimeMillis();
+		
 		try {
 			MapPos bottomLeft = projection.fromInternal(envelope.getMinX(), envelope.getMinY());
 			MapPos topRight = projection.fromInternal(envelope.getMaxX(), envelope.getMaxY());
@@ -311,12 +317,11 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		}
 
 		if (textLayer != null) {
-			try {
-				textLayer.calculateVisibleElementsCustom(envelope, zoom);
-			} catch (Exception e) {
-				FLog.e("error updating text layer", e);
-			}
+			textLayer.renderOnce();
+			textLayer.calculateVisibleElements(envelope, zoom);
 		}
+		
+		//FLog.d("time: " + (System.currentTimeMillis() - time) / 1000);
 	}
 
 }

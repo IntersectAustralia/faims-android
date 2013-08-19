@@ -17,7 +17,7 @@ public class EditView extends DrawView {
 	
 	protected MapPos projectPoint(MapPos p) {
 		p = GeometryUtil.transformVertex(p, mapView, false);
-		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, mapView.getProjectSrid(), p);
+		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, mapView.getProjectSrid(), p);
 	}
 
 }

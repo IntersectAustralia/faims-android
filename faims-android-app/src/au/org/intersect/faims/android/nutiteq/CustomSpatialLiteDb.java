@@ -56,17 +56,9 @@ public class CustomSpatialLiteDb extends SpatialLiteDb {
 
         }
         
-
-        String qry;
-        if (!dbLayer.spatialIndex) {
-            qry = "SELECT HEX(AsBinary(extent(" + geomCol + "))) "
+        
+        String qry = "SELECT HEX(AsBinary(extent(" + geomCol + "))) "
                     + " from " + dbLayer.table;
-        } else {
-            qry = "SELECT HEX(AsBinary(extent(" + geomCol + "))) "
-                    + " from " + dbLayer.table
-                    + " where ROWID IN (select pkid from idx_"
-                    + dbLayer.table + "_" + dbLayer.geomColumn;
-        }
 
         FLog.d(qry);
         try {

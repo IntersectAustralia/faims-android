@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -109,7 +110,6 @@ public class CustomMapView extends MapView {
 
 		@Override
 		public void onDrawFrameAfter3D(GL10 arg0, float arg1) {
-
 		}
 
 		@Override
@@ -132,6 +132,11 @@ public class CustomMapView extends MapView {
 
 		@Override
 		public void onMapMoved() {
+			MapPos p = CustomMapView.this.getFocusPoint();
+			boolean mapMoved = lastMapPoint == null || Double.compare(lastMapPoint.x, p.x) != 0 || Double.compare(lastMapPoint.y, p.y) != 0;
+			CustomMapView.this.lastMapMoved = mapMoved;
+			CustomMapView.this.lastMapPoint = p;
+			
 			if (CustomMapView.this.toolsEnabled && CustomMapView.this.currentTool != null) {
 				CustomMapView.this.currentTool.onMapChanged();
 			}
@@ -320,6 +325,10 @@ public class CustomMapView extends MapView {
 	private ToggleButton layerDisplayButton;
 
 	private String projectSrid;
+
+	private MapPos lastMapPoint;
+	
+	private boolean lastMapMoved;
 	
 	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
 		this(activity);
@@ -665,6 +674,18 @@ public class CustomMapView extends MapView {
 	        }
 	    });
 	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		switch (event.getAction()) {
+	        case MotionEvent.ACTION_UP:
+	            if (lastMapMoved) {
+	            	refreshMap();
+	            }
+	            break;
+	    }
+		return super.onTouchEvent(event);
+	}
 
 	@Override
 	protected void onConfigurationChanged(Configuration newConfig) {
@@ -804,6 +825,7 @@ public class CustomMapView extends MapView {
 					+ latitude);
 		}
 		this.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
+		refreshMap();
 	}
 
 	public int addShapeLayer(String layerName, String file,
@@ -1336,7 +1358,7 @@ public class CustomMapView extends MapView {
 				activityRef.get().getDatabaseManager().updateRel(data.id, WKTUtil.collectionToWKT(geomList));
 			}
 			
-			this.updateRenderer();
+			refreshMap();
 		} catch (Exception e) {
 			FLog.e("error saving geometry", e);
 		}
@@ -1354,10 +1376,12 @@ public class CustomMapView extends MapView {
 				activityRef.get().getDatabaseManager().deleteRel(data.id);
 			}
 			clearHighlights();
+			
 			GeometryData geomData = (GeometryData) geom.userData;
 			removeFromAllSelections(geomData.id);
 			updateSelections();
-			this.updateRenderer();
+			
+			refreshMap();
 		} catch (Exception e) {
 			FLog.e("error deleting geometry", e);
 		}
@@ -1365,7 +1389,7 @@ public class CustomMapView extends MapView {
 
 	public void clearHighlightTransform() {
 		transformGeometryList = null;
-		updateRenderer();
+		updateDrawView();
 	}
 	
 	private void updateDrawView() {
@@ -1489,6 +1513,7 @@ public class CustomMapView extends MapView {
 					
 					Thread.sleep(1000);
 					while(CustomMapView.this.canRunThreads()) {
+						
 						activityRef.get().runOnUiThread(new Runnable() {
 
 							@Override
@@ -1516,6 +1541,19 @@ public class CustomMapView extends MapView {
         });
 	}
 	
+	public void refreshMap() {
+		List<Layer> layers = this.getAllLayers();
+		for (Layer layer : layers) {
+			if (layer instanceof CustomSpatialiteLayer) {
+				((CustomSpatialiteLayer) layer).renderOnce();
+			} else if (layer instanceof DatabaseLayer) {
+				((DatabaseLayer) layer).renderOnce();
+			}
+		}
+		
+		updateRenderer();
+	}
+
 	private void updateMapMarker() {
 		if (currentPositionLayer != null && previousLocation != null) {
 			MapPos p = new MapPos(previousLocation.getLongitude(), previousLocation.getLatitude());
@@ -1823,7 +1861,7 @@ public class CustomMapView extends MapView {
 		if (currentTool != null) {
 			currentTool.onSelectionChanged();
 		}
-		updateRenderer();
+		refreshMap();
 	}
 
 	public void addSelectQueryBuilder(String name, QueryBuilder builder) {

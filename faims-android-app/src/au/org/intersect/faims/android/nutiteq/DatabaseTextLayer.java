@@ -24,6 +24,8 @@ public class DatabaseTextLayer extends TextLayer {
 	private StyleSet<TextStyle> styleSet;
 	private int minZoom;
 	private Vector<Text> objects;
+	
+	private boolean renderOnce;
 
 	public DatabaseTextLayer(Projection projection, DatabaseLayer databaseLayer, StyleSet<TextStyle> styleSet) {
 		super(projection);
@@ -34,58 +36,61 @@ public class DatabaseTextLayer extends TextLayer {
 		}
 	}
 	
-	@Override
-	public void calculateVisibleElements(Envelope envelope, int zoom) {
-		if (objects != null) {
-			 setVisibleElementsList(objects);
-		}
+	public void renderOnce() {
+		renderOnce = true;
 	}
 	
-	public void calculateVisibleElementsCustom(Envelope envelope, int zoom) {
+	@Override
+	public void calculateVisibleElements(Envelope envelope, int zoom) {
 		objects = new Vector<Text>();
 		
 		if (zoom < minZoom) {
 	        setVisibleElementsList(null);
 	      return;
 	    }
+		
+		if (renderOnce) {
+			renderOnce = false;
 
-	    List<Geometry> geometries = databaseLayer.getVisibleElements();
-	    if (geometries == null || geometries.size() == 0) {
-	    	setVisibleElementsList(null);
-	    	return;
-	    }
-	    
-	    for(Geometry geom: geometries){
-	        
-			GeometryData userData = (GeometryData) geom.userData;
-	        String label = userData.label;
-	        
-	        MapPos topRight = null;
-	        if (geom instanceof Point) {
-	        	topRight = ((Point) geom).getMapPos();
-	        } else if (geom instanceof Line) {
-	        	topRight = ((Line) geom).getVertexList().get(0);
-	        } else if (geom instanceof Polygon) {
-	        	try {
-	        		MapPos center = SpatialiteUtil.computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
-	        		topRight = GeometryUtil.convertFromWgs84(center);
-	        	} catch (Exception e) {
-	        		topRight = new MapPos(0, 0);
-	        		FLog.e("error computing centroid of polygon", e);
-	        	}
-	        } else {
-	        	FLog.e("invalid geometry type");
-	        }
-	        
-	        Text newText = new Text(topRight, label, styleSet, null);
-	        
-	        newText.attachToLayer(this);
-	        newText.setActiveStyle(zoom);
-	        
-	        objects.add(newText);
-	    }
-	    
-	    setVisibleElementsList(objects);
+		    List<Geometry> geometries = databaseLayer.getVisibleElements();
+		    if (geometries == null || geometries.size() == 0) {
+		    	setVisibleElementsList(null);
+		    	return;
+		    }
+		    
+		    for(Geometry geom: geometries){
+		        
+				GeometryData userData = (GeometryData) geom.userData;
+		        String label = userData.label;
+		        
+		        MapPos topRight = null;
+		        if (geom instanceof Point) {
+		        	topRight = ((Point) geom).getMapPos();
+		        } else if (geom instanceof Line) {
+		        	topRight = ((Line) geom).getVertexList().get(0);
+		        } else if (geom instanceof Polygon) {
+		        	try {
+		        		MapPos center = SpatialiteUtil.computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
+		        		topRight = GeometryUtil.convertFromWgs84(center);
+		        	} catch (Exception e) {
+		        		topRight = new MapPos(0, 0);
+		        		FLog.e("error computing centroid of polygon", e);
+		        	}
+		        } else {
+		        	FLog.e("invalid geometry type");
+		        }
+		        
+		        Text newText = new Text(topRight, label, styleSet, null);
+		        
+		        newText.attachToLayer(this);
+		        newText.setActiveStyle(zoom);
+		        
+		        objects.add(newText);
+		    }
+		    
+		    setVisibleElementsList(objects);
+		    
+		}
 	}
 
 }

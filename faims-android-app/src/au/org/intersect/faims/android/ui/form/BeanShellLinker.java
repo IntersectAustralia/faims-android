@@ -456,7 +456,7 @@ public class BeanShellLinker {
 					@Override
 					public void onMapClicked(double x, double y, boolean arg2) {
 						try {
-							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), new MapPos(x, y));
+							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), new MapPos(x, y));
 							interpreter.set("_map_point_clicked", p);
 							execute(clickCallback);
 						} catch (Exception e) {
@@ -3083,7 +3083,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
 						.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3102,7 +3102,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
 						.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3208,7 +3208,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3785, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
 						.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -3942,7 +3942,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				mapView.updateRenderer();
+				mapView.refreshMap();
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

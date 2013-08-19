@@ -44,8 +44,9 @@ public class DatabaseLayer extends GeometryLayer {
 	protected CustomMapView mapView;
 	protected String userid;
 	protected ArrayList<String> hideGeometryList;
+	
 	protected boolean renderAll;
-	protected boolean hasRendered;
+	private boolean renderOnce;
 
 	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
 			int maxObjects, GeometryStyle pointStyle,
@@ -149,14 +150,25 @@ public class DatabaseLayer extends GeometryLayer {
 		this.maxObjects = value;
 	}
 
+	public void renderAllVectors(boolean value) {
+		renderAll = value;
+	}
+	
+	public void renderOnce() {
+		renderOnce = true;
+	}
+
 	@Override
 	public void calculateVisibleElements(Envelope envelope, int zoom) {
 		if (zoom < minZoom) {
 			setVisibleElementsList(null);
 			return;
 		}
-
-		executeVisibilityCalculationTask(new LoadDataTask(envelope,zoom));
+		
+		if (renderOnce) {
+			renderOnce = false;
+			executeVisibilityCalculationTask(new LoadDataTask(envelope,zoom));
+		}
 	}
 
 	public void createElementsInLayer(int zoom, Vector<Geometry> objectTemp,
@@ -224,11 +236,6 @@ public class DatabaseLayer extends GeometryLayer {
 		hideGeometryList.clear();
 	}
 
-	public void renderAllVectors(boolean value) {
-		renderAll = value;
-		hasRendered = false;
-	}
-
 	protected class LoadDataTask implements Task {
 		final Envelope envelope;
 		final int zoom;
@@ -254,9 +261,8 @@ public class DatabaseLayer extends GeometryLayer {
 	}
 
 	public void loadData(Envelope envelope, int zoom) {
-		if (renderAll && hasRendered) return;
-		hasRendered = true;
-
+		//long time = System.currentTimeMillis();
+		
 		try {
 			ArrayList<MapPos> pts = mapView.getMapBoundaryPts();
 			Vector<Geometry> objectTemp = null;
@@ -282,12 +288,11 @@ public class DatabaseLayer extends GeometryLayer {
 		}
 		
 		if (textLayer != null) {
-			try {
-				textLayer.calculateVisibleElementsCustom(envelope, zoom);
-			} catch (Exception e) {
-				FLog.e("error updating text layer", e);
-			}
+			textLayer.renderOnce();
+			textLayer.calculateVisibleElements(envelope, zoom);
 		}
+		
+		//FLog.d("time: " + (System.currentTimeMillis() - time) / 1000);
 	}
 
 }

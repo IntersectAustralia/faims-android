@@ -6,7 +6,6 @@ import java.util.Stack;
 
 import au.org.intersect.faims.android.log.FLog;
 
-import com.nutiteq.components.Components;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -68,12 +67,6 @@ public class CanvasLayer extends GeometryLayer {
 		}
 		
 		setVisibleElementsList(newVisibleElementsList);
-		
-		// Update renderer
-		Components components = getComponents();
-		if (components != null) {
-		  components.mapRenderers.getMapRenderer().frustumChanged();
-		}
 	}
 
 	public Point addPoint(int geomId, MapPos point, GeometryStyle style) {		
