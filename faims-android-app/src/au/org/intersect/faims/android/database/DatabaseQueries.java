@@ -158,7 +158,7 @@ public final class DatabaseQueries {
 			"                                      measure,\n" + 
 			"                                      vocabname,\n" + 
 			"                                      freetext), ' | ') as response, hex(asbinary(geospatialcolumn))\n" + 
-			"FROM (  SELECT uuid, geospatialcolumn, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" + 
+			"FROM (  SELECT uuid, geospatialcolumn, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, archentity.rowid as arowid\n" + 
 			"          FROM aentvalue\n" + 
 			"          JOIN attributekey USING (attributeid)\n" + 
 			"          join archentity USING (uuid)\n" + 
@@ -170,9 +170,10 @@ public final class DatabaseQueries {
 			"              GROUP BY uuid, attributeid\n" + 
 			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" + 
 						userQuery +
-			"          WHERE aentvalue.deleted is NULL\n" + 
+			"          WHERE " +
+			"          arowid in (select pkid from idx_archentity_geospatialcolumn where pkid MATCH RtreeIntersects(?, ?, ?, ?))" +
+			"		   and aentvalue.deleted is NULL\n" + 
 			"          and archentity.deleted is NULL\n" + 
-			"          and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n" + 
 			"       ORDER BY uuid, attributename ASC, valuetimestamp desc)\n" + 
 			"group by uuid limit ?;";
 	}
@@ -206,7 +207,7 @@ public final class DatabaseQueries {
 			"                                      vocabname,\n" + 
 			"                                      freetext), ' | ') as response, Hex(AsBinary(geospatialcolumn))\n" + 
 			"      from (\n" + 
-			"      SELECT relationshipid, geospatialcolumn, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" + 
+			"      SELECT relationshipid, geospatialcolumn, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, relationship.rowid as rrowid\n" + 
 			"          FROM relnvalue\n" + 
 			"          JOIN attributekey USING (attributeid)\n" + 
 			"          JOIN relationship USING (relationshipid)\n" + 
@@ -218,9 +219,10 @@ public final class DatabaseQueries {
 			"               GROUP BY relationshipid, attributeid\n" + 
 			"            ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" + 
 						userQuery +
-			"         WHERE relnvalue.deleted is NULL\n" + 
+			"         WHERE " +
+			"         rrowid in (select pkid from idx_relationship_geospatialcolumn where pkid MATCH RtreeIntersects(?, ?, ?, ?))" +
+			"         and relnvalue.deleted is NULL\n" + 
 			"         and relationship.deleted is NULL\n" + 
-			"                    and st_intersects(transform(geospatialcolumn, 4326), PolyFromText(?, 4326))\n" + 
 			"      ORDER BY relationshipid, attributename asc)\n" + 
 			"      group by relationshipid limit ?;";
 	}
