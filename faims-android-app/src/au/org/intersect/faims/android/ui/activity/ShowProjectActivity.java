@@ -274,7 +274,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		public void onReceive(Context context, Intent intent) {
 			ShowProjectActivity activity = this.activityRef.get();
 			if (activity == null) {
-				FLog.d("WifiBroadcastReciever cannot get activity");
+				FLog.d("WifiBroadcastReceiver cannot get activity");
+				return;
+			}
+			
+			if (activity.serverDiscovery.isServerHostFixed()) {
+				FLog.d("Ignoring WifiBroadcastReceiver as server host is fixed");
 				return;
 			}
 			
@@ -1155,7 +1160,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	public void startSync() {
 		FLog.d("starting sync");
 		
-		if (wifiConnected) {
+		if (serverDiscovery.isServerHostFixed() || wifiConnected) {
 			syncActive = true;
 			
 			waitForNextSync();

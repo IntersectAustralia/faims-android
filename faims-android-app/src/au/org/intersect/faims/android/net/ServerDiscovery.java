@@ -316,4 +316,8 @@ public class ServerDiscovery {
         setServerHostFixed(isServerHostValid());
 	}
 
+	public boolean isServerHostFixed() {
+		return serverFixed;
+	}
+
 }
