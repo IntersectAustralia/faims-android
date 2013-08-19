@@ -883,6 +883,7 @@ public class CustomMapView extends MapView {
 			spatialLayer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
+		spatialLayer.renderOnce();
 		
 		orderLayers();
 		
@@ -917,6 +918,7 @@ public class CustomMapView extends MapView {
 			layer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
+		layer.renderOnce();
 		
 		orderLayers();
 		
@@ -941,6 +943,7 @@ public class CustomMapView extends MapView {
 			layer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
+		layer.renderOnce();
 		
 		orderLayers();
 		
