@@ -21,7 +21,7 @@ import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PolygonStyle;
 import android.app.Dialog;
 
-//========= Persist Functionalities ==========
+//========= Persist Functionality ==========
 /**
   * When android runs low on resources the project activity can be destroyed if its in a 
   * suspended state and then restored when its resumed. This will result in a loss of
@@ -39,7 +39,7 @@ persistObject(String name) {
 	linker.setPersistedObjectName(name);
 }
 
-//========= Tab / Tab Group Functionalities ==========
+//========= Tab / Tab Group Functionality ==========
 /**
   * Show the tab group with the following reference and clear all values in the tab group.
   *
@@ -124,7 +124,7 @@ cancelTab(String ref, boolean warn){
 	linker.cancelTab(ref, warn);
 }
 
-//========= Dialog Functionalities ==========
+//========= Dialog Functionality ==========
 /**
   * Show a toast to the user with the given message, the toast will last for about 1 second.
   *
@@ -166,7 +166,7 @@ showBusy(String title, String message) {
 	return linker.showBusy(title, message);
 }
 
-//========= Setter / Getter Functionalities ==========
+//========= Setter / Getter Functionality ==========
 /**
   * Set the field with the following reference to the given value.
   *
@@ -259,7 +259,7 @@ clearFieldDirty(String ref) {
 	linker.setFieldDirty(ref, false, "");
 }
 
-//========= Event Callback Functionalities ==========
+//========= Event Callback Functionality ==========
 /**
   * Binding an event to the field with the given reference.
   *
@@ -286,43 +286,47 @@ onFocus(String ref, String focusCallback, String blurCallback) {
 	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
 }
 
-//========= User Functionalities ==========
+//========= User Functionality ==========
 /**
-  * Set the current user of the application, used to determine who creates the record.
+  * Set the current user of the application. Is a requirement for insert records into the database.
+  *
   * @param user the user of the application
   */
 setUser(User user){
 	linker.setUser(user);
 }
 
-//========= Arch Ent / Relationship Functionalities ==========
+//========= Archaeological Entity / Relationship Functionality ==========
 /**
-  * Saving arch entity into the database and return the entity_id of the saved entity
-  * @param entity_id the id of the arch entity to be saved, might be null to save new entity
-  * @param entity_type the type of the entity to be saved, must be coherent with the type specified in data schema
-  * @param geo_data the list of geometries to be associated with the saved entity
-  * @param attributes the list of attributes to be associated with the saved entity
-  * @return the entity_id of the saved entity
+  * Insert a new or update an existing archaeological entity record and return the id of the saved record.
+  *
+  * @param entity_id the id of the entity to be saved, set to null to save a new record
+  * @param entity_type the type of the entity to be saved, must be one specified in the data schema
+  * @param geo_data the list of geometries to be associated with the entity
+  * @param attributes the list of attributes to be associated with the entity
+  * @return the id of the saved entity
   */
 saveArchEnt(String entity_id, String entity_type, List geo_data, List attributes) {
 	return linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
 }
 
 /**
-  * Saving relationship into the database and return the rel_id of the saved relationship
-  * @param rel_id the id of the relationship to be saved, might be null to save new relationship
-  * @param rel_type the type of the relationship to be saved, must be coherent with the type specified in data schema
-  * @param geo_data the list of geometries to be associated with the saved relationship
-  * @param attributes the list of attributes to be associated with the saved relationship
-  * @return the rel_id of the saved relationship
+  * Insert a new or update an existing relationship record and return the id of the saved record.
+  *
+  * @param rel_id the id of the relationship to be saved, set to null to save a new record
+  * @param rel_type the type of the relationship to be saved, must be one specified in the data schema
+  * @param geo_data the list of geometries to be associated with the relationship
+  * @param attributes the list of attributes to be associated with the relationship
+  * @return the id of the saved relationship
   */
 saveRel(String rel_id, String rel_type, List geo_data, List attributes) {
 	return linker.saveRel(rel_id, rel_type, geo_data, attributes);
 }
 
 /**
-  * Delete an arch entity from the database
-  * @param entity_id the id of the arch entity to be deleted
+  * Deletes the specified archaeological entity.
+  *
+  * @param entity_id the id of the entity to be deleted
   * @return boolean value true if deleted, false if not
   */
 deleteArchEnt(String entity_id){
@@ -330,7 +334,8 @@ deleteArchEnt(String entity_id){
 }
 
 /**
-  * Delete a relationship from the database
+  * Deletes the specified relationship.
+  *
   * @param rel_id the id of the relationship to be deleted
   * @return boolean value true if deleted, false if not
   */
@@ -339,17 +344,19 @@ deleteRel(String rel_id){
 }
 
 /**
-  * Add an arch entity to the relationship by specifying the verb as the relation.
-  * @param entity_id the id of the arch entity to be associated with relationship
-  * @param rel_id the id of the relationship to be associated to
-  * @param verb the relation that is defined in the dataschema
+  * Add an existing archaeological entity to an existing relationship and the verb of the relation.
+  *
+  * @param entity_id the id of the entity
+  * @param rel_id the id of the relationship
+  * @param verb the relation verb that is defined in the data schema for the specified relationship
   */
 addReln(String entity_id, String rel_id, String verb) {
 	linker.addReln(entity_id, rel_id, verb);
 }
 
 /**
-  * Create attribute list to be saved to the entity/relationship
+  * Create an attribute list.
+  *
   * @return new attribute list
   */
 createAttributeList() {
@@ -357,27 +364,29 @@ createAttributeList() {
 }
 
 /**
-  * Create entity attribute to be added to the attribute list
-  * @param name the name of the attribute, should be coherent to the attribute name specified in the schema to be saved
+  * Create an entity attribute to be added to the attribute list.
+  *
+  * @param name the name of the attribute
   * @param text the text of the entity attribute, could be null
-  * @param vocab the vocab of the entity attribute (obtained from the database), could be null
+  * @param vocab the vocab id of the entity attribute (obtained from the database), could be null
   * @param measure the measure of the entity attribute, could be null
-  * @param certainty the certainty of the entity attribute, defaulted to 100% certainty
-  * @return EntityAttribute
+  * @param certainty the certainty of the entity attribute, could be null
+  * @return an entity attribute
   */
 createEntityAttribute(String name, String text, String vocab, String measure, String certainty){
 	return createEntityAttribute(name, text, vocab, measure, certainty, false);
 }
 
 /**
-  * Create entity attribute to be added to the attribute list
-  * @param name the name of the attribute, should be coherent to the attribute name specified in the schema to be saved
+  * Create an entity attribute to be added to the attribute list.
+  *
+  * @param name the name of the attribute
   * @param text the text of the entity attribute, could be null
-  * @param vocab the vocab of the entity attribute (obtained from the database), could be null
+  * @param vocab the vocab id of the entity attribute (obtained from the database), could be null
   * @param measure the measure of the entity attribute, could be null
-  * @param certainty the certainty of the entity attribute, defaulted to 100% certainty
-  * @param isDeleted set whether the entity attribute is deleted or not
-  * @return EntityAttribute
+  * @param certainty the certainty of the entity attribute, could be null
+  * @param isDeleted set to true to delete the attribute
+  * @return an entity attribute
   */
 createEntityAttribute(String name, String text, String vocab, String measure, String certainty, boolean isDeleted) {
 	EntityAttribute attribute = new EntityAttribute();
@@ -391,25 +400,27 @@ createEntityAttribute(String name, String text, String vocab, String measure, St
 }
 
 /**
-  * Create relationship attribute to be added to the attribute list
-  * @param name the name of the attribute, should be coherent to the attribute name specified in the schema to be saved
+  * Create a relationship attribute to be added to the attribute list.
+  *
+  * @param name the name of the attribute
   * @param text the text of the relationship attribute, could be null
-  * @param vocab the vocab of the relationship attribute (obtained from the database), could be null
-  * @param certainty the certainty of the relationship attribute, defaulted to 100% certainty
-  * @return RelationshipAttribute
+  * @param vocab the vocab id of the relationship attribute (obtained from the database), could be null
+  * @param certainty the certainty of the relationship attribute, could be null
+  * @return a relationship attribute
   */
 createRelationshipAttribute(String name, String text, String vocab, String certainty){
 	return createRelationshipAttribute(name, text, vocab, certainty, false);
 }
 
 /**
-  * Create relationship attribute to be added to the attribute list
-  * @param name the name of the attribute, should be coherent to the attribute name specified in the schema to be saved
+  * Create a relationship attribute to be added to the attribute list.
+  *
+  * @param name the name of the attribute
   * @param text the text of the relationship attribute, could be null
-  * @param vocab the vocab of the relationship attribute (obtained from the database), could be null
-  * @param certainty the certainty of the relationship attribute, defaulted to 100% certainty
-  * @param isDeleted set whether the relationship attribute is deleted or not
-  * @return RelationshipAttribute
+  * @param vocab the vocab id of the relationship attribute (obtained from the database), could be null
+  * @param certainty the certainty of the relationship attribute, could be null
+  * @param isDeleted set to true to delete the attribute
+  * @return a relationship attribute
   */
 createRelationshipAttribute(String name, String text, String vocab, String certainty, boolean isDeleted) {
 	RelationshipAttribute attribute = new RelationshipAttribute();
@@ -422,151 +433,171 @@ createRelationshipAttribute(String name, String text, String vocab, String certa
 }
 
 /**
-  * Populate dropdown from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing.
+  * Populate dropdown field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the dropdown
+  * @param values the collection of values to populate the dropdown with
   */
 populateDropDown(String ref, Collection values){
     linker.populateDropDown(ref, values);
 }
 
 /**
-  * Populate radio group from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing.
+  * Populate radio group field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the radio group
+  * @param values the collection of values to populate the radio group with
   */
 populateRadioGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
 
 /**
-  * Populate checkbox from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing.
+  * Populate checkbox group field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the checkbox
+  * @param values the collection of values to populate the checkbox group with
   */
 populateCheckBoxGroup(String ref, Collection values) {
 	linker.populateList(ref, values);
 }
 
 /**
-  * Populate list from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing.
+  * Populate list with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the list
+  * @param values the collection of values to populate the list with
   */
 populateList(String ref, Collection values){
 	linker.populateList(ref, values);
 }
 
 /**
-  * Populate picture gallery from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing.
+  * Used in conjunction with the click event on a list. This returns last selected value in the list.
+  *
+  * @return the last selected value in the list
+  */
+String getListItemValue() {
+	return _list_item_value;
+}
+
+/**
+  * Populate picture gallery field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the picture gallery
+  * @param values the collection of values to populate the picture gallery with
   */
 populatePictureGallery(String ref, Collection values){
 	linker.populatePictureGallery(ref, values);
 }
 
 /**
-  * Populate camera picture gallery from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing. This is usually used to show picture\n
-  * after taking picture from camera.
+  * Populate camera picture gallery field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the camera picture gallery
+  * @param values the collection of values to populate the camera picture gallery with
   */
 populateCameraPictureGallery(String ref, Collection values){
 	linker.populateCameraPictureGallery(ref, values);
 }
 
 /**
-  * Populate video gallery from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing. This is usually used to show video\n
-  * after recording video.
+  * Populate video gallery field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the camera picture gallery
+  * @param values the collection of values to populate the video gallery with
   */
 populateVideoGallery(String ref, Collection values){
 	linker.populateVideoGallery(ref, values);
 }
 
 /**
-  * Populate audio list from values to the field that has the reference. If the field reference is not found\n
-  * or wrong type of field, there will be a logic error dialog appearing. This is usually used to show audio\n
-  * after recording audio.
+  * Populate audio list field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param values the collection of values to populate the camera picture gallery
+  * @param values the collection of values to populate the audio list with
   */
 populateAudioList(String ref, Collection values){
 	linker.populateAudioList(ref, values);
 }
 
 /**
-  * Fetching the data of arch entity with the given id, if the id is not found, a logic error dialog will appear
-  * @param id the entity id of the arch entity
-  * @return ArchEntity object or null
+  * Fetch the archaeological entity record with the specified id.
+  *
+  * @param id the id of the entity
+  * @return an entity or null
   */
 Object fetchArchEnt(String id){
     return linker.fetchArchEnt(id);
 }
 
 /**
-  * Fetching the data of relationship with the given id, if the id is not found, a logic error dialog will appear
-  * @param id the entity id of the relationship
-  * @return Relationship object or null
+  * Fetch the relationship record with the specified id.
+  *
+  * @param id the id of the relationship
+  * @return a relationship or null
   */
 Object fetchRel(String id){
     return linker.fetchRel(id);
 }
 
 /**
-  * Fetching the data from the database by running query specified by user. It will only return one result.
+  * Fetch the result of a query. This will return only a single row.
+  *
   * @param query the query to be run against the database
-  * @return Collection of String, might be empty
+  * @return Collection of String
   */
 Object fetchOne(String query){
     return linker.fetchOne(query);
 }
 
 /**
-  * Fetching the data from the database by running query specified by user. It will return all result.
+  * Fetch the results of a query. This will return a collection of rows.
+  *
   * @param query the query to be run against the database
-  * @return Collection of Collection of String, might be empty
+  * @return Collection of Collection of String
   */
 Collection fetchAll(String query){
     return linker.fetchAll(query);
 }
 
 /**
-  * Fetching the list of arch entity to show to the user so the user can see what entities have been saved.
-  * @param type the type of arch entity to be shown
-  * @return Collection of Collection of String, might be empty
+  * Fetch a list of entities. Each row in the collection is a list with the first item being the id of the entity and the second the identifier of the entity.
+  *
+  * @param type the type of arch entity to filter
+  * @return Collection of Collection of String
   */
 Collection fetchEntityList(String type){
     return linker.fetchEntityList(type);
 }
 
 /**
-  * Fetching the list of relationship to show to the user so the user can see what entities have been saved.
-  * @param type the type of relationship to be shown
-  * @return Collection of Collection of String, might be empty
+  * Fetch a list of relationships. Each row in the collection is a list with the first item being the id of the relationship and the second the identifier of the relationship.
+  *
+  * @param type the type of relationship to filter
+  * @return Collection of Collection of String
   */
 Collection fetchRelationshipList(String type){
     return linker.fetchRelationshipList(type);
 }
 
-/**
-  * Get the selected value from the list to be used in the logic
-  * @return _list_item_value of the selected value in the list
-  */
-String getListItemValue() {
-	return _list_item_value;
-}
-
-//========= Navigation Functionalities ==========
+//========= Navigation Functionality ==========
 /**
   * Provide functionality to go back as if the user press the hardware back button
   */
@@ -574,7 +605,7 @@ goBack(){
 	linker.goBack();
 }
 
-//========= GPS Functionalities ==========
+//========= GPS Functionality ==========
 /**
   * Set the GPS update interval to determine how often the GPS should update, defaulted to 10 seconds
   * @param seconds the interval to be set
@@ -674,7 +705,7 @@ stopTrackingGPS(){
 	linker.stopTrackingGPS();
 }
 
-//========= Map Functionalities ==========
+//========= Map Functionality ==========
 /**
   * Binding map click event and vector click event to the map view that has the reference. If the map view reference is not found,\n
   * there will be a logic error dialog appearing.
@@ -1243,7 +1274,7 @@ refreshMap(String ref) {
 	linker.refreshMap(ref);
 }
 
-//========= Sync Functionalities ==========
+//========= Sync Functionality ==========
 /**
   * Pushing a database to the server which is used for syncing, after finished, it will execute the callback
   * @param callback the callback that will be executed when the operation finished
@@ -1310,7 +1341,7 @@ setFileSyncEnabled(boolean enabled) {
 	linker.setFileSyncEnabled(enabled);
 }
 
-//========= Static Data Functionalities ==========
+//========= Static Data Functionality ==========
 /**
   * Get the static data for current project name
   * @return project name
@@ -1431,7 +1462,7 @@ public String hasSensitiveData() {
 	return linker.hasSensitiveData();
 }
 
-//========= File attachment Functionalities ==========
+//========= File attachment Functionality ==========
 /**
   * Get the name of last selected file from the file browser
   * @return name of last selected file
