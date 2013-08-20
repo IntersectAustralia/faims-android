@@ -23,8 +23,14 @@ import android.app.Dialog;
 
 //========= Persist Functionalities ==========
 /**
-  * Persisting a beanshell object to store the value of the object name when the application is destroyed\n
-  * and restore the value when the application is restored
+  * Sometimes due to the nature of android destroying and restoring the project activity
+  * when it runs low of resources the variable state in the ui logic can be destroyed.
+  *
+  * To overcome this use the following method to define the name of a single logic object
+  * that will saved and restored when the activity is destroyed and restored.
+  *
+  * For more information on how to use this function please look at the cookbook.
+  *
   * @param name the name of the object
   */
 persistObject(String name) {
@@ -33,78 +39,93 @@ persistObject(String name) {
 
 //========= Tab / Tab Group Functionalities ==========
 /**
-  * Showing the tab group with the label and clear all values if there was any value before in the tab group
-  * @param label the label of the tab group
+  * Show the tab group with the following reference and clear all values in the tab group.
+  *
+  * @param ref the reference to the tab group
   */
-newTabGroup(String label) {
-	linker.newTabGroup(label);
+newTabGroup(String ref) {
+	linker.newTabGroup(ref);
 }
 
 /**
-  * Showing the tab with the label and clear all values if there was any value before in the tab
-  * @param label the label of the tab
+  * Show the tab with the following reference and clear all values in the tab.
+  *
+  * @param ref the reference to the tab
   */
-newTab(String label) {
-	linker.newTab(label);
+newTab(String ref) {
+	linker.newTab(ref);
 }
 
 /**
-  * Showing the tab group with the label and keep all values if there was any value before in the tab group
-  * @param label the label of the tab group
+  * Show the tab group with the following reference.
+  *
+  * This will retain all the current values in the tab group.
+  *
+  * @param ref the reference to the tab group
   */
-showTabGroup(String label){
-    linker.showTabGroup(label);
+showTabGroup(String ref){
+    linker.showTabGroup(ref);
 }
 
 /**
-  * Showing the tab group with the label and load values for a given uuid to the tab group
-  * @param id the reference of the tab group
-  * @param uuid the id of the record
+  * Show the tab group with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab group.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship
   */
-showTabGroup(String id, String uuid){
-    linker.showTabGroup(id,uuid);
+showTabGroup(String ref, String id){
+    linker.showTabGroup(ref, id);
 }
 
 /**
-  * Showing the tab with the label and keep all values if there was any value before in the tab
-  * @param label the label of the tab
+  * Show the tab with the following reference.
+  *
+  * This will retain all the current values in the tab.
+  *
+  * @param ref the reference to the tab
   */
-showTab(String label) {
-	linker.showTab(label);
+showTab(String ref) {
+	linker.showTab(ref);
 }
 
 /**
-  * Showing the tab with the label and load values for a given uuid to the tab
-  * @param id the reference of the tab
-  * @param uuid the id of the record
+  * Show the tab with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab.
+  *
+  * @param ref the reference to the tab
+  * @param id the id of the entity or relationship
   */
-showTab(String id, String uuid) {
-	linker.showTab(id, uuid);
+showTab(String ref, String id) {
+	linker.showTab(ref, id);
 }
 
 /**
-  * Cancelling tab group will close the tab group. It will only give warning if the warning is set to be true\n
-  * and if there is any changes in any field in the tab group
-  * @param id the reference of the tab group
-  * @param warn a boolean to set whether a warning dialog should appear or not
+  * Close the tab group with the following reference with an option to show
+  * a warning dialog if there are changes that haven't been saved. 
+  *
+  * @param ref the reference to the tab group
+  * @param warn set to true to show a warning dialog if there are changes that haven't been saved
   */
-cancelTabGroup(String id, boolean warn){
-	linker.cancelTabGroup(id,warn);
+cancelTabGroup(String ref, boolean warn){
+	linker.cancelTabGroup(ref, warn);
 }
 
 /**
-  * Cancelling tab will close the tab. It will only give warning if the warning is set to be true\n
-  * and if there is any changes in any field in the tab
-  * @param id the reference of the tab
-  * @param warn a boolean to set whether a warning dialog should appear or not
+  * Close the tab with the following reference with an option to show
+  * a warning dialog if there are changes that haven't been saved. 
+  *
+  * @param ref the reference to the tab
+  * @param warn set to true to show a warning dialog if there are changes that haven't been saved
   */
-cancelTab(String id, boolean warn){
-	linker.cancelTab(id,warn);
+cancelTab(String ref, boolean warn){
+	linker.cancelTab(ref, warn);
 }
 
 //========= Dialog Functionalities ==========
 /**
-  * Showing a toast to the user with the given message, the toast will last for about 1 second
+  * Show a toast to the user with the given message, the toast will last for about 1 second.
+  *
   * @param message the message to be shown to the user
   */
 showToast(String message) {
@@ -112,18 +133,20 @@ showToast(String message) {
 }
 
 /**
-  * Showing an alert dialog to the user with the given message and a specific callback for ok and cancel buttons
+  * Show an alert dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
-  * @param okCallback the callback that is executed when OK button is pressed
-  * @param cancelCallback the callback that is executed when cancel button is pressed
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
   */
 showAlert(String title, String message, String okCallback, String cancelCallback){
     linker.showAlert(title, message, okCallback, cancelCallback);
 }
 
 /**
-  * Showing a warning dialog to the user with the given message
+  * Show a warning dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
   */
@@ -132,7 +155,8 @@ showWarning(String title, String message) {
 }
 
 /**
-  * Showing a busy dialog to the user with the given message
+  * Show a busy dialog to the user with the given message.
+  *
   * @param title the title of the dialog
   * @param message the message to be shown to the user
   */
@@ -142,20 +166,26 @@ showBusy(String title, String message) {
 
 //========= Setter / Getter Functionalities ==========
 /**
-  * Set value to the field that has the reference with given value. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Set the field with the following reference with the given value.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
+  * For more information on how to use this function please look at the cookbook.
+  *
   * @param ref the reference to the field
-  * @param value the value to be set to the field, could be a collection, number, or String
+  * @param value the value to set the field to
   */
 setFieldValue(String ref, Object value){
     linker.setFieldValue(ref, value);
 }
 
 /**
-  * Set certainty to the field that has the reference with given value. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Set the field with the following reference with the given certainty
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
-  * @param value the value to be set to the field, could be a number or String
+  * @param value the value to set the certainty for the field to
   */
 setFieldCertainty(String ref, Object value){
     linker.setFieldCertainty(ref, value);
