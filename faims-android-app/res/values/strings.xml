@@ -77,8 +77,13 @@
     <string name="download_database_error_message">Error storage limit reached.</string>
     
     <string name="render_ui_failure_title">Error</string>
-    <string name="render_ui_failure_message">Failed to load project due to invalid ui schema.</string>
-    <string name="faims_server_setting_title">FAIMS Server Settings</string>
+    <string name="render_ui_failure_message">Failed to load project.</string>
+    
+    <string name="faims_fetch_project_list_title">Fetch Project List</string>
+    <string name="faims_server_setting_title">Settings</string>
+    <string name="faims_about_title">About</string>
+    <string name="intersect_logo">Intersect Logo</string>
+    
     <string name="server_ip_settings_title">FAIMS Server Host</string>
     <string name="server_port_settings_title">FAIMS Server Port</string>
 

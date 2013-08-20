@@ -1,12 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
   <item android:id="@+id/fetch_project_list"
-    android:title="Fetch Project List"
+    android:title="@string/faims_fetch_project_list_title"
     android:icon="@drawable/ic_menu_add" 
-    android:showAsAction="ifRoom" tools:ignore="HardcodedText"/>
+    android:showAsAction="ifRoom"/>
   
   <item android:id="@+id/faims_server_setting"
     android:title="@string/faims_server_setting_title"
+    android:icon="@android:drawable/ic_menu_preferences"
+    android:showAsAction="never"/>
+  
+   <item android:id="@+id/faims_about"
+    android:title="@string/faims_about_title"
     android:icon="@android:drawable/ic_menu_preferences"
     android:showAsAction="never"/>
 </menu>

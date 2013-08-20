@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.ui.dialog.AboutDialog;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.ProjectUtil;
 
@@ -82,11 +83,20 @@ public class MainActivity extends RoboActivity {
 			case R.id.faims_server_setting:
 				showFaimsServerSettings();
 				return true;
+			case R.id.faims_about:
+				showFaimsAboutDialog();
+				return true;
 			default:
 				return (super.onOptionsItemSelected(item));
 		}
 	}
 	
+	private void showFaimsAboutDialog() {
+		AboutDialog about = new AboutDialog(this);
+		about.setTitle("About FAIMS");
+		about.show();
+	}
+
 	private void showFaimsServerSettings() {
 		Intent faimsServerIntent = new Intent(MainActivity.this, FaimsServerSettingsActivity.class);
 		MainActivity.this.startActivityForResult(faimsServerIntent, 2);
