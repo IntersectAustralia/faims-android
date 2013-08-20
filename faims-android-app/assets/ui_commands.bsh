@@ -1518,24 +1518,10 @@ public String hasSensitiveData() {
 }
 
 //========= File attachment Functionality ==========
-/**
-  * Get the name of last selected file from the file browser
-  * @return name of last selected file
-  */
-getLastSelectedFilename() {
-	return _last_selected_filename;
-}
 
 /**
-  * Get the path of last selected file from the file browser
-  * @return path of last selected file
-  */
-getLastSelectedFilepath() {
-	return _last_selected_filepath;
-}
-
-/**
-  * Show the file browser and execute the callback after finish
+  * Show the file browser and execute the callback once a file is selected.
+  *
   * @param callback the callback to be executed once the operation finished
   */
 showFileBrowser(String callback) {
@@ -1543,9 +1529,30 @@ showFileBrowser(String callback) {
 }
 
 /**
-  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
-  * the file will be available on the other devices syncing to the server. If not, the file\n
-  * will only available on the server.
+  * This is used in conjuction with showFileBrowser. This returns the filename of the last selected file.
+  *
+  * @return name of last selected file
+  */
+getLastSelectedFilename() {
+	return _last_selected_filename;
+}
+
+/**
+  * This is used in conjuction with showFileBrowser. This returns the filepath of the last selected file.
+  *
+  * @return path of last selected file
+  */
+getLastSelectedFilepath() {
+	return _last_selected_filepath;
+}
+
+/**
+  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
+  *
+  * Files in the app folder are sync to the server and other apps. Files in the server folder are only
+  * synced to the server.
+  *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
   */
@@ -1554,48 +1561,57 @@ attachFile(String filePath, boolean sync) {
 }
 
 /**
-  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
-  * the file will be available on the other devices syncing to the server. If not, the file\n
-  * will only available on the server. If the dir is defined, it will create the dir in the app/server folder.
+  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
+  *
+  * Files in the app folder are sync to the server and other apps. Files in the server folder are only
+  * synced to the server.
+  *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
-  * @param dir the directory to be added to the app/server folfer, might be null
+  * @param dir the directory to be added to the app/server folfer, can be null
   */
 attachFile(String filePath, boolean sync, String dir) {
 	return linker.attachFile(filePath, sync, dir, null);
 }
 
 /**
-  * Attach a file to the project folder by specifying the path of the file.If sync is true,\n
-  * the file will be available on the other devices syncing to the server. If not, the file\n
-  * will only available on the server. If the dir is defined, it will create the dir in the app/server folder.
+  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
+  *
+  * Files in the app folder are sync to the server and other apps. Files in the server folder are only
+  * synced to the server.
+  *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
-  * @param dir the directory to be added to the app/server folfer, might be null
-  * @param callback code to execute when file is finish copying into files directory
+  * @param dir the directory to be added to the app/server folfer, can be null
+  * @param callback code to execute when file is finished copying into the directory
   */
 attachFile(String filePath, boolean sync, String dir, String callback) {
 	return linker.attachFile(filePath, sync, dir, callback);
 }
 
 /**
-  * List all attached file to an arch entity by providing the id of the arch entity.
-  * @param id the id of the arch entity, it will get the logic error dialog if null
+  * List all attached files of an archaeological entity by providing the id of the entity.
+  *
+  * @param id the id of the entity
   */
 viewArchEntAttachedFiles(String id){
 	linker.viewArchEntAttachedFiles(id);
 }
 
 /**
-  * List all attached file to an arch entity by providing the id of the relationship.
-  * @param id the id of the relationship, it will get the logic error dialog if null
+  * List all attached files of a relationship by providing the id of the relationship.
+  *
+  * @param id the id of the relationship
   */
 viewRelAttachedFiles(String id){
 	linker.viewRelAttachedFiles(id);
 }
 
 /**
-  * Open the camera and then execute the callback after finish
+  * Open the camera and then execute the callback after finish.
+  *
   * @param callback the callback executed after operation is finish
   */
 openCamera(String callback){
@@ -1603,7 +1619,8 @@ openCamera(String callback){
 }
 
 /**
-  * Open the video recorder and then execute the callback after finish
+  * Open the video recorder and then execute the callback after finish.
+  *
   * @param callback the callback executed after operation is finish
   */
 openVideo(String callback){
@@ -1611,7 +1628,8 @@ openVideo(String callback){
 }
 
 /**
-  * Open the audio recorder and then execute the callback after finish
+  * Open the audio recorder and then execute the callback after finish.
+  *
   * @param callback the callback executed after operation is finish
   */
 recordAudio(String callback){
@@ -1619,7 +1637,8 @@ recordAudio(String callback){
 }
 
 /**
-  * Get the path of last taken picture
+  * This is used in conjunction with openCamera. This returns the file path of the last picture taken.
+  *
   * @return the path of the last taken picture
   */
 String getLastPictureFilePath(){
@@ -1627,7 +1646,8 @@ String getLastPictureFilePath(){
 }
 
 /**
-  * Get the path of last recorded video
+  * This is used in conjunction with openVideo. This returns the file path of the last video taken.
+  *
   * @return the path of the last recorded video
   */
 String getLastVideoFilePath(){
@@ -1635,7 +1655,8 @@ String getLastVideoFilePath(){
 }
 
 /**
-  * Get the path of last recorded audio
+  * This is used in conjunction with recordVideo. This returns the file path of the last audio taken.
+  *
   * @return the path of the last recorded audio
   */
 String getLastAudioFilePath(){
@@ -1657,7 +1678,7 @@ getAttachedFilePath(String file) {
 }
 
 /**
-  * @return returns the full path to attached file
+  * @return returns the file path relative to the projects folder of file
   */
 stripAttachedFilePath(String file) {
 	return linker.stripAttachedFilePath(file);
@@ -1666,7 +1687,8 @@ stripAttachedFilePath(String file) {
 //========= MISC ==========
 
 /**
-  * Executes a given string of code
+  * Executes a given string of code.
+  *
   * @param code the string of code to execute
   */
 execute(String code){
