@@ -599,7 +599,7 @@ Collection fetchRelationshipList(String type){
 
 //========= Navigation Functionality ==========
 /**
-  * Provide functionality to go back as if the user press the hardware back button
+  * Provide functionality to go back as if the user press the hardware back button.
   */
 goBack(){
 	linker.goBack();
@@ -607,30 +607,33 @@ goBack(){
 
 //========= GPS Functionality ==========
 /**
-  * Set the GPS update interval to determine how often the GPS should update, defaulted to 10 seconds
-  * @param seconds the interval to be set
+  * Set the GPS update interval to determine how often the GPS should update. Default value is 10 seconds.
+  *
+  * @param seconds the length of the interval in seconds
   */
 setGPSUpdateInterval(int seconds){
 	linker.setGpsUpdateInterval(seconds);
 }
 
 /**
-  * Start using the internal GPS to update the location
+  * Start using the internal GPS to update the location.
   */
 startInternalGPS(){
 	linker.startInternalGPS();
 }
 
 /**
-  * Start using the external GPS to update the location, it will bring up dialog to the user to choose\n
-  * which bluetooth device to be used as external GPS
+  * Start using the external GPS to update the location.
+  *
+  * A dialog will be presented to the user to choose which bluetooth device to be used as external GPS.
   */
 startExternalGPS(){
 	linker.startExternalGPS();
 }
 
 /**
-  * Get the GPS position containing longitude and latitude from external GPS or internal GPS
+  * Get the GPS position as longitude and latitude from external GPS or internal GPS.
+  *
   * @return GPSPosition if starting GPS or null if no GPS started or position found
   */
 Object getGPSPosition(){
@@ -638,7 +641,8 @@ Object getGPSPosition(){
 }
 
 /**
-  * Get the GPS position containing longitude and latitude with the projection selected from external GPS or internal GPS
+  * Get the GPS position as longitude and latitude in the project projection from external GPS or internal GPS.
+  *
   * @return projected GPSPosition if starting GPS or null if no GPS started or position found
   */
 Object getGPSPositionProjected() {
@@ -646,7 +650,8 @@ Object getGPSPositionProjected() {
 }
 
 /**
-  * Get the GPS accuracy from external GPS or internal GPS
+  * Get the GPS accuracy from external GPS or internal GPS.
+  *
   * @return accuracy of the gps or null
   */
 Object getGPSEstimatedAccuracy(){
@@ -654,7 +659,8 @@ Object getGPSEstimatedAccuracy(){
 }
 
 /**
-  * Get the GPS heading from external GPS or internal GPS
+  * Get the GPS heading from external GPS or internal GPS.
+  *
   * @return heading of the gps or null
   */
 Object getGPSHeading(){
@@ -662,7 +668,8 @@ Object getGPSHeading(){
 }
 
 /**
-  * Get the GPS position containing longitude and latitude from selected GPS
+  * Get the GPS position as longitude and latitude from selected GPS.
+  *
   * @param gps the type of gps used, one of "internal" or "external"
   * @return GPSPosition if starting GPS or null if no GPS started or position found
   */
@@ -671,7 +678,8 @@ Object getGPSPosition(String gps){
 }
 
 /**
-  * Get the GPS accuracy from selected GPS
+  * Get the GPS accuracy from selected GPS.
+  *
   * @param gps the type of gps used, one of "internal" or "external"
   * @return accuracy of the selected gps or null
   */
@@ -680,7 +688,8 @@ Object getGPSEstimatedAccuracy(String gps){
 }
 
 /**
-  * Get the GPS heading from selected GPS
+  * Get the GPS heading from selected GPS.
+  *
   * @param gps the type of gps used, one of "internal" or "external"
   * @return heading of the selected gps or null
   */
@@ -689,7 +698,8 @@ Object getGPSHeading(String gps){
 }
 
 /**
-  * Start track log of the GPS and save it to the database so the user can look at the track log in the map view
+  * Start GPS track log with as either time based or distance based.
+  *
   * @param type either "distance" or "time"
   * @param value the value of the tracking, if type is "distance", the value will be in meter, if type is "time", the value will be in seconds
   * @param callback code to execute when interval limit is reached
@@ -699,7 +709,7 @@ startTrackingGPS(String type, int value, String callback){
 }
 
 /**
-  * Stopping the track log of the GPS
+  * Stop the GPS track log.
   */
 stopTrackingGPS(){
 	linker.stopTrackingGPS();
