@@ -23,15 +23,17 @@ import android.app.Dialog;
 
 //========= Persist Functionalities ==========
 /**
-  * Sometimes due to the nature of android destroying and restoring the project activity
-  * when it runs low of resources the variable state in the ui logic can be destroyed.
+  * When android runs low on resources the project activity can be destroyed if its in a 
+  * suspended state and then restored when its resumed. This will result in a loss of
+  * variable state in the logic script.
   *
-  * To overcome this use the following method to define the name of a single logic object
-  * that will saved and restored when the activity is destroyed and restored.
+  * To restore variable state in the logic script use the following method to define 
+  * the name of a single object that will saved and restored when the activity 
+  * is destroyed and restored.
   *
   * For more information on how to use this function please look at the cookbook.
   *
-  * @param name the name of the object
+  * @param name the name of the object to restore
   */
 persistObject(String name) {
 	linker.setPersistedObjectName(name);
@@ -166,7 +168,7 @@ showBusy(String title, String message) {
 
 //========= Setter / Getter Functionalities ==========
 /**
-  * Set the field with the following reference with the given value.
+  * Set the field with the following reference to the given value.
   *
   * If the field reference is not found a logic error dialog will appear.
   *
@@ -180,7 +182,7 @@ setFieldValue(String ref, Object value){
 }
 
 /**
-  * Set the field with the following reference with the given certainty
+  * Set the certainty of the field with the following reference to the given value
   *
   * If the field reference is not found a logic error dialog will appear.
   *
@@ -192,18 +194,22 @@ setFieldCertainty(String ref, Object value){
 }
 
 /**
-  * Set annotation to the field that has the reference with given value. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Set the annotation of the field with the following reference to the given value
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
-  * @param value the value to be set to the field, only accept String
+  * @param value the value to set the annotation for the field to
   */
 setFieldAnnotation(String ref, Object value){
     linker.setFieldAnnotation(ref, value);
 }
 
 /**
-  * Get value of the field that has the reference. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Get value of the field with the following reference.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
   * @return the value of the field, could be collection or String
   */
@@ -212,20 +218,24 @@ Object getFieldValue(String ref){
 }
 
 /**
-  * Get certainty of the field that has the reference. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Get certainty of the field with the following reference.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
-  * @return the certainty of the field in String representation
+  * @return the certainty of the field
   */
 Object getFieldCertainty(String ref){
     return linker.getFieldCertainty(ref);
 }
 
 /**
-  * Get annotation of the field that has the reference. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Get annotation of the field with the following reference.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  *
   * @param ref the reference to the field
-  * @return the annotation of the field in String representation
+  * @return the annotation of the field
   */
 Object getFieldAnnotation(String ref){
     return linker.getFieldAnnotation(ref);
@@ -233,15 +243,16 @@ Object getFieldAnnotation(String ref){
 
 /**
   * Get the current time of the application
-  * @return the current time in String representation
+  *
+  * @return the current time e.g. 2013-01-20 13:20:01
   */
 String getCurrentTime(){
     return linker.getCurrentTime();
 }
 
 /**
-  * Clear the dirty button from the field that has the reference. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Clear a dirty field with the following reference
+  *
   * @param ref the reference to the field
   */
 clearFieldDirty(String ref) {
