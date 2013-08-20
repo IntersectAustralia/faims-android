@@ -1308,7 +1308,8 @@ refreshMap(String ref) {
 
 //========= Sync Functionality ==========
 /**
-  * Pushing a database to the server which is used for syncing, after finished, it will execute the callback
+  * Push the full database from the app to the server and execute the callback when finished.
+  *
   * @param callback the callback that will be executed when the operation finished
   */
 pushDatabaseToServer(String callback) {
@@ -1316,7 +1317,8 @@ pushDatabaseToServer(String callback) {
 }
 
 /**
-  * Pulling a database from the server which is used for syncing, after finished, it will execute the callback
+  * Pull the full database from the server to the app and execute the callback when finished.
+  *
   * @param callback the callback that will be executed when the operation finished
   */
 pullDatabaseFromServer(String callback) {
@@ -1324,7 +1326,8 @@ pullDatabaseFromServer(String callback) {
 }
 
 /**
-  * Set whether the sync should be enabled or not
+  * Enable or disable syncing the database from the app to the server.
+  *
   * @param value boolean value to set the sync enabled or not
   */
 setSyncEnabled(boolean value) {
@@ -1332,7 +1335,8 @@ setSyncEnabled(boolean value) {
 }
 
 /**
-  * An event listener for sync that will execute call back for start, success, and failure of the sync
+  * Bind to the sync start, success and failure events.
+  *
   * @param startCallback the callback that will be executed when sync is started
   * @param successCallback the callback that will be executed when sync is finish
   * @param failureCallback the callback that will be executed when sync is failing
@@ -1342,31 +1346,35 @@ onSyncEvent(String startCallback, String successCallback, String failureCallback
 }
 
 /**
-  * Set the minimum interval for the sync to happen
-  * @param value the minimum interval for the sync to happen
+  * Set the minimum interval for the sync to happen.
+  *
+  * @param value the minimum interval for the sync to happen in seconds
   */
 setSyncMinInterval(float value) {
 	linker.setSyncMinInterval(value);
 }
 
 /**
-  * Set the maximum interval for the sync to happen
-  * @param value the maximum interval for the sync to happen
+  * Set the maximum interval for the sync to happen.
+  *
+  * @param value the maximum interval for the sync to happen in seconds
   */
 setSyncMaxInterval(float value) {
 	linker.setSyncMaxInterval(value);
 }
 
 /**
-  * Set the delay interval for each sync
-  * @param value the delay interval for each sync
+  * Set the delay interval to add to the current sync interval when a sync failure happens.
+  *
+  * @param value the delay interval for each sync in seconds.
   */
 setSyncDelay(float value) {
 	linker.setSyncDelay(value);
 }
 
 /**
-  * Set whether the file sync should be enabled or not
+  * Set whether files should also be synced with the database.
+  *
   * @param value boolean value to set the file sync enabled or not
   */
 setFileSyncEnabled(boolean enabled) {
@@ -1375,7 +1383,8 @@ setFileSyncEnabled(boolean enabled) {
 
 //========= Static Data Functionality ==========
 /**
-  * Get the static data for current project name
+  * Get the static data for current project name.
+  *
   * @return project name
   */
 String getProjectName(){
@@ -1383,7 +1392,8 @@ String getProjectName(){
 }
 
 /**
-  * Get the static data for current project projection
+  * Get the static data for current project projection.
+  *
   * @return project projection
   */
 String getProjectSrid(){
@@ -1391,7 +1401,8 @@ String getProjectSrid(){
 }
 
 /**
-  * Get the static data for current project id
+  * Get the static data for current project id.
+  *
   * @return project id
   */
 String getProjectId(){
@@ -1399,7 +1410,8 @@ String getProjectId(){
 }
 
 /**
-  * Get the static data for current project season
+  * Get the static data for current project season.
+  *
   * @return project season
   */
 String getProjectSeason(){
@@ -1407,7 +1419,8 @@ String getProjectSeason(){
 }
 
 /**
-  * Get the static data for current project description
+  * Get the static data for current project description.
+  *
   * @return project description
   */
 String getProjectDescription(){
@@ -1415,7 +1428,8 @@ String getProjectDescription(){
 }
 
 /**
-  * Get the static data for current permit number
+  * Get the static data for current permit number.
+  *
   * @return permit number
   */
 String getPermitNo(){
@@ -1423,7 +1437,8 @@ String getPermitNo(){
 }
 
 /**
-  * Get the static data for current permit holder
+  * Get the static data for current permit holder.
+  *
   * @return permit holder
   */
 String getPermitHolder(){
@@ -1431,7 +1446,8 @@ String getPermitHolder(){
 }
 
 /**
-  * Get the static data for current contact and address
+  * Get the static data for current contact and address.
+  *
   * @return contact and address
   */
 String getContactAndAddress(){
@@ -1439,7 +1455,8 @@ String getContactAndAddress(){
 }
 
 /**
-  * Get the static data for current participants
+  * Get the static data for current participants.
+  *
   * @return participants
   */
 String getParticipants(){
@@ -1447,7 +1464,8 @@ String getParticipants(){
 }
 
 /**
-  * Get the static data for permit issued by
+  * Get the static data for permit issued by.
+  *
   * @return permit issued by
   */
 public String getPermitIssuedBy() {
@@ -1455,7 +1473,8 @@ public String getPermitIssuedBy() {
 }
 
 /**
-  * Get the static data for permit type
+  * Get the static data for permit type.
+  *
   * @return permit type
   */
 public String getPermitType() {
@@ -1463,7 +1482,8 @@ public String getPermitType() {
 }
 
 /**
-  * Get the static data for copyright holder
+  * Get the static data for copyright holder.
+  *
   * @return copyright holder
   */
 public String getCopyrightHolder() {
@@ -1471,7 +1491,8 @@ public String getCopyrightHolder() {
 }
 
 /**
-  * Get the static data for client/sponsor
+  * Get the static data for client/sponsor.
+  *
   * @return client/sponsor
   */
 public String getClientSponsor() {
@@ -1479,7 +1500,8 @@ public String getClientSponsor() {
 }
 
 /**
-  * Get the static data for land owner
+  * Get the static data for land owner.
+  *
   * @return land owner
   */
 public String getLandOwner() {
@@ -1487,7 +1509,8 @@ public String getLandOwner() {
 }
 
 /**
-  * Get the static data for whether containing sensitive data or not
+  * Get the static data for whether containing sensitive data or not.
+  *
   * @return true or false
   */
 public String hasSensitiveData() {
