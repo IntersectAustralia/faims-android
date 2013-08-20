@@ -261,22 +261,26 @@ clearFieldDirty(String ref) {
 
 //========= Event Callback Functionalities ==========
 /**
-  * Binding an event to the field that has the reference with a callback. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Binding an event to the field with the given reference.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
   * @param type the type of event, one of click, show, or load
-  * @param callback the callback that is executed when the binded field is on the set event
+  * @param callback the callback that is executed when the event is triggered
   */
 onEvent(String ref, String type, String callback) {
 	linker.bindViewToEvent(ref, type, callback);
 }
 
 /**
-  * Binding a focus/blur event to the field that has the reference with a callback. If the field reference is not found,\n
-  * there will be a logic error dialog appearing.
+  * Binding a focus/blur event to the field with the given reference.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
   * @param ref the reference to the field
-  * @param focusCallback the callback that is executed when the field is on focus event
-  * @param blurCallback the callback that is executed when the field is on blur event
+  * @param focusCallback the callback that is executed when focus event is triggered
+  * @param blurCallback the callback that is executed when blur event is triggered
   */
 onFocus(String ref, String focusCallback, String blurCallback) {
 	linker.bindFocusAndBlurEvent(ref, focusCallback, blurCallback);
