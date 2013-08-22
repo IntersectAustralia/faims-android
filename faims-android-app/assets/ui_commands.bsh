@@ -1105,12 +1105,7 @@ createTextStyle(int minZoom, int color, int size, android.graphics.Typeface font
 }
 
 /**
-  * As a mechanism for editing geometry. Once geometry is added to the highlight list.
-  * By setting the lock on a map to true another overlay will be rendered that stays in
-  * place while the map moves. This will give the user a visual cue as to the new
-  * position of the geometry.
-  *
-  * This function should be used in conjunction with prepareHighlightTransform and doHighlightTransform.
+  * This sets the tilt of the map to be locked at 90 degrees to give a 2D view of the map.
   *
   * @param ref the reference to the map view
   * @param lock set to true to lock the map view
@@ -1140,7 +1135,7 @@ removeGeometryHighlight(String ref, int geomId) {
 }
 
 /**
-  * Call this method after locking the map to prepare the geometry to be transformed to their new position.
+  * Call this method to prepare the geometry in the highlisted list to be transformed to their new position.
   *
   * @param ref the reference to the map view
   */
@@ -1149,7 +1144,7 @@ prepareHighlightTransform(String ref) {
 }
 
 /**
-  * Call this method after unlocking the map to transform the geometry to their new position.
+  * Call this method after calling prepareHighlightTransform once your ready to transform the geometry to their new position.
   *
   * @param ref the reference to the map view
   */
