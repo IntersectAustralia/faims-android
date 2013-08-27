@@ -3314,6 +3314,11 @@ public class BeanShellLinker {
 	public void openVideo(String callback) {
 		videoCallBack = callback;
 		Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+		cameraVideoPath = Environment.getExternalStorageDirectory() + "/"
+				+ Environment.DIRECTORY_DCIM + "/video-"
+				+ System.currentTimeMillis() + ".mp4";
+		File file = new File(cameraVideoPath);
+		videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 		activity.startActivityForResult(videoIntent,
 				ShowProjectActivity.VIDEO_REQUEST_CODE);
 	}
@@ -3410,10 +3415,6 @@ public class BeanShellLinker {
 		} catch (EvalError e) {
 			FLog.e("error when executing the callback for the audio", e);
 		}
-	}
-
-	public void setLastVideoFilePath(String path) {
-		cameraVideoPath = path;
 	}
 
 	public String getLastAudioFilePath() {

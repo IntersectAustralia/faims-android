@@ -684,8 +684,6 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					break;
 				case VIDEO_REQUEST_CODE:
 					if(resultCode == RESULT_OK){
-						Uri uri = data.getData();
-						this.linker.setLastVideoFilePath(getRealPathFromURI(uri));
 						this.linker.executeVideoCallBack();
 					}
 			}
