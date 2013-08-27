@@ -98,7 +98,6 @@ public class CreatePolygonTool extends SettingsTool {
 	
 	@Override
 	public void onLayersChanged() {
-		clearPoints();
 		super.onLayersChanged();
 	}
 	

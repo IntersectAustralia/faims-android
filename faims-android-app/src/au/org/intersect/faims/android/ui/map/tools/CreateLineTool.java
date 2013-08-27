@@ -99,7 +99,6 @@ public class CreateLineTool extends SettingsTool {
 	
 	@Override
 	public void onLayersChanged() {
-		clearPoints();
 		super.onLayersChanged();
 	}
 
