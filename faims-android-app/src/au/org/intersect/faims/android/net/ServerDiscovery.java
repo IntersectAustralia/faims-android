@@ -311,8 +311,9 @@ public class ServerDiscovery {
         String serverPort = preferences.getString("pref_server_port", null);
         serverIP = serverIP == null || serverIP.isEmpty() ? null : serverIP;
         serverPort = serverPort == null || serverPort.isEmpty() || serverIP == null || serverIP.isEmpty() ? null : serverPort;
-        setServerIP(serverIP);
-        setServerPort(serverPort);
+        
+        if (serverIP != null) setServerIP(serverIP);
+        if (serverPort != null) setServerPort(serverPort);
         setServerHostFixed(isServerHostValid());
 	}
 

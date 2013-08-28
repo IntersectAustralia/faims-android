@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.activity;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
@@ -368,6 +369,7 @@ public class FetchProjectsActivity extends RoboActivity {
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
 						if (projectListAdapter != null) projectListAdapter.clear();
 		    			FetchProjectsActivity.this.projects = (List<Project>) fetchResult.data;
+		    			Collections.reverse(FetchProjectsActivity.this.projects);
 		    			for (Project p : projects) {
 		    				FetchProjectsActivity.this.projectListAdapter.add(p.name);
 		    			}
