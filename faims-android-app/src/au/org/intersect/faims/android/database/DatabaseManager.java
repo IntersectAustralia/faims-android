@@ -934,10 +934,10 @@ public class DatabaseManager {
 	}
 
 	public List<User> fetchAllUser() throws Exception{
-		Collection<List<String>> users = fetchAll("select userid, fname, lname from user");
+		Collection<List<String>> users = fetchAll("select userid, fname, lname, email from user");
 		List<User> userList = new ArrayList<User>();
 		for(List<String> userData : users){
-			User user = new User(userData.get(0), userData.get(1), userData.get(2));
+			User user = new User(userData.get(0), userData.get(1), userData.get(2), userData.get(3));
 			userList.add(user);
 		}
 		return userList;

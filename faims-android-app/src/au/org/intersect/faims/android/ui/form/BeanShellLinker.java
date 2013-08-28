@@ -3739,9 +3739,15 @@ public class BeanShellLinker {
 							activity.startActivity(intent);
 						}
 					} else {
-						showWarning(
+						if (file.getPath().contains("files/server")) {
+							showWarning(
 								"Attached File",
-								"The file does not currently exist in the FAIMS folder. If the file is still uploading or syncing please wait and try again when the process has finished");
+								"Cannot open the selected file. The selected file only syncs to the server.");
+						} else {
+							showWarning(
+								"Attached File",
+								"Cannot open the selected file. Please wait for the file to finish syning to the app.");
+						}
 					}
 				}
 

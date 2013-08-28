@@ -327,8 +327,8 @@ String device = "";
 login(){
 
     if (getFieldValue("user/tab1/devices") != ""){
-	    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
-	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getFieldValue("user/tab1/users") + "';");
+	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
 	    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
 	    device = deviceResult.get(0);
 	    setUser(user);

@@ -381,8 +381,8 @@ User user;
 login(){
 
     if (getFieldValue("user/tab1/devices") != ""){
-	    Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getFieldValue("user/tab1/users") + "';");
-	    user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getFieldValue("user/tab1/users") + "';");
+	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
 	    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
 	    device = deviceResult.get(0);
 	    setUser(user);
@@ -2650,9 +2650,6 @@ onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");
 	if (isNull(structure_id)) return;
-	populateCheckBoxGroup("structure/final/AudioList",structureAudios);
-    populateCheckBoxGroup("structure/final/sketchfilelist", structureSketches);
-    populateCheckBoxGroup("structure/final/filelist", structureFiles);
 
     populateDropDown("structure/info/Preservation", makeVocab("Preservation"));
     populateDropDown("structure/info/Form", makeVocab("Form"));
@@ -2665,8 +2662,8 @@ loadStructure() {
     populateList("structure/info/StuccoInterior", makeVocab("StuccoInterior"));
     populateList("structure/info/StuccoExterior", makeVocab("StuccoExterior"));
     populateDropDown("structure/info/RoofForm", makeVocab("RoofForm"));
-	showTabGroup("structure", structure_id);
 	loadStructureFileAttributes(structure_id);
+	showTabGroup("structure", structure_id);
     duplicateEAID();
 }
 

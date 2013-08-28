@@ -10,8 +10,8 @@ populateListForUsers(){
 }
 
 login(){
-	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
-	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+	user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
 	setUser(user);
 	showTabGroup("tabgroup1");
 }
@@ -30,7 +30,7 @@ initialise() {
 }
 
 setUser(){
-	User user = new User("0","Default","User");
+	User user = new User("0","Default","User", "default.user@email.com");
 	setUser(user);
 }
 
