@@ -247,7 +247,7 @@ public class BeanShellLinker {
 						if (getGPSPosition() != null) {
 							execute(callback);
 						} else {
-							showToast("no gps signal at the moment");
+							showToast("No GPS signal");
 						}
 					}
 				};
@@ -276,7 +276,7 @@ public class BeanShellLinker {
 								prevLat = latitude;
 							}
 						} else {
-							showToast("no gps signal at the moment");
+							showToast("No GPS signal");
 						}
 					}
 				};
@@ -285,7 +285,7 @@ public class BeanShellLinker {
 				FLog.e("wrong type format is used");
 			}
 		} else {
-			showToast("gps tracking has been started, please stop it before starting");
+			showToast("GPS tracking has been started, please stop it before starting");
 		}
 	}
 

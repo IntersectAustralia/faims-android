@@ -32,10 +32,10 @@
     <string name="download_project_failure_message">Would you like to try again?</string>
     
     <string name="download_project_error_title">Project is too big</string>
-    <string name="download_project_error_message">Error storage limit reached.</string>
+    <string name="download_project_error_message">Error storage limit reached</string>
     
     <string name="download_busy_project_error_title">Project archive in progress</string>
-    <string name="download_busy_project_error_message">Please wait till project has finished archiving on the server and try again.</string>
+    <string name="download_busy_project_error_message">Please wait until project has finished archiving on the server and try again</string>
     
     <string name="confirm_update_project_setting_title">Update Project Setting</string>
     <string name="confirm_update_project_setting_message">Would you like to update project setting for</string>
@@ -50,10 +50,10 @@
     <string name="update_project_failure_message">Would you like to try again?</string>
     
     <string name="update_project_error_title">Project is too big</string>
-    <string name="update_project_error_message">Error storage limit reached.</string>
+    <string name="update_project_error_message">Error storage limit reached</string>
     
     <string name="update_busy_project_error_title">Project archive in progress</string>
-    <string name="update_busy_project_error_message">Please wait till project has finished archiving on the server and try again.</string>
+    <string name="update_busy_project_error_message">Please wait until project has finished archiving on the server and try again</string>
 
     <string name="render_project_title">Show Project</string>
     <string name="render_project_message">Do you want to render project?</string>
@@ -74,10 +74,10 @@
     <string name="download_database_failure_message">Would you like to try again?</string>
     
     <string name="download_database_error_title">Database is too big</string>
-    <string name="download_database_error_message">Error storage limit reached.</string>
+    <string name="download_database_error_message">Error storage limit reached</string>
     
     <string name="render_ui_failure_title">Error</string>
-    <string name="render_ui_failure_message">Failed to load project.</string>
+    <string name="render_ui_failure_message">Failed to load project</string>
     
     <string name="faims_fetch_project_list_title">Fetch Project List</string>
     <string name="faims_server_setting_title">Settings</string>

@@ -397,7 +397,7 @@ public class EditTool extends HighlightTool {
 				// get selected geometry
 				List<Geometry> selection = mapView.getHighlights();
 				if (selection.size() != 1) {
-					showError("Please select only one geometry to edit");
+					showError("Please select one geometry to edit");
 					return;
 				}
 				

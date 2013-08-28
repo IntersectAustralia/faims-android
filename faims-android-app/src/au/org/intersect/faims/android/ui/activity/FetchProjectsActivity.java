@@ -284,7 +284,7 @@ public class FetchProjectsActivity extends RoboActivity {
 	protected void showUpdateProjectDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Update");
-		builder.setMessage("Do you want to update project setting or project data?");
+		builder.setMessage("Do you want to update project settings or project data?");
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			
@@ -301,7 +301,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			}
 		});
 		
-		builder.setNegativeButton("Update Setting", new OnClickListener() {
+		builder.setNegativeButton("Update Settings", new OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
