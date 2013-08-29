@@ -340,6 +340,17 @@ public class UIRenderer implements IRestoreActionListener{
     public TabGroup getTabGroupByLabel(String label){
     	return this.tabGroupMap.get(label);
     }
+    
+    public Tab getTabByLabel(String label) {
+    	if (label == null) return null;
+		String[] labels = label.split("/");
+		if (labels.length < 2) return null;
+		String group = labels[0];
+		String tab = labels[1];
+		TabGroup tabGroup = tabGroupMap.get(group);
+		Tab currentTab = (tabGroup == null) ? null : tabGroup.getTab(tab);
+		return currentTab;
+    }
 
 	public Tab showTab(String label) {
 		if (label == null) return null;

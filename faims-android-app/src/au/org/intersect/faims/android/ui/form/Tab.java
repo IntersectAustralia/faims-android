@@ -65,6 +65,9 @@ public class Tab implements Parcelable{
 	private Arch16n arch16n;
 	private String reference;
 	private static final String FREETEXT = "freetext";
+	private List<String> onLoadCommands;
+	private List<String> onShowCommands;
+	private boolean tabShown;
 
 	public Tab(Parcel source){
 		hidden = source.readBundle().getBoolean("hidden");
@@ -80,6 +83,9 @@ public class Tab implements Parcelable{
 		this.hidden = hidden;
 		this.reference = reference;
 		//this.scrollable = scrollable;
+		
+		onLoadCommands = new ArrayList<String>();
+		onShowCommands = new ArrayList<String>();
 		
 		this.linearLayout = new LinearLayout(activity);
 		this.viewReference = new HashMap<String, String>();
@@ -975,6 +981,13 @@ public class Tab implements Parcelable{
 		for (CustomMapView mapView : mapViewList) {
 			mapView.restartThreads();
 		}
+		
+		if (!tabShown) {
+			tabShown = true;
+			executeCommands(onLoadCommands);
+		}
+		
+		executeCommands(onShowCommands);
 	}
 
 	public void onHideTab() {
@@ -985,6 +998,23 @@ public class Tab implements Parcelable{
 	
 	public List<CustomMapView> getMapViewList(){
 		return mapViewList;
+	}
+	
+	public void addOnLoadCommand(String command){
+		this.onLoadCommands.add(command);
+	}
+	
+	public void addOnShowCommand(String command){
+		this.onShowCommands.add(command);
+	}
+	
+	private void executeCommands(List<String> commands){
+
+		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
+		
+		for(String command : commands){
+			linker.execute(command);	
+		}
 	}
 
 }

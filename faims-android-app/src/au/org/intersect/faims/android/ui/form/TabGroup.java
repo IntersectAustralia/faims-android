@@ -105,7 +105,7 @@ public class TabGroup extends Fragment {
 			((ViewGroup) tabHost.getParent()).removeView(tabHost);
 		}
 		
-		// TODO does this need to be removed?
+		// TODO does this listener need to be removed?
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 
 			@Override

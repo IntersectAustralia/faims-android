@@ -2636,16 +2636,16 @@ updateAll(){
 	populateDropDown("control/data/windowList", window);
 }
 
-onEvent("control", "show", "updateAll()");
-onEvent("feature", "show", "updateAllFeature()");
-onEvent("lichen", "show", "updateAllLichen()");
-onEvent("doorway", "show", "updateAllDoorway()");
-onEvent("freeWall", "show", "updateAllFreeWall()");
-//onEvent("niche", "show", "updateAllNiche()");
-//onEvent("window", "show", "updateAllWindow()");
-onEvent("structure", "show", "updateAllStructure()");
-onEvent("specialFind", "show", "updateAllSpecialFind()");
-onEvent("surfaceCollection", "show", "updateAllSurfaceCollection()");
+onEvent("control/data", "show", "updateAll()");
+onEvent("feature/featureDetail", "show", "updateAllFeature()");
+onEvent("lichen/lichenDetail", "show", "updateAllLichen()");
+onEvent("doorway/doorDetail", "show", "updateAllDoorway()");
+onEvent("freeWall/freeWallDetail", "show", "updateAllFreeWall()");
+//onEvent("niche/nicheDetail", "show", "updateAllNiche()");
+//onEvent("window/windowDetail", "show", "updateAllWindow()");
+onEvent("structure/load", "show", "updateAllStructure()");
+onEvent("specialFind/findDetail", "show", "updateAllSpecialFind()");
+onEvent("surfaceCollection/load", "show", "updateAllSurfaceCollection()");
 
 loadStructure() {
 	structure_id = getFieldValue("control/data/structureList");

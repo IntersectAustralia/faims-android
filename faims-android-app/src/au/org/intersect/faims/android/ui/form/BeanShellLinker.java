@@ -385,20 +385,28 @@ public class BeanShellLinker {
 			} else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
 				if (tg == null) {
-					FLog.w("cannot find tabgroup " + ref);
-					showWarning("Logic Error", "Error cannot find tabgroup "
-							+ tg);
-					return;
+					Tab tb = activity.getUIRenderer().getTabByLabel(ref);
+					if (tb == null) {
+						FLog.w("cannot find view " + ref);
+						showWarning("Logic Error", "Error cannot find view " + ref);
+						return;
+					} else {
+						tb.addOnLoadCommand(code);
+					}
 				} else {
 					tg.addOnLoadCommand(code);
 				}
 			} else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
 				if (tg == null) {
-					FLog.w("cannot find tabgroup " + ref);
-					showWarning("Logic Error", "Error cannot find tabgroup "
-							+ tg);
-					return;
+					Tab tb = activity.getUIRenderer().getTabByLabel(ref);
+					if (tb == null) {
+						FLog.w("cannot find view " + ref);
+						showWarning("Logic Error", "Error cannot find view " + ref);
+						return;
+					} else {
+						tb.addOnShowCommand(code);
+					}
 				} else {
 					tg.addOnShowCommand(code);
 				}
