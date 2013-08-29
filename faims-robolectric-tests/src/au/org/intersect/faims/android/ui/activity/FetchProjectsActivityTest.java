@@ -73,7 +73,7 @@ public class FetchProjectsActivityTest {
 
 		for (int i = 0; i < count; i++) {
 			assertEquals("Project " + i + " exists", "Project " + i,
-					projectListView.getItemAtPosition(i));
+					projectListView.getItemAtPosition(count - i - 1));
 		}
 	}
 
@@ -100,7 +100,7 @@ public class FetchProjectsActivityTest {
 
 		for (int i = 0; i < count; i++) {
 			assertEquals("Project " + i + " exists", "Project " + i,
-					projectListView.getItemAtPosition(i));
+					projectListView.getItemAtPosition(count - i - 1));
 		}
 		
 		// update count and refresh list
@@ -119,7 +119,7 @@ public class FetchProjectsActivityTest {
 		
 		for (int i = 0; i < count; i++) {
 			assertEquals("Refreshed Project " + i + " exists", "Project " + i,
-					projectListView.getItemAtPosition(i));
+					projectListView.getItemAtPosition(count - i - 1));
 		}
 	}
 	
@@ -191,7 +191,7 @@ public class FetchProjectsActivityTest {
 		// show projects list
 		for (int i = 0; i < count; i++) {
 			assertEquals("Project " + i + " exists", "Project " + i,
-					projectListView.getItemAtPosition(i));
+					projectListView.getItemAtPosition(count - i - 1));
 		}
 	}
 	
@@ -267,7 +267,7 @@ public class FetchProjectsActivityTest {
 		// show projects list
 		for (int i = 0; i < count; i++) {
 			assertEquals("Project " + i + " exists", "Project " + i,
-					projectListView.getItemAtPosition(i));
+					projectListView.getItemAtPosition(count - i - 1));
 		}
 	}
 
