@@ -748,7 +748,7 @@ public class CustomMapView extends MapView {
 
 	public int addBaseMap(String layerName, String file) throws Exception {
 		if (!new File(file).exists()) {
-			throw new MapException("Error map does not exist " + file);
+			throw new MapException("File " + file + " does not exist.");
 		}
 		
 		if (this.getLayers().getBaseLayer() != null) {
@@ -761,19 +761,18 @@ public class CustomMapView extends MapView {
 		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
 				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
 				this, true);
+		
+		// center map 
+		double[][] boundaries = gdalLayer.getBoundary();
+		setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);		
+		
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().setBaseLayer(gdalLayer);
-		//setZoomRange(gdalLayer);
-		//setMapBounds(gdalLayer);
 		
 		if(currentPositionLayer == null){
         	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
         	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
         }
-		
-		// center map 
-		double[][] boundaries = gdalLayer.getBoundary();
-		setMapFocusPoint(((float)boundaries[0][0]+(float)boundaries[3][0])/2, ((float)boundaries[0][1]+(float)boundaries[3][1])/2);
 		
 		orderLayers();
 		
@@ -782,7 +781,7 @@ public class CustomMapView extends MapView {
 
 	public int addRasterMap(String layerName, String file) throws Exception {
 		if (!new File(file).exists()) {
-			throw new MapException("Error map does not exist " + file);
+			throw new MapException("File " + file + " does not exist.");
 		}
 		
 		validateLayerName(layerName);
@@ -790,10 +789,12 @@ public class CustomMapView extends MapView {
 		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
 				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
 				this, true);
+		
+		// check if valid raster layer
+		gdalLayer.getBoundary();
+		
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().addLayer(gdalLayer);
-		//setZoomRange(gdalLayer);
-		//setMapBounds(gdalLayer);
 		
 		if(currentPositionLayer == null){
         	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
@@ -805,11 +806,6 @@ public class CustomMapView extends MapView {
 		return addLayer(gdalLayer);
 	}
 
-//	protected void setZoomRange(CustomGdalMapLayer gdalLayer){
-//		double bestzoom = gdalLayer.getBestZoom();
-//		this.getConstraints().setZoomRange(new Range((float) (bestzoom - 5.0), (float) (bestzoom + 1)));
-//	}
-	
 	protected void setMapBounds(CustomGdalMapLayer gdalLayer){
 		double[][] bound = gdalLayer.getBoundary();
 		MapPos p1 = GeometryUtil.convertFromWgs84(new MapPos(bound[0][0], bound[0][1]));
@@ -821,7 +817,7 @@ public class CustomMapView extends MapView {
 	public void setMapFocusPoint(float longitude, float latitude)
 			throws Exception {
 		if (latitude < -90.0f || latitude > 90.0f) {
-			throw new MapException("Error map latitude out of range "
+			throw new MapException("Latitude out of range "
 					+ latitude);
 		}
 		this.setFocusPoint(new EPSG3857().fromWgs84(longitude, latitude));
@@ -834,7 +830,7 @@ public class CustomMapView extends MapView {
 			StyleSet<PolygonStyle> polygonStyleSet) throws Exception {
 
 		if (!new File(file).exists()) {
-			throw new MapException("Error file does not exist " + file);
+			throw new MapException("File " + file + " does not exist.");
 		}
 
 		validateLayerName(layerName);
@@ -855,7 +851,7 @@ public class CustomMapView extends MapView {
 			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		if (!new File(file).exists()) {
-			throw new MapException("Error file does not exist " + file);
+			throw new MapException("File " + file + " does not exist.");
 		}
 
 		validateLayerName(layerName);
@@ -875,6 +871,10 @@ public class CustomMapView extends MapView {
 				"Geometry", labelColumns,
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle,
 				polygonStyle);
+		
+		// check if valid spatial layer
+		spatialLayer.getDataExtent();		
+		
 		this.getLayers().addLayer(spatialLayer);
 		
 		if (textStyleSet != null) {
@@ -1131,8 +1131,12 @@ public class CustomMapView extends MapView {
 		}
 
 		validateLayerName(layerName);
+		
+		layerNameMap.remove(getLayerName(layer));
 
 		setLayerName(layer, layerName);
+		
+		layerNameMap.put(layerName, layer);
 	}
 
 	private void initTools() {

@@ -37,6 +37,7 @@ import android.widget.ToggleButton;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -256,6 +257,11 @@ public class LayerManagerDialog extends AlertDialog {
 					int position, long arg3) {
 				List<Layer> layers = mapView.getAllLayers();
 				int last = layers.size() - 1;
+				if (last - position < 0 || last - position >= layers.size()) {
+					FLog.e("Error on layer long click");
+					return true;
+				}
+				
 				final Layer layer = layers.get(last - position);
 				
 				Context context = LayerManagerDialog.this.getContext();
@@ -593,27 +599,48 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					if(rasterFile != null){
-						mapView.addBaseMap(editText.getText().toString(), rasterFile.getPath());
-						redrawLayers();
-					}
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
+		
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	        public void onClick(DialogInterface dialog, int id) {
 	           // ignore
 	        }
 	    });
-		AlertDialog d = builder.create();
+		
+		rasterFile = null;
+		
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
-		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText().toString();
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else if (rasterFile == null) {
+						showErrorDialog("Please select a raster file.");
+					} else {
+						mapView.addBaseMap(layerName, rasterFile.getPath());
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (MapException e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog("Could not load raster layer.");
+				}
+			}
+			
+		});
 	}
 	
 	private void addRasterLayer(){
@@ -652,15 +679,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					if(rasterFile != null){
-						mapView.addRasterMap(editText.getText().toString(), rasterFile.getPath());
-						redrawLayers();
-					}
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -670,9 +689,38 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		rasterFile = null;
+		
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText().toString();
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else if (rasterFile == null) {
+						showErrorDialog("Please select a raster file.");
+					} else {
+						mapView.addRasterMap(layerName, rasterFile.getPath());
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (MapException e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog("Could not load raster layer.");
+				}
+			}
+			
+		});
 	}
 	
 //	private void addShapeLayer(){
@@ -819,21 +867,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					if(spatialFile != null){
-						String layerName = editText.getText() != null ? editText.getText().toString() : null;
-						String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
-						String idColumn = idColumnSpinner.getSelectedItem() != null ? (String) idColumnSpinner.getSelectedItem() : null;
-						String labelColumn = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
-						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, idColumn, labelColumn, 
-								pointStyle, lineStyle, polygonStyle, 
-								textStyle.toStyleSet());
-						redrawLayers();
-					}
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -843,9 +877,49 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		spatialFile = null;
+		
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					String tableName = tableNameSpinner.getSelectedItem() != null ? (String) tableNameSpinner.getSelectedItem() : null;
+					String idColumn = idColumnSpinner.getSelectedItem() != null ? (String) idColumnSpinner.getSelectedItem() : null;
+					String labelColumn = labelColumnSpinner.getSelectedItem() != null ? (String) labelColumnSpinner.getSelectedItem() : null;
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else if (spatialFile == null) {
+						showErrorDialog("Please select a spatialite db file.");
+					} else if (tableName == null || "".equals(tableName)) {
+						showErrorDialog("Please select a table.");
+					} else if (idColumn == null || "".equals(idColumn)) {
+						showErrorDialog("Please select a id column.");
+					} else if (labelColumn == null || "".equals(labelColumn)) {
+						showErrorDialog("Please select a label column.");
+					} else {
+						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, idColumn, labelColumn, 
+								pointStyle, lineStyle, polygonStyle, 
+								textStyle.toStyleSet());
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (MapException e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog("Could not load vector layer.");
+				}
+			}
+			
+		});
 	}
 	
 	private void addDatabaseLayer(){
@@ -897,18 +971,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					String layerName = editText.getText() != null ? editText.getText().toString() : null;
-					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
-					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
-					mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
-							pointStyle, lineStyle, polygonStyle, 
-							textStyle.toStyleSet());
-					redrawLayers();
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -918,9 +981,37 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					String type = typeSpinner.getSelectedItem() != null ? (String) typeSpinner.getSelectedItem() : null;
+					String query = querySpinner.getSelectedItem() != null ? (String) querySpinner.getSelectedItem() : null;
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else if (type == null || "".equals(type)) {
+						showErrorDialog("Please select a type.");
+					} else {
+						mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
+								pointStyle, lineStyle, polygonStyle, 
+								textStyle.toStyleSet());
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog("Could not load database layer.");
+				}
+			}
+			
+		});
 	}
 	
 	protected void addViewTrackLogLayer() throws Exception {
@@ -946,14 +1037,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					String layerName = editText.getText() != null ? editText.getText().toString() : null;
-					createUsersTrackLogLayer(layerName);
-					redrawLayers();
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -963,9 +1047,31 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else {
+						createUsersTrackLogLayer(layerName);
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog("Could not load track log layer.");
+				}
+			}
+			
+		});
 	}
 
 	private void createUsersTrackLogLayer(String layerName) throws Exception {
@@ -1173,13 +1279,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					mapView.addCanvasLayer(editText.getText().toString());
-					redrawLayers();
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -1189,9 +1289,31 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else {
+						mapView.addCanvasLayer(layerName);
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				}
+			}
+			
+		});
 	}
 
 	private void removeLayer(final Layer layer) {
@@ -1255,14 +1377,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
-				try {
-					mapView.renameLayer(layer, editText.getText().toString());
-					mapView.updateLayers();
-					redrawLayers();
-				} catch (Exception e) {
-					FLog.e(e.getMessage(), e);
-					showErrorDialog(e.getMessage());
-				}
+				// ignore
 			}
 	        
 	    });
@@ -1272,9 +1387,32 @@ public class LayerManagerDialog extends AlertDialog {
 	        }
 	    });
 		
-		AlertDialog d = builder.create();
+		final AlertDialog d = builder.create();
 		d.setCanceledOnTouchOutside(true);
 		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				try {
+					String layerName = editText.getText() != null ? editText.getText().toString() : null;
+					
+					if (layerName == null || "".equals(layerName)) {
+						showErrorDialog("Please enter a layer name.");
+					} else {
+						mapView.renameLayer(layer, layerName);
+						mapView.updateLayers();
+						redrawLayers();
+						d.dismiss();
+					}
+				} catch (Exception e) {
+					FLog.e(e.getMessage(), e);
+					showErrorDialog(e.getMessage());
+				}
+			}
+			
+		});
 	}
 	
 	private void config(final Layer layer) {
@@ -1302,6 +1440,27 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(DialogInterface arg0, int arg1) {
+				// ignore
+			}
+	        
+	    });
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int arg1) {
+				// ignore
+			}
+	        
+	    });
+		
+		final AlertDialog d = builder.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
+		
+		d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
 				try {
 					int limit = Integer.parseInt(vectorLimitText.getText().toString());
 					if (limit <= 0) {
@@ -1315,25 +1474,14 @@ public class LayerManagerDialog extends AlertDialog {
 						((DatabaseLayer) layer).setMaxObjects(limit);
 					}
 					mapView.refreshMap();
+					d.dismiss();
 				} catch (Exception e) {
 					FLog.e("error setting config", e);
 					showErrorDialog(e.getMessage());
 				}
 			}
-	        
-	    });
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-				// ignore
-			}
-	        
-	    });
-		
-		AlertDialog d = builder.create();
-		d.setCanceledOnTouchOutside(true);
-		d.show();
+			
+		});
 	}
 	
 	private void showMetadata(Layer layer) {
