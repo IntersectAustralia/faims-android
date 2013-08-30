@@ -25,7 +25,7 @@ public class PointStyleDialog extends StyleDialog {
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
 			addColorField("color", "Point Color:", Integer.toHexString(style.pointColor));
 			addSlider("size", "Point Size:", style.size);
-			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
+			addSlider("pickingSize", "Point Selection Tolerance:", style.pickingSize);
 			
 			if (this.positiveListener == null) {
 				setPositiveButton("Ok", new DialogInterface.OnClickListener() {

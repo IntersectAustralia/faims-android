@@ -22,14 +22,14 @@ public class PolygonStyleDialog extends StyleDialog {
 			
 			setTitle("Style Settings");
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
-			addColorField("color", "Polygon Color:", Integer.toHexString(style.polygonColor));
-			addSlider("size", "Point Size:", style.size);
-			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
-			addColorField("strokeColor", "Stroke Color:", Integer.toHexString(style.lineColor));
-			addSlider("width", "Stroke Width:", style.width);
-			addSlider("pickingWidth", "Stroke Picking Width:", style.pickingWidth);
-			addCheckBox("showStroke", "Show Stroke on Polygon:", style.showStroke);
+			addColorField("color", "Polygon Fill Color:", Integer.toHexString(style.polygonColor));
+			addCheckBox("showStroke", "Show Outline on Polygon:", style.showStroke);
+			addColorField("strokeColor", "Outline Color:", Integer.toHexString(style.lineColor));
+			addSlider("width", "Outline Width:", style.width);
+			addSlider("pickingWidth", "Outline Selection Tolerance:", style.pickingWidth);
 			addCheckBox("showPoints", "Show Points on Polygon:", style.showPoints);
+			addSlider("size", "Point Size:", style.size);
+			addSlider("pickingSize", "Point Selection Tolerance:", style.pickingSize);
 			
 			if (this.positiveListener == null) {
 				setPositiveButton("Ok", new DialogInterface.OnClickListener() {

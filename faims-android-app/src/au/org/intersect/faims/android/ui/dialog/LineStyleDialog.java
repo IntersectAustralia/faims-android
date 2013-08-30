@@ -24,11 +24,11 @@ public class LineStyleDialog extends StyleDialog {
 			
 			addRange("minZoom", "Min Zoom:", style.minZoom, 0, FaimsSettings.MAX_ZOOM);
 			addColorField("color", "Line Color:", Integer.toHexString(style.lineColor));
-			addSlider("size", "Point Size:", style.size);
-			addSlider("pickingSize", "Point Picking Size:", style.pickingSize);
 			addSlider("width", "Line Width:", style.width);
-			addSlider("pickingWidth", "Line Picking Width:", style.pickingWidth);
+			addSlider("pickingWidth", "Line Selection Tolerance:", style.pickingWidth);
 			addCheckBox("showPoints", "Show Points on Line:", style.showPoints);
+			addSlider("size", "Point Size:", style.size);
+			addSlider("pickingSize", "Point Selection Tolerance:", style.pickingSize);
 			
 			if (this.positiveListener == null) {
 				setPositiveButton("Ok", new DialogInterface.OnClickListener() {
