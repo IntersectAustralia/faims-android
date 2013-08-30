@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -112,6 +113,26 @@ public class PointSelectionTool extends HighlightSelectionTool {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						// ignore
+					}
+				});
+				
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// ignore
+					}
+				});
+				
+				settingsDialog = builder.create();
+				settingsDialog.setCanceledOnTouchOutside(true);
+				settingsDialog.show();
+				
+				settingsDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
 						try {
 							float distance = Float.parseFloat(((EditText) settingsDialog.getField("distance")).getText().toString());
 							boolean remove = settingsDialog.parseCheckBox("remove");
@@ -127,24 +148,15 @@ public class PointSelectionTool extends HighlightSelectionTool {
 							
 							mapView.runPointSelection((Point) GeometryUtil.convertGeometryToWgs84(point), distance, remove);
 							selectedDistance.setText("Current Distance: " + distance + " m");
+							
+							settingsDialog.dismiss();
 						} catch (Exception e) {
 							FLog.e("error running point selection query", e);
 							showError(e.getMessage());
 						}
 					}
-				});
-				
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// ignore
-					}
 				});
-				
-				settingsDialog = builder.create();
-				settingsDialog.setCanceledOnTouchOutside(true);
-				settingsDialog.show();
 			}
 				
 		});

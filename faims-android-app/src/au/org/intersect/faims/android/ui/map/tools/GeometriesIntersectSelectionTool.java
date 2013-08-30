@@ -3,6 +3,7 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.View;
@@ -89,24 +90,7 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						try {
-							boolean remove = settingsDialog.parseCheckBox("remove");
-							
-							if (mapView.getHighlights().size() == 0) {
-								showError("Please select a geometry");
-								return;
-							}
-							
-							List<Geometry> transformedGeometries = new ArrayList<Geometry>();
-							for(Geometry geometry : mapView.getHighlights()){
-								transformedGeometries.add(GeometryUtil.convertGeometryToWgs84(geometry));
-							}
-							
-							mapView.runIntersectionSelection(transformedGeometries, remove);
-						} catch (Exception e) {
-							FLog.e("error running polygon selection query", e);
-							showError(e.getMessage());
-						}
+						
 					}
 				});
 				
@@ -121,6 +105,34 @@ public class GeometriesIntersectSelectionTool extends HighlightSelectionTool {
 				settingsDialog = builder.create();
 				settingsDialog.setCanceledOnTouchOutside(true);
 				settingsDialog.show();
+				
+				settingsDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+
+					@Override
+					public void onClick(View arg0) {
+						try {
+							boolean remove = settingsDialog.parseCheckBox("remove");
+							
+							if (mapView.getHighlights().size() == 0) {
+								showError("Please select a geometry");
+								return;
+							}
+							
+							List<Geometry> transformedGeometries = new ArrayList<Geometry>();
+							for(Geometry geometry : mapView.getHighlights()){
+								transformedGeometries.add(GeometryUtil.convertGeometryToWgs84(geometry));
+							}
+							
+							mapView.runIntersectionSelection(transformedGeometries, remove);
+							
+							settingsDialog.dismiss();
+						} catch (Exception e) {
+							FLog.e("error running intersect selection query", e);
+							showError(e.getMessage());
+						}
+					}
+					
+				});
 			}
 				
 		});
