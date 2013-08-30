@@ -26,9 +26,9 @@ public class LineStyleDialog extends StyleDialog {
 			addColorField("color", "Line Color:", Integer.toHexString(style.lineColor));
 			addSlider("width", "Line Width:", style.width);
 			addSlider("pickingWidth", "Line Selection Tolerance:", style.pickingWidth);
-			addCheckBox("showPoints", "Show Points on Line:", style.showPoints);
-			addSlider("size", "Point Size:", style.size);
-			addSlider("pickingSize", "Point Selection Tolerance:", style.pickingSize);
+			addCheckBox("showPoints", "Show Vertices on Line:", style.showPoints);
+			addSlider("size", "Vertex Size:", style.size);
+			addSlider("pickingSize", "Vertex Selection Tolerance:", style.pickingSize);
 			
 			if (this.positiveListener == null) {
 				setPositiveButton("Ok", new DialogInterface.OnClickListener() {

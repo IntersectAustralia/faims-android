@@ -27,9 +27,9 @@ public class PolygonStyleDialog extends StyleDialog {
 			addColorField("strokeColor", "Outline Color:", Integer.toHexString(style.lineColor));
 			addSlider("width", "Outline Width:", style.width);
 			addSlider("pickingWidth", "Outline Selection Tolerance:", style.pickingWidth);
-			addCheckBox("showPoints", "Show Points on Polygon:", style.showPoints);
-			addSlider("size", "Point Size:", style.size);
-			addSlider("pickingSize", "Point Selection Tolerance:", style.pickingSize);
+			addCheckBox("showPoints", "Show Vertices on Polygon:", style.showPoints);
+			addSlider("size", "Vertex Size:", style.size);
+			addSlider("pickingSize", "Vertex Selection Tolerance:", style.pickingSize);
 			
 			if (this.positiveListener == null) {
 				setPositiveButton("Ok", new DialogInterface.OnClickListener() {

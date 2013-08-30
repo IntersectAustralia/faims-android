@@ -43,7 +43,8 @@ public class ConfigDialog extends AlertDialog {
 		scrollView.addView(layout);
 		addColorField("color", "Select Tool Color:", Integer.toHexString(mapView.getDrawViewColor()));
 		addColorField("editColor", "Edit Tool Color:", Integer.toHexString(mapView.getEditViewColor()));
-		addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
+		addSlider("strokeSize", "Guide Outline Width:", mapView.getDrawViewStrokeStyle());
+		addSlider("vertexSize", "Guide Vertex Size:", mapView.getVertexSize());
 		addSlider("textSize", "Details Text Size:", mapView.getDrawViewTextSize());
 		
 		final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getProjectSrid());
@@ -51,7 +52,7 @@ public class ConfigDialog extends AlertDialog {
 			addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 		}
 		addCheckBox("showKm", "Display measurements in km:", mapView.showKm());
-		addSlider("vertexSize", "Guide Point Size:", mapView.getVertexSize());
+		
 		addTextField("buffer", "Tracker Tool Buffer Size (m):", Float.toString(mapView.getPathBuffer()));
 		addColorField("bufferColor", "Tracker Tool Buffer Color:", Integer.toHexString(mapView.getBufferColor()));
 		addColorField("targetColor", "Tracker Tool Target Color:", Integer.toHexString(mapView.getTargetColor()));
