@@ -3,14 +3,20 @@ package au.org.intersect.faims.android.ui.activity;
 import java.util.List;
 
 import roboguice.activity.RoboActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.ui.dialog.AboutDialog;
@@ -51,6 +57,53 @@ public class MainActivity extends RoboActivity {
     	super.onStart();
     	
     	readStoredProjects();
+    	
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    	if (sp.getInt("launched", 0) == 0) {
+    		SharedPreferences.Editor editor = sp.edit();
+    		editor.putInt("launched", 1);
+    		editor.commit();
+    		
+    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    		builder.setTitle("Welcome to FAIMS");
+    		builder.setMessage("Do you want to download demo module?");
+
+    		builder.setPositiveButton("Yes", new OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				fetchProjectsFromDemoServer();
+    			}
+    		});
+    		
+    		builder.setNegativeButton("No", new OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				// ignore
+    			}
+    		});
+    		
+    		builder.create().show();
+    	}
+		
+    }
+    
+    private void fetchProjectsFromDemoServer() {
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    	String host = getResources().getString(R.string.demo_server_host);
+		String port = getResources().getString(R.string.demo_server_port);
+		SharedPreferences.Editor editor = sp.edit();
+		editor.putString("pref_server_ip", host);
+		editor.putString("pref_server_port", port);
+		editor.commit();
+		
+		int duration = Toast.LENGTH_LONG;
+		Toast toast = Toast.makeText(getApplicationContext(),
+				"Select a project to download", duration);
+		toast.show();
+		
+		fetchProjectsFromServer();
     }
     
     @Override
