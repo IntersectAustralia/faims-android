@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import org.apache.http.params.HttpParams;
 
 import android.net.http.AndroidHttpClient;
 import android.os.Environment;
+import android.util.Base64;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Project;
@@ -49,6 +49,10 @@ public class FAIMSClient {
 	private static final int CONNECTION_TIMEOUT = 60 * 1000;
 	
 	private static final int DATA_TIMEOUT = 60 * 1000;
+	
+	private static final String USERNAME = "faimsandroidapp";
+	
+	private static final String TOKEN = "YiQIeV39sdhb2ltRmOyGN";
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -120,7 +124,7 @@ public class FAIMSClient {
 					}
 				}
 				
-				HttpPost post = new HttpPost(new URI(getUri(path)));
+				HttpPost post = createPostRequest(getUri(path));
 				post.setEntity(entity);
 				
 				HttpResponse response = httpClient.execute(post);
@@ -477,7 +481,7 @@ public class FAIMSClient {
 	private HttpResponse getRequest(String uri, HttpParams params) throws IOException {
 		FLog.d(uri);
 		
-		HttpGet get = new HttpGet(uri);
+		HttpGet get = createGetRequest(uri);
 		
 		if (params != null) {
 			get.setParams(params);
@@ -711,6 +715,22 @@ public class FAIMSClient {
 			}
 			httpClient.getConnectionManager().shutdown();
 		}
+	}
+	
+	private String getCredentials() {
+		return "Basic " + Base64.encodeToString((USERNAME+":"+TOKEN).getBytes(), Base64.NO_WRAP);
+	}
+	
+	private HttpPost createPostRequest(String uri) {
+		HttpPost post = new HttpPost(uri);
+		post.setHeader("Authorization", getCredentials());
+		return post;
+	}
+	
+	private HttpGet createGetRequest(String uri) {
+		HttpGet get = new HttpGet(uri);
+		get.setHeader("Authorization", getCredentials());
+		return get;
 	}
 	
 }
