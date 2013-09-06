@@ -149,6 +149,9 @@ public class PolygonSelectionTool extends HighlightSelectionTool {
 							selectedDistance.setText("Current Distance: " + distance + " m");
 							
 							settingsDialog.dismiss();
+						} catch (NumberFormatException e) {
+							FLog.e("error setting config", e);
+							showError("Please enter a float value");
 						} catch (Exception e) {
 							FLog.e("error running polygon selection query", e);
 							showError(e.getMessage());
