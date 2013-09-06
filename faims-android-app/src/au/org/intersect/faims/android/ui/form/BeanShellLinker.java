@@ -3754,7 +3754,7 @@ public class BeanShellLinker {
 						} else {
 							showWarning(
 								"Attached File",
-								"Cannot open the selected file. Please wait for the file to finish syning to the app.");
+								"Cannot open the selected file. Please wait for the file to finish syncing to the app.");
 						}
 					}
 				}
