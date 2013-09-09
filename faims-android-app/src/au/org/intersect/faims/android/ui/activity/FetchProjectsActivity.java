@@ -203,7 +203,6 @@ public class FetchProjectsActivity extends RoboActivity {
         	}
         });
         
-        fetchProjectsList();
     }
     
     @Override
@@ -211,6 +210,8 @@ public class FetchProjectsActivity extends RoboActivity {
     	super.onResume();
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         serverDiscovery.initiateServerIPAndPort(preferences);
+        
+        fetchProjectsList();
     }
 
     protected void showDownloadProjectDialog(final String selectedItem) {
