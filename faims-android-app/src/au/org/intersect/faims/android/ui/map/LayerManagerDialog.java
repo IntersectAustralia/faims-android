@@ -1477,7 +1477,7 @@ public class LayerManagerDialog extends AlertDialog {
 					d.dismiss();
 				} catch (NumberFormatException e) {
 					FLog.e("error setting config", e);
-					showErrorDialog("Please enter a integer value");
+					showErrorDialog("Please enter an integer value");
 				} catch (Exception e) {
 					FLog.e("error setting config", e);
 					showErrorDialog(e.getMessage());
