@@ -10,6 +10,7 @@ import java.util.Map;
 import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
 
+import roboguice.RoboGuice;
 import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import android.text.format.Time;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -40,11 +42,15 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
+
+import com.google.inject.Inject;
 
 public class Tab implements Parcelable{
 
@@ -69,6 +75,9 @@ public class Tab implements Parcelable{
 	private List<String> onShowCommands;
 	private boolean tabShown;
 
+	@Inject
+	DatabaseManager databaseManager;
+	
 	public Tab(Parcel source){
 		hidden = source.readBundle().getBoolean("hidden");
 		reference = source.readString();
@@ -107,6 +116,8 @@ public class Tab implements Parcelable{
         } else {
         	this.view = linearLayout;
         }
+        // inject faimsClient and serverDiscovery
+        RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
 	}
 
 	public static final Parcelable.Creator<Tab> CREATOR = new Parcelable.Creator<Tab>() {
@@ -139,6 +150,7 @@ public class Tab implements Parcelable{
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	Button dirtyButton = null;
+    	Button infoButton = null;
 		if (linearLayout == null) {
 			linearLayout = this.linearLayout;
 		}
@@ -163,6 +175,11 @@ public class Tab implements Parcelable{
 	    			fieldLinearLayout.addView(annotationButton);
 	    		}
 	    		
+	    		if(attribute.info && attribute.name != null){
+	    			infoButton = createInfoButton();
+	    			fieldLinearLayout.addView(infoButton);
+	    		}
+	    		
 	    		if (isArchEnt || isRelationship) {
 		    		dirtyButton = createDirtyButton();
 		    		dirtyButton.setVisibility(View.GONE);
@@ -181,30 +198,30 @@ public class Tab implements Parcelable{
             	switch (attribute.dataType) {
 	                case Constants.DATATYPE_INTEGER:
 	                	view = createIntegerTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
 	                    break;
 	                case Constants.DATATYPE_DECIMAL:
 	                	view = createDecimalTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
 	                    break;
 	                case Constants.DATATYPE_LONG:
 	                	view = createLongTextField(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
 	                    break;
 	                // set input type as date picker
 	                case Constants.DATATYPE_DATE:
 	                	view = createDatePicker(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, DateUtil.getDate((CustomDatePicker) view));
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, DateUtil.getDate((CustomDatePicker) view));
 	                    break;
 	                // get the text area
 	                case Constants.DATATYPE_TEXT:
 	                	view = createTextArea(attribute, ref);
-	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+	                	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
 	                    break;
 	                // set input type as time picker
 	                case Constants.DATATYPE_TIME:
 	                	view = createTimePicker(attribute, ref);
-	    				setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, DateUtil.getTime((CustomTimePicker) view));
+	    				setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, DateUtil.getTime((CustomTimePicker) view));
 	                    break;
 	                // default is edit text
 	                default:
@@ -218,7 +235,7 @@ public class Tab implements Parcelable{
 	                		view = mapLayout.getMapView();
 	                	} else {
 	                		view = createTextField(-1, attribute, ref);
-	                		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+	                		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
 	                	}
 	                    break;
             	}
@@ -254,12 +271,12 @@ public class Tab implements Parcelable{
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForSingleSelection(attribute, directory, ref);
-                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }
                         // Radio Button
                         else if ("full".equalsIgnoreCase(attribute.questionAppearance)) {
                         	view = createRadioGroup(attribute, ref);
-                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         // List
                         } else if ("compact".equalsIgnoreCase(attribute.questionAppearance) ) {
                         	view = createList(attribute);
@@ -268,7 +285,7 @@ public class Tab implements Parcelable{
                         } else {
                         	view = createDropDown(attribute, ref);
                         	NameValuePair pair = (NameValuePair) ((CustomSpinner) view).getSelectedItem();
-                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, pair.getValue());
+                        	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, pair.getValue());
                         }
                         break;
                 }
@@ -279,10 +296,10 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
                             view = renderImageSliderForMultiSelection(attribute, directory, ref);
-                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }else{
 	                    	view = createCheckListGroup(attribute, ref);
-	                    	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, new ArrayList<NameValuePair>());
+	                    	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
                         }
                 }
                 break;
@@ -343,19 +360,33 @@ public class Tab implements Parcelable{
 		button.setTextSize(10);
 		return button;
 	}
-	
-	private void setupView(LinearLayout linearLayout, View view, Button certaintyButton, Button annotationButton, Button dirtyButton, String ref) {
-		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, ref, "");
+
+	private Button createInfoButton() {
+		Button button = new Button(this.activityRef.get());
+		button.setBackgroundResource(R.drawable.square_button);
+		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 34);
+		LayoutParams layoutParams = new LayoutParams(size, size);
+		layoutParams.topMargin = 10;
+		button.setLayoutParams(layoutParams);
+		button.setText("I");
+		button.setTextSize(10);
+		return button;
+	}
+
+	private void setupView(LinearLayout linearLayout, View view, Button certaintyButton, Button annotationButton, Button dirtyButton, Button infoButton, String attributeName, String ref) {
+		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attributeName, ref, "");
 	}
 	
-	private void setupView(LinearLayout linearLayout,View view, Button certaintyButton, Button annotationButton, Button dirtyButton, String ref, Object value) {
+	private void setupView(LinearLayout linearLayout,View view, Button certaintyButton, Button annotationButton, Button dirtyButton, Button infoButton, String attributeName, String ref, Object value) {
 		if (certaintyButton != null) onCertaintyButtonClicked(certaintyButton, view);
         if (annotationButton != null) onAnnotationButtonClicked(annotationButton, view);
         if (dirtyButton != null) onDirtyButtonClicked(dirtyButton, view);
+        if (infoButton != null) onInfoButtonClicked(infoButton, attributeName);
         linearLayout.addView(view);
         valueReference.put(ref, value);
 	}
 	
+
 	private CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
 		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
     	if (attribute.readOnly) {
@@ -697,6 +728,68 @@ public class Tab implements Parcelable{
 		});
 	}
 
+	private void onInfoButtonClicked(Button infoButton, final String attributeName) {
+		infoButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				try {
+					StringBuilder description = new StringBuilder();
+					String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+					List<String[]> vocabTermDescriptions = databaseManager.getVocabulariesTerm(attributeName);
+					description.append("<i>Description:</i>");
+					if(attributeDescription != null){
+						description.append("<br/>" + attributeDescription);
+					}
+					if(!vocabTermDescriptions.isEmpty()){
+						description.append("<p/>");
+						description.append("<i>Glossary:</i>");
+					}
+					description.append("<ul>");
+					for (String[] vocabTermDescription : vocabTermDescriptions) {
+						description.append("<li>");
+						description.append("<b>" + vocabTermDescription[0] + "</b>");
+						if(vocabTermDescription[1] != null){
+							description.append("<br/>" + vocabTermDescription[1]);
+						}
+						if(vocabTermDescription[2] != null && !vocabTermDescription[2].isEmpty()){
+							description.append("<br/>" + "<img src=\"" + vocabTermDescription[2] + "\"/>");
+						}
+						description.append("</li>");
+					}
+					description.append("</ul>");
+					showDescriptionDialog(description.toString());
+				} catch (Exception e) {
+					FLog.e("Cannot retrieve the description for attribute " + name, e);
+				}
+				
+			}
+
+		});
+	}
+	
+	private void showDescriptionDialog(String description) {
+		AlertDialog.Builder dialog = new AlertDialog.Builder(this.activityRef.get());
+		dialog.setTitle("Info");
+		ScrollView scrollView = new ScrollView(this.activityRef.get());
+		LinearLayout layout = new LinearLayout(this.activityRef.get());
+		WebView webView = new WebView(this.activityRef.get());
+		webView.loadDataWithBaseURL("file:///" + this.activityRef.get().getProjectDir() + "/", description, "text/html", null, null);
+		layout.addView(webView);
+		scrollView.addView(layout);
+		dialog.setView(scrollView);
+		dialog.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// dismiss the dialog
+			}
+		});
+		AlertDialog d = dialog.create();
+		d.setCanceledOnTouchOutside(true);
+		d.show();
+	}
+	
 	public TabSpec createTabSpec(TabHost tabHost) {
 		TabSpec tabSpec = tabHost.newTabSpec(name);
 		

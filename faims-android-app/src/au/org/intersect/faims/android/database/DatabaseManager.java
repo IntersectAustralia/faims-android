@@ -1714,5 +1714,77 @@ public class DatabaseManager {
 			}
 		}
 	}
+
+	public String getAttributeDescription(String name) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				String description = null;
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+	
+				String query = DatabaseQueries.GET_ATTRIBUTE_DESCRIPTION;
+				stmt = db.prepare(query);
+				stmt.bind(1, name);
+				if(stmt.step()){
+					description = stmt.column_string(0);
+				}
+				stmt.close();
+				stmt = null;
+				
+				return description;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
+
+	public List<String[]> getVocabulariesTerm(String attributeName) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				List<String[]> description = new ArrayList<String[]>();
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+	
+				String query = DatabaseQueries.GET_VOCABULARIES_TERM_DESCRIPTION;
+				stmt = db.prepare(query);
+				stmt.bind(1, attributeName);
+				while(stmt.step()){
+					description.add(new String[]{stmt.column_string(0), stmt.column_string(1), stmt.column_string(2)});
+				}
+				stmt.close();
+				stmt = null;
+				
+				return description;
+			} finally {
+				try {
+					if (stmt != null) stmt.close();
+				} catch(Exception e) {
+					FLog.e("error closing statement", e);
+				}
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+		}
+	}
 	
 }
