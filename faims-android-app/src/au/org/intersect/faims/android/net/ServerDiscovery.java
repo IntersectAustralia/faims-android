@@ -95,6 +95,10 @@ public class ServerDiscovery {
 		return serverIP != null && serverPort != null;
 	}
 	
+	public boolean isServerHostValid(String serverIP, String serverPort) {
+		return serverIP != null && serverPort != null;
+	}
+	
 	public synchronized void stopDiscovery() {
 		killThreads();
 	}
@@ -314,7 +318,7 @@ public class ServerDiscovery {
         
         if (serverIP != null) setServerIP(serverIP);
         if (serverPort != null) setServerPort(serverPort);
-        setServerHostFixed(isServerHostValid());
+        setServerHostFixed(isServerHostValid(serverIP, serverPort));
 	}
 
 	public boolean isServerHostFixed() {
