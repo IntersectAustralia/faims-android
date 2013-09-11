@@ -327,8 +327,8 @@ public final class DatabaseQueries {
 				"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
 				"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
 				"insert or replace into vocabulary (\n" + 
-				"         vocabid, attributeid, vocabname, SemanticMapURL,PictureURL) \n" + 
-				"  select vocabid, attributeid, vocabname, SemanticMapURL,PictureURL\n" + 
+				"         vocabid, attributeid, vocabname, vocabdescription, SemanticMapURL,PictureURL) \n" + 
+				"  select vocabid, attributeid, vocabname, vocabdescription, SemanticMapURL,PictureURL\n" + 
 				"  from import.vocabulary;\n" + 
 				"insert or replace into user (\n" + 
 				"         userid, fname, lname, email) \n" + 
