@@ -315,6 +315,8 @@ public class FileUtil {
 	}
 	
 	private static void getDirectoryList(File dir, List<String> fileList, String base) {
+		if (dir == null || dir.listFiles() == null) return;
+		
 		for (File f : dir.listFiles()) {
 			if (f.isDirectory()) {
 				getDirectoryList(f, fileList, base + f.getName() + "/");
