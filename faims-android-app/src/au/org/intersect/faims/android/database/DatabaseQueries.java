@@ -388,4 +388,11 @@ public final class DatabaseQueries {
 	
 	public static String IS_RELNVALUE_FORKED = 
 			"select count(isforked) from relnvalue where relationshipid = ?;";
+	
+	public static String GET_ATTRIBUTE_DESCRIPTION =
+			"select attributedescription from attributekey where attributename = ?;";
+	
+	public static final String GET_VOCABULARIES_TERM_DESCRIPTION =
+			"select vocabname, vocabdescription, pictureurl from attributekey join vocabulary using (attributeid) where attributename = ?;";
+
 }
