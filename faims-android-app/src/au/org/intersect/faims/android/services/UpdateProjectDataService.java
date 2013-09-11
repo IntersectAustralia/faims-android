@@ -26,19 +26,26 @@ public class UpdateProjectDataService extends DownloadService {
 			
 			FLog.d("update project data for project " + project.name);
 			
+			// 0. delete data directory
 			// 1. download project data
+			
+			// 0.
+			FileUtil.deleteDirectory(new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)));
+			new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)).mkdirs();
 			
 			// 1.
 			DownloadResult result = downloadDataDirectory(intent);
 			
 			if (downloadStopped) {
 				FileUtil.deleteDirectory(new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)));
+				new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)).mkdirs();
 				FLog.d("update project data cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				FileUtil.deleteDirectory(new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)));
+				new File(projectDir + "/" + this.getResources().getString(R.string.data_dir)).mkdirs();
 				FLog.d("update project data directory failure");
 				return result;
 			}
