@@ -39,6 +39,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
+import au.org.intersect.faims.android.nutiteq.CustomSpatialLiteDb;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
@@ -80,6 +81,7 @@ import com.nutiteq.components.Constraints;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
+import com.nutiteq.db.DBLayer;
 import com.nutiteq.geometry.DynamicMarker;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
@@ -872,6 +874,20 @@ public class CustomMapView extends MapView {
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle,
 				polygonStyle);
 		
+		CustomSpatialLiteDb spatialLite = new CustomSpatialLiteDb(spatialLayer.getDbPath());
+		Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
+		DBLayer dbLayer = null;
+		for (String layerKey : dbLayers.keySet()) {
+			DBLayer layer = dbLayers.get(layerKey);
+			if (layer.table.equalsIgnoreCase(spatialLayer.getTableName())
+					&& layer.geomColumn.equalsIgnoreCase(spatialLayer.getGeometryColumn())) {
+				dbLayer = layer;
+				break;
+			}
+		}
+		if(spatialLite.checkDataFromDataBase(dbLayer) == null){
+			throw new MapException("Table contains unsupported geometry");
+		}
 		// check if valid spatial layer
 		spatialLayer.getDataExtent();		
 		

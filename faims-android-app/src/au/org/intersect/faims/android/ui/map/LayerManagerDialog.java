@@ -1661,7 +1661,7 @@ public class LayerManagerDialog extends AlertDialog {
 					db = new jsqlite.Database();
 					db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
 					
-					String query = "select name from sqlite_master where type = 'table' and sql like '%\"Geometry\"%';";
+					String query = "select f_table_name from geometry_columns;";
 					st = db.prepare(query);
 					
 					while(st.step()){
