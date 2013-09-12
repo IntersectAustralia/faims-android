@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="libs/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="libs/commons-compress-1.4.1.jar"/>
 	<classpathentry kind="lib" path="libs/core.jar"/>
-	<classpathentry kind="lib" path="libs/graphhopper-0.1-SNAPSHOT-android.jar"/>
 	<classpathentry kind="lib" path="libs/gson-2.2.3.jar"/>
 	<classpathentry kind="lib" path="libs/guice-2.0-no_aop.jar"/>
 	<classpathentry kind="lib" path="libs/hamcrest.jar"/>

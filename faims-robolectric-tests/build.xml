@@ -45,7 +45,6 @@
 		<file name="jmustache-1.5.jar"/>
 		<file name="slf4j-android-1.6.1-RC1.jar"/>
 		<file name="jts-1.13.jar"/>
-		<file name="graphhopper-0.1-SNAPSHOT-android.jar"/>
 		<!-- TODO fix ugly references -->
 		<file name="../../android-filechooser/code/bin/classes.jar "/>
 		<file name="../../android-filechooser/code/bin/code.jar "/>
