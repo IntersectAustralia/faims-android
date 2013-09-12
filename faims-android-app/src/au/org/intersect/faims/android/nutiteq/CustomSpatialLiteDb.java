@@ -70,7 +70,7 @@ public class CustomSpatialLiteDb extends SpatialLiteDb {
         return result;
     }
 	
-	public Geometry checkDataFromDataBase(final DBLayer dbLayer) {
+	public boolean checkValidGeometry(final DBLayer dbLayer) {
         result = null;
         Callback cb = new Callback() {
             
@@ -116,6 +116,6 @@ public class CustomSpatialLiteDb extends SpatialLiteDb {
             FLog.e("SpatialLite: Failed to query data! ", e);
         }
 
-        return result;
+        return result != null;
     }
 }

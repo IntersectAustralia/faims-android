@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
@@ -16,7 +17,6 @@ import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
-import com.nutiteq.layers.vector.SpatialLiteDb;
 import com.nutiteq.log.Log;
 import com.nutiteq.projections.Projection;
 import com.nutiteq.tasks.Task;
@@ -31,7 +31,7 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 	private SpatialiteTextLayer textLayer;
 	private boolean textVisible;
 
-	private SpatialLiteDb spatialLite;
+	private CustomSpatialLiteDb spatialLite;
 	private DBLayer dbLayer;
 
 	private GeometryStyle pointStyle;
@@ -322,6 +322,22 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		}
 		
 		//FLog.d("time: " + (System.currentTimeMillis() - time) / 1000);
+	}
+
+	public void raiseInvalidLayer() throws MapException {
+		Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
+		DBLayer dbLayer = null;
+		for (String layerKey : dbLayers.keySet()) {
+			DBLayer layer = dbLayers.get(layerKey);
+			if (layer.table.equalsIgnoreCase(getTableName())
+					&& layer.geomColumn.equalsIgnoreCase(getGeometryColumn())) {
+				dbLayer = layer;
+				break;
+			}
+		}
+		if(!spatialLite.checkValidGeometry(dbLayer)){
+			throw new MapException("Table contains unsupported geometry");
+		}
 	}
 
 }

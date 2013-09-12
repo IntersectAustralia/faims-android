@@ -39,7 +39,6 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
-import au.org.intersect.faims.android.nutiteq.CustomSpatialLiteDb;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
@@ -81,7 +80,6 @@ import com.nutiteq.components.Constraints;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.components.Options;
 import com.nutiteq.components.Range;
-import com.nutiteq.db.DBLayer;
 import com.nutiteq.geometry.DynamicMarker;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
@@ -758,11 +756,14 @@ public class CustomMapView extends MapView {
 			removeLayer(layer);
 		}
 
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 
 		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
 				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
 				this, true);
+		
+		// check if valid raster layer
+		gdalLayer.raiseInvalidLayer();
 		
 		// center map 
 		double[][] boundaries = gdalLayer.getBoundary();
@@ -786,14 +787,14 @@ public class CustomMapView extends MapView {
 			throw new MapException("File " + file + " does not exist.");
 		}
 		
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 
 		CustomGdalMapLayer gdalLayer = new CustomGdalMapLayer(nextLayerId(),
 				layerName, new EPSG3857(), 0, 18, CustomMapView.nextId(), file,
 				this, true);
 		
 		// check if valid raster layer
-		gdalLayer.getBoundary();
+		gdalLayer.raiseInvalidLayer();
 		
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().addLayer(gdalLayer);
@@ -835,7 +836,7 @@ public class CustomMapView extends MapView {
 			throw new MapException("File " + file + " does not exist.");
 		}
 
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 
 		CustomOgrLayer ogrLayer = new CustomOgrLayer(nextLayerId(), layerName,
 				new EPSG3857(), file, null, FaimsSettings.DEFAULT_VECTOR_OBJECTS,
@@ -856,7 +857,7 @@ public class CustomMapView extends MapView {
 			throw new MapException("File " + file + " does not exist.");
 		}
 
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 		
 		if (idColumn == null || "".equals(idColumn)) {
 			throw new MapException("Invalid id column");
@@ -874,22 +875,8 @@ public class CustomMapView extends MapView {
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle,
 				polygonStyle);
 		
-		CustomSpatialLiteDb spatialLite = new CustomSpatialLiteDb(spatialLayer.getDbPath());
-		Map<String, DBLayer> dbLayers = spatialLite.qrySpatialLayerMetadata();
-		DBLayer dbLayer = null;
-		for (String layerKey : dbLayers.keySet()) {
-			DBLayer layer = dbLayers.get(layerKey);
-			if (layer.table.equalsIgnoreCase(spatialLayer.getTableName())
-					&& layer.geomColumn.equalsIgnoreCase(spatialLayer.getGeometryColumn())) {
-				dbLayer = layer;
-				break;
-			}
-		}
-		if(spatialLite.checkDataFromDataBase(dbLayer) == null){
-			throw new MapException("Table contains unsupported geometry");
-		}
-		// check if valid spatial layer
-		spatialLayer.getDataExtent();		
+		// throws exception if not valid
+		spatialLayer.raiseInvalidLayer();
 		
 		this.getLayers().addLayer(spatialLayer);
 		
@@ -907,7 +894,7 @@ public class CustomMapView extends MapView {
 	}
 
 	public int addCanvasLayer(String layerName) throws Exception {
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 
 		CanvasLayer layer = new CanvasLayer(nextLayerId(), layerName,
 				new EPSG3857());
@@ -921,7 +908,7 @@ public class CustomMapView extends MapView {
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
@@ -947,7 +934,7 @@ public class CustomMapView extends MapView {
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle,
 			StyleSet<TextStyle> textStyleSet) throws Exception {
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,  databaseManager,
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
@@ -1133,7 +1120,7 @@ public class CustomMapView extends MapView {
 		this.userTrackLogLayer = userTrackLogLayer;
 	}
 
-	private void validateLayerName(String name) throws Exception {
+	private void raiseInvalidLayerName(String name) throws Exception {
 		if (name == null || "".equals(name)) {
 			throw new MapException("Please specify a name for the layer");
 		} else if (getLayer(name) != null) {
@@ -1146,7 +1133,7 @@ public class CustomMapView extends MapView {
 			throw new MapException("Layer does not exist");
 		}
 
-		validateLayerName(layerName);
+		raiseInvalidLayerName(layerName);
 		
 		layerNameMap.remove(getLayerName(layer));
 

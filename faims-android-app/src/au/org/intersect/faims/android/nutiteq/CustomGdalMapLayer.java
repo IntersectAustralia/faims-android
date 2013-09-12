@@ -10,6 +10,8 @@ import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 import org.gdal.osr.osr;
 
+import au.org.intersect.faims.android.exceptions.MapException;
+
 import com.nutiteq.MapView;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.layers.raster.GdalMapLayer;
@@ -182,4 +184,12 @@ public class CustomGdalMapLayer extends GdalMapLayer {
         return new double[]{transPoint[0], transPoint[1]};
         
     }
+
+	public void raiseInvalidLayer() throws MapException {
+		try {
+			getBoundary();
+		} catch (Exception e) {
+			throw new MapException("Invalid raster map file");
+		}
+	}
 }
