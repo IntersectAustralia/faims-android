@@ -42,6 +42,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -479,8 +480,8 @@ public class Tab implements Parcelable{
         return list;
 	}
 	
-	private CustomSpinner createDropDown(FormAttribute attribute, String ref) {
-		CustomSpinner spinner = new CustomSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
+	private HierarchicalSpinner createDropDown(FormAttribute attribute, String ref) {
+		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -736,28 +737,22 @@ public class Tab implements Parcelable{
 				try {
 					StringBuilder description = new StringBuilder();
 					String attributeDescription = databaseManager.getAttributeDescription(attributeName);
-					List<String[]> vocabTermDescriptions = databaseManager.getVocabulariesTerm(attributeName);
+					
 					description.append("<i>Description:</i>");
 					if(attributeDescription != null){
 						description.append("<br/>" + attributeDescription);
 					}
-					if(!vocabTermDescriptions.isEmpty()){
+					
+					List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+					VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
+					
+					if(!terms.isEmpty()){
 						description.append("<p/>");
 						description.append("<i>Glossary:</i>");
 					}
-					description.append("<ul>");
-					for (String[] vocabTermDescription : vocabTermDescriptions) {
-						description.append("<li>");
-						description.append("<b>" + vocabTermDescription[0] + "</b>");
-						if(vocabTermDescription[1] != null){
-							description.append("<br/>" + vocabTermDescription[1]);
-						}
-						if(vocabTermDescription[2] != null && !vocabTermDescription[2].isEmpty()){
-							description.append("<br/>" + "<img src=\"" + vocabTermDescription[2] + "\"/>");
-						}
-						description.append("</li>");
-					}
-					description.append("</ul>");
+					
+					createVocabularyTermXML(description, terms);
+					
 					showDescriptionDialog(description.toString());
 				} catch (Exception e) {
 					FLog.e("Cannot retrieve the description for attribute " + name, e);
@@ -766,6 +761,32 @@ public class Tab implements Parcelable{
 			}
 
 		});
+	}
+	
+	private void createVocabularyTermXML(StringBuilder sb, List<VocabularyTerm> terms) {
+		sb.append("<ul>");
+		
+		for (VocabularyTerm term : terms) {
+			sb.append("<li>");
+			sb.append("<b>" + term.name + "</b>");
+			
+			if(term.description != null && !"".equals(term.description)){
+				sb.append("<br/>" + term.description);
+			}
+			
+			if(term.pictureURL != null && !"".equals(term.pictureURL)){
+				sb.append("<br/>" + "<img src=\"" + term.pictureURL + "\"/>");
+			}
+			
+			if (term.terms != null){
+				sb.append("<br/>");
+				createVocabularyTermXML(sb, term.terms);
+			}
+			
+			sb.append("</li>");
+		}
+		
+		sb.append("</ul>");
 	}
 	
 	private void showDescriptionDialog(String description) {

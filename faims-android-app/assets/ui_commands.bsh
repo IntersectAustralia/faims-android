@@ -445,6 +445,18 @@ populateDropDown(String ref, Collection values){
 }
 
 /**
+  * Populate dropdown field hierarchical vocab terms of the given attribute.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param attributeName the name of the attribute
+  */
+populateHierarchicalDropDown(String ref, String attributeName){
+    linker.populateHierarchicalDropDown(ref, attributeName);
+}
+
+/**
   * Populate radio group field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
