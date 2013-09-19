@@ -47,7 +47,7 @@
 
 
 
-	<ArchaeologicalElement type="ExcavationUnitStructure">
+	<ArchaeologicalElement name="ExcavationUnitStructure">
 		<description>
 			A unit is a portion of trench described by this record..
 		</description>
@@ -166,7 +166,7 @@
 	</ArchaeologicalElement>
 
 
-	<ArchaeologicalElement type="ExcavationUnitSoil">
+	<ArchaeologicalElement name="ExcavationUnitSoil">
 		<description>
 			A unit is a portion of trench described by this record..
 		</description>

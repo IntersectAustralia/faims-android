@@ -44,7 +44,7 @@
     </property>
   </RelationshipElement>
   
-  <ArchaeologicalElement type="SimpleEntity">
+  <ArchaeologicalElement name="SimpleEntity">
     <description>
       An simple entity
     </description>
@@ -86,7 +86,7 @@
     </property>
   </ArchaeologicalElement>
   
-  <ArchaeologicalElement type="GpsEntity">
+  <ArchaeologicalElement name="GpsEntity">
     <description>
       An simple entity
     </description>
@@ -128,7 +128,7 @@
     </property>
   </ArchaeologicalElement>
   
-  <ArchaeologicalElement type="gps_track">
+  <ArchaeologicalElement name="gps_track">
     <description>
       A unit is a portion of trench described by this record..
     </description>
