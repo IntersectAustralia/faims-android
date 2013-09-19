@@ -1,15 +1,16 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import android.R;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -21,9 +22,12 @@ public class HierarchicalSpinner extends CustomSpinner {
 	
 	private List<VocabularyTerm> currentTerms;
 
-	protected boolean loadedTerms;
-
 	private List<VocabularyTerm> currentItems;
+
+	private boolean lastSelected;
+
+	private HashMap<String, VocabularyTerm> vocabIdToParentTerm;
+	private HashMap<String, List<VocabularyTerm>> vocabIdToParentTerms;
 
 	public HierarchicalSpinner(Context context) {
 		super(context);
@@ -32,61 +36,84 @@ public class HierarchicalSpinner extends CustomSpinner {
 	public HierarchicalSpinner(Context context,
 			String name, String type, String ref) {
 		super(context, name, type, ref);
+	}
+	
+	private void mapVocabToParent() {
+		this.vocabIdToParentTerm = new HashMap<String, VocabularyTerm>();
+		this.vocabIdToParentTerms = new HashMap<String, List<VocabularyTerm>>();
+		
+		for (VocabularyTerm term : terms) {
+			vocabIdToParentTerm.put(term.id, null);
+			vocabIdToParentTerms.put(term.id, null);
+			if (term.terms != null) {
+				mapVocabToParent(term);
+			}
+		}
+	}
+	
+	private void mapVocabToParent(VocabularyTerm parentTerm) {
+		for (VocabularyTerm term : parentTerm.terms) {
+			vocabIdToParentTerm.put(term.id, parentTerm);
+			vocabIdToParentTerms.put(term.id, parentTerm.terms);
+			if (term.terms != null) {
+				mapVocabToParent(term);
+			}
+		}
+	}
+
+	public void setTerms(List<VocabularyTerm> terms) {
+		this.terms = terms;
+		
+		mapVocabToParent();
+		
+		this.parentTerms = new Stack<VocabularyTerm>();
 		
 		setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View view,
 					int index, long arg3) {
-				if (index < 0 || index >= currentTerms.size()) {
-					FLog.w("selecting item that does not exist");
-					return;
+				try {
+					TextView text = (TextView) view;
+					StringBuilder sb = new StringBuilder();
+					
+					for (VocabularyTerm term : parentTerms) {
+						if (sb.length() != 0) sb.append(" > ");
+						sb.append(term.getName());
+					}
+					
+					if (index >= parentTerms.size()) {
+						if (sb.length() != 0) sb.append(" > ");
+						sb.append(currentTerms.get(index).getName());
+					}
+					
+					text.setText(sb);
+					
+					if (lastSelected && currentTerms.get(index).terms != null) {
+						performClick();
+					}
+					
+					lastSelected = false;
+				} catch (Exception e) {
+					FLog.e("error on item select", e);
 				}
-				
-				TextView text = (TextView) view;
-				StringBuilder sb = new StringBuilder();
-				
-				for (VocabularyTerm term : parentTerms) {
-					if (sb.length() != 0) sb.append(" > ");
-					sb.append(term.getName());
-				}
-				
-				if (index >= parentTerms.size()) {
-					if (sb.length() != 0) sb.append(" > ");
-					sb.append(currentTerms.get(index).getName());
-				}
-				
-				text.setText(sb);
-				
-				if (currentTerms.get(index).terms != null) {
-					performClick();
-				}
-				
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		});
-	}
-
-	public void setTerms(List<VocabularyTerm> terms) {
-		this.terms = terms;
-		this.parentTerms = new Stack<VocabularyTerm>();
+		
 		loadTerms();
 	}
 	
 	private void loadTerms() {
-		loadedTerms = true;
-		
 		if (parentTerms.size() == 0) { 
 			currentTerms = terms;
 			currentItems = terms;
 			
-			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.simple_dropdown_item_1line, currentItems));
+			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		} else {
 			VocabularyTerm selectedTerm = parentTerms.peek();
 			currentTerms = new ArrayList<VocabularyTerm>();
@@ -98,19 +125,21 @@ public class HierarchicalSpinner extends CustomSpinner {
 			currentTerms.addAll(selectedTerm.terms);
 			currentItems.addAll(selectedTerm.terms);
 			
-			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.simple_dropdown_item_1line, currentItems));
+			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		}
 	}
 	
 	@Override
-	public Object getSelectedItem() {
-		// TODO Auto-generated method stub
-		return super.getSelectedItem();
+	public void setSelection(int position) {
+		setSelectionItem(position, true);
 	}
 	
-	@Override
-	public void setSelection(int position) {
-		if (currentTerms == null) return;
+	private void setSelectionItem(int position, boolean selected) {
+		if (terms == null) return;
+		FLog.d("position:" + position);
+		FLog.d("selected:" + selected);
+		
+		lastSelected = selected;
 		
 		try {
 			VocabularyTerm selectedTerm = currentTerms.get(position);
@@ -135,10 +164,69 @@ public class HierarchicalSpinner extends CustomSpinner {
 					super.setSelection(parentTerms.peek().terms.indexOf(parentTerm) + parentTerms.size());
 				}
 			}
-			
 		} catch (Exception e) {
 			FLog.e("error selecting item on hierarchical spinner", e);
 		}
 	}
 	
+	@Override
+	public void setValue(String value) {
+		if (terms == null) {
+			super.setValue(value);
+			return;
+		}
+		
+		if (value == null || "".equals(value)) {
+			reset();
+			return;
+		}
+		
+		// add terms to parent stack
+		parentTerms.clear();
+		VocabularyTerm parentTerm = vocabIdToParentTerm.get(value);
+		while(parentTerm != null) {
+			parentTerms.insertElementAt(parentTerm, 0);
+			parentTerm = vocabIdToParentTerm.get(parentTerm.id);
+		}
+		
+		// load terms
+		loadTerms();
+		
+		// set selection using position in term list
+		List<VocabularyTerm> terms = vocabIdToParentTerms.get(value);
+		if (terms == null) {
+			terms = this.terms;
+		}
+		
+		int index = 0;
+		for (VocabularyTerm t : terms) {
+			if (t.id.equals(value)) {
+				setSelectionItem(parentTerms.size() + index, false);
+				break;
+			}
+			index++;
+		}
+	}
+	
+	@Override
+	public String getValue() {
+		if (terms == null) {
+			return super.getValue();
+		}
+		
+		int index = getSelectedItemPosition();
+		return currentTerms.get(index).id;
+	}
+	
+	@Override
+	public void reset() {
+		if (terms == null) {
+			super.reset();
+			return;
+		}
+		
+		parentTerms.clear();
+		loadTerms();
+		setSelection(0);
+	}
 }

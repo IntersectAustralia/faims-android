@@ -491,10 +491,10 @@ public class Tab implements Parcelable{
         }
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
                 this.activityRef.get(),
-                android.R.layout.simple_spinner_dropdown_item,
+                R.layout.multiline_spinner_dropdown_item,
                 choices);
         spinner.setAdapter(arrayAdapter);
-        spinner.setSelection(0);
+        spinner.reset();
         return spinner;
 	}
 	
@@ -1051,7 +1051,7 @@ public class Tab implements Parcelable{
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
-				spinner.setSelection(0);
+				spinner.reset();
 				spinner.setCertainty(1);
 				spinner.setAnnotation("");
 				spinner.setCurrentCertainty(1);

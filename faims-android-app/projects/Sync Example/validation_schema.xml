@@ -62,7 +62,7 @@
 
 	</RelationshipElement>
 
-	<ArchaeologicalElement type='small'>
+	<ArchaeologicalElement name='small'>
 
 		<property name='name'>
 
