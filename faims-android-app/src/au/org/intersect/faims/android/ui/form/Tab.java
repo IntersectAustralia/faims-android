@@ -369,7 +369,7 @@ public class Tab implements Parcelable{
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
-		button.setText("I");
+		button.setText("?");
 		button.setTextSize(10);
 		return button;
 	}
