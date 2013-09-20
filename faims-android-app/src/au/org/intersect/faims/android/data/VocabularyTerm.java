@@ -25,6 +25,11 @@ public class VocabularyTerm extends NameValuePair {
 	}
 	
 	@Override
+	public String getName() {
+		return this.name;
+	}
+	
+	@Override
 	public String toString() {
 		if (terms != null)
 			return this.name + " ...";
@@ -35,6 +40,7 @@ public class VocabularyTerm extends NameValuePair {
 		if (terms == null) return;
 		for (VocabularyTerm term : terms) {
 			term.name = arch16n.substituteValue(term.name);
+			term.description = arch16n.substituteValue(term.description);
 			if (term.terms != null) {
 				applyArch16n(term.terms, arch16n);
 			}
