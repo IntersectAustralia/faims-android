@@ -135,9 +135,10 @@ public class HierarchicalSpinner extends CustomSpinner {
 	}
 	
 	private void setSelectionItem(int position, boolean selected) {
-		if (terms == null) return;
-		FLog.d("position:" + position);
-		FLog.d("selected:" + selected);
+		if (terms == null) {
+			super.setSelection(position);
+			return;
+		}
 		
 		lastSelected = selected;
 		
@@ -227,6 +228,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		
 		parentTerms.clear();
 		loadTerms();
-		setSelection(0);
+		setSelectionItem(0, false);
 	}
 }

@@ -39,6 +39,7 @@
                       <location></location>
                     </child2>
                   </container1>
+                  <type></type>
                   <sync></sync>
                   <files></files>
                   <attachfile></attachfile>
@@ -66,8 +67,9 @@
           </tabgroup1>
           <tabgroup2>
               <tab1>
-                  <type></type>
+                  <relationship></relationship>
                   <name></name>
+                  <type></type>
                   <location></location>
                   <save></save>
                   <clear></clear>
@@ -174,6 +176,13 @@
             </select>
           </group>
         </group>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
         <select1 ref="sync" appearance="full" faims_certainty="false">
             <label>Sync:</label>
             <item>
@@ -265,8 +274,8 @@
       <label></label>
       <group ref="tab1">
         <label>Save Relationship</label>
-        <select1 ref="type" faims_annotation="false" faims_certainty="false">
-            <label>Type:</label>
+        <select1 ref="relationship" faims_annotation="false" faims_certainty="false">
+            <label>Relationship:</label>
             <item>
             	<label>dummy</label>
             	<value>dummy</value>
@@ -275,6 +284,13 @@
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
             <label>Name:</label>
         </input>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
         <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
             <label>Location:</label>
             <item>
