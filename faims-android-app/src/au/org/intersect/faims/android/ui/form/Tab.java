@@ -771,7 +771,7 @@ public class Tab implements Parcelable{
 			if(attributeDescription != null && !"".equals(attributeDescription)){
 				description.append("<p><i>Description:</i>");
 				description.append("<br/>");
-				description.append(attributeDescription);
+				description.append(activityRef.get().getArch16n().substituteValue(attributeDescription));
 				description.append("</p>");
 			}
 			
