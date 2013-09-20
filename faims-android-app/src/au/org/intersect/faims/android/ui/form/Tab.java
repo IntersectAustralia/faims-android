@@ -176,7 +176,7 @@ public class Tab implements Parcelable{
 	    			fieldLinearLayout.addView(annotationButton);
 	    		}
 	    		
-	    		if(attribute.info && attribute.name != null){
+	    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
 	    			infoButton = createInfoButton();
 	    			fieldLinearLayout.addView(infoButton);
 	    		}
@@ -734,33 +734,59 @@ public class Tab implements Parcelable{
 			
 			@Override
 			public void onClick(View v) {
-				try {
-					StringBuilder description = new StringBuilder();
-					String attributeDescription = databaseManager.getAttributeDescription(attributeName);
-					
-					description.append("<i>Description:</i>");
-					if(attributeDescription != null){
-						description.append("<br/>" + attributeDescription);
-					}
-					
-					List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
-					VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
-					
-					if(!terms.isEmpty()){
-						description.append("<p/>");
-						description.append("<i>Glossary:</i>");
-					}
-					
-					createVocabularyTermXML(description, terms);
-					
-					showDescriptionDialog(description.toString());
-				} catch (Exception e) {
-					FLog.e("Cannot retrieve the description for attribute " + name, e);
-				}
-				
+				showDescriptionDialog(getAttributeDescription(attributeName));
 			}
 
 		});
+	}
+	
+	private boolean hasAttributeDescription(String attributeName) {
+		try {
+			
+			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			
+			boolean termsEmpty = terms == null || terms.isEmpty();
+			boolean attributeDescriptionEmpty = attributeDescription == null || "".equals(attributeDescription);
+			
+			FLog.d("attribute:" + attributeName);
+			FLog.d("description:" + attributeDescriptionEmpty);
+			FLog.d("terms:" + termsEmpty);
+			
+			if(termsEmpty && attributeDescriptionEmpty) return false;
+			
+			return true;
+		} catch (Exception e) {
+			FLog.e("Cannot retrieve the description for attribute " + attributeName, e);
+			return false;
+		}
+	}
+	
+	private String getAttributeDescription(String attributeName) {
+		StringBuilder description = new StringBuilder();
+		try {
+			
+			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+			
+			if(attributeDescription != null && !"".equals(attributeDescription)){
+				description.append("<p><i>Description:</i>");
+				description.append("<br/>");
+				description.append(attributeDescription);
+				description.append("</p>");
+			}
+			
+			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			
+			if(!terms.isEmpty()){
+				description.append("<p><i>Glossary:</i></p>");
+				VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
+				createVocabularyTermXML(description, terms);
+			}
+			
+		} catch (Exception e) {
+			FLog.e("Cannot retrieve the description for attribute " + attributeName, e);
+		}
+		return description.toString();
 	}
 	
 	private void createVocabularyTermXML(StringBuilder sb, List<VocabularyTerm> terms) {
@@ -768,18 +794,26 @@ public class Tab implements Parcelable{
 		
 		for (VocabularyTerm term : terms) {
 			sb.append("<li>");
-			sb.append("<b>" + term.name + "</b>");
 			
 			if(term.description != null && !"".equals(term.description)){
-				sb.append("<br/>" + term.description);
+				sb.append("<p><b>");
+				sb.append(term.name);
+				sb.append("</b><br/>");
+				sb.append(term.description);
+				sb.append("</p>");
+			} else {
+				sb.append("<p><b>");
+				sb.append(term.name);
+				sb.append("</b></p>");
 			}
 			
 			if(term.pictureURL != null && !"".equals(term.pictureURL)){
-				sb.append("<br/>" + "<img src=\"" + term.pictureURL + "\"/>");
+				sb.append("<img src=\"");
+				sb.append(term.pictureURL);
+				sb.append("\"/>");
 			}
 			
 			if (term.terms != null){
-				sb.append("<br/>");
 				createVocabularyTermXML(sb, term.terms);
 			}
 			

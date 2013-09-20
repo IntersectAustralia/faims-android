@@ -31,8 +31,7 @@ initialise() {
 	entityCount = fetchEntityList("simple").size() + 1;
 	refreshEntities();
 	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
-	//populateDropDown("tabgroup1/tab1/type", types);
-	populateHierarchicalDropDown("tabgroup1/tab1/type", "type");
+	populateDropDown("tabgroup1/tab1/type", types);
 	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
 	populatePictureGallery("tabgroup1/tab1/picture", pictures);
 }
