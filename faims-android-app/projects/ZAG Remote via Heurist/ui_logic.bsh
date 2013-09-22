@@ -1,3 +1,11 @@
+
+// Move first tab into second tab
+// change rs_groundtruth_result to featureClassification
+
+// put all in
+
+
+
 /*** MAP ***/
 
 DATA_ENTRY_LAYER = "Data Entry Layer";
@@ -370,16 +378,53 @@ getNoneList() {
 }
 
 refreshEntities() {
-	Object entities = fetchEntityList("RS_Feature");
 
-	populateDropDown("control/data/RSFeatureList", entities);
+	populateList("control/data/RS_FeatureList", fetchEntityList("RemoteSensingFeature"));
 }
 
+
+onEvent("control/data", "show", "refreshEntities()");
 /*** USER ***/
 
 getDefaultUsersList() {
 	users = fetchAll("select userid, fname ||' ' || lname from user");
 	return users;
+}
+
+
+
+
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+setGPSUpdateInterval(4);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+
+}
+
+syncStarted() {
+}
+
+syncCompleted() {
+}
+
+syncFailed() {
 }
 
 
@@ -420,20 +465,173 @@ makeGallery(String attrib){
     return a;
 }
 
-
+ArrayList featurePictures = new ArrayList();
+String feature_id = null;
 
 newRSFeature(){
 	feature_id = null;
 
-	featureFiles = getNoneList();
-	featureSketches = getNoneList();
-	featurePictures = new ArrayList();
-	featureVideos = new ArrayList();
-	featureAudios = getNoneList();
+	
+	
+
 
 	newTabGroup("RS_Feature");
+    setFieldValue("RS_Feature/header11_58/TimeStamp", getCurrentTime());
 
-	populateDropDown("RS_Feature/header11_58/FeatureSource", makeVocab("FeatureSource"));
-    /*populateRadioGroup("RS_Feature/header11_58/Feature_Source_Confidence", makeVocab("FeatureSourceConfidence"));
-    populateCheckBoxGroup("RS_Feature/header11_58/Feature_Type", makeVocab("FeatureType"));*/
+
+	populateCheckBoxGroup("RS_Feature/header11_58/FeatureSource", makeVocab("FeatureSource"));
+    populateRadioGroup("RS_Feature/header11_58/Feature_Source_Confidence", makeVocab("FeatureSourceConfidence"));
+    populateCheckBoxGroup("RS_Feature/header11_58/Feature_Type", makeVocab("FeatureType"));
+
+    populateRadioGroup("RS_Feature/header11_69/Feature_Accessibility", makeVocab("FeatureAccessibility"));
+    populateRadioGroup("RS_Feature/header11_69/Ground_Control", makeVocab("GroundControl"));
+    populateRadioGroup("RS_Feature/header11_69/GCRepeat", makeVocab("GCRepeat"));
+	populateRadioGroup("RS_Feature/header11_69/RS_Groundtruth_Result", makeVocab("RSGroundtruthResult"));
+
+    populateCheckBoxGroup("RS_Feature/header11_69/Feature_Actual_Cause", makeVocab("FeatureActualCause"));
+    
+    populateCheckBoxGroup("RS_Feature/header11_69/RS_Feature_Period_s_", makeVocab("RSFeaturePeriod"));
+    populateRadioGroup("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));
+
+	
+    populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
+
+
+
 }
+
+takeRSPicture() {
+    openCamera("OnRSPictureTaken()");
+}
+
+OnRSPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("RS_Feature/header11_70/PhotoGallery", pictureFilepath, featurePictures);
+}
+
+onEvent("RS_Feature/header11_70/Photo", "click", "takeRSPicture()");
+
+saveFeature(id) {
+	if (isNull(getFieldValue("RS_Feature/header11_58/FeatureID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;
+	}
+	feature_id = updateFeature(id);
+}
+
+deleteFeature(){
+	if (!isNull(feature_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Feature!", "reallyDeleteFeature()", "doNotDelete()");
+	}
+}
+
+reallyDeleteFeature(){
+    deleteArchEnt(feature_id);
+    cancelTabGroup("RS_Feature", false);
+}
+
+doNotDelete(){
+    showToast("Delete Cancelled.");
+}
+
+
+
+updateFeature(id) {
+	showBusyDialog();
+	entitySaved = false;
+
+	if (isNull(id)) id = null;
+
+    
+
+    featurePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+	ArrayList featureSource = new ArrayList();
+
+	ArrayList featureType = new ArrayList();
+	ArrayList featureCause = new ArrayList();
+	ArrayList featurePeriod = new ArrayList();
+
+
+
+
+
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}else if ("FeatureSource".equals(attribute.getName())) {
+				featureSource.add(attribute);
+			
+			}else if ("FeatureType".equals(attribute.getName())) {
+				featureSource.add(attribute);
+			
+			}else if ("FeatureActualCause".equals(attribute.getName())) {
+				featureSource.add(attribute);
+			
+			}else if ("FeatureSource".equals(attribute.getName())) {
+				featureSource.add(attribute);
+			}
+		}
+	}
+
+
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("FeatureID", "freetext", "RS_Feature/header11_58/FeatureID", false),
+    	AttributeDef("Timestamp", "freetext", "RS_Feature/header11_58/TimeStamp", false),
+    	AttributeDef("ShortSummary", "freetext", "RS_Feature/header11_58/Short_summary"),
+
+
+		//Theeban: featureSources checkbox -- check this? is this valid? Gallery and sync seem... ... have lots more code.
+    	AttributeDef("FeatureSource", "vocab", "RS_Feature/header11_58/FeatureSource", featureSource, true),
+
+    	AttributeDef("FeatureSourceConfidence", "vocab", "RS_Feature/header11_58/Feature_Source_Confidence"),
+    	//featuretype checkbox.
+    	AttributeDef("FeatureType", "vocab", "RS_Feature/header11_58/Feature_Type", featureType, true),
+
+
+    	AttributeDef("FeatureAccessibility", "vocab", "RS_Feature/header11_69/Feature_Accessibility"),
+    	AttributeDef("FeatureActualCause", "vocab", "RS_Feature/header11_69/Feature_Actual_Cause", featureCause, true),
+    	AttributeDef("RSGroundtruthResult", "vocab", "RS_Feature/header11_69/RS_Groundtruth_Result"),
+    	AttributeDef("GroundControl", "vocab", "RS_Feature/header11_69/Ground_Control"),
+    	AttributeDef("RSFeaturePeriod", "vocab", "RS_Feature/header11_69/RS_Feature_Period_s_", featurePeriod, true),
+
+
+    	AttributeDef("RSFeatureSiteCode", "freetext", "RS_Feature/header11_69/RS_Feature_Site_Code", false),
+    	AttributeDef("RS_Feature_Notes", "freetext", "RS_Feature/header11_69/RS_Feature_Notes"),
+
+    	AttributeDef("GCRepeat", "vocab", "RS_Feature/header11_69/GCRepeat"),
+    	AttributeDef("BestImageAlgorithm", "vocab", "RS_Feature/header11_69/Best_image_algorithm"),
+		AttributeDef("RSAreaAnalysedNumericVersion", "freetext", "RS_Feature/header11_69/RS_Area_Analysed_Numeric_version"),
+
+		AttributeDef("RSGeologySoilComments", "freetext", "RS_Feature/header11_69/RS_Geology_Soil_Comments"),
+
+    	AttributeDef("Photos", "files", "RS_Feature/header11_70/PhotoGallery", loadedPictures, true)
+
+
+
+    	};
+
+
+
+
+    //saveFiles(loadedPictures, getFieldValue("RS_Feature/header11_70/PhotoGallery"), "picture", attributeDefs);
+
+
+    saved_id = saveEntity(id, "RemoteSensingFeature", attributeDefs, null, null);
+
+
+	entitySaved = true;
+
+    return saved_id;
+
+	
+}
+
+onEvent("RS_Feature/header11_70/Update", "click", "saveFeature(feature_id)");
+onEvent("RS_Feature/header11_70/Delete", "click", "deleteFeature()");

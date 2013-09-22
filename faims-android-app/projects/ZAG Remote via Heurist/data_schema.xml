@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet type="text/xsl" href="http://xsd.localdomain/lib/assets/data_schema.xsl"?>
 <dataSchema name="hdb_ZAG_RemoteSensing" preparer="Brian Ballsun.Stanton" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.localdomain/lib/assets/data_schema.xsd">
-  <ArchaeologicalElement type="RemoteSensingFeature">
+  <ArchaeologicalElement name="RemoteSensingFeature">
     <description>A remote sensed feature</description>
     <property type="float" name="FeatureID" isIdentifier="true">
       <description>The human entered feature ID.</description>
@@ -135,6 +135,9 @@
       </lookup>
     </property>
     <property type="float" name="RSAreaAnalysedNumericVersion">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="float" name="RSAreaAnalysedCode">
       <description>Please document the nature of this detail type (field)) ...</description>
     </property>
     <property type="blocktext" name="RSGeologySoilComments">
