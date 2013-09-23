@@ -322,6 +322,18 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), def.saveCertainty? getFieldCertainty(def.ref) : null));
     	} else if ("vocab".equals(def.type)) {
     		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("checkbox".equals(def.type)) {
+    		values = getFieldValue(def.ref);
+
+    		// delete if nothing selected
+			if (values == null || values.isEmpty()) {
+				attributes.add(createEntityAttribute(def.name, null, null, null, null, true));
+			} else {
+				for (Object value : values) {
+					attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), value.getName(), null, getFieldCertainty(def.ref)));
+				}
+			}
+
     	} else if ("files".equals(def.type)) {
     		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes, def.sync);
     	} else if ("attachments".equals(def.type)) {
@@ -548,15 +560,6 @@ updateFeature(id) {
 
 	ArrayList loadedPictures = new ArrayList();
 
-	ArrayList featureSource = new ArrayList();
-
-	ArrayList featureType = new ArrayList();
-	ArrayList featureCause = new ArrayList();
-	ArrayList featurePeriod = new ArrayList();
-
-
-
-
 
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
@@ -564,17 +567,6 @@ updateFeature(id) {
 			System.out.println(attribute.toString());
 			if ("Photos".equals(attribute.getName())) {
 				loadedPictures.add(getAttachedFilePath(attribute.getText()));
-			}else if ("FeatureSource".equals(attribute.getName())) {
-				featureSource.add(attribute);
-			
-			}else if ("FeatureType".equals(attribute.getName())) {
-				featureSource.add(attribute);
-			
-			}else if ("FeatureActualCause".equals(attribute.getName())) {
-				featureSource.add(attribute);
-			
-			}else if ("FeatureSource".equals(attribute.getName())) {
-				featureSource.add(attribute);
 			}
 		}
 	}
@@ -588,18 +580,18 @@ updateFeature(id) {
 
 
 		//Theeban: featureSources checkbox -- check this? is this valid? Gallery and sync seem... ... have lots more code.
-    	AttributeDef("FeatureSource", "vocab", "RS_Feature/header11_58/FeatureSource", featureSource, true),
+    	AttributeDef("FeatureSource", "checkbox", "RS_Feature/header11_58/FeatureSource"),
 
     	AttributeDef("FeatureSourceConfidence", "vocab", "RS_Feature/header11_58/Feature_Source_Confidence"),
     	//featuretype checkbox.
-    	AttributeDef("FeatureType", "vocab", "RS_Feature/header11_58/Feature_Type", featureType, true),
+    	AttributeDef("FeatureType", "checkbox", "RS_Feature/header11_58/Feature_Type"),
 
 
     	AttributeDef("FeatureAccessibility", "vocab", "RS_Feature/header11_69/Feature_Accessibility"),
-    	AttributeDef("FeatureActualCause", "vocab", "RS_Feature/header11_69/Feature_Actual_Cause", featureCause, true),
+    	AttributeDef("FeatureActualCause", "checkbox", "RS_Feature/header11_69/Feature_Actual_Cause"),
     	AttributeDef("RSGroundtruthResult", "vocab", "RS_Feature/header11_69/RS_Groundtruth_Result"),
     	AttributeDef("GroundControl", "vocab", "RS_Feature/header11_69/Ground_Control"),
-    	AttributeDef("RSFeaturePeriod", "vocab", "RS_Feature/header11_69/RS_Feature_Period_s_", featurePeriod, true),
+    	AttributeDef("RSFeaturePeriod", "checkbox", "RS_Feature/header11_69/RS_Feature_Period_s_"),
 
 
     	AttributeDef("RSFeatureSiteCode", "freetext", "RS_Feature/header11_69/RS_Feature_Site_Code", false),
