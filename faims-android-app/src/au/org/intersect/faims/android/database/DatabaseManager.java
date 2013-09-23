@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,8 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKBUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
@@ -35,11 +38,16 @@ public class DatabaseManager {
 	private String userId;
 	
 	private jsqlite.Database db;
+	private WeakReference<ShowProjectActivity> activityRef;
 
 	public void init(String filename) {
 		this.dbname = filename;
 	}
 
+	public void setWeakReference(ShowProjectActivity activity){
+		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+	}
+	
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
@@ -128,6 +136,7 @@ public class DatabaseManager {
 					st.step();
 					st.close();
 					st = null;
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				}
 			} finally {
 				try {
@@ -243,7 +252,7 @@ public class DatabaseManager {
 						st = null;
 					}
 				}
-				
+				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				return uuid;
 				
 			} finally {
@@ -294,7 +303,7 @@ public class DatabaseManager {
 				st.step();
 				st.close();
 				st = null;
-				
+				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				return uuid;
 				
 			} finally {
@@ -346,6 +355,7 @@ public class DatabaseManager {
 				st.close();
 				st = null;
 				
+				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				return uuid;
 				
 			} finally {
@@ -396,6 +406,7 @@ public class DatabaseManager {
 					st.step();
 					st.close();
 					st = null;
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				}
 			} finally {
 				try {
@@ -511,7 +522,7 @@ public class DatabaseManager {
 						st = null;
 					}
 				}
-				
+				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				return uuid;
 				
 			} finally {
@@ -638,7 +649,7 @@ public class DatabaseManager {
 				st.step();
 				st.close();
 				st = null;
-				
+				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
 				return true;
 				
 			} finally {
@@ -1784,6 +1795,64 @@ public class DatabaseManager {
 					FLog.e("error closing database", e);
 				}
 			}
+		}
+	}
+
+	public boolean hasRecordsFrom(String timestamp) throws Exception {
+		synchronized(DatabaseManager.class) {
+			Stmt stmt = null;
+			try {
+				int count = 0;
+				db = new jsqlite.Database();
+				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+	
+				String query = DatabaseQueries.COUNT_AENT_RECORDS(timestamp);
+				stmt = db.prepare(query);
+				if(stmt.step()){
+					count = stmt.column_int(0);
+				}
+				stmt.close();
+				stmt = null;
+				
+				if(count > 0){
+					return true;
+				}
+				
+				query = DatabaseQueries.COUNT_RELN_RECORDS(timestamp);
+				stmt = db.prepare(query);
+				if(stmt.step()){
+					count = stmt.column_int(0);
+				}
+				stmt.close();
+				stmt = null;
+				
+				if(count > 0){
+					return true;
+				}
+				
+				query = DatabaseQueries.COUNT_AENT_RELN_RECORDS(timestamp);
+				stmt = db.prepare(query);
+				if(stmt.step()){
+					count = stmt.column_int(0);
+				}
+				stmt.close();
+				stmt = null;
+				
+				if(count > 0){
+					return true;
+				}
+				
+			} finally {
+				try {
+					if (db != null) {
+						db.close();
+						db = null;
+					}
+				} catch (Exception e) {
+					FLog.e("error closing database", e);
+				}
+			}
+			return false;
 		}
 	}
 	

@@ -18,6 +18,7 @@ public class Project implements Serializable {
 	public String participants;
 	public String version;
 	public String timestamp;
+	public String fileSyncTimeStamp;
 	public String srid;
 	public String permitIssuedBy;
 	public String permitType;
@@ -47,6 +48,7 @@ public class Project implements Serializable {
 		if (object.has("participant")) p.participants = object.get("participant").getAsString();
 		if (object.has("version")) p.version = object.get("version").getAsString();
 		if (object.has("timestamp")) p.timestamp = object.get("timestamp").getAsString();
+		if (object.has("file_sync_timestamp")) p.fileSyncTimeStamp = object.get("file_sync_timestamp").getAsString();
 		if (object.has("srid")) p.srid = object.get("srid").getAsString();
 		if (object.has("permit_issued_by")) p.permitIssuedBy = object.get("permit_issued_by").getAsString();
 		if (object.has("permit_type")) p.permitType = object.get("permit_type").getAsString();
@@ -69,6 +71,7 @@ public class Project implements Serializable {
 		if (participants != null) object.addProperty("participant", participants);
 		if (version != null) object.addProperty("version", version);
 		if (timestamp != null) object.addProperty("timestamp", timestamp);
+		if (fileSyncTimeStamp != null) object.addProperty("file_sync_timestamp", fileSyncTimeStamp);
 		if (srid != null) object.addProperty("srid", srid);
 		if (permitIssuedBy != null) object.addProperty("permit_issued_by", permitIssuedBy);
 		if (permitType != null) object.addProperty("permit_type", permitType);

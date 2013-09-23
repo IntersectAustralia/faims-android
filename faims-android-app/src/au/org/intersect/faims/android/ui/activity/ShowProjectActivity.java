@@ -4,6 +4,7 @@ import group.pals.android.lib.ui.filechooser.FileChooserActivity;
 import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,13 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -76,6 +81,7 @@ import au.org.intersect.faims.android.ui.form.TabGroup;
 import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.util.BitmapUtil;
+import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ProjectUtil;
@@ -86,6 +92,9 @@ import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class ShowProjectActivity extends FragmentActivity implements IFAIMSRestorable{
 	
+	public static final String FILES = "files";
+	public static final String DATABASE = "database";
+
 	public interface SyncListener {
 		
 		public void handleStart();
@@ -196,7 +205,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess();
+					activity.callSyncSuccess(DATABASE);
 					
 					activity.syncLock.release();
 				}
@@ -205,7 +214,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess();
+					activity.callSyncSuccess(DATABASE);
 					
 					activity.syncLock.release();
 				} else {
@@ -224,7 +233,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			}
 		}
 	}
-		
+
 	private static class SyncFilesHandler extends ShowProjectActivityHandler {
 
 		public SyncFilesHandler(ShowProjectActivity activity) {
@@ -239,13 +248,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				activity.resetSyncInterval();
 				activity.waitForNextSync();
 				
-				activity.callSyncSuccess();
+				activity.callSyncSuccess(FILES);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess();
+					activity.callSyncSuccess(FILES);
 				} else {
 					// failure
 					activity.delaySyncInterval();
@@ -302,10 +311,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 	}
 	
-	enum SyncIndicatorColor {
-		GREEN,
-		ORANGE,
-		RED
+	public enum SyncStatus {
+		ACTIVE_NO_CHANGES,
+		ACTIVE_SYNCING,
+		INACTIVE,
+		ERROR,
+		ACTIVE_HAS_CHANGES;
+		
+		public static SyncStatus toSyncStatus(String syncStatusString){
+			return valueOf(syncStatusString);
+		}
 	}
 
 	public static final int CAMERA_REQUEST_CODE = 1;
@@ -355,10 +370,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	private List<SyncListener> listeners;
 
-	private boolean syncIndicatorVisible;
-
-	private SyncIndicatorColor syncIndicatorColor = SyncIndicatorColor.GREEN;
-	private SyncIndicatorColor lastSyncIndicatorColor = SyncIndicatorColor.GREEN;
+	private SyncStatus syncStatus = SyncStatus.INACTIVE;
 
 	private boolean isActivityShowing;
 
@@ -375,7 +387,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	private boolean pathValid;
 	
-	private BitmapDrawable blueArrow;
+	private BitmapDrawable whiteArrow;
 
 	private BitmapDrawable greyArrow;
 
@@ -393,6 +405,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private boolean syncStarted = false;
 
+	private Animation rotation;
+	private ImageView syncAnimImage;
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -409,6 +424,14 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		CustomMapView.registerLicense(getApplicationContext());
 		
 		this.activityData = new ShowProjectActivityData();
+		
+		rotation = AnimationUtils.loadAnimation(this,
+				R.anim.clockwise);
+		rotation.setRepeatCount(Animation.INFINITE);
+		
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		syncAnimImage = (ImageView) inflater.inflate(
+				R.layout.rotate, null);
 		
 		setupSync();
 		setupWifiBroadcast();
@@ -500,7 +523,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		this.projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
 		
 		databaseManager.init(projectDir + "/db.sqlite3");
-		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE));
+		databaseManager.setWeakReference(this);
+		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
 		arch16n = new Arch16n(projectDir, project.name);
 		
 		SpatialiteUtil.setDatabaseName(projectDir + "/db.sqlite3");
@@ -712,21 +736,57 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		menu.findItem(R.id.green_sync_indicator).setVisible(false);
-		menu.findItem(R.id.orange_sync_indicator).setVisible(false);
-		menu.findItem(R.id.red_sync_indicator).setVisible(false);
-		switch(syncIndicatorColor) {
-			case GREEN:
-				menu.findItem(R.id.green_sync_indicator).setVisible(syncIndicatorVisible);
+		// gps status
+		menu.findItem(R.id.action_gps_active).setVisible(false);
+		menu.findItem(R.id.action_gps_inactive).setVisible(false);
+		if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
+			menu.findItem(R.id.action_gps_active).setVisible(true);
+		}else{
+			menu.findItem(R.id.action_gps_inactive).setVisible(true);
+		}
+
+		// tracker status
+		menu.findItem(R.id.action_tracker_active).setVisible(false);
+		menu.findItem(R.id.action_tracker_inactive).setVisible(false);
+		if(gpsDataManager.isTrackingStarted()){
+			menu.findItem(R.id.action_tracker_active).setVisible(true);
+		}else{
+			menu.findItem(R.id.action_tracker_inactive).setVisible(true);
+		}
+
+		// sync status
+		menu.findItem(R.id.action_sync).setVisible(false);
+		menu.findItem(R.id.action_sync_active).setVisible(false);
+		menu.findItem(R.id.action_sync_error).setVisible(false);
+		menu.findItem(R.id.action_sync_has_changes).setVisible(false);
+		menu.findItem(R.id.action_sync_inactive).setVisible(false);
+		
+		syncAnimImage.clearAnimation();
+		
+		switch(syncStatus) {
+			case ACTIVE_SYNCING:
+				MenuItem syncItem = menu.findItem(R.id.action_sync_active).setVisible(true);
+
+				syncAnimImage.startAnimation(rotation);
+
+				syncItem.setActionView(syncAnimImage);
+				
 				break;
-			case ORANGE:
-				menu.findItem(R.id.orange_sync_indicator).setVisible(syncIndicatorVisible);
+			case ERROR:
+				menu.findItem(R.id.action_sync_error).setVisible(true);
+				break;
+			case ACTIVE_NO_CHANGES:
+				menu.findItem(R.id.action_sync).setVisible(true);
+				break;
+			case ACTIVE_HAS_CHANGES:
+				menu.findItem(R.id.action_sync_has_changes).setVisible(true);
 				break;
 			default:
-				menu.findItem(R.id.red_sync_indicator).setVisible(syncIndicatorVisible);
+				menu.findItem(R.id.action_sync_inactive).setVisible(true);
 				break;
 		}
 		
+		// follow status
 		MenuItem distance_text = menu.findItem(R.id.distance_text);
 		distance_text.setVisible(pathIndicatorVisible);
 		String distanceInfo = pathIndex < 0 ? "" : " to point (" + pathIndex + "/" + pathLength + ")";
@@ -746,16 +806,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			if (tempBitmap != null) {
 				tempBitmap.recycle();
 			}
-			if (blueArrow == null) {
-				blueArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
-					getResources(), au.org.intersect.faims.android.R.drawable.blue_arrow));
+			if (whiteArrow == null) {
+				whiteArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
+					getResources(), au.org.intersect.faims.android.R.drawable.white_arrow));
 			}
 			if (greyArrow == null) {
 				greyArrow = new BitmapDrawable(getResources(), UnscaledBitmapLoader.decodeResource(
 					getResources(), au.org.intersect.faims.android.R.drawable.grey_arrow));
 			}
 			
-			this.tempBitmap = BitmapUtil.rotateBitmap(pathValid ? blueArrow.getBitmap() : greyArrow.getBitmap(), pathBearing - pathHeading);
+			this.tempBitmap = BitmapUtil.rotateBitmap(pathValid ? whiteArrow.getBitmap() : greyArrow.getBitmap(), pathBearing - pathHeading);
 			direction_indicator.setIcon(new BitmapDrawable(getResources(), tempBitmap));
 		} else {
 			direction_indicator.setVisible(false);
@@ -1148,11 +1208,8 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			syncTaskTimer = null;
 		}
 		
-		if (syncIndicatorColor == SyncIndicatorColor.ORANGE) {
-			revertSyncIndicatorColor();
-		}
+		setSyncStatus(SyncStatus.INACTIVE);
 		
-		setSyncIndicatorVisible(false);
 	}
 	
 	public void startSync() {
@@ -1162,10 +1219,18 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			syncActive = true;
 			
 			waitForNextSync();
-			
-			setSyncIndicatorVisible(true);
+			try {
+				if(hasDatabaseChanges()){
+					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}else{
+					setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES : SyncStatus.ACTIVE_NO_CHANGES);
+				}
+			} catch (Exception e) {
+				FLog.e("error when checking database changes", e);
+				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+			}
 		} else {
-			setSyncIndicatorVisible(false);
+			setSyncStatus(SyncStatus.INACTIVE);
 			FLog.d("cannot start sync wifi disabled");
 		}
 	}
@@ -1290,29 +1355,79 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		for (SyncListener listener : listeners) {
 			listener.handleStart();
 		}
+		setSyncStatus(SyncStatus.ACTIVE_SYNCING);
 		syncStarted = true;
-		setSyncIndicatorColor(SyncIndicatorColor.ORANGE);
 	}
 	
-	public void callSyncSuccess() {
+	public void callSyncSuccess(String type) {
 		for (SyncListener listener : listeners) {
 			listener.handleSuccess();
 		}
-		
-		setSyncIndicatorColor(SyncIndicatorColor.GREEN);
 		syncStarted = false;
+		
+		if(DATABASE.equals(type)){
+			try {
+				if(hasDatabaseChanges()){
+					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
+			} catch (Exception e) {
+				FLog.e("error when checking database changes", e);
+				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+			}
+		}else if(FILES.equals(type)){
+			setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES : SyncStatus.ACTIVE_NO_CHANGES);
+		}else{
+			setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+		}
+		
 		if (delayStopSync) {
 			delayStopSync = false;
 			stopSync();
 		}
 	}
+
+	private boolean hasDatabaseChanges() throws Exception{
+		Project project = ProjectUtil.getProject(projectKey);
+		String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
+		
+		// create temp database to upload
+		databaseManager.init(database);
+		return databaseManager.hasRecordsFrom(project.timestamp);
+	}
+
+	private boolean hasFileChanges(){
+		Project project = ProjectUtil.getProject(projectKey);
+		
+		if(project.fileSyncTimeStamp != null){
+			File attachedFiles = new File(getProjectDir() + "/files");
+			return hasFileChanges(attachedFiles, project.fileSyncTimeStamp);
+		}else{
+			return true;
+		}
+	}
 	
+	private boolean hasFileChanges(File attachedFiles, String fileSyncTimeStamp) {
+		if(attachedFiles.isDirectory()){
+			for(File file : attachedFiles.listFiles()){
+				if(file.isDirectory()){
+					return hasFileChanges(file, fileSyncTimeStamp);
+				}else{
+					if(file.lastModified() > DateUtil.convertToDateGMT(fileSyncTimeStamp).getTime()){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+		
+	}
+
 	public void callSyncFailure() {
 		for (SyncListener listener : listeners) {
 			listener.handleFailure();
 		}
 		syncStarted = false;
-		setSyncIndicatorColor(SyncIndicatorColor.RED);
+		setSyncStatus(SyncStatus.ERROR);
 		
 		if (delayStopSync) {
 			delayStopSync = false;
@@ -1369,20 +1484,11 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	*/
 	
-	public void setSyncIndicatorVisible(boolean visible) {
-		syncIndicatorVisible = visible;
-		this.invalidateOptionsMenu();
-	}
-	
-	private void revertSyncIndicatorColor() {
-		syncIndicatorColor = lastSyncIndicatorColor;
-		this.invalidateOptionsMenu();
-	}
-	
-	private void setSyncIndicatorColor(SyncIndicatorColor color) {
-		lastSyncIndicatorColor = syncIndicatorColor;
-		syncIndicatorColor = color;
-		this.invalidateOptionsMenu();
+	public void setSyncStatus(SyncStatus status) {
+		if(!isSyncStarted()){
+			syncStatus = status;
+			this.invalidateOptionsMenu();
+		}
 	}
 	
 	public void enableFileSync() {
@@ -1487,5 +1593,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			}
 			
 		}).start();
+	}
+
+	public boolean isSyncStarted() {
+		return syncStarted;
 	}
 }

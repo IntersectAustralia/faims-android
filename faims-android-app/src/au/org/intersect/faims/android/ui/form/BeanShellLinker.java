@@ -227,6 +227,7 @@ public class BeanShellLinker {
 		this.activity.getGPSDataManager().setTrackingType(type);
 		this.activity.getGPSDataManager().setTrackingValue(value);
 		this.activity.getGPSDataManager().setTrackingExec(callback);
+		this.activity.invalidateOptionsMenu();
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
@@ -235,6 +236,7 @@ public class BeanShellLinker {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
+			this.activity.getGPSDataManager().setTrackingStarted(true);
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -300,6 +302,8 @@ public class BeanShellLinker {
 			trackingHandlerThread.quit();
 			trackingHandlerThread = null;
 		}
+		this.activity.getGPSDataManager().setTrackingStarted(false);
+		this.activity.invalidateOptionsMenu();
 	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
@@ -506,7 +510,6 @@ public class BeanShellLinker {
 						+ label);
 				return;
 			}
-
 			tabGroup.clearTabs();
 		} catch (Exception e) {
 			FLog.e("error showing new tabgroup " + label, e);
@@ -538,6 +541,7 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error showing tabgroup " + label);
 				return null;
 			}
+			activity.getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -569,6 +573,7 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error showing tab group " + id);
 				return;
 			}
+			activity.getActionBar().setTitle(tabGroup.getLabel());
 			if (tabGroup.getArchEntType() != null) {
 				showArchEntityTabGroup(uuid, tabGroup);
 			} else if (tabGroup.getRelType() != null) {
@@ -3637,7 +3642,9 @@ public class BeanShellLinker {
 						}
 				
 			});
-
+			if(!activity.isSyncStarted()){
+				activity.setSyncStatus(ShowProjectActivity.SyncStatus.ACTIVE_HAS_CHANGES);
+			}
 			return attachFile;
 		} catch (Exception e) {
 			FLog.e("error attaching file " + filePath, e);
