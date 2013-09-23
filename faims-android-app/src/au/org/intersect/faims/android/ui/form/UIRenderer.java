@@ -32,7 +32,6 @@ import android.widget.DatePicker;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.R;
@@ -390,12 +389,9 @@ public class UIRenderer implements IRestoreActionListener{
 			if (obj instanceof TextView) {
 				TextView tv = (TextView) obj;
 				return tv.getText().toString();
-			} else if (obj instanceof Spinner) {
-				Spinner spinner = (Spinner) obj;
-				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-				if (pair == null)
-					return "";
-				return pair.getValue();
+			} else if (obj instanceof CustomSpinner) {
+				CustomSpinner spinner = (CustomSpinner) obj;
+				return spinner.getValue();
 			} else if (obj instanceof LinearLayout) {
 				LinearLayout ll = (LinearLayout) obj;
 
@@ -656,17 +652,9 @@ public class UIRenderer implements IRestoreActionListener{
 				if (obj instanceof TextView) {
 					TextView tv = (TextView) obj;
 					tv.setText(value);
-				} else if (obj instanceof Spinner) {
-					Spinner spinner = (Spinner) obj;
-
-					for (int i = 0; i < spinner.getAdapter().getCount(); ++i) {
-						NameValuePair pair = (NameValuePair) spinner
-								.getItemAtPosition(i);
-						if (value.equalsIgnoreCase(pair.getValue())) {
-							spinner.setSelection(i);
-							break;
-						}
-					}
+				} else if (obj instanceof CustomSpinner) {
+					CustomSpinner spinner = (CustomSpinner) obj;
+					spinner.setValue(value);
 				} else if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
 

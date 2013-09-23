@@ -81,7 +81,7 @@ onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
 ArrayList types = new ArrayList();
 types.add("AboveBelow");
 types.add("NextTo");
-populateDropDown("tabgroup2/tab1/type", types);
+populateDropDown("tabgroup2/tab1/relationship", types);
 
 Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 
@@ -181,6 +181,7 @@ updateEntity() {
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
 	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
+	attributes.add(createEntityAttribute("type", getFieldAnnotation("tabgroup1/tab1/type"), getFieldValue("tabgroup1/tab1/type"), null, getFieldCertainty("tabgroup1/tab1/type")));
 	
 	Object values = getFieldValue("tabgroup1/tab1/location");
 	
@@ -316,6 +317,7 @@ clearEntity() {
 	populateCheckBoxGroup("tabgroup1/tab1/audios", audios);
 	
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateHierarchicalDropDown("tabgroup1/tab1/type", "type");
 	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
 }
@@ -467,7 +469,7 @@ loadRel() {
 updateRel() {
 	if (isNull(rel_id)) rel_id = null;
 	
-	type = getFieldValue("tabgroup2/tab1/type");
+	type = getFieldValue("tabgroup2/tab1/relationship");
 
 	ArrayList locations = new ArrayList();
 	List attributes = createAttributeList();
@@ -484,6 +486,8 @@ updateRel() {
 	}
 	
 	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
+	attributes.add(createRelationshipAttribute("type", getFieldAnnotation("tabgroup2/tab1/type"), getFieldValue("tabgroup2/tab1/type"), getFieldCertainty("tabgroup2/tab1/type")));
+	
 	Object values = getFieldValue("tabgroup2/tab1/location");
 	
 	// delete locations that no longer exist
@@ -516,6 +520,7 @@ clearRel() {
 	newTab("tabgroup2/tab1");
 	
 	populateCheckBoxGroup("tabgroup2/tab1/location", locations);
+	populateHierarchicalDropDown("tabgroup2/tab1/type", "type");
 }
 
 updateAll() {

@@ -44,7 +44,7 @@
     </property>
   </RelationshipElement>
   
-  <ArchaeologicalElement type="Simple">
+  <ArchaeologicalElement name="Simple">
     <description>
       An simple entity
     </description>

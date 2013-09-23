@@ -327,8 +327,8 @@ public final class DatabaseQueries {
 				"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
 				"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
 				"insert or replace into vocabulary (\n" + 
-				"         vocabid, attributeid, vocabname, vocabdescription, SemanticMapURL,PictureURL) \n" + 
-				"  select vocabid, attributeid, vocabname, vocabdescription, SemanticMapURL,PictureURL\n" + 
+				"         vocabid, attributeid, vocabname, vocabdescription, parentvocabid, SemanticMapURL, PictureURL) \n" + 
+				"  select vocabid, attributeid, vocabname, vocabdescription, parentvocabid, SemanticMapURL, PictureURL\n" + 
 				"  from import.vocabulary;\n" + 
 				"insert or replace into user (\n" + 
 				"         userid, fname, lname, email) \n" + 
@@ -393,7 +393,7 @@ public final class DatabaseQueries {
 			"select attributedescription from attributekey where attributename = ?;";
 	
 	public static final String GET_VOCABULARIES_TERM_DESCRIPTION =
-			"select vocabname, vocabdescription, pictureurl from attributekey join vocabulary using (attributeid) where attributename = ?;";
+			"select vocabid, vocabname, vocabdescription, pictureurl, parentvocabid from attributekey join vocabulary using (attributeid) where attributename = ?;";
 
 	public static String COUNT_AENT_RECORDS(String timestamp) {
 		return "select count (uuid) from archentity where aenttimestamp >= '" + timestamp + "';";

@@ -1,6 +1,6 @@
 <ValidationSchema>
 
-	<ArchaeologicalElement type='Structure'>
+	<ArchaeologicalElement name='Structure'>
 
 		<property name='ArchaeologicalElementID'>
 		    

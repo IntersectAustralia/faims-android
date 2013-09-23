@@ -44,7 +44,7 @@
     </property>
   </RelationshipElement>
   
-  <ArchaeologicalElement type="Simple">
+  <ArchaeologicalElement name="Simple">
     <description>
       An simple entity
     </description>
@@ -60,14 +60,14 @@
     <property type="timestamp" name="timestamp">
       <bundle>DOI</bundle>
     </property>
-    <property type="checklist" name="type">
+    <property type="dropdown" name="type">
 	  <bundle>DOI</bundle>
-      <lookup>
-        <term>Type A</term>
-        <term>Type B</term>
-        <term>Type C</term>
-        <term>Type D</term>
-      </lookup>
+	  <lookup>
+	      <term>Type A</term>
+	      <term>Type B</term>
+	      <term>Type C</term>
+	      <term>Type D</term>
+	  </lookup>
     </property>
     <property type="dropdown" name="location">
       <bundle>DOI</bundle>

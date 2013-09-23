@@ -13,6 +13,7 @@ import java.util.Vector;
 import jsqlite.Callback;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.data.User;
+import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKBUtil;
@@ -1762,11 +1763,13 @@ public class DatabaseManager {
 		}
 	}
 
-	public List<String[]> getVocabulariesTerm(String attributeName) throws Exception {
+	public List<VocabularyTerm> getVocabularyTerms(String attributeName) throws Exception {
 		synchronized(DatabaseManager.class) {
 			Stmt stmt = null;
 			try {
-				List<String[]> description = new ArrayList<String[]>();
+				HashMap<String, VocabularyTerm> vocabIdToTerm = new HashMap<String, VocabularyTerm>();
+				HashMap<String, List<VocabularyTerm>> parentIdToTerms = new HashMap<String, List<VocabularyTerm>>();
+				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
 	
@@ -1774,12 +1777,32 @@ public class DatabaseManager {
 				stmt = db.prepare(query);
 				stmt.bind(1, attributeName);
 				while(stmt.step()){
-					description.add(new String[]{stmt.column_string(0), stmt.column_string(1), stmt.column_string(2)});
+					VocabularyTerm term = new VocabularyTerm(stmt.column_string(0), stmt.column_string(1), stmt.column_string(2), stmt.column_string(3));
+					
+					vocabIdToTerm.put(term.id, term);
+					
+					String parentId = stmt.column_string(4);
+					
+					if (parentIdToTerms.get(parentId) == null) {
+						parentIdToTerms.put(parentId, new ArrayList<VocabularyTerm>());
+					}
+					
+					List<VocabularyTerm> terms = parentIdToTerms.get(parentId);
+					
+					terms.add(term);
 				}
 				stmt.close();
 				stmt = null;
 				
-				return description;
+				// map parent terms to child terms
+				for (String parentId : parentIdToTerms.keySet()) {
+					if (parentId != null) {
+						VocabularyTerm term = vocabIdToTerm.get(parentId);
+						term.terms = parentIdToTerms.get(parentId);
+					}
+				}
+				
+				return parentIdToTerms.get(null);
 			} finally {
 				try {
 					if (stmt != null) stmt.close();

@@ -61,7 +61,6 @@ import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -70,6 +69,7 @@ import android.widget.VideoView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Project;
 import au.org.intersect.faims.android.data.User;
+import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
@@ -336,8 +336,8 @@ public class BeanShellLinker {
 
 						});
 					} else {
-						if (view instanceof Spinner) {
-							((Spinner) view)
+						if (view instanceof CustomSpinner) {
+							((CustomSpinner) view)
 									.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
 										@Override
@@ -1188,17 +1188,9 @@ public class BeanShellLinker {
 				if (obj instanceof TextView) {
 					TextView tv = (TextView) obj;
 					tv.setText(value);
-				} else if (obj instanceof Spinner) {
-					Spinner spinner = (Spinner) obj;
-
-					for (int i = 0; i < spinner.getAdapter().getCount(); ++i) {
-						NameValuePair pair = (NameValuePair) spinner
-								.getItemAtPosition(i);
-						if (value.equalsIgnoreCase(pair.getValue())) {
-							spinner.setSelection(i);
-							break;
-						}
-					}
+				} else if (obj instanceof CustomSpinner) {
+					CustomSpinner spinner = (CustomSpinner) obj;
+					spinner.setValue(value);
 				} else if (obj instanceof LinearLayout) {
 					LinearLayout ll = (LinearLayout) obj;
 
@@ -1476,12 +1468,9 @@ public class BeanShellLinker {
 			if (obj instanceof TextView) {
 				TextView tv = (TextView) obj;
 				return tv.getText().toString();
-			} else if (obj instanceof Spinner) {
-				Spinner spinner = (Spinner) obj;
-				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-				if (pair == null)
-					return "";
-				return pair.getValue();
+			} else if (obj instanceof CustomSpinner) {
+				CustomSpinner spinner = (CustomSpinner) obj;
+				return spinner.getValue();
 			} else if (obj instanceof LinearLayout) {
 				LinearLayout ll = (LinearLayout) obj;
 
@@ -1722,8 +1711,8 @@ public class BeanShellLinker {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 
-			if (obj instanceof Spinner && valuesObj instanceof ArrayList) {
-				Spinner spinner = (Spinner) obj;
+			if (obj instanceof CustomSpinner && valuesObj instanceof ArrayList) {
+				CustomSpinner spinner = (CustomSpinner) obj;
 
 				ArrayList<NameValuePair> pairs = null;
 				boolean isList = false;
@@ -1752,6 +1741,30 @@ public class BeanShellLinker {
 						this.activity,
 						android.R.layout.simple_spinner_dropdown_item, pairs);
 				spinner.setAdapter(arrayAdapter);
+				activity.getUIRenderer().getTabForView(ref)
+						.setValueReference(ref, getFieldValue(ref));
+			} else {
+				showWarning("Logic Error", "Cannot populate drop down " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate drop down " + ref, e);
+			showWarning("Logic Error", "Error populate drop down " + ref);
+		}
+	}
+	
+	public void populateHierarchicalDropDown(String ref, String attributeName) {
+
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof HierarchicalSpinner) {
+				HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
+				
+				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
+				
+				spinner.setTerms(terms);
+				
 				activity.getUIRenderer().getTabForView(ref)
 						.setValueReference(ref, getFieldValue(ref));
 			} else {

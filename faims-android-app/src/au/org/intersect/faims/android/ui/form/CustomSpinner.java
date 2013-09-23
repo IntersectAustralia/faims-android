@@ -89,4 +89,24 @@ public class CustomSpinner extends Spinner {
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
+
+	public void setValue(String value) {
+		for (int i = 0; i < getAdapter().getCount(); ++i) {
+			NameValuePair pair = (NameValuePair) getItemAtPosition(i);
+			if (value.equalsIgnoreCase(pair.getValue())) {
+				setSelection(i);
+				break;
+			}
+		}
+	}
+
+	public String getValue() {
+		NameValuePair pair = (NameValuePair) getSelectedItem();
+		if (pair == null) return "";
+		return pair.getValue();
+	}
+	
+	public void reset() {
+		setSelection(0);
+	}
 }

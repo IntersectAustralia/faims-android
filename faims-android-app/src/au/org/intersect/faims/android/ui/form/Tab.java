@@ -42,6 +42,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
@@ -175,7 +176,7 @@ public class Tab implements Parcelable{
 	    			fieldLinearLayout.addView(annotationButton);
 	    		}
 	    		
-	    		if(attribute.info && attribute.name != null){
+	    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
 	    			infoButton = createInfoButton();
 	    			fieldLinearLayout.addView(infoButton);
 	    		}
@@ -368,7 +369,7 @@ public class Tab implements Parcelable{
 		LayoutParams layoutParams = new LayoutParams(size, size);
 		layoutParams.topMargin = 10;
 		button.setLayoutParams(layoutParams);
-		button.setText("I");
+		button.setText("?");
 		button.setTextSize(10);
 		return button;
 	}
@@ -479,8 +480,8 @@ public class Tab implements Parcelable{
         return list;
 	}
 	
-	private CustomSpinner createDropDown(FormAttribute attribute, String ref) {
-		CustomSpinner spinner = new CustomSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
+	private HierarchicalSpinner createDropDown(FormAttribute attribute, String ref) {
+		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -490,10 +491,10 @@ public class Tab implements Parcelable{
         }
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
                 this.activityRef.get(),
-                android.R.layout.simple_spinner_dropdown_item,
+                R.layout.multiline_spinner_dropdown_item,
                 choices);
         spinner.setAdapter(arrayAdapter);
-        spinner.setSelection(0);
+        spinner.reset();
         return spinner;
 	}
 	
@@ -733,39 +734,93 @@ public class Tab implements Parcelable{
 			
 			@Override
 			public void onClick(View v) {
-				try {
-					StringBuilder description = new StringBuilder();
-					String attributeDescription = databaseManager.getAttributeDescription(attributeName);
-					List<String[]> vocabTermDescriptions = databaseManager.getVocabulariesTerm(attributeName);
-					description.append("<i>Description:</i>");
-					if(attributeDescription != null){
-						description.append("<br/>" + attributeDescription);
-					}
-					if(!vocabTermDescriptions.isEmpty()){
-						description.append("<p/>");
-						description.append("<i>Glossary:</i>");
-					}
-					description.append("<ul>");
-					for (String[] vocabTermDescription : vocabTermDescriptions) {
-						description.append("<li>");
-						description.append("<b>" + vocabTermDescription[0] + "</b>");
-						if(vocabTermDescription[1] != null){
-							description.append("<br/>" + vocabTermDescription[1]);
-						}
-						if(vocabTermDescription[2] != null && !vocabTermDescription[2].isEmpty()){
-							description.append("<br/>" + "<img src=\"" + vocabTermDescription[2] + "\"/>");
-						}
-						description.append("</li>");
-					}
-					description.append("</ul>");
-					showDescriptionDialog(description.toString());
-				} catch (Exception e) {
-					FLog.e("Cannot retrieve the description for attribute " + name, e);
-				}
-				
+				showDescriptionDialog(getAttributeDescription(attributeName));
 			}
 
 		});
+	}
+	
+	private boolean hasAttributeDescription(String attributeName) {
+		try {
+			
+			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			
+			boolean termsEmpty = terms == null || terms.isEmpty();
+			boolean attributeDescriptionEmpty = attributeDescription == null || "".equals(attributeDescription);
+			
+			FLog.d("attribute:" + attributeName);
+			FLog.d("description:" + attributeDescriptionEmpty);
+			FLog.d("terms:" + termsEmpty);
+			
+			if(termsEmpty && attributeDescriptionEmpty) return false;
+			
+			return true;
+		} catch (Exception e) {
+			FLog.e("Cannot retrieve the description for attribute " + attributeName, e);
+			return false;
+		}
+	}
+	
+	private String getAttributeDescription(String attributeName) {
+		StringBuilder description = new StringBuilder();
+		try {
+			
+			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+			
+			if(attributeDescription != null && !"".equals(attributeDescription)){
+				description.append("<p><i>Description:</i>");
+				description.append("<br/>");
+				description.append(activityRef.get().getArch16n().substituteValue(attributeDescription));
+				description.append("</p>");
+			}
+			
+			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			
+			if(!terms.isEmpty()){
+				description.append("<p><i>Glossary:</i></p>");
+				VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
+				createVocabularyTermXML(description, terms);
+			}
+			
+		} catch (Exception e) {
+			FLog.e("Cannot retrieve the description for attribute " + attributeName, e);
+		}
+		return description.toString();
+	}
+	
+	private void createVocabularyTermXML(StringBuilder sb, List<VocabularyTerm> terms) {
+		sb.append("<ul>");
+		
+		for (VocabularyTerm term : terms) {
+			sb.append("<li>");
+			
+			if(term.description != null && !"".equals(term.description)){
+				sb.append("<p><b>");
+				sb.append(term.name);
+				sb.append("</b><br/>");
+				sb.append(term.description);
+				sb.append("</p>");
+			} else {
+				sb.append("<p><b>");
+				sb.append(term.name);
+				sb.append("</b></p>");
+			}
+			
+			if(term.pictureURL != null && !"".equals(term.pictureURL)){
+				sb.append("<img src=\"");
+				sb.append(term.pictureURL);
+				sb.append("\"/>");
+			}
+			
+			if (term.terms != null){
+				createVocabularyTermXML(sb, term.terms);
+			}
+			
+			sb.append("</li>");
+		}
+		
+		sb.append("</ul>");
 	}
 	
 	private void showDescriptionDialog(String description) {
@@ -1030,7 +1085,7 @@ public class Tab implements Parcelable{
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			} else if (v instanceof CustomSpinner) {
 				CustomSpinner spinner = (CustomSpinner) v;
-				spinner.setSelection(0);
+				spinner.reset();
 				spinner.setCertainty(1);
 				spinner.setAnnotation("");
 				spinner.setCurrentCertainty(1);
