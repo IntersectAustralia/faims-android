@@ -86,5 +86,17 @@
     
     <string name="server_ip_settings_title">FAIMS Server Host</string>
     <string name="server_port_settings_title">FAIMS Server Port</string>
+    
+    <string name="gps_active">GPS active</string>
+    <string name="gps_inactive">GPS disabled</string>
+    
+    <string name="tracker_active">Track log active</string>
+    <string name="tracker_inactive">Track log disabled</string>
+    
+    <string name="sync_no_changes">Sync active</string>
+    <string name="sync_inactive">Sync disabled</string>
+    <string name="sync_has_changes">Ready to sync</string>
+    <string name="sync_syncing">Sync in progress</string>
+    <string name="sync_error">Sync error</string>
 
 </resources>

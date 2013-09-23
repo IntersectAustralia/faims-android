@@ -395,4 +395,15 @@ public final class DatabaseQueries {
 	public static final String GET_VOCABULARIES_TERM_DESCRIPTION =
 			"select vocabid, vocabname, vocabdescription, pictureurl, parentvocabid from attributekey join vocabulary using (attributeid) where attributename = ?;";
 
+	public static String COUNT_AENT_RECORDS(String timestamp) {
+		return "select count (uuid) from archentity where aenttimestamp >= '" + timestamp + "';";
+	}
+
+	public static String COUNT_RELN_RECORDS(String timestamp) {
+		return "select count (relationshipid) from relationship where relntimestamp >= '" + timestamp + "';";
+	}
+	
+	public static String COUNT_AENT_RELN_RECORDS(String timestamp) {
+		return "select count (uuid) from aentreln where aentrelntimestamp >= '" + timestamp + "';";
+	}
 }

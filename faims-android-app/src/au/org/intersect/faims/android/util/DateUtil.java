@@ -7,6 +7,7 @@ import java.util.TimeZone;
 
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+import au.org.intersect.faims.android.log.FLog;
 
 public class DateUtil {
 	
@@ -47,4 +48,14 @@ public class DateUtil {
 		return getCurrentTimestampGMT("yyyy-MM-dd HH:mm:ss");
 	}
 
+	public static Date convertToDateGMT(String date){
+		try{
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+			return formatter.parse(date);
+		}catch(Exception e){
+			FLog.e("Can not convert string to date", e);
+			return null;
+		}
+	}
 }
