@@ -1,8 +1,4 @@
 
-// Move first tab into second tab
-// change rs_groundtruth_result to featureClassification
-
-// put all in
 
 
 
@@ -32,6 +28,7 @@ initStatic() {
 initStatic();
 */
 
+User user;
 
 initMap() {
 	setMapZoom("control/map/map", 19.0f);
@@ -44,11 +41,9 @@ initMap() {
 	queryName = "All entities";
 	querySQL =
 		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-		" FROM archentity join aenttype using (aenttypeid)\n" +
-		" where archentity.deleted is null\n" + 
-		"   and lower(aenttypename) != lower('gps_track')\n" + 
-		" group by uuid\n" + 
-		" having max(aenttimestamp)";
+		" FROM latestNonDeletedArchEntIdentifiers\n" +
+		" where lower(aenttypename) != lower('gps_track')\n";
+		
 	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
 
 	addTrackLogLayerQuery("control/map/map", "track log entities", 
@@ -146,11 +141,11 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+//	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
 	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
 	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
 	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	//attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
 	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
 	
 	positionProj = getGPSPositionProjected();
@@ -231,18 +226,18 @@ hasFile(files, filename) {
 	return false;
 }
 
-Dialog d = null;
+Dialog busyDialog = null;
 
 showBusyDialog() {
-	if (d == null) {
-		d = showBusy("Message", "Please wait while attachments are copied.");
+	if (busyDialog == null) {
+		busyDialog = showBusy("Message", "Please wait while attachments are copied.");
 	}
 }
 
 closeBusyDialog() {
-	if (d != null) {
-		d.dismiss();
-		d = null;
+	if (busyDialog != null) {
+		busyDialog.dismiss();
+		busyDialog = null;
 	}
 }
 
@@ -291,15 +286,12 @@ entitySaved = false;
 entityCallback = null;
 
 checkFilesAttached() {
-	if (entityCallback == null){
-		showToast("Finish saving record.");
-		return;
-	}
+	if (isAttachingFiles()) return;
 
-	if (entitySaved && !isAttachingFiles()) {
+	if (entitySaved){
 		closeBusyDialog();
 		showToast("Finish saving record.");
-		execute(entityCallback);
+		if (entityCallback != null) execute(entityCallback);
 	}
 }
 
@@ -390,8 +382,9 @@ getNoneList() {
 }
 
 refreshEntities() {
-
+	showToast("Fetching saved features...");
 	populateList("control/data/RS_FeatureList", fetchEntityList("RemoteSensingFeature"));
+	System.out.println(fetchEntityList("RemoteSensingFeature"));
 }
 
 
@@ -449,7 +442,7 @@ populateListForUsers();
 
 String username = "";
 String device = "";
-User user;
+
 
 login(){
 
@@ -479,6 +472,8 @@ makeGallery(String attrib){
 
 ArrayList featurePictures = new ArrayList();
 String feature_id = null;
+onEvent("RS_Feature", "show", "showTab(\"RS_Feature/header11_58\")");
+
 
 newRSFeature(){
 	feature_id = null;
@@ -488,6 +483,7 @@ newRSFeature(){
 
 
 	newTabGroup("RS_Feature");
+    
     setFieldValue("RS_Feature/header11_58/TimeStamp", getCurrentTime());
 
 
@@ -496,14 +492,14 @@ newRSFeature(){
     populateCheckBoxGroup("RS_Feature/header11_58/Feature_Type", makeVocab("FeatureType"));
 
     populateRadioGroup("RS_Feature/header11_69/Feature_Accessibility", makeVocab("FeatureAccessibility"));
-    populateRadioGroup("RS_Feature/header11_69/Ground_Control", makeVocab("GroundControl"));
+    populateDropDown("RS_Feature/header11_69/Ground_Control", makeVocab("GroundControl"));
     populateRadioGroup("RS_Feature/header11_69/GCRepeat", makeVocab("GCRepeat"));
-	populateRadioGroup("RS_Feature/header11_69/RS_Groundtruth_Result", makeVocab("RSGroundtruthResult"));
+	populateDropDown("RS_Feature/header11_69/RS_Groundtruth_Result", makeVocab("RSGroundtruthResult"));
 
     populateCheckBoxGroup("RS_Feature/header11_69/Feature_Actual_Cause", makeVocab("FeatureActualCause"));
     
     populateCheckBoxGroup("RS_Feature/header11_69/RS_Feature_Period_s_", makeVocab("RSFeaturePeriod"));
-    populateRadioGroup("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));
+    populateDropDown("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));
 
 	
     populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
@@ -529,6 +525,7 @@ saveFeature(id) {
 		return;
 	}
 	feature_id = updateFeature(id);
+	clearCreatedGeometry();
 }
 
 deleteFeature(){
@@ -549,17 +546,9 @@ doNotDelete(){
 
 
 updateFeature(id) {
-	showBusyDialog();
-	entitySaved = false;
-
 	if (isNull(id)) id = null;
-
-    
-
     featurePictures = new ArrayList();
-
 	ArrayList loadedPictures = new ArrayList();
-
 
 	if (!isNull(id)) {
 		entity = fetchArchEnt(id);
@@ -572,41 +561,25 @@ updateFeature(id) {
 	}
 
 
-
    	Object[] attributeDefs = new Object[] {
     	AttributeDef("FeatureID", "freetext", "RS_Feature/header11_58/FeatureID", false),
-    	AttributeDef("Timestamp", "freetext", "RS_Feature/header11_58/TimeStamp", false),
+    	AttributeDef("TimeStamp", "freetext", "RS_Feature/header11_58/TimeStamp", false),
     	AttributeDef("ShortSummary", "freetext", "RS_Feature/header11_58/Short_summary"),
-
-
-		//Theeban: featureSources checkbox -- check this? is this valid? Gallery and sync seem... ... have lots more code.
     	AttributeDef("FeatureSource", "checkbox", "RS_Feature/header11_58/FeatureSource"),
-
     	AttributeDef("FeatureSourceConfidence", "vocab", "RS_Feature/header11_58/Feature_Source_Confidence"),
-    	//featuretype checkbox.
     	AttributeDef("FeatureType", "checkbox", "RS_Feature/header11_58/Feature_Type"),
-
-
     	AttributeDef("FeatureAccessibility", "vocab", "RS_Feature/header11_69/Feature_Accessibility"),
     	AttributeDef("FeatureActualCause", "checkbox", "RS_Feature/header11_69/Feature_Actual_Cause"),
     	AttributeDef("RSGroundtruthResult", "vocab", "RS_Feature/header11_69/RS_Groundtruth_Result"),
     	AttributeDef("GroundControl", "vocab", "RS_Feature/header11_69/Ground_Control"),
     	AttributeDef("RSFeaturePeriod", "checkbox", "RS_Feature/header11_69/RS_Feature_Period_s_"),
-
-
     	AttributeDef("RSFeatureSiteCode", "freetext", "RS_Feature/header11_69/RS_Feature_Site_Code", false),
-    	AttributeDef("RS_Feature_Notes", "freetext", "RS_Feature/header11_69/RS_Feature_Notes"),
-
+    	AttributeDef("RSFeatureNotes", "freetext", "RS_Feature/header11_69/RS_Feature_Notes"),
     	AttributeDef("GCRepeat", "vocab", "RS_Feature/header11_69/GCRepeat"),
     	AttributeDef("BestImageAlgorithm", "vocab", "RS_Feature/header11_69/Best_image_algorithm"),
 		AttributeDef("RSAreaAnalysedNumericVersion", "freetext", "RS_Feature/header11_69/RS_Area_Analysed_Numeric_version"),
-
 		AttributeDef("RSGeologySoilComments", "freetext", "RS_Feature/header11_69/RS_Geology_Soil_Comments"),
-
     	AttributeDef("Photos", "files", "RS_Feature/header11_70/PhotoGallery", loadedPictures, true)
-
-
-
     	};
 
 
@@ -615,7 +588,7 @@ updateFeature(id) {
     //saveFiles(loadedPictures, getFieldValue("RS_Feature/header11_70/PhotoGallery"), "picture", attributeDefs);
 
 
-    saved_id = saveEntity(id, "RemoteSensingFeature", attributeDefs, null, null);
+    saved_id = saveEntity(id, "RemoteSensingFeature", attributeDefs, getCreatedGeometry(), null);
 
 
 	entitySaved = true;
@@ -625,5 +598,43 @@ updateFeature(id) {
 	
 }
 
+
+loadRSFeature() {
+
+	newRSFeature();
+	feature_id = getListItemValue(); //getFieldValue("control/data/RS_FeatureList");
+	if (isNull(feature_id)) return;
+
+	
+
+	loadFeatureFileAttributes(feature_id);
+	showTabGroup("RS_Feature", feature_id);
+	
+    
+}
+
+loadFeatureFileAttributes(id){
+	featurePictures = new ArrayList();
+
+	if (!isNull(id)) {
+		archEntity = fetchArchEnt(id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if(!attr.isDeleted()){
+					if("Photos".equals(attr.getName())){
+						featurePictures.add(getAttachedFilePath(attr.getText()));
+					}
+				}
+			}
+		}
+	}
+
+    populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
+    selectGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
+}
+
+
 onEvent("RS_Feature/header11_70/Update", "click", "saveFeature(feature_id)");
 onEvent("RS_Feature/header11_70/Delete", "click", "deleteFeature()");
+onEvent("control/data/RS_FeatureList", "click", "loadRSFeature()");
