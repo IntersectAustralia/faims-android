@@ -43,15 +43,15 @@ public class FileUtil {
 	}
 	
 	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
+		FileOutputStream out = new FileOutputStream(filename);
 		return new TarArchiveOutputStream(
-				 new GZIPOutputStream(
-						 new FileOutputStream(filename)));
+				 new GZIPOutputStream(out));
 	}
 	
 	public static TarArchiveInputStream createTarInputStream(String filename) throws IOException {
+		FileInputStream in = new FileInputStream(filename);
 		return new TarArchiveInputStream(
-				 new GZIPInputStream(
-						 new FileInputStream(filename)));
+				 new GZIPInputStream(in));
 	}
 	
 	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
@@ -70,7 +70,7 @@ public class FileUtil {
 	}
 	
 	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		FLog.d("add dir " + dir + "  to tarname " + tarname);
+		//FLog.d("add dir " + dir + "  to tarname " + tarname);
 		
 		File d = new File(dir);
 		if (d.isDirectory()) {
@@ -106,7 +106,7 @@ public class FileUtil {
 	}
 	
 	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
-		FLog.d("add file " + filename + "  to tarname " + tarname);
+		//FLog.d("add file " + filename + "  to tarname " + tarname);
 		
 		FileInputStream fs = null;
 		try {
@@ -125,7 +125,7 @@ public class FileUtil {
 	}
 	
 	public static void untarFile(String dir, TarArchiveInputStream is) throws IOException {
-		FLog.c();
+		//FLog.d("untar file " + dir);
 		
 		try {
 			TarArchiveEntry e;
@@ -152,8 +152,6 @@ public class FileUtil {
 	}
 	
 	public static void saveFile(InputStream input, String filename) throws IOException {
-		FLog.d("saving to file " + filename);
-		
 		FileOutputStream os = null;
 		try {
 			os = new FileOutputStream(filename);
@@ -181,13 +179,12 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		FLog.d("writing tar file " + file.getAbsolutePath());
+		//FLog.d("writing tar file " + file.getAbsolutePath());
 		
 		// make sure directory path exists
 		makeDirs(file.getParent());
 		
 		FileOutputStream os = null;
-		
 		try {
 			os = new FileOutputStream(file);
 	        IOUtils.copy(ts, os);
@@ -278,23 +275,51 @@ public class FileUtil {
 		}
 		return null;
 	}
-
-	public static void deleteDirectory(File dir) {
-		if (!dir.isDirectory()) {
+	
+	public static void delete(File file) {
+		if (file.isDirectory()) {
+			deleteDirectory(file);
+		} else {
+			deleteFile(file);
+		}
+	}
+	
+	private static void deleteFile(File file) {
+		if (!file.isFile()) {
+			FLog.d("Cannot delete file " + file);
 			return;
 		}
-		for (File f : dir.listFiles()) {
-			if (f.isDirectory()) {
-				deleteDirectory(f);
-			} else {
-				f.delete();
-			}
+		
+		// android hack: rename file to unused location before deleting as file so current location can be reused
+		File toFile = new File(file.getAbsolutePath() + System.currentTimeMillis());
+		file.renameTo(toFile);
+		boolean success = toFile.delete();
+		if (!success) {
+			FLog.d("failed to delete file " + toFile);
 		}
-		dir.delete();
+	}
+
+	private static void deleteDirectory(File dir) {
+		if (!dir.isDirectory()) {
+			FLog.d("Cannot delete directory " + dir);
+			return;
+		}
+		
+		for (File f : dir.listFiles()) {
+			delete(f);
+		}
+		
+		// android hack: rename file to unused location before deleting as file so current location can be reused
+		File toDir = new File(dir.getAbsolutePath() + System.currentTimeMillis());
+		dir.renameTo(toDir);
+		boolean success = toDir.delete();
+		if (!success) {
+			FLog.d("failed to delete file " + toDir);
+		}
 	}
 
 	public static void copyFile(String fromPath, String toPath) throws IOException {
-		FLog.d("copying file " + fromPath + " to " + toPath);
+		//FLog.d("copying file " + fromPath + " to " + toPath);
 		
 		FileInputStream input = null;
 		FileOutputStream output = null;
@@ -326,8 +351,7 @@ public class FileUtil {
 		}
 	}
 
-	public static void moveDir(String fromDir, String toDir) {
-		FLog.c();
+	public static void moveDir(String fromDir, String toDir) throws Exception {
 		toDir = new File(toDir).getAbsolutePath() + "/";
 		
 		File d = new File(fromDir);
@@ -347,12 +371,17 @@ public class FileUtil {
 		}
 	}
 	
-	private static void moveFile(File file, String dir) {
+	private static void moveFile(File file, String dir) throws Exception {
 		File d = new File(dir);
+		
 		if (!d.isDirectory()) {
 			d.mkdirs();
 		}
-		file.renameTo(new File(dir + file.getName()));
+		
+		File toFile = new File(dir + file.getName());
+		if (!file.renameTo(toFile)) {
+			copyFile(file.getAbsolutePath(), toFile.getAbsolutePath());
+		}
 	}
 
 	public static void touch(File lock) {

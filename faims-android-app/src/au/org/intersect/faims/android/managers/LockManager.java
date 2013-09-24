@@ -15,7 +15,7 @@ public class LockManager {
 	
 	public static void clearLock(String filename) {
 		File f = new File(filename);
-		if (f.exists()) f.delete();
+		if (f.exists()) FileUtil.delete(f);
 	}
 	
 	public static boolean isLocked(String filename) {

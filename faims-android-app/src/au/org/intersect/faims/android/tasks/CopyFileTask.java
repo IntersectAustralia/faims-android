@@ -33,7 +33,9 @@ public class CopyFileTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected void onCancelled() {
 		File file = new File(toPath);
-		if (file.exists()) file.delete();
+		if (file.exists()) {
+			FileUtil.delete(file);
+		}
 	}
 	
 	@Override

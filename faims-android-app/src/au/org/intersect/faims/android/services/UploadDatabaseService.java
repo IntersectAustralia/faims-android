@@ -22,7 +22,7 @@ public class UploadDatabaseService extends UploadService {
 	@Override
 	public void onDestroy() {
 		if (tempDB != null) {
-			tempDB.delete();
+			FileUtil.delete(tempDB);
 		}
 		databaseManager.interrupt();
 		super.onDestroy();
@@ -69,9 +69,13 @@ public class UploadDatabaseService extends UploadService {
 	    	// upload database
 			return faimsClient.uploadDatabase(project, tempFile, userId);
 		} finally {
-			if (tempDB != null) tempDB.delete();
+			if (tempDB != null) {
+				FileUtil.delete(tempDB);
+			}
 
-			if (tempFile != null) tempFile.delete();
+			if (tempFile != null) {
+				FileUtil.delete(tempFile);
+			}
 			
 			// TODO check if this is necessary as file util also closes the stream
 			if (os != null) {

@@ -380,11 +380,11 @@ public class FAIMSClient {
 			} finally {
 				
 				if (tempFile != null) {
-					tempFile.delete();
+					FileUtil.delete(tempFile);
 				}
 				
 				if (tempDir != null) {
-					FileUtil.deleteDirectory(tempDir);
+					FileUtil.delete(tempDir);
 				}
 				
 				try {
@@ -455,7 +455,7 @@ public class FAIMSClient {
 			
 			if (!archive.md5.equals(md5)) {
 				
-				tempArchive.delete();
+				FileUtil.delete(tempArchive);
 				
 				return null;
 			}
@@ -465,7 +465,7 @@ public class FAIMSClient {
 			if (stream != null) stream.close();
 			
 			if (isInterrupted && tempArchive != null) {
-				tempArchive.delete();
+				FileUtil.delete(tempArchive);
 			}
 		}
 	}
@@ -564,7 +564,7 @@ public class FAIMSClient {
 			} finally {
 				
 				if (uploadFileRef != null) {
-					uploadFileRef.delete();
+					FileUtil.delete(uploadFileRef);
 				}
 				
 				try {
@@ -692,16 +692,16 @@ public class FAIMSClient {
 		if (httpClient != null) {
 			isInterrupted = true;
 			if (tempArchive != null) {
-				tempArchive.delete();
+				FileUtil.delete(tempArchive);
 			}
 			if (tempFile != null) {
-				tempFile.delete();
+				FileUtil.delete(tempFile);
 			}
 			if (tempDir != null) {
-				FileUtil.deleteDirectory(tempDir);
+				FileUtil.delete(tempDir);
 			}
 			if (uploadFileRef != null) {
-				uploadFileRef.delete();
+				FileUtil.delete(uploadFileRef);
 			}
 			try {
 				if (uploadFileOS != null) uploadFileOS.close();
