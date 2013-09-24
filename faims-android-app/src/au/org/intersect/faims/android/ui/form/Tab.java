@@ -749,10 +749,6 @@ public class Tab implements Parcelable{
 			boolean termsEmpty = terms == null || terms.isEmpty();
 			boolean attributeDescriptionEmpty = attributeDescription == null || "".equals(attributeDescription);
 			
-			FLog.d("attribute:" + attributeName);
-			FLog.d("description:" + attributeDescriptionEmpty);
-			FLog.d("terms:" + termsEmpty);
-			
 			if(termsEmpty && attributeDescriptionEmpty) return false;
 			
 			return true;
