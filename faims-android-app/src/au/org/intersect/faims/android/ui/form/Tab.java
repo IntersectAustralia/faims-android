@@ -67,7 +67,6 @@ public class Tab implements Parcelable{
 	private String name;
 	private String label;
 	private boolean hidden;
-	//private boolean scrollable;
 	private View view;
 	private Arch16n arch16n;
 	private String reference;
@@ -92,7 +91,6 @@ public class Tab implements Parcelable{
 		this.label = label;
 		this.hidden = hidden;
 		this.reference = reference;
-		//this.scrollable = scrollable;
 		
 		onLoadCommands = new ArrayList<String>();
 		onShowCommands = new ArrayList<String>();
@@ -241,30 +239,6 @@ public class Tab implements Parcelable{
 	                    break;
             	}
                 break;
-            // uploading image by using camera
-            /*
-            case Constants.CONTROL_IMAGE_CHOOSE:
-                Button imageButton = new Button(this.context);
-                imageButton.setText("Choose Image");
-
-                final ImageView imageView = new ImageView(this.context);
-                imageButton.setOnClickListener(new OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        Intent cameraIntent = new Intent(
-                                MediaStore.ACTION_IMAGE_CAPTURE);
-                        UIRenderer.this.imageView = imageView;
-                        ((ShowProjectActivity) UIRenderer.this.context)
-                                .startActivityForResult(cameraIntent,
-                                        ShowProjectActivity.CAMERA_REQUEST_CODE);
-                    }
-                });
-               
-                layout.addView(imageButton);
-                layout.addView(imageView);
-                break;
-            */
             // create control for select one showing it as drop down
             case Constants.CONTROL_SELECT_ONE:
                 switch (attribute.dataType) {
