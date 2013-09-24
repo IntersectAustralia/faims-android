@@ -66,21 +66,42 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setGGAMessage(GGAMessage);
 		setBODMessage(BODMessage);
 		setExternalGPSTimestamp(System.currentTimeMillis());
-		if(GGAMessage == null){
-			setExternalGPSStarted(false);
+		if(!isExternalGPSStarted){
+			if(hasValidGGAMessage()){
+				setExternalGPSStarted(true);
+				activityRef.get().invalidateOptionsMenu();
+			}
 		}else{
-			setExternalGPSStarted(true);
+			if(!hasValidGGAMessage()){
+				setExternalGPSStarted(false);
+				activityRef.get().invalidateOptionsMenu();
+			}
 		}
-		activityRef.get().invalidateOptionsMenu();
 	}
 
-	@Override
+    private boolean hasValidGGAMessage(){
+    	GGASentence sentence = null;
+        try{
+	        if (this.GGAMessage != null) {
+	            sentence = (GGASentence) SentenceFactory.getInstance()
+	                    .createParser(this.GGAMessage);
+	        }
+        	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
+        } catch (Exception e){
+        	FLog.e("wrong gga format sentence", e);
+        	return false;
+        }
+    }
+
+    @Override
 	public void onLocationChanged(Location location) {
 		setAccuracy(location.getAccuracy());
 		setLocation(location);
 		setInternalGPSTimestamp(System.currentTimeMillis());
-		setInternalGPSStarted(true);
-		activityRef.get().invalidateOptionsMenu();
+		if(!isInternalGPSStarted){
+			setInternalGPSStarted(true);
+			activityRef.get().invalidateOptionsMenu();
+		}
 	}
 
 	@Override
@@ -88,8 +109,10 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setAccuracy(0.0f);
 		setLocation(null);
 		setInternalGPSTimestamp(System.currentTimeMillis());
-		setInternalGPSStarted(false);
-		activityRef.get().invalidateOptionsMenu();
+		if(isInternalGPSStarted){
+			setInternalGPSStarted(false);
+			activityRef.get().invalidateOptionsMenu();
+		}
 	}
 
 	@Override

@@ -80,6 +80,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
@@ -227,7 +228,6 @@ public class BeanShellLinker {
 		this.activity.getGPSDataManager().setTrackingType(type);
 		this.activity.getGPSDataManager().setTrackingValue(value);
 		this.activity.getGPSDataManager().setTrackingExec(callback);
-		this.activity.invalidateOptionsMenu();
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
@@ -236,7 +236,6 @@ public class BeanShellLinker {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
-			this.activity.getGPSDataManager().setTrackingStarted(true);
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -247,8 +246,16 @@ public class BeanShellLinker {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
+							if(!activity.getGPSDataManager().isTrackingStarted()){
+								activity.getGPSDataManager().setTrackingStarted(true);
+								activity.invalidateOptionsMenu();
+							}
 							execute(callback);
 						} else {
+							if(activity.getGPSDataManager().isTrackingStarted()){
+								activity.getGPSDataManager().setTrackingStarted(false);
+								activity.invalidateOptionsMenu();
+							}
 							showToast("No GPS signal");
 						}
 					}
@@ -277,7 +284,15 @@ public class BeanShellLinker {
 								prevLong = longitude;
 								prevLat = latitude;
 							}
+							if(!activity.getGPSDataManager().isTrackingStarted()){
+								activity.getGPSDataManager().setTrackingStarted(true);
+								activity.invalidateOptionsMenu();
+							}
 						} else {
+							if(activity.getGPSDataManager().isTrackingStarted()){
+								activity.getGPSDataManager().setTrackingStarted(false);
+								activity.invalidateOptionsMenu();
+							}
 							showToast("No GPS signal");
 						}
 					}
@@ -3655,7 +3670,7 @@ public class BeanShellLinker {
 						}
 				
 			});
-			if(!activity.isSyncStarted()){
+			if(!activity.getSyncStatus().equals(SyncStatus.INACTIVE)){
 				activity.setSyncStatus(ShowProjectActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
 			return attachFile;

@@ -1491,6 +1491,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 	}
 	
+	public SyncStatus getSyncStatus() {
+		return syncStatus;
+	}
+
 	public void enableFileSync() {
 		activityData.setFileSyncEnabled(true);
 	}

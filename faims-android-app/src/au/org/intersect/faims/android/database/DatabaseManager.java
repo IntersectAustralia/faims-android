@@ -137,7 +137,9 @@ public class DatabaseManager {
 					st.step();
 					st.close();
 					st = null;
-					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+					if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+						activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+					}
 				}
 			} finally {
 				try {
@@ -253,7 +255,9 @@ public class DatabaseManager {
 						st = null;
 					}
 				}
-				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
 				return uuid;
 				
 			} finally {
@@ -304,7 +308,9 @@ public class DatabaseManager {
 				st.step();
 				st.close();
 				st = null;
-				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
 				return uuid;
 				
 			} finally {
@@ -356,7 +362,9 @@ public class DatabaseManager {
 				st.close();
 				st = null;
 				
-				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
 				return uuid;
 				
 			} finally {
@@ -407,7 +415,9 @@ public class DatabaseManager {
 					st.step();
 					st.close();
 					st = null;
-					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+					if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+						activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+					}
 				}
 			} finally {
 				try {
@@ -523,7 +533,9 @@ public class DatabaseManager {
 						st = null;
 					}
 				}
-				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
 				return uuid;
 				
 			} finally {
@@ -650,7 +662,9 @@ public class DatabaseManager {
 				st.step();
 				st.close();
 				st = null;
-				activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+					activityRef.get().setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				}
 				return true;
 				
 			} finally {
