@@ -304,7 +304,7 @@ public class CustomMapView extends MapView {
 
 	private Bitmap greyDot;
 
-	private Bitmap blueArrow;
+	private Bitmap whiteArrow;
 
 	private Bitmap greyArrow;
 
@@ -376,8 +376,8 @@ public class CustomMapView extends MapView {
 				getResources(), R.drawable.blue_dot);
 		greyDot = UnscaledBitmapLoader.decodeResource(
 				getResources(), R.drawable.grey_dot);
-		blueArrow = UnscaledBitmapLoader.decodeResource(
-				getResources(), R.drawable.blue_arrow);
+		whiteArrow = UnscaledBitmapLoader.decodeResource(
+				getResources(), R.drawable.white_arrow);
 		greyArrow = UnscaledBitmapLoader.decodeResource(
 				getResources(), R.drawable.grey_arrow);
 		
@@ -1583,7 +1583,7 @@ public class CustomMapView extends MapView {
 			if (tempBitmap != null) {
 				tempBitmap.recycle();
 			}
-			this.tempBitmap = BitmapUtil.rotateBitmap(valid ? blueArrow : greyArrow, heading + this.getRotation());
+			this.tempBitmap = BitmapUtil.rotateBitmap(valid ? whiteArrow : greyArrow, heading + this.getRotation());
 	        return MarkerStyle.builder().setBitmap(tempBitmap)
 	                .setSize(0.5f).setAnchorX(MarkerStyle.CENTER).setAnchorY(MarkerStyle.CENTER).build();
 		} else {

@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.gps;
 
+import java.lang.ref.WeakReference;
+
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.BODSentence;
@@ -16,6 +18,7 @@ import au.org.intersect.faims.android.data.ActivityData;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
 import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
+import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
 
 import com.google.inject.Singleton;
 
@@ -49,9 +52,13 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	
 	private int trackingValue;
 	private String trackingExec;
+	private boolean isTrackingStarted;
+
+	private WeakReference<ShowProjectActivity> activityRef;
 	
-	public void init(LocationManager manager){
+	public void init(LocationManager manager, ShowProjectActivity activity){
 		this.locationManager = manager;
+		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
 	}
 	
     @Override
@@ -59,6 +66,12 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setGGAMessage(GGAMessage);
 		setBODMessage(BODMessage);
 		setExternalGPSTimestamp(System.currentTimeMillis());
+		if(GGAMessage == null){
+			setExternalGPSStarted(false);
+		}else{
+			setExternalGPSStarted(true);
+		}
+		activityRef.get().invalidateOptionsMenu();
 	}
 
 	@Override
@@ -66,6 +79,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setAccuracy(location.getAccuracy());
 		setLocation(location);
 		setInternalGPSTimestamp(System.currentTimeMillis());
+		setInternalGPSStarted(true);
+		activityRef.get().invalidateOptionsMenu();
 	}
 
 	@Override
@@ -73,6 +88,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setAccuracy(0.0f);
 		setLocation(null);
 		setInternalGPSTimestamp(System.currentTimeMillis());
+		setInternalGPSStarted(false);
+		activityRef.get().invalidateOptionsMenu();
 	}
 
 	@Override
@@ -87,7 +104,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		try{
 			destroyInternalGPSListener();
 			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, this);
-			setInternalGPSStarted(true);
+			setInternalGPSStarted(false);
 		}catch(Exception e){
 			FLog.e("Starting internal gps exception : " + e);
 		}
@@ -101,7 +118,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.handler = new Handler(this.handlerThread.getLooper());
 			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval() * 1000);
 			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval() * 1000);
-			setExternalGPSStarted(true);
+			setExternalGPSStarted(false);
 		}catch (Exception e){
 			FLog.e("Starting external gps exception", e);
 		}
@@ -325,6 +342,14 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 
 	public void setTrackingExec(String exec) {
 		this.trackingExec = exec;
+	}
+
+	public boolean isTrackingStarted() {
+		return isTrackingStarted;
+	}
+
+	public void setTrackingStarted(boolean isTrackingStarted) {
+		this.isTrackingStarted = isTrackingStarted;
 	}
 
 	@Override

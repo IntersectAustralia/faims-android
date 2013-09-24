@@ -1,0 +1,629 @@
+
+// Move first tab into second tab
+// change rs_groundtruth_result to featureClassification
+
+// put all in
+
+
+
+/*** MAP ***/
+
+DATA_ENTRY_LAYER = "Data Entry Layer";
+DATA_ENTRY_LAYER_ID = 0;
+
+/*
+initStatic() {
+	setFieldValue("control/static/name", getProjectName());
+	setFieldValue("control/static/id", getProjectId());
+	setFieldValue("control/static/season", getProjectSeason());
+	setFieldValue("control/static/description", getProjectDescription());
+	setFieldValue("control/static/permit_no", getPermitNo());
+	setFieldValue("control/static/permit_holder", getPermitHolder());
+	setFieldValue("control/static/contact_address", getContactAndAddress());
+	setFieldValue("control/static/participants", getParticipants());
+	setFieldValue("control/static/permit_issued_by", getPermitIssuedBy());
+	setFieldValue("control/static/permit_type", getPermitType());
+	setFieldValue("control/static/copyright_holder", getCopyrightHolder());
+	setFieldValue("control/static/client_sponsor", getClientSponsor());
+	setFieldValue("control/static/land_owner", getLandOwner());
+	setFieldValue("control/static/has_sensitive_data", hasSensitiveData());
+}
+
+initStatic();
+*/
+
+
+initMap() {
+	setMapZoom("control/map/map", 19.0f);
+
+	showBaseMap("control/map/map", "Base Layer", "files/data/maps/ZAG-TPan-3857-grass-tiled.tif");
+
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
+	isEntity = true;
+	queryName = "All entities";
+	querySQL =
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) != lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)";
+	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
+
+	addTrackLogLayerQuery("control/map/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+		
+	addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower(?) \n" + 
+		"   group by uuid").addParameter("Type", "RemoteSensingFeature"));
+		
+	//addLegacySelectQueryBuilder("control/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
+	//	createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
+					
+	// define database layer styles for points, lines, polygons and text
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+
+	showDatabaseLayer("control/map/map", "Entity Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
+
+initMap();
+
+onToolEvent("control/map/map", "load", "onLoadData()");
+
+onLoadData() {
+	id = getMapGeometryLoaded();
+	is_entity = "entity".equals(getMapGeometryLoadedType());
+	
+	showToast("To load entity please use load tab");
+}
+
+onEvent("control/map/clear", "click", "onClearMap()");
+onEvent("control/map/create", "click", "onCreateMap()");
+
+onClearMap() {
+	clearGeometryList("control/map/map", getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID));
+}
+
+onCreateMap() {
+	List geomList = getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+	if (geomList == null || geomList.size() == 0) {
+		showWarning("Logic Error", "No geometry found on data entry layer");
+	} else if (geomList.size() > 1) {
+		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
+	} else {
+		Geometry geom = geomList.get(0);
+		/*if (geom instanceof Point) {
+			showTabGroup("createPoint");
+		} else if (geom instanceof Line) {
+			showTabGroup("createLine");
+		} else if (geom instanceof Polygon) {
+			showTabGroup("createPolygon");
+		}*/
+		newRSFeature();
+
+	}
+}
+
+getCreatedGeometry() {
+	return getGeometryList("control/map/map", DATA_ENTRY_LAYER_ID);
+}
+
+clearCreatedGeometry() {
+	onClearMap();
+}
+
+onEvent("control/gps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("control/gps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("control/gps/stopTrackLog", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
+
+/*** MISC ***/
+
+addToPictureGallery(ref, picture, pictures) {
+	pictures.add(picture);
+    selectedPictures = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedPictures = new ArrayList();
+    	selectedPictures.add(picture);
+    } else {
+    	selectedPictures = getFieldValue(ref);
+    	selectedPictures.add(picture);
+    }
+    populateCameraPictureGallery(ref, pictures);
+    setFieldValue(ref, selectedPictures);
+}
+
+addToVideoGallery(ref, video, videos) {
+	videos.add(video);
+    selectedVideos = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedVideos = new ArrayList();
+    	selectedVideos.add(video);
+    } else {
+    	selectedVideos = getFieldValue(ref);
+    	selectedVideos.add(video);
+    }
+    populateVideoGallery(ref, videos);
+    setFieldValue(ref, selectedVideos);
+}
+
+isNull(v) {
+	return v == null || "".equals(v);
+}
+
+AttributeDef(String name, String type, String ref) {
+	return AttributeDef(name, type, ref, true);
+}
+
+AttributeDef(String name, String type, String ref, boolean saveCertainty) {
+	this.name = name;
+	this.type = type;
+	this.ref = ref;
+	this.saveCertainty = saveCertainty;
+	return this;
+}
+
+AttributeDef(String name, String type, String ref, ArrayList loadedFiles, boolean sync) {
+	this.name = name;
+	this.type = type;
+	this.ref = ref;
+	this.loadedFiles = loadedFiles;
+	this.sync = sync;
+	return this;
+}
+
+AttributeDef(String name, String type, String ref1, String ref2) {
+	this.name = name;
+	this.type = type;
+	this.ref1 = ref1;
+	this.ref2 = ref2;
+	return this;
+}
+
+hasFile(files, filename) {
+	for (String f : files) {
+		if (f.equals(filename)) return true;
+	}
+	return false;
+}
+
+Dialog d = null;
+
+showBusyDialog() {
+	if (d == null) {
+		d = showBusy("Message", "Please wait while attachments are copied.");
+	}
+}
+
+closeBusyDialog() {
+	if (d != null) {
+		d.dismiss();
+		d = null;
+	}
+}
+
+OnFilesAttached() {
+	checkFilesAttached();
+}
+
+saveFiles(loadedFiles, files, type, attributes, sync) {
+	if (isNull(files)) {
+		files = new ArrayList();
+	}
+	if (files.size() == 1 && "None".equals(files.get(0))) return;
+
+	// delete attributes that are not included
+	for (String file : loadedFiles) {
+		if (!hasFile(files, file)) {
+			attributes.add(createEntityAttribute(type, stripAttachedFilePath(file), null, null, null, true));
+		}
+	}
+
+	// add new attributes that are included
+	hasAttachment = false;
+	for (String file : files) {
+		String filename = null;
+		if (!hasFile(loadedFiles, file)) {
+			hasAttachment = true;
+			filename = attachFile(file, sync, null, "OnFilesAttached()");
+		} else {
+			for (String f : loadedFiles) {
+				if (f.equals(file)) {
+					filename = f;
+					break;
+				}
+			}
+		}
+		attributes.add(createEntityAttribute(type, stripAttachedFilePath(filename), null, null, null));
+	}
+
+	if (!hasAttachment) {
+		OnFilesAttached();
+	}
+}
+
+
+entitySaved = false;
+entityCallback = null;
+
+checkFilesAttached() {
+	if (entityCallback == null){
+		showToast("Finish saving record.");
+		return;
+	}
+
+	if (entitySaved && !isAttachingFiles()) {
+		closeBusyDialog();
+		showToast("Finish saving record.");
+		execute(entityCallback);
+	}
+}
+
+saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
+	showToast("Saving record. Please wait.");
+
+	showBusyDialog();
+
+	entitySaved = false;
+	entityCallback = callback;
+
+    List attributes = createAttributeList();
+
+    for (Object def : attributeDefs) {
+
+    	// name, text, vocab, measure, certainty
+    	if ("freetext".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("measure".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("vocab".equals(def.type)) {
+    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
+    	} else if ("checkbox".equals(def.type)) {
+    		values = getFieldValue(def.ref);
+
+    		// delete if nothing selected
+			if (values == null || values.isEmpty()) {
+				attributes.add(createEntityAttribute(def.name, null, null, null, null, true));
+			} else {
+				for (Object value : values) {
+					attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), value.getName(), null, getFieldCertainty(def.ref)));
+				}
+			}
+
+    	} else if ("files".equals(def.type)) {
+    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes, def.sync);
+    	} else if ("attachments".equals(def.type)) {
+    		List pairs = getFieldValue(def.ref);
+    		ArrayList files = new ArrayList();
+    		for (NameValuePair pair : pairs) {
+    			files.add(pair.getName());
+    		}
+    		saveFiles(def.loadedFiles, files, def.name, attributes, def.sync);
+    	} else if ("gps".equals(def.type)) {
+    		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
+	    		geoData = new ArrayList();
+	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
+	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
+	    		geoData.add(new Point(p, null, (PointStyle) null, null));
+	    	}
+    	}
+
+    }
+
+    saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
+
+    entitySaved = true;
+    checkFilesAttached();
+
+    return saved_id;
+}
+
+convertListToPairs(list) {
+	ArrayList pairs = new ArrayList();
+	if (list.size() == 1 && "None".equals(list.get(0))) return pairs;
+	for (String s : list) {
+		pairs.add(new NameValuePair(s, "true"));
+	}
+	return pairs;
+}
+
+saveEntitiesToRel(type, entity1, entity2) {
+	rel_id = saveRel(null, type, null, null);
+	addReln(entity1, rel_id, null);
+	addReln(entity2, rel_id, null);
+}
+
+selectGallery(ref, list) {
+	for (String s : list) {
+		setFieldValue(ref, s);
+	}
+}
+
+getNoneList() {
+	list = new ArrayList();
+	list.add("None");
+	return list;
+}
+
+refreshEntities() {
+
+	populateList("control/data/RS_FeatureList", fetchEntityList("RemoteSensingFeature"));
+}
+
+
+onEvent("control/data", "show", "refreshEntities()");
+/*** USER ***/
+
+getDefaultUsersList() {
+	users = fetchAll("select userid, fname ||' ' || lname from user");
+	return users;
+}
+
+
+
+
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+setGPSUpdateInterval(4);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+
+}
+
+syncStarted() {
+}
+
+syncCompleted() {
+}
+
+syncFailed() {
+}
+
+
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+User user;
+
+login(){
+
+   
+	    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+	    
+	    
+	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+
+	    setUser(user);
+	    username = userResult.get(1) + " " + userResult.get(2);
+	    showTabGroup("control");
+	
+}
+
+onEvent("user/usertab/users", "click", "login()");
+
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
+    return a;
+}
+
+makeGallery(String attrib){
+    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabname" );
+    return a;
+}
+
+ArrayList featurePictures = new ArrayList();
+String feature_id = null;
+
+newRSFeature(){
+	feature_id = null;
+
+	
+	
+
+
+	newTabGroup("RS_Feature");
+    setFieldValue("RS_Feature/header11_58/TimeStamp", getCurrentTime());
+
+
+	populateCheckBoxGroup("RS_Feature/header11_58/FeatureSource", makeVocab("FeatureSource"));
+    populateRadioGroup("RS_Feature/header11_58/Feature_Source_Confidence", makeVocab("FeatureSourceConfidence"));
+    populateCheckBoxGroup("RS_Feature/header11_58/Feature_Type", makeVocab("FeatureType"));
+
+    populateRadioGroup("RS_Feature/header11_69/Feature_Accessibility", makeVocab("FeatureAccessibility"));
+    populateRadioGroup("RS_Feature/header11_69/Ground_Control", makeVocab("GroundControl"));
+    populateRadioGroup("RS_Feature/header11_69/GCRepeat", makeVocab("GCRepeat"));
+	populateRadioGroup("RS_Feature/header11_69/RS_Groundtruth_Result", makeVocab("RSGroundtruthResult"));
+
+    populateCheckBoxGroup("RS_Feature/header11_69/Feature_Actual_Cause", makeVocab("FeatureActualCause"));
+    
+    populateCheckBoxGroup("RS_Feature/header11_69/RS_Feature_Period_s_", makeVocab("RSFeaturePeriod"));
+    populateRadioGroup("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));
+
+	
+    populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
+
+
+
+}
+
+takeRSPicture() {
+    openCamera("OnRSPictureTaken()");
+}
+
+OnRSPictureTaken() {
+    pictureFilepath = getLastPictureFilePath();
+    addToPictureGallery("RS_Feature/header11_70/PhotoGallery", pictureFilepath, featurePictures);
+}
+
+onEvent("RS_Feature/header11_70/Photo", "click", "takeRSPicture()");
+
+saveFeature(id) {
+	if (isNull(getFieldValue("RS_Feature/header11_58/FeatureID"))) {
+		showWarning("Logic Error", "Cannot save record without id");
+		return;
+	}
+	feature_id = updateFeature(id);
+}
+
+deleteFeature(){
+	if (!isNull(feature_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Feature!", "reallyDeleteFeature()", "doNotDelete()");
+	}
+}
+
+reallyDeleteFeature(){
+    deleteArchEnt(feature_id);
+    cancelTabGroup("RS_Feature", false);
+}
+
+doNotDelete(){
+    showToast("Delete Cancelled.");
+}
+
+
+
+updateFeature(id) {
+	showBusyDialog();
+	entitySaved = false;
+
+	if (isNull(id)) id = null;
+
+    
+
+    featurePictures = new ArrayList();
+
+	ArrayList loadedPictures = new ArrayList();
+
+
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		for (Object attribute : entity.getAttributes()) {
+			System.out.println(attribute.toString());
+			if ("Photos".equals(attribute.getName())) {
+				loadedPictures.add(getAttachedFilePath(attribute.getText()));
+			}
+		}
+	}
+
+
+
+   	Object[] attributeDefs = new Object[] {
+    	AttributeDef("FeatureID", "freetext", "RS_Feature/header11_58/FeatureID", false),
+    	AttributeDef("Timestamp", "freetext", "RS_Feature/header11_58/TimeStamp", false),
+    	AttributeDef("ShortSummary", "freetext", "RS_Feature/header11_58/Short_summary"),
+
+
+		//Theeban: featureSources checkbox -- check this? is this valid? Gallery and sync seem... ... have lots more code.
+    	AttributeDef("FeatureSource", "checkbox", "RS_Feature/header11_58/FeatureSource"),
+
+    	AttributeDef("FeatureSourceConfidence", "vocab", "RS_Feature/header11_58/Feature_Source_Confidence"),
+    	//featuretype checkbox.
+    	AttributeDef("FeatureType", "checkbox", "RS_Feature/header11_58/Feature_Type"),
+
+
+    	AttributeDef("FeatureAccessibility", "vocab", "RS_Feature/header11_69/Feature_Accessibility"),
+    	AttributeDef("FeatureActualCause", "checkbox", "RS_Feature/header11_69/Feature_Actual_Cause"),
+    	AttributeDef("RSGroundtruthResult", "vocab", "RS_Feature/header11_69/RS_Groundtruth_Result"),
+    	AttributeDef("GroundControl", "vocab", "RS_Feature/header11_69/Ground_Control"),
+    	AttributeDef("RSFeaturePeriod", "checkbox", "RS_Feature/header11_69/RS_Feature_Period_s_"),
+
+
+    	AttributeDef("RSFeatureSiteCode", "freetext", "RS_Feature/header11_69/RS_Feature_Site_Code", false),
+    	AttributeDef("RS_Feature_Notes", "freetext", "RS_Feature/header11_69/RS_Feature_Notes"),
+
+    	AttributeDef("GCRepeat", "vocab", "RS_Feature/header11_69/GCRepeat"),
+    	AttributeDef("BestImageAlgorithm", "vocab", "RS_Feature/header11_69/Best_image_algorithm"),
+		AttributeDef("RSAreaAnalysedNumericVersion", "freetext", "RS_Feature/header11_69/RS_Area_Analysed_Numeric_version"),
+
+		AttributeDef("RSGeologySoilComments", "freetext", "RS_Feature/header11_69/RS_Geology_Soil_Comments"),
+
+    	AttributeDef("Photos", "files", "RS_Feature/header11_70/PhotoGallery", loadedPictures, true)
+
+
+
+    	};
+
+
+
+
+    //saveFiles(loadedPictures, getFieldValue("RS_Feature/header11_70/PhotoGallery"), "picture", attributeDefs);
+
+
+    saved_id = saveEntity(id, "RemoteSensingFeature", attributeDefs, null, null);
+
+
+	entitySaved = true;
+
+    return saved_id;
+
+	
+}
+
+onEvent("RS_Feature/header11_70/Update", "click", "saveFeature(feature_id)");
+onEvent("RS_Feature/header11_70/Delete", "click", "deleteFeature()");

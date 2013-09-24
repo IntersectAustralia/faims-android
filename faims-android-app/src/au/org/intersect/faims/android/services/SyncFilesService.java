@@ -18,7 +18,9 @@ import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
+import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.ProjectUtil;
 
 import com.google.inject.Inject;
 
@@ -54,7 +56,12 @@ public class SyncFilesService extends IntentService {
 		// 1. upload server directory
 		// 2. upload app directory
 		// 3. download app directory
-		
+		Bundle extras = intent.getExtras();
+		Project project = (Project) extras.get("project");
+		String dumpTimeStamp = DateUtil.getCurrentTimestampGMT();
+		project.fileSyncTimeStamp = dumpTimeStamp;
+		FLog.d("set fileSyncTimeStamp");
+		ProjectUtil.saveProject(project);
 		Result uploadServerResult = uploadServerDirectory(intent);
 		if (uploadServerResult.resultCode != FAIMSClientResultCode.SUCCESS) {
 			sendMessage(intent, uploadServerResult);

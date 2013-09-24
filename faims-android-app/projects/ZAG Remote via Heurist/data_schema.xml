@@ -1,0 +1,147 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="http://xsd.localdomain/lib/assets/data_schema.xsl"?>
+<dataSchema name="hdb_ZAG_RemoteSensing" preparer="Brian Ballsun.Stanton" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.localdomain/lib/assets/data_schema.xsd">
+  <ArchaeologicalElement name="RemoteSensingFeature">
+    <description>A remote sensed feature</description>
+    <property type="float" name="FeatureID" isIdentifier="true">
+      <description>The human entered feature ID.</description>
+    </property>
+    <property type="date" name="TimeStamp">
+      <description>A completely redundant timestamp.</description>
+    </property>
+    <property type="blocktext" name="ShortSummary">
+      <description>Short summary or description of the object/entity</description>
+    </property>
+    <property type="enum" name="FeatureSource">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>Ground Control<description>Ground Control</description></term>
+        <term>Informant<description>Informant</description></term>
+        <term>Other<description>Other</description></term>
+        <term>RS Analysis (apriori)<description>RS Analysis (apriori)</description></term>
+        <term>Satellite Image<description>Satellite Image</description></term>
+        <term>Survey<description>Survey</description></term>
+        <term>Topo Map<description>Topo Map</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="FeatureSourceConfidence">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>1. High<description>1. High</description></term>
+        <term>2. Medium<description>2. Medium</description></term>
+        <term>3. Low<description>3. Low</description></term>
+        <term>NA<description>NA</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="FeatureType">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>1. Visible on surface<description>1. Visible on surface</description></term>
+        <term>2. Positive cropmark<description>2. Positive cropmark</description></term>
+        <term>3. Negative cropmark<description>3. Negative cropmark</description></term>
+        <term>4. Distinct soilmark<description>4. Distinct soilmark</description></term>
+        <term>5. Shadowmark<description>5. Shadowmark</description></term>
+        <term>8. Unknown<description>8. Unknown</description></term>
+        <term>9. Other<description>9. Other</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="FeatureAccessibility">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>Accessible<description>Accessible</description></term>
+        <term>Not accessible<description>Not accessible</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="FeatureActualCause">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>01. Surface scatter<description>01. Surface scatter</description></term>
+        <term>02. Mound<description>02. Mound</description></term>
+        <term>03. Latent masonry or earthworks<description>03. Latent masonry or earthworks</description></term>
+        <term>04. Latent cut or ditch<description>04. Latent cut or ditch</description></term>
+        <term>05. Surface earthworks or masonry<description>05. Surface earthworks or masonry</description></term>
+        <term>06. Soil chemistry phenomenon<description>06. Soil chemistry phenomenon</description></term>
+        <term>07. Geological phenomenon<description>07. Geological phenomenon</description></term>
+        <term>08. Protruding bedrock<description>08. Protruding bedrock</description></term>
+        <term>09. Natural phenomenon<description>09. Natural phenomenon</description></term>
+        <term>10. Defunct feature<description>10. Defunct feature</description></term>
+        <term>11. Robber''s trench or featurre<description>11. Robber''s trench or featurre</description></term>
+        <term>12. Modern feature<description>12. Modern feature</description></term>
+        <term>98. Unknown<description>98. Unknown</description></term>
+        <term>99. Other<description>99. Other</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="RSGroundtruthResult">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>Classification error (site present, misclassified)<description>Classification error (site present, misclassified)</description></term>
+        <term>False Negative (site present, not detected)<description>False Negative (site present, not detected)</description></term>
+        <term>False Positive (no struc, no surf. mtrl)<description>False Positive (no struc, no surf. mtrl)</description></term>
+        <term>GC Failure<description>GC Failure</description></term>
+        <term>Indeterminate<description>Indeterminate</description></term>
+        <term>True negative (site not present, nor predicted)<description>True negative (site not present, nor predicted)</description></term>
+        <term>True Positive (site present where expected)<description>True Positive (site present where expected)</description></term>
+      </lookup>
+    </property>
+    <property type="file" name="Photos">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="enum" name="GroundControl">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>Attempted and failed<description>Attempted and failed</description></term>
+        <term>Completed<description>Completed</description></term>
+        <term>Not yet attempted<description>Not yet attempted</description></term>
+      </lookup>
+    </property>
+    <property type="enum" name="GCRepeat">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>No<description>No:Negative response</description></term>
+        <term>Yes<description>Yes:Affirmative response</description></term>
+      </lookup>
+    </property>
+    <property type="float" name="RSFeatureSiteCode">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="enum" name="RSFeaturePeriod">
+      <description>What period does this feature exihibit?</description>
+      <lookup>
+        <term>1. Prehistoric<description>1. Prehistoric</description></term>
+        <term>2. Historic (Ancient)<description>2. Historic (Ancient)</description></term>
+        <term>3. Pre-modern<description>3. Pre-modern</description></term>
+        <term>4. Ottoman<description>4. Ottoman</description></term>
+        <term>5. Modern<description>5. Modern</description></term>
+        <term>9. Unknown<description>9. Unknown</description></term>
+      </lookup>
+    </property>
+    <property type="blocktext" name="RSFeatureNotes">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="enum" name="BestImageAlgorithm">
+      <description>Please document the nature of this detail type (field)) ...</description>
+      <lookup>
+        <term>4-1-2<description>4-1-2</description></term>
+        <term>4-1-4<description>4-1-4</description></term>
+        <term>8-1-1<description>8-1-1</description></term>
+        <term>Index 1<description>Index 1</description></term>
+        <term>Index 2<description>Index 2</description></term>
+        <term>Index 3<description>Index 3</description></term>
+        <term>Index 4<description>Index 4</description></term>
+        <term>NDVI<description>NDVI</description></term>
+        <term>Panchromatic<description>Panchromatic</description></term>
+        <term>Tassel<description>Tassel</description></term>
+        <term>True colour<description>True colour</description></term>
+      </lookup>
+    </property>
+    <property type="float" name="RSAreaAnalysedNumericVersion">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="float" name="RSAreaAnalysedCode">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="blocktext" name="RSGeologySoilComments">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>
