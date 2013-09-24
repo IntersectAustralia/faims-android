@@ -130,6 +130,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			destroyInternalGPSListener();
 			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, this);
 			setInternalGPSStarted(true);
+			activityRef.get().invalidateOptionsMenu();
 		}catch(Exception e){
 			FLog.e("Starting internal gps exception : " + e);
 		}
@@ -144,6 +145,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval() * 1000);
 			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval() * 1000);
 			setExternalGPSStarted(true);
+			activityRef.get().invalidateOptionsMenu();
 		}catch (Exception e){
 			FLog.e("Starting external gps exception", e);
 		}
@@ -154,6 +156,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.locationManager != null){
 				this.locationManager.removeUpdates(this);
 			}
+			setInternalGPSStarted(false);
+			activityRef.get().invalidateOptionsMenu();
 		}catch(Exception e){
 			FLog.e("Stopping internal gps exception : " + e);
 		}
@@ -168,6 +172,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.handlerThread != null){
 				handlerThread.quit();
 			}
+			setExternalGPSStarted(false);
+			activityRef.get().invalidateOptionsMenu();
 		}catch (Exception e) {
 			FLog.e("Stopping external gps exception", e);
 		}
