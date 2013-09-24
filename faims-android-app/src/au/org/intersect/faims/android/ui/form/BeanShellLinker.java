@@ -236,6 +236,8 @@ public class BeanShellLinker {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
+			this.activity.getGPSDataManager().setTrackingStarted(true);
+			this.activity.invalidateOptionsMenu();
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -246,16 +248,8 @@ public class BeanShellLinker {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							if(!activity.getGPSDataManager().isTrackingStarted()){
-								activity.getGPSDataManager().setTrackingStarted(true);
-								activity.invalidateOptionsMenu();
-							}
 							execute(callback);
 						} else {
-							if(activity.getGPSDataManager().isTrackingStarted()){
-								activity.getGPSDataManager().setTrackingStarted(false);
-								activity.invalidateOptionsMenu();
-							}
 							showToast("No GPS signal");
 						}
 					}
@@ -284,15 +278,7 @@ public class BeanShellLinker {
 								prevLong = longitude;
 								prevLat = latitude;
 							}
-							if(!activity.getGPSDataManager().isTrackingStarted()){
-								activity.getGPSDataManager().setTrackingStarted(true);
-								activity.invalidateOptionsMenu();
-							}
 						} else {
-							if(activity.getGPSDataManager().isTrackingStarted()){
-								activity.getGPSDataManager().setTrackingStarted(false);
-								activity.invalidateOptionsMenu();
-							}
 							showToast("No GPS signal");
 						}
 					}

@@ -737,10 +737,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
 		// gps status
-		menu.findItem(R.id.action_gps_active).setVisible(false);
 		menu.findItem(R.id.action_gps_inactive).setVisible(false);
+		menu.findItem(R.id.action_gps_active_has_signal).setVisible(false);
+		menu.findItem(R.id.action_gps_active_no_signal).setVisible(false);
 		if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
-			menu.findItem(R.id.action_gps_active).setVisible(true);
+			if(gpsDataManager.isHasValidExternalGPSSignal() || gpsDataManager.isHasValidInternalGPSSignal()){
+				menu.findItem(R.id.action_gps_active_has_signal).setVisible(true);
+			}else{
+				menu.findItem(R.id.action_gps_active_no_signal).setVisible(true);
+			}
 		}else{
 			menu.findItem(R.id.action_gps_inactive).setVisible(true);
 		}

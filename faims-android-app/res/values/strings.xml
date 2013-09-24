@@ -87,8 +87,10 @@
     <string name="server_ip_settings_title">FAIMS Server Host</string>
     <string name="server_port_settings_title">FAIMS Server Port</string>
     
-    <string name="gps_active">GPS active</string>
     <string name="gps_inactive">GPS disabled</string>
+    <string name="action_gps_active_has_signal">GPS active has signal</string>
+    <string name="action_gps_active_no_signal">GPS active no signal</string>
+    
     
     <string name="tracker_active">Track log active</string>
     <string name="tracker_inactive">Track log disabled</string>
