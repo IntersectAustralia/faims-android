@@ -45,9 +45,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private int gpsUpdateInterval = 10;
 	
 	private boolean isExternalGPSStarted;
-
 	private boolean isInternalGPSStarted;
 
+	private boolean hasValidExternalGPSSignal;
+	private boolean hasValidInternalGPSSignal;
+	
 	private String trackingType;
 	
 	private int trackingValue;
@@ -66,21 +68,42 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setGGAMessage(GGAMessage);
 		setBODMessage(BODMessage);
 		setExternalGPSTimestamp(System.currentTimeMillis());
-		if(GGAMessage == null){
-			setExternalGPSStarted(false);
+		if(!hasValidExternalGPSSignal){
+			if(hasValidGGAMessage()){
+				setHasValidExternalGPSSignal(true);
+				activityRef.get().invalidateOptionsMenu();
+			}
 		}else{
-			setExternalGPSStarted(true);
+			if(!hasValidGGAMessage()){
+				setHasValidExternalGPSSignal(false);
+				activityRef.get().invalidateOptionsMenu();
+			}
 		}
-		activityRef.get().invalidateOptionsMenu();
 	}
 
-	@Override
+    private boolean hasValidGGAMessage(){
+    	GGASentence sentence = null;
+        try{
+	        if (this.GGAMessage != null) {
+	            sentence = (GGASentence) SentenceFactory.getInstance()
+	                    .createParser(this.GGAMessage);
+	        }
+        	return this.GGAMessage != null && sentence != null && sentence.getPosition() != null;
+        } catch (Exception e){
+        	FLog.e("wrong gga format sentence", e);
+        	return false;
+        }
+    }
+
+    @Override
 	public void onLocationChanged(Location location) {
 		setAccuracy(location.getAccuracy());
 		setLocation(location);
 		setInternalGPSTimestamp(System.currentTimeMillis());
-		setInternalGPSStarted(true);
-		activityRef.get().invalidateOptionsMenu();
+		if(!hasValidInternalGPSSignal){
+			setHasValidInternalGPSSignal(true);
+			activityRef.get().invalidateOptionsMenu();
+		}
 	}
 
 	@Override
@@ -88,8 +111,10 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setAccuracy(0.0f);
 		setLocation(null);
 		setInternalGPSTimestamp(System.currentTimeMillis());
-		setInternalGPSStarted(false);
-		activityRef.get().invalidateOptionsMenu();
+		if(hasValidInternalGPSSignal){
+			setHasValidInternalGPSSignal(false);
+			activityRef.get().invalidateOptionsMenu();
+		}
 	}
 
 	@Override
@@ -104,7 +129,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		try{
 			destroyInternalGPSListener();
 			this.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, this);
-			setInternalGPSStarted(false);
+			setInternalGPSStarted(true);
+			activityRef.get().invalidateOptionsMenu();
 		}catch(Exception e){
 			FLog.e("Starting internal gps exception : " + e);
 		}
@@ -118,7 +144,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			this.handler = new Handler(this.handlerThread.getLooper());
 			this.externalGPSTasks = new ExternalGPSTasks(this.gpsDevice,this.handler, this, getGpsUpdateInterval() * 1000);
 			this.handler.postDelayed(externalGPSTasks, getGpsUpdateInterval() * 1000);
-			setExternalGPSStarted(false);
+			setExternalGPSStarted(true);
+			activityRef.get().invalidateOptionsMenu();
 		}catch (Exception e){
 			FLog.e("Starting external gps exception", e);
 		}
@@ -129,6 +156,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.locationManager != null){
 				this.locationManager.removeUpdates(this);
 			}
+			setInternalGPSStarted(false);
+			activityRef.get().invalidateOptionsMenu();
 		}catch(Exception e){
 			FLog.e("Stopping internal gps exception : " + e);
 		}
@@ -143,6 +172,8 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.handlerThread != null){
 				handlerThread.quit();
 			}
+			setExternalGPSStarted(false);
+			activityRef.get().invalidateOptionsMenu();
 		}catch (Exception e) {
 			FLog.e("Stopping external gps exception", e);
 		}
@@ -295,6 +326,22 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 
 	public void setLocationManager(LocationManager locationManager) {
 		this.locationManager = locationManager;
+	}
+
+	public boolean isHasValidExternalGPSSignal() {
+		return hasValidExternalGPSSignal;
+	}
+
+	public void setHasValidExternalGPSSignal(boolean hasValidExternalGPSSignal) {
+		this.hasValidExternalGPSSignal = hasValidExternalGPSSignal;
+	}
+
+	public boolean isHasValidInternalGPSSignal() {
+		return hasValidInternalGPSSignal;
+	}
+
+	public void setHasValidInternalGPSSignal(boolean hasValidInternalGPSSignal) {
+		this.hasValidInternalGPSSignal = hasValidInternalGPSSignal;
 	}
 
 	public int getGpsUpdateInterval() {

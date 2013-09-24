@@ -79,10 +79,11 @@
       </lookup>
     </property>
     <property type="dropdown" name="picture">
+      <description>This is a picture gallery</description>
       <bundle>DOI</bundle>
       <lookup>
-        <term pictureURL="files/data/pictures/cugl69808.jpg">cugl69808.jpg</term>
-        <term pictureURL="files/data/pictures/cugl69807a.jpg">cugl69807a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl69808.jpg">cugl69808.jpg<description>This is the first picture</description></term>
+        <term pictureURL="files/data/pictures/cugl69807a.jpg">cugl69807a.jpg<description>This is the second picture</description></term>
         <term pictureURL="files/data/pictures/cugl67286.jpg">cugl67286.jpg</term>
         <term pictureURL="files/data/pictures/cugl66291-7579a.jpg">cugl66291-7579a.jpg</term>
         <term pictureURL="files/data/pictures/cugl39501_1.jpg">cugl39501_1.jpg</term>

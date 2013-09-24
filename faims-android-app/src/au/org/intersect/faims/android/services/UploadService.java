@@ -15,6 +15,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
+import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
 
@@ -55,7 +56,7 @@ public abstract class UploadService extends IntentService {
 			}
 		}
 		if (tempFile != null) {
-			tempFile.delete();
+			FileUtil.delete(tempFile);
 		}
 		FLog.d("stopping upload service");
 	}

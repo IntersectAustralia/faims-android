@@ -69,13 +69,13 @@ public class SyncDatabaseService extends IntentService {
 			}
 		}
 		if (tempProject != null) {
-			tempProject.delete();
+			FileUtil.delete(tempProject);
 		}
 		if (tempDB != null) {
-			tempDB.delete();
+			FileUtil.delete(tempDB);
 		}
 		if (tempDir != null) {
-			FileUtil.deleteDirectory(tempDir);
+			FileUtil.delete(tempDir);
 		}
 		databaseManager.interrupt();
 		FLog.d("stopping service");
@@ -178,11 +178,11 @@ public class SyncDatabaseService extends IntentService {
 			return Result.FAILURE;
 		} finally {
 			if (tempDB != null) {
-				tempDB.delete();
+				FileUtil.delete(tempDB);
 			}
 			
 			if (tempProject != null) {
-				tempProject.delete();
+				FileUtil.delete(tempProject);
 			}
 			
 			// TODO check if this is necessary as file util also closes the stream
@@ -265,7 +265,7 @@ public class SyncDatabaseService extends IntentService {
 			return Result.FAILURE;
 		} finally {
 			if (tempDir != null) {
-				FileUtil.deleteDirectory(tempDir);
+				FileUtil.delete(tempDir);
 			}
 		}
 	}
