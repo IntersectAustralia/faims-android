@@ -981,23 +981,40 @@ public class BeanShellLinker {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
-				if (valueObj instanceof Number) {
-					valueObj = valueObj.toString();
-				}
+				if (obj instanceof CustomCheckBoxGroup) {
+					if (valueObj instanceof List<?>) {
+						List<?> values = null;
+						values = convertToNameValuePairs((List<?>) valueObj);
+						customView.setValues(values);
+					} else {
+						FLog.w("cannot set field value " + ref + " = "
+								+ valueObj);
+						showWarning("Logic Error", "Cannot set field value "
+								+ ref + " = " + valueObj);
+					}
 				
-				if (valueObj instanceof String) {
-					String value = (String) valueObj;
+				} else if (obj instanceof PictureGallery) {
+					PictureGallery gallery = (PictureGallery) obj;
+					if (gallery.isMulti()) {
+						if (valueObj instanceof List<?>) {
+							List<?> values = null;
+							values = convertToNameValuePairs((List<?>) valueObj);
+							customView.setValues(values);
+						} else {
+							FLog.w("cannot set field value " + ref + " = "
+									+ valueObj);
+							showWarning("Logic Error", "Cannot set field value "
+									+ ref + " = " + valueObj);
+						}
+					} else {
+						String value = valueObj == null ? null : String.valueOf(valueObj);
+						value = activity.getArch16n().substituteValue(value);
+						customView.setValue((String) value);
+					}
+				} else {
+					String value = valueObj == null ? null : String.valueOf(valueObj);
 					value = activity.getArch16n().substituteValue(value);
 					customView.setValue((String) value);
-				} else if (valueObj instanceof List<?>) {
-					List<?> values = null;
-					values = convertToNameValuePairs((List<?>) valueObj);
-					customView.setValues(values);
-				} else {
-					FLog.w("cannot set field value " + ref + " = "
-							+ valueObj);
-					showWarning("Logic Error", "Cannot set field value "
-							+ ref + " = " + valueObj);
 				}
 			} else {
 				FLog.w("cannot set field value to view with ref " + ref);
@@ -1015,21 +1032,10 @@ public class BeanShellLinker {
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
-				
-				if (valueObj instanceof Number) {
-					valueObj = valueObj.toString();
-				}
 
-				if (valueObj instanceof String) {
-					float value = Float.valueOf((String) valueObj);
-					
-					customView.setCertainty(value);				
-				} else {
-					FLog.w("cannot set field certainty " + ref + " = "
-							+ valueObj);
-					showWarning("Logic Error", "Cannot set field certainty "
-							+ ref + " = " + valueObj);
-				}
+				float value = Float.valueOf(String.valueOf(valueObj));
+				
+				customView.setCertainty(value);				
 			} else {
 				FLog.w("cannot set field certainty to view with ref " + ref);
 				showWarning("Logic Error", "Cannot find view with ref " + ref);
@@ -1047,16 +1053,9 @@ public class BeanShellLinker {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
-				if (valueObj instanceof String) {
-					String value = (String) valueObj;
-					
-					customView.setAnnotation(value);				
-				} else {
-					FLog.w("cannot set field annotation " + ref + " = "
-							+ valueObj);
-					showWarning("Logic Error", "Cannot set field annotation "
-							+ ref + " = " + valueObj);
-				}
+				String value = valueObj == null ? null : String.valueOf(valueObj);
+				
+				customView.setAnnotation(value);	
 			} else {
 				FLog.w("cannot set field annotation to view with ref " + ref);
 				showWarning("Logic Error", "Cannot find view with ref " + ref);
@@ -1102,9 +1101,9 @@ public class BeanShellLinker {
 					return customView.getValues();
 				} else if (customView instanceof PictureGallery) {
 					if (((PictureGallery) customView).isMulti()) {
-						return customView.getValue();
-					} else {
 						return customView.getValues();
+					} else {
+						return customView.getValue();
 					}
 				} else {
 					return customView.getValue();
