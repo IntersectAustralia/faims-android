@@ -55,14 +55,33 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 	
 	@Override
 	public String getValue() {
-		// TODO Auto-generated method stub
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+
+			if (view instanceof CustomCheckBox) {
+				CustomCheckBox cb = (CustomCheckBox) view;
+				if (cb.isChecked()) {
+					return cb.getValue();
+				}
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public void setValue(String value) {
-		// TODO Auto-generated method stub
-		
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+			if (view instanceof CustomCheckBox) {
+				CustomCheckBox cb = (CustomCheckBox) view;
+				if (cb.getValue()
+						.toString()
+						.equalsIgnoreCase(value)) {
+					cb.setChecked(true);
+					break;
+				}
+			}
+		}
 	}
 
 	@Override

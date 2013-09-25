@@ -15,12 +15,17 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
+import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
 
 public class VideoGallery extends PictureGallery {
 
 	public VideoGallery(Context context) {
 		super(context);
+	}
+	
+	public VideoGallery(Context context, String ref, FormAttribute attribute) {
+		super(context, ref, attribute, true);
 	}
 	
 	@Override

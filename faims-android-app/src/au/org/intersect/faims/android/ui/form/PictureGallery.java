@@ -38,7 +38,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		super(context);
 	}
 
-	public PictureGallery(Context context, String ref, FormAttribute attribute, String projectDir, boolean isMulti) {
+	public PictureGallery(Context context, String ref, FormAttribute attribute, boolean isMulti) {
 		super(context);
 		this.attributeName = attribute.name;
 		this.attributeType = attribute.type;
@@ -49,6 +49,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);
+		
+		reset();
 	}
 
 	@Override
@@ -204,6 +206,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		updateImages();
 	}
 	
+	@Override
 	public String getValue() {
 		if(selectedImages != null && !selectedImages.isEmpty()){
 			return getSelectedImages().get(0)
@@ -212,8 +215,12 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		return null;
 	}
 
+	@Override
 	public void setValue(String value) {
-		removeSelectedImages();
+		if (!isMulti) {
+			removeSelectedImages();
+		}
+		
 		for (CustomImageView image : galleryImages) {
 			if (image.getPicture().getId().equals(value)) {
 				addSelectedImage(image);
@@ -221,6 +228,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		}
 	}
 	
+	@Override
 	public List<?> getValues() {
 		if (selectedImages != null && !selectedImages.isEmpty()) {
 			List<NameValuePair> selectedPictures = new ArrayList<NameValuePair>();
@@ -233,6 +241,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public void setValues(List<?> values) {
 		List<NameValuePair> pairs = (List<NameValuePair>) values;
 		for (NameValuePair pair : pairs) {

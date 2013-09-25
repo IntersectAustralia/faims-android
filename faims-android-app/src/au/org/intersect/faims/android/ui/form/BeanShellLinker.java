@@ -977,7 +977,7 @@ public class BeanShellLinker {
 	public void setFieldValue(String ref, Object valueObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			
+			FLog.d("" + obj);
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
@@ -987,25 +987,15 @@ public class BeanShellLinker {
 						values = convertToNameValuePairs((List<?>) valueObj);
 						customView.setValues(values);
 					} else {
-						FLog.w("cannot set field value " + ref + " = "
-								+ valueObj);
-						showWarning("Logic Error", "Cannot set field value "
-								+ ref + " = " + valueObj);
+						String value = valueObj == null ? null : String.valueOf(valueObj);
+						value = activity.getArch16n().substituteValue(value);
+						customView.setValue((String) value);
 					}
-				
 				} else if (obj instanceof PictureGallery) {
-					PictureGallery gallery = (PictureGallery) obj;
-					if (gallery.isMulti()) {
-						if (valueObj instanceof List<?>) {
-							List<?> values = null;
-							values = convertToNameValuePairs((List<?>) valueObj);
-							customView.setValues(values);
-						} else {
-							FLog.w("cannot set field value " + ref + " = "
-									+ valueObj);
-							showWarning("Logic Error", "Cannot set field value "
-									+ ref + " = " + valueObj);
-						}
+					if (valueObj instanceof List<?>) {
+						List<?> values = null;
+						values = convertToNameValuePairs((List<?>) valueObj);
+						customView.setValues(values);
 					} else {
 						String value = valueObj == null ? null : String.valueOf(valueObj);
 						value = activity.getArch16n().substituteValue(value);
@@ -1033,7 +1023,7 @@ public class BeanShellLinker {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 
-				float value = Float.valueOf(String.valueOf(valueObj));
+				float value = valueObj == null ? 0 : Float.valueOf(String.valueOf(valueObj));
 				
 				customView.setCertainty(value);				
 			} else {
@@ -1126,7 +1116,7 @@ public class BeanShellLinker {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
-				return customView.getCertainty();
+				return String.valueOf(customView.getCertainty());
 			} else {
 				FLog.w("cannot get field certainty from view with ref " + ref);
 				showWarning("Logic Error", "Cannot find view with ref " + ref);
@@ -1329,7 +1319,7 @@ public class BeanShellLinker {
 						ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
 						for (List<String> pictureList : arrayList) {
 							Picture picture = new Picture(pictureList.get(0),
-									activity.getArch16n().substituteValue(pictureList.get(1)), pictureList.get(2));
+									activity.getArch16n().substituteValue(pictureList.get(1)), activity.getProjectDir() + "/" + pictureList.get(2));
 							pictures.add(picture);
 						}
 					} catch (Exception e) {

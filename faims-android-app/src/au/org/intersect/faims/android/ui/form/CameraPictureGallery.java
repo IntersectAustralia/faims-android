@@ -23,8 +23,8 @@ public class CameraPictureGallery extends PictureGallery {
 		super(context);
 	}
 	
-	public CameraPictureGallery(Context context, String ref, FormAttribute attribute, String projectDir, boolean isMulti) {
-		super(context, ref, attribute, projectDir, isMulti);
+	public CameraPictureGallery(Context context, String ref, FormAttribute attribute) {
+		super(context, ref, attribute, true);
 	}
 	
 	protected void setGalleryImage(CustomImageView gallery, String path) {

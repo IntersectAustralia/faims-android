@@ -136,7 +136,7 @@ public class Tab implements Parcelable{
 		return dirtyButtonMap.get(ref);
 	}
 
-	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
+	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	Button dirtyButton = null;
@@ -236,7 +236,7 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE:
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = createPictureGallery(attribute, directory, ref);
+                            view = createPictureGallery(attribute, ref);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }
                         // Radio Button
@@ -261,7 +261,7 @@ public class Tab implements Parcelable{
                 switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = createMultiSelectPictureGallery(attribute, directory, ref);
+                            view = createMultiSelectPictureGallery(attribute, ref);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }else{
 	                    	view = createCheckListGroup(attribute, ref);
@@ -818,16 +818,16 @@ public class Tab implements Parcelable{
 	 * @param attributeType 
 	 * @param attributeName 
      */
-    private PictureGallery createPictureGallery(final FormAttribute attribute, String directory, String ref) {
-    	return createImageSlider(attribute, directory, ref, false);
+    private PictureGallery createPictureGallery(final FormAttribute attribute, String ref) {
+    	return createImageSlider(attribute, ref, false);
     }
 
-    private View createMultiSelectPictureGallery(FormAttribute attribute, String directory, String ref) {
-    	return createImageSlider(attribute, directory, ref, true);
+    private View createMultiSelectPictureGallery(FormAttribute attribute, String ref) {
+    	return createImageSlider(attribute, ref, true);
 	}
 
-    private PictureGallery createImageSlider(final FormAttribute attribute, String directory, String ref, final boolean isMulti) {
-		final PictureGallery gallery = new PictureGallery(this.activityRef.get(), ref, attribute, directory, isMulti);
+    private PictureGallery createImageSlider(final FormAttribute attribute, String ref, final boolean isMulti) {
+		final PictureGallery gallery = new PictureGallery(this.activityRef.get(), ref, attribute,isMulti);
         return gallery;
 	}
 

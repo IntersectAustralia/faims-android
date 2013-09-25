@@ -90,7 +90,7 @@ public class UIRenderer implements IRestoreActionListener{
      * Render the tabs and questions inside the tabs
      * 
      */
-    public void createUI(String directory) {
+    public void createUI() {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
@@ -117,7 +117,7 @@ public class UIRenderer implements IRestoreActionListener{
 	    		if("style".equals(tabGroupName)){
 	    			parseStyle(tabGroupElement,groupIndex);
 	    		}else{
-	    			parseTabGroups(directory, groupIndex, tabGroupElement, tabGroupCaption, tabGroupName);
+	    			parseTabGroups(groupIndex, tabGroupElement, tabGroupCaption, tabGroupName);
 	    		}
 	    	
 	    	groupIndex = this.fem.getModel().incrementIndex(groupIndex, false);
@@ -126,7 +126,7 @@ public class UIRenderer implements IRestoreActionListener{
     	
     }
 
-	private void parseTabGroups(String directory, FormIndex groupIndex, GroupDef tabGroupElement, FormEntryCaption tabGroupCaption, String tabGroupName) {
+	private void parseTabGroups(FormIndex groupIndex, GroupDef tabGroupElement, FormEntryCaption tabGroupCaption, String tabGroupName) {
 		IFormElement element;
 		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
 		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
@@ -148,14 +148,14 @@ public class UIRenderer implements IRestoreActionListener{
 			element = this.fem.getModel().getForm().getChild(tabIndex);
 
 			if (element instanceof GroupDef) {
-				parseTab(directory, tabGroupName, element, tabGroup, tabIndex);
+				parseTab(tabGroupName, element, tabGroup, tabIndex);
 			}
 
 			tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
 		}
 	}
 
-	private void parseTab(String directory, String tabGroupName, IFormElement element, TabGroup tabGroup, FormIndex tabIndex) {
+	private void parseTab(String tabGroupName, IFormElement element, TabGroup tabGroup, FormIndex tabIndex) {
 		GroupDef tabElement = (GroupDef) element;
 		FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
 
@@ -172,15 +172,15 @@ public class UIRenderer implements IRestoreActionListener{
 			element = this.fem.getModel().getForm().getChild(containerIndex);
 
 			if (element instanceof GroupDef) {
-				parseContainer(null, directory, tabGroupName, tabName, element,tabGroup, containerIndex, tab, 1);
+				parseContainer(null, tabGroupName, tabName, element,tabGroup, containerIndex, tab, 1);
 			} else {
-				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, containerIndex, null);
+				parseInput(tabGroupName, tabName, element, tabGroup,tab, containerIndex, null);
 			}
 			containerIndex = this.fem.getModel().incrementIndex(containerIndex, false);
 		}
 	}
 
-	private void parseContainer(LinearLayout containerLayout, String directory, String tabGroupName, String tabName, IFormElement element,
+	private void parseContainer(LinearLayout containerLayout, String tabGroupName, String tabName, IFormElement element,
 			TabGroup tabGroup, FormIndex childIndex, Tab tab, int depth) {
 		if (depth > 5) {
 
@@ -205,9 +205,9 @@ public class UIRenderer implements IRestoreActionListener{
 		for (int i = 0; i < childContainerElement.getChildren().size(); i++) {
 			element = this.fem.getModel().getForm().getChild(inputIndex);
 			if (element instanceof GroupDef) {
-				parseContainer(childContainerLayout, directory, tabGroupName,tabName, element, tabGroup, inputIndex, tab, ++depth);
+				parseContainer(childContainerLayout, tabGroupName,tabName, element, tabGroup, inputIndex, tab, ++depth);
 			} else {
-				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, inputIndex, childContainerLayout);
+				parseInput(tabGroupName, tabName, element, tabGroup,tab, inputIndex, childContainerLayout);
 			}
 			inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
 		}
@@ -224,13 +224,13 @@ public class UIRenderer implements IRestoreActionListener{
 		return styleMappings;
 	}
 
-	private void parseInput(String directory, String tabGroupName, String tabName, IFormElement element, TabGroup tabGroup, Tab tab,
+	private void parseInput(String tabGroupName, String tabName, IFormElement element, TabGroup tabGroup, Tab tab,
 			FormIndex childIndex, LinearLayout containerLayout) {
 		QuestionDef questionElement = (QuestionDef) element;
 		String style = questionElement.getAdditionalAttribute(null,"faims_style");
 		FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(childIndex);
 		String viewName = input.getIndex().getReference().getNameLast();
-		View view = tab.addInput(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName, directory,
+		View view = tab.addInput(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName,
 				tabGroup.isArchEnt(), tabGroup.isRelationship(),getStyleMappings(style));
 
 		viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
