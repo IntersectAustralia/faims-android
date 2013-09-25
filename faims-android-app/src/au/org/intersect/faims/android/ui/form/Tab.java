@@ -236,7 +236,7 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE:
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = createPictureGallery(attribute, ref);
+                            view = createPictureGallery(attribute, ref, false);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }
                         // Radio Button
@@ -261,9 +261,18 @@ public class Tab implements Parcelable{
                 switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = createMultiSelectPictureGallery(attribute, ref);
+                            view = createPictureGallery(attribute, ref, true);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
-                        }else{
+                    	} else if ("camera".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createCameraPictureGallery(attribute, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
+                    	} else if ("video".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createVideoGallery(attribute, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
+                    	} else if ("audio".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createAudioListGroup(attribute, ref);
+                    		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
+                        } else {
 	                    	view = createCheckListGroup(attribute, ref);
 	                    	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
                         }
@@ -469,6 +478,12 @@ public class Tab implements Parcelable{
         }
         
         return checkboxGroup;
+	}
+	
+	private AudioListGroup createAudioListGroup(FormAttribute attribute, String ref) {
+		AudioListGroup audioListGroup = new AudioListGroup(
+                this.activityRef.get(), attribute.name, attribute.type, ref);
+        return audioListGroup;
 	}
 	
 	private Button createTrigger(FormAttribute attribute) {
@@ -808,27 +823,17 @@ public class Tab implements Parcelable{
 	public Map<String, String> getViewReference() {
 		return viewReference;
 	}
-
-	/**
-     * Rendering image slide for select one
-     * 
-     * @param layout
-     * @param questionPrompt
-	 * @param path2 
-	 * @param attributeType 
-	 * @param attributeName 
-     */
-    private PictureGallery createPictureGallery(final FormAttribute attribute, String ref) {
-    	return createImageSlider(attribute, ref, false);
-    }
-
-    private View createMultiSelectPictureGallery(FormAttribute attribute, String ref) {
-    	return createImageSlider(attribute, ref, true);
+	
+    private PictureGallery createPictureGallery(FormAttribute attribute, String ref, boolean isMulti) {
+		return new PictureGallery(this.activityRef.get(), ref, attribute, isMulti);
 	}
-
-    private PictureGallery createImageSlider(final FormAttribute attribute, String ref, final boolean isMulti) {
-		final PictureGallery gallery = new PictureGallery(this.activityRef.get(), ref, attribute,isMulti);
-        return gallery;
+    
+    private CameraPictureGallery createCameraPictureGallery(FormAttribute attribute, String ref) {
+		return new CameraPictureGallery(this.activityRef.get(), ref, attribute);
+	}
+    
+    private VideoGallery createVideoGallery(FormAttribute attribute, String ref) {
+		return new VideoGallery(this.activityRef.get(), ref, attribute);
 	}
 
 	/*

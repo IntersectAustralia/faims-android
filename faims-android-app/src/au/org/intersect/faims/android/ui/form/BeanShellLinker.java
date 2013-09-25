@@ -977,7 +977,7 @@ public class BeanShellLinker {
 	public void setFieldValue(String ref, Object valueObj) {
 		try {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
-			FLog.d("" + obj);
+
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
@@ -1314,7 +1314,7 @@ public class BeanShellLinker {
 
 			if (obj instanceof PictureGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
-				if (valuesObj instanceof ArrayList<?>) {
+				if (valuesObj instanceof List<?>) {
 					try {
 						ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
 						for (List<String> pictureList : arrayList) {
@@ -1334,6 +1334,8 @@ public class BeanShellLinker {
 				final PictureGallery gallery = (PictureGallery) obj;
 				gallery.populate(pictures);
 			} else {
+				FLog.w("Cannot populate picture gallery "
+						+ ref);
 				showWarning("Logic Error", "Cannot populate picture gallery "
 						+ ref);
 			}
@@ -1350,7 +1352,7 @@ public class BeanShellLinker {
 
 			if (obj instanceof CameraPictureGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
-				if (valuesObj instanceof ArrayList<?>) {
+				if (valuesObj instanceof List<?>) {
 					ArrayList<String> values = (ArrayList<String>) valuesObj;
 					for (String value : values) {
 						Picture picture = new Picture(value, null, value);
@@ -1361,7 +1363,9 @@ public class BeanShellLinker {
 				final CameraPictureGallery gallery = (CameraPictureGallery) obj;
 				gallery.populate(pictures);
 			} else {
-				showWarning("Logic Error", "Cannot populate picture gallery "
+				FLog.w("Cannot populate camera picture gallery "
+						+ ref);
+				showWarning("Logic Error", "Cannot populate camera picture gallery "
 						+ ref);
 			}
 		} catch (Exception e) {
@@ -1377,7 +1381,7 @@ public class BeanShellLinker {
 
 			if (obj instanceof VideoGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
-				if (valuesObj instanceof ArrayList<?>) {
+				if (valuesObj instanceof List<?>) {
 					ArrayList<String> values = (ArrayList<String>) valuesObj;
 					for (String value : values) {
 						Picture picture = new Picture(value, null, value);
@@ -1388,6 +1392,8 @@ public class BeanShellLinker {
 				final VideoGallery gallery = (VideoGallery) obj;
 				gallery.populate(pictures);
 			} else {
+				FLog.w("Cannot populate video gallery "
+						+ ref);
 				showWarning("Logic Error", "Cannot populate video gallery "
 						+ ref);
 			}

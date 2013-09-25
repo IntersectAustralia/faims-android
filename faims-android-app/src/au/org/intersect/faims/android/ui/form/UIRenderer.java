@@ -424,10 +424,13 @@ public class UIRenderer implements IRestoreActionListener{
 	public void storeViewValues(Bundle savedInstanceState){
 		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for(String reference : viewMap.keySet()){
-			viewValues.put(reference, linker.getFieldValue(reference));
-			viewCertainties.put(reference, linker.getFieldCertainty(reference));
-			viewAnnotations.put(reference, linker.getFieldAnnotation(reference));
-			viewDirtyReasons.put(reference, linker.getFieldDirty(reference));
+			Object obj = getViewByRef(reference);
+			if (obj instanceof ICustomView) {
+				viewValues.put(reference, linker.getFieldValue(reference));
+				viewCertainties.put(reference, linker.getFieldCertainty(reference));
+				viewAnnotations.put(reference, linker.getFieldAnnotation(reference));
+				viewDirtyReasons.put(reference, linker.getFieldDirty(reference));
+			}
 		}
 		savedInstanceState.putSerializable("viewValues", (Serializable) viewValues);
 		savedInstanceState.putSerializable("viewCertainties", (Serializable) viewCertainties);
@@ -448,10 +451,13 @@ public class UIRenderer implements IRestoreActionListener{
 		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for (Tab tab : tabGroup.getTabs()) {
 			for(String reference : tab.getViewReference().values()){
-				linker.setFieldValue(reference, viewValues.get(reference));
-				linker.setFieldCertainty(reference, viewCertainties.get(reference));
-				linker.setFieldAnnotation(reference, viewAnnotations.get(reference));
-				linker.setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
+				Object obj = getViewByRef(reference);
+				if (obj instanceof ICustomView) {
+					linker.setFieldValue(reference, viewValues.get(reference));
+					linker.setFieldCertainty(reference, viewCertainties.get(reference));
+					linker.setFieldAnnotation(reference, viewAnnotations.get(reference));
+					linker.setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
+				}
 			}
 		}
 	}

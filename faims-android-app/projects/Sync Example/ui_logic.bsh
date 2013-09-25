@@ -135,8 +135,8 @@ loadFileAttributes(){
 	populateCheckBoxGroup("tabgroup1/tab1/audios", audios);
 	populateCheckBoxGroup("tabgroup1/tab1/files", files);
 	
-	setFieldValue("tabgroup1/tab1/pictures", pictures);
-	setFieldValue("tabgroup1/tab1/videos", videos);
+	setFieldValue("tabgroup1/tab1/pictures", convertListToPairs(pictures));
+	setFieldValue("tabgroup1/tab1/videos", convertListToPairs(videos));
 	setFieldValue("tabgroup1/tab1/audios", convertListToPairs(audios));
 	setFieldValue("tabgroup1/tab1/files", convertListToPairs(files));
 }
@@ -203,8 +203,8 @@ updateEntity() {
 	}
 	
 	saveFiles(loadedFiles, convertPairsToList(getFieldValue("tabgroup1/tab1/files")), "file", attributes); 
-	saveFiles(loadedPictures, getFieldValue("tabgroup1/tab1/pictures"), "picture", attributes);
-	saveFiles(loadedVideos, getFieldValue("tabgroup1/tab1/videos"), "video", attributes);
+	saveFiles(loadedPictures, convertPairsToList(getFieldValue("tabgroup1/tab1/pictures")), "picture", attributes);
+	saveFiles(loadedVideos, convertPairsToList(getFieldValue("tabgroup1/tab1/videos")), "video", attributes);
 	saveFiles(loadedAudios, convertPairsToList(getFieldValue("tabgroup1/tab1/audios")), "audio", attributes);
 	
 	entityCallback = "loadFileAttributes()";
@@ -343,11 +343,11 @@ OnPictureTaken() {
     	selectedPictures = new ArrayList();
     	selectedPictures.add(pictureFilepath);
     } else {
-    	selectedPictures = getFieldValue("tabgroup1/tab1/pictures");
+    	selectedPictures = convertPairsToList(getFieldValue("tabgroup1/tab1/pictures"));
     	selectedPictures.add(pictureFilepath);
     }
     populateCameraPictureGallery("tabgroup1/tab1/pictures", pictures);
-    setFieldValue("tabgroup1/tab1/pictures", selectedPictures);
+    setFieldValue("tabgroup1/tab1/pictures", convertListToPairs(selectedPictures));
 }
 
 ArrayList videos = new ArrayList();
@@ -364,11 +364,11 @@ OnVideoTaken() {
     	selectedVideos = new ArrayList();
     	selectedVideos.add(videoFilepath);
     } else {
-    	selectedVideos = getFieldValue("tabgroup1/tab1/videos");
+    	selectedVideos = convertPairsToList(getFieldValue("tabgroup1/tab1/videos"));
     	selectedVideos.add(videoFilepath);
     }
     populateVideoGallery("tabgroup1/tab1/videos", videos);
-    setFieldValue("tabgroup1/tab1/videos", selectedVideos);
+    setFieldValue("tabgroup1/tab1/videos", convertListToPairs(selectedVideos));
 }
 
 ArrayList audios = new ArrayList();

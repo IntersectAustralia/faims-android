@@ -135,11 +135,11 @@
       </group>
     </group>
     <group ref="menu">
-      <label></label>
+      <label>Options</label>
       <group ref="tab1" faims_scrollable="false">
-        <label>Menu</label>
+        <label>Options</label>
         <select1 ref="options" appearance="compact">
-          <label>Users:</label>
+          <label>Options:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -148,7 +148,7 @@
       </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="small">
-      <label></label>
+      <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
         <group ref="container1" faims_style="orientation">
@@ -204,7 +204,7 @@
         <trigger ref="attachfile">
             <label>Attached File:</label>
         </trigger>
-        <select ref="pictures" type="image" faims_annotation="false" faims_certainty="false">
+        <select ref="pictures" type="camera" faims_annotation="false" faims_certainty="false">
             <label>Pictures:</label>
             <item>
                 <label>dummy</label>
@@ -214,7 +214,7 @@
         <trigger ref="attachpicture">
             <label>Take picture</label>
         </trigger>
-        <select ref="videos" type="image" faims_annotation="false" faims_certainty="false">
+        <select ref="videos" type="video" faims_annotation="false" faims_certainty="false">
             <label>Videos:</label>
             <item>
                 <label>dummy</label>
@@ -224,7 +224,7 @@
         <trigger ref="attachvideo">
             <label>Take video</label>
         </trigger>
-        <select ref="audios" faims_annotation="false" faims_certainty="false">
+        <select ref="audios" type="audio" faims_annotation="false" faims_certainty="false">
             <label>Audios:</label>
             <item>
                 <label>dummy</label>
@@ -271,7 +271,7 @@
       </group>
     </group>
     <group ref="tabgroup2" faims_rel_type="AboveBelow">
-      <label></label>
+      <label>Relationship</label>
       <group ref="tab1">
         <label>Save Relationship</label>
         <select1 ref="relationship" faims_annotation="false" faims_certainty="false">
@@ -323,7 +323,7 @@
       </group>
     </group>
     <group ref="tabgroup3">
-      <label></label>
+      <label>Controls</label>
       <group ref="tab1" faims_hidden="false">
           <label>Controls</label>
           <trigger ref="start">
@@ -335,7 +335,7 @@
       </group>
     </group>
     <group ref="tabgroup4">
-        <label></label>
+        <label>Associations</label>
         <group ref="tab1">
             <label>Add Entity Member</label>
             <select1 ref="entities">
