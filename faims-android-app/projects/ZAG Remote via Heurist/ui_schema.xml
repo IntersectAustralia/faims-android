@@ -111,9 +111,9 @@
       </group>
     </group>
     <group ref="user">
-      <label>User_List</label>
+      <label>User List</label>
       <group ref="usertab" faims_scrollable="false">
-        <label>User_List</label>
+        <label>Select a User to login as:</label>
         <select1 appearance="compact" ref="users">
           <label>Users:</label>
           <item>
@@ -124,7 +124,7 @@
       </group>
     </group>
     <group ref="control">
-      <label>Maps.And.Controls</label>
+      <label>Maps And Controls</label>
       <group faims_scrollable="false" ref="map">
         <label>Map</label>
         <input faims_certainty="false" faims_map="true" ref="map">
@@ -147,7 +147,7 @@
         </group>
       </group>
       <group ref="data" faims_scrollable="false">
-        <label>Retrieve Data</label>
+        <label>Saved Features</label>
         <select1 faims_annotation="false" faims_certainty="false" ref="RS_FeatureList" appearance="compact">
           <label>Saved Remote Sensing Features</label>
           <item>
@@ -158,35 +158,35 @@
         
       </group>
       <group ref="gps">
-        <label>Communications.Control.Tab</label>
+        <label>Control</label>
         <trigger ref="connectexternal">
-          <label>Connect.To.External.GPS</label>
+          <label>Connect To External GPS</label>
         </trigger>
         <trigger ref="connectinternal">
-          <label>Connect.To.Internal.GPS</label>
+          <label>Connect To Internal GPS</label>
         </trigger>
         <trigger ref="startsync">
-          <label>Start.Synching</label>
+          <label>Start Synching</label>
         </trigger>
         <trigger ref="stopsync">
-          <label>Stop.Synching</label>
+          <label>Stop Synching</label>
         </trigger>
         <trigger ref="startTimeLog">
-          <label>Start.Time.Log</label>
+          <label>Start Time Log</label>
         </trigger>
         <trigger ref="startDistanceLog">
-          <label>Start.Distance.Log</label>
+          <label>Start Distance Log</label>
         </trigger>
         <trigger ref="stopTrackLog">
-          <label>Stop.Track.Log</label>
+          <label>Stop Track Log</label>
         </trigger>
       </group>
     </group>
     <!--RS_FEATURE-->
     <group faims_archent_type="RemoteSensingFeature" ref="RS_Feature">
-      <label>Ground_control</label>
+      <label>RS Feature</label>
        <group ref="header11_58">
-        <label>Feature_detected_(in_remote_sensing)</label>
+        <label>Feature detected (in remote sensing)</label>
 
         <input faims_annotation="false" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false" ref="FeatureID">
           <label>FeatureID</label>
@@ -195,7 +195,7 @@
           <label>TimeStamp</label>
         </input>
         <input faims_attribute_name="ShortSummary" faims_attribute_type="freetext" ref="Short_summary">
-          <label>Short_summary</label>
+          <label>Short summary</label>
         </input>
         <select appearance="compact" faims_attribute_name="FeatureSource" faims_attribute_type="vocab" ref="FeatureSource">
           <label>FeatureSource</label>
@@ -205,14 +205,14 @@
           </item>
         </select>
         <select1 appearance="full" faims_attribute_name="FeatureSourceConfidence" faims_attribute_type="vocab" ref="Feature_Source_Confidence">
-          <label>Feature_Source_Confidence</label>
+          <label>Feature Source Confidence</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select appearance="compact" faims_attribute_name="FeatureType" faims_attribute_type="vocab" ref="Feature_Type">
-          <label>Feature_Type</label>
+          <label>Feature Type</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -220,63 +220,63 @@
         </select>
       </group>
       <group ref="header11_69">
-        <label>Feature_Attributes_(on_the_ground)</label>
+        <label>Attributes</label>
         <select1 appearance="full" faims_attribute_name="FeatureAccessibility" faims_attribute_type="vocab" ref="Feature_Accessibility">
-          <label>Feature_Accessibility</label>
+          <label>Feature Accessibility</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <select appearance="compact" faims_attribute_name="FeatureActualCause" faims_attribute_type="vocab" ref="Feature_Actual_Cause">
-          <label>Feature_Actual_Cause</label>
+          <label>Feature Actual Cause</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select>
-        <select1 appearance="full" faims_attribute_name="RSGroundtruthResult" faims_attribute_type="vocab" ref="RS_Groundtruth_Result">
-          <label>RS_Groundtruth_Result</label>
+        <select1 faims_attribute_name="RSGroundtruthResult" faims_attribute_type="vocab" ref="RS_Groundtruth_Result">
+          <label>Feature Classification</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
-        <select1 appearance="full" faims_attribute_name="GroundControl" faims_attribute_type="vocab" ref="Ground_Control">
-          <label>Ground_Control</label>
+        <select1 faims_attribute_name="GroundControl" faims_attribute_type="vocab" ref="Ground_Control">
+          <label>Ground Control</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <input faims_attribute_name="RSFeatureSiteCode" faims_attribute_type="freetext" ref="RS_Feature_Site_Code">
-          <label>RS_Feature_Site_Code</label>
+          <label>RS Feature Site Code</label>
         </input>
         <select appearance="compact" faims_attribute_name="RSFeaturePeriod(s)" faims_attribute_type="vocab" ref="RS_Feature_Period_s_">
-          <label>RS_Feature_Period(s)</label>
+          <label>RS Feature Period(s)</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select>
         <input faims_attribute_name="RSFeatureNotes" faims_attribute_type="freetext" ref="RS_Feature_Notes">
-          <label>RS_Feature_Notes</label>
+          <label>RS Feature Notes</label>
         </input>
-        <select1 appearance="full" faims_attribute_name="BestImageAlgorithm" faims_attribute_type="vocab" ref="Best_image_algorithm">
-          <label>Best_image_algorithm</label>
+        <select1 faims_attribute_name="BestImageAlgorithm" faims_attribute_type="vocab" ref="Best_image_algorithm">
+          <label>Best image algorithm</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
           </item>
         </select1>
         <input faims_attribute_name="RSAreaAnalysedNumericVersion" faims_attribute_type="freetext" ref="RS_Area_Analysed_Numeric_version">
-          <label>RS_Area_Analysed_Code</label>
+          <label>RS Area Analysed Code</label>
         </input>
         <input faims_attribute_name="RSGeologySoilComments" faims_attribute_type="freetext" ref="RS_Geology_Soil_Comments">
-          <label>RS_Geology_Soil_Comments</label>
+          <label>RS Geology Soil Comments</label>
         </input>
         <select1 appearance="full" faims_attribute_name="GCRepeat" faims_attribute_type="vocab" ref="GCRepeat">
-          <label>GC_should_be_repeated</label>
+          <label>GC should be repeated</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -284,9 +284,9 @@
         </select1>        
       </group>
       <group ref="header11_70">
-        <label>Attachments.And.Saving</label>
+        <label>Photo and Save</label>
         <trigger ref="Photo">
-          <label>Take.Picture</label>
+          <label>Take Picture</label>
         </trigger>
         <select ref="PhotoGallery" type="image">
           <label>Gallery:</label>
@@ -296,10 +296,10 @@
           </item>
         </select>      
         <trigger ref="Update">
-          <label>Save.Record</label>
+          <label>Save Record</label>
         </trigger>
         <trigger ref="Delete">
-          <label>Delete.Record</label>
+          <label>Delete Record</label>
         </trigger>
       </group>
     </group>
