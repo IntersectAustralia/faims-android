@@ -187,7 +187,7 @@
         </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="gpsentity">
-      <label>GPS Plotting</label>
+      <label>GPS Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
@@ -227,7 +227,7 @@
       </group>
     </group>
     <group ref="tabgroup2" faims_archent_type="simpleentity">
-      <label>Map Example</label>
+      <label>Drawing Test</label>
       <group ref="tab1"  faims_scrollable="false">
         <label>Map</label>
         <select1 ref="drawActions"  faims_certainty="false" faims_annotation="false">
@@ -347,7 +347,7 @@
       </group>
     </group>
     <group ref="tabgroup3">
-      <label>GPS Plotting</label>
+      <label>Point Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="longitude">
@@ -368,7 +368,7 @@
       </group>
     </group>
     <group ref="tabgroup4">
-      <label>Kaz Map</label>
+      <label>Kaz Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="map" faims_map="true" faims_certainty="false">
@@ -377,7 +377,7 @@
       </group>
     </group>
     <group ref="tabgroup5" faims_archent_type="simpleentity">
-      <label>Map UI</label>
+      <label>UI Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
         <input ref="map" faims_map="true" faims_certainty="false">
