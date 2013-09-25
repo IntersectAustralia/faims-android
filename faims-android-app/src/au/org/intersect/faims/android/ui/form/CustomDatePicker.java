@@ -1,15 +1,20 @@
 package au.org.intersect.faims.android.ui.form;
 
-import android.content.Context;
-import android.widget.DatePicker;
+import java.util.List;
 
-public class CustomDatePicker extends DatePicker {
+import android.content.Context;
+import android.text.format.Time;
+import android.widget.DatePicker;
+import au.org.intersect.faims.android.util.DateUtil;
+
+public class CustomDatePicker extends DatePicker implements ICustomView {
 
 	private String attributeName;
 	private String attributeType;
 	private String ref;
-	private float certainty = 1;
-	private float currentCertainty = 1;
+	private String currentValue;
+	private float certainty;
+	private float currentCertainty;
 	private boolean dirty;
 	private String dirtyReason;
 	
@@ -22,6 +27,7 @@ public class CustomDatePicker extends DatePicker {
 		this.attributeName = attributeName;
 		this.attributeType = attributeType;
 		this.ref = ref;
+		reset();
 	}
 
 	public String getAttributeName() {
@@ -36,24 +42,12 @@ public class CustomDatePicker extends DatePicker {
 		return ref;
 	}
 
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
-
 	public float getCertainty() {
 		return certainty;
 	}
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
-	}
-
-	public float getCurrentCertainty() {
-		return currentCertainty;
-	}
-
-	public void setCurrentCertainty(float currentCertainty) {
-		this.currentCertainty = currentCertainty;
 	}
 
 	public boolean isDirty() {
@@ -70,5 +64,56 @@ public class CustomDatePicker extends DatePicker {
 
 	public String getDirtyReason() {
 		return dirtyReason;
+	}
+	
+	public String getValue() {
+		return DateUtil.getDate(this);
+	}
+	
+	public void setValue(String value) {
+		DateUtil.setDatePicker(this, value);
+	}
+
+	public void reset() {
+		Time now = new Time();
+		now.setToNow();
+		updateDate(now.year, now.month, now.monthDay);
+		setCertainty(1);
+		save();
+	}
+
+	public boolean hasChanges() {
+		return !Compare.equal(getValue(), currentValue) || 
+				!Compare.equal(getCertainty(), currentCertainty);
+	}
+	
+	@Override
+	public void save() {
+		currentValue = getValue();
+		currentCertainty = getCertainty();
+	}
+
+	@Override
+	public String getAnnotation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setAnnotation(String annotation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<?> getValues() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setValues(List<?> values) {
+		// TODO Auto-generated method stub
+		
 	}
 }

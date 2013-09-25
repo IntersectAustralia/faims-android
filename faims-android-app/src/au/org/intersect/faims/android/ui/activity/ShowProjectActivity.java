@@ -884,7 +884,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		try {
 			// render the ui definition
 			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-			ShowProjectActivity.this.renderer.createUI(FaimsSettings.projectsDir + projectKey);
+			ShowProjectActivity.this.renderer.createUI(projectDir);
 			if(savedInstanceState == null){
 				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 			}

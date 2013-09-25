@@ -9,17 +9,7 @@ import android.widget.LinearLayout;
 import au.org.intersect.faims.android.ui.form.styling.FaimsStyling;
 import au.org.intersect.faims.android.ui.form.styling.StyleUtils;
 
-public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
-	
-	private String attributeName;
-	private String attributeType;
-	private String ref;
-	private float certainty = 1;
-	private float currentCertainty = 1;
-	private String annotation = "";
-	private String currentAnnotation = "";
-	private boolean dirty;
-	private String dirtyReason;
+public class CustomLinearLayout extends LinearLayout implements FaimsStyling {
 	
 	public CustomLinearLayout(Context context) {
 		super(context);
@@ -29,61 +19,6 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
 		super(context);
 		this.setOrientation(LinearLayout.VERTICAL);
 		applyStyle(styleMappings);
-	}
-
-	public CustomLinearLayout(Context context, String attributeName, String attributeType, String ref) {
-		super(context);
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
-		this.ref = ref;
-	}
-
-	public String getAttributeName() {
-		return attributeName;
-	}
-
-	public String getAttributeType() {
-		return attributeType;
-	}
-
-	public String getRef() {
-		return ref;
-	}
-
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
-
-	public float getCertainty() {
-		return certainty;
-	}
-
-	public void setCertainty(float certainty) {
-		this.certainty = certainty;
-	}
-
-	public float getCurrentCertainty() {
-		return currentCertainty;
-	}
-
-	public void setCurrentCertainty(float currentCertainty) {
-		this.currentCertainty = currentCertainty;
-	}
-
-	public String getAnnotation() {
-		return annotation;
-	}
-
-	public void setAnnotation(String annotation) {
-		this.annotation = annotation;
-	}
-
-	public String getCurrentAnnotation() {
-		return currentAnnotation;
-	}
-
-	public void setCurrentAnnotation(String currentAnnotation) {
-		this.currentAnnotation = currentAnnotation;
 	}
 
 	@Override
@@ -113,20 +48,5 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling{
 		}
 		
 	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
 	
-	public void setDirty(boolean value) {
-		this.dirty = value;
-	}
-	
-	public void setDirtyReason(String value) {
-		this.dirtyReason = value;
-	}
-
-	public String getDirtyReason() {
-		return dirtyReason;
-	}
 }

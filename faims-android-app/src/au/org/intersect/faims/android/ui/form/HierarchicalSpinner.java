@@ -178,7 +178,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		}
 		
 		if (value == null || "".equals(value)) {
-			reset();
 			return;
 		}
 		
@@ -228,6 +227,11 @@ public class HierarchicalSpinner extends CustomSpinner {
 		
 		parentTerms.clear();
 		loadTerms();
+		
 		setSelectionItem(0, false);
+		setCertainty(1);
+		setAnnotation("");
+		
+		save();
 	}
 }

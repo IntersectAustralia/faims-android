@@ -1,0 +1,141 @@
+<ValidationSchema>
+
+	 <RelationshipElement name='AboveBelow'>
+
+		<property name='name'>
+
+			<validator type='evaluator' cmd='spell.sh ?'>
+              <cmd><![CDATA[spell.sh ?]]></cmd>
+			  <param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='evaluator' cmd='spell.sh ?'>
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='evaluator' cmd='spell.sh ? ?'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='blankchecker'>
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';"/>
+			</validator>-->
+			<!--<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='typechecker' datatype='text'>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='typechecker' datatype='text'>
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='typechecker' datatype='text'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='querychecker'>
+              <query><![CDATA[select length(?) < 20, 'Field value is too long']]></query>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='querychecker'>
+			    <query><![CDATA[select length(?) < 20, 'Field value is too long']]></query>
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='querychecker'>
+			    <query><![CDATA[select length(?) < 20 AND ? like 'Test', 'Field value is too long and does not contain Test']]></query>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from relnvalue join attributekey using (attributeid) where relationshipid = ? and relnvaluetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+		</property>
+
+		<property name='location'>
+		    <validator type='blankchecker'>
+				<param type='field' value='vocab' />
+			</validator>
+		</property>
+
+	</RelationshipElement>
+
+	<ArchaeologicalElement name='small'>
+
+		<property name='name'>
+
+			<validator type='evaluator' cmd='spell.sh ?'>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='evaluator' cmd='spell.sh ?'>
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='evaluator' cmd='spell.sh ? ?'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='blankchecker'>
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--><validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='typechecker' datatype='text'>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='typechecker' datatype='text'>
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='typechecker' datatype='text'>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+			<validator type='querychecker'>
+                <query><![CDATA[select length(?) < 20, 'Field value is too long']]></query>
+				<param type='field' value='freetext' />
+			</validator>
+			<!--<validator type='querychecker' query="select length(?) < 20, 'Field value is too long'" >
+			    <query><![CDATA[select length(?) < 20, 'Field value is too long']]></query>
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+			<!--<validator type='querychecker' query="select length(?) < 20 AND ? like 'Test', 'Field value is too long and does not contain Test'" >
+			    <query><![CDATA[select length(?) < 20 AND ? like 'Test', 'Field value is too long and does not contain Test']]></query>
+				<param type='field' value='freetext' />
+				<param type='query' value="select freetext from aentvalue join attributekey using (attributeid) where uuid = ? and valuetimestamp = ? and attributename = 'name';" />
+			</validator>-->
+
+		</property>
+
+		<property name='value'>
+		    <validator type='blankchecker'>
+				<param type='field' value='measure' />
+				<param type='field' value='certainty' />
+			</validator>
+
+		    <validator type='typechecker' datatype='real'>
+				<param type='field' value='measure' />
+			</validator>
+
+		    <validator type='typechecker' datatype='real'>
+				<param type='field' value='certainty' />
+			</validator>
+		</property>
+
+		<property name='location'>
+		    <validator type='blankchecker'>
+				<param type='field' value='vocab' />
+			</validator>
+		</property>
+
+	</ArchaeologicalElement>
+
+</ValidationSchema>
