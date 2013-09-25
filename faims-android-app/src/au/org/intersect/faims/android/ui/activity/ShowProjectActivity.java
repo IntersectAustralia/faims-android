@@ -586,6 +586,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			if (currentTabGroup != null) {
 				renderer.invalidateListViews(currentTabGroup);
 				renderer.setCurrentTabGroup(currentTabGroup);
+				getActionBar().setTitle(currentTabGroup.getLabel());
 			}
 			super.onBackPressed();
 		}else{
