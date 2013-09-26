@@ -400,14 +400,17 @@ attachFile() {
 
 setFilename() {
 	filePath = getLastSelectedFilepath();
-	files.add(filePath);
 	selectedFiles = null;
     if (isNull(getFieldValue("tabgroup1/tab1/files"))) {
     	selectedFiles = new ArrayList();
     	selectedFiles.add(filePath);
+    	files.add(filePath);
     } else {
     	selectedFiles = convertPairsToList(getFieldValue("tabgroup1/tab1/files"));
-    	selectedFiles.add(filePath);
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		files.add(filePath);
+    	}
     }
     populateCheckBoxGroup("tabgroup1/tab1/files", files);
     setFieldValue("tabgroup1/tab1/files", convertListToPairs(selectedFiles));
