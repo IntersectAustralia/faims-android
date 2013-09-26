@@ -756,7 +756,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		menu.findItem(R.id.action_tracker_active_has_gps).setVisible(false);
 		menu.findItem(R.id.action_tracker_inactive).setVisible(false);
 		if(gpsDataManager.isTrackingStarted()){
-			if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
+			if(gpsDataManager.hasValidExternalGPSSignal() || gpsDataManager.hasValidInternalGPSSignal()){
 				menu.findItem(R.id.action_tracker_active_has_gps).setVisible(true);
 			}else{
 				menu.findItem(R.id.action_tracker_active_no_gps).setVisible(true);
