@@ -108,21 +108,21 @@ public class DatabaseManager {
 		}
 	}
 
-	public void deleteArchEnt(String entity_id) throws jsqlite.Exception {
+	public void deleteArchEnt(String entityId) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("entity_id:" + entity_id);
+			FLog.d("entityId:" + entityId);
 			
 			Stmt st = null;
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				if (entity_id != null) {
+				if (entityId != null) {
 					String parenttimestamp = null;
 					
 					String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
 					st = db.prepare(query);
-					st.bind(1, entity_id);
+					st.bind(1, entityId);
 					if (st.step()) {
 						parenttimestamp = st.column_string(0);
 					}
@@ -133,7 +133,7 @@ public class DatabaseManager {
 					st = db.prepare(query);
 					st.bind(1, userId);
 					st.bind(2, parenttimestamp);
-					st.bind(3, entity_id);
+					st.bind(3, entityId);
 					st.step();
 					st.close();
 					st = null;
@@ -159,12 +159,12 @@ public class DatabaseManager {
 		}
 	}
 
-	public String saveArchEnt(String entity_id, String entity_type,
-			String geo_data, List<EntityAttribute> attributes) throws Exception {
+	public String saveArchEnt(String entityId, String entityType,
+			String geometry, List<EntityAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("entity_id:" + entity_id);
-			FLog.d("entity_type:" + entity_type);
-			FLog.d("geo_data:" + geo_data);
+			FLog.d("entityId:" + entityId);
+			FLog.d("entityType:" + entityType);
+			FLog.d("geometry:" + geometry);
 			
 			if (attributes != null) {
 				for (EntityAttribute attribute : attributes) {
@@ -177,19 +177,19 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				if (!validArchEnt(db, entity_id, entity_type, geo_data, attributes)) {
+				if (!validArchEnt(db, entityId, entityType, geometry, attributes)) {
 					FLog.d("arch entity not valid");
 					return null;
 				}
 				
 				String uuid;
 				
-				if (entity_id == null) {
+				if (entityId == null) {
 					// create new entity
 					uuid = generateUUID();
 				} else {
 					// update entity
-					uuid = entity_id;
+					uuid = entityId;
 				}
 				
 				String parenttimestamp = null;
@@ -209,10 +209,10 @@ public class DatabaseManager {
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, clean(geo_data));
+				st.bind(3, clean(geometry));
 				st.bind(4, currentTimestamp);
 				st.bind(5, parenttimestamp);
-				st.bind(6, entity_type);
+				st.bind(6, entityType);
 				st.step();
 				st.close();
 				st = null;
@@ -278,10 +278,10 @@ public class DatabaseManager {
 		}
 	}
 	
-	public String updateArchEnt(String uuid, String geo_data) throws Exception {
+	public String updateArchEnt(String uuid, String geometry) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("uuid:" + uuid);
-			FLog.d("geo_data:" + geo_data);
+			FLog.d("geometry:" + geometry);
 			
 			Stmt st = null;
 			try {
@@ -302,7 +302,7 @@ public class DatabaseManager {
 				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_ARCHENTITY;
 				st = db.prepare(query);
 				st.bind(1, userId);
-				st.bind(2, clean(geo_data));
+				st.bind(2, clean(geometry));
 				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
@@ -331,10 +331,10 @@ public class DatabaseManager {
 		}
 	}
 	
-	public String updateRel(String uuid, String geo_data) throws Exception {
+	public String updateRel(String uuid, String geometry) throws Exception {
 		synchronized(DatabaseManager.class) {
 			FLog.d("uuid:" + uuid);
-			FLog.d("geo_data:" + geo_data);
+			FLog.d("geometry:" + geometry);
 			
 			Stmt st = null;
 			try {
@@ -355,7 +355,7 @@ public class DatabaseManager {
 				query = DatabaseQueries.INSERT_AND_UPDATE_INTO_RELATIONSHIP;
 				st = db.prepare(query);
 				st.bind(1, userId);
-				st.bind(2, clean(geo_data));
+				st.bind(2, clean(geometry));
 				st.bind(3, parenttimestamp);
 				st.bind(4, uuid);
 				st.step();
@@ -386,21 +386,21 @@ public class DatabaseManager {
 		}
 	}
 	
-	public void deleteRel(String rel_id) throws jsqlite.Exception {
+	public void deleteRel(String relationshipId) throws jsqlite.Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("rel_id:" + rel_id);
+			FLog.d("relationshipId:" + relationshipId);
 			
 			Stmt st = null;
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				if (rel_id != null) {
+				if (relationshipId != null) {
 					String parenttimestamp = null;
 					
 					String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
 					st = db.prepare(query);
-					st.bind(1, rel_id);
+					st.bind(1, relationshipId);
 					if (st.step()) {
 						parenttimestamp = st.column_string(0);
 					}
@@ -411,7 +411,7 @@ public class DatabaseManager {
 					st = db.prepare(query);
 					st.bind(1, userId);
 					st.bind(2, parenttimestamp);
-					st.bind(3, rel_id);
+					st.bind(3, relationshipId);
 					st.step();
 					st.close();
 					st = null;
@@ -436,12 +436,12 @@ public class DatabaseManager {
 			}
 		}
 	}
-	public String saveRel(String rel_id, String rel_type,
-			String geo_data, List<RelationshipAttribute> attributes) throws Exception {
+	public String saveRel(String relationshipId, String relationshipType,
+			String geometry, List<RelationshipAttribute> attributes) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("rel_id:" + rel_id);
-			FLog.d("rel_type:" + rel_type);
-			FLog.d("geo_data:" + geo_data);
+			FLog.d("relationshipId:" + relationshipId);
+			FLog.d("relationshipType:" + relationshipType);
+			FLog.d("geometry:" + geometry);
 			
 			if (attributes != null) {
 				for (RelationshipAttribute attribute : attributes) {
@@ -455,20 +455,20 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				if (!validRel(db, rel_id, rel_type, geo_data, attributes)) {
+				if (!validRel(db, relationshipId, relationshipType, geometry, attributes)) {
 					FLog.d("relationship not valid");
 					return null;
 				}
 				
 				String uuid;
 				
-				if (rel_id == null) {
+				if (relationshipId == null) {
 					// create new relationship
 					uuid = generateUUID();
 					
 				} else {
 					
-					uuid = rel_id;
+					uuid = relationshipId;
 				}
 				
 				String parenttimestamp = null;
@@ -488,10 +488,10 @@ public class DatabaseManager {
 				st = db.prepare(query);
 				st.bind(1, uuid);
 				st.bind(2, userId);
-				st.bind(3, clean(geo_data));
+				st.bind(3, clean(geometry));
 				st.bind(4, currentTimestamp);
 				st.bind(5, parenttimestamp);
-				st.bind(6, rel_type);
+				st.bind(6, relationshipType);
 				st.step();
 				st.close();
 				st = null;
@@ -557,12 +557,12 @@ public class DatabaseManager {
 		}
 	}
 	
-	private boolean validArchEnt(jsqlite.Database db, String entity_id, String entity_type, String geo_data, List<EntityAttribute> attributes) throws Exception {
+	private boolean validArchEnt(jsqlite.Database db, String entityId, String entityType, String geometry, List<EntityAttribute> attributes) throws Exception {
 		Stmt st = null;
 		try {
-			if (entity_id == null && !hasEntityType(db, entity_type)) {
+			if (entityId == null && !hasEntityType(db, entityType)) {
 				return false;
-			} else if (entity_id != null && !hasEntity(db, entity_id)) {
+			} else if (entityId != null && !hasEntity(db, entityId)) {
 				return false;
 			}
 			
@@ -572,7 +572,7 @@ public class DatabaseManager {
 					String query = DatabaseQueries.CHECK_VALID_AENT;
 					
 					st = db.prepare(query);
-					st.bind(1, entity_type);
+					st.bind(1, entityType);
 					st.bind(2, attribute.getName());
 					st.step();
 					if (st.column_int(0) == 0) {
@@ -588,12 +588,12 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	private boolean validRel(jsqlite.Database db, String rel_id, String rel_type, String geo_data, List<RelationshipAttribute> attributes) throws Exception {
+	private boolean validRel(jsqlite.Database db, String relationshipId, String relationshipType, String geometry, List<RelationshipAttribute> attributes) throws Exception {
 		Stmt st = null;
 		try {
-			if (rel_id == null && !hasRelationshipType(db, rel_type)) {
+			if (relationshipId == null && !hasRelationshipType(db, relationshipType)) {
 				return false;
-			} else if (rel_id != null && !hasRelationship(db, rel_id)) {
+			} else if (relationshipId != null && !hasRelationship(db, relationshipId)) {
 				return false;
 			}
 			
@@ -602,7 +602,7 @@ public class DatabaseManager {
 				for (RelationshipAttribute attribute : attributes) {
 					String query = DatabaseQueries.CHECK_VALID_RELN;
 					st = db.prepare(query);
-					st.bind(1, rel_type);
+					st.bind(1, relationshipType);
 					st.bind(2, attribute.getName());
 					st.step();
 					if (st.column_int(0) == 0) {
@@ -619,10 +619,10 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	public boolean addReln(String entity_id, String rel_id, String verb) throws Exception {
+	public boolean addReln(String entityId, String relationshipId, String verb) throws Exception {
 		synchronized(DatabaseManager.class) {
-			FLog.d("entity_id:" + entity_id);
-			FLog.d("rel_id:" + rel_id);
+			FLog.d("entityId:" + entityId);
+			FLog.d("relationshipId:" + relationshipId);
 			FLog.d("verb:" + verb);
 			
 			Stmt st = null;
@@ -631,7 +631,7 @@ public class DatabaseManager {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
 				
-				if (!hasEntity(db, entity_id) || !hasRelationship(db, rel_id)) {
+				if (!hasEntity(db, entityId) || !hasRelationship(db, relationshipId)) {
 					FLog.d("cannot add entity to relationship");
 					return false;
 				}
@@ -640,8 +640,8 @@ public class DatabaseManager {
 				
 				String query = DatabaseQueries.GET_AENT_RELN_PARENT_TIMESTAMP;
 				st = db.prepare(query);
-				st.bind(1, entity_id);
-				st.bind(2, rel_id);
+				st.bind(1, entityId);
+				st.bind(2, relationshipId);
 				if (st.step()) {
 					parenttimestamp = st.column_string(0);
 				}
@@ -653,8 +653,8 @@ public class DatabaseManager {
 				// create new entity relationship
 				query = DatabaseQueries.INSERT_AENT_RELN;
 				st = db.prepare(query);
-				st.bind(1, entity_id);
-				st.bind(2, rel_id);
+				st.bind(1, entityId);
+				st.bind(2, relationshipId);
 				st.bind(3, userId);
 				st.bind(4, clean(verb));
 				st.bind(5, currentTimestamp);
@@ -1177,11 +1177,11 @@ public class DatabaseManager {
 		}
 	}
 	
-	private boolean hasEntityType(jsqlite.Database db, String entity_type) throws Exception {
+	private boolean hasEntityType(jsqlite.Database db, String entityType) throws Exception {
 		Stmt st = null;
 		try {
 			st = db.prepare(DatabaseQueries.COUNT_ENTITY_TYPE);
-			st.bind(1, entity_type);
+			st.bind(1, entityType);
 			st.step();
 			if (st.column_int(0) == 0) {
 				FLog.d("entity type does not exist");
@@ -1193,14 +1193,14 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	private boolean hasEntity(jsqlite.Database db, String entity_id) throws Exception {
+	private boolean hasEntity(jsqlite.Database db, String entityId) throws Exception {
 		Stmt st = null;
 		try {
 			st = db.prepare(DatabaseQueries.COUNT_ENTITY);
-			st.bind(1, entity_id);
+			st.bind(1, entityId);
 			st.step();
 			if (st.column_int(0) == 0) {
-				FLog.d("entity id " + entity_id + " does not exist");
+				FLog.d("entity id " + entityId + " does not exist");
 				return false;
 			}
 		} finally {
@@ -1209,11 +1209,11 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	private boolean hasRelationshipType(jsqlite.Database db, String rel_type) throws Exception {
+	private boolean hasRelationshipType(jsqlite.Database db, String relationshipType) throws Exception {
 		Stmt st = null;
 		try {
 			st = db.prepare(DatabaseQueries.COUNT_RELN_TYPE);
-			st.bind(1, rel_type);
+			st.bind(1, relationshipType);
 			st.step();
 			if (st.column_int(0) == 0) {
 				FLog.d("rel type does not exist");
@@ -1225,14 +1225,14 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	private boolean hasRelationship(jsqlite.Database db, String rel_id) throws Exception {
+	private boolean hasRelationship(jsqlite.Database db, String relationshipId) throws Exception {
 		Stmt st = null;
 		try {
 			st = db.prepare(DatabaseQueries.COUNT_RELN);
-			st.bind(1, rel_id);
+			st.bind(1, relationshipId);
 			st.step();
 			if (st.column_int(0) == 0) {
-				FLog.d("rel id " + rel_id + " does not exist");
+				FLog.d("rel id " + relationshipId + " does not exist");
 				return false;
 			}
 		} finally {

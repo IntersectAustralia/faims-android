@@ -21,6 +21,8 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	private String currentAnnotation;
 	private boolean dirty;
 	private String dirtyReason;
+	private boolean annotationEnabled;
+	private boolean certaintyEnabled;
 
 	public CustomRadioGroup(Context context) {
 		super(context);
@@ -187,6 +189,26 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 			radioButton.setValue(pair.getValue());
 			rg.addView(radioButton);
 		}
+	}
+	
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
 	}
 
 }

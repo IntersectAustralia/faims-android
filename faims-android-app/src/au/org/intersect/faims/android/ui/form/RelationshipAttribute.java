@@ -1,82 +1,37 @@
 package au.org.intersect.faims.android.ui.form;
 
-public class RelationshipAttribute {
-
-	private String name;
-	private String text;
-	private String vocab;
-	private String certainty;
-	private String type;
-	private boolean isDeleted;
-	private boolean dirty;
-	private String dirtyReason;
-
-	public String getName() {
-		return name;
+public class RelationshipAttribute extends Attribute {
+	
+	public RelationshipAttribute() {
+		
 	}
 	
-	public void setName(String value) {
-		name = value;
+	public RelationshipAttribute(String name, String text, String vocab, String certainty) {
+		this(name, text, vocab, certainty, false);
 	}
 	
-	public String getText() {
-		return text;
-	}
-	
-	public void setText(String value) {
-		text = value;
-	}
-	
-	public String getVocab() {
-		return vocab;
-	}
-	
-	public void setVocab(String value) {
-		vocab = value;
-	}
-	
-	public String getCertainty() {
-		return certainty;
-	}
-	
-	public void setCertainty(String value) {
-		certainty = value;
-	}
-	
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public boolean isDeleted() {
-		return isDeleted;
-	}
-
-	public void setDeleted(boolean isDeleted) {
+	public RelationshipAttribute(String name, String text, String vocab, String certainty, boolean isDeleted) {
+		this.name = name;
+		this.text = text;
+		this.vocab = vocab;
+		this.certainty = certainty;
 		this.isDeleted = isDeleted;
 	}
-
-	public String toString() {
-		return "(" + name + "," + text + "," + vocab + "," + certainty + "," + isDeleted + ")";
-	}
-
-	public void setDirty(boolean value) {
-		this.dirty = value;
+	
+	public String getValue() {
+		if (VOCAB.equals(type)) {
+			return vocab;
+		} else {
+			return text;
+		}
 	}
 	
-	public boolean isDirty() {
-		return this.dirty;
-	}
-	
-	public void setDirtyReason(String value) {
-		this.dirtyReason = value;
-	}
-	
-	public String getDirtyReason() {
-		return dirtyReason;
+	public String getAnnotation() {
+		if (VOCAB.equals(type)) {
+			return text;
+		} else {
+			return null;
+		}
 	}
 
 }

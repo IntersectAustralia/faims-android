@@ -17,6 +17,8 @@ public class CustomEditText extends EditText implements ICustomView {
 	private String currentAnnotation;
 	private boolean dirty;
 	private String dirtyReason;
+	private boolean annotationEnabled;
+	private boolean certaintyEnabled;
 	
 	public CustomEditText(Context context) {
 		super(context);
@@ -112,5 +114,25 @@ public class CustomEditText extends EditText implements ICustomView {
 	public void setValues(List<?> values) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
 	}
 }

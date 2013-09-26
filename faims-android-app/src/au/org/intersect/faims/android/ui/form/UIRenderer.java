@@ -230,7 +230,7 @@ public class UIRenderer implements IRestoreActionListener{
 		String style = questionElement.getAdditionalAttribute(null,"faims_style");
 		FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(childIndex);
 		String viewName = input.getIndex().getReference().getNameLast();
-		View view = tab.addInput(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName,
+		View view = tab.addCustomView(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName,
 				tabGroup.isArchEnt(), tabGroup.isRelationship(),getStyleMappings(style));
 
 		viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);

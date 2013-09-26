@@ -22,5 +22,9 @@ public interface ICustomView {
 	public void save();
 	public List<?> getValues();
 	public void setValues(List<?> values);
+	public boolean getAnnotationEnabled();
+	public void setAnnotationEnabled(boolean enabled);
+	public boolean getCertaintyEnabled();
+	public void setCertaintyEnabled(boolean enabled);
 	
 }

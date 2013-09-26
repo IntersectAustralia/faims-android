@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.AlertDialog;
@@ -20,12 +21,19 @@ import au.org.intersect.faims.android.log.FLog;
 
 public class VideoGallery extends PictureGallery {
 
+	private boolean sync;
+
 	public VideoGallery(Context context) {
 		super(context);
 	}
 	
 	public VideoGallery(Context context, String ref, FormAttribute attribute) {
 		super(context, ref, attribute, true);
+		this.sync = attribute.sync;
+	}
+	
+	public boolean getSync() {
+		return sync;
 	}
 	
 	@Override
@@ -132,6 +140,22 @@ public class VideoGallery extends PictureGallery {
 			FLog.e("error obtaining video file duration", e);
 		}
 		return stringBuilder.toString();
+	}
+
+	@Override
+	public void reset() {
+		removeSelectedImages();
+		galleriesLayout.removeAllViews();
+		galleryImages = new ArrayList<CustomImageView>();
+		
+		setCertainty(1);
+		setAnnotation("");
+		save();
+	}
+
+	public void addVideo(String value) {
+		Picture picture = new Picture(value, null, value);
+		addSelectedImage(addGallery(picture));
 	}
 
 }

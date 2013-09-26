@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.form;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Date;
 
 import android.app.AlertDialog;
@@ -19,12 +20,19 @@ import au.org.intersect.faims.android.log.FLog;
 
 public class CameraPictureGallery extends PictureGallery {
 
+	private boolean sync;
+
 	public CameraPictureGallery(Context context) {
 		super(context);
 	}
 	
 	public CameraPictureGallery(Context context, String ref, FormAttribute attribute) {
 		super(context, ref, attribute, true);
+		this.sync = attribute.sync;
+	}
+	
+	public boolean getSync() {
+		return sync;
 	}
 	
 	protected void setGalleryImage(CustomImageView gallery, String path) {
@@ -108,6 +116,22 @@ public class CameraPictureGallery extends PictureGallery {
 			FLog.e("error when decode the bitmap", e);
 		}
 		return null;
+	}
+	
+	@Override
+	public void reset() {
+		removeSelectedImages();
+		galleriesLayout.removeAllViews();
+		galleryImages = new ArrayList<CustomImageView>();
+		
+		setCertainty(1);
+		setAnnotation("");
+		save();
+	}
+
+	public void addPicture(String value) {
+		Picture picture = new Picture(value, null, value);
+		addSelectedImage(addGallery(picture));
 	}
 
 }

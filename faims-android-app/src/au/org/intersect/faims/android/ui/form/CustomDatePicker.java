@@ -17,6 +17,8 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	private float currentCertainty;
 	private boolean dirty;
 	private String dirtyReason;
+	private boolean annotationEnabled;
+	private boolean certaintyEnabled;
 	
 	public CustomDatePicker(Context context) {
 		super(context);
@@ -115,5 +117,25 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	public void setValues(List<?> values) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
 	}
 }

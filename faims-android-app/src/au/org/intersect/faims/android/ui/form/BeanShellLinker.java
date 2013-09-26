@@ -77,10 +77,6 @@ public class BeanShellLinker {
 
 	private ShowProjectActivity activity;
 
-	private static final String FREETEXT = "freetext";
-	private static final String MEASURE = "measure";
-	private static final String VOCAB = "vocab";
-
 	private String persistedObjectName;
 
 	private String lastFileBrowserCallback;
@@ -559,6 +555,104 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error showing tab " + id);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	public void saveTabGroup(String id, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes) {
+		try {
+			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity, id);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error saving tab group " + id);
+				return;
+			}
+			if (tabGroup.getArchEntType() != null) {
+				List<EntityAttribute> entityAttributes = (List<EntityAttribute>) attributes;
+				
+				entityAttributes.addAll(getEntityAttributesFromTabGroup(tabGroup));
+				
+				ArchEntity archEntity = (ArchEntity) fetchArchEnt(uuid);
+				attachFilesForTabGroup(archEntity.getAttributes(), tabGroup);
+				
+				saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
+			} else if (tabGroup.getRelType() != null) {
+				List<RelationshipAttribute> relationshipAttributes = (List<RelationshipAttribute>) attributes;
+				
+				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(tabGroup));
+				
+				Relationship relationship = (Relationship) fetchRel(uuid);
+				attachFilesForTabGroup(relationship.getAttributes(), tabGroup);
+				
+				saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
+			} else {
+				FLog.e("cannot save tabgroup with no type");
+				showWarning("Logic Error", "Cannot save tabgroup with no type");
+			}
+		} catch (Exception e) {
+			FLog.e("error saving tabgroup " + id);
+			showWarning("Logic Error", "Error saving tab group " + id);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public void saveTab(String id, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes) {
+		try {
+			if (id == null) {
+				showWarning("Logic Error", "Error saving tab " + id);
+				return;
+			}
+			String[] ids = id.split("/");
+			if (ids.length < 2) {
+				showWarning("Logic Error", "Error saving tab " + id);
+				return;
+			}
+			String groupId = ids[0];
+			String tabId = ids[1];
+			TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error saving tab " + id);
+				return;
+			}
+			Tab tab = tabGroup.getTab(tabId);
+			if (tab == null) {
+				showWarning("Logic Error", "Error saving tab " + id);
+				return;
+			}
+			if (tabGroup.getArchEntType() != null) {
+				List<EntityAttribute> entityAttributes = (List<EntityAttribute>) attributes;
+				
+				entityAttributes.addAll(getEntityAttributesFromTab(tab));
+				
+				ArchEntity archEntity = (ArchEntity) fetchArchEnt(uuid);
+				attachFilesForTab(archEntity.getAttributes(), tab);
+				
+				saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
+			} else if (tabGroup.getRelType() != null) {
+				List<RelationshipAttribute> relationshipAttributes = (List<RelationshipAttribute>) attributes;
+				
+				relationshipAttributes.addAll(getRelationshipAttributesFromTab(tab));
+				
+				Relationship relationship = (Relationship) fetchRel(uuid);
+				attachFilesForTab(relationship.getAttributes(), tab);
+				
+				saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
+			} else {
+				FLog.e("cannot save tab with no type");
+				showWarning("Logic Error", "Cannot save tab with no type");
+			}
+		} catch (Exception e) {
+			FLog.e("error saving tab " + id);
+			showWarning("Logic Error", "Error saving tab " + id);
+		}
+	}
+	
+	private void attachFilesForTabGroup(Collection<? extends Attribute> attributes, TabGroup tabGroup) {
+		for (Tab tab : tabGroup.getTabs()) {
+			attachFilesForTab(attributes, tab);
+		}
+	}
+	
+	private void attachFilesForTab(Collection<? extends Attribute> attributes, Tab tab) {
+		
+	}
 
 	public void cancelTabGroup(String id, boolean warn) {
 		try {
@@ -716,202 +810,252 @@ public class BeanShellLinker {
 
 	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
 		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj == null) {
-			FLog.d("cannot find arch entity " + tabGroup.getLabel());
-			showWarning("Logic Error",
-					"Error showing tab group " + tabGroup.getLabel());
-			return;
-		}
 		if (archEntityObj instanceof ArchEntity) {
-			ArchEntity archEntity = (ArchEntity) archEntityObj;
-			try {
-				for (Tab tab : tabGroup.getTabs()) {
-					reinitiateArchEntFieldsValue(tab, archEntity);
-				}
-			} catch (Exception e) {
-				FLog.e("error showing arch entity tab group "
-						+ tabGroup.getLabel(), e);
-				showWarning("Logic Error", "Error showing tab group "
-						+ tabGroup.getLabel());
+			for (Tab tab : tabGroup.getTabs()) {
+				showArchEntityTab((ArchEntity) archEntityObj, tab);
 			}
+		} else {
+			FLog.d("cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
+			showWarning("Logic Error",
+					"Cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
+			return;
 		}
 	}
 
 	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
 		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj == null) {
-			FLog.d("cannot find relationship " + tabGroup.getLabel());
-			showWarning("Logic Error",
-					"Error showing tab group " + tabGroup.getLabel());
-			return;
-		}
 		if (relationshipObj instanceof Relationship) {
-			Relationship relationship = (Relationship) relationshipObj;
-			try {
-				for (Tab tab : tabGroup.getTabs()) {
-					reinitiateRelationshipFieldsValue(tab, relationship);
-				}
-			} catch (Exception e) {
-				FLog.e("error showing relationship tab group "
-						+ tabGroup.getLabel(), e);
-				showWarning("Logic Error", "Error showing tab group "
-						+ tabGroup.getLabel());
+			for (Tab tab : tabGroup.getTabs()) {
+				showRelationshipTab((Relationship) relationshipObj, tab);
 			}
+		} else {
+			FLog.d("cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
+			showWarning("Logic Error",
+					"Cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
+			return;
 		}
 	}
 
 	private void showArchEntityTab(String uuid, Tab tab) {
 		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj == null) {
-			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
-			return;
-		}
 		if (archEntityObj instanceof ArchEntity) {
-			ArchEntity archEntity = (ArchEntity) archEntityObj;
-			try {
-				reinitiateArchEntFieldsValue(tab, archEntity);
-			} catch (Exception e) {
-				FLog.e("error showing arch entity tab " + tab.getLabel(), e);
-				showWarning("Logic Error",
-						"Error showing tab " + tab.getLabel());
-			}
+			showArchEntityTab((ArchEntity) archEntityObj, tab);
+		} else {
+			FLog.d("cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
+			showWarning("Logic Error",
+					"Cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
+			return;
 		}
 	}
 	
-	private String joinStr(String s1, String s2) {
-		if (s1 == null) {
-			return s2;
-		} else if (s2 == null) {
-			return s1;
-		} 
-		return s1 + ";" + s2;
-	}
-
-	private void reinitiateArchEntFieldsValue(Tab tab, ArchEntity archEntity) {
-		tab.clearViews();
-		HashMap<String, String> dirtyMap = new HashMap<String, String>();
-		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
-			String s;
-			if (dirtyMap.containsKey(entityAttribute.getName())) {
-				s = dirtyMap.get(entityAttribute.getName());
-			} else {
-				s = null;
-			}
-			
-			dirtyMap.put(entityAttribute.getName(), joinStr(s, entityAttribute.getDirtyReason()));
-		}
-		for (EntityAttribute entityAttribute : archEntity.getAttributes()) {
-			if (tab.hasView(entityAttribute.getName())) {
-				List<View> views = tab.getViews(entityAttribute.getName());
-				if (views != null) {
-					String s = dirtyMap.get(entityAttribute.getName());
-					entityAttribute.setDirty(s != null);
-					entityAttribute.setDirtyReason(s);
-					loadArchEntFieldsValue(tab, entityAttribute, views);
+	private void showArchEntityTab(ArchEntity archEntity, Tab tab) {
+		try {
+			tab.clearViews();
+			for (EntityAttribute attribute : archEntity.getAttributes()) {
+				if (tab.hasView(attribute.getName())) {
+					List<View> views = tab.getViews(attribute.getName());
+					if (views != null) {
+						setAttributeTab(attribute, views);
+					}
 				}
 			}
+		} catch (Exception e) {
+			FLog.e("error showing arch entity tab " + tab.getLabel(), e);
+			showWarning("Logic Error",
+					"Error showing tab " + tab.getLabel());
 		}
 	}
-
+	
 	private void showRelationshipTab(String uuid, Tab tab) {
 		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj == null) {
-			showWarning("Logic Error", "Error showing tab " + tab.getLabel());
+		if (relationshipObj instanceof Relationship) {
+			showRelationshipTab((Relationship) relationshipObj, tab);
+		} else {
+			FLog.d("cannot show tab " + tab.getLabel() + " with relationship " + uuid);
+			showWarning("Logic Error",
+					"Cannot show tab " + tab.getLabel() + " with relationship " + uuid);
 			return;
 		}
-		if (relationshipObj instanceof Relationship) {
-			Relationship relationship = (Relationship) relationshipObj;
-			try {
-				reinitiateRelationshipFieldsValue(tab, relationship);
-			} catch (Exception e) {
-				FLog.e("error showing relationship tab " + tab.getLabel(), e);
-				showWarning("Logic Error",
-						"Error showing tab " + tab.getLabel());
-			}
-		}
 	}
-
-	private void reinitiateRelationshipFieldsValue(Tab tab,
-			Relationship relationship) {
-		tab.clearViews();
-		HashMap<String, String> dirtyMap = new HashMap<String, String>();
-		for (RelationshipAttribute relationshipAttribute : relationship.getAttributes()) {
-			String s;
-			if (dirtyMap.containsKey(relationshipAttribute.getName())) {
-				s = dirtyMap.get(relationshipAttribute.getName());
-			} else {
-				s = null;
-			}
-			
-			dirtyMap.put(relationshipAttribute.getName(), joinStr(s, relationshipAttribute.getDirtyReason()));
-		}
-		for (RelationshipAttribute relationshipAttribute : relationship
-				.getAttributes()) {
-			if (tab.hasView(relationshipAttribute.getName())) {
-				List<View> views = tab
-						.getViews(relationshipAttribute.getName());
-				if (views != null) {
-					String s = dirtyMap.get(relationshipAttribute.getName());
-					relationshipAttribute.setDirty(s != null);
-					relationshipAttribute.setDirtyReason(s);
-					loadRelationshipFieldsValue(tab, relationshipAttribute,
-							views);
+	
+	private void showRelationshipTab(Relationship relationship, Tab tab) {
+		try {
+			tab.clearViews();
+			for (RelationshipAttribute attribute : relationship.getAttributes()) {
+				if (tab.hasView(attribute.getName())) {
+					List<View> views = tab.getViews(attribute.getName());
+					if (views != null) {
+						setAttributeTab(attribute, views);
+					}
 				}
 			}
+		} catch (Exception e) {
+			FLog.e("error showing relationship tab " + tab.getLabel(), e);
+			showWarning("Logic Error",
+					"Error showing tab " + tab.getLabel());
 		}
 	}
 
-	private void loadArchEntFieldsValue(Tab tab,
-			EntityAttribute entityAttribute, List<View> views) {
+	private void setAttributeTab(Attribute attribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
-				setArchEntityFieldValueForType(tab,
-						customView.getAttributeType(),
-						customView.getRef(), entityAttribute);
+				if (v instanceof FileListGroup) {
+					FileListGroup audioList = (FileListGroup) v;
+					audioList.addFile(attribute.getValue());
+				} else if (v instanceof CameraPictureGallery) {
+					CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
+					// pictures require the full path
+					cameraGallery.addPicture(getAttachedFilePath(attribute.getValue()));
+				} else if (v instanceof VideoGallery) {
+					VideoGallery videoGallery = (VideoGallery) v;
+					// pictures require the full path
+					videoGallery.addVideo(getAttachedFilePath(attribute.getValue()));
+				} else {
+					setAttributeView(customView.getRef(), attribute);
+				}
 				customView.save();
 			}
 		}
 	}
 
-	private void loadRelationshipFieldsValue(Tab tab,
-			RelationshipAttribute relationshipAttribute, List<View> views) {
-		for (View v : views) {
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				setRelationshipFieldValueForType(tab,
-						customView.getAttributeType(),
-						customView.getRef(), relationshipAttribute);
-				customView.save();
-			}
-		}
-	}
-
-	private void setArchEntityFieldValueForType(Tab tab, String type,
-			String ref, EntityAttribute attribute) {
-		if (FREETEXT.equals(type)) {
-			setFieldValue(ref, attribute.getText());
-		} else if (MEASURE.equals(type)) {
-			setFieldValue(ref, attribute.getMeasure());
-			setFieldAnnotation(ref, attribute.getText());
-		} else if (VOCAB.equals(type)) {
-			setFieldValue(ref, attribute.getVocab());
-			setFieldAnnotation(ref, attribute.getText());
-		}
+	private void setAttributeView(String ref, Attribute attribute) {
+		setFieldValue(ref, attribute.getValue());
 		setFieldCertainty(ref, attribute.getCertainty());
-		setFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
+		setFieldAnnotation(ref, attribute.getAnnotation());
+		appendFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
+	}
+	
+	private List<EntityAttribute> getEntityAttributesFromTabGroup(TabGroup tabGroup) {
+		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+		for (Tab tab : tabGroup.getTabs()) {
+			attributes.addAll(getEntityAttributesFromTab(tab));
+		}
+		return attributes;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<EntityAttribute> getEntityAttributesFromTab(Tab tab) {
+		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+		
+		List<View> views = tab.getAllViews();
+		if (views != null) {
+			for (View v : views) {
+				if (v instanceof ICustomView) {
+					ICustomView customView = (ICustomView) v;
+					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
+					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
+					if (v instanceof PictureGallery) {
+						PictureGallery gallery = (PictureGallery) v;
+						List<NameValuePair> pairs = (List<NameValuePair>) gallery.getValues();
+						if (pairs == null || pairs.isEmpty()) {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
+						} else {
+							for (NameValuePair pair : pairs) {
+								// strip out full path from pictures
+								String value = (v instanceof CameraPictureGallery || v instanceof VideoGallery) ? stripAttachedFilePath(pair.getName()) : pair.getName();
+								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, value, null, certainty));
+								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, value, certainty));
+								} else {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
+								}
+							}
+						}
+					} else if (v instanceof CustomCheckBoxGroup) {
+						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
+						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
+						if (pairs == null || pairs.isEmpty()) {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
+						} else {
+							for (NameValuePair pair : pairs) {
+								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, pair.getName(), null, certainty));
+								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, pair.getName(), certainty));
+								} else {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), pair.getName(), null, null, certainty));
+								}
+							}
+						}
+					} else {
+						if (Attribute.MEASURE.equals(customView.getAttributeType())) {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, customView.getValue(), null, certainty));
+						} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, customView.getValue(), certainty));
+						} else {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), customView.getValue(), null, null, certainty));
+						}
+					}
+				}
+			}
+		} 
+		
+		return attributes;
 	}
 
-	private void setRelationshipFieldValueForType(Tab tab, String type,
-			String ref, RelationshipAttribute relationshipAttribute) {
-		if (FREETEXT.equals(type)) {
-			setFieldValue(ref, relationshipAttribute.getText());
-		} else if (VOCAB.equals(type)) {
-			setFieldValue(ref, relationshipAttribute.getVocab());
-			setFieldAnnotation(ref, relationshipAttribute.getText());
+	private List<RelationshipAttribute> getRelationshipAttributesFromTabGroup(TabGroup tabGroup) {
+		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
+		for (Tab tab : tabGroup.getTabs()) {
+			attributes.addAll(getRelationshipAttributesFromTab(tab));
 		}
-		setFieldCertainty(ref, relationshipAttribute.getCertainty());
-		setFieldDirty(ref, relationshipAttribute.isDirty(), relationshipAttribute.getDirtyReason());
+		return attributes;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<RelationshipAttribute> getRelationshipAttributesFromTab(Tab tab) {
+		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
+		
+		List<View> views = tab.getAllViews();
+		if (views != null) {
+			for (View v : views) {
+				if (v instanceof ICustomView) {
+					ICustomView customView = (ICustomView) v;
+					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
+					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
+					if (v instanceof PictureGallery) {
+						PictureGallery gallery = (PictureGallery) v;
+						List<NameValuePair> pairs = (List<NameValuePair>) gallery.getValues();
+						if (pairs == null || pairs.isEmpty()) {
+							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
+						} else {
+							for (NameValuePair pair : pairs) {
+								// strip out full path from pictures
+								String value = (v instanceof CameraPictureGallery || v instanceof VideoGallery) ? stripAttachedFilePath(pair.getName()) : pair.getName();
+								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, value, certainty));
+								} else {
+									attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
+								}
+							}
+						}
+					} else if (v instanceof CustomCheckBoxGroup) {
+						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
+						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
+						if (pairs == null || pairs.isEmpty()) {
+							attributes.add(new RelationshipAttribute(customView.getAttributeName(), null, null, null, true));
+						} else {
+							for (NameValuePair pair : pairs) {
+								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, pair.getName(), certainty));
+								} else {
+									attributes.add(new RelationshipAttribute(customView.getAttributeName(), pair.getName(), null, certainty));
+								}
+							}
+						}
+					} else {
+						if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+							attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, customView.getValue(), certainty));
+						} else {
+							attributes.add(new RelationshipAttribute(customView.getAttributeName(), customView.getValue(), null, certainty));
+						}
+					}
+				}
+			}
+		} 
+		
+		return attributes;
 	}
 
 	public void showToast(String message) {
@@ -1079,6 +1223,35 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error setting field dirty " + ref);
 		}
 	}
+	
+	public void appendFieldDirty(String ref, boolean isDirty, String dirtyReason) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			if (obj instanceof ICustomView) {
+				ICustomView customView = (ICustomView) obj;
+				
+				Button dirtyButton = activity.getUIRenderer().getTabForView(ref).getDirtyButton(ref);
+				if (dirtyButton != null) {
+					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
+				}
+				
+				customView.setDirty(isDirty);
+				String reason = customView.getDirtyReason();
+				if (reason != null && reason != "") {
+					reason += ";" + dirtyReason;
+				}
+				
+				customView.setDirtyReason(reason);
+			} else {
+				FLog.w("cannot set field dirty to view with ref " + ref);
+				showWarning("Logic Error", "Cannot find view with ref " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting field isDirty " + ref, e);
+			showWarning("Logic Error", "Error setting field dirty " + ref);
+		}
+	}
 
 	public Object getFieldValue(String ref) {
 		try {
@@ -1170,12 +1343,12 @@ public class BeanShellLinker {
 		return DateUtil.getCurrentTimestampGMT();
 	}
 
-	public String saveArchEnt(String entity_id, String entity_type,
-			List<Geometry> geo_data, List<EntityAttribute> attributes) {
+	public String saveArchEnt(String entityId, String entityType,
+			List<Geometry> geometry, List<EntityAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geo_data);
-			return activity.getDatabaseManager().saveArchEnt(entity_id,
-					entity_type, WKTUtil.collectionToWKT(geomList), attributes);
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geometry);
+			return activity.getDatabaseManager().saveArchEnt(entityId,
+					entityType, WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
 			FLog.e("error saving arch entity", e);
@@ -1184,12 +1357,12 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	public Boolean deleteArchEnt(String entity_id){
+	public Boolean deleteArchEnt(String entityId){
 		try {
-			activity.getDatabaseManager().deleteArchEnt(entity_id);
+			activity.getDatabaseManager().deleteArchEnt(entityId);
 			for(Tab tab : activity.getUIRenderer().getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
-					mapView.removeFromAllSelections(entity_id);
+					mapView.removeFromAllSelections(entityId);
 					mapView.updateSelections();
 				}
 			}
@@ -1200,11 +1373,11 @@ public class BeanShellLinker {
 		return false;
 	}
 
-	public String saveRel(String rel_id, String rel_type,
-			List<Geometry> geo_data, List<RelationshipAttribute> attributes) {
+	public String saveRel(String relationshpId, String relationshipType,
+			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geo_data);
-			return activity.getDatabaseManager().saveRel(rel_id, rel_type,
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geometry);
+			return activity.getDatabaseManager().saveRel(relationshpId, relationshipType,
 					WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
@@ -1214,12 +1387,12 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	public Boolean deleteRel(String rel_id){
+	public Boolean deleteRel(String relationshpId){
 		try {
-			activity.getDatabaseManager().deleteRel(rel_id);
+			activity.getDatabaseManager().deleteRel(relationshpId);
 			for(Tab tab : activity.getUIRenderer().getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
-					mapView.removeFromAllSelections(rel_id);
+					mapView.removeFromAllSelections(relationshpId);
 					mapView.updateSelections();
 				}
 			}
@@ -1230,9 +1403,9 @@ public class BeanShellLinker {
 		return false;
 	}
 	
-	public boolean addReln(String entity_id, String rel_id, String verb) {
+	public boolean addReln(String entityId, String relationshpId, String verb) {
 		try {
-			return activity.getDatabaseManager().addReln(entity_id, rel_id,
+			return activity.getDatabaseManager().addReln(entityId, relationshpId,
 					verb);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity relationship", e);

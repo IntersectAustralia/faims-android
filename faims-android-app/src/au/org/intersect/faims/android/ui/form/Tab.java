@@ -136,7 +136,8 @@ public class Tab implements Parcelable{
 		return dirtyButtonMap.get(ref);
 	}
 
-	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
+	public View addCustomView(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, 
+			boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	Button dirtyButton = null;
@@ -270,7 +271,7 @@ public class Tab implements Parcelable{
                     		view = createVideoGallery(attribute, ref);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                     	} else if ("audio".equalsIgnoreCase(attribute.questionType)) {
-                    		view = createAudioListGroup(attribute, ref);
+                    		view = createFileListGroup(attribute, ref);
                     		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
                         } else {
 	                    	view = createCheckListGroup(attribute, ref);
@@ -358,6 +359,12 @@ public class Tab implements Parcelable{
         if (dirtyButton != null) onDirtyButtonClicked(dirtyButton, view);
         if (infoButton != null) onInfoButtonClicked(infoButton, attributeName);
         linearLayout.addView(view);
+        
+        if (view instanceof ICustomView) {
+        	ICustomView customView = (ICustomView) view;
+        	customView.setCertaintyEnabled(annotationButton != null);
+        	customView.setAnnotationEnabled(annotationButton != null);
+        }
 	}
 	
 
@@ -480,9 +487,9 @@ public class Tab implements Parcelable{
         return checkboxGroup;
 	}
 	
-	private AudioListGroup createAudioListGroup(FormAttribute attribute, String ref) {
-		AudioListGroup audioListGroup = new AudioListGroup(
-                this.activityRef.get(), attribute.name, attribute.type, ref);
+	private FileListGroup createFileListGroup(FormAttribute attribute, String ref) {
+		FileListGroup audioListGroup = new FileListGroup(
+                this.activityRef.get(), attribute.name, attribute.type, attribute.sync, ref);
         return audioListGroup;
 	}
 	

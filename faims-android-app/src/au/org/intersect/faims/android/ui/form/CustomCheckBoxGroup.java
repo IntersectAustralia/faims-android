@@ -19,6 +19,8 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 	private String currentAnnotation;
 	private boolean dirty;
 	private String dirtyReason;
+	private boolean annotationEnabled;
+	private boolean certaintyEnabled;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
@@ -221,6 +223,26 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 			checkBox.setValue(pair.getValue());
 			addView(checkBox);
 		}
+	}
+
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
 	}
 
 }

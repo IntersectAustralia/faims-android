@@ -34,6 +34,10 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected ArrayList<CustomImageView> galleryImages;
 	protected LinearLayout galleriesLayout;
 
+	private boolean annotationEnabled;
+
+	private boolean certaintyEnabled;
+
 	public PictureGallery(Context context) {
 		super(context);
 	}
@@ -157,7 +161,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		currentAnnotation = getAnnotation();
 	}
 	
-	private void updateImages() {
+	protected void updateImages() {
 		if (galleryImages == null) return;
 		
 		for (CustomImageView view : galleryImages) {
@@ -259,56 +263,66 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	public void populate(List<Picture> pictures) {
 		removeSelectedImages();
+		
 		galleriesLayout.removeAllViews();
 		galleryImages = new ArrayList<CustomImageView>();
+		
 		for (Picture picture : pictures) {
-			String path = picture.getUrl();
-			
-			LinearLayout galleryLayout = new LinearLayout(
-					galleriesLayout.getContext());
-			galleryLayout.setOrientation(LinearLayout.VERTICAL);
-			final CustomImageView gallery = new CustomImageView(
-					galleriesLayout.getContext());
-			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					GALLERY_SIZE, GALLERY_SIZE);
-			
-			setGalleryImage(gallery, path);
-			
-			gallery.setBackgroundColor(Color.LTGRAY);
-			gallery.setPadding(10, 10, 10, 10);
-			gallery.setLayoutParams(layoutParams);
-			gallery.setPicture(picture);
-			gallery.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					selectImage(v);
-				}
-			});
-			gallery.setOnLongClickListener(new OnLongClickListener() {
-
-				@Override
-				public boolean onLongClick(View v) {
-					longSelectImage(v);
-					return true;
-				}
-			});
-			
-			TextView textView = new TextView(
-					galleriesLayout.getContext());
-			String name = picture.getName() != null ? picture
-					.getName() : new File(path).getName();
-			textView.setText(name);
-			textView.setGravity(Gravity.CENTER_HORIZONTAL);
-			textView.setTextSize(20);
-			galleryLayout.addView(textView);
-			galleryLayout.addView(gallery);
-			
-			galleryImages.add(gallery);
-			galleriesLayout.addView(galleryLayout);
+			addGallery(picture);
 		}
 	}
 	
+	protected CustomImageView addGallery(Picture picture) {
+		String path = picture.getUrl();
+	
+		LinearLayout galleryLayout = new LinearLayout(
+				galleriesLayout.getContext());
+		galleryLayout.setOrientation(LinearLayout.VERTICAL);
+		
+		final CustomImageView gallery = new CustomImageView(
+				galleriesLayout.getContext());
+		
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+				GALLERY_SIZE, GALLERY_SIZE);
+		
+		setGalleryImage(gallery, path);
+		
+		gallery.setBackgroundColor(Color.LTGRAY);
+		gallery.setPadding(10, 10, 10, 10);
+		gallery.setLayoutParams(layoutParams);
+		gallery.setPicture(picture);
+		gallery.setOnClickListener(new OnClickListener() {
+	
+			@Override
+			public void onClick(View v) {
+				selectImage(v);
+			}
+		});
+		gallery.setOnLongClickListener(new OnLongClickListener() {
+	
+			@Override
+			public boolean onLongClick(View v) {
+				longSelectImage(v);
+				return true;
+			}
+		});
+		
+		TextView textView = new TextView(
+				galleriesLayout.getContext());
+		String name = picture.getName() != null ? picture
+				.getName() : new File(path).getName();
+		textView.setText(name);
+		textView.setGravity(Gravity.CENTER_HORIZONTAL);
+		textView.setTextSize(20);
+		galleryLayout.addView(textView);
+		galleryLayout.addView(gallery);
+		
+		galleryImages.add(gallery);
+		galleriesLayout.addView(galleryLayout);
+		
+		return gallery;
+	}
+
 	protected void selectImage(View v) {
 		CustomImageView selectedImageView = (CustomImageView) v;
 		
@@ -335,6 +349,26 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		if(path != null && new File(path).exists()){
 			gallery.setImageURI(Uri.parse(path));
 		}
+	}
+	
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
 	}
 	
 }
