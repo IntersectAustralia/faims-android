@@ -742,7 +742,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		menu.findItem(R.id.action_gps_active_has_signal).setVisible(false);
 		menu.findItem(R.id.action_gps_active_no_signal).setVisible(false);
 		if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
-			if(gpsDataManager.isHasValidExternalGPSSignal() || gpsDataManager.isHasValidInternalGPSSignal()){
+			if(gpsDataManager.hasValidExternalGPSSignal() || gpsDataManager.hasValidInternalGPSSignal()){
 				menu.findItem(R.id.action_gps_active_has_signal).setVisible(true);
 			}else{
 				menu.findItem(R.id.action_gps_active_no_signal).setVisible(true);
@@ -752,10 +752,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 
 		// tracker status
-		menu.findItem(R.id.action_tracker_active).setVisible(false);
+		menu.findItem(R.id.action_tracker_active_no_gps).setVisible(false);
+		menu.findItem(R.id.action_tracker_active_has_gps).setVisible(false);
 		menu.findItem(R.id.action_tracker_inactive).setVisible(false);
 		if(gpsDataManager.isTrackingStarted()){
-			menu.findItem(R.id.action_tracker_active).setVisible(true);
+			if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
+				menu.findItem(R.id.action_tracker_active_has_gps).setVisible(true);
+			}else{
+				menu.findItem(R.id.action_tracker_active_no_gps).setVisible(true);
+			}
 		}else{
 			menu.findItem(R.id.action_tracker_inactive).setVisible(true);
 		}

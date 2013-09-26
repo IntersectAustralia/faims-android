@@ -12,9 +12,13 @@
     android:title="@string/action_gps_active_has_signal"
     android:icon="@drawable/action_gps_active_signal" 
     android:showAsAction="ifRoom"/>
-  <item android:id="@+id/action_tracker_active"
-    android:title="@string/tracker_active"
-    android:icon="@drawable/action_track_active" 
+  <item android:id="@+id/action_tracker_active_no_gps"
+    android:title="@string/tracker_active_no_gps"
+    android:icon="@drawable/action_track_active_no_gps" 
+    android:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_tracker_active_has_gps"
+    android:title="@string/tracker_active_has_gps"
+    android:icon="@drawable/action_track_active_has_gps" 
     android:showAsAction="ifRoom"/>
   <item android:id="@+id/action_tracker_inactive"
     android:title="@string/tracker_inactive"

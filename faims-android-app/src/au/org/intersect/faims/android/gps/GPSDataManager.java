@@ -328,7 +328,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		this.locationManager = locationManager;
 	}
 
-	public boolean isHasValidExternalGPSSignal() {
+	public boolean hasValidExternalGPSSignal() {
 		return hasValidExternalGPSSignal;
 	}
 
@@ -336,7 +336,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		this.hasValidExternalGPSSignal = hasValidExternalGPSSignal;
 	}
 
-	public boolean isHasValidInternalGPSSignal() {
+	public boolean hasValidInternalGPSSignal() {
 		return hasValidInternalGPSSignal;
 	}
 

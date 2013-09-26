@@ -92,7 +92,8 @@
     <string name="action_gps_active_no_signal">GPS active no signal</string>
     
     
-    <string name="tracker_active">Track log active</string>
+    <string name="tracker_active_has_gps">Track log active, GPS connected</string>
+    <string name="tracker_active_no_gps">Track log active, GPS not connected</string>
     <string name="tracker_inactive">Track log disabled</string>
     
     <string name="sync_no_changes">Sync active</string>
