@@ -1,0 +1,410 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="SyncExample" preparer="Nobody">
+    
+   <RelationshipElement name="AboveBelow" type="hierarchy">
+    <description>
+      Indicates that one element is above or below another element.
+    </description>
+    <parent>
+      Above
+    </parent>
+    <child>
+      Below
+    </child>
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <description>This is a name.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="type">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>
+            Type A
+            <description>This is Type A</description>
+            <term>
+                Color A1
+                <term>
+                    Shape A1S1
+                    <term>Size A1S1R1
+                        <description>This is Size A1S1R1</description></term>
+                    <term>Size A1S1R2</term>
+                    <term>Size A1S1R3</term>
+                    <term>Size A1S1R4</term>
+                </term>
+                <term>
+                    Shape A1S2
+                    <term>Size A1S2R1</term>
+                    <term>Size A1S2R2</term>
+                    <term>Size A1S2R3</term>
+                    <term>Size A1S2R4</term>
+                </term>
+                <term>
+                    Shape A1S3
+                    <term>Size A1S3R1</term>
+                    <term>Size A1S3R2</term>
+                    <term>Size A1S3R3</term>
+                    <term>Size A1S3R4</term>
+                </term>
+                <term>
+                    Shape A1S4
+                    <term>Size A1S4R1</term>
+                    <term>Size A1S4R2</term>
+                    <term>Size A1S4R3</term>
+                    <term>Size A1S4R4</term>
+                </term>
+            </term>
+            <term>
+                Color A2
+                <term>Shape A2S1</term>
+                <term>Shape A2S2</term>
+                <term>Shape A2S3</term>
+                <term>Shape A2S4</term>
+	        </term>
+            <term>
+                Color A3
+                <term>Shape A3S1</term>
+                <term>Shape A3S2</term>
+                <term>Shape A3S3</term>
+                <term>Shape A3S4</term>
+	        </term>
+            <term>
+                Color A4
+                <term>Shape A4S1</term>
+                <term>Shape A4S2</term>
+                <term>Shape A4S3</term>
+                <term>Shape A4S4</term>
+	    	</term>
+        </term>
+        <term>
+            Type B
+            <description>This is Type B</description>
+            <term>
+                Color B1
+                <term>Shape B1S1
+                    <description>This is Shape B1S1</description></term>
+                <term>Shape B1S2</term>
+                <term>Shape B1S3</term>
+                <term>Shape B1S4</term>
+            </term>
+            <term>
+                Color B2
+                <term>Shape B2S1</term>
+                <term>Shape B2S2</term>
+                <term>Shape B2S3</term>
+                <term>Shape B2S4</term>
+	        </term>
+            <term>
+                Color B3
+                <term>Shape B3S1</term>
+                <term>Shape B3S2</term>
+                <term>Shape B3S3</term>
+                <term>Shape B3S4</term>
+	        </term>
+            <term>
+                Color B4
+                <term>Shape B4S1</term>
+                <term>Shape B4S2</term>
+                <term>Shape B4S3</term>
+                <term>Shape B4S4</term>
+	    	</term>
+        </term>
+        <term>
+        	Type C
+        	<description>This is Type C</description>
+            <term>Color C1</term>
+            <term>Color C2</term>
+            <term>Color C3</term>
+            <term>Color C4</term>  
+        </term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="dropdown" name="location">
+      <description>This is a location</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </RelationshipElement>
+  
+   <RelationshipElement name="NextTo" type="container">
+    <description>
+      Indicates that one element is next to another element.
+    </description>
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <description>This is a name.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="type">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>
+            Type A
+            <description>This is Type A</description>
+            <term>
+                Color A1
+                <term>
+                    Shape A1S1
+                    <term>Size A1S1R1
+                        <description>This is Size A1S1R1</description></term>
+                    <term>Size A1S1R2</term>
+                    <term>Size A1S1R3</term>
+                    <term>Size A1S1R4</term>
+                </term>
+                <term>
+                    Shape A1S2
+                    <term>Size A1S2R1</term>
+                    <term>Size A1S2R2</term>
+                    <term>Size A1S2R3</term>
+                    <term>Size A1S2R4</term>
+                </term>
+                <term>
+                    Shape A1S3
+                    <term>Size A1S3R1</term>
+                    <term>Size A1S3R2</term>
+                    <term>Size A1S3R3</term>
+                    <term>Size A1S3R4</term>
+                </term>
+                <term>
+                    Shape A1S4
+                    <term>Size A1S4R1</term>
+                    <term>Size A1S4R2</term>
+                    <term>Size A1S4R3</term>
+                    <term>Size A1S4R4</term>
+                </term>
+            </term>
+            <term>
+                Color A2
+                <term>Shape A2S1</term>
+                <term>Shape A2S2</term>
+                <term>Shape A2S3</term>
+                <term>Shape A2S4</term>
+	        </term>
+            <term>
+                Color A3
+                <term>Shape A3S1</term>
+                <term>Shape A3S2</term>
+                <term>Shape A3S3</term>
+                <term>Shape A3S4</term>
+	        </term>
+            <term>
+                Color A4
+                <term>Shape A4S1</term>
+                <term>Shape A4S2</term>
+                <term>Shape A4S3</term>
+                <term>Shape A4S4</term>
+	    	</term>
+        </term>
+        <term>
+            Type B
+            <description>This is Type B</description>
+            <term>
+                Color B1
+                <term>Shape B1S1
+                    <description>This is Shape B1S1</description></term>
+                <term>Shape B1S2</term>
+                <term>Shape B1S3</term>
+                <term>Shape B1S4</term>
+            </term>
+            <term>
+                Color B2
+                <term>Shape B2S1</term>
+                <term>Shape B2S2</term>
+                <term>Shape B2S3</term>
+                <term>Shape B2S4</term>
+	        </term>
+            <term>
+                Color B3
+                <term>Shape B3S1</term>
+                <term>Shape B3S2</term>
+                <term>Shape B3S3</term>
+                <term>Shape B3S4</term>
+	        </term>
+            <term>
+                Color B4
+                <term>Shape B4S1</term>
+                <term>Shape B4S2</term>
+                <term>Shape B4S3</term>
+                <term>Shape B4S4</term>
+	    	</term>
+        </term>
+        <term>
+        	Type C
+        	<description>This is Type C</description>
+            <term>Color C1</term>
+            <term>Color C2</term>
+            <term>Color C3</term>
+            <term>Color C4</term>  
+        </term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="dropdown" name="location">
+        <description>This is a location</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </RelationshipElement>
+  
+  <ArchaeologicalElement name="small">
+    <description>
+      An small entity
+    </description>
+    <property type="string" name="entity" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <description>This is a name.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="value">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="file">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="picture">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="video">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="audio">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="timestamp" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="type">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>
+            Type A
+            <description>This is Type A</description>
+            <term>
+                Color A1
+                <term>
+                    Shape A1S1
+                    <term>Size A1S1R1
+                        <description>This is Size A1S1R1</description></term>
+                    <term>Size A1S1R2</term>
+                    <term>Size A1S1R3</term>
+                    <term>Size A1S1R4</term>
+                </term>
+                <term>
+                    Shape A1S2
+                    <term>Size A1S2R1</term>
+                    <term>Size A1S2R2</term>
+                    <term>Size A1S2R3</term>
+                    <term>Size A1S2R4</term>
+                </term>
+                <term>
+                    Shape A1S3
+                    <term>Size A1S3R1</term>
+                    <term>Size A1S3R2</term>
+                    <term>Size A1S3R3</term>
+                    <term>Size A1S3R4</term>
+                </term>
+                <term>
+                    Shape A1S4
+                    <term>Size A1S4R1</term>
+                    <term>Size A1S4R2</term>
+                    <term>Size A1S4R3</term>
+                    <term>Size A1S4R4</term>
+                </term>
+            </term>
+            <term>
+                Color A2
+                <term>Shape A2S1</term>
+                <term>Shape A2S2</term>
+                <term>Shape A2S3</term>
+                <term>Shape A2S4</term>
+	        </term>
+            <term>
+                Color A3
+                <term>Shape A3S1</term>
+                <term>Shape A3S2</term>
+                <term>Shape A3S3</term>
+                <term>Shape A3S4</term>
+	        </term>
+            <term>
+                Color A4
+                <term>Shape A4S1</term>
+                <term>Shape A4S2</term>
+                <term>Shape A4S3</term>
+                <term>Shape A4S4</term>
+	    	</term>
+        </term>
+        <term>
+            Type B
+            <description>This is Type B</description>
+            <term>
+                Color B1
+                <term>Shape B1S1
+                    <description>This is Shape B1S1</description></term>
+                <term>Shape B1S2</term>
+                <term>Shape B1S3</term>
+                <term>Shape B1S4</term>
+            </term>
+            <term>
+                Color B2
+                <term>Shape B2S1</term>
+                <term>Shape B2S2</term>
+                <term>Shape B2S3</term>
+                <term>Shape B2S4</term>
+	        </term>
+            <term>
+                Color B3
+                <term>Shape B3S1</term>
+                <term>Shape B3S2</term>
+                <term>Shape B3S3</term>
+                <term>Shape B3S4</term>
+	        </term>
+            <term>
+                Color B4
+                <term>Shape B4S1</term>
+                <term>Shape B4S2</term>
+                <term>Shape B4S3</term>
+                <term>Shape B4S4</term>
+	    	</term>
+        </term>
+        <term>
+        	Type C
+        	<description>This is Type C</description>
+            <term>Color C1</term>
+            <term>Color C2</term>
+            <term>Color C3</term>
+            <term>Color C4</term>  
+        </term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="dropdown" name="location">
+        <description>This is a location</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </ArchaeologicalElement>
+  
+</dataSchema>

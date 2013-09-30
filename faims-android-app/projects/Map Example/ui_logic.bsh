@@ -1057,13 +1057,7 @@ updateUIEntity(String entityId) {
 		
 	}
 	
-	String id = saveArchEnt(entityId, "simpleentity", list, attributes);
-	
-	refreshUIEntities();
-	
-	refreshMap("tabgroup5/tab1/map");
-	
-	return id;
+	saveTab("tabgroup5/tab2", entityId, list, attributes, "refreshUIEntities(); refreshMap(\"tabgroup5/tab1/map\");");
 }
 
 loadUIEntity(entityId) {
