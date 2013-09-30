@@ -1712,6 +1712,14 @@ public class CustomMapView extends MapView {
 		setLayerVisible(getLayer(layerId), value);
 	}
 	
+	public void setGdalLayerShowAlways(String layerName, boolean showAlways) throws MapException {
+		if (getLayer(layerName) instanceof CustomGdalMapLayer){
+			((CustomGdalMapLayer)getLayer(layerName)).setShowAlways(showAlways);
+		}else{
+			throw new MapException("invalid layer, should be a gdal map layer");
+		}
+	}
+	
 	public void setLayerVisible(Layer layer, boolean value) throws Exception {
 		if (layer == null) {
 			throw new MapException("Layer does not exist");

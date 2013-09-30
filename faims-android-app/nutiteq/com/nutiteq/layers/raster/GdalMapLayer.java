@@ -65,7 +65,7 @@ public class GdalMapLayer extends RasterLayer {
     Map<Envelope, GdalDatasetInfo> dataSets = new HashMap<Envelope, GdalDatasetInfo>();
     Map<Envelope, Dataset> openDataSets = new HashMap<Envelope, Dataset>();
     private int counter=1;
-    private boolean showAlways;
+    protected boolean showAlways;
 
     /**
      * Read raster data source using GDAL library. Tested with:

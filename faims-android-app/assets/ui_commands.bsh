@@ -924,6 +924,18 @@ setLayerVisible(String ref, int layerId, boolean visible) {
 }
 
 /**
+  * Change the showAlways attribute of the specified gdal layer in the map view with the given reference.
+  * If showAlways set to true, the GDAL layer will always be loaded without doing calculation to determine
+  * which tile should be shown at certain zoom level.
+  *
+  * @param ref the reference to the map view
+  * @param layerName the layerName to set showAlways options, will show logic error dialog if not a gdal layer
+  * @param showAlways the boolean to set whether it is doing calculation or not
+  */
+setGdalLayerShowAlways(String ref, String layerName, boolean showAlways){
+	linker.setGdalLayerShowAlways(ref, layerName, showAlways);
+}
+/**
   * Draw a point on the map view with the given reference by specifying the point and style.
   *
   * @param ref the reference to the map view

@@ -3007,6 +3007,24 @@ public class BeanShellLinker {
 					+ ref);
 		}
 	}
+	
+	public void setGdalLayerShowAlways(String ref, String layerName, boolean showAlways) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+
+				mapView.setGdalLayerShowAlways(layerName, showAlways);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting gdal layer showalways option " + ref, e);
+			showWarning("Logic Error", "Error setting gdal layer showalways option "
+					+ ref);
+		}
+	}
 
 	public int drawPoint(String ref, int layerId, MapPos point,
 			GeometryStyle style) {

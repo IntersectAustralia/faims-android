@@ -26,6 +26,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
@@ -313,7 +314,20 @@ public class LayerManagerDialog extends AlertDialog {
 				layout.addView(renameButton);
 				layout.addView(showMetadataButton);
 				
-				if (layer instanceof CustomSpatialiteLayer) {
+				if (layer instanceof CustomGdalMapLayer){
+					CheckBox checkBox = new CheckBox(context);
+					checkBox.setText("best zoom loading");
+					checkBox.setChecked(!((CustomGdalMapLayer)layer).isShowAlways());
+					checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+						
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+							((CustomGdalMapLayer)layer).setShowAlways(!isChecked);
+						}
+					});
+					layout.addView(checkBox);
+
+				}else if (layer instanceof CustomSpatialiteLayer) {
 					final ToggleButton showLabelsButton = new ToggleButton(context);
 					showLabelsButton.setTextOn("Hide Labels");
 					showLabelsButton.setTextOff("Show Labels");
