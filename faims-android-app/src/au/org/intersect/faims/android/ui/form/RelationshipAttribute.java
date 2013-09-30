@@ -18,7 +18,8 @@ public class RelationshipAttribute extends Attribute {
 		this.isDeleted = isDeleted;
 	}
 	
-	public String getValue() {
+	@Override
+	public String getValue(String type) {
 		if (VOCAB.equals(type)) {
 			return vocab;
 		} else {
@@ -26,7 +27,8 @@ public class RelationshipAttribute extends Attribute {
 		}
 	}
 	
-	public String getAnnotation() {
+	@Override
+	public String getAnnotation(String type) {
 		if (VOCAB.equals(type)) {
 			return text;
 		} else {

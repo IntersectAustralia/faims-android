@@ -4,11 +4,10 @@ import java.util.List;
 
 import android.content.Context;
 import android.widget.EditText;
+import au.org.intersect.faims.android.data.FormAttribute;
 
 public class CustomEditText extends EditText implements ICustomView {
 
-	private String attributeName;
-	private String attributeType;
 	private String ref;
 	private String currentValue;
 	private float certainty;
@@ -19,25 +18,25 @@ public class CustomEditText extends EditText implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
+	private FormAttribute attribute;
 	
 	public CustomEditText(Context context) {
 		super(context);
 	}
 	
-	public CustomEditText(Context context, String attributeName, String attributeType, String ref) {
+	public CustomEditText(Context context, FormAttribute attribute, String ref) {
 		super(context);
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
+		this.attribute = attribute;
 		this.ref = ref;
 		reset();
 	}
 
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
 
 	public String getRef() {
@@ -85,6 +84,8 @@ public class CustomEditText extends EditText implements ICustomView {
 	}
 
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
 		setValue("");
 		setCertainty(1);
 		setAnnotation("");
@@ -92,6 +93,7 @@ public class CustomEditText extends EditText implements ICustomView {
 	}
 
 	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

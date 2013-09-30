@@ -18,8 +18,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	protected static final int GALLERY_SIZE = 400;
 	
-	private String attributeName;
-	private String attributeType;
 	private String ref;
 	private List<NameValuePair> currentValues;
 	private float certainty;
@@ -27,8 +25,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	private String annotation;
 	private String currentAnnotation;
 	private boolean isMulti;
-	private boolean dirty;
-	private String dirtyReason;
+	protected boolean dirty;
+	protected String dirtyReason;
 	
 	protected List<CustomImageView> selectedImages;
 	protected ArrayList<CustomImageView> galleryImages;
@@ -38,14 +36,15 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	private boolean certaintyEnabled;
 
+	private FormAttribute attribute;
+
 	public PictureGallery(Context context) {
 		super(context);
 	}
 
-	public PictureGallery(Context context, String ref, FormAttribute attribute, boolean isMulti) {
+	public PictureGallery(Context context, FormAttribute attribute, String ref, boolean isMulti) {
 		super(context);
-		this.attributeName = attribute.name;
-		this.attributeType = attribute.type;
+		this.attribute = attribute;
 		this.ref = ref;
 		this.isMulti = isMulti;
 		
@@ -59,12 +58,12 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	@Override
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
 
 	@Override
@@ -118,6 +117,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
 		removeSelectedImages();
 		setCertainty(1);
 		setAnnotation("");
@@ -148,6 +149,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	@Override
 	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
 		return !(compareValues()) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

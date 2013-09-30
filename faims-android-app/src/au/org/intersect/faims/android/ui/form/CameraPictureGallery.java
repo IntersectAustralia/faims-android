@@ -26,8 +26,8 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 		super(context);
 	}
 	
-	public CameraPictureGallery(Context context, String ref, FormAttribute attribute) {
-		super(context, ref, attribute, true);
+	public CameraPictureGallery(Context context, FormAttribute attribute, String ref) {
+		super(context, attribute, ref, true);
 		this.sync = attribute.sync;
 	}
 	
@@ -120,6 +120,9 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 	
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
+		
 		removeSelectedImages();
 		galleriesLayout.removeAllViews();
 		galleryImages = new ArrayList<CustomImageView>();

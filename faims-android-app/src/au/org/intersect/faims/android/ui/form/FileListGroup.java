@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.form;
 
 import android.content.Context;
+import au.org.intersect.faims.android.data.FormAttribute;
 
 public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileView {
 	
@@ -10,9 +11,8 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		super(context);
 	}
 
-	public FileListGroup(Context context, String attributeName,
-			String attributeType, boolean sync, String ref) {
-		super(context, attributeName, attributeType, ref);
+	public FileListGroup(Context context, FormAttribute attribute, boolean sync, String ref) {
+		super(context, attribute, ref);
 		this.sync = sync;
 	}
 	
@@ -22,6 +22,9 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 	
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
+		
 		removeAllViews();
 		
 		setCertainty(1);
@@ -35,6 +38,7 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		checkBox.setValue(value);
 		checkBox.setChecked(true);
 		addView(checkBox);
+		this.invalidate();
 	}
 
 }

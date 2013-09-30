@@ -270,7 +270,7 @@ public class Tab implements Parcelable{
                     	} else if ("video".equalsIgnoreCase(attribute.questionType)) {
                     		view = createVideoGallery(attribute, ref);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
-                    	} else if ("audio".equalsIgnoreCase(attribute.questionType)) {
+                    	} else if ("file".equalsIgnoreCase(attribute.questionType)) {
                     		view = createFileListGroup(attribute, ref);
                     		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
                         } else {
@@ -362,14 +362,14 @@ public class Tab implements Parcelable{
         
         if (view instanceof ICustomView) {
         	ICustomView customView = (ICustomView) view;
-        	customView.setCertaintyEnabled(annotationButton != null);
+        	customView.setCertaintyEnabled(certaintyButton != null);
         	customView.setAnnotationEnabled(annotationButton != null);
         }
 	}
 	
 
 	private CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -390,7 +390,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomDatePicker createDatePicker(FormAttribute attribute, String ref) {
-		CustomDatePicker date = new CustomDatePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomDatePicker date = new CustomDatePicker(this.activityRef.get(), attribute, ref);
     	Time now = new Time();
 		now.setToNow();
 		date.updateDate(now.year, now.month, now.monthDay);
@@ -401,7 +401,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomEditText createTextArea(FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -410,7 +410,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomTimePicker createTimePicker(FormAttribute attribute, String ref) {
-		CustomTimePicker time = new CustomTimePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomTimePicker time = new CustomTimePicker(this.activityRef.get(), attribute, ref);
     	Time timeNow = new Time();
         timeNow.setToNow();
 		time.setCurrentHour(timeNow.hour);
@@ -422,7 +422,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomRadioGroup createRadioGroup(FormAttribute attribute, String ref) {
-		CustomRadioGroup radioGroup = new CustomRadioGroup(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomRadioGroup radioGroup = new CustomRadioGroup(this.activityRef.get(), attribute, ref);
 		
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		for (final SelectChoice selectChoice : attribute.selectChoices) {
@@ -455,7 +455,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private HierarchicalSpinner createDropDown(FormAttribute attribute, String ref) {
-		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
+		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute, ref);
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -474,7 +474,7 @@ public class Tab implements Parcelable{
 	
 	private CustomCheckBoxGroup createCheckListGroup(FormAttribute attribute, String ref) {
 		CustomCheckBoxGroup checkboxGroup = new CustomCheckBoxGroup(
-                this.activityRef.get(), attribute.name, attribute.type, ref);
+                this.activityRef.get(), attribute, ref);
         
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
@@ -489,7 +489,7 @@ public class Tab implements Parcelable{
 	
 	private FileListGroup createFileListGroup(FormAttribute attribute, String ref) {
 		FileListGroup audioListGroup = new FileListGroup(
-                this.activityRef.get(), attribute.name, attribute.type, attribute.sync, ref);
+                this.activityRef.get(), attribute, attribute.sync, ref);
         return audioListGroup;
 	}
 	
@@ -501,11 +501,13 @@ public class Tab implements Parcelable{
 	}
 	
 	private void setDirtyTextArea(EditText text, String value) {
+		if (value == null || "".equals(value)) return;
+		
 		String[] lines = value.split(";");
 		StringBuffer sb = new StringBuffer();
 		int count = 0;
 		for (String l : lines) {
-			if (l.equals("")) continue;
+			if (l.trim().equals("")) continue;
 			sb.append(l);
 			sb.append("\n");
 			count++;
@@ -689,7 +691,7 @@ public class Tab implements Parcelable{
 			
 			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
 			
-			if(!terms.isEmpty()){
+			if(terms != null && !terms.isEmpty()){
 				description.append("<p><i>Glossary:</i></p>");
 				VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
 				createVocabularyTermXML(description, terms);
@@ -832,15 +834,15 @@ public class Tab implements Parcelable{
 	}
 	
     private PictureGallery createPictureGallery(FormAttribute attribute, String ref, boolean isMulti) {
-		return new PictureGallery(this.activityRef.get(), ref, attribute, isMulti);
+		return new PictureGallery(this.activityRef.get(), attribute, ref, isMulti);
 	}
     
     private CameraPictureGallery createCameraPictureGallery(FormAttribute attribute, String ref) {
-		return new CameraPictureGallery(this.activityRef.get(), ref, attribute);
+		return new CameraPictureGallery(this.activityRef.get(), attribute, ref);
 	}
     
     private VideoGallery createVideoGallery(FormAttribute attribute, String ref) {
-		return new VideoGallery(this.activityRef.get(), ref, attribute);
+		return new VideoGallery(this.activityRef.get(), attribute, ref);
 	}
 
 	/*

@@ -188,25 +188,14 @@
 	            	<value>dummy</value>
 	          	</item>
 	        </select1>
-	        <select ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
+	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
 	            <label>Gallery:</label>
 	            <item>
 	                <label>dummy</label>
 	                <value>dummy</value>
 	            </item>
-	        </select>
-	        <select1 ref="sync" appearance="full" faims_certainty="false">
-	            <label>Sync:</label>
-	            <item>
-	                <label>On</label>
-	                <value>1</value>
-	            </item>
-	            <item>
-	                <label>Off</label>
-	                <value>0</value>
-	            </item>
 	        </select1>
-	        <select ref="files" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -216,7 +205,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -236,7 +225,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="audio" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>

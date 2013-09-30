@@ -83,8 +83,8 @@ public abstract class Attribute {
 		return dirtyReason;
 	}
 	
-	public abstract String getValue();
+	public abstract String getValue(String type);
 	
-	public abstract String getAnnotation();
+	public abstract String getAnnotation(String type);
 	
 }

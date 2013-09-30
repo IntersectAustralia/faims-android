@@ -78,6 +78,26 @@ onEvent("tabgroup3/tab1/stop", "click", "stopSync()");
 
 String entity_id = null;
 
+initEntity() {
+	clearEntity();
+}
+
+onEvent("tabgroup1", "show", "initEntity()");	
+
+closeEntity() {
+	cancelTabGroup("tabgroup1", true);
+}
+
+onEvent("tabgroup1/tab1/close", "click", "closeEntity()");
+
+loadEntities() {
+	Object entities = fetchEntityList("small");
+	populateDropDown("tabgroup1/tab2/entities", entities);
+}
+loadEntities();
+
+onEvent("tabgroup1/tab2", "show", "loadEntities()");
+
 saveEntity() {
 	updateEntity();
 }
@@ -95,17 +115,17 @@ loadEntity() {
 updateEntity() {
 	if (isNull(entity_id)) entity_id = null;
 	
-	attributes = createAttributesList();
-	entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
-	attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
-	entity_id = saveTabGroup("tabgroup1", entity_id, null, attributes);
+	attributes = null;
+	if (entity_id == null) {
+		attributes = createAttributeList();
+		entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	}
+	
+	saveTabGroup("tabgroup1", entity_id, null, attributes, "entity_id = getLastSavedRecordId(); loadEntity();");
 }
 
 clearEntity() {
-	entity_id = null;
-	
-	newTab("tabgroup1/tab1");
-	
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 	
@@ -114,8 +134,11 @@ clearEntity() {
 	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
 	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
 	
+	entity_id = null;
+	
+	newTab("tabgroup1/tab1");
+	
 	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
-	setFieldValue("tabgroup1/tab1/sync", "0");
 }
 
 deleteEntity(){
@@ -127,68 +150,17 @@ deleteEntity(){
     cancelTabGroup("tabgroup1", false);
 }
 
-attachFileEntity() {
-	showFileBrowser("OnFileAttachedEntity()");
-}
-
-OnFileAttachedEntity() {
-	
-}
-
-takePictureEntity() {
-	openCamera("OnPictureTakenEntity()");
-}
-
-OnPictureTakenEntity() {
-	
-}
-
-takeVideoEntity() {
-	openVideo("OnVideoTakenEntity()");
-}
-
-OnVideoTakenEntity() {
-	
-}
-
-recordAudioEntity(){
-	recordAudio("OnAudioRecordedEntity()");
-}
-
-OnAudioRecordedEntity(){
-	
-}
-
-onEvent("tabgroup1/tab1/attachfile", "click", "attachFileEntity()");
-onEvent("tabgroup1/tab1/attachpicture", "click", "takePictureEntity()");
-onEvent("tabgroup1/tab1/attachvideo", "click", "takeVideoEntity()");
-onEvent("tabgroup1/tab1/attachaudio", "click", "recordAudioEntity()");
-
-onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity_id)");
-
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity()");
 
-closeEntity() {
-	cancelTabGroup("tabgroup1", true);
-}
+onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
+onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");
+onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/videos\")");
+onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
 
-onEvent("tabgroup1/tab1/close", "click", "closeEntity()");
-
-initEntity() {
-	clearEntity();
-}
-
-onEvent("tabgroup1", "show", "initEntity()");	
-
-loadEntityTab() {
-	Object entities = fetchEntityList("small");
-	populateDropDown("tabgroup1/tab2/entities", entities);
-}
-
-onEvent("tabgroup1/tab2", "show", "loadEntityTab()");
+onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity_id)");
 
 // ASSOCIATIONS
 
@@ -204,35 +176,11 @@ onEvent("tabgroup4/tab1/add", "click", "onAddMember()");
 onAddMember() {
 	eid = getFieldValue("tabgroup4/tab1/entities");
 	rid = getFieldValue("tabgroup4/tab1/relationships");
-	if (eid == null || "".equals(eid) || rid == null || "".equals(rid)) return;
+	if (isNull(eid) || isNull(rid)) return;
 	
 	verb = getFieldValue("tabgroup4/tab1/verb");
 	
 	addReln(eid, rid, verb);
 	
 	showToast("Added relationship member");
-}
-
-// MISC
-
-convertPairsToList(pairs) {
-	if (pairs == null) return new ArrayList();
-	ArrayList list = new ArrayList();
-	for (NameValuePair p : pairs) {
-		list.add(p.getName());
-	}
-	return list;
-}
-
-convertListToPairs(list) {
-	if (list == null) return new ArrayList();
-	ArrayList pairs = new ArrayList();
-	for (String s : list) {
-		pairs.add(new NameValuePair(s, "true"));
-	}
-	return pairs;
-}
-
-isNull(value) {
-	return value == null || "".equals(value);
 }

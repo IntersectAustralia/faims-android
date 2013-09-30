@@ -99,6 +99,8 @@ public class BeanShellLinker {
 	private MediaRecorder recorder;
 	private String audioCallBack;
 
+	protected Dialog saveDialog;
+
 	public BeanShellLinker(ShowProjectActivity activity, Project project) {
 		this.activity = activity;
 		this.project = project;
@@ -149,6 +151,17 @@ public class BeanShellLinker {
 			FLog.i("error executing code", e);
 			showWarning("Logic Error", "Error encountered in logic script");
 		}
+	}
+	
+	public void executeOnUiThread(final String code) {
+		activity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				execute(code);
+			}
+			
+		});
 	}
 
 	public void startTrackingGPS(final String type, final int value, final String callback) {
@@ -554,6 +567,36 @@ public class BeanShellLinker {
 		}
 	}
 	
+	private void showSaveDialog() {
+		try {
+			while(saveDialog != null) {
+				Thread.sleep(1);
+			}
+			
+			activity.runOnUiThread(new Runnable() {
+	
+				@Override
+				public void run() {
+					saveDialog = showBusy("Busy", "Saving record");
+				}
+				
+			});
+			
+			while(saveDialog == null) {
+				Thread.sleep(1);
+			}
+		} catch (Exception e) {
+			FLog.e("error showing saving dialog", e);
+		}
+	}
+	
+	private void hideSaveDialog() {
+		if (saveDialog != null) {
+			saveDialog.dismiss();
+			saveDialog = null;
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void saveTabGroup(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
 		try {
@@ -563,55 +606,77 @@ public class BeanShellLinker {
 				return;
 			}
 			if (tabGroup.getArchEntType() != null) {
-				new Thread(new Runnable() {
+				HandlerThread thread = new HandlerThread("saving");
+				thread.start();
+				Handler handler = new Handler(thread.getLooper());
+				handler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
-							Dialog d = showBusy("Busy", "Saving record");
+							showSaveDialog();
 							
-							List<EntityAttribute> entityAttributes = (List<EntityAttribute>) attributes;
+							try {
+								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+								if (attributes != null) {
+									entityAttributes.addAll((List<EntityAttribute>) attributes);
+								}
+								
+								entityAttributes.addAll(getEntityAttributesFromTabGroup(tabGroup));
+								
+								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
+								
+								interpreter.set("_saved_record_id", entityId);
+								executeOnUiThread(callback);
+							} catch (Exception e) {
+								FLog.e("error saving tabgroup " + id, e);
+								showWarning("Logic Error", "Error saving tab group " + id);
+							}
 							
-							entityAttributes.addAll(getEntityAttributesFromTabGroup(tabGroup));
-							
-							String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-							
-							d.dismiss();
-							
-							interpreter.set("_saved_record_id", entityId);
-							execute(callback);
+							hideSaveDialog();
 						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id);
+							FLog.e("error saving tabgroup " + id, e);
 							showWarning("Logic Error", "Error saving tab group " + id);
 						}
 					}
 					
-				}).start();
+				});
 			} else if (tabGroup.getRelType() != null) {
-				new Thread(new Runnable() {
+				HandlerThread thread = new HandlerThread("saving");
+				thread.start();
+				Handler handler = new Handler(thread.getLooper());
+				handler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
-							Dialog d = showBusy("Busy", "Saving record");
+							showSaveDialog();
 							
-							List<RelationshipAttribute> relationshipAttributes = (List<RelationshipAttribute>) attributes;
+							try {
+								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+								if (attributes != null) {
+									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+								}
+								
+								relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(tabGroup));
+								
+								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
+								
+								interpreter.set("_saved_record_id", relationshipId);
+								executeOnUiThread(callback);
+							} catch (Exception e) {
+								FLog.e("error saving tabgroup " + id, e);
+								showWarning("Logic Error", "Error saving tab group " + id);
+							}
 							
-							relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(tabGroup));
-							
-							String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-							
-							d.dismiss();
-							
-							interpreter.set("_saved_record_id", relationshipId);
-							execute(callback);
+							hideSaveDialog();
 						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id);
+							FLog.e("error saving tabgroup " + id, e);
 							showWarning("Logic Error", "Error saving tab group " + id);
 						}
 					}
 					
-				}).start();
+				});
 			} else {
 				FLog.e("cannot save tabgroup with no type");
 				showWarning("Logic Error", "Cannot save tabgroup with no type");
@@ -647,55 +712,77 @@ public class BeanShellLinker {
 				return;
 			}
 			if (tabGroup.getArchEntType() != null) {
-				new Thread(new Runnable() {
+				HandlerThread thread = new HandlerThread("saving");
+				thread.start();
+				Handler handler = new Handler(thread.getLooper());
+				handler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
-							Dialog d = showBusy("Busy", "Saving record");
+							showSaveDialog();
 							
-							List<EntityAttribute> entityAttributes = (List<EntityAttribute>) attributes;
+							try {
+								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+								if (attributes != null) {
+									entityAttributes.addAll((List<EntityAttribute>) attributes);
+								}
+								
+								entityAttributes.addAll(getEntityAttributesFromTab(tab));
+								
+								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
+								
+								interpreter.set("_saved_record_id", entityId);
+								executeOnUiThread(callback);
+							} catch (Exception e) {
+								FLog.e("error saving tab " + id, e);
+								showWarning("Logic Error", "Error saving tab " + id);
+							}
 							
-							entityAttributes.addAll(getEntityAttributesFromTab(tab));
-							
-							String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-							
-							d.dismiss();
-							
-							interpreter.set("_saved_record_id", entityId);
-							execute(callback);
+							hideSaveDialog();
 						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id);
-							showWarning("Logic Error", "Error saving tab group " + id);
+							FLog.e("error saving tab " + id, e);
+							showWarning("Logic Error", "Error saving tab " + id);
 						}
 					}
 					
-				}).start();
+				});
 			} else if (tabGroup.getRelType() != null) {
-				new Thread(new Runnable() {
+				HandlerThread thread = new HandlerThread("saving");
+				thread.start();
+				Handler handler = new Handler(thread.getLooper());
+				handler.post(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
-							Dialog d = showBusy("Busy", "Saving record");
+							showSaveDialog();
 							
-							List<RelationshipAttribute> relationshipAttributes = (List<RelationshipAttribute>) attributes;
+							try {
+								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+								if (attributes != null) {
+									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+								}
+								
+								relationshipAttributes.addAll(getRelationshipAttributesFromTab(tab));
+								
+								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
+								
+								interpreter.set("_saved_record_id", relationshipId);
+								executeOnUiThread(callback);
+							} catch (Exception e) {
+								FLog.e("error saving tab " + id, e);
+								showWarning("Logic Error", "Error saving tab " + id);
+							}
 							
-							relationshipAttributes.addAll(getRelationshipAttributesFromTab(tab));
-							
-							String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-							
-							d.dismiss();
-							
-							interpreter.set("_saved_record_id", relationshipId);
-							execute(callback);
+							hideSaveDialog();
 						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id);
-							showWarning("Logic Error", "Error saving tab group " + id);
+							FLog.e("error saving tab " + id, e);
+							showWarning("Logic Error", "Error saving tab " + id);
 						}
 					}
 					
-				}).start();
+				});
 			} else {
 				FLog.e("cannot save tab with no type");
 				showWarning("Logic Error", "Cannot save tab with no type");
@@ -840,7 +927,9 @@ public class BeanShellLinker {
 			
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
-				return customView.hasChanges();
+				if (customView.hasChanges()) {
+					return true;
+				}
 			}
 			
 		}
@@ -955,27 +1044,27 @@ public class BeanShellLinker {
 				if (v instanceof FileListGroup) {
 					// add full path
 					FileListGroup fileList = (FileListGroup) v;
-					fileList.addFile(getAttachedFilePath(attribute.getValue()));
+					fileList.addFile(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
 				} else if (v instanceof CameraPictureGallery) {
 					CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
 					// add full path
-					cameraGallery.addPicture(getAttachedFilePath(attribute.getValue()));
+					cameraGallery.addPicture(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
 				} else if (v instanceof VideoGallery) {
 					VideoGallery videoGallery = (VideoGallery) v;
 					// add full path
-					videoGallery.addVideo(getAttachedFilePath(attribute.getValue()));
+					videoGallery.addVideo(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
 				} else {
-					setAttributeView(customView.getRef(), attribute);
+					setAttributeView(customView.getRef(), attribute, customView);
 				}
 				customView.save();
 			}
 		}
 	}
 
-	private void setAttributeView(String ref, Attribute attribute) {
-		setFieldValue(ref, attribute.getValue());
+	private void setAttributeView(String ref, Attribute attribute, ICustomView customView) {
+		setFieldValue(ref, attribute.getValue(customView.getAttributeType()));
 		setFieldCertainty(ref, attribute.getCertainty());
-		setFieldAnnotation(ref, attribute.getAnnotation());
+		setFieldAnnotation(ref, attribute.getAnnotation(customView.getAttributeType()));
 		appendFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
 	}
 	
@@ -998,24 +1087,20 @@ public class BeanShellLinker {
 					ICustomView customView = (ICustomView) v;
 					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if ((customView instanceof FileListGroup) ||
-							(customView instanceof CameraPictureGallery) ||
-							(customView instanceof VideoGallery)) {
+					if (customView instanceof ICustomFileView) {
 						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
 						if (pairs == null || pairs.isEmpty()) {
 							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
 						} else {
 							for (NameValuePair pair : pairs) {
 								// strip out full path
-								String value = (v instanceof CameraPictureGallery || v instanceof VideoGallery) ? stripAttachedFilePath(pair.getName()) : pair.getName();
+								String value = null;
 								
 								// attach new files
-								if (!value.contains(activity.getProjectDir())) {
-									if (customView instanceof ICustomFileView) {
-										value = attachFile(value, ((ICustomFileView) customView).getSync(), null, null);
-									} else {
-										FLog.w("cannot attach files for unsupported view" + customView);
-									}
+								if (!pair.getName().contains(activity.getProjectDir() + "/files")) {
+									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
+								} else {
+									value = stripAttachedFilePath(pair.getName());
 								}
 								
 								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
@@ -1078,24 +1163,20 @@ public class BeanShellLinker {
 					ICustomView customView = (ICustomView) v;
 					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if ((customView instanceof FileListGroup) ||
-							(customView instanceof CameraPictureGallery) ||
-							(customView instanceof VideoGallery)) {
+					if (customView instanceof ICustomFileView) {
 						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
 						if (pairs == null || pairs.isEmpty()) {
 							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
 						} else {
 							for (NameValuePair pair : pairs) {
 								// strip out full path
-								String value = (v instanceof CameraPictureGallery || v instanceof VideoGallery) ? stripAttachedFilePath(pair.getName()) : pair.getName();
+								String value = null;
 								
 								// attach new files
-								if (!value.contains(activity.getProjectDir())) {
-									if (customView instanceof ICustomFileView) {
-										value = attachFile(value, ((ICustomFileView) customView).getSync(), null, null);
-									} else {
-										FLog.w("cannot attach files for unsupported view" + customView);
-									}
+								if (!pair.getName().contains(activity.getProjectDir() + "/files")) {
+									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
+								} else {
+									value = stripAttachedFilePath(pair.getName());
 								}
 								
 								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
@@ -1147,50 +1228,57 @@ public class BeanShellLinker {
 
 	public void showAlert(final String title, final String message,
 			final String okCallback, final String cancelCallback) {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-
-		builder.setTitle(title);
-		builder.setMessage(message);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				// User clicked OK button
-				execute(okCallback);
-			}
-		});
-		builder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						// User cancelled the dialog
-						execute(cancelCallback);
-					}
-				});
-
-		builder.create().show();
-
+		try {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+	
+			builder.setTitle(title);
+			builder.setMessage(message);
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// User clicked OK button
+					execute(okCallback);
+				}
+			});
+			builder.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							// User cancelled the dialog
+							execute(cancelCallback);
+						}
+					});
+	
+			builder.create().show();
+		} catch (Exception e) {
+			FLog.e("error showing alert", e);
+		}
 	}
 
 	public void showWarning(final String title, final String message) {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
-
-		builder.setTitle(title);
-		builder.setMessage(message);
-		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				// User clicked OK button
-			}
-		});
-		builder.create().show();
-
+		try {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+	
+			builder.setTitle(title);
+			builder.setMessage(message);
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					// User clicked OK button
+				}
+			});
+			builder.create().show();
+		} catch (Exception e) {
+			FLog.e("error showing warning", e);
+		}
 	}
 	
 	public Dialog showBusy(final String title, final String message) {
-
-		BusyDialog d = new BusyDialog(this.activity, title, message, null);
-		d.show();
-		
-		return d;
+		try {
+			BusyDialog d = new BusyDialog(this.activity, title, message, null);
+			d.show();
+			return d;
+		} catch (Exception e) {
+			FLog.e("error showing busy", e);
+		}
+		return null;
 	}
 
 	public void setFieldValue(String ref, Object valueObj) {
@@ -1306,15 +1394,23 @@ public class BeanShellLinker {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
+				boolean isViewDirty = isDirty || customView.isDirty();
+				
 				Button dirtyButton = activity.getUIRenderer().getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
-					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
+					dirtyButton.setVisibility(isViewDirty ? View.VISIBLE : View.GONE);
 				}
 				
-				customView.setDirty(isDirty);
-				String reason = customView.getDirtyReason();
-				if (reason != null && reason != "") {
-					reason += ";" + dirtyReason;
+				customView.setDirty(isViewDirty);
+				
+				String reason = null;
+				if (dirtyReason != null && !"".equals(dirtyReason)) {
+					reason = customView.getDirtyReason();
+					if (reason != null && !"".equals(reason)) {
+						reason += ";" + dirtyReason;
+					} else {
+						reason = dirtyReason;
+					}
 				}
 				
 				customView.setDirtyReason(reason);
@@ -3127,6 +3223,57 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error stripping attached file path", e);
 			showWarning("Logic Error", "Error stripping attached file path");
+		}
+		return null;
+	}
+	
+	public String addFile(String ref, String file) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof FileListGroup) {
+				FileListGroup filesList = (FileListGroup) obj;
+				filesList.addFile(file);
+			} else {
+				FLog.w("cannot add file to view " + obj);
+				showWarning("Logic Error", "Cannot add file to view " + obj);
+			}
+		} catch (Exception e) {
+			FLog.e("error adding file to list", e);
+			showWarning("Logic Error", "Error adding file to list");
+		}
+		return null;
+	}
+	
+	public String addPicture(String ref, String file) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CameraPictureGallery) {
+				CameraPictureGallery gallery = (CameraPictureGallery) obj;
+				gallery.addPicture(file);
+			}else {
+				FLog.w("cannot add picture to view " + obj);
+				showWarning("Logic Error", "Cannot add picture to view " + obj);
+			}
+		} catch (Exception e) {
+			FLog.e("error adding picture to gallery", e);
+			showWarning("Logic Error", "Error adding picture to gallery");
+		}
+		return null;
+	}
+	
+	public String addVideo(String ref, String file) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof VideoGallery) {
+				VideoGallery gallery = (VideoGallery) obj;
+				gallery.addVideo(file);
+			} else {
+				FLog.w("cannot add video to view " + obj);
+				showWarning("Logic Error", "Cannot add video to view " + obj);
+			}
+		} catch (Exception e) {
+			FLog.e("error adding video to gallery", e);
+			showWarning("Logic Error", "Error adding video to gallery");
 		}
 		return null;
 	}

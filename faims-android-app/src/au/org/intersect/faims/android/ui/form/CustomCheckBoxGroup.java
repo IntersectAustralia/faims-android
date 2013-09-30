@@ -6,27 +6,27 @@ import java.util.List;
 import android.content.Context;
 import android.view.View;
 import android.widget.LinearLayout;
+import au.org.intersect.faims.android.data.FormAttribute;
 
 public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomView {
 	
-	private String attributeName;
-	private String attributeType;
 	private String ref;
 	private List<NameValuePair> currentValues;
 	private float certainty;
 	private float currentCertainty;
 	private String annotation;
 	private String currentAnnotation;
-	private boolean dirty;
-	private String dirtyReason;
+	protected boolean dirty;
+	protected String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
+	private FormAttribute attribute;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
 	}
 	
-	public CustomCheckBoxGroup(Context context, String attributeName, String attributeType, String ref) {
+	public CustomCheckBoxGroup(Context context, FormAttribute attribute, String ref) {
 		super(context);
 		
 		setLayoutParams(new LayoutParams(
@@ -34,20 +34,19 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 	                LayoutParams.MATCH_PARENT));
 	    setOrientation(LinearLayout.VERTICAL);
 		
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
+		this.attribute = attribute;
 		this.ref = ref;
 		reset();
 	}
 
 	@Override
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
 
 	@Override
@@ -108,6 +107,8 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
 			if (view instanceof CustomCheckBox) {
@@ -164,6 +165,7 @@ public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomVi
 	
 	@Override
 	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
 		return !(compareValues()) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

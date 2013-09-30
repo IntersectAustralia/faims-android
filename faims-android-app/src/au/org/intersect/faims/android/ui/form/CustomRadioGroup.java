@@ -8,11 +8,10 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import au.org.intersect.faims.android.data.FormAttribute;
 
 public class CustomRadioGroup extends LinearLayout implements ICustomView {
 
-	private String attributeName;
-	private String attributeType;
 	private String ref;
 	private String currentValue;
 	private float certainty;
@@ -23,12 +22,13 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
+	private FormAttribute attribute;
 
 	public CustomRadioGroup(Context context) {
 		super(context);
 	}
 	
-	public CustomRadioGroup(Context context, String attributeName, String attributeType, String ref) {
+	public CustomRadioGroup(Context context, FormAttribute attribute, String ref) {
 		super(context);
 		
 		setLayoutParams(new LayoutParams(
@@ -36,20 +36,19 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
                 LayoutParams.MATCH_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
 		
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
+		this.attribute = attribute;
 		this.ref = ref;
 		reset();
 	}
 
 	@Override
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
 
 	@Override
@@ -124,6 +123,8 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
 		setValue("");
 		setCertainty(1);
 		setAnnotation("");
@@ -152,6 +153,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
 	@Override
 	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
 		return !(Compare.equal(getValue(), currentValue)) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

@@ -5,12 +5,11 @@ import java.util.List;
 import android.content.Context;
 import android.text.format.Time;
 import android.widget.TimePicker;
+import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.util.DateUtil;
 
 public class CustomTimePicker extends TimePicker implements ICustomView {
 
-	private String attributeName;
-	private String attributeType;
 	private String ref;
 	private String currentValue;
 	private float certainty;
@@ -19,25 +18,25 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
+	private FormAttribute attribute;
 	
 	public CustomTimePicker(Context context) {
 		super(context);
 	}
 	
-	public CustomTimePicker(Context context, String attributeName, String attributeType, String ref) {
+	public CustomTimePicker(Context context, FormAttribute attribute, String ref) {
 		super(context);
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
+		this.attribute = attribute;
 		this.ref = ref;
 		reset();
 	}
 
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
 	
 	public String getRef() {
@@ -77,6 +76,8 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	}
 
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
 		Time now = new Time();
 		now.setToNow();
 		setCurrentHour(now.hour);
@@ -86,6 +87,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	}
 
 	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getCertainty(), currentCertainty);
 	}

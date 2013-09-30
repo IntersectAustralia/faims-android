@@ -27,8 +27,8 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 		super(context);
 	}
 	
-	public VideoGallery(Context context, String ref, FormAttribute attribute) {
-		super(context, ref, attribute, true);
+	public VideoGallery(Context context, FormAttribute attribute, String ref) {
+		super(context, attribute, ref, true);
 		this.sync = attribute.sync;
 	}
 	
@@ -144,6 +144,9 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 
 	@Override
 	public void reset() {
+		dirty = false;
+		dirtyReason = null;
+		
 		removeSelectedImages();
 		galleriesLayout.removeAllViews();
 		galleryImages = new ArrayList<CustomImageView>();

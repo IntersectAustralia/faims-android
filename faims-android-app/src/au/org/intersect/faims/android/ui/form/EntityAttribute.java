@@ -33,7 +33,8 @@ public class EntityAttribute extends RelationshipAttribute {
 		return "(" + name + "," + text + "," + vocab + "," + measure + "," + certainty + "," + isDeleted + ")";
 	}
 	
-	public String getValue() {
+	@Override
+	public String getValue(String type) {
 		if (MEASURE.equals(type)) {
 			return measure;
 		} else if (VOCAB.equals(type)) {
@@ -43,7 +44,8 @@ public class EntityAttribute extends RelationshipAttribute {
 		}
 	}
 	
-	public String getAnnotation() {
+	@Override
+	public String getAnnotation(String type) {
 		if (MEASURE.equals(type)) {
 			return text;
 		} else if (VOCAB.equals(type)) {

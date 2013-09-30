@@ -112,7 +112,7 @@ showTab(String ref, String id) {
   * @param callback code to execute when saving is finished
   */
 saveTabGroup(String ref, String id, List geometry, List attributes, String callback){
-    linker.saveTabGroup(ref, id, geometry, list, callback);
+    linker.saveTabGroup(ref, id, geometry, attributes, callback);
 }
 
 /**
@@ -125,7 +125,7 @@ saveTabGroup(String ref, String id, List geometry, List attributes, String callb
   * @param callback code to execute when saving is finished
   */
 saveTab(String ref, String id, List geometry, List attributes, String callback){
-    linker.saveTab(ref, id, geometry, list, callback);
+    linker.saveTab(ref, id, geometry, attributes, callback);
 }
 
 /**
@@ -1726,6 +1726,36 @@ stripAttachedFilePath(String file) {
 	return linker.stripAttachedFilePath(file);
 }
 
+/**
+  * Add file to checkbox group.
+  *
+  * @param ref reference to the checkbox group
+  * @param file the filepath of the file to add
+  */
+addFile(String ref, String file) {
+	linker.addFile(ref, file);
+}
+
+/**
+  * Add picture to gallery.
+  *
+  * @param ref reference to the gallery
+  * @param file the filepath of the picture to add
+  */
+addPicture(String ref, String file) {
+	linker.addPicture(ref, file);
+}
+
+/**
+  * Add file to checkbox group.
+  *
+  * @param ref reference to the checkbox group
+  * @param file the filepath of the video to add
+  */
+addVideo(String ref, String file) {
+	linker.addVideo(ref, file);
+}
+
 //========= MISC ==========
 
 /**
@@ -1735,4 +1765,114 @@ stripAttachedFilePath(String file) {
   */
 execute(String code){
 	return linker.execute(code);
+}
+
+attachFileTo(String ref) {
+	showFileBrowser("_setFileTo(\""+ref+"\")");
+}
+
+_setFileTo(String ref) {
+	String filePath = getLastSelectedFilepath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addFile(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addFile(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachPictureTo(String ref) {
+	openCamera("_setPictureTo(\""+ref+"\")");
+}
+
+_setPictureTo(String ref) {
+	String filePath = getLastPictureFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addPicture(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addPicture(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachVideoTo(String ref) {
+	openVideo("_setVideoTo(\""+ref+"\")");
+}
+
+_setVideoTo(String ref) {
+	String filePath = getLastVideoFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addVideo(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addVideo(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachAudioTo(String ref) {
+	recordAudio("_setAudioTo(\""+ref+"\")");
+}
+
+_setAudioTo(String ref) {
+	String filePath = getLastAudioFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addFile(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addFile(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+_convertPairsToList(pairs) {
+	if (pairs == null) return new ArrayList();
+	ArrayList list = new ArrayList();
+	for (NameValuePair p : pairs) {
+		list.add(p.getName());
+	}
+	return list;
+}
+
+_convertListToPairs(list) {
+	if (list == null) return new ArrayList();
+	ArrayList pairs = new ArrayList();
+	for (String s : list) {
+		pairs.add(new NameValuePair(s, "true"));
+	}
+	return pairs;
+}
+
+isNull(String value) {
+	return value == null || "".equals(value);
+}
+
+isNull(List value) {
+	return value == null || value.isEmpty();
 }
