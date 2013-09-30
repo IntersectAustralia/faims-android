@@ -76,7 +76,7 @@ onEvent("tabgroup3/tab1/stop", "click", "stopSync()");
 
 // ENTITY
 
-String entity_id = null;
+String entityId = null;
 
 initEntity() {
 	clearEntity();
@@ -105,24 +105,30 @@ saveEntity() {
 loadEntity() {
 	clearEntity();
 
-	entity_id = getFieldValue("tabgroup1/tab2/entities");
+	entityId = getFieldValue("tabgroup1/tab2/entities");
 	
-	if (isNull(entity_id)) return;
+	if (isNull(entityId)) return;
 	
-	showTab("tabgroup1/tab1", entity_id);
+	showTab("tabgroup1/tab1", entityId);
+}
+
+reloadEntity() {
+	if (isNull(entityId)) return;
+	
+	showTab("tabgroup1/tab1", entityId);
 }
 
 updateEntity() {
-	if (isNull(entity_id)) entity_id = null;
+	if (isNull(entityId)) entityId = null;
 	
 	attributes = null;
-	if (entity_id == null) {
+	if (entityId == null) {
 		attributes = createAttributeList();
 		entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
 		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
 	}
 	
-	saveTabGroup("tabgroup1", entity_id, null, attributes, "entity_id = getLastSavedRecordId(); loadEntity();");
+	saveTabGroup("tabgroup1", entityId, null, attributes, "entityId = getLastSavedRecordId(); reloadEntity();");
 }
 
 clearEntity() {
@@ -134,7 +140,7 @@ clearEntity() {
 	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
 	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
 	
-	entity_id = null;
+	entityId = null;
 	
 	newTab("tabgroup1/tab1");
 	
@@ -142,10 +148,10 @@ clearEntity() {
 }
 
 deleteEntity(){
-	if (isNull(entity_id)) return;
+	if (isNull(entityId)) return;
 	
-	deleteArchEnt(entity_id);
-	entity_id = null;
+	deleteArchEnt(entityId);
+	entityId = null;
 	
     cancelTabGroup("tabgroup1", false);
 }
@@ -160,13 +166,110 @@ onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/ta
 onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/videos\")");
 onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
 
-onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity_id)");
+onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+// RELATIONSHIP
+
+String relationshipId = null;
+
+initRelationship() {
+	clearRelationship();
+}
+
+onEvent("tabgroup2", "show", "initRelationship()");	
+
+closeRelationship() {
+	cancelTabGroup("tabgroup2", true);
+}
+
+onEvent("tabgroup2/tab1/close", "click", "closeRelationship()");
+
+loadRelationships() {
+	Object relationships = fetchRelationshipList("abovebelow");
+	populateDropDown("tabgroup2/tab2/relationships", relationships);
+}
+loadRelationships();
+
+onEvent("tabgroup2/tab2", "show", "loadRelationships()");
+
+saveRelationship() {
+	updateRelationship();
+}
+
+loadRelationship() {
+	clearRelationship();
+
+	relationshipId = getFieldValue("tabgroup2/tab2/relationships");
+	
+	if (isNull(relationshipId)) return;
+	
+	showTab("tabgroup2/tab1", relationshipId);
+}
+
+reloadRelationship() {
+	if (isNull(relationshipId)) return;
+	
+	showTab("tabgroup2/tab1", relationshipId);
+}
+
+updateRelationship() {
+	if (isNull(relationshipId)) relationshipId = null;
+	
+	attributes = null;
+	if (relationshipId == null) {
+		attributes = createAttributeList();
+		relationshipCount = Integer.valueOf(fetchOne("select count(distinct(relationshipid)) from relationship;").get(0)) + 1;
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relationshipCount, null, null));
+	}
+	
+	saveTabGroup("tabgroup2", relationshipId, null, attributes, "relationshipId = getLastSavedRecordId(); reloadRelationship();");
+}
+
+clearRelationship() {
+	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+	populateCheckBoxGroup("tabgroup2/tab1/location", locations);
+	
+	populateHierarchicalDropDown("tabgroup2/tab1/type", "type");
+	
+	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
+	populatePictureGallery("tabgroup2/tab1/gallery", pictures);
+	
+	relationshipId = null;
+	
+	newTab("tabgroup2/tab1");
+	
+	setFieldValue("tabgroup2/tab1/timestamp", getCurrentTime());
+}
+
+deleteRelationship(){
+	if (isNull(relationshipId)) return;
+	
+	deleteRel(relationshipId);
+	relationshipId = null;
+	
+    cancelTabGroup("tabgroup2", false);
+}
+
+onEvent("tabgroup2/tab1/save", "delayclick", "saveRelationship()");
+onEvent("tabgroup2/tab1/clear", "click", "clearRelationship()");
+onEvent("tabgroup2/tab2/load", "click", "loadRelationship()");
+onEvent("tabgroup2/tab1/delete", "click", "deleteRelationship()");
+
+onEvent("tabgroup2/tab1/attachfile", "click", "attachFileTo(\"tabgroup2/tab1/files\")");
+onEvent("tabgroup2/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup2/tab1/pictures\")");
+onEvent("tabgroup2/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup2/tab1/videos\")");
+onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/audios\")");
+
+onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
 // ASSOCIATIONS
 
 loadMembers() {
 	Object entities = fetchEntityList("small");
-	populateDropDown("tabgroup1/tab2/entities", entities);
+	populateDropDown("tabgroup4/tab1/entities", entities);
+	
+	Object relationships = fetchRelationshipList("abovebelow");
+	populateDropDown("tabgroup4/tab1/relationships", relationships);
 }
 
 onEvent("tabgroup4", "show", "loadMembers()");
