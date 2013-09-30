@@ -36,6 +36,7 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 		this.name = name;
 		this.layerId = layerId;
 		this.gdalSource = gdalSource;
+		setShowAlways(true);
 	}
 	
 	public String getName() {
@@ -191,5 +192,9 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 		} catch (Exception e) {
 			throw new MapException("Invalid raster map file");
 		}
+	}
+
+	public boolean isShowAlways(){
+		return this.showAlways;
 	}
 }

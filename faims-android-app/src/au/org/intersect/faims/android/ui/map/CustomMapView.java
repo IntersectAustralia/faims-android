@@ -88,7 +88,6 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 import com.nutiteq.layers.Layer;
-import com.nutiteq.layers.raster.GdalMapLayer;
 import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.MarkerStyle;
@@ -400,6 +399,8 @@ public class CustomMapView extends MapView {
         	FLog.e("error adding vertex layer", e);
         }
         
+        currentPositionLayer = new MarkerLayer(new EPSG3857());
+        this.getLayers().addLayer(currentPositionLayer);
         // store proper projection result
         try {
 			projectionProper = SpatialiteUtil.isProperProjection(projectSrid);
@@ -512,10 +513,6 @@ public class CustomMapView extends MapView {
 		} else if (layer instanceof DatabaseLayer) {
 			// remove associated text layer
 			removeLayer(((DatabaseLayer) layer).getTextLayer());
-		} else if ((layer instanceof GdalMapLayer) && layer == baseLayer) {
-			this.getLayers().removeLayer(currentPositionLayer);
-			currentPositionLayer = null;
-			gpsMarker = null;
 		}
 		
 		if (layer == selectedLayer) {
@@ -772,11 +769,6 @@ public class CustomMapView extends MapView {
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().setBaseLayer(gdalLayer);
 		
-		if(currentPositionLayer == null){
-        	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-        	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
-        }
-		
 		orderLayers();
 		
 		return addLayer(gdalLayer);
@@ -798,11 +790,6 @@ public class CustomMapView extends MapView {
 		
 		//gdalLayer.setShowAlways(true);
 		this.getLayers().addLayer(gdalLayer);
-		
-		if(currentPositionLayer == null){
-        	currentPositionLayer = new MarkerLayer(gdalLayer.getProjection());
-        	CustomMapView.this.getLayers().addLayer(currentPositionLayer);
-        }
 		
 		orderLayers();
 		
@@ -1565,7 +1552,7 @@ public class CustomMapView extends MapView {
 	}
 
 	private void updateMapMarker() {
-		if (currentPositionLayer != null && previousLocation != null) {
+		if (previousLocation != null) {
 			MapPos p = new MapPos(previousLocation.getLongitude(), previousLocation.getLatitude());
 			MarkerStyle style = createMarkerStyle(previousHeading, locationValid);
 			if (gpsMarker == null) {
@@ -1723,6 +1710,14 @@ public class CustomMapView extends MapView {
 	
 	public void setLayerVisible(int layerId, boolean value) throws Exception {
 		setLayerVisible(getLayer(layerId), value);
+	}
+	
+	public void setGdalLayerShowAlways(String layerName, boolean showAlways) throws MapException {
+		if (getLayer(layerName) instanceof CustomGdalMapLayer){
+			((CustomGdalMapLayer)getLayer(layerName)).setShowAlways(showAlways);
+		}else{
+			throw new MapException("invalid layer, should be a gdal map layer");
+		}
 	}
 	
 	public void setLayerVisible(Layer layer, boolean value) throws Exception {

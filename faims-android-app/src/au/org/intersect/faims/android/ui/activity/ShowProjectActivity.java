@@ -586,6 +586,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			if (currentTabGroup != null) {
 				renderer.invalidateListViews(currentTabGroup);
 				renderer.setCurrentTabGroup(currentTabGroup);
+				getActionBar().setTitle(currentTabGroup.getLabel());
 			}
 			super.onBackPressed();
 		}else{
@@ -655,9 +656,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if(gpsDataManager.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		if(linker != null && gpsDataManager.getTrackingType() != null){
+		if(linker != null && gpsDataManager.isTrackingStarted()){
 			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue(), gpsDataManager.getTrackingExec());
 		}
+		invalidateOptionsMenu();
 	}
 	
 	@Override
@@ -673,7 +675,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 		
 		if(this.linker != null){
-			this.linker.stopTrackingGPS();
+			this.linker.stopTrackingGPSForOnPause();
 		}
 		if(this.gpsDataManager != null){
 			this.gpsDataManager.destroyListener();
@@ -741,7 +743,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		menu.findItem(R.id.action_gps_active_has_signal).setVisible(false);
 		menu.findItem(R.id.action_gps_active_no_signal).setVisible(false);
 		if(gpsDataManager.isExternalGPSStarted() || gpsDataManager.isInternalGPSStarted()){
-			if(gpsDataManager.isHasValidExternalGPSSignal() || gpsDataManager.isHasValidInternalGPSSignal()){
+			if(gpsDataManager.hasValidExternalGPSSignal() || gpsDataManager.hasValidInternalGPSSignal()){
 				menu.findItem(R.id.action_gps_active_has_signal).setVisible(true);
 			}else{
 				menu.findItem(R.id.action_gps_active_no_signal).setVisible(true);
@@ -751,10 +753,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 
 		// tracker status
-		menu.findItem(R.id.action_tracker_active).setVisible(false);
+		menu.findItem(R.id.action_tracker_active_no_gps).setVisible(false);
+		menu.findItem(R.id.action_tracker_active_has_gps).setVisible(false);
 		menu.findItem(R.id.action_tracker_inactive).setVisible(false);
 		if(gpsDataManager.isTrackingStarted()){
-			menu.findItem(R.id.action_tracker_active).setVisible(true);
+			if(gpsDataManager.hasValidExternalGPSSignal() || gpsDataManager.hasValidInternalGPSSignal()){
+				menu.findItem(R.id.action_tracker_active_has_gps).setVisible(true);
+			}else{
+				menu.findItem(R.id.action_tracker_active_no_gps).setVisible(true);
+			}
 		}else{
 			menu.findItem(R.id.action_tracker_inactive).setVisible(true);
 		}

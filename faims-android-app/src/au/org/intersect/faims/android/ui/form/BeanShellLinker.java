@@ -306,6 +306,19 @@ public class BeanShellLinker {
 		this.activity.getGPSDataManager().setTrackingStarted(false);
 		this.activity.invalidateOptionsMenu();
 	}
+	
+	public void stopTrackingGPSForOnPause() {
+		FLog.d("gps tracking is stopped on paused");
+		
+		if (trackingHandler != null) {
+			trackingHandler.removeCallbacks(trackingTask);
+			trackingHandler = null;
+		}
+		if (trackingHandlerThread != null) {
+			trackingHandlerThread.quit();
+			trackingHandlerThread = null;
+		}
+	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try {
@@ -2991,6 +3004,24 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error setting vector layer visiblity " + ref, e);
 			showWarning("Logic Error", "Error setting vector layer visibility "
+					+ ref);
+		}
+	}
+	
+	public void setGdalLayerShowAlways(String ref, String layerName, boolean showAlways) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+
+				mapView.setGdalLayerShowAlways(layerName, showAlways);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error setting gdal layer showalways option " + ref, e);
+			showWarning("Logic Error", "Error setting gdal layer showalways option "
 					+ ref);
 		}
 	}
