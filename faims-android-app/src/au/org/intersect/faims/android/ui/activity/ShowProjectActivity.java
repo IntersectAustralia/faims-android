@@ -656,9 +656,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		if(gpsDataManager.isInternalGPSStarted()){
 			gpsDataManager.startInternalGPSListener();
 		}
-		if(linker != null && gpsDataManager.getTrackingType() != null){
+		if(linker != null && gpsDataManager.isTrackingStarted()){
 			linker.startTrackingGPS(gpsDataManager.getTrackingType(), gpsDataManager.getTrackingValue(), gpsDataManager.getTrackingExec());
 		}
+		invalidateOptionsMenu();
 	}
 	
 	@Override
@@ -674,7 +675,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 		
 		if(this.linker != null){
-			this.linker.stopTrackingGPS();
+			this.linker.stopTrackingGPSForOnPause();
 		}
 		if(this.gpsDataManager != null){
 			this.gpsDataManager.destroyListener();

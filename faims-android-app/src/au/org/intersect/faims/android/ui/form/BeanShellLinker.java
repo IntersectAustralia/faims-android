@@ -306,6 +306,19 @@ public class BeanShellLinker {
 		this.activity.getGPSDataManager().setTrackingStarted(false);
 		this.activity.invalidateOptionsMenu();
 	}
+	
+	public void stopTrackingGPSForOnPause() {
+		FLog.d("gps tracking is stopped on paused");
+		
+		if (trackingHandler != null) {
+			trackingHandler.removeCallbacks(trackingTask);
+			trackingHandler = null;
+		}
+		if (trackingHandlerThread != null) {
+			trackingHandlerThread.quit();
+			trackingHandlerThread = null;
+		}
+	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try {

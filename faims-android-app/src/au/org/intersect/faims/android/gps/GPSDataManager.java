@@ -156,8 +156,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.locationManager != null){
 				this.locationManager.removeUpdates(this);
 			}
-			setInternalGPSStarted(false);
-			activityRef.get().invalidateOptionsMenu();
+			setHasValidInternalGPSSignal(false);
 		}catch(Exception e){
 			FLog.e("Stopping internal gps exception : " + e);
 		}
@@ -172,8 +171,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			if(this.handlerThread != null){
 				handlerThread.quit();
 			}
-			setExternalGPSStarted(false);
-			activityRef.get().invalidateOptionsMenu();
+			setHasValidExternalGPSSignal(false);
 		}catch (Exception e) {
 			FLog.e("Stopping external gps exception", e);
 		}
