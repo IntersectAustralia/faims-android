@@ -19,7 +19,7 @@ import android.widget.VideoView;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
 
-public class VideoGallery extends PictureGallery {
+public class VideoGallery extends PictureGallery implements ICustomFileView {
 
 	private boolean sync;
 

@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.ui.form;
 
 import android.content.Context;
 
-public class FileListGroup extends CustomCheckBoxGroup {
+public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileView {
 	
 	private boolean sync;
 

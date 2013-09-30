@@ -18,7 +18,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
 
-public class CameraPictureGallery extends PictureGallery {
+public class CameraPictureGallery extends PictureGallery implements ICustomFileView {
 
 	private boolean sync;
 
