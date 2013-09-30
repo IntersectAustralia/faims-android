@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -33,9 +34,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 		super(context);
 	}
 
-	public HierarchicalSpinner(Context context,
-			String name, String type, String ref) {
-		super(context, name, type, ref);
+	public HierarchicalSpinner(Context context, FormAttribute attribute, String ref) {
+		super(context, attribute, ref);
 	}
 	
 	private void mapVocabToParent() {
@@ -178,7 +178,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		}
 		
 		if (value == null || "".equals(value)) {
-			reset();
 			return;
 		}
 		
@@ -225,9 +224,16 @@ public class HierarchicalSpinner extends CustomSpinner {
 			super.reset();
 			return;
 		}
+		dirty = false;
+		dirtyReason = null;
 		
 		parentTerms.clear();
 		loadTerms();
+		
 		setSelectionItem(0, false);
+		setCertainty(1);
+		setAnnotation("");
+		
+		save();
 	}
 }

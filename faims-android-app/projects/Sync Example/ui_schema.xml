@@ -29,17 +29,12 @@
           </menu>
           <tabgroup1>
               <tab1>
-                  <container1>
-                    <child1>
-                      <name></name>
-                      <value></value>
-                    </child1>
-                    <child2>
-                      <timestamp></timestamp>
-                      <location></location>
-                    </child2>
-                  </container1>
+                  <name></name>
+                  <value></value>
+                  <timestamp></timestamp>
+                  <location></location>
                   <type></type>
+                  <gallery></gallery>
                   <sync></sync>
                   <files></files>
                   <attachfile></attachfile>
@@ -59,6 +54,7 @@
                     </child2>
                   </container2>
                   <delete></delete>
+                  <close></close>
               </tab1>
               <tab2>
                   <entities></entities>
@@ -67,13 +63,32 @@
           </tabgroup1>
           <tabgroup2>
               <tab1>
-                  <relationship></relationship>
                   <name></name>
-                  <type></type>
+                  <value></value>
+                  <timestamp></timestamp>
                   <location></location>
-                  <save></save>
-                  <clear></clear>
+                  <type></type>
+                  <gallery></gallery>
+                  <sync></sync>
+                  <files></files>
+                  <attachfile></attachfile>
+                  <pictures></pictures>
+                  <attachpicture></attachpicture>
+                  <videos></videos>
+                  <attachvideo></attachvideo>
+                  <audios></audios>
+                  <attachaudio></attachaudio>
+                  <viewattached></viewattached>
+                  <container2>
+                    <child1>
+                      <save></save>
+                    </child1>
+                    <child2>
+                      <clear></clear>
+                    </child2>
+                  </container2>
                   <delete></delete>
+                  <close></close>
               </tab1>
               <tab2>
                   <relationships></relationships>
@@ -96,10 +111,9 @@
           </tabgroup4>
         </faims>
       </instance>
-
-      <bind nodeset="/faims/tabgroup1/tab1/container1/child1/name" type="string"/>
-      <bind nodeset="/faims/tabgroup1/tab1/container1/child1/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup1/tab1/filename" type="string"/>
+      
+      <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup2/tab1/value" type="decimal"/>
       
     </model>
   </h:head>
@@ -122,7 +136,7 @@
       </group>
     </group>
     <group ref="user">
-      <label></label>
+      <label>Users List</label>
       <group ref="tab1" faims_scrollable="false">
         <label>User List</label>
         <select1 ref="users" appearance="compact">
@@ -135,11 +149,11 @@
       </group>
     </group>
     <group ref="menu">
-      <label></label>
+      <label>Options</label>
       <group ref="tab1" faims_scrollable="false">
-        <label>Menu</label>
+        <label>Options</label>
         <select1 ref="options" appearance="compact">
-          <label>Users:</label>
+          <label>Options:</label>
           <item>
             <label>dummy</label>
             <value>dummy</value>
@@ -148,23 +162,16 @@
       </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="small">
-      <label></label>
+      <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-        <group ref="container1" faims_style="orientation">
-          <label></label>
-          <group ref="child1" faims_style="even">
-            <label></label>
-            <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
-              <label>Name:</label>
-            </input>
-            <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
-                <label>Value:</label>
-            </input>
-          </group>
-          <group ref="child2" faims_style="even">
-            <label></label>
-            <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	          	<label>Name:</label>
+	        </input>
+	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+	            <label>Value:</label>
+	        </input>
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -174,87 +181,84 @@
                 	<value>dummy</value>
               	</item>
             </select>
-          </group>
-        </group>
-        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
-            <label>Type:</label>
-            <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
-        </select1>
-        <select1 ref="sync" appearance="full" faims_certainty="false">
-            <label>Sync:</label>
-            <item>
-                <label>On</label>
-                <value>1</value>
-            </item>
-            <item>
-                <label>Off</label>
-                <value>0</value>
-            </item>
-        </select1>
-        <select ref="files" faims_annotation="false" faims_certainty="false">
-            <label>Files:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <trigger ref="attachfile">
-            <label>Attached File:</label>
-        </trigger>
-        <select ref="pictures" type="image" faims_annotation="false" faims_certainty="false">
-            <label>Pictures:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <trigger ref="attachpicture">
-            <label>Take picture</label>
-        </trigger>
-        <select ref="videos" type="image" faims_annotation="false" faims_certainty="false">
-            <label>Videos:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <trigger ref="attachvideo">
-            <label>Take video</label>
-        </trigger>
-        <select ref="audios" faims_annotation="false" faims_certainty="false">
-            <label>Audios:</label>
-            <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <trigger ref="attachaudio">
-            <label>Record Audio</label>
-        </trigger>
-        <trigger ref="viewattached">
-            <label>View Attached Files</label>
-        </trigger>
-        <group ref="container2" faims_style="orientation">
-          <label></label>
-          <group ref="child1" faims_style="even">
-            <label></label>
-            <trigger ref="save">
-              <label>Save</label>
-            </trigger>
-          </group>
-          <group ref="child2" faims_style="even">
-            <label></label>
-            <trigger ref="clear">
-              <label>Clear</label>
-            </trigger>
-          </group>
-        </group>
-        <trigger ref="delete">
-          <label>Delete</label>
-        </trigger>
+	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+	            <label>Type:</label>
+	            <item>
+	            	<label>dummy</label>
+	            	<value>dummy</value>
+	          	</item>
+	        </select1>
+	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
+	            <label>Gallery:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select1>
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Files:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachfile">
+	            <label>Attached File:</label>
+	        </trigger>
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Pictures:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachpicture">
+	            <label>Take picture</label>
+	        </trigger>
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Videos:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachvideo">
+	            <label>Take video</label>
+	        </trigger>
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Audios:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachaudio">
+	            <label>Record Audio</label>
+	        </trigger>
+	        <trigger ref="viewattached">
+	            <label>View Attached Files</label>
+	        </trigger>
+	        <group ref="container2" faims_style="orientation">
+	          <label></label>
+	          <group ref="child1" faims_style="even">
+	            <label></label>
+	            <trigger ref="save">
+	              <label>Save</label>
+	            </trigger>
+	          </group>
+	          <group ref="child2" faims_style="even">
+	            <label></label>
+	            <trigger ref="clear">
+	              <label>Clear</label>
+	            </trigger>
+	          </group>
+	        </group>
+	        <trigger ref="delete">
+	          <label>Delete</label>
+	        </trigger>
+	        <trigger ref="close">
+	          <label>Close</label>
+	        </trigger>
       </group>
       <group ref="tab2" faims_hidden="false">
         <label>Load Entity</label>
@@ -271,42 +275,103 @@
       </group>
     </group>
     <group ref="tabgroup2" faims_rel_type="AboveBelow">
-      <label></label>
-      <group ref="tab1">
+      <label>Relationship</label>
+      <group ref="tab1" faims_hidden="false">
         <label>Save Relationship</label>
-        <select1 ref="relationship" faims_annotation="false" faims_certainty="false">
-            <label>Relationship:</label>
-            <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
-        </select1>
-        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
-            <label>Name:</label>
-        </input>
-        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
-            <label>Type:</label>
-            <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
-        </select1>
-        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-            <label>Location:</label>
-            <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
-        </select>
-        <trigger ref="save">
-            <label>Save</label>
-        </trigger>
-        <trigger ref="clear">
-            <label>Clear</label>
-        </trigger>
-        <trigger ref="delete">
-          <label>Delete</label>
-        </trigger>
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	          	<label>Name:</label>
+	        </input>
+	        <input ref="value" faims_attribute_name="value" faims_attribute_type="freetext">
+	            <label>Value:</label>
+	        </input>
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+              <label>Timestamp:</label>
+            </input>
+            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+                <label>Location:</label>
+                <item>
+                	<label>dummy</label>
+                	<value>dummy</value>
+              	</item>
+            </select>
+	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+	            <label>Type:</label>
+	            <item>
+	            	<label>dummy</label>
+	            	<value>dummy</value>
+	          	</item>
+	        </select1>
+	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
+	            <label>Gallery:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select1>
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Files:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachfile">
+	            <label>Attached File:</label>
+	        </trigger>
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Pictures:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachpicture">
+	            <label>Take picture</label>
+	        </trigger>
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Videos:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachvideo">
+	            <label>Take video</label>
+	        </trigger>
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	            <label>Audios:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select>
+	        <trigger ref="attachaudio">
+	            <label>Record Audio</label>
+	        </trigger>
+	        <trigger ref="viewattached">
+	            <label>View Attached Files</label>
+	        </trigger>
+	        <group ref="container2" faims_style="orientation">
+	          <label></label>
+	          <group ref="child1" faims_style="even">
+	            <label></label>
+	            <trigger ref="save">
+	              <label>Save</label>
+	            </trigger>
+	          </group>
+	          <group ref="child2" faims_style="even">
+	            <label></label>
+	            <trigger ref="clear">
+	              <label>Clear</label>
+	            </trigger>
+	          </group>
+	        </group>
+	        <trigger ref="delete">
+	          <label>Delete</label>
+	        </trigger>
+	        <trigger ref="close">
+	          <label>Close</label>
+	        </trigger>
       </group>
       <group ref="tab2">
         <label>Load Relationship</label>
@@ -323,19 +388,19 @@
       </group>
     </group>
     <group ref="tabgroup3">
-      <label></label>
+      <label>Controls</label>
       <group ref="tab1" faims_hidden="false">
           <label>Controls</label>
           <trigger ref="start">
-              <label>Enable File Sync</label>
+              <label>Enable Sync</label>
           </trigger>
           <trigger ref="stop">
-              <label>Disable File Sync</label>
+              <label>Disable Sync</label>
           </trigger>
       </group>
     </group>
     <group ref="tabgroup4">
-        <label></label>
+        <label>Associations</label>
         <group ref="tab1">
             <label>Add Entity Member</label>
             <select1 ref="entities">

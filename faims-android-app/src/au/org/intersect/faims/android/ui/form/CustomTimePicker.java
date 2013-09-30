@@ -1,43 +1,46 @@
 package au.org.intersect.faims.android.ui.form;
 
+import java.util.List;
+
 import android.content.Context;
+import android.text.format.Time;
 import android.widget.TimePicker;
+import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.util.DateUtil;
 
-public class CustomTimePicker extends TimePicker {
+public class CustomTimePicker extends TimePicker implements ICustomView {
 
-	private String attributeName;
-	private String attributeType;
 	private String ref;
-	private float certainty = 1;
-	private float currentCertainty = 1;
+	private String currentValue;
+	private float certainty;
+	private float currentCertainty;
 	private boolean dirty;
 	private String dirtyReason;
+	private boolean annotationEnabled;
+	private boolean certaintyEnabled;
+	private FormAttribute attribute;
 	
 	public CustomTimePicker(Context context) {
 		super(context);
 	}
 	
-	public CustomTimePicker(Context context, String attributeName, String attributeType, String ref) {
+	public CustomTimePicker(Context context, FormAttribute attribute, String ref) {
 		super(context);
-		this.attributeName = attributeName;
-		this.attributeType = attributeType;
+		this.attribute = attribute;
 		this.ref = ref;
+		reset();
 	}
 
 	public String getAttributeName() {
-		return attributeName;
+		return attribute.name;
 	}
 
 	public String getAttributeType() {
-		return attributeType;
+		return attribute.type;
 	}
-
+	
 	public String getRef() {
 		return ref;
-	}
-
-	public void setRef(String ref) {
-		this.ref = ref;
 	}
 
 	public float getCertainty() {
@@ -46,14 +49,6 @@ public class CustomTimePicker extends TimePicker {
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
-	}
-
-	public float getCurrentCertainty() {
-		return currentCertainty;
-	}
-
-	public void setCurrentCertainty(float currentCertainty) {
-		this.currentCertainty = currentCertainty;
 	}
 
 	public boolean isDirty() {
@@ -71,4 +66,80 @@ public class CustomTimePicker extends TimePicker {
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
+	
+	public String getValue() {
+		return DateUtil.getTime(this);
+	}
+	
+	public void setValue(String value) {
+		DateUtil.setTimePicker(this, value);
+	}
+
+	public void reset() {
+		dirty = false;
+		dirtyReason = null;
+		Time now = new Time();
+		now.setToNow();
+		setCurrentHour(now.hour);
+		setCurrentMinute(now.minute);
+		setCertainty(1);
+		save();
+	}
+
+	public boolean hasChanges() {
+		if (attribute.readOnly) return false;
+		return !Compare.equal(getValue(), currentValue) || 
+				!Compare.equal(getCertainty(), currentCertainty);
+	}
+	
+	@Override
+	public void save() {
+		currentValue = getValue();
+		currentCertainty = getCertainty();
+	}
+
+	@Override
+	public String getAnnotation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setAnnotation(String annotation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<?> getValues() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setValues(List<?> values) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public boolean getAnnotationEnabled() {
+		return annotationEnabled;
+	}
+
+	@Override
+	public void setAnnotationEnabled(boolean enabled) {
+		annotationEnabled = enabled;
+	}
+
+	@Override
+	public boolean getCertaintyEnabled() {
+		return certaintyEnabled;
+	}
+
+	@Override
+	public void setCertaintyEnabled(boolean enabled) {
+		certaintyEnabled = enabled;
+	}
+
 }

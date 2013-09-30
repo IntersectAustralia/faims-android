@@ -896,7 +896,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		try {
 			// render the ui definition
 			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-			ShowProjectActivity.this.renderer.createUI(FaimsSettings.projectsDir + projectKey);
+			ShowProjectActivity.this.renderer.createUI();
 			if(savedInstanceState == null){
 				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
 			}
@@ -1548,24 +1548,32 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
-		linker.storeBeanShellData(savedInstanceState);
-		renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
-		renderer.storeTabs(savedInstanceState);
-		renderer.storeViewValues(savedInstanceState);
-		activityData.setUserId(databaseManager.getUserId());
-		activityData.saveTo(savedInstanceState);
-		gpsDataManager.saveTo(savedInstanceState);
+		try {
+			linker.storeBeanShellData(savedInstanceState);
+			renderer.storeBackStack(savedInstanceState,getSupportFragmentManager());
+			renderer.storeTabs(savedInstanceState);
+			renderer.storeViewValues(savedInstanceState);
+			activityData.setUserId(databaseManager.getUserId());
+			activityData.saveTo(savedInstanceState);
+			gpsDataManager.saveTo(savedInstanceState);
+		} catch (Exception e) {
+			FLog.e("error saving bundle", e);
+		}
 	}
 
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
-		linker.restoreBeanShellData(savedInstanceState);
-		renderer.restoreBackStack(savedInstanceState, this);
-		renderer.restoreTabs(savedInstanceState);
-		renderer.restoreViewValues(savedInstanceState);
-		activityData.restoreFrom(savedInstanceState);
-		gpsDataManager.restoreFrom(savedInstanceState);
-		this.databaseManager.setUserId(activityData.getUserId());
+		try {
+			linker.restoreBeanShellData(savedInstanceState);
+			renderer.restoreBackStack(savedInstanceState, this);
+			renderer.restoreTabs(savedInstanceState);
+			renderer.restoreViewValues(savedInstanceState);
+			activityData.restoreFrom(savedInstanceState);
+			gpsDataManager.restoreFrom(savedInstanceState);
+			this.databaseManager.setUserId(activityData.getUserId());
+		} catch (Exception e) {
+			FLog.e("error restoring bundle", e);
+		}
 	}
 
 	// TODO think about what happens if copy fails

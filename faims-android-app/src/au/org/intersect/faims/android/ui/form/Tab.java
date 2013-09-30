@@ -1,6 +1,5 @@
 package au.org.intersect.faims.android.ui.form;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,24 +14,18 @@ import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.format.Time;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -60,7 +53,6 @@ public class Tab implements Parcelable{
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
 	private Map<String, List<View>> viewMap;
-	private Map<String, Object> valueReference;
 	private Map<String, Button> dirtyButtonMap;
 	private List<View> viewList;
 	private List<CustomMapView> mapViewList;
@@ -97,7 +89,6 @@ public class Tab implements Parcelable{
 		
 		this.linearLayout = new LinearLayout(activity);
 		this.viewReference = new HashMap<String, String>();
-		this.valueReference = new HashMap<String, Object>();
 		this.dirtyButtonMap = new HashMap<String, Button>();
 		this.viewMap = new HashMap<String, List<View>>();
 		this.viewList = new ArrayList<View>();
@@ -145,7 +136,8 @@ public class Tab implements Parcelable{
 		return dirtyButtonMap.get(ref);
 	}
 
-	public View addInput(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, String directory, boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
+	public View addCustomView(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, 
+			boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
     	Button certaintyButton = null;
     	Button annotationButton = null;
     	Button dirtyButton = null;
@@ -245,7 +237,7 @@ public class Tab implements Parcelable{
                     case Constants.DATATYPE_CHOICE:
                     	// check if the type if image to create image slider
                         if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = renderImageSliderForSingleSelection(attribute, directory, ref);
+                            view = createPictureGallery(attribute, ref, false);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
                         }
                         // Radio Button
@@ -270,9 +262,18 @@ public class Tab implements Parcelable{
                 switch (attribute.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
                     	if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = renderImageSliderForMultiSelection(attribute, directory, ref);
+                            view = createPictureGallery(attribute, ref, true);
                             setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
-                        }else{
+                    	} else if ("camera".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createCameraPictureGallery(attribute, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
+                    	} else if ("video".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createVideoGallery(attribute, ref);
+                            setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref);
+                    	} else if ("file".equalsIgnoreCase(attribute.questionType)) {
+                    		view = createFileListGroup(attribute, ref);
+                    		setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
+                        } else {
 	                    	view = createCheckListGroup(attribute, ref);
 	                    	setupView(linearLayout, view, certaintyButton, annotationButton, dirtyButton, infoButton, attribute.name, ref, new ArrayList<NameValuePair>());
                         }
@@ -358,12 +359,17 @@ public class Tab implements Parcelable{
         if (dirtyButton != null) onDirtyButtonClicked(dirtyButton, view);
         if (infoButton != null) onInfoButtonClicked(infoButton, attributeName);
         linearLayout.addView(view);
-        valueReference.put(ref, value);
+        
+        if (view instanceof ICustomView) {
+        	ICustomView customView = (ICustomView) view;
+        	customView.setCertaintyEnabled(certaintyButton != null);
+        	customView.setAnnotationEnabled(annotationButton != null);
+        }
 	}
 	
 
 	private CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -384,7 +390,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomDatePicker createDatePicker(FormAttribute attribute, String ref) {
-		CustomDatePicker date = new CustomDatePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomDatePicker date = new CustomDatePicker(this.activityRef.get(), attribute, ref);
     	Time now = new Time();
 		now.setToNow();
 		date.updateDate(now.year, now.month, now.monthDay);
@@ -395,7 +401,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomEditText createTextArea(FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomEditText text = new CustomEditText(this.activityRef.get(), attribute, ref);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -404,7 +410,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private CustomTimePicker createTimePicker(FormAttribute attribute, String ref) {
-		CustomTimePicker time = new CustomTimePicker(this.activityRef.get(), attribute.name, attribute.type, ref);
+		CustomTimePicker time = new CustomTimePicker(this.activityRef.get(), attribute, ref);
     	Time timeNow = new Time();
         timeNow.setToNow();
 		time.setCurrentHour(timeNow.hour);
@@ -415,30 +421,23 @@ public class Tab implements Parcelable{
 		return time;
 	}
 	
-	private CustomLinearLayout createRadioGroup(FormAttribute attribute, String ref) {
-		CustomLinearLayout selectLayout = new CustomLinearLayout(this.activityRef.get(), attribute.name, attribute.type, ref);
-        selectLayout.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
-        selectLayout.setOrientation(LinearLayout.VERTICAL);
-        RadioGroup radioGroupLayout = new RadioGroup(this.activityRef.get());
-        radioGroupLayout.setOrientation(LinearLayout.HORIZONTAL);
-        HorizontalScrollView scrollView = new HorizontalScrollView(this.activityRef.get());
-		scrollView.addView(radioGroupLayout);
-        for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	CustomRadioButton radioButton = new CustomRadioButton(this.activityRef.get());
+	private CustomRadioGroup createRadioGroup(FormAttribute attribute, String ref) {
+		CustomRadioGroup radioGroup = new CustomRadioGroup(this.activityRef.get(), attribute, ref);
+		
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
         	innerText = arch16n.substituteValue(innerText);
-            radioButton.setText(innerText);
-            radioButton.setValue(selectChoice.getValue());
-            radioGroupLayout.addView(radioButton);
+        	pairs.add(new NameValuePair(innerText, selectChoice.getValue()));
         }
-        selectLayout.addView(scrollView);
-        return selectLayout;
+		radioGroup.populate(pairs);
+		
+		return radioGroup;  
 	}
 	
 	private CustomListView createList(FormAttribute attribute) {
 		CustomListView list = new CustomListView(this.activityRef.get());
+		
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -446,6 +445,7 @@ public class Tab implements Parcelable{
         	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
             choices.add(pair);
         }
+        
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
                 this.activityRef.get(),
                 android.R.layout.simple_list_item_1,
@@ -455,7 +455,7 @@ public class Tab implements Parcelable{
 	}
 	
 	private HierarchicalSpinner createDropDown(FormAttribute attribute, String ref) {
-		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute.name, attribute.type, ref);
+		HierarchicalSpinner spinner = new HierarchicalSpinner(this.activityRef.get(), attribute, ref);
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
         	String innerText = selectChoice.getLabelInnerText();
@@ -472,22 +472,25 @@ public class Tab implements Parcelable{
         return spinner;
 	}
 	
-	private CustomLinearLayout createCheckListGroup(FormAttribute attribute, String ref) {
-		CustomLinearLayout selectLayout = new CustomLinearLayout(
-                this.activityRef.get(), attribute.name, attribute.type, ref);
-        selectLayout.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
-        selectLayout.setOrientation(LinearLayout.VERTICAL);
+	private CustomCheckBoxGroup createCheckListGroup(FormAttribute attribute, String ref) {
+		CustomCheckBoxGroup checkboxGroup = new CustomCheckBoxGroup(
+                this.activityRef.get(), attribute, ref);
+        
+        List<NameValuePair> choices = new ArrayList<NameValuePair>();
         for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	CustomCheckBox checkBox = new CustomCheckBox(this.activityRef.get());
         	String innerText = selectChoice.getLabelInnerText();
         	innerText = arch16n.substituteValue(innerText);
-            checkBox.setText(innerText);
-            checkBox.setValue(selectChoice.getValue());
-            selectLayout.addView(checkBox);
+        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+            choices.add(pair);
         }
-        return selectLayout;
+        
+        return checkboxGroup;
+	}
+	
+	private FileListGroup createFileListGroup(FormAttribute attribute, String ref) {
+		FileListGroup audioListGroup = new FileListGroup(
+                this.activityRef.get(), attribute, attribute.sync, ref);
+        return audioListGroup;
 	}
 	
 	private Button createTrigger(FormAttribute attribute) {
@@ -498,11 +501,13 @@ public class Tab implements Parcelable{
 	}
 	
 	private void setDirtyTextArea(EditText text, String value) {
+		if (value == null || "".equals(value)) return;
+		
 		String[] lines = value.split(";");
 		StringBuffer sb = new StringBuffer();
 		int count = 0;
 		for (String l : lines) {
-			if (l.equals("")) continue;
+			if (l.trim().equals("")) continue;
 			sb.append(l);
 			sb.append("\n");
 			count++;
@@ -520,25 +525,12 @@ public class Tab implements Parcelable{
 				EditText textView = new EditText(activityRef.get());
 				scrollView.addView(textView);
 				textView.setEnabled(false);
-				if (view instanceof CustomEditText){
-	        		CustomEditText customEditText = (CustomEditText) view;
-	        		setDirtyTextArea(textView, customEditText.getDirtyReason());
-				}else if (view instanceof CustomDatePicker){
-	        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
-	        		setDirtyTextArea(textView, customDatePicker.getDirtyReason());
-	        	}else if (view instanceof CustomTimePicker){
-	        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
-	        		setDirtyTextArea(textView, customTimePicker.getDirtyReason());
-	        	}else if (view instanceof CustomLinearLayout){
-	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-	        		setDirtyTextArea(textView, customLinearLayout.getDirtyReason());
-	        	}else if (view instanceof CustomHorizontalScrollView){
-	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-	        		setDirtyTextArea(textView, customHorizontalScrollView.getDirtyReason());
-	        	}else if (view instanceof CustomSpinner){
-	        		CustomSpinner customSpinner = (CustomSpinner) view;
-	        		setDirtyTextArea(textView, customSpinner.getDirtyReason());
-	        	}
+				
+				if (view instanceof ICustomView) {
+					ICustomView customView = (ICustomView) view;
+					setDirtyTextArea(textView, customView.getDirtyReason());
+				}
+				
 				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 				
 				builder.setTitle("Annotation");
@@ -561,19 +553,12 @@ public class Tab implements Parcelable{
 			@Override
 			public void onClick(View v) {
 				final EditText editText = new EditText(v.getContext());
-				if (view instanceof CustomEditText){
-	        		CustomEditText customEditText = (CustomEditText) view;
-	        		editText.setText(customEditText.getCurrentAnnotation());
-	        	}else if (view instanceof CustomLinearLayout){
-	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-	        		editText.setText(customLinearLayout.getCurrentAnnotation());
-	        	}else if (view instanceof CustomHorizontalScrollView){
-	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-	        		editText.setText(customHorizontalScrollView.getCurrentAnnotation());
-	        	}else if (view instanceof CustomSpinner){
-	        		CustomSpinner customSpinner = (CustomSpinner) view;
-	        		editText.setText(customSpinner.getCurrentAnnotation());
-	        	}
+				
+				if (view instanceof ICustomView) {
+					ICustomView customView = (ICustomView) view;
+					editText.setText(customView.getAnnotation());
+				}
+				
 				AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
 				
 				builder.setTitle("Annotation");
@@ -581,19 +566,11 @@ public class Tab implements Parcelable{
 				builder.setView(editText);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				        public void onClick(DialogInterface dialog, int id) {
-				        	if (view instanceof CustomEditText){
-				        		CustomEditText customEditText = (CustomEditText) view;
-				        		customEditText.setCurrentAnnotation(editText.getText().toString());
-				        	}else if (view instanceof CustomLinearLayout){
-				        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-				        		customLinearLayout.setCurrentAnnotation(editText.getText().toString());
-				        	}else if (view instanceof CustomHorizontalScrollView){
-				        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-				        		customHorizontalScrollView.setCurrentAnnotation(editText.getText().toString());
-				        	}else if (view instanceof CustomSpinner){
-				        		CustomSpinner customSpinner = (CustomSpinner) view;
-				        		customSpinner.setCurrentAnnotation(editText.getText().toString());
-				        	}
+				        	
+				        	if (view instanceof ICustomView) {
+								ICustomView customView = (ICustomView) view;
+								customView.setAnnotation(editText.getText().toString());
+							}
 				        }
 				    });
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -617,31 +594,12 @@ public class Tab implements Parcelable{
 				float certainty = 0;
 				seekBar.setMax(100);
 				seekBar.setMinimumWidth((int) ScaleUtil.getDip(Tab.this.activityRef.get(), 400));
-				if (view instanceof CustomEditText){
-	        		CustomEditText customEditText = (CustomEditText) view;
-	        		certainty = customEditText.getCurrentCertainty();
+				
+				if (view instanceof ICustomView) {
+					ICustomView customView = (ICustomView) view;
+					certainty = customView.getCertainty();
 	        		seekBar.setProgress((int) (certainty * 100));
-	        	}else if (view instanceof CustomDatePicker){
-	        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
-	        		certainty = customDatePicker.getCurrentCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-	        	}else if (view instanceof CustomTimePicker){
-	        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
-	        		certainty = customTimePicker.getCurrentCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-	        	}else if (view instanceof CustomLinearLayout){
-	        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-	        		certainty = customLinearLayout.getCurrentCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-	        	}else if (view instanceof CustomHorizontalScrollView){
-	        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-	        		certainty = customHorizontalScrollView.getCurrentCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-	        	}else if (view instanceof CustomSpinner){
-	        		CustomSpinner customSpinner = (CustomSpinner) view;
-	        		certainty = customSpinner.getCurrentCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-	        	}
+				}
 				
 				final TextView text = new TextView(v.getContext());
 				text.setText("    Certainty: " + certainty);
@@ -670,25 +628,11 @@ public class Tab implements Parcelable{
 				builder.setView(layout);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				        public void onClick(DialogInterface dialog, int id) {
-				        	if (view instanceof CustomEditText){
-				        		CustomEditText customEditText = (CustomEditText) view;
-				        		customEditText.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}else if (view instanceof CustomDatePicker){
-				        		CustomDatePicker customDatePicker = (CustomDatePicker) view;
-				        		customDatePicker.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}else if (view instanceof CustomTimePicker){
-				        		CustomTimePicker customTimePicker = (CustomTimePicker) view;
-				        		customTimePicker.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}else if (view instanceof CustomLinearLayout){
-				        		CustomLinearLayout customLinearLayout = (CustomLinearLayout) view;
-				        		customLinearLayout.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}else if (view instanceof CustomHorizontalScrollView){
-				        		CustomHorizontalScrollView customHorizontalScrollView = (CustomHorizontalScrollView) view;
-				        		customHorizontalScrollView.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}else if (view instanceof CustomSpinner){
-				        		CustomSpinner customSpinner = (CustomSpinner) view;
-				        		customSpinner.setCurrentCertainty(((float)seekBar.getProgress())/100);
-				        	}
+				        	
+				        	if (view instanceof ICustomView) {
+								ICustomView customView = (ICustomView) view;
+								customView.setCertainty(((float)seekBar.getProgress())/100);
+							}
 				        }
 				    });
 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -747,7 +691,7 @@ public class Tab implements Parcelable{
 			
 			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
 			
-			if(!terms.isEmpty()){
+			if(terms != null && !terms.isEmpty()){
 				description.append("<p><i>Glossary:</i></p>");
 				VocabularyTerm.applyArch16n(terms, activityRef.get().getArch16n());
 				createVocabularyTermXML(description, terms);
@@ -885,100 +829,20 @@ public class Tab implements Parcelable{
 		return this.viewMap.get(name);
 	}
 	
-	public Object getStoredValue(String ref){
-		return this.valueReference.get(ref);
-	}
-
 	public Map<String, String> getViewReference() {
 		return viewReference;
 	}
-
-	public void setValueReference(String ref, Object value){
-		this.valueReference.put(ref, value);
-	}
-
-	/**
-     * Rendering image slide for select one
-     * 
-     * @param layout
-     * @param questionPrompt
-	 * @param path2 
-	 * @param attributeType 
-	 * @param attributeName 
-     */
-    private CustomHorizontalScrollView renderImageSliderForSingleSelection(final FormAttribute attribute, String directory, String ref) {
-    	return renderImageSlider(attribute, directory, ref, false);
-    }
-
-    private View renderImageSliderForMultiSelection(FormAttribute attribute, String directory, String ref) {
-    	return renderImageSlider(attribute, directory, ref, true);
-	}
-
-    private CustomHorizontalScrollView renderImageSlider(final FormAttribute attribute, String directory, String ref, final boolean isMulti) {
-		final CustomHorizontalScrollView horizontalScrollView = new CustomHorizontalScrollView(this.activityRef.get(), attribute.name, attribute.type, ref, isMulti);
-        LinearLayout galleriesLayout = new LinearLayout(this.activityRef.get());
-        galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
-        final List<CustomImageView> galleryImages = new ArrayList<CustomImageView>();
-        for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	final String picturePath = Environment.getExternalStorageDirectory() + directory + "/" + selectChoice.getValue();
-        	File pictureFolder = new File(picturePath);
-        	if(pictureFolder.exists()){
-	        	for(final String name : pictureFolder.list()){
-	        		LinearLayout galleryLayout = new LinearLayout(this.activityRef.get());
-	        		galleryLayout.setOrientation(LinearLayout.VERTICAL);
-	        		CustomImageView gallery = new CustomImageView(this.activityRef.get());
-	        		int size = (int) ScaleUtil.getDip(this.activityRef.get(), 400);
-	        		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
-	                gallery.setImageURI(Uri.parse(ref+"/"+name));
-	                gallery.setBackgroundColor(Color.LTGRAY);
-	                gallery.setPadding(10, 10, 10, 10);
-	                gallery.setLayoutParams(layoutParams);
-	                gallery.setPicture(null);
-	                gallery.setOnClickListener(new OnClickListener() {
 	
-	                    @Override
-	                    public void onClick(View v) {
-	                    	if(isMulti){
-	                    		CustomImageView selectedImageView = (CustomImageView) v;
-	                    		if(horizontalScrollView.getSelectedImageViews() != null){
-	                    			if(horizontalScrollView.getSelectedImageViews().contains(selectedImageView)){
-	                    				view.setBackgroundColor(Color.LTGRAY);
-	                    				horizontalScrollView.removeSelectedImageView(selectedImageView);
-	                    			}else{
-	                    				view.setBackgroundColor(Color.BLUE);
-	                    				horizontalScrollView.addSelectedImageView(selectedImageView);
-	                    			}
-	                    		}else{
-	                    			view.setBackgroundColor(Color.BLUE);
-                    				horizontalScrollView.addSelectedImageView(selectedImageView);
-	                    		}
-	                    	}else{
-	                    		CustomImageView selectedImageView = (CustomImageView) v;
-		                        horizontalScrollView.addSelectedImageView(selectedImageView);
-		                        for (CustomImageView view : galleryImages) {
-		                            if (view.equals(selectedImageView)) {
-		                                view.setBackgroundColor(Color.BLUE);
-		                            } else {
-		                                view.setBackgroundColor(Color.LTGRAY);
-		                            }
-		                        }
-	                    	}
-	                    }
-	                });
-	                TextView textView = new TextView(this.activityRef.get());
-	                textView.setText(name);
-	                textView.setGravity(Gravity.CENTER_HORIZONTAL);
-	                textView.setTextSize(20);
-	                galleryLayout.addView(textView);
-	                galleryImages.add(gallery);
-	                galleryLayout.addView(gallery);
-	                galleriesLayout.addView(galleryLayout);
-	        	}
-	        	horizontalScrollView.setImageViews(galleryImages);
-	        }
-        }
-        horizontalScrollView.addView(galleriesLayout);
-        return horizontalScrollView;
+    private PictureGallery createPictureGallery(FormAttribute attribute, String ref, boolean isMulti) {
+		return new PictureGallery(this.activityRef.get(), attribute, ref, isMulti);
+	}
+    
+    private CameraPictureGallery createCameraPictureGallery(FormAttribute attribute, String ref) {
+		return new CameraPictureGallery(this.activityRef.get(), attribute, ref);
+	}
+    
+    private VideoGallery createVideoGallery(FormAttribute attribute, String ref) {
+		return new VideoGallery(this.activityRef.get(), attribute, ref);
 	}
 
 	/*
@@ -993,90 +857,10 @@ public class Tab implements Parcelable{
 
 	public void clearViews() {
 		for (View v : viewList) {
-			if (v instanceof CustomEditText) {
-				CustomEditText text = (CustomEditText) v;
-				text.setText("");
-				text.setCertainty(1);
-				text.setAnnotation("");
-				text.setCurrentCertainty(1);
-				text.setCurrentAnnotation("");
-				valueReference.put(text.getRef(), "");
-				Button dirtyButton = dirtyButtonMap.get(text.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if (v instanceof CustomDatePicker) {
-				CustomDatePicker date = (CustomDatePicker) v;
-				Time now = new Time();
-				now.setToNow();
-				date.updateDate(now.year, now.month, now.monthDay);
-				date.setCertainty(1);
-				date.setCurrentCertainty(1);
-				valueReference.put(date.getRef(), DateUtil.getDate(date));
-				Button dirtyButton = dirtyButtonMap.get(date.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if (v instanceof CustomTimePicker) {
-				CustomTimePicker time = (CustomTimePicker) v;
-				Time now = new Time();
-				now.setToNow();
-				time.setCurrentHour(now.hour);
-				time.setCurrentMinute(now.minute);
-				time.setCertainty(1);
-				time.setCurrentCertainty(1);
-				valueReference.put(time.getRef(), DateUtil.getTime(time));
-				Button dirtyButton = dirtyButtonMap.get(time.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if (v instanceof CustomLinearLayout) {
-				CustomLinearLayout layout = (CustomLinearLayout) v;
-				layout.setCertainty(1);
-				layout.setAnnotation("");
-				layout.setCurrentCertainty(1);
-				layout.setCurrentAnnotation("");
-				View child0 = layout.getChildAt(0);
-				
-				if (child0 instanceof HorizontalScrollView) {
-					
-					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
-					View child1 = horizontalScrollView.getChildAt(0);
-					if(child1 instanceof RadioGroup){
-						RadioGroup rg = (RadioGroup) child1;
-						rg.clearCheck();
-						valueReference.put(layout.getRef(), "");
-					}
-				}else if (child0 instanceof CheckBox){
-					for(int i = 0; i < layout.getChildCount(); ++i){
-						View view = layout.getChildAt(i);
-						if (view instanceof CustomCheckBox){
-							CustomCheckBox cb = (CustomCheckBox) view;
-							cb.setChecked(false);
-						}
-					}
-					valueReference.put(layout.getRef(), new ArrayList<NameValuePair>());
-				}
-				Button dirtyButton = dirtyButtonMap.get(layout.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if (v instanceof CustomSpinner) {
-				CustomSpinner spinner = (CustomSpinner) v;
-				spinner.reset();
-				spinner.setCertainty(1);
-				spinner.setAnnotation("");
-				spinner.setCurrentCertainty(1);
-				spinner.setCurrentAnnotation("");
-				NameValuePair pair = (NameValuePair) spinner.getSelectedItem();
-				valueReference.put(spinner.getRef(), pair.getValue());
-				Button dirtyButton = dirtyButtonMap.get(spinner.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if(v instanceof CustomHorizontalScrollView){
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) v;
-				horizontalScrollView.setCertainty(1);
-				horizontalScrollView.setAnnotation("");
-				horizontalScrollView.setCurrentCertainty(1);
-				horizontalScrollView.setCurrentAnnotation("");
-				if(horizontalScrollView.getImageViews() != null){
-					for(CustomImageView customImageView : horizontalScrollView.getImageViews()){
-						customImageView.setBackgroundColor(Color.LTGRAY);
-					}
-				}
-				horizontalScrollView.removeSelectedImageViews();
-				Button dirtyButton = dirtyButtonMap.get(horizontalScrollView.getRef());
+			if (v instanceof ICustomView) {
+				ICustomView customView = (ICustomView) v;
+				customView.reset();
+				Button dirtyButton = dirtyButtonMap.get(customView.getRef());
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			}
 		}

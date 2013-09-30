@@ -1,33 +1,26 @@
 package au.org.intersect.faims.android.ui.form;
 
-public class EntityAttribute {
+public class EntityAttribute extends RelationshipAttribute {
 	
-	private String name;
-	private String text;
 	private String measure;
-	private String certainty;
-	private String vocab;
-	private String type;
-	private boolean isDeleted;
-	private boolean dirty;
-	private String dirtyReason;
+	
+	public EntityAttribute() {
+		
+	}
+	
+	public EntityAttribute(String name, String text, String measure, String vocab, String certainty) {
+		this(name, text, measure, vocab, certainty, false);
+	}
+	
+	public EntityAttribute(String name, String text, String measure, String vocab, String certainty, boolean isDeleted) {
+		this.name = name;
+		this.text = text;
+		this.measure = measure;
+		this.vocab = vocab;
+		this.certainty = certainty;
+		this.isDeleted = isDeleted;
+	}
 
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String value) {
-		name = value;
-	}
-	
-	public String getText() {
-		return text;
-	}
-	
-	public void setText(String value) {
-		text = value;
-	}
-	
 	public String getMeasure() {
 		return measure;
 	}
@@ -36,71 +29,29 @@ public class EntityAttribute {
 		measure = value;
 	}
 	
-	public String getCertainty() {
-		return certainty;
-	}
-	
-	public void setCertainty(String value) {
-		certainty = value;
-	}
-	
-	public String getVocab() {
-		return vocab;
-	}
-	
-	public void setVocab(String value) {
-		vocab = value;
-	}
-	
 	public String toString() {
 		return "(" + name + "," + text + "," + vocab + "," + measure + "," + certainty + "," + isDeleted + ")";
 	}
-
-	public boolean hasFreeText(){
-		return this.text != null;
-	}
-
-	public boolean hasMeasure(){
-		return this.measure != null;
-	}
-
-	public boolean hasCertainty(){
-		return this.certainty != null;
-	}
-
-	public boolean hasVocab(){
-		return this.vocab != null;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public boolean isDeleted() {
-		return isDeleted;
-	}
-
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
-	}
-
-	public void setDirty(boolean value) {
-		this.dirty = value;
+	
+	@Override
+	public String getValue(String type) {
+		if (MEASURE.equals(type)) {
+			return measure;
+		} else if (VOCAB.equals(type)) {
+			return vocab;
+		} else {
+			return text;
+		}
 	}
 	
-	public boolean isDirty() {
-		return dirty;
-	}
-	
-	public void setDirtyReason(String value) {
-		this.dirtyReason = value;
-	}
-	
-	public String getDirtyReason() {
-		return dirtyReason;
+	@Override
+	public String getAnnotation(String type) {
+		if (MEASURE.equals(type)) {
+			return text;
+		} else if (VOCAB.equals(type)) {
+			return text;
+		} else {
+			return null;
+		}
 	}
 }

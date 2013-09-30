@@ -14,6 +14,7 @@ public class FormAttribute {
 	public String questionAppearance;
 	public String name;
 	public String type;
+	public boolean sync;
 	public boolean certainty;
 	public boolean annotation;
 	public boolean readOnly;
@@ -36,6 +37,7 @@ public class FormAttribute {
 		attribute.info = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_info"));
 		attribute.readOnly = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_read_only"));
 		attribute.map = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"));
+		attribute.sync = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_sync"));
 		attribute.selectChoices = input.getSelectChoices();
 		return attribute;
 	}

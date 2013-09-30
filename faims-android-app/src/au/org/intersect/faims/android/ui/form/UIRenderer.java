@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.ui.form;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,26 +18,16 @@ import org.javarosa.form.api.FormEntryPrompt;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.DatePicker;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
-import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
-import au.org.intersect.faims.android.util.DateUtil;
 
 /**
  * Class that reads the ui defintion file and render the UI
@@ -101,7 +90,7 @@ public class UIRenderer implements IRestoreActionListener{
      * Render the tabs and questions inside the tabs
      * 
      */
-    public void createUI(String directory) {
+    public void createUI() {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
     	
@@ -128,7 +117,7 @@ public class UIRenderer implements IRestoreActionListener{
 	    		if("style".equals(tabGroupName)){
 	    			parseStyle(tabGroupElement,groupIndex);
 	    		}else{
-	    			parseTabGroups(directory, groupIndex, tabGroupElement, tabGroupCaption, tabGroupName);
+	    			parseTabGroups(groupIndex, tabGroupElement, tabGroupCaption, tabGroupName);
 	    		}
 	    	
 	    	groupIndex = this.fem.getModel().incrementIndex(groupIndex, false);
@@ -137,7 +126,7 @@ public class UIRenderer implements IRestoreActionListener{
     	
     }
 
-	private void parseTabGroups(String directory, FormIndex groupIndex, GroupDef tabGroupElement, FormEntryCaption tabGroupCaption, String tabGroupName) {
+	private void parseTabGroups(FormIndex groupIndex, GroupDef tabGroupElement, FormEntryCaption tabGroupCaption, String tabGroupName) {
 		IFormElement element;
 		String archEntType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_archent_type");
 		String relType = tabGroupCaption.getFormElement().getAdditionalAttribute(null, "faims_rel_type");
@@ -159,14 +148,14 @@ public class UIRenderer implements IRestoreActionListener{
 			element = this.fem.getModel().getForm().getChild(tabIndex);
 
 			if (element instanceof GroupDef) {
-				parseTab(directory, tabGroupName, element, tabGroup, tabIndex);
+				parseTab(tabGroupName, element, tabGroup, tabIndex);
 			}
 
 			tabIndex = this.fem.getModel().incrementIndex(tabIndex, false);
 		}
 	}
 
-	private void parseTab(String directory, String tabGroupName, IFormElement element, TabGroup tabGroup, FormIndex tabIndex) {
+	private void parseTab(String tabGroupName, IFormElement element, TabGroup tabGroup, FormIndex tabIndex) {
 		GroupDef tabElement = (GroupDef) element;
 		FormEntryCaption tabCaption = this.fem.getModel().getCaptionPrompt(tabIndex);
 
@@ -183,15 +172,15 @@ public class UIRenderer implements IRestoreActionListener{
 			element = this.fem.getModel().getForm().getChild(containerIndex);
 
 			if (element instanceof GroupDef) {
-				parseContainer(null, directory, tabGroupName, tabName, element,tabGroup, containerIndex, tab, 1);
+				parseContainer(null, tabGroupName, tabName, element,tabGroup, containerIndex, tab, 1);
 			} else {
-				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, containerIndex, null);
+				parseInput(tabGroupName, tabName, element, tabGroup,tab, containerIndex, null);
 			}
 			containerIndex = this.fem.getModel().incrementIndex(containerIndex, false);
 		}
 	}
 
-	private void parseContainer(LinearLayout containerLayout, String directory, String tabGroupName, String tabName, IFormElement element,
+	private void parseContainer(LinearLayout containerLayout, String tabGroupName, String tabName, IFormElement element,
 			TabGroup tabGroup, FormIndex childIndex, Tab tab, int depth) {
 		if (depth > 5) {
 
@@ -216,9 +205,9 @@ public class UIRenderer implements IRestoreActionListener{
 		for (int i = 0; i < childContainerElement.getChildren().size(); i++) {
 			element = this.fem.getModel().getForm().getChild(inputIndex);
 			if (element instanceof GroupDef) {
-				parseContainer(childContainerLayout, directory, tabGroupName,tabName, element, tabGroup, inputIndex, tab, ++depth);
+				parseContainer(childContainerLayout, tabGroupName,tabName, element, tabGroup, inputIndex, tab, ++depth);
 			} else {
-				parseInput(directory, tabGroupName, tabName, element, tabGroup,tab, inputIndex, childContainerLayout);
+				parseInput(tabGroupName, tabName, element, tabGroup,tab, inputIndex, childContainerLayout);
 			}
 			inputIndex = this.fem.getModel().incrementIndex(inputIndex, false);
 		}
@@ -235,13 +224,13 @@ public class UIRenderer implements IRestoreActionListener{
 		return styleMappings;
 	}
 
-	private void parseInput(String directory, String tabGroupName, String tabName, IFormElement element, TabGroup tabGroup, Tab tab,
+	private void parseInput(String tabGroupName, String tabName, IFormElement element, TabGroup tabGroup, Tab tab,
 			FormIndex childIndex, LinearLayout containerLayout) {
 		QuestionDef questionElement = (QuestionDef) element;
 		String style = questionElement.getAdditionalAttribute(null,"faims_style");
 		FormEntryPrompt input = this.fem.getModel().getQuestionPrompt(childIndex);
 		String viewName = input.getIndex().getReference().getNameLast();
-		View view = tab.addInput(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName, directory,
+		View view = tab.addCustomView(containerLayout, FormAttribute.parseFromInput(input), tabGroupName + "/"+ tabName + "/" + viewName, viewName,
 				tabGroup.isArchEnt(), tabGroup.isRelationship(),getStyleMappings(style));
 
 		viewMap.put(tabGroupName + "/" + tabName + "/" + viewName, view);
@@ -381,545 +370,10 @@ public class UIRenderer implements IRestoreActionListener{
 		this.currentTabGroup = currentTabGroup;
 	}
 
-	public Object getFieldValue(String ref) {
-
-		try {
-			Object obj = getViewByRef(ref);
-
-			if (obj instanceof TextView) {
-				TextView tv = (TextView) obj;
-				return tv.getText().toString();
-			} else if (obj instanceof CustomSpinner) {
-				CustomSpinner spinner = (CustomSpinner) obj;
-				return spinner.getValue();
-			} else if (obj instanceof LinearLayout) {
-				LinearLayout ll = (LinearLayout) obj;
-
-				View child0 = ll.getChildAt(0);
-
-				if (child0 instanceof CheckBox) {
-					List<NameValuePair> valueList = new ArrayList<NameValuePair>();
-
-					for (int i = 0; i < ll.getChildCount(); ++i) {
-						View view = ll.getChildAt(i);
-
-						if (view instanceof CustomCheckBox) {
-							CustomCheckBox cb = (CustomCheckBox) view;
-							if (cb.isChecked()) {
-								valueList.add(new NameValuePair(cb.getValue(),
-										"true"));
-							}
-						}
-					}
-					return valueList;
-				} else if (child0 instanceof HorizontalScrollView) {
-					
-					HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
-					View child1 = horizontalScrollView.getChildAt(0);
-					if(child1 instanceof RadioGroup){
-						RadioGroup rg = (RadioGroup) child1;
-						String value = "";
-						for (int i = 0; i < rg.getChildCount(); ++i) {
-							View view = rg.getChildAt(i);
-	
-							if (view instanceof CustomRadioButton) {
-								CustomRadioButton rb = (CustomRadioButton) view;
-								if (rb.isChecked()) {
-									value = rb.getValue();
-									break;
-								}
-							}
-						}
-						return value;
-					}
-				} else {
-					return null;
-				}
-			} else if (obj instanceof DatePicker) {
-				DatePicker date = (DatePicker) obj;
-				return DateUtil.getDate(date);
-			} else if (obj instanceof TimePicker) {
-				TimePicker time = (TimePicker) obj;
-				return DateUtil.getTime(time);
-			} else if (obj instanceof CustomHorizontalScrollView) {
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				if (!horizontalScrollView.isMulti()) {
-					if(horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()){
-						return horizontalScrollView.getSelectedImageViews().get(0)
-								.getPicture().getId();
-					}else{
-						return "";
-					}
-				} else {
-					if (horizontalScrollView.getSelectedImageViews() != null && !horizontalScrollView.getSelectedImageViews().isEmpty()) {
-						List<String> selectedPictures = new ArrayList<String>();
-						for (CustomImageView imageView : horizontalScrollView
-								.getSelectedImageViews()) {
-							selectedPictures.add(imageView.getPicture()
-									.getUrl());
-						}
-						return selectedPictures;
-					}
-					return "";
-				}
-			} else if (obj instanceof CustomListView) {
-				CustomListView listView = (CustomListView) obj;
-				if (listView.getSelectedItems() != null) {
-					List<String> audios = new ArrayList<String>();
-					for (Object item : listView.getSelectedItems()) {
-						NameValuePair pair = (NameValuePair) item;
-						audios.add(pair.getValue());
-					}
-					return audios;
-				} else {
-					return "";
-				}
-			} else {
-				FLog.w("cannot find view " + ref);
-				return null;
-			}
-		} catch (Exception e) {
-			FLog.e("error getting field value " + ref, e);
-		}
-		return null;
-	}
-
-	private Object getFieldCertainty(String ref){
-		
-		try{
-			Object obj = getViewByRef(ref);
-			
-			if (obj instanceof CustomEditText){
-				CustomEditText tv = (CustomEditText) obj;
-				return String.valueOf(tv.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomSpinner){
-				CustomSpinner spinner = (CustomSpinner) obj;
-				return String.valueOf(spinner.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomLinearLayout){
-				CustomLinearLayout layout = (CustomLinearLayout) obj;
-				return String.valueOf(layout.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomDatePicker) {
-				CustomDatePicker date = (CustomDatePicker) obj;
-				return String.valueOf(date.getCurrentCertainty());
-			} 
-			else if (obj instanceof CustomTimePicker) {
-				CustomTimePicker time = (CustomTimePicker) obj;
-				return String.valueOf(time.getCurrentCertainty());
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				return String.valueOf(horizontalScrollView.getCurrentCertainty());
-			}
-			else {
-				// TODO show warning
-				return null;
-			}
-		}
-		catch(Exception e){
-			FLog.e("error getting field certainty",e);
-			// TODO show warning
-			return null;
-		}
-	}
-
-	private Object getFieldAnnotation(String ref){
-		
-		try{
-			Object obj = getViewByRef(ref);
-			
-			if (obj instanceof CustomEditText){
-				CustomEditText tv = (CustomEditText) obj;
-				return tv.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomSpinner){
-				CustomSpinner spinner = (CustomSpinner) obj;
-				return spinner.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomLinearLayout){
-				CustomLinearLayout layout = (CustomLinearLayout) obj;
-				return layout.getCurrentAnnotation();
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				return horizontalScrollView.getCurrentAnnotation();
-			}
-			else {
-				// TODO show warning
-				return null;
-			}
-		}
-		catch(Exception e){
-			FLog.e("error getting field annotation",e);
-			// TODO show warning
-			return null;
-		}
-	}
-	
-	private String getFieldDirty(String ref){
-		
-		try{
-			Object obj = getViewByRef(ref);
-			
-			if (obj instanceof CustomEditText){
-				CustomEditText tv = (CustomEditText) obj;
-				return tv.getDirtyReason();
-			}
-			else if (obj instanceof CustomSpinner){
-				CustomSpinner spinner = (CustomSpinner) obj;
-				return spinner.getDirtyReason();
-			}
-			else if (obj instanceof CustomLinearLayout){
-				CustomLinearLayout layout = (CustomLinearLayout) obj;
-				return layout.getDirtyReason();
-			}
-			else if (obj instanceof CustomDatePicker) {
-				CustomDatePicker date = (CustomDatePicker) obj;
-				return date.getDirtyReason();
-			} 
-			else if (obj instanceof CustomTimePicker) {
-				CustomTimePicker time = (CustomTimePicker) obj;
-				return time.getDirtyReason();
-			}
-			else if (obj instanceof CustomHorizontalScrollView){
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				return horizontalScrollView.getDirtyReason();
-			}
-			else {
-				// TODO show warning
-				return null;
-			}
-		}
-		catch(Exception e){
-			FLog.e("error getting field annotation",e);
-			// TODO show warning
-			return null;
-		}
-	}
-
 	public LinkedList<Tab> getTabList() {
 		return tabList;
 	}
-
-	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
-		ArrayList<NameValuePair> pairs = null;
-		try {
-			@SuppressWarnings("unchecked")
-			List<NameValuePair> values = (List<NameValuePair>) valuesObj;
-			pairs = new ArrayList<NameValuePair>();
-			for (NameValuePair p : values) {
-				pairs.add(new NameValuePair(arch16n
-						.substituteValue(p.getName()), p.getValue()));
-			}
-		} catch (Exception e) {
-			try {
-				@SuppressWarnings("unchecked")
-				List<List<String>> values = (List<List<String>>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (List<String> list : values) {
-					pairs.add(new NameValuePair(arch16n
-							.substituteValue(list.get(1)), list.get(0)));
-				}
-			} catch (Exception ee) {
-				@SuppressWarnings("unchecked")
-				List<String> values = (List<String>) valuesObj;
-				pairs = new ArrayList<NameValuePair>();
-				for (String value : values) {
-					pairs.add(new NameValuePair(arch16n
-							.substituteValue(value), arch16n
-							.substituteValue(value)));
-				}
-			}
-		}
-		return pairs;
-	}
 	
-	public void setFieldValue(String ref, Object valueObj) {
-		try {
-			Object obj = getViewByRef(ref);
-
-			if (valueObj instanceof Number) {
-				valueObj = valueObj.toString();
-			}
-
-			if (valueObj instanceof String) {
-
-				String value = (String) valueObj;
-				value = arch16n.substituteValue(value);
-
-				if (obj instanceof TextView) {
-					TextView tv = (TextView) obj;
-					tv.setText(value);
-				} else if (obj instanceof CustomSpinner) {
-					CustomSpinner spinner = (CustomSpinner) obj;
-					spinner.setValue(value);
-				} else if (obj instanceof LinearLayout) {
-					LinearLayout ll = (LinearLayout) obj;
-
-					View child0 = ll.getChildAt(0);
-
-					if (child0 instanceof HorizontalScrollView) {
-						HorizontalScrollView horizontalScrollView = (HorizontalScrollView) child0;
-						View child1 = horizontalScrollView.getChildAt(0);
-						if(child1 instanceof RadioGroup){
-							RadioGroup rg = (RadioGroup) child1;
-							List<CustomRadioButton> buttons = new ArrayList<CustomRadioButton>();
-							for (int i = 0; i < rg.getChildCount(); ++i) {
-								View view = rg.getChildAt(i);
-								if (view instanceof CustomRadioButton) {
-									buttons.add((CustomRadioButton) view);
-								}
-							}
-							rg.removeAllViews();
-							for (CustomRadioButton rb : buttons) {
-								CustomRadioButton radioButton = new CustomRadioButton(
-										rg.getContext());
-								radioButton.setText(rb.getText());
-								radioButton.setValue(rb.getValue());
-								if (rb.getValue().toString()
-										.equalsIgnoreCase(value)) {
-									radioButton.setChecked(true);
-								}
-								rg.addView(radioButton);
-	
-							}
-						}
-
-					} else if (child0 instanceof CheckBox) {
-						for (int i = 0; i < ll.getChildCount(); ++i) {
-							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox) {
-								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue().toString()
-										.equalsIgnoreCase(value)) {
-									cb.setChecked(true);
-									break;
-								}
-							}
-						}
-					}
-				} else if (obj instanceof DatePicker) {
-					DatePicker date = (DatePicker) obj;
-					DateUtil.setDatePicker(date, value);
-				} else if (obj instanceof TimePicker) {
-					TimePicker time = (TimePicker) obj;
-					DateUtil.setTimePicker(time, value);
-				} else if (obj instanceof CustomHorizontalScrollView) {
-					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					for (CustomImageView customImageView : horizontalScrollView
-							.getImageViews()) {
-						if (!horizontalScrollView.isMulti()) {
-							if (customImageView.getPicture().getId().equals(value)) {
-								customImageView.setBackgroundColor(Color.BLUE);
-								horizontalScrollView
-									.addSelectedImageView(customImageView);
-								break;
-							}
-						}else{
-							if (customImageView.getPicture().getUrl().equals(value)) {
-								customImageView.setBackgroundColor(Color.BLUE);
-								horizontalScrollView
-									.addSelectedImageView(customImageView);
-								break;
-							}
-						}
-					}
-				} else {
-					FLog.w("cannot find view " + ref);
-				}
-			}
-
-			else if (valueObj instanceof List<?>) {
-				
-				if (obj instanceof LinearLayout) {
-					LinearLayout ll = (LinearLayout) obj;
-					
-					List<NameValuePair> valueList = convertToNameValuePairs((Collection<?>) valueObj);
-
-					for (NameValuePair pair : valueList) {
-						for (int i = 0; i < ll.getChildCount(); ++i) {
-							View view = ll.getChildAt(i);
-							if (view instanceof CustomCheckBox) {
-								CustomCheckBox cb = (CustomCheckBox) view;
-								if (cb.getValue()
-										.toString()
-										.equalsIgnoreCase(
-												arch16n
-														.substituteValue(
-																pair.getName()))) {
-									cb.setChecked("true".equals(pair.getValue()));
-									break;
-								}
-							}
-						}
-					}
-				} else if (obj instanceof CustomHorizontalScrollView) {
-					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					
-					@SuppressWarnings("unchecked")
-					List<String> valueList = (List<String>) valueObj;
-					
-					for (String value : valueList) {
-						for (CustomImageView customImageView : horizontalScrollView
-								.getImageViews()) {
-							if (!horizontalScrollView.isMulti()) {
-								if (customImageView.getPicture().getId().equals(value)) {
-									customImageView.setBackgroundColor(Color.BLUE);
-									horizontalScrollView
-											.addSelectedImageView(customImageView);
-								}
-							}else{
-								if (customImageView.getPicture().getUrl().equals(value)) {
-									customImageView.setBackgroundColor(Color.BLUE);
-									horizontalScrollView
-											.addSelectedImageView(customImageView);
-								}
-							}
-						}
-					}
-				} else {
-					FLog.w("cannot find view " + ref);
-				}
-			}
-		} catch (Exception e) {
-			FLog.e("error setting field value " + ref, e);
-		}
-	}
-
-	private void setFieldCertainty(String ref, Object valueObj) {
-		try{
-			Object obj = getViewByRef(ref);
-			
-			if (valueObj instanceof Number) {
-				valueObj = valueObj.toString();
-			}
-			
-			if (valueObj instanceof String){
-				
-				float value = Float.valueOf((String) valueObj);
-				
-				if (obj instanceof CustomEditText){
-					CustomEditText tv = (CustomEditText) obj;
-					tv.setCertainty(value);
-					tv.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomSpinner){
-					CustomSpinner spinner = (CustomSpinner) obj;
-					spinner.setCertainty(value);
-					spinner.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomLinearLayout){
-					CustomLinearLayout layout = (CustomLinearLayout) obj;
-					layout.setCertainty(value);
-					layout.setCurrentCertainty(value);
-				}
-				else if (obj instanceof CustomDatePicker) {
-					CustomDatePicker date = (CustomDatePicker) obj;
-					date.setCertainty(value);
-					date.setCurrentCertainty(value);
-				} 
-				else if (obj instanceof CustomTimePicker) {
-					CustomTimePicker time = (CustomTimePicker) obj;
-					time.setCertainty(value);
-					time.setCurrentCertainty(value);
-				}else if (obj instanceof CustomHorizontalScrollView){
-					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					horizontalScrollView.setCertainty(value);
-					horizontalScrollView.setCurrentCertainty(value);
-				}else {
-					// TODO show warning
-				}
-			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field certainty",e);
-			// TODO show warning
-		}
-	}
-
-	private void setFieldAnnotation(String ref, Object valueObj) {
-		try{
-			Object obj = getViewByRef(ref);
-			
-			if (valueObj instanceof String){
-				
-				String value = (String) valueObj;
-				
-				if (obj instanceof CustomEditText){
-					CustomEditText tv = (CustomEditText) obj;
-					tv.setAnnotation(value);
-					tv.setCurrentAnnotation(value);
-				}
-				else if (obj instanceof CustomSpinner){
-					CustomSpinner spinner = (CustomSpinner) obj;
-					spinner.setAnnotation(value);
-					spinner.setCurrentAnnotation(value);
-				}
-				else if (obj instanceof CustomLinearLayout){
-					CustomLinearLayout layout = (CustomLinearLayout) obj;
-					layout.setAnnotation(value);
-					layout.setCurrentAnnotation(value);
-				}else if (obj instanceof CustomHorizontalScrollView){
-					CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-					horizontalScrollView.setAnnotation(value);
-					horizontalScrollView.setCurrentAnnotation(value);
-				}else {
-					// TODO show warning
-				}
-			}
-		}
-		catch(Exception e){
-			FLog.e("error setting field annotation",e);
-			// TODO show warning
-		}
-	}
-	
-	public void setFieldDirty(String ref, boolean isDirty, String isDirtyReason) {
-		try {
-			Object obj = getViewByRef(ref);
-			
-			if (obj != null) {
-				Button dirtyButton = getTabForView(ref).getDirtyButton(ref);
-				if (dirtyButton != null) {
-					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
-				}
-			}
-
-			if (obj instanceof CustomEditText) {
-				CustomEditText tv = (CustomEditText) obj;
-				tv.setDirty(isDirty);
-				tv.setDirtyReason(isDirtyReason);
-			} else if (obj instanceof CustomSpinner) {
-				CustomSpinner spinner = (CustomSpinner) obj;
-				spinner.setDirty(isDirty);
-				spinner.setDirtyReason(isDirtyReason);
-			} else if (obj instanceof CustomLinearLayout) {
-				CustomLinearLayout layout = (CustomLinearLayout) obj;
-				layout.setDirty(isDirty);
-				layout.setDirtyReason(isDirtyReason);
-			} else if (obj instanceof CustomDatePicker) {
-				CustomDatePicker date = (CustomDatePicker) obj;
-				date.setDirty(isDirty);
-				date.setDirtyReason(isDirtyReason);
-			} else if (obj instanceof CustomTimePicker) {
-				CustomTimePicker time = (CustomTimePicker) obj;
-				time.setDirty(isDirty);
-				time.setDirtyReason(isDirtyReason);
-			} else if (obj instanceof CustomHorizontalScrollView) {
-				CustomHorizontalScrollView horizontalScrollView = (CustomHorizontalScrollView) obj;
-				horizontalScrollView.setDirty(isDirty);
-				horizontalScrollView.setDirtyReason(isDirtyReason);
-			} else {
-				FLog.w("cannot set field isDirty " + ref + " = "
-						+ isDirty);
-			}
-		} catch (Exception e) {
-			FLog.e("error setting field isDirty " + ref, e);
-		}
-	}
-
 	@SuppressWarnings("rawtypes")
 	public List<View> getViewByType(Class type){
 		List<View> result = new ArrayList<View>();
@@ -968,11 +422,15 @@ public class UIRenderer implements IRestoreActionListener{
 	}
 
 	public void storeViewValues(Bundle savedInstanceState){
+		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for(String reference : viewMap.keySet()){
-			viewValues.put(reference, getFieldValue(reference));
-			viewCertainties.put(reference, getFieldCertainty(reference));
-			viewAnnotations.put(reference, getFieldAnnotation(reference));
-			viewDirtyReasons.put(reference, getFieldDirty(reference));
+			Object obj = getViewByRef(reference);
+			if (obj instanceof ICustomView) {
+				viewValues.put(reference, linker.getFieldValue(reference));
+				viewCertainties.put(reference, linker.getFieldCertainty(reference));
+				viewAnnotations.put(reference, linker.getFieldAnnotation(reference));
+				viewDirtyReasons.put(reference, linker.getFieldDirty(reference));
+			}
 		}
 		savedInstanceState.putSerializable("viewValues", (Serializable) viewValues);
 		savedInstanceState.putSerializable("viewCertainties", (Serializable) viewCertainties);
@@ -990,12 +448,16 @@ public class UIRenderer implements IRestoreActionListener{
 	
 	@Override
 	public void restoreViewValuesForTabGroup(TabGroup tabGroup){
+		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for (Tab tab : tabGroup.getTabs()) {
 			for(String reference : tab.getViewReference().values()){
-				setFieldValue(reference, viewValues.get(reference));
-				setFieldCertainty(reference, viewCertainties.get(reference));
-				setFieldAnnotation(reference, viewAnnotations.get(reference));
-				setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
+				Object obj = getViewByRef(reference);
+				if (obj instanceof ICustomView) {
+					linker.setFieldValue(reference, viewValues.get(reference));
+					linker.setFieldCertainty(reference, viewCertainties.get(reference));
+					linker.setFieldAnnotation(reference, viewAnnotations.get(reference));
+					linker.setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
+				}
 			}
 		}
 	}

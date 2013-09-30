@@ -103,6 +103,41 @@ showTab(String ref, String id) {
 }
 
 /**
+  * Save the tab group with the following reference.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship. Can be null to save new record
+  * @param geometry the geometry list of the record
+  * @param attributes additional attributes to save for the record
+  * @param callback code to execute when saving is finished
+  */
+saveTabGroup(String ref, String id, List geometry, List attributes, String callback){
+    linker.saveTabGroup(ref, id, geometry, attributes, callback);
+}
+
+/**
+  * Save the tab with the following reference.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship. Can be null to save new record
+  * @param geometry the geometry list of the record
+  * @param attributes additional attributes to save for the record
+  * @param callback code to execute when saving is finished
+  */
+saveTab(String ref, String id, List geometry, List attributes, String callback){
+    linker.saveTab(ref, id, geometry, attributes, callback);
+}
+
+/**
+  * Return the last saved record id.
+  *
+  * @return id the id of the last saved record using saveTabGroup or saveTab
+  */
+getLastSavedRecordId() {
+	return _saved_record_id;
+}
+
+/**
   * Close the tab group with the following reference with an option to show
   * a warning dialog if there are changes that haven't been saved. 
   *
@@ -300,58 +335,58 @@ setUser(User user){
 /**
   * Insert a new or update an existing archaeological entity record and return the id of the saved record.
   *
-  * @param entity_id the id of the entity to be saved, set to null to save a new record
-  * @param entity_type the type of the entity to be saved, must be one specified in the data schema
-  * @param geo_data the list of geometries to be associated with the entity
+  * @param entityId the id of the entity to be saved, set to null to save a new record
+  * @param entityType the type of the entity to be saved, must be one specified in the data schema
+  * @param geometry the list of geometries to be associated with the entity
   * @param attributes the list of attributes to be associated with the entity
   * @return the id of the saved entity
   */
-saveArchEnt(String entity_id, String entity_type, List geo_data, List attributes) {
-	return linker.saveArchEnt(entity_id, entity_type, geo_data, attributes);
+saveArchEnt(String entityId, String entityType, List geometry, List attributes) {
+	return linker.saveArchEnt(entityId, entityType, geometry, attributes);
 }
 
 /**
   * Insert a new or update an existing relationship record and return the id of the saved record.
   *
-  * @param rel_id the id of the relationship to be saved, set to null to save a new record
-  * @param rel_type the type of the relationship to be saved, must be one specified in the data schema
-  * @param geo_data the list of geometries to be associated with the relationship
+  * @param relationshipId the id of the relationship to be saved, set to null to save a new record
+  * @param relationshipType the type of the relationship to be saved, must be one specified in the data schema
+  * @param geometry the list of geometries to be associated with the relationship
   * @param attributes the list of attributes to be associated with the relationship
   * @return the id of the saved relationship
   */
-saveRel(String rel_id, String rel_type, List geo_data, List attributes) {
-	return linker.saveRel(rel_id, rel_type, geo_data, attributes);
+saveRel(String relationshipId, String relationshipType, List geometry, List attributes) {
+	return linker.saveRel(relationshipId, relationshipType, geometry, attributes);
 }
 
 /**
   * Deletes the specified archaeological entity.
   *
-  * @param entity_id the id of the entity to be deleted
+  * @param entityId the id of the entity to be deleted
   * @return boolean value true if deleted, false if not
   */
-deleteArchEnt(String entity_id){
-	return linker.deleteArchEnt(entity_id);
+deleteArchEnt(String entityId){
+	return linker.deleteArchEnt(entityId);
 }
 
 /**
   * Deletes the specified relationship.
   *
-  * @param rel_id the id of the relationship to be deleted
+  * @param relationshipId the id of the relationship to be deleted
   * @return boolean value true if deleted, false if not
   */
-deleteRel(String rel_id){
-	return linker.deleteRel(rel_id);
+deleteRel(String relationshipId){
+	return linker.deleteRel(relationshipId);
 }
 
 /**
   * Add an existing archaeological entity to an existing relationship and the verb of the relation.
   *
-  * @param entity_id the id of the entity
-  * @param rel_id the id of the relationship
+  * @param entityId the id of the entity
+  * @param relationshipId the id of the relationship
   * @param verb the relation verb that is defined in the data schema for the specified relationship
   */
-addReln(String entity_id, String rel_id, String verb) {
-	linker.addReln(entity_id, rel_id, verb);
+addReln(String entityId, String relationshipId, String verb) {
+	linker.addReln(entityId, relationshipId, verb);
 }
 
 /**
@@ -1703,6 +1738,36 @@ stripAttachedFilePath(String file) {
 	return linker.stripAttachedFilePath(file);
 }
 
+/**
+  * Add file to checkbox group.
+  *
+  * @param ref reference to the checkbox group
+  * @param file the filepath of the file to add
+  */
+addFile(String ref, String file) {
+	linker.addFile(ref, file);
+}
+
+/**
+  * Add picture to gallery.
+  *
+  * @param ref reference to the gallery
+  * @param file the filepath of the picture to add
+  */
+addPicture(String ref, String file) {
+	linker.addPicture(ref, file);
+}
+
+/**
+  * Add file to checkbox group.
+  *
+  * @param ref reference to the checkbox group
+  * @param file the filepath of the video to add
+  */
+addVideo(String ref, String file) {
+	linker.addVideo(ref, file);
+}
+
 //========= MISC ==========
 
 /**
@@ -1712,4 +1777,114 @@ stripAttachedFilePath(String file) {
   */
 execute(String code){
 	return linker.execute(code);
+}
+
+attachFileTo(String ref) {
+	showFileBrowser("_setFileTo(\""+ref+"\")");
+}
+
+_setFileTo(String ref) {
+	String filePath = getLastSelectedFilepath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addFile(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addFile(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachPictureTo(String ref) {
+	openCamera("_setPictureTo(\""+ref+"\")");
+}
+
+_setPictureTo(String ref) {
+	String filePath = getLastPictureFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addPicture(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addPicture(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachVideoTo(String ref) {
+	openVideo("_setVideoTo(\""+ref+"\")");
+}
+
+_setVideoTo(String ref) {
+	String filePath = getLastVideoFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addVideo(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addVideo(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+attachAudioTo(String ref) {
+	recordAudio("_setAudioTo(\""+ref+"\")");
+}
+
+_setAudioTo(String ref) {
+	String filePath = getLastAudioFilePath();
+	List selectedFiles = null;
+    if (isNull(getFieldValue(ref))) {
+    	selectedFiles = new ArrayList();
+    	selectedFiles.add(filePath);
+    	addFile(ref, filePath);
+    } else {
+    	selectedFiles = _convertPairsToList(getFieldValue(ref));
+    	if (!selectedFiles.contains(filePath)) {
+    		selectedFiles.add(filePath);
+    		addFile(ref, filePath);
+    	}
+    }
+    setFieldValue(ref, _convertListToPairs(selectedFiles));
+}
+
+_convertPairsToList(pairs) {
+	if (pairs == null) return new ArrayList();
+	ArrayList list = new ArrayList();
+	for (NameValuePair p : pairs) {
+		list.add(p.getName());
+	}
+	return list;
+}
+
+_convertListToPairs(list) {
+	if (list == null) return new ArrayList();
+	ArrayList pairs = new ArrayList();
+	for (String s : list) {
+		pairs.add(new NameValuePair(s, "true"));
+	}
+	return pairs;
+}
+
+isNull(String value) {
+	return value == null || "".equals(value);
+}
+
+isNull(List value) {
+	return value == null || value.isEmpty();
 }
