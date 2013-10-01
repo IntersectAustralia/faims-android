@@ -919,4 +919,7 @@ public class Tab implements Parcelable{
 		}
 	}
 
+	protected ScrollView getScrollViewForTab(){
+		return this.view instanceof ScrollView ? (ScrollView) this.view : null;
+	}
 }
