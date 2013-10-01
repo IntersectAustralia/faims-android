@@ -185,7 +185,7 @@ public class PathFollowerTool extends HighlightTool {
 		killFollowerThread = false;
 		currentPoint = p.getMapPos();
 		try {
-			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getProjectSrid());
+			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getModuleSrid());
 		} catch (Exception e) {
 			FLog.e("error gettting geometry buffer", e);
 		}
@@ -202,7 +202,7 @@ public class PathFollowerTool extends HighlightTool {
 						
 							double dx = point.x - currentPoint.x;
 							double dy = point.y - currentPoint.y;
-							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getProjectSrid());
+							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getModuleSrid());
 							
 							double nextStep;
 							if (d == 0) {
@@ -255,7 +255,7 @@ public class PathFollowerTool extends HighlightTool {
 				builder.addColorField("color", "Select Color:", Integer.toHexString(mapView.getDrawViewColor()));
 				builder.addSlider("strokeSize", "Stroke Size:", mapView.getDrawViewStrokeStyle());
 				builder.addSlider("textSize", "Text Size:", mapView.getDrawViewTextSize());
-				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getProjectSrid());
+				final boolean isEPSG4326 = GeometryUtil.EPSG4326.equals(mapView.getModuleSrid());
 				if (isEPSG4326)
 					builder.addCheckBox("showDegrees", "Show Degrees:", !mapView.showDecimal());
 				builder.addSlider("buffer", "Path Buffer", buffer);

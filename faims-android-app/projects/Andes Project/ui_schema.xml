@@ -903,16 +903,16 @@
       <group ref="static">
         <label>Static Data</label>
         <input ref="name" faims_read_only="true">
-          <label>Project Name:</label>
+          <label>Module Name:</label>
         </input>
         <input ref="id" faims_read_only="true">
-          <label>Project Id:</label>
+          <label>Module Id:</label>
         </input>
         <input ref="season" faims_read_only="true">
-          <label>Project Year:</label>
+          <label>Module Year:</label>
         </input>
         <input ref="description" faims_read_only="true">
-          <label>Project Description:</label>
+          <label>Module Description:</label>
         </input>
         <input ref="permit_no" faims_read_only="true">
           <label>Permit No:</label>

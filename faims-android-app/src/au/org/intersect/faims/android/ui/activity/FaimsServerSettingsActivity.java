@@ -116,8 +116,8 @@ public class FaimsServerSettingsActivity extends Activity{
 					if(result instanceof Boolean){
 						if((Boolean)result){
 							
-							Intent fetchProjectsIntent = new Intent(FaimsServerSettingsActivity.this, FetchProjectsActivity.class);
-							FaimsServerSettingsActivity.this.startActivityForResult(fetchProjectsIntent,1);
+							Intent fetchModulesIntent = new Intent(FaimsServerSettingsActivity.this, FetchModulesActivity.class);
+							FaimsServerSettingsActivity.this.startActivityForResult(fetchModulesIntent,1);
 							FaimsServerSettingsActivity.this.finish();
 							
 						}else{

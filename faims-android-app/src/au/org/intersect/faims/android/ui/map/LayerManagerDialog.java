@@ -49,7 +49,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
@@ -190,15 +190,15 @@ public class LayerManagerDialog extends AlertDialog {
 	public void attachToMap(CustomMapView mapView) {
 		this.mapView = mapView;
 		
-		ShowProjectActivity activity = mapView.getActivity();
-		activity.getFileManager().addListener(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+		ShowModuleActivity activity = mapView.getActivity();
+		activity.getFileManager().addListener(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			@Override
 	           public void onFileSelected(File file) {
 					LayerManagerDialog.this.rasterFile = file;
 					LayerManagerDialog.this.selectedFileText.setText(file.getName());
 	           }
 		});
-		activity.getFileManager().addListener(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+		activity.getFileManager().addListener(ShowModuleActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			
 			@Override
 			public void onFileSelected(File file) {
@@ -602,7 +602,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(View arg0) {
-				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
+				showFileBrowser(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
 		layout.addView(browserButton);
@@ -682,7 +682,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(View arg0) {
-				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
+				showFileBrowser(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
 		layout.addView(browserButton);
@@ -760,7 +760,7 @@ public class LayerManagerDialog extends AlertDialog {
 //
 //			@Override
 //			public void onClick(View arg0) {
-//				showFileBrowser(ShowProjectActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
+//				showFileBrowser(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE);
 //			}
 //		});
 //		layout.addView(browserButton);
@@ -862,7 +862,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 			@Override
 			public void onClick(View arg0) {
-				showFileBrowser(ShowProjectActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE);
+				showFileBrowser(ShowModuleActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE);
 			}
 		});
 		layout.addView(browserButton);
@@ -1557,8 +1557,8 @@ public class LayerManagerDialog extends AlertDialog {
 
 			double[][] originalBounds = gdalMapLayer.getBoundary();
 			
-			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getProjectSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
-			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getProjectSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
+			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
+			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
 			
 	        TextView upperLeftTextView = new TextView(this.getContext());
 	        upperLeftTextView.setText("Upper left boundary:");

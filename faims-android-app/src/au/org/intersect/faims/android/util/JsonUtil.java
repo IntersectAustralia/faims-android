@@ -7,7 +7,7 @@ import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -33,18 +33,18 @@ public class JsonUtil {
         return parser.parse(reader).getAsJsonObject(); 
 	}
 	
-	public static List<Project> deserializeProjects(InputStream stream) throws IOException {
-		LinkedList<Project> projects = new LinkedList<Project>();
+	public static List<Module> deserializeModules(InputStream stream) throws IOException {
+		LinkedList<Module> modules = new LinkedList<Module>();
 		JsonArray objects = deserializeJsonArray(stream);
 		for (int i = 0; i < objects.size(); i++) {
-			projects.push(Project.fromJson(objects.get(i).getAsJsonObject()));
+			modules.push(Module.fromJson(objects.get(i).getAsJsonObject()));
 		}
-		return projects;
+		return modules;
 	}
 	
-	public static Project deserializeProjectArchive(InputStream stream) throws IOException {
+	public static Module deserializeModuleArchive(InputStream stream) throws IOException {
 		JsonObject object = deserializeJsonObject(stream);
-		return Project.fromJson(object);
+		return Module.fromJson(object);
 	}
 	
 	public static JsonObject deserializeJsonObject(InputStream stream) throws IOException {

@@ -182,7 +182,7 @@ public class DrawView extends View {
 	}
 	
 	protected MapPos projectPoint(MapPos p) {
-		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, mapView.getProjectSrid(), p);
+		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, mapView.getModuleSrid(), p);
 	}
 	
 	public void setDrawList(List<Geometry> geometryList) {

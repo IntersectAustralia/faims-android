@@ -38,7 +38,7 @@ import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -48,7 +48,7 @@ import com.google.inject.Inject;
 
 public class Tab implements Parcelable{
 
-	private WeakReference<ShowProjectActivity> activityRef;
+	private WeakReference<ShowModuleActivity> activityRef;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
 	private Map<String, String> viewReference;
@@ -75,8 +75,8 @@ public class Tab implements Parcelable{
 		reference = source.readString();
 	}
 	
-	public Tab(ShowProjectActivity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
-		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+	public Tab(ShowModuleActivity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		this.name = name;
 		this.arch16n = arch16n;
 		label = this.arch16n.substituteValue(label);
@@ -743,7 +743,7 @@ public class Tab implements Parcelable{
 		ScrollView scrollView = new ScrollView(this.activityRef.get());
 		LinearLayout layout = new LinearLayout(this.activityRef.get());
 		WebView webView = new WebView(this.activityRef.get());
-		webView.loadDataWithBaseURL("file:///" + this.activityRef.get().getProjectDir() + "/", description, "text/html", null, null);
+		webView.loadDataWithBaseURL("file:///" + this.activityRef.get().getModuleDir() + "/", description, "text/html", null, null);
 		layout.addView(webView);
 		scrollView.addView(layout);
 		dialog.setView(scrollView);

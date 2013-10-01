@@ -37,13 +37,13 @@
         </activity>
         
         <activity
-            android:name="au.org.intersect.faims.android.ui.activity.FetchProjectsActivity"
-            android:label="@string/fetch_projects_name"
+            android:name="au.org.intersect.faims.android.ui.activity.FetchModulesActivity"
+            android:label="@string/fetch_modules_name"
             android:configChanges="orientation|keyboardHidden|screenSize"
              />
 
         <activity
-            android:name="au.org.intersect.faims.android.ui.activity.ShowProjectActivity" 
+            android:name="au.org.intersect.faims.android.ui.activity.ShowModuleActivity" 
             android:configChanges="orientation|keyboardHidden|screenSize" 
             >
              <meta-data
@@ -58,15 +58,15 @@
              />
         
         <service
-            android:name="au.org.intersect.faims.android.services.DownloadProjectService"
+            android:name="au.org.intersect.faims.android.services.DownloadModuleService"
             ></service>
         
         <service
-            android:name="au.org.intersect.faims.android.services.UpdateProjectSettingService"
+            android:name="au.org.intersect.faims.android.services.UpdateModuleSettingService"
             ></service>
         
         <service
-            android:name="au.org.intersect.faims.android.services.UpdateProjectDataService"
+            android:name="au.org.intersect.faims.android.services.UpdateModuleDataService"
             ></service>
         
         <service

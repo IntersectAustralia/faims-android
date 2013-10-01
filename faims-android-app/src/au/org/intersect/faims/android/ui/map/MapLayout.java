@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.map;
 import android.content.Context;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
 public class MapLayout extends LinearLayout {
 
@@ -20,7 +20,7 @@ public class MapLayout extends LinearLayout {
 	public MapLayout(Context context) {
 		super(context);
 		
-		ShowProjectActivity activity = (ShowProjectActivity) context;
+		ShowModuleActivity activity = (ShowModuleActivity) context;
 		
 		this.setOrientation(LinearLayout.VERTICAL);
 		this.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1));

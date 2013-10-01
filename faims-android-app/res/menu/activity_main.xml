@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
-  <item android:id="@+id/fetch_project_list"
-    android:title="Fetch Project List"
+  <item android:id="@+id/fetch_module_list"
+    android:title="Fetch Module List"
     android:icon="@drawable/ic_menu_add" 
     android:showAsAction="ifRoom" tools:ignore="HardcodedText"/>
   

@@ -27,7 +27,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
 /**
  * Class that reads the ui defintion file and render the UI
@@ -39,7 +39,7 @@ public class UIRenderer implements IRestoreActionListener{
 
     private FormEntryController fem;
     
-    private WeakReference<ShowProjectActivity> activityRef;
+    private WeakReference<ShowModuleActivity> activityRef;
     
     private HashMap<String, TabGroup> tabGroupMap;
     private LinkedList<TabGroup> tabGroupList;
@@ -68,10 +68,10 @@ public class UIRenderer implements IRestoreActionListener{
 
 	private Map<String,Map<String,String>> styles;
 
-	public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowProjectActivity activity) {
+	public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowModuleActivity activity) {
         this.fem = fem;
         this.arch16n = arch16n;
-        this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+        this.activityRef = new WeakReference<ShowModuleActivity>(activity);
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
         this.viewTabMap = new HashMap<String, Tab>();

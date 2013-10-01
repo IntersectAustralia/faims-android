@@ -32,7 +32,7 @@ import android.os.Environment;
 import android.util.Base64;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FileInfo;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.JsonUtil;
@@ -91,11 +91,11 @@ public class FAIMSClient {
 		}
 	}
 	
-	public Result uploadDatabase(Project project, File file, String userId) {
+	public Result uploadDatabase(Module module, File file, String userId) {
 		try {
 			HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
 			extraParts.put("user", new StringBody(userId));
-			return uploadFile(file, "/android/project/" + project.key + "/db_upload", extraParts);
+			return uploadFile(file, "/android/module/" + module.key + "/db_upload", extraParts);
 		} catch (Exception e) {
 			FLog.e("error uploading database", e);
 			return new Result(FAIMSClientResultCode.FAILURE);
@@ -156,13 +156,13 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FetchResult fetchProjectList() {
+	public FetchResult fetchModuleList() {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			try {			
 				initClient();
 				
-				HttpResponse response = getRequest(getUri("/android/projects"));
+				HttpResponse response = getRequest(getUri("/android/modules"));
 				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 					FLog.d("request failed");
 					return FetchResult.FAILURE;
@@ -171,25 +171,25 @@ public class FAIMSClient {
 				HttpEntity entity = response.getEntity();
 				
 				if (isInterrupted) {
-					FLog.d("fetch projects list interrupted");
+					FLog.d("fetch modules list interrupted");
 					
 					return FetchResult.INTERRUPTED;
 				}
 				
 				stream = entity.getContent();
 				
-				List<Project> ps = JsonUtil.deserializeProjects(stream);
+				List<Module> ps = JsonUtil.deserializeModules(stream);
 				
-				ArrayList<Project> projects = new ArrayList<Project>();
-				for (Project p : ps) {
-					projects.add(p);
+				ArrayList<Module> modules = new ArrayList<Module>();
+				for (Module p : ps) {
+					modules.add(p);
 				}
 				
-				FLog.d("fetched projects!");
+				FLog.d("fetched modules!");
 		        
-				return new FetchResult(FAIMSClientResultCode.SUCCESS, null, projects);
+				return new FetchResult(FAIMSClientResultCode.SUCCESS, null, modules);
 			} catch(Exception e) {
-				FLog.e("error fetching projects list", e);
+				FLog.e("error fetching modules list", e);
 				
 				return FetchResult.FAILURE;
 				
@@ -206,7 +206,7 @@ public class FAIMSClient {
 		}
 	}
 	
-	public FetchResult fetchDatabaseVersion(Project project) {
+	public FetchResult fetchDatabaseVersion(Module module) {
 		synchronized(FAIMSClient.class) {
 	
 			InputStream infoStream = null;
@@ -216,7 +216,7 @@ public class FAIMSClient {
 				
 				FileInfo info = new FileInfo();
 				
-				HttpResponse response = getRequest(getUri("/android/project/" + project.key + "/db_archive"));
+				HttpResponse response = getRequest(getUri("/android/module/" + module.key + "/db_archive"));
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
 					FLog.d("request busy");
@@ -267,21 +267,21 @@ public class FAIMSClient {
 		}
 	}
 	
-	public DownloadResult downloadSettings(Project project) {
-		return downloadFile("/android/project/" + project.key + "/settings_archive", 
-				"/android/project/" + project.key + "/settings_download", 
-				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
+	public DownloadResult downloadSettings(Module module) {
+		return downloadFile("/android/module/" + module.key + "/settings_archive", 
+				"/android/module/" + module.key + "/settings_download", 
+				Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key);
 	}
 	
-	public DownloadResult downloadDatabase(Project project) {
-		return downloadFile("/android/project/" + project.key + "/db_archive", 
-				"/android/project/" + project.key + "/db_download", 
-				Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
+	public DownloadResult downloadDatabase(Module module) {
+		return downloadFile("/android/module/" + module.key + "/db_archive", 
+				"/android/module/" + module.key + "/db_download", 
+				Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key);
 	}
 	
-	public DownloadResult downloadDatabase(Project project, String version, String dir) {
-		return downloadFile("/android/project/" + project.key + "/db_archive?version=" + version, 
-				"/android/project/" + project.key + "/db_download?version=" + version, 
+	public DownloadResult downloadDatabase(Module module, String version, String dir) {
+		return downloadFile("/android/module/" + module.key + "/db_archive?version=" + version, 
+				"/android/module/" + module.key + "/db_download?version=" + version, 
 				dir);
 	}
 	
@@ -353,7 +353,7 @@ public class FAIMSClient {
 				
 				// unpack into temp directory
 				
-				tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + "temp_" + UUID.randomUUID());
+				tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + "temp_" + UUID.randomUUID());
 				tempDir.mkdirs();
 				
 				FileUtil.untarFile(tempDir.getAbsolutePath(), downloadFileIS);
@@ -433,9 +433,9 @@ public class FAIMSClient {
 			
 			stream = entity.getContent();
 			
-	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir); // make sure directory exists
+	    	FileUtil.makeDirs(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir); // make sure directory exists
 			
-	    	tempArchive = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempArchive = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 	    	
 			FileUtil.saveFile(stream, tempArchive.getAbsolutePath());
 			
@@ -491,13 +491,13 @@ public class FAIMSClient {
 		return response;
 	}
 
-	public Result uploadDirectory(String projectDir, String uploadDir, String requestExcludePath, String uploadPath) {
+	public Result uploadDirectory(String moduleDir, String uploadDir, String requestExcludePath, String uploadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			try {
 				initClient();
 				
-				String uploadDirPath = projectDir + "/" + uploadDir;
+				String uploadDirPath = moduleDir + "/" + uploadDir;
 				
 				if (!new File(uploadDirPath).isDirectory()) {
 					FLog.d("no files to upload");
@@ -545,7 +545,7 @@ public class FAIMSClient {
 					return Result.SUCCESS;
 				}
 				
-				uploadFileRef = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+				uploadFileRef = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 				
 				uploadFileOS = FileUtil.createTarOutputStream(uploadFileRef.getAbsolutePath());
 				
@@ -584,7 +584,7 @@ public class FAIMSClient {
 		}
 	}
 
-	public DownloadResult downloadDirectory(String projectDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
+	public DownloadResult downloadDirectory(String moduleDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		synchronized(FAIMSClient.class) {
 			InputStream stream = null;
 			try {
@@ -624,7 +624,7 @@ public class FAIMSClient {
 					return DownloadResult.SUCCESS;
 				}
 				
-				String downloadDirPath = projectDir + "/" + downloadDir;
+				String downloadDirPath = moduleDir + "/" + downloadDir;
 				
 				// make sure dir exists
 				FileUtil.makeDirs(downloadDirPath);

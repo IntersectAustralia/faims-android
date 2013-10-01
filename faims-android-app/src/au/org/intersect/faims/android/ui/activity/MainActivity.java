@@ -18,14 +18,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.ui.dialog.AboutDialog;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
-import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 
 public class MainActivity extends RoboActivity {
 
-	private ArrayAdapter<NameValuePair> projectListAdapter;
+	private ArrayAdapter<NameValuePair> moduleListAdapter;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,20 +33,20 @@ public class MainActivity extends RoboActivity {
         
         setContentView(R.layout.activity_main);
         
-        ListView projectList = (ListView) findViewById(R.id.project_list);
+        ListView moduleList = (ListView) findViewById(R.id.module_list);
         
-        projectListAdapter = new ArrayAdapter<NameValuePair>(this,android.R.layout.simple_list_item_1);
-        projectList.setAdapter(projectListAdapter);
+        moduleListAdapter = new ArrayAdapter<NameValuePair>(this,android.R.layout.simple_list_item_1);
+        moduleList.setAdapter(moduleListAdapter);
         
-        projectList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        moduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         	
         	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-        		final String selectedItem = projectListAdapter.getItem(arg2).getValue();
+        		final String selectedItem = moduleListAdapter.getItem(arg2).getValue();
         		
-        		Intent showProjectsIntent = new Intent(MainActivity.this, ShowProjectActivity.class);
-				showProjectsIntent.putExtra("key", selectedItem);
-				MainActivity.this.startActivityForResult(showProjectsIntent, 1);
+        		Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
+				showModulesIntent.putExtra("key", selectedItem);
+				MainActivity.this.startActivityForResult(showModulesIntent, 1);
         	}
         });
         
@@ -56,7 +56,7 @@ public class MainActivity extends RoboActivity {
     protected void onStart() {
     	super.onStart();
     	
-    	readStoredProjects();
+    	readStoredModules();
     	
     	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     	if (sp.getInt("launched", 0) == 0) {
@@ -72,7 +72,7 @@ public class MainActivity extends RoboActivity {
     			
     			@Override
     			public void onClick(DialogInterface dialog, int which) {
-    				fetchProjectsFromDemoServer();
+    				fetchModulesFromDemoServer();
     			}
     		});
     		
@@ -89,7 +89,7 @@ public class MainActivity extends RoboActivity {
 		
     }
     
-    private void fetchProjectsFromDemoServer() {
+    private void fetchModulesFromDemoServer() {
     	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     	String host = getResources().getString(R.string.demo_server_host);
 		String port = getResources().getString(R.string.demo_server_port);
@@ -100,10 +100,10 @@ public class MainActivity extends RoboActivity {
 		
 		int duration = Toast.LENGTH_LONG;
 		Toast toast = Toast.makeText(getApplicationContext(),
-				"Select a project to download", duration);
+				"Select a module to download", duration);
 		toast.show();
 		
-		fetchProjectsFromServer();
+		fetchModulesFromServer();
     }
     
     @Override
@@ -130,8 +130,8 @@ public class MainActivity extends RoboActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.fetch_project_list:
-				fetchProjectsFromServer();
+			case R.id.fetch_module_list:
+				fetchModulesFromServer();
 				return (true);
 			case R.id.faims_server_setting:
 				showFaimsServerSettings();
@@ -156,20 +156,20 @@ public class MainActivity extends RoboActivity {
 	}
 
 	/**
-	 * Open a new activity and shows a list of projects from the server
+	 * Open a new activity and shows a list of modules from the server
 	 */
-	private void fetchProjectsFromServer(){
+	private void fetchModulesFromServer(){
 		
-		Intent fetchProjectsIntent = new Intent(MainActivity.this, FetchProjectsActivity.class);
-		MainActivity.this.startActivityForResult(fetchProjectsIntent,1);
+		Intent fetchModulesIntent = new Intent(MainActivity.this, FetchModulesActivity.class);
+		MainActivity.this.startActivityForResult(fetchModulesIntent,1);
 	}
     
-	private void readStoredProjects() {
-		projectListAdapter.clear();
-		List<Project> projects = ProjectUtil.getProjects();
-		if (projects != null) {
-			for (Project p : projects) {
-				projectListAdapter.add(new NameValuePair(p.name,p.key));
+	private void readStoredModules() {
+		moduleListAdapter.clear();
+		List<Module> modules = ModuleUtil.getModules();
+		if (modules != null) {
+			for (Module p : modules) {
+				moduleListAdapter.add(new NameValuePair(p.name,p.key));
 			}
 		}
 	}

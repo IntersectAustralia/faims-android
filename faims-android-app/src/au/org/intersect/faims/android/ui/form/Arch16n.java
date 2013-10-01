@@ -13,12 +13,12 @@ public class Arch16n {
 
 	private Map<String,String> properties;
 	private String path;
-	private String projectName;
+	private String moduleName;
 
-	public Arch16n(String path, String projectName){
+	public Arch16n(String path, String moduleName){
 		this.properties = new HashMap<String, String>();
 		this.path = path;
-		this.projectName = projectName;
+		this.moduleName = moduleName;
 	}
 
 	public void generatePropertiesMap() {
@@ -29,12 +29,12 @@ public class Arch16n {
 				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));
 			}
 		} catch (FileNotFoundException e) {
-			FLog.d("Required faims.properties is not found in the project");
+			FLog.d("Required faims.properties is not found in the module");
 		} catch (IOException e) {
 		}
 		
 		try{
-			FileInputStream fileInputStream = new FileInputStream(path+"/faims_"+projectName.replaceAll("\\s", "_")+".properties");
+			FileInputStream fileInputStream = new FileInputStream(path+"/faims_"+moduleName.replaceAll("\\s", "_")+".properties");
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
 			for(String s : propertyResourceBundle.keySet()){
 				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));

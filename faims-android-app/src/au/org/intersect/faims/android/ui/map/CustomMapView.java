@@ -48,7 +48,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
 import au.org.intersect.faims.android.ui.map.tools.AzimuthTool;
@@ -264,7 +264,7 @@ public class CustomMapView extends MapView {
 	private GPSLocation previousLocation;
 	private Float previousHeading;
 
-	private WeakReference<ShowProjectActivity> activityRef;
+	private WeakReference<ShowModuleActivity> activityRef;
 	
 	private HashMap<String, String> databaseLayerQueryMap;
 	private String trackLogQueryName;
@@ -323,16 +323,16 @@ public class CustomMapView extends MapView {
 	
 	private ToggleButton layerDisplayButton;
 
-	private String projectSrid;
+	private String moduleSrid;
 
 	private MapPos lastMapPoint;
 	
 	private boolean lastMapMoved;
 	
-	public CustomMapView(ShowProjectActivity activity, MapLayout mapLayout) {
+	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout) {
 		this(activity);
 		
-		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 
 		layerIdMap = new SparseArray<Layer>();
 		layerNameMap = new HashMap<String, Layer>();
@@ -384,10 +384,10 @@ public class CustomMapView extends MapView {
 		startMapOverlayThread();
         startGPSLocationThread();
         
-        projectSrid = activityRef.get().getProject().getSrid();
+        moduleSrid = activityRef.get().getModule().getSrid();
         
         // set default value for showing point coords as degrees or decimal
-        setShowDecimal(!GeometryUtil.EPSG4326.equals(projectSrid));
+        setShowDecimal(!GeometryUtil.EPSG4326.equals(moduleSrid));
         
         // create vertex editing canvas
         try {
@@ -403,7 +403,7 @@ public class CustomMapView extends MapView {
         this.getLayers().addLayer(currentPositionLayer);
         // store proper projection result
         try {
-			projectionProper = SpatialiteUtil.isProperProjection(projectSrid);
+			projectionProper = SpatialiteUtil.isProperProjection(moduleSrid);
 		} catch (Exception e) {
 			FLog.e("error checking for proper projection", e);
 		}
@@ -1635,7 +1635,7 @@ public class CustomMapView extends MapView {
 					Geometry geom = getGeomToFollow();
 					Line line = (geom instanceof Line) ? (Line) geom : null;
 					
-					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, projectSrid));
+					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, moduleSrid));
 					activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
 					activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
 					activityRef.get().setPathHeading(previousHeading);
@@ -1760,7 +1760,7 @@ public class CustomMapView extends MapView {
 		selectionDialog.show();
 	}
 
-	public ShowProjectActivity getActivity() {
+	public ShowModuleActivity getActivity() {
 		return activityRef.get();
 	}
 	
@@ -1932,8 +1932,8 @@ public class CustomMapView extends MapView {
 		return lastSelectionQuery;
 	}
 
-	public String getProjectSrid() {
-		return projectSrid;
+	public String getModuleSrid() {
+		return moduleSrid;
 	}
 
 	public void addLegacySelectQueryBuilder(String name, String dbPath, String tableName, LegacyQueryBuilder builder) {
@@ -2011,7 +2011,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = projectSrid;
+		String srid = moduleSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance, srid));
@@ -2067,7 +2067,7 @@ public class CustomMapView extends MapView {
 		}
 		
 		List<String> uuids = new ArrayList<String>();
-		String srid = projectSrid;
+		String srid = moduleSrid;
 		try {
 			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance, srid));
 			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance, srid));
@@ -2192,17 +2192,17 @@ public class CustomMapView extends MapView {
 			Point point = new Point(pos, null, (PointStyle) null, null);
 			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
 			MapPos mp = lp;
-			double min = SpatialiteUtil.distanceBetween(pos,  lp, projectSrid);
+			double min = SpatialiteUtil.distanceBetween(pos,  lp, moduleSrid);
 			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
 				MapPos p = line.getVertexList().get(i);
 				ArrayList<MapPos> pts = new ArrayList<MapPos>();
 				pts.add(p);
 				pts.add(lp);
 				Line seg = new Line(pts, null, (LineStyle) null, null);
-				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, projectSrid)) {
+				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, moduleSrid)) {
 					return lp;
 				} else {
-					double d = SpatialiteUtil.distanceBetween(pos, p, projectSrid);
+					double d = SpatialiteUtil.distanceBetween(pos, p, moduleSrid);
 					if (d < min) {
 						min = d;
 						mp = p;
@@ -2228,7 +2228,7 @@ public class CustomMapView extends MapView {
 	private void updateGeomBuffer() {
 		if (geomToFollow != null) {
 			try {
-				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, projectSrid);
+				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, moduleSrid);
 			} catch (Exception e) {
 				FLog.e("error getting geometry buffer", e);
 			}

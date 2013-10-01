@@ -17,14 +17,14 @@ import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
 	public static int tabGroupId = 1;
 	
-	private WeakReference<ShowProjectActivity> activityRef;
+	private WeakReference<ShowModuleActivity> activityRef;
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
 	private LinkedList<Tab> tabs;
@@ -184,7 +184,7 @@ public class TabGroup extends Fragment {
 		return null;
 	}
 
-	public void setActivity(WeakReference<ShowProjectActivity> activityRef) {
+	public void setActivity(WeakReference<ShowModuleActivity> activityRef) {
 		this.activityRef = activityRef;
 	}
 
@@ -206,7 +206,7 @@ public class TabGroup extends Fragment {
 	
 	private void executeCommands(List<String> commands){
 
-		BeanShellLinker linker = ((ShowProjectActivity) getActivity()).getBeanShellLinker();
+		BeanShellLinker linker = ((ShowModuleActivity) getActivity()).getBeanShellLinker();
 		
 		for(String command : commands){
 			linker.execute(command);	
