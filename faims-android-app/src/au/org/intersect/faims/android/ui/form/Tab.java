@@ -856,7 +856,8 @@ public class Tab implements Parcelable{
     */
 
 	public void clearViews() {
-		for (View v : viewList) {
+		List<View> views = getAllChildrenViews();
+		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
 				customView.reset();
