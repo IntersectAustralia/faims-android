@@ -136,6 +136,7 @@ clearEntity() {
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
 	
 	populateHierarchicalDropDown("tabgroup1/tab1/type", "type");
+	populateHierarchicalPictureGallery("tabgroup1/tab1/rocks", "rocks");
 	
 	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
 	populatePictureGallery("tabgroup1/tab1/gallery", pictures);
@@ -230,6 +231,7 @@ clearRelationship() {
 	populateCheckBoxGroup("tabgroup2/tab1/location", locations);
 	
 	populateHierarchicalDropDown("tabgroup2/tab1/type", "type");
+	populateHierarchicalPictureGallery("tabgroup2/tab1/rocks", "rocks");
 	
 	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
 	populatePictureGallery("tabgroup2/tab1/gallery", pictures);

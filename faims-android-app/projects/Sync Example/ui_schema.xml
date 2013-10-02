@@ -35,7 +35,7 @@
                   <location></location>
                   <type></type>
                   <gallery></gallery>
-                  <sync></sync>
+                  <rocks></rocks>
                   <files></files>
                   <attachfile></attachfile>
                   <pictures></pictures>
@@ -69,7 +69,7 @@
                   <location></location>
                   <type></type>
                   <gallery></gallery>
-                  <sync></sync>
+                  <rocks></rocks>
                   <files></files>
                   <attachfile></attachfile>
                   <pictures></pictures>
@@ -195,6 +195,13 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
+	        <select1 ref="rocks" type="image" faims_attribute_name="rocks" faims_attribute_type="vocab">
+	            <label>Rocks:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select1>
 	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
 	            <label>Files:</label>
 	            <item>
@@ -303,6 +310,13 @@
 	        </select1>
 	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
 	            <label>Gallery:</label>
+	            <item>
+	                <label>dummy</label>
+	                <value>dummy</value>
+	            </item>
+	        </select1>
+	        <select1 ref="rocks" type="image" faims_attribute_name="rocks" faims_attribute_type="vocab">
+	            <label>Rocks:</label>
 	            <item>
 	                <label>dummy</label>
 	                <value>dummy</value>

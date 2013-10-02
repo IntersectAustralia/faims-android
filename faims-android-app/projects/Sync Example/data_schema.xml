@@ -51,6 +51,22 @@
         <term pictureURL="files/data/pictures/cugl26140.jpg">cugl26140.jpg</term>
       </lookup>
     </property>
+    <property type="string" name="rocks">
+      <description>This is a rock gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/rocks/Angular.png">Angular.png<description>Angular</description>
+            <term pictureURL="files/data/rocks/AngularSub.png">AngularSub.png<description>Angular Sub</description></term>
+            <term pictureURL="files/data/rocks/AngularVery.png">AngularVery.png<description>Angular Very</description></term>
+            <term pictureURL="files/data/rocks/AngularAngular.png">AngularAngular.png<description>Angular Angular</description></term>
+        </term>
+        <term pictureURL="files/data/rocks/Rounded.png">Rounded.png<description>Rounded</description>
+            <term pictureURL="files/data/rocks/RoundedSub.png">RoundedSub<description>Rounded Sub</description></term>
+            <term pictureURL="files/data/rocks/RoundedWell.png">RoundedWell.png<description>Rounded Well</description></term>
+            <term pictureURL="files/data/rocks/RoundedRounded.png">RoundedRounded.png<description>Rounded Rounded</description></term>
+        </term>
+      </lookup>
+    </property>
     <property type="string" name="type">
       <bundle>DOI</bundle>
       <lookup>
@@ -197,7 +213,46 @@
       <bundle>DOI</bundle>
     </property>
     <property type="string" name="gallery">
+      <description>This is a picture gallery</description>
       <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/pictures/cugl69808.jpg">cugl69808.jpg<description>This is the first picture</description></term>
+        <term pictureURL="files/data/pictures/cugl69807a.jpg">cugl69807a.jpg<description>This is the second picture</description></term>
+        <term pictureURL="files/data/pictures/cugl67286.jpg">cugl67286.jpg</term>
+        <term pictureURL="files/data/pictures/cugl66291-7579a.jpg">cugl66291-7579a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39501_1.jpg">cugl39501_1.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39500_01.jpg">cugl39500_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39499_01.jpg">cugl39499_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39498_01.jpg">cugl39498_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39497_01.jpg">cugl39497_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39443a.jpg">cugl39443a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26216.jpg">cugl26216.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26210a.jpg">cugl26210a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26209b.jpg">cugl26209b.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26208a.jpg">cugl26208a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26207.jpg">cugl26207.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26206a.jpg">cugl26206a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26197a.jpg">cugl26197a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26193.jpg">cugl26193.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26185a.jpg">cugl26185a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26140.jpg">cugl26140.jpg</term>
+      </lookup>
+    </property>
+    <property type="string" name="rocks">
+      <description>This is a rock gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/rocks/Angular.png">Angular.png<description>Angular</description>
+            <term pictureURL="files/data/rocks/AngularSub.png">AngularSub.png<description>Angular Sub</description></term>
+            <term pictureURL="files/data/rocks/AngularVery.png">AngularVery.png<description>Angular Very</description></term>
+            <term pictureURL="files/data/rocks/AngularAngular.png">AngularAngular.png<description>Angular Angular</description></term>
+        </term>
+        <term pictureURL="files/data/rocks/Rounded.png">Rounded.png<description>Rounded</description>
+            <term pictureURL="files/data/rocks/RoundedSub.png">RoundedSub<description>Rounded Sub</description></term>
+            <term pictureURL="files/data/rocks/RoundedWell.png">RoundedWell.png<description>Rounded Well</description></term>
+            <term pictureURL="files/data/rocks/RoundedRounded.png">RoundedRounded.png<description>Rounded Rounded</description></term>
+        </term>
+      </lookup>
     </property>
     <property type="string" name="type">
       <bundle>DOI</bundle>
