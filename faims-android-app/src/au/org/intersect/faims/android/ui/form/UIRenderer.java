@@ -270,7 +270,10 @@ public class UIRenderer implements IRestoreActionListener{
     	TabGroup tabGroup = this.tabGroupList.get(index);
     	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
-    	if (tabGroup == this.currentTabGroup) return currentTabGroup;
+    	if (tabGroup == this.currentTabGroup) {
+    		tabGroup.resetTabGroupOnShow();
+    		return currentTabGroup;
+    	}
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
         if(this.currentTabGroup == null){
@@ -291,7 +294,10 @@ public class UIRenderer implements IRestoreActionListener{
     	TabGroup tabGroup = this.tabGroupMap.get(name);
     	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
-    	if (tabGroup == this.currentTabGroup) return currentTabGroup;
+    	if (tabGroup == this.currentTabGroup){
+    		tabGroup.resetTabGroupOnShow();
+    		return currentTabGroup;
+    	}
     	
     	FragmentTransaction ft = fm.beginTransaction();
 	    if(this.currentTabGroup == null){
@@ -302,7 +308,6 @@ public class UIRenderer implements IRestoreActionListener{
         }
 	    this.currentTabGroup = tabGroup;
         ft.commit();
-        
         return tabGroup;
     }
 

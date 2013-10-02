@@ -151,6 +151,9 @@ public class TabGroup extends Fragment {
 				widget.getChildAt(i).setVisibility(View.VISIBLE);
 				tab.setHidden(false);
 				tabHost.setCurrentTab(i);
+				if(tab.getScrollViewForTab() != null){
+					tab.getScrollViewForTab().scrollTo(0, 0);
+				}
 				return tab;
 			}
 		}
@@ -243,6 +246,7 @@ public class TabGroup extends Fragment {
 			tab.onShowTab();
 			lastTab = getCurrentTab();
 		}
+		resetTabGroupOnShow();
 	}
 	
 	public void onHideTabGroup() {
@@ -255,6 +259,17 @@ public class TabGroup extends Fragment {
 
 	public String getGroupTag() {
 		return id;
+	}
+	
+	protected void resetTabGroupOnShow(){
+		tabHost.setCurrentTab(0);
+		if(!getTabs().isEmpty()){
+			for (Tab tab : getTabs()) {
+				if(tab.getScrollViewForTab() != null){
+					tab.getScrollViewForTab().scrollTo(0, 0);
+				}
+			}
+		}
 	}
 
 }
