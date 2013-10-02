@@ -834,7 +834,10 @@ public class Tab implements Parcelable{
 	}
 	
     private PictureGallery createPictureGallery(FormAttribute attribute, String ref, boolean isMulti) {
-		return new PictureGallery(this.activityRef.get(), attribute, ref, isMulti);
+    	if (isMulti) {
+    		return new PictureGallery(this.activityRef.get(), attribute, ref, isMulti);
+    	}
+    	return new HierarchicalPictureGallery(this.activityRef.get(), attribute, ref);
 	}
     
     private CameraPictureGallery createCameraPictureGallery(FormAttribute attribute, String ref) {

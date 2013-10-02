@@ -178,8 +178,27 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	public List<CustomImageView> getSelectedImages() {
 		return selectedImages;
 	}
+	
+	public int getSelectionItem() {
+		if (selectedImages != null && !selectedImages.isEmpty()) {
+			return galleryImages.indexOf(selectedImages.get(0)); 
+		}
+		return -1;
+	}
+	
+	public void setSelectionItem(int position) {
+		if (galleryImages != null && galleryImages.size() > position) {
+			addSelectedImage(galleryImages.get(position));
+		}
+		
+		updateImages();
+	}
 
 	public void addSelectedImage(CustomImageView imageView){
+		if (!isMulti) {
+			removeSelectedImages();
+		}
+		
 		if(selectedImages == null){
 			selectedImages = new ArrayList<CustomImageView>();
 		}
@@ -223,10 +242,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	@Override
 	public void setValue(String value) {
-		if (!isMulti) {
-			removeSelectedImages();
-		}
-		
 		for (CustomImageView image : galleryImages) {
 			if (image.getPicture().getId().equals(value)) {
 				addSelectedImage(image);
@@ -335,7 +350,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				addSelectedImage(selectedImageView);
     		}
     	}else{
-    		removeSelectedImages();
             addSelectedImage(selectedImageView);
     	}
 		

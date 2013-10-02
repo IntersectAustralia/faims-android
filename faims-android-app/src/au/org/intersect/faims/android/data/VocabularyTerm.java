@@ -47,4 +47,17 @@ public class VocabularyTerm extends NameValuePair {
 		}
 	}
 
+	public static void applyProjectDir(List<VocabularyTerm> terms,
+			String projectDir) {
+		if (terms == null) return;
+		for (VocabularyTerm term : terms) {
+			if (term.pictureURL != null) {
+				term.pictureURL = projectDir + term.pictureURL;
+			}
+			if (term.terms != null) {
+				applyProjectDir(term.terms, projectDir);
+			}
+		}
+	}
+
 }

@@ -1613,6 +1613,8 @@ public class BeanShellLinker {
 						android.R.layout.simple_spinner_dropdown_item, pairs);
 				spinner.setAdapter(arrayAdapter);
 			} else {
+				FLog.w("cannot populate drop down "
+						+ ref);
 				showWarning("Logic Error", "Cannot populate drop down " + ref);
 			}
 		} catch (Exception e) {
@@ -1633,11 +1635,13 @@ public class BeanShellLinker {
 				
 				spinner.setTerms(terms);
 			} else {
-				showWarning("Logic Error", "Cannot populate drop down " + ref);
+				FLog.w("cannot populate hierarchical drop down "
+						+ ref);
+				showWarning("Logic Error", "Cannot populate hierarchical drop down " + ref);
 			}
 		} catch (Exception e) {
-			FLog.e("error populate drop down " + ref, e);
-			showWarning("Logic Error", "Error populate drop down " + ref);
+			FLog.e("error populate hierarchical drop down " + ref, e);
+			showWarning("Logic Error", "Error populate hierarchical drop down " + ref);
 		}
 	}
 	
@@ -1656,6 +1660,8 @@ public class BeanShellLinker {
 				CustomListView list = (CustomListView) obj;
 				list.populate(convertToNameValuePairs(valuesObj));
 			} else {
+				FLog.w("cannot populate list "
+						+ ref);
 				showWarning("Logic Error", "Cannot populate list " + ref);
 			}
 		} catch (Exception e) {
@@ -1688,10 +1694,10 @@ public class BeanShellLinker {
 					}
 				}
 				
-				final PictureGallery gallery = (PictureGallery) obj;
+				PictureGallery gallery = (PictureGallery) obj;
 				gallery.populate(pictures);
 			} else {
-				FLog.w("Cannot populate picture gallery "
+				FLog.w("cannot populate picture gallery "
 						+ ref);
 				showWarning("Logic Error", "Cannot populate picture gallery "
 						+ ref);
@@ -1699,6 +1705,29 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error populate picture gallery " + ref, e);
 			showWarning("Logic Error", "Error populate picture gallery " + ref);
+		}
+	}
+	
+	public void populateHierarchicalPictureGallery(String ref, String attributeName) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			
+			if (obj instanceof PictureGallery) {				
+				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
+				VocabularyTerm.applyProjectDir(terms, activity.getProjectDir() + "/");
+				
+				HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
+				gallery.setTerms(terms);
+			} else {
+				FLog.w("cannot populate hierarchical picture gallery "
+						+ ref);
+				showWarning("Logic Error", "Cannot populate hierarchical picture gallery "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate hierarchical picture gallery " + ref, e);
+			showWarning("Logic Error", "Error populate hierarchical picture gallery " + ref);
 		}
 	}
 

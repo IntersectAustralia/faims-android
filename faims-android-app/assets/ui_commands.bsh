@@ -549,6 +549,18 @@ populatePictureGallery(String ref, Collection values){
 }
 
 /**
+  * Populate hierarchical picture gallery field with the vocabulary in the given attribute name.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param attributeName the name of the attribute with the vocabulary
+  */
+populateHierarchicalPictureGallery(String ref, String attributeName){
+	linker.populateHierarchicalPictureGallery(ref, attributeName);
+}
+
+/**
   * Populate camera picture gallery field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
