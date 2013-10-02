@@ -1791,6 +1791,11 @@ execute(String code){
 	return linker.execute(code);
 }
 
+/**
+  * Helper method to be used with a button click event to attach files to a view
+  *
+  * @param ref the view reference to attach the files to (must be of type file)
+  */
 attachFileTo(String ref) {
 	showFileBrowser("_setFileTo(\""+ref+"\")");
 }
@@ -1812,6 +1817,11 @@ _setFileTo(String ref) {
     setFieldValue(ref, _convertListToPairs(selectedFiles));
 }
 
+/**
+  * Helper method to be used with a button click event to attach pictures to a view
+  *
+  * @param ref the view reference to attach the pictures to (must be of type camera)
+  */
 attachPictureTo(String ref) {
 	openCamera("_setPictureTo(\""+ref+"\")");
 }
@@ -1833,6 +1843,11 @@ _setPictureTo(String ref) {
     setFieldValue(ref, _convertListToPairs(selectedFiles));
 }
 
+/**
+  * Helper method to be used with a button click event to attach videos to a view
+  *
+  * @param ref the view reference to attach the videos to (must be of type video)
+  */
 attachVideoTo(String ref) {
 	openVideo("_setVideoTo(\""+ref+"\")");
 }
@@ -1854,6 +1869,11 @@ _setVideoTo(String ref) {
     setFieldValue(ref, _convertListToPairs(selectedFiles));
 }
 
+/**
+  * Helper method to be used with a button click event to attach audios to a view
+  *
+  * @param ref the view reference to attach the videos to (must be of type file)
+  */
 attachAudioTo(String ref) {
 	recordAudio("_setAudioTo(\""+ref+"\")");
 }
@@ -1893,10 +1913,18 @@ _convertListToPairs(list) {
 	return pairs;
 }
 
+/**
+  * Helper method to test if a value is null or empty.
+  * @param value a string value
+  */
 isNull(String value) {
 	return value == null || "".equals(value);
 }
 
+/**
+  * Helper method to test if a value is null or empty.
+  * @param value a list value.
+  */
 isNull(List value) {
 	return value == null || value.isEmpty();
 }
