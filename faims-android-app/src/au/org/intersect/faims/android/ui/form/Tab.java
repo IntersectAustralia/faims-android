@@ -722,7 +722,7 @@ public class Tab implements Parcelable{
 			}
 			
 			if(term.pictureURL != null && !"".equals(term.pictureURL)){
-				sb.append("<img src=\"");
+				sb.append("<img width=\"100\" height=\"100\" src=\"");
 				sb.append(term.pictureURL);
 				sb.append("\"/>");
 			}
