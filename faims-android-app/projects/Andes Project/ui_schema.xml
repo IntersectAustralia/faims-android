@@ -742,12 +742,12 @@
             <trigger ref="structure">
                 <label>{Create Structure}</label>
             </trigger>
-            <trigger ref="feature">
+            <!-- <trigger ref="feature">
                 <label>{Create Feature}</label>
             </trigger>
             <trigger ref="surfaceCollection">
                 <label>{Create Surface Collection}</label>
-            </trigger>
+            </trigger> -->
         </group>
     </group>
     <group ref="control">
@@ -785,7 +785,7 @@
         <trigger ref="structureLoad">
           <label>{Load.Structure}</label>
         </trigger>
-        <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
+        <!-- <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
           <label>{Walls}</label>
           <item>
             <label>{dummy}</label>
@@ -874,7 +874,7 @@
         </select1>
         <trigger ref="windowLoad">
           <label>{Load.Window}</label>
-        </trigger>
+        </trigger> -->
       </group>
       <group ref="gps">
         <label>{Communications.Control.Tab}</label>
@@ -1080,7 +1080,7 @@
         <input ref="OtherArchitecturalDetails" faims_attribute_name="OtherArchitecturalDetails" faims_attribute_type="freetext">
           <label>{Other.Architectural.Detail}:</label>
         </input>
-<trigger ref="Update2">
+		<trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
 
@@ -1093,21 +1093,21 @@
         <trigger ref="Update">
           <label>{Save.Record}</label>
         </trigger>
-        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        <!-- <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Total.Walls.Recorded}:</label>
-        </input>
-        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Total.Gabled.Walls.Recorded}:</label>
-        </input>
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Windows.Recorded}:</label>
-        </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Niches.Recorded}:</label>
-        </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Doorways.Recorded}:</label>
-        </input>
+        </input> -->
         <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
           <label>{Number.Of.Internal.Partitions}:</label>
           <item>
@@ -1118,18 +1118,18 @@
         <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
           <label>{Partition.Description}:</label>
         </input>
-        <trigger ref="AddWall">
+        <!-- <trigger ref="AddWall">
           <label>{Add.Wall.To.Structure}</label>
-        </trigger>
+        </trigger> -->
         <trigger ref="AddCorner">
           <label>{Add.Corner.To.Structure}</label>
         </trigger>
         <!--<trigger ref="AddDoorway">
           <label>{Add.Doorway.To.Structure}</label>
         </trigger>-->
-        <trigger ref="AddNiche">
+        <!-- <trigger ref="AddNiche">
           <label>{Add.Niche.To.Structure}</label>
-        </trigger>
+        </trigger> -->
         <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1145,7 +1145,7 @@
         <trigger ref="Photo">
           <label>{Take.Picture}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photo" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1155,7 +1155,7 @@
         <trigger ref="Video">
           <label>{Take.Video}</label>
         </trigger>
-        <select ref="VideoGallery" type="image">
+        <select ref="VideoGallery" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false">
           <label>{Video.Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1165,7 +1165,7 @@
         <trigger ref="Audio">
           <label>{Record.Audio}</label>
         </trigger>
-		<select ref="AudioList" faims_certainty="false" faims_annotation="false">
+		<select ref="AudioList" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false">
             <label>{Audio.List}:</label>
             <item>
                 <label>{None}</label>
@@ -1175,7 +1175,7 @@
         <trigger ref="Sketch">
           <label>{Sketch}</label>
         </trigger>
-        <select ref="sketchfilelist" faims_certainty="false" faims_annotation="false">
+        <select ref="sketchfilelist" type="file" faims_attribute_name="sketchfilename" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false">
             <label>{Sketch.File.List}:</label>
             <item>
                 <label>{None}</label>
@@ -1185,7 +1185,7 @@
         <trigger ref="AddAttachment">
           <label>{Add.Attachment}</label>
         </trigger>
-		<select ref="filelist" faims_certainty="false" faims_annotation="false">
+		<select ref="filelist" type="file" faims_attribute_name="filename" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false">
             <label>{Attachments}:</label>
             <item>
                 <label>{None}</label>
@@ -1204,7 +1204,7 @@
       </group>
       <group ref="load" faims_scrollable="true">
         <label>{Load.Structure.Items}</label>
-        <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
+        <!-- <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
           <label>{Structure.Walls}</label>
           <item>
             <label>{dummy}</label>
@@ -1213,7 +1213,7 @@
         </select1>
         <trigger ref="structureWallLoad">
           <label>{Load.Structure.Walls}</label>
-        </trigger>
+        </trigger> -->
         <select1 ref="cornerList" faims_certainty="false" faims_annotation="false">
           <label>{Corners}</label>
           <item>
@@ -1296,20 +1296,20 @@
         <trigger ref="CornerPhotos">
           <label>{Corner.Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="CornerPhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="AddNiche">
+        <!-- <trigger ref="AddNiche">
           <label>{Add.Niche}</label>
-        </trigger>
+        </trigger> -->
         <!-- {Button: “Add Niche”}               -->
-        <trigger ref="Duplicate">
+        <!-- <trigger ref="Duplicate">
           <label>{Duplicate.Record}</label>
-        </trigger>
+        </trigger> -->
       <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1395,40 +1395,40 @@
         <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
           <label>{Gable.Distance}:</label>
         </input>
-        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        <!-- <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Window.Count}:</label>
-        </input>
-        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Niche.Count}:</label>
-        </input>
-        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input> -->
+        <!-- <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Doorway.Count}:</label>
-        </input>
+        </input> -->
         <trigger ref="WallPhotos">
           <label>{Wall.Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="WallPhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
             <value>dummy</value>
           </item>
         </select>
-        <trigger ref="NewWindow">
+        <!-- <trigger ref="NewWindow">
           <label>{New.Window}</label>
-        </trigger>
+        </trigger> -->
         <!-- {button}-->
-        <trigger ref="NewNiche">
+        <!-- <trigger ref="NewNiche">
           <label>{New.Niche}</label>
-        </trigger>
+        </trigger> -->
         <!-- {button}-->
         <!--<trigger ref="NewLichen">
           <label>{New.Lichen}</label>
         </trigger>-->
         <!-- {button}-->
-          <trigger ref="Duplicate">
+          <!-- <trigger ref="Duplicate">
           <label>{Duplicate.Record}</label>
-        </trigger>
+        </trigger> -->
         <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1503,7 +1503,7 @@
         <trigger ref="DoorPhotos">
           <label>{Door.Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="DoorPhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1618,7 +1618,7 @@
         <trigger ref="NichePhotos">
           <label>{Niche.Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="NichePhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1708,7 +1708,7 @@
         <trigger ref="Photos">
           <label>{Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1777,7 +1777,7 @@
         <trigger ref="Photos">
           <label>{Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1872,7 +1872,7 @@
         <trigger ref="Photos">
           <label>{Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="WallPhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1931,7 +1931,7 @@
         <trigger ref="Photos">
           <label>{Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -1991,7 +1991,7 @@
         <trigger ref="Photos">
           <label>{Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
@@ -2219,7 +2219,7 @@
         <trigger ref="WindowPhotos">
           <label>{Window.Photos}</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="WindowPhotos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>{Gallery}:</label>
           <item>
             <label>{dummy}</label>
