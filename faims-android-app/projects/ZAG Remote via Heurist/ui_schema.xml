@@ -155,7 +155,6 @@
             <value>dummy</value>
           </item>
         </select1>
-        
       </group>
       <group ref="gps">
         <label>Control</label>
@@ -187,7 +186,6 @@
       <label>RS Feature</label>
        <group ref="header11_58">
         <label>Feature detected (in remote sensing)</label>
-
         <input faims_annotation="false" faims_attribute_name="FeatureID" faims_attribute_type="freetext" faims_certainty="false" ref="FeatureID">
           <label>FeatureID</label>
         </input>
@@ -252,7 +250,7 @@
         <input faims_attribute_name="RSFeatureSiteCode" faims_attribute_type="freetext" ref="RS_Feature_Site_Code">
           <label>RS Feature Site Code</label>
         </input>
-        <select appearance="compact" faims_attribute_name="RSFeaturePeriod(s)" faims_attribute_type="vocab" ref="RS_Feature_Period_s_">
+        <select appearance="compact" faims_attribute_name="RSFeaturePeriod" faims_attribute_type="vocab" ref="RS_Feature_Period_s_">
           <label>RS Feature Period(s)</label>
           <item>
             <label>dummy</label>
@@ -288,7 +286,7 @@
         <trigger ref="Photo">
           <label>Take Picture</label>
         </trigger>
-        <select ref="PhotoGallery" type="image">
+        <select ref="PhotoGallery" type="camera" faims_attribute_name="Photos" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true">
           <label>Gallery:</label>
           <item>
             <label>dummy</label>

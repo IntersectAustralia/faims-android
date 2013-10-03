@@ -83,9 +83,6 @@
         <term>True Positive (site present where expected)<description>True Positive (site present where expected)</description></term>
       </lookup>
     </property>
-    <property type="file" name="Photos">
-      <description>Please document the nature of this detail type (field)) ...</description>
-    </property>
     <property type="enum" name="GroundControl">
       <description>Please document the nature of this detail type (field)) ...</description>
       <lookup>
@@ -138,6 +135,9 @@
       <description>Please document the nature of this detail type (field)) ...</description>
     </property>
     <property type="blocktext" name="RSGeologySoilComments">
+      <description>Please document the nature of this detail type (field)) ...</description>
+    </property>
+    <property type="file" name="Photos">
       <description>Please document the nature of this detail type (field)) ...</description>
     </property>
   </ArchaeologicalElement>

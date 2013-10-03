@@ -1,12 +1,3 @@
-
-
-
-
-/*** MAP ***/
-
-DATA_ENTRY_LAYER = "Data Entry Layer";
-DATA_ENTRY_LAYER_ID = 0;
-
 /*
 initStatic() {
 	setFieldValue("control/static/name", getModuleName());
@@ -28,6 +19,11 @@ initStatic() {
 initStatic();
 */
 
+/*** MAP ***/
+
+DATA_ENTRY_LAYER = "Data Entry Layer";
+DATA_ENTRY_LAYER_ID = 0;
+
 User user;
 
 initMap() {
@@ -39,10 +35,7 @@ initMap() {
 
 	isEntity = true;
 	queryName = "All entities";
-	querySQL =
-		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-		" FROM latestNonDeletedArchEntIdentifiers\n" +
-		" where lower(aenttypename) != lower('gps_track')\n";
+	querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
 		
 	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
 
@@ -121,6 +114,10 @@ clearCreatedGeometry() {
 	onClearMap();
 }
 
+/*** TRACKLOG ***/
+
+setGPSUpdateInterval(4);
+
 onEvent("control/gps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
 onEvent("control/gps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
 onEvent("control/gps/stopTrackLog", "click", "stopTrackingGPS()");
@@ -141,7 +138,7 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-//	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	//attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
 	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
 	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
 	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
@@ -156,376 +153,43 @@ saveGPSTrack(List attributes) {
 	saveArchEnt(null, "gps_track", l, attributes);
 }
 
-/*** MISC ***/
-
-addToPictureGallery(ref, picture, pictures) {
-	pictures.add(picture);
-    selectedPictures = null;
-    if (isNull(getFieldValue(ref))) {
-    	selectedPictures = new ArrayList();
-    	selectedPictures.add(picture);
-    } else {
-    	selectedPictures = getFieldValue(ref);
-    	selectedPictures.add(picture);
-    }
-    populateCameraPictureGallery(ref, pictures);
-    setFieldValue(ref, selectedPictures);
-}
-
-addToVideoGallery(ref, video, videos) {
-	videos.add(video);
-    selectedVideos = null;
-    if (isNull(getFieldValue(ref))) {
-    	selectedVideos = new ArrayList();
-    	selectedVideos.add(video);
-    } else {
-    	selectedVideos = getFieldValue(ref);
-    	selectedVideos.add(video);
-    }
-    populateVideoGallery(ref, videos);
-    setFieldValue(ref, selectedVideos);
-}
-
-isNull(v) {
-	return v == null || "".equals(v);
-}
-
-AttributeDef(String name, String type, String ref) {
-	return AttributeDef(name, type, ref, true);
-}
-
-AttributeDef(String name, String type, String ref, boolean saveCertainty) {
-	this.name = name;
-	this.type = type;
-	this.ref = ref;
-	this.saveCertainty = saveCertainty;
-	return this;
-}
-
-AttributeDef(String name, String type, String ref, ArrayList loadedFiles, boolean sync) {
-	this.name = name;
-	this.type = type;
-	this.ref = ref;
-	this.loadedFiles = loadedFiles;
-	this.sync = sync;
-	return this;
-}
-
-AttributeDef(String name, String type, String ref1, String ref2) {
-	this.name = name;
-	this.type = type;
-	this.ref1 = ref1;
-	this.ref2 = ref2;
-	return this;
-}
-
-hasFile(files, filename) {
-	for (String f : files) {
-		if (f.equals(filename)) return true;
-	}
-	return false;
-}
-
-Dialog busyDialog = null;
-
-showBusyDialog() {
-	if (busyDialog == null) {
-		busyDialog = showBusy("Message", "Please wait while attachments are copied.");
-	}
-}
-
-closeBusyDialog() {
-	if (busyDialog != null) {
-		busyDialog.dismiss();
-		busyDialog = null;
-	}
-}
-
-OnFilesAttached() {
-	checkFilesAttached();
-}
-
-saveFiles(loadedFiles, files, type, attributes, sync) {
-	if (isNull(files)) {
-		files = new ArrayList();
-	}
-	if (files.size() == 1 && "None".equals(files.get(0))) return;
-
-	// delete attributes that are not included
-	for (String file : loadedFiles) {
-		if (!hasFile(files, file)) {
-			attributes.add(createEntityAttribute(type, stripAttachedFilePath(file), null, null, null, true));
-		}
-	}
-
-	// add new attributes that are included
-	hasAttachment = false;
-	for (String file : files) {
-		String filename = null;
-		if (!hasFile(loadedFiles, file)) {
-			hasAttachment = true;
-			filename = attachFile(file, sync, null, "OnFilesAttached()");
-		} else {
-			for (String f : loadedFiles) {
-				if (f.equals(file)) {
-					filename = f;
-					break;
-				}
-			}
-		}
-		attributes.add(createEntityAttribute(type, stripAttachedFilePath(filename), null, null, null));
-	}
-
-	if (!hasAttachment) {
-		OnFilesAttached();
-	}
-}
-
-
-entitySaved = false;
-entityCallback = null;
-
-checkFilesAttached() {
-	if (isAttachingFiles()) return;
-
-	if (entitySaved){
-		closeBusyDialog();
-		showToast("Finish saving record.");
-		if (entityCallback != null) execute(entityCallback);
-	}
-}
-
-saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
-	showToast("Saving record. Please wait.");
-
-	showBusyDialog();
-
-	entitySaved = false;
-	entityCallback = callback;
-
-    List attributes = createAttributeList();
-
-    for (Object def : attributeDefs) {
-
-    	// name, text, vocab, measure, certainty
-    	if ("freetext".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldValue(def.ref), null, null, def.saveCertainty? getFieldCertainty(def.ref) : null));
-    	} else if ("measure".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), null, getFieldValue(def.ref), def.saveCertainty? getFieldCertainty(def.ref) : null));
-    	} else if ("vocab".equals(def.type)) {
-    		attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), getFieldValue(def.ref), null, def.saveCertainty? getFieldCertainty(def.ref) : null));
-    	} else if ("checkbox".equals(def.type)) {
-    		values = getFieldValue(def.ref);
-
-    		// delete if nothing selected
-			if (values == null || values.isEmpty()) {
-				attributes.add(createEntityAttribute(def.name, null, null, null, null, true));
-			} else {
-				for (Object value : values) {
-					attributes.add(createEntityAttribute(def.name, getFieldAnnotation(def.ref), value.getName(), null, getFieldCertainty(def.ref)));
-				}
-			}
-
-    	} else if ("files".equals(def.type)) {
-    		saveFiles(def.loadedFiles, getFieldValue(def.ref), def.name, attributes, def.sync);
-    	} else if ("attachments".equals(def.type)) {
-    		List pairs = getFieldValue(def.ref);
-    		ArrayList files = new ArrayList();
-    		for (NameValuePair pair : pairs) {
-    			files.add(pair.getName());
-    		}
-    		saveFiles(def.loadedFiles, files, def.name, attributes, def.sync);
-    	} else if ("gps".equals(def.type)) {
-    		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
-	    		geoData = new ArrayList();
-	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
-	    		p = convertFromProjToProj("4326", getModuleSrid(), p);
-	    		geoData.add(new Point(p, null, (PointStyle) null, null));
-	    	}
-    	}
-
-    }
-
-    saved_id = saveArchEnt(entityId, entityType, geoData, attributes);
-
-    entitySaved = true;
-    checkFilesAttached();
-
-    return saved_id;
-}
-
-convertListToPairs(list) {
-	ArrayList pairs = new ArrayList();
-	if (list.size() == 1 && "None".equals(list.get(0))) return pairs;
-	for (String s : list) {
-		pairs.add(new NameValuePair(s, "true"));
-	}
-	return pairs;
-}
-
-saveEntitiesToRel(type, entity1, entity2) {
-	rel_id = saveRel(null, type, null, null);
-	addReln(entity1, rel_id, null);
-	addReln(entity2, rel_id, null);
-}
-
-selectGallery(ref, list) {
-	for (String s : list) {
-		setFieldValue(ref, s);
-	}
-}
-
-getNoneList() {
-	list = new ArrayList();
-	list.add("None");
-	return list;
-}
+/*** FEATURE ***/
 
 refreshEntities() {
 	showToast("Fetching saved features...");
 	populateList("control/data/RS_FeatureList", fetchEntityList("RemoteSensingFeature"));
-	System.out.println(fetchEntityList("RemoteSensingFeature"));
 }
-
 
 onEvent("control/data", "show", "refreshEntities()");
-/*** USER ***/
 
-getDefaultUsersList() {
-	users = fetchAll("select userid, fname ||' ' || lname from user");
-	return users;
-}
-
-
-
-
-onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
-onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
-onEvent("control/gps/startsync", "click", "startSync()");
-onEvent("control/gps/stopsync", "click", "stopSync()");
-
-onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
-
-
-setSyncMinInterval(10.0f);
-setSyncMaxInterval(20.0f);
-setSyncDelay(5.0f);
-setGPSUpdateInterval(4);
-
-startSync() {
-    setSyncEnabled(true);
-    setFileSyncEnabled(true);
-}
-
-stopSync() {
-    setSyncEnabled(false);
-    setFileSyncEnabled(false);
-
-}
-
-syncStarted() {
-}
-
-syncCompleted() {
-}
-
-syncFailed() {
-}
-
-
-
-populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
-}
-
-populateListForUsers();
-
-String username = "";
-String device = "";
-
-
-login(){
-
-   
-	    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-	    
-	    
-	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-
-	    setUser(user);
-	    username = userResult.get(1) + " " + userResult.get(2);
-	    showTabGroup("control");
-	
-}
-
-onEvent("user/usertab/users", "click", "login()");
-
-makeVocab(String attrib){
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
-    return a;
-}
-
-makeGallery(String attrib){
-    Object a = fetchAll("select vocabid, vocabname, pictureurl from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' order by vocabname" );
-    return a;
-}
-
-ArrayList featurePictures = new ArrayList();
 String feature_id = null;
-onEvent("RS_Feature", "show", "showTab(\"RS_Feature/header11_58\")");
-
 
 newRSFeature(){
 	feature_id = null;
-
-	
-	
-
-
 	newTabGroup("RS_Feature");
     
     setFieldValue("RS_Feature/header11_58/TimeStamp", getCurrentTime());
 
-
 	populateCheckBoxGroup("RS_Feature/header11_58/FeatureSource", makeVocab("FeatureSource"));
     populateRadioGroup("RS_Feature/header11_58/Feature_Source_Confidence", makeVocab("FeatureSourceConfidence"));
     populateCheckBoxGroup("RS_Feature/header11_58/Feature_Type", makeVocab("FeatureType"));
-
     populateRadioGroup("RS_Feature/header11_69/Feature_Accessibility", makeVocab("FeatureAccessibility"));
     populateDropDown("RS_Feature/header11_69/Ground_Control", makeVocab("GroundControl"));
     populateRadioGroup("RS_Feature/header11_69/GCRepeat", makeVocab("GCRepeat"));
 	populateDropDown("RS_Feature/header11_69/RS_Groundtruth_Result", makeVocab("RSGroundtruthResult"));
-
     populateCheckBoxGroup("RS_Feature/header11_69/Feature_Actual_Cause", makeVocab("FeatureActualCause"));
-    
     populateCheckBoxGroup("RS_Feature/header11_69/RS_Feature_Period_s_", makeVocab("RSFeaturePeriod"));
-    populateDropDown("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));
-
-	
-    populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
-
-
-
+    populateDropDown("RS_Feature/header11_69/Best_image_algorithm", makeVocab("BestImageAlgorithm"));  
 }
 
-takeRSPicture() {
-    openCamera("OnRSPictureTaken()");
-}
+onEvent("RS_Feature/header11_70/Photo", "click", "attachPictureTo(\"RS_Feature/header11_70/PhotoGallery\")");
 
-OnRSPictureTaken() {
-    pictureFilepath = getLastPictureFilePath();
-    addToPictureGallery("RS_Feature/header11_70/PhotoGallery", pictureFilepath, featurePictures);
-}
-
-onEvent("RS_Feature/header11_70/Photo", "click", "takeRSPicture()");
-
-saveFeature(id) {
+saveFeature() {
 	if (isNull(getFieldValue("RS_Feature/header11_58/FeatureID"))) {
 		showWarning("Logic Error", "Cannot save record without id");
 		return;
 	}
-	feature_id = updateFeature(id);
-	clearCreatedGeometry();
+	saveTabGroup("RS_Feature", feature_id, getCreatedGeometry(), null, "feature_id = getLastSavedRecordId(); clearCreatedGeometry();");
 }
 
 deleteFeature(){
@@ -543,98 +207,70 @@ doNotDelete(){
     showToast("Delete Cancelled.");
 }
 
-
-
-updateFeature(id) {
-	if (isNull(id)) id = null;
-    featurePictures = new ArrayList();
-	ArrayList loadedPictures = new ArrayList();
-
-	if (!isNull(id)) {
-		entity = fetchArchEnt(id);
-		for (Object attribute : entity.getAttributes()) {
-			System.out.println(attribute.toString());
-			if ("Photos".equals(attribute.getName())) {
-				loadedPictures.add(getAttachedFilePath(attribute.getText()));
-			}
-		}
-	}
-
-
-   	Object[] attributeDefs = new Object[] {
-    	AttributeDef("FeatureID", "freetext", "RS_Feature/header11_58/FeatureID", false),
-    	AttributeDef("TimeStamp", "freetext", "RS_Feature/header11_58/TimeStamp", false),
-    	AttributeDef("ShortSummary", "freetext", "RS_Feature/header11_58/Short_summary"),
-    	AttributeDef("FeatureSource", "checkbox", "RS_Feature/header11_58/FeatureSource"),
-    	AttributeDef("FeatureSourceConfidence", "vocab", "RS_Feature/header11_58/Feature_Source_Confidence"),
-    	AttributeDef("FeatureType", "checkbox", "RS_Feature/header11_58/Feature_Type"),
-    	AttributeDef("FeatureAccessibility", "vocab", "RS_Feature/header11_69/Feature_Accessibility"),
-    	AttributeDef("FeatureActualCause", "checkbox", "RS_Feature/header11_69/Feature_Actual_Cause"),
-    	AttributeDef("RSGroundtruthResult", "vocab", "RS_Feature/header11_69/RS_Groundtruth_Result"),
-    	AttributeDef("GroundControl", "vocab", "RS_Feature/header11_69/Ground_Control"),
-    	AttributeDef("RSFeaturePeriod", "checkbox", "RS_Feature/header11_69/RS_Feature_Period_s_"),
-    	AttributeDef("RSFeatureSiteCode", "freetext", "RS_Feature/header11_69/RS_Feature_Site_Code", false),
-    	AttributeDef("RSFeatureNotes", "freetext", "RS_Feature/header11_69/RS_Feature_Notes"),
-    	AttributeDef("GCRepeat", "vocab", "RS_Feature/header11_69/GCRepeat"),
-    	AttributeDef("BestImageAlgorithm", "vocab", "RS_Feature/header11_69/Best_image_algorithm"),
-		AttributeDef("RSAreaAnalysedNumericVersion", "freetext", "RS_Feature/header11_69/RS_Area_Analysed_Numeric_version"),
-		AttributeDef("RSGeologySoilComments", "freetext", "RS_Feature/header11_69/RS_Geology_Soil_Comments"),
-    	AttributeDef("Photos", "files", "RS_Feature/header11_70/PhotoGallery", loadedPictures, true)
-    	};
-
-
-
-
-    //saveFiles(loadedPictures, getFieldValue("RS_Feature/header11_70/PhotoGallery"), "picture", attributeDefs);
-
-
-    saved_id = saveEntity(id, "RemoteSensingFeature", attributeDefs, getCreatedGeometry(), null);
-
-
-	entitySaved = true;
-
-    return saved_id;
-
-	
-}
-
-
 loadRSFeature() {
-
 	newRSFeature();
-	feature_id = getListItemValue(); //getFieldValue("control/data/RS_FeatureList");
+	feature_id = getListItemValue();
 	if (isNull(feature_id)) return;
 
-	
-
-	loadFeatureFileAttributes(feature_id);
 	showTabGroup("RS_Feature", feature_id);
-	
-    
 }
 
-loadFeatureFileAttributes(id){
-	featurePictures = new ArrayList();
-
-	if (!isNull(id)) {
-		archEntity = fetchArchEnt(id);
-		entityAttributes = archEntity.getAttributes();
-		for(EntityAttribute attr : entityAttributes){
-			if("file".equals(attr.getType())){
-				if(!attr.isDeleted()){
-					if("Photos".equals(attr.getName())){
-						featurePictures.add(getAttachedFilePath(attr.getText()));
-					}
-				}
-			}
-		}
-	}
-
-    populateCameraPictureGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
-    selectGallery("RS_Feature/header11_70/PhotoGallery", featurePictures);
-}
-
-
-onEvent("RS_Feature/header11_70/Update", "click", "saveFeature(feature_id)");
+onEvent("RS_Feature/header11_70/Update", "click", "saveFeature()");
 onEvent("RS_Feature/header11_70/Delete", "click", "deleteFeature()");
 onEvent("control/data/RS_FeatureList", "click", "loadRSFeature()");
+
+/*** USER ***/
+
+getDefaultUsersList() {
+	users = fetchAll("select userid, fname ||' ' || lname from user");
+	return users;
+}
+
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+
+	setUser(user);
+	username = userResult.get(1) + " " + userResult.get(2);
+	showTabGroup("control");
+}
+
+onEvent("user/usertab/users", "click", "login()");
+
+/*** SYNC ***/
+
+onEvent("control/gps/startsync", "click", "startSync()");
+onEvent("control/gps/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
+/*** MISC ***/
+
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
+    return a;
+}
