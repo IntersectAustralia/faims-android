@@ -189,7 +189,14 @@ saveFeature() {
 		showWarning("Logic Error", "Cannot save record without id");
 		return;
 	}
-	saveTabGroup("RS_Feature", feature_id, getCreatedGeometry(), null, "feature_id = getLastSavedRecordId(); clearCreatedGeometry();");
+	
+	data = getCreatedGeometry();
+	if (!isNull(feature_id)) {
+		entity = fetchArchEnt(feature_id);
+		data = entity.getGeometryList();
+	}
+	
+	saveTabGroup("RS_Feature", feature_id, data, null, "feature_id = getLastSavedRecordId(); clearCreatedGeometry();");
 }
 
 deleteFeature(){
