@@ -28,6 +28,10 @@
             <map>
               <map/>
               <mapContainer>
+
+                <child0>
+                  <zoomGPS/>
+                </child0>
                 <child1>
                   <clear/>
                 </child1>
@@ -132,6 +136,12 @@
         </input>
         <group faims_style="orientation" ref="mapContainer">
           <label/>
+          <group faims_style="even" ref="child0">
+            <label/>
+            <trigger ref="zoomGPS">
+              <label>centerMe</label>
+            </trigger>
+          </group>          
           <group faims_style="even" ref="child1">
             <label/>
             <trigger ref="clear">
