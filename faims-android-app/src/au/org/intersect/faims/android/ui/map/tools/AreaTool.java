@@ -140,7 +140,7 @@ public class AreaTool extends HighlightTool {
 		try {
 			if (mapView.getHighlights().size() < 1) return;
 			Polygon polygon = (Polygon) mapView.getHighlights().get(0);
-			area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), mapView.getProjectSrid());
+			area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), mapView.getModuleSrid());
 		} catch (Exception e) {
 			FLog.e("error computing area of polygon", e);
 			showError("Error computing area of polygon");

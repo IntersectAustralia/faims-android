@@ -6,14 +6,14 @@ import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.FetchResult;
 
 
-public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
+public class FetchModulesListTask extends AsyncTask<Void, Void, Void> {
 
 	private FAIMSClient faimsClient;
 	private ITaskListener listener;
 	
 	private FetchResult result;
 	
-	public FetchProjectsListTask(FAIMSClient faimsClient, ITaskListener listener) {
+	public FetchModulesListTask(FAIMSClient faimsClient, ITaskListener listener) {
 		this.faimsClient = faimsClient;
 		this.listener = listener;
 	}
@@ -21,7 +21,7 @@ public class FetchProjectsListTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... values) {
 		
-		result = faimsClient.fetchProjectList();
+		result = faimsClient.fetchModuleList();
 	
 		return null;
 	}

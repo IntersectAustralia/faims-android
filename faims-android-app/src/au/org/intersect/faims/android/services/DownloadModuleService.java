@@ -6,51 +6,51 @@ import android.content.Intent;
 import android.os.Environment;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
-import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 
-public class DownloadProjectService extends DownloadService {
+public class DownloadModuleService extends DownloadService {
 
-	public DownloadProjectService() {
-		super("DownloadProjectService");
+	public DownloadModuleService() {
+		super("DownloadModuleService");
 	}
 	
 	@Override
 	protected DownloadResult doDownload(Intent intent) {
-		File projectDir = null;
+		File moduleDir = null;
 		try {
-			Project project = (Project) intent.getExtras().get("project");
+			Module module = (Module) intent.getExtras().get("module");
 			
-			FLog.d("downloading project " + project.name);
+			FLog.d("downloading module " + module.name);
 			
-			// 0. delete project if it exists
-			// 1. download settings (ui schema, ui logic, project settings, properties file(s))
+			// 0. delete module if it exists
+			// 1. download settings (ui schema, ui logic, module settings, properties file(s))
 			// 2. download database
 			// 3. download data files
 			// 4. download app files
 			
 			// 0.
 			
-			projectDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key);
-			FileUtil.delete(projectDir);
+			moduleDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key);
+			FileUtil.delete(moduleDir);
 			
 			// 1.
-			DownloadResult result = faimsClient.downloadSettings(project);
+			DownloadResult result = faimsClient.downloadSettings(module);
 			
 			if (downloadStopped) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download settings failure");
 				return result;
@@ -59,17 +59,17 @@ public class DownloadProjectService extends DownloadService {
 			String version = result.info.version;
 			
 			// 2.
-			result = faimsClient.downloadDatabase(project);
+			result = faimsClient.downloadDatabase(module);
 			
 			if (downloadStopped) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download database failure");
 				return result;
@@ -79,14 +79,14 @@ public class DownloadProjectService extends DownloadService {
 			result = downloadDataDirectory(intent);
 			
 			if (downloadStopped) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download data directory failure");
 				return result;
@@ -96,34 +96,34 @@ public class DownloadProjectService extends DownloadService {
 			result = downloadAppDirectory(intent);
 			
 			if (downloadStopped) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				FileUtil.delete(projectDir);
+				FileUtil.delete(moduleDir);
 				
 				FLog.d("download app directory failure");
 				return result;
 			}
 			
-			// if result is success then update the project settings with version and timestamp
+			// if result is success then update the module settings with version and timestamp
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				project = ProjectUtil.getProject(project.key); // get the latest settings
-				project.version = version;
-				project.timestamp = DateUtil.getCurrentTimestampGMT(); // note: updating timestamp as database is overwritten
-				ProjectUtil.saveProject(project);
+				module = ModuleUtil.getModule(module.key); // get the latest settings
+				module.version = version;
+				module.timestamp = DateUtil.getCurrentTimestampGMT(); // note: updating timestamp as database is overwritten
+				ModuleUtil.saveModule(module);
 			}
 			
 			return result;
 		} catch (Exception e) {
-			if (projectDir != null) {
-				FileUtil.delete(projectDir);
+			if (moduleDir != null) {
+				FileUtil.delete(moduleDir);
 			}
 			
-			FLog.e("error downloading project", e);
+			FLog.e("error downloading module", e);
 		}
 		return null;
 	}
@@ -148,13 +148,13 @@ public class DownloadProjectService extends DownloadService {
 	
 	private DownloadResult downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		try {
-			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			Module module = (Module) intent.getExtras().get("module");
+			String moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 			
-			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
-					"/android/project/" + project.key + "/" + requestExcludePath, 
-					"/android/project/" + project.key + "/" + infoPath,
-					"/android/project/" + project.key + "/" + downloadPath);
+			DownloadResult downloadResult = faimsClient.downloadDirectory(moduleDir, downloadDir, 
+					"/android/module/" + module.key + "/" + requestExcludePath, 
+					"/android/module/" + module.key + "/" + infoPath,
+					"/android/module/" + module.key + "/" + downloadPath);
 		
 			if (downloadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();

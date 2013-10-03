@@ -4,7 +4,7 @@
     <string name="app_name">FAIMS</string>
     <string name="welcome">This is the FAIMS Android App!</string>
     <string name="menu_settings">Settings</string>
-    <string name="fetch_projects_name">Project List on Server</string> 
+    <string name="fetch_modules_name">Module List on Server</string> 
     
     <string name="choice_positive_button">YES</string>
     <string name="choice_negative_button">NO</string>
@@ -16,47 +16,47 @@
     <string name="locate_server_failure_title">Could not find Server</string>
     <string name="locate_server_failure_message">Would you like to try again?</string>
     
-    <string name="fetch_projects_title">Fetching Project List</string>
-    <string name="fetch_projects_message">please wait..</string>
+    <string name="fetch_modules_title">Fetching Module List</string>
+    <string name="fetch_modules_message">please wait..</string>
     
-    <string name="fetch_projects_failure_title">Could not fetch projects</string>
-    <string name="fetch_projects_failure_message">Would you like to try again?</string>
+    <string name="fetch_modules_failure_title">Could not fetch modules</string>
+    <string name="fetch_modules_failure_message">Would you like to try again?</string>
     
-    <string name="confirm_download_project_title">Download Project</string>
-    <string name="confirm_download_project_message">Would you like to download</string>
+    <string name="confirm_download_module_title">Download Module</string>
+    <string name="confirm_download_module_message">Would you like to download</string>
     
-    <string name="download_project_title">Downloading Project</string>
-    <string name="download_project_message">please wait..</string>
+    <string name="download_module_title">Downloading Module</string>
+    <string name="download_module_message">please wait..</string>
     
-    <string name="download_project_failure_title">Could not download project</string>
-    <string name="download_project_failure_message">Would you like to try again?</string>
+    <string name="download_module_failure_title">Could not download module</string>
+    <string name="download_module_failure_message">Would you like to try again?</string>
     
-    <string name="download_project_error_title">Project is too big</string>
-    <string name="download_project_error_message">Error storage limit reached</string>
+    <string name="download_module_error_title">Module is too big</string>
+    <string name="download_module_error_message">Error storage limit reached</string>
     
-    <string name="download_busy_project_error_title">Project archive in progress</string>
-    <string name="download_busy_project_error_message">Please wait until project has finished archiving on the server and try again</string>
+    <string name="download_busy_module_error_title">Module archive in progress</string>
+    <string name="download_busy_module_error_message">Please wait until module has finished archiving on the server and try again</string>
     
-    <string name="confirm_update_project_setting_title">Update Project Setting</string>
-    <string name="confirm_update_project_setting_message">Would you like to update project setting for</string>
+    <string name="confirm_update_module_setting_title">Update Module Setting</string>
+    <string name="confirm_update_module_setting_message">Would you like to update module setting for</string>
     
-    <string name="confirm_update_project_data_title">Update Project Data</string>
-    <string name="confirm_update_project_data_message">Would you like to update project data for</string>
+    <string name="confirm_update_module_data_title">Update Module Data</string>
+    <string name="confirm_update_module_data_message">Would you like to update module data for</string>
     
-    <string name="update_project_title">Updating Project</string>
-    <string name="update_project_message">please wait..</string>
+    <string name="update_module_title">Updating Module</string>
+    <string name="update_module_message">please wait..</string>
     
-    <string name="update_project_failure_title">Could not update project</string>
-    <string name="update_project_failure_message">Would you like to try again?</string>
+    <string name="update_module_failure_title">Could not update module</string>
+    <string name="update_module_failure_message">Would you like to try again?</string>
     
-    <string name="update_project_error_title">Project is too big</string>
-    <string name="update_project_error_message">Error storage limit reached</string>
+    <string name="update_module_error_title">Module is too big</string>
+    <string name="update_module_error_message">Error storage limit reached</string>
     
-    <string name="update_busy_project_error_title">Project archive in progress</string>
-    <string name="update_busy_project_error_message">Please wait until project has finished archiving on the server and try again</string>
+    <string name="update_busy_module_error_title">Module archive in progress</string>
+    <string name="update_busy_module_error_message">Please wait until module has finished archiving on the server and try again</string>
 
-    <string name="render_project_title">Show Project</string>
-    <string name="render_project_message">Do you want to render project?</string>
+    <string name="render_module_title">Show Module</string>
+    <string name="render_module_message">Do you want to render module?</string>
     
     <string name="upload_database_title">Uploading Database</string>
     <string name="upload_database_message">please wait..</string>
@@ -67,8 +67,8 @@
     <string name="download_database_title">Downloading Database</string>
     <string name="download_database_message">please wait..</string>
     
-    <string name="load_project_title">Loading project</string>
-    <string name="load_project_message">please wait..</string>
+    <string name="load_module_title">Loading module</string>
+    <string name="load_module_message">please wait..</string>
 
     <string name="download_database_failure_title">Could not download database</string>
     <string name="download_database_failure_message">Would you like to try again?</string>
@@ -77,9 +77,9 @@
     <string name="download_database_error_message">Error storage limit reached</string>
     
     <string name="render_ui_failure_title">Error</string>
-    <string name="render_ui_failure_message">Failed to load project</string>
+    <string name="render_ui_failure_message">Failed to load module</string>
     
-    <string name="faims_fetch_project_list_title">Fetch Project List</string>
+    <string name="faims_fetch_module_list_title">Fetch Module List</string>
     <string name="faims_server_setting_title">Settings</string>
     <string name="faims_about_title">About</string>
     <string name="intersect_logo">Intersect Logo</string>

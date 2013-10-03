@@ -26,7 +26,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
@@ -34,10 +34,10 @@ import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.FetchResult;
 import au.org.intersect.faims.android.net.ServerDiscovery;
-import au.org.intersect.faims.android.services.DownloadProjectService;
-import au.org.intersect.faims.android.services.UpdateProjectDataService;
-import au.org.intersect.faims.android.services.UpdateProjectSettingService;
-import au.org.intersect.faims.android.tasks.FetchProjectsListTask;
+import au.org.intersect.faims.android.services.DownloadModuleService;
+import au.org.intersect.faims.android.services.UpdateModuleDataService;
+import au.org.intersect.faims.android.services.UpdateModuleSettingService;
+import au.org.intersect.faims.android.tasks.FetchModulesListTask;
 import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
@@ -48,20 +48,20 @@ import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 
 import com.google.inject.Inject;
 
-public class FetchProjectsActivity extends RoboActivity {
+public class FetchModulesActivity extends RoboActivity {
 	
-	public static class DownloadProjectHandler extends Handler {
+	public static class DownloadModuleHandler extends Handler {
 		
-		private WeakReference<FetchProjectsActivity> activityRef;
+		private WeakReference<FetchModulesActivity> activityRef;
 
-		public DownloadProjectHandler(FetchProjectsActivity activity) {
-			this.activityRef = new WeakReference<FetchProjectsActivity>(activity);
+		public DownloadModuleHandler(FetchModulesActivity activity) {
+			this.activityRef = new WeakReference<FetchModulesActivity>(activity);
 		}
 		
 		public void handleMessage(Message message) {
-			FetchProjectsActivity activity = activityRef.get();
+			FetchModulesActivity activity = activityRef.get();
 			if (activity == null) {
-				FLog.d("FetchProjectsHandler cannot get activity");
+				FLog.d("FetchModulesHandler cannot get activity");
 				return;
 			}
 			
@@ -69,15 +69,15 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show project activity
-				activity.showProjectActivity();
+				// start show module activity
+				activity.showModuleActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
 				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showDownloadProjectErrorDialog();
+					activity.showDownloadModuleErrorDialog();
 				} else {
-					activity.showDownloadProjectFailureDialog();
+					activity.showDownloadModuleFailureDialog();
 				}
 			} else {
 				// ignore
@@ -86,18 +86,18 @@ public class FetchProjectsActivity extends RoboActivity {
 		
 	};
 
-	public static class UpdateProjectSettingHandler extends Handler {
+	public static class UpdateModuleSettingHandler extends Handler {
 		
-		private WeakReference<FetchProjectsActivity> activityRef;
+		private WeakReference<FetchModulesActivity> activityRef;
 
-		public UpdateProjectSettingHandler(FetchProjectsActivity activity) {
-			this.activityRef = new WeakReference<FetchProjectsActivity>(activity);
+		public UpdateModuleSettingHandler(FetchModulesActivity activity) {
+			this.activityRef = new WeakReference<FetchModulesActivity>(activity);
 		}
 		
 		public void handleMessage(Message message) {
-			FetchProjectsActivity activity = activityRef.get();
+			FetchModulesActivity activity = activityRef.get();
 			if (activity == null) {
-				FLog.d("FetchProjectsHandler cannot get activity");
+				FLog.d("FetchModulesHandler cannot get activity");
 				return;
 			}
 			
@@ -105,15 +105,15 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show project activity
-				activity.showProjectActivity();
+				// start show module activity
+				activity.showModuleActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
 				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showUpdateProjectErrorDialog();
+					activity.showUpdateModuleErrorDialog();
 				} else {
-					activity.showUpdateProjectSettingFailureDialog();
+					activity.showUpdateModuleSettingFailureDialog();
 				}
 			} else {
 				// ignore
@@ -122,18 +122,18 @@ public class FetchProjectsActivity extends RoboActivity {
 		
 	};
 
-	public static class UpdateProjectDataHandler extends Handler {
+	public static class UpdateModuleDataHandler extends Handler {
 		
-		private WeakReference<FetchProjectsActivity> activityRef;
+		private WeakReference<FetchModulesActivity> activityRef;
 
-		public UpdateProjectDataHandler(FetchProjectsActivity activity) {
-			this.activityRef = new WeakReference<FetchProjectsActivity>(activity);
+		public UpdateModuleDataHandler(FetchModulesActivity activity) {
+			this.activityRef = new WeakReference<FetchModulesActivity>(activity);
 		}
 		
 		public void handleMessage(Message message) {
-			FetchProjectsActivity activity = activityRef.get();
+			FetchModulesActivity activity = activityRef.get();
 			if (activity == null) {
-				FLog.d("FetchProjectsHandler cannot get activity");
+				FLog.d("FetchModulesHandler cannot get activity");
 				return;
 			}
 			
@@ -141,15 +141,15 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			DownloadResult result = (DownloadResult) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show project activity
-				activity.showProjectActivity();
+				// start show module activity
+				activity.showModuleActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
 				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showUpdateProjectErrorDialog();
+					activity.showUpdateModuleErrorDialog();
 				} else {
-					activity.showUpdateProjectDataFailureDialog();
+					activity.showUpdateModuleDataFailureDialog();
 				}
 			} else {
 				// ignore
@@ -163,10 +163,10 @@ public class FetchProjectsActivity extends RoboActivity {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
-	private ArrayAdapter<String> projectListAdapter;
+	private ArrayAdapter<String> moduleListAdapter;
 	
-	protected List<Project> projects;
-	protected Project selectedProject;
+	protected List<Module> modules;
+	protected Module selectedModule;
 	
 	protected BusyDialog busyDialog;
 	protected ChoiceDialog choiceDialog;
@@ -175,31 +175,31 @@ public class FetchProjectsActivity extends RoboActivity {
 	private AsyncTask<Void, Void, Void> locateTask;
 	private AsyncTask<Void, Void, Void> fetchTask;
 	
-	protected final DownloadProjectHandler handler = new DownloadProjectHandler(FetchProjectsActivity.this);
-	protected final UpdateProjectSettingHandler updateProjectSettingHandler = new UpdateProjectSettingHandler(FetchProjectsActivity.this);
-	protected final UpdateProjectDataHandler updateProjectDataHandler = new UpdateProjectDataHandler(FetchProjectsActivity.this);
+	protected final DownloadModuleHandler handler = new DownloadModuleHandler(FetchModulesActivity.this);
+	protected final UpdateModuleSettingHandler updateModuleSettingHandler = new UpdateModuleSettingHandler(FetchModulesActivity.this);
+	protected final UpdateModuleDataHandler updateModuleDataHandler = new UpdateModuleDataHandler(FetchModulesActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        setContentView(R.layout.activity_fetch_projects);
+        setContentView(R.layout.activity_fetch_modules);
         
         serverDiscovery.setApplication(getApplication());
         
-        ListView projectList = (ListView) findViewById(R.id.project_list);
+        ListView moduleList = (ListView) findViewById(R.id.module_list);
         
-        projectListAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
-        projectList.setAdapter(projectListAdapter);
+        moduleListAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
+        moduleList.setAdapter(moduleListAdapter);
         
-        projectList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        moduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         	
         	@Override
         	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-        		final String selectedItem = projectListAdapter.getItem(arg2).toString();
-        		selectedProject = projects.get(arg2);
+        		final String selectedItem = moduleListAdapter.getItem(arg2).toString();
+        		selectedModule = modules.get(arg2);
         		
-        		showDownloadProjectDialog(selectedItem);
+        		showDownloadModuleDialog(selectedItem);
         	}
         });
         
@@ -211,36 +211,36 @@ public class FetchProjectsActivity extends RoboActivity {
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         serverDiscovery.initiateServerIPAndPort(preferences);
         
-        fetchProjectsList();
+        fetchModulesList();
     }
 
-    protected void showDownloadProjectDialog(final String selectedItem) {
-    	File projectDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + selectedProject.key);
-    	if(!projectDir.exists()){
-    		choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
-					getString(R.string.confirm_download_project_title),
-					getString(R.string.confirm_download_project_message) + " " + selectedItem + "?",
+    protected void showDownloadModuleDialog(final String selectedItem) {
+    	File moduleDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + selectedModule.key);
+    	if(!moduleDir.exists()){
+    		choiceDialog = new ChoiceDialog(FetchModulesActivity.this, 
+					getString(R.string.confirm_download_module_title),
+					getString(R.string.confirm_download_module_message) + " " + selectedItem + "?",
 					new IDialogListener() {
 
 						@Override
 						public void handleDialogResponse(
 								DialogResultCode resultCode) {
 							if (resultCode == DialogResultCode.SELECT_YES) {
-								downloadProjectArchive();
+								downloadModuleArchive();
 							}
 						}
 				
 			});
 			choiceDialog.show();
     	}else{
-	    	showUpdateOrDownloadProjectDialog(selectedItem);
+	    	showUpdateOrDownloadModuleDialog(selectedItem);
     	}
 	}
 
-	protected void showUpdateOrDownloadProjectDialog(final String selectedItem) {
+	protected void showUpdateOrDownloadModuleDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Download");
-		builder.setMessage("Do you want to download or update project?");
+		builder.setMessage("Do you want to download or update module?");
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			
@@ -254,16 +254,16 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				choiceDialog = new ChoiceDialog(FetchProjectsActivity.this, 
-						getString(R.string.confirm_download_project_title),
-						getString(R.string.confirm_download_project_message) + " " + selectedItem + "?",
+				choiceDialog = new ChoiceDialog(FetchModulesActivity.this, 
+						getString(R.string.confirm_download_module_title),
+						getString(R.string.confirm_download_module_message) + " " + selectedItem + "?",
 						new IDialogListener() {
 
 							@Override
 							public void handleDialogResponse(
 									DialogResultCode resultCode) {
 								if (resultCode == DialogResultCode.SELECT_YES) {
-									downloadProjectArchive();
+									downloadModuleArchive();
 								}
 							}
 					
@@ -276,17 +276,17 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				showUpdateProjectDialog(selectedItem);
+				showUpdateModuleDialog(selectedItem);
 			}
 		});
 		
 		builder.create().show();
 	}
 
-	protected void showUpdateProjectDialog(final String selectedItem) {
+	protected void showUpdateModuleDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Update");
-		builder.setMessage("Do you want to update project settings or project data?");
+		builder.setMessage("Do you want to update module settings or module data?");
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			
@@ -299,7 +299,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				updateProjectDataArchive();
+				updateModuleDataArchive();
 			}
 		});
 		
@@ -307,7 +307,7 @@ public class FetchProjectsActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				updateProjectSettingArchive();
+				updateModuleSettingArchive();
 			}
 		});
 		builder.create().show();
@@ -325,25 +325,25 @@ public class FetchProjectsActivity extends RoboActivity {
     		confirmDialog.dismiss();
     	
     	// kill all services
-		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+		Intent intent = new Intent(FetchModulesActivity.this, DownloadModuleService.class);
 		stopService(intent);
-		Intent dataIntent = new Intent(FetchProjectsActivity.this, UpdateProjectDataService.class);
+		Intent dataIntent = new Intent(FetchModulesActivity.this, UpdateModuleDataService.class);
 		stopService(dataIntent);
-		Intent serviceIntent = new Intent(FetchProjectsActivity.this, UpdateProjectSettingService.class);
+		Intent serviceIntent = new Intent(FetchModulesActivity.this, UpdateModuleSettingService.class);
 		stopService(serviceIntent);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.acitvity_fetch_projects, menu);
+        getMenuInflater().inflate(R.menu.acitvity_fetch_modules, menu);
         return true;
     }
     
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.refresh_project_list:
-				fetchProjectsList();
+			case R.id.refresh_module_list:
+				fetchModulesList();
 				return (true);
 			default:
 				return (super.onOptionsItemSelected(item));
@@ -351,31 +351,31 @@ public class FetchProjectsActivity extends RoboActivity {
 	}
     
     /**
-     * Fetch projects from the server to load into list
+     * Fetch modules from the server to load into list
      */
-    protected void fetchProjectsList() {
+    protected void fetchModulesList() {
     	
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyFetchingProjectsDialog();
+    		showBusyFetchingModulesDialog();
     		
-    		fetchTask = new FetchProjectsListTask(faimsClient, new ITaskListener() {
+    		fetchTask = new FetchModulesListTask(faimsClient, new ITaskListener() {
 
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handleTaskCompleted(Object result) {
-					FetchProjectsActivity.this.busyDialog.dismiss();
+					FetchModulesActivity.this.busyDialog.dismiss();
 					
 					FetchResult fetchResult = (FetchResult) result;
 					
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
-						if (projectListAdapter != null) projectListAdapter.clear();
-		    			FetchProjectsActivity.this.projects = (List<Project>) fetchResult.data;
-		    			Collections.reverse(FetchProjectsActivity.this.projects);
-		    			for (Project p : projects) {
-		    				FetchProjectsActivity.this.projectListAdapter.add(p.name);
+						if (moduleListAdapter != null) moduleListAdapter.clear();
+		    			FetchModulesActivity.this.modules = (List<Module>) fetchResult.data;
+		    			Collections.reverse(FetchModulesActivity.this.modules);
+		    			for (Module p : modules) {
+		    				FetchModulesActivity.this.moduleListAdapter.add(p.name);
 		    			}
 					} else if (fetchResult.resultCode == FAIMSClientResultCode.FAILURE) {
-						showFetchProjectsFailureDialog();
+						showFetchModulesFailureDialog();
 					} else {
 						// ignore
 					}
@@ -389,12 +389,12 @@ public class FetchProjectsActivity extends RoboActivity {
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					fetchProjectsList();
+    					fetchModulesList();
     				} else {
-    					showLocateServerFetchProjectsFailureDialog();
+    					showLocateServerFetchModulesFailureDialog();
     				}
     			}
         		
@@ -403,17 +403,17 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
     
-	protected void downloadProjectArchive() {
+	protected void downloadModuleArchive() {
     	
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyDownloadingProjectsDialog();
+    		showBusyDownloadingModulesDialog();
     		
     		// start service
-    		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+    		Intent intent = new Intent(FetchModulesActivity.this, DownloadModuleService.class);
     		
 		    Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", selectedProject);
+		    intent.putExtra("module", selectedModule);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -422,10 +422,10 @@ public class FetchProjectsActivity extends RoboActivity {
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					downloadProjectArchive();
+    					downloadModuleArchive();
     				} else {
     					showLocateServerDownloadArchiveFailureDialog();
     				}
@@ -436,17 +436,17 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
 
-	protected void updateProjectSettingArchive() {
+	protected void updateModuleSettingArchive() {
     	
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyUpdatingProjectSettingDialog();
+    		showBusyUpdatingModuleSettingDialog();
     		
     		// start service
-    		Intent intent = new Intent(FetchProjectsActivity.this, UpdateProjectSettingService.class);
+    		Intent intent = new Intent(FetchModulesActivity.this, UpdateModuleSettingService.class);
     		
-		    Messenger messenger = new Messenger(updateProjectSettingHandler);
+		    Messenger messenger = new Messenger(updateModuleSettingHandler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", selectedProject);
+		    intent.putExtra("module", selectedModule);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -455,10 +455,10 @@ public class FetchProjectsActivity extends RoboActivity {
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					updateProjectSettingArchive();
+    					updateModuleSettingArchive();
     				} else {
     					showLocateServerDownloadArchiveFailureDialog();
     				}
@@ -469,17 +469,17 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
 
-	protected void updateProjectDataArchive() {
+	protected void updateModuleDataArchive() {
     	
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyUpdatingProjectDataDialog();
+    		showBusyUpdatingModuleDataDialog();
     		
     		// start service
-    		Intent intent = new Intent(FetchProjectsActivity.this, UpdateProjectDataService.class);
+    		Intent intent = new Intent(FetchModulesActivity.this, UpdateModuleDataService.class);
     		
-		    Messenger messenger = new Messenger(updateProjectDataHandler);
+		    Messenger messenger = new Messenger(updateModuleDataHandler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", selectedProject);
+		    intent.putExtra("module", selectedModule);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -488,10 +488,10 @@ public class FetchProjectsActivity extends RoboActivity {
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				FetchProjectsActivity.this.busyDialog.dismiss();
+    				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					updateProjectDataArchive();
+    					updateModuleDataArchive();
     				} else {
     					showLocateServerDownloadArchiveFailureDialog();
     				}
@@ -502,8 +502,8 @@ public class FetchProjectsActivity extends RoboActivity {
     	
     }
 
-	private void showLocateServerFetchProjectsFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
+	private void showLocateServerFetchModulesFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
@@ -511,7 +511,7 @@ public class FetchProjectsActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							fetchProjectsList();
+							fetchModulesList();
 						}
 					}
     		
@@ -520,7 +520,7 @@ public class FetchProjectsActivity extends RoboActivity {
     }
     
     private void showLocateServerDownloadArchiveFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
@@ -528,7 +528,7 @@ public class FetchProjectsActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadProjectArchive();
+							downloadModuleArchive();
 						}
 					}
     		
@@ -536,16 +536,16 @@ public class FetchProjectsActivity extends RoboActivity {
     	choiceDialog.show();
     }
     
-    private void showFetchProjectsFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
-				getString(R.string.fetch_projects_failure_title),
-				getString(R.string.fetch_projects_failure_message),
+    private void showFetchModulesFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
+				getString(R.string.fetch_modules_failure_title),
+				getString(R.string.fetch_modules_failure_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							fetchProjectsList();
+							fetchModulesList();
 						}
 					}
     		
@@ -553,16 +553,16 @@ public class FetchProjectsActivity extends RoboActivity {
     	choiceDialog.show();
     }
     
-    private void showDownloadProjectFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
-				getString(R.string.download_project_failure_title),
-				getString(R.string.download_project_failure_message),
+    private void showDownloadModuleFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
+				getString(R.string.download_module_failure_title),
+				getString(R.string.download_module_failure_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadProjectArchive();
+							downloadModuleArchive();
 						}
 					}
     		
@@ -571,9 +571,9 @@ public class FetchProjectsActivity extends RoboActivity {
     }
     
     private void showBusyErrorDialog() {
-    	confirmDialog = new ConfirmDialog(FetchProjectsActivity.this,
-				getString(R.string.download_busy_project_error_title),
-				getString(R.string.download_busy_project_error_message),
+    	confirmDialog = new ConfirmDialog(FetchModulesActivity.this,
+				getString(R.string.download_busy_module_error_title),
+				getString(R.string.download_busy_module_error_message),
 				new IDialogListener() {
 
 					@Override
@@ -585,10 +585,10 @@ public class FetchProjectsActivity extends RoboActivity {
     	confirmDialog.show();
     }
     
-    private void showDownloadProjectErrorDialog() {
-    	confirmDialog = new ConfirmDialog(FetchProjectsActivity.this,
-				getString(R.string.download_project_error_title),
-				getString(R.string.download_project_error_message),
+    private void showDownloadModuleErrorDialog() {
+    	confirmDialog = new ConfirmDialog(FetchModulesActivity.this,
+				getString(R.string.download_module_error_title),
+				getString(R.string.download_module_error_message),
 				new IDialogListener() {
 
 					@Override
@@ -601,7 +601,7 @@ public class FetchProjectsActivity extends RoboActivity {
     }
     
     private void showBusyLocatingServerDialog() {
-    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
+    	busyDialog = new BusyDialog(FetchModulesActivity.this, 
 				getString(R.string.locate_server_title),
 				getString(R.string.locate_server_message),
 				new IDialogListener() {
@@ -610,7 +610,7 @@ public class FetchProjectsActivity extends RoboActivity {
 					public void handleDialogResponse(
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
-							FetchProjectsActivity.this.locateTask.cancel(true);
+							FetchModulesActivity.this.locateTask.cancel(true);
 						}
 					}
 			
@@ -618,17 +618,17 @@ public class FetchProjectsActivity extends RoboActivity {
 		busyDialog.show();
     }
     
-    private void showBusyFetchingProjectsDialog() {
-    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-				getString(R.string.fetch_projects_title),
-				getString(R.string.fetch_projects_message),
+    private void showBusyFetchingModulesDialog() {
+    	busyDialog = new BusyDialog(FetchModulesActivity.this, 
+				getString(R.string.fetch_modules_title),
+				getString(R.string.fetch_modules_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
-							FetchProjectsActivity.this.fetchTask.cancel(true);
+							FetchModulesActivity.this.fetchTask.cancel(true);
 						}
 					}
 			
@@ -636,10 +636,10 @@ public class FetchProjectsActivity extends RoboActivity {
 		busyDialog.show();
     }
     
-    private void showBusyDownloadingProjectsDialog() {
-    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-				getString(R.string.download_project_title),
-				getString(R.string.download_project_message),
+    private void showBusyDownloadingModulesDialog() {
+    	busyDialog = new BusyDialog(FetchModulesActivity.this, 
+				getString(R.string.download_module_title),
+				getString(R.string.download_module_message),
 				new IDialogListener() {
 
 					@Override
@@ -647,7 +647,7 @@ public class FetchProjectsActivity extends RoboActivity {
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
 							// stop service
-				    		Intent intent = new Intent(FetchProjectsActivity.this, DownloadProjectService.class);
+				    		Intent intent = new Intent(FetchModulesActivity.this, DownloadModuleService.class);
 				    		
 				    		stopService(intent);
 						}
@@ -657,10 +657,10 @@ public class FetchProjectsActivity extends RoboActivity {
 	    busyDialog.show();
     }
     
-    private void showBusyUpdatingProjectSettingDialog() {
-    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-				getString(R.string.update_project_title),
-				getString(R.string.update_project_message),
+    private void showBusyUpdatingModuleSettingDialog() {
+    	busyDialog = new BusyDialog(FetchModulesActivity.this, 
+				getString(R.string.update_module_title),
+				getString(R.string.update_module_message),
 				new IDialogListener() {
 
 					@Override
@@ -668,7 +668,7 @@ public class FetchProjectsActivity extends RoboActivity {
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
 							// stop service
-				    		Intent intent = new Intent(FetchProjectsActivity.this, UpdateProjectSettingService.class);
+				    		Intent intent = new Intent(FetchModulesActivity.this, UpdateModuleSettingService.class);
 				    		
 				    		stopService(intent);
 						}
@@ -678,10 +678,10 @@ public class FetchProjectsActivity extends RoboActivity {
 	    busyDialog.show();
     }
 
-    private void showBusyUpdatingProjectDataDialog() {
-    	busyDialog = new BusyDialog(FetchProjectsActivity.this, 
-				getString(R.string.update_project_title),
-				getString(R.string.update_project_message),
+    private void showBusyUpdatingModuleDataDialog() {
+    	busyDialog = new BusyDialog(FetchModulesActivity.this, 
+				getString(R.string.update_module_title),
+				getString(R.string.update_module_message),
 				new IDialogListener() {
 
 					@Override
@@ -689,7 +689,7 @@ public class FetchProjectsActivity extends RoboActivity {
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
 							// stop service
-				    		Intent intent = new Intent(FetchProjectsActivity.this, UpdateProjectDataService.class);
+				    		Intent intent = new Intent(FetchModulesActivity.this, UpdateModuleDataService.class);
 				    		
 				    		stopService(intent);
 						}
@@ -699,16 +699,16 @@ public class FetchProjectsActivity extends RoboActivity {
 	    busyDialog.show();
     }
 
-    private void showUpdateProjectSettingFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
-				getString(R.string.update_project_failure_title),
-				getString(R.string.update_project_failure_message),
+    private void showUpdateModuleSettingFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
+				getString(R.string.update_module_failure_title),
+				getString(R.string.update_module_failure_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateProjectSettingArchive();
+							updateModuleSettingArchive();
 						}
 					}
     		
@@ -716,16 +716,16 @@ public class FetchProjectsActivity extends RoboActivity {
     	choiceDialog.show();
     }
 
-    private void showUpdateProjectDataFailureDialog() {
-    	choiceDialog = new ChoiceDialog(FetchProjectsActivity.this,
-				getString(R.string.update_project_failure_title),
-				getString(R.string.update_project_failure_message),
+    private void showUpdateModuleDataFailureDialog() {
+    	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
+				getString(R.string.update_module_failure_title),
+				getString(R.string.update_module_failure_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateProjectDataArchive();
+							updateModuleDataArchive();
 						}
 					}
     		
@@ -733,10 +733,10 @@ public class FetchProjectsActivity extends RoboActivity {
     	choiceDialog.show();
     }
 
-    private void showUpdateProjectErrorDialog() {
-    	confirmDialog = new ConfirmDialog(FetchProjectsActivity.this,
-				getString(R.string.update_project_error_title),
-				getString(R.string.update_project_error_message),
+    private void showUpdateModuleErrorDialog() {
+    	confirmDialog = new ConfirmDialog(FetchModulesActivity.this,
+				getString(R.string.update_module_error_title),
+				getString(R.string.update_module_error_message),
 				new IDialogListener() {
 
 					@Override
@@ -748,10 +748,10 @@ public class FetchProjectsActivity extends RoboActivity {
     	confirmDialog.show();
     }
     
-    private void showProjectActivity() {
-    	Intent showProjectsIntent = new Intent(this, ShowProjectActivity.class);
-		showProjectsIntent.putExtra("key", selectedProject.key);
-		startActivityForResult(showProjectsIntent, 1);
+    private void showModuleActivity() {
+    	Intent showModulesIntent = new Intent(this, ShowModuleActivity.class);
+		showModulesIntent.putExtra("key", selectedModule.key);
+		startActivityForResult(showModulesIntent, 1);
 		finish();
     }
 }

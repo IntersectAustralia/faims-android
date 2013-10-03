@@ -23,7 +23,7 @@ import android.app.Dialog;
 
 //========= Persist Functionality ==========
 /**
-  * When android runs low on resources the project activity can be destroyed if its in a 
+  * When android runs low on resources the module activity can be destroyed if its in a 
   * suspended state and then restored when its resumed. This will result in a loss of
   * variable state in the logic script.
   *
@@ -700,7 +700,7 @@ Object getGPSPosition(){
 }
 
 /**
-  * Get the GPS position as longitude and latitude in the project projection from external GPS or internal GPS.
+  * Get the GPS position as longitude and latitude in the module projection from external GPS or internal GPS.
   *
   * @return projected GPSPosition if starting GPS or null if no GPS started or position found
   */
@@ -889,7 +889,7 @@ createCanvasLayer(String ref, String layerName) {
 }
 
 /**
-  * Set the focus point of the map view using longitude and latitude specified in the projects projection.
+  * Set the focus point of the map view using longitude and latitude specified in the modules projection.
   *
   * @param ref the reference to the map view
   * @param longitude the longitude of the focus point
@@ -900,7 +900,7 @@ setMapFocusPoint(String ref, float longitude, float latitude) {
 }
 
 /**
-  * Set the focus point of the map view using longitude and latitude specified in the projects projection.
+  * Set the focus point of the map view using longitude and latitude specified in the modules projection.
   *
   * @param ref the reference to the map view
   * @param longitude the longitude of the focus point
@@ -1449,45 +1449,45 @@ setFileSyncEnabled(boolean enabled) {
 
 //========= Static Data Functionality ==========
 /**
-  * Get the static data for current project name.
+  * Get the static data for current module name.
   *
-  * @return project name
+  * @return module name
   */
-String getProjectName(){
-	return linker.getProjectName();
+String getModuleName(){
+	return linker.getModuleName();
 }
 
 /**
-  * Get the static data for current project projection.
+  * Get the static data for current module projection.
   *
-  * @return project projection
+  * @return module projection
   */
-String getProjectSrid(){
-	return linker.getProjectSrid();
+String getModuleSrid(){
+	return linker.getModuleSrid();
 }
 
 /**
-  * Get the static data for current project id.
+  * Get the static data for current module id.
   *
-  * @return project id
+  * @return module id
   */
-String getProjectId(){
-	return linker.getProjectId();
+String getModuleId(){
+	return linker.getModuleId();
 }
 
 /**
-  * Get the static data for current project season.
+  * Get the static data for current module season.
   *
-  * @return project season
+  * @return module season
   */
-String getProjectSeason(){
-	return linker.getProjectSeason();
+String getModuleSeason(){
+	return linker.getModuleSeason();
 }
 
 /**
-  * Get the static data for current project description.
+  * Get the static data for current module description.
   *
-  * @return project description
+  * @return module description
   */
 String getProjectDescription(){
 	return linker.getProjectDescription();
@@ -1613,7 +1613,7 @@ getLastSelectedFilepath() {
 }
 
 /**
-  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * Copy a file into the modules server or app folders. If the sync is set to true then the file
   * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
   *
   * Files in the app folder are sync to the server and other apps. Files in the server folder are only
@@ -1627,7 +1627,7 @@ attachFile(String filePath, boolean sync) {
 }
 
 /**
-  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * Copy a file into the modules server or app folders. If the sync is set to true then the file
   * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
   *
   * Files in the app folder are sync to the server and other apps. Files in the server folder are only
@@ -1642,7 +1642,7 @@ attachFile(String filePath, boolean sync, String dir) {
 }
 
 /**
-  * Copy a file into the projects server or app folders. If the sync is set to true then the file
+  * Copy a file into the modules server or app folders. If the sync is set to true then the file
   * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
   *
   * Files in the app folder are sync to the server and other apps. Files in the server folder are only
@@ -1744,7 +1744,7 @@ getAttachedFilePath(String file) {
 }
 
 /**
-  * @return returns the file path relative to the projects folder of file
+  * @return returns the file path relative to the modules folder of file
   */
 stripAttachedFilePath(String file) {
 	return linker.stripAttachedFilePath(file);

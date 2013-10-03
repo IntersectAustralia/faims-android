@@ -43,7 +43,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.exceptions.MapException;
@@ -55,8 +55,8 @@ import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity.SyncStatus;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
@@ -75,7 +75,7 @@ public class BeanShellLinker {
 
 	private Interpreter interpreter;
 
-	private ShowProjectActivity activity;
+	private ShowModuleActivity activity;
 
 	private String persistedObjectName;
 
@@ -93,7 +93,7 @@ public class BeanShellLinker {
 	private String videoCallBack;
 	private String cameraVideoPath;
 
-	private Project project;
+	private Module module;
 
 	private String audioFileNamePath;
 	private MediaRecorder recorder;
@@ -101,9 +101,9 @@ public class BeanShellLinker {
 
 	protected Dialog saveDialog;
 
-	public BeanShellLinker(ShowProjectActivity activity, Project project) {
+	public BeanShellLinker(ShowModuleActivity activity, Module module) {
 		this.activity = activity;
-		this.project = project;
+		this.module = module;
 		this.interpreter = new Interpreter();
 		try {
 			interpreter.set("linker", this);
@@ -111,7 +111,7 @@ public class BeanShellLinker {
 			FLog.e("error setting linker", e);
 		}
 		this.activity.getFileManager().addListener(
-				ShowProjectActivity.FILE_BROWSER_REQUEST_CODE,
+				ShowModuleActivity.FILE_BROWSER_REQUEST_CODE,
 				new FileManager.FileManagerListener() {
 
 					@Override
@@ -424,7 +424,7 @@ public class BeanShellLinker {
 					@Override
 					public void onMapClicked(double x, double y, boolean arg2) {
 						try {
-							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), new MapPos(x, y));
+							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), new MapPos(x, y));
 							interpreter.set("_map_point_clicked", p);
 							execute(clickCallback);
 						} catch (Exception e) {
@@ -1110,7 +1110,7 @@ public class BeanShellLinker {
 								String value = null;
 								
 								// attach new files
-								if (!pair.getName().contains(activity.getProjectDir() + "/files")) {
+								if (!pair.getName().contains(activity.getModuleDir() + "/files")) {
 									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
 								} else {
 									value = stripAttachedFilePath(pair.getName());
@@ -1186,7 +1186,7 @@ public class BeanShellLinker {
 								String value = null;
 								
 								// attach new files
-								if (!pair.getName().contains(activity.getProjectDir() + "/files")) {
+								if (!pair.getName().contains(activity.getModuleDir() + "/files")) {
 									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
 								} else {
 									value = stripAttachedFilePath(pair.getName());
@@ -1530,7 +1530,7 @@ public class BeanShellLinker {
 	public String saveArchEnt(String entityId, String entityType,
 			List<Geometry> geometry, List<EntityAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geometry);
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
 			return activity.getDatabaseManager().saveArchEnt(entityId,
 					entityType, WKTUtil.collectionToWKT(geomList), attributes);
 
@@ -1560,7 +1560,7 @@ public class BeanShellLinker {
 	public String saveRel(String relationshpId, String relationshipType,
 			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.project.getSrid(), GeometryUtil.EPSG4326, geometry);
+			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
 			return activity.getDatabaseManager().saveRel(relationshpId, relationshipType,
 					WKTUtil.collectionToWKT(geomList), attributes);
 
@@ -1682,7 +1682,7 @@ public class BeanShellLinker {
 						ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
 						for (List<String> pictureList : arrayList) {
 							Picture picture = new Picture(pictureList.get(0),
-									activity.getArch16n().substituteValue(pictureList.get(1)), activity.getProjectDir() + "/" + pictureList.get(2));
+									activity.getArch16n().substituteValue(pictureList.get(1)), activity.getModuleDir() + "/" + pictureList.get(2));
 							pictures.add(picture);
 						}
 					} catch (Exception e) {
@@ -1828,7 +1828,7 @@ public class BeanShellLinker {
 			if (e != null) {
 				List<Geometry> geomList = e.getGeometryList();
 				if (geomList != null) {
-					e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+					e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
 				}
 			}
 			return e;
@@ -1845,7 +1845,7 @@ public class BeanShellLinker {
 			if (r != null) {
 				List<Geometry> geomList = r.getGeometryList();
 				if (geomList != null) {
-					r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), geomList));
+					r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
 				}
 			}
 			return r;
@@ -1946,10 +1946,10 @@ public class BeanShellLinker {
 		return this.activity.getGPSDataManager().getGPSPosition();
 	}
 	
-	public Object getGPSPositionProjected() {
+	public Object getGPSPositionModuleed() {
 		GPSLocation l = (GPSLocation) this.activity.getGPSDataManager().getGPSPosition();
 		if (l == null) return l;
-		MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, project.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
+		MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
 		l.setLongitude(p.x);
 		l.setLatitude(p.y);
 		return l;
@@ -1982,7 +1982,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getProjectDir() + "/" + filename;
+				String filepath = activity.getModuleDir() + "/" + filename;
 				mapView.addBaseMap(layerName, filepath);
 
 			} else {
@@ -2005,7 +2005,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getProjectDir() + "/" + filename;
+				String filepath = activity.getModuleDir() + "/" + filename;
 				mapView.addRasterMap(layerName, filepath);
 
 			} else {
@@ -2026,7 +2026,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				MapPos p = GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
+				MapPos p = GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
 				mapView.setMapFocusPoint((float) p.x, (float) p.y);
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2094,7 +2094,7 @@ public class BeanShellLinker {
 	}
 
 	public void centerOnCurrentPosition(String ref) {
-		Object currentLocation = getGPSPositionProjected();
+		Object currentLocation = getGPSPositionModuleed();
 		if (currentLocation != null) {
 			GPSLocation location = (GPSLocation) currentLocation;
 			setMapFocusPoint(ref, (float) location.getLongitude(),
@@ -2110,7 +2110,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getProjectDir() + "/" + filename;
+				String filepath = activity.getModuleDir() + "/" + filename;
 				return mapView.addShapeLayer(layerName, filepath,
 						pointStyle.toPointStyleSet(),
 						lineStyle.toLineStyleSet(),
@@ -2138,7 +2138,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getProjectDir() + "/" + filename;
+				String filepath = activity.getModuleDir() + "/" + filename;
 				return mapView.addSpatialLayer(layerName, filepath, tablename,
 						idColumn, labelColumn, pointStyle,
 						lineStyle,
@@ -2271,7 +2271,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, point), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, point), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2295,7 +2295,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2319,7 +2319,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, GeometryUtil.convertFromProjToProj(project.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2378,7 +2378,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2397,7 +2397,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2503,7 +2503,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, project.getSrid(), mapView
+				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2567,7 +2567,7 @@ public class BeanShellLinker {
 
 	public void addSyncListener(final String startCallback,
 			final String successCallback, final String failureCallback) {
-		this.activity.addSyncListener(new ShowProjectActivity.SyncListener() {
+		this.activity.addSyncListener(new ShowModuleActivity.SyncListener() {
 
 			@Override
 			public void handleStart() {
@@ -2595,7 +2595,7 @@ public class BeanShellLinker {
 		File file = new File(cameraPicturepath);
 		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 		this.activity.startActivityForResult(cameraIntent,
-				ShowProjectActivity.CAMERA_REQUEST_CODE);
+				ShowModuleActivity.CAMERA_REQUEST_CODE);
 	}
 
 	public void executeCameraCallBack() {
@@ -2615,7 +2615,7 @@ public class BeanShellLinker {
 		File file = new File(cameraVideoPath);
 		videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
 		activity.startActivityForResult(videoIntent,
-				ShowProjectActivity.VIDEO_REQUEST_CODE);
+				ShowModuleActivity.VIDEO_REQUEST_CODE);
 	}
 
 	public void executeVideoCallBack() {
@@ -2724,64 +2724,64 @@ public class BeanShellLinker {
 		return cameraPicturepath;
 	}
 
-	public String getProjectName() {
-		return this.project.getName();
+	public String getModuleName() {
+		return this.module.getName();
 	}
 	
-	public String getProjectSrid() {
-		return this.project.getSrid();
+	public String getModuleSrid() {
+		return this.module.getSrid();
 	}
 
-	public String getProjectId() {
-		return this.project.getKey();
+	public String getModuleId() {
+		return this.module.getKey();
 	}
 
-	public String getProjectSeason() {
-		return this.project.getSeason();
+	public String getModuleSeason() {
+		return this.module.getSeason();
 	}
 
 	public String getProjectDescription() {
-		return this.project.getDescription();
+		return this.module.getDescription();
 	}
 
 	public String getPermitNo() {
-		return this.project.getPermitNo();
+		return this.module.getPermitNo();
 	}
 
 	public String getPermitHolder() {
-		return this.project.getPermitHolder();
+		return this.module.getPermitHolder();
 	}
 
 	public String getContactAndAddress() {
-		return this.project.getContactAndAddress();
+		return this.module.getContactAndAddress();
 	}
 
 	public String getParticipants() {
-		return this.project.getParticipants();
+		return this.module.getParticipants();
 	}
 	
 	public String getPermitIssuedBy() {
-		return this.project.getPermitIssuedBy();
+		return this.module.getPermitIssuedBy();
 	}
 
 	public String getPermitType() {
-		return this.project.getPermitType();
+		return this.module.getPermitType();
 	}
 
 	public String getCopyrightHolder() {
-		return this.project.getCopyrightHolder();
+		return this.module.getCopyrightHolder();
 	}
 
 	public String getClientSponsor() {
-		return this.project.getClientSponsor();
+		return this.module.getClientSponsor();
 	}
 
 	public String getLandOwner() {
-		return this.project.getLandOwner();
+		return this.module.getLandOwner();
 	}
 
 	public String hasSensitiveData() {
-		return this.project.hasSensitiveData();
+		return this.module.hasSensitiveData();
 	}
 
 	public void setSyncMinInterval(float value) {
@@ -2817,7 +2817,7 @@ public class BeanShellLinker {
 	public void showFileBrowser(String callback) {
 		this.lastFileBrowserCallback = callback;
 		this.activity
-				.showFileBrowser(ShowProjectActivity.FILE_BROWSER_REQUEST_CODE);
+				.showFileBrowser(ShowModuleActivity.FILE_BROWSER_REQUEST_CODE);
 	}
 
 	public void setLastSelectedFile(File file) {
@@ -2907,14 +2907,14 @@ public class BeanShellLinker {
 			}
 
 			// create directories
-			FileUtil.makeDirs(activity.getProjectDir() + "/" + attachFile);
+			FileUtil.makeDirs(activity.getModuleDir() + "/" + attachFile);
 			String name= file.getName();
 			
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
-			activity.copyFile(filePath, activity.getProjectDir() + "/"
-					+ attachFile, new ShowProjectActivity.AttachFileListener() {
+			activity.copyFile(filePath, activity.getModuleDir() + "/"
+					+ attachFile, new ShowModuleActivity.AttachFileListener() {
 
 						@Override
 						public void handleComplete() {
@@ -2925,7 +2925,7 @@ public class BeanShellLinker {
 				
 			});
 			if(!activity.getSyncStatus().equals(SyncStatus.INACTIVE)){
-				activity.setSyncStatus(ShowProjectActivity.SyncStatus.ACTIVE_HAS_CHANGES);
+				activity.setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
 			return attachFile;
 		} catch (Exception e) {
@@ -2980,7 +2980,7 @@ public class BeanShellLinker {
 			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
 			Map<String, Integer> count = new HashMap<String, Integer>();
 			for (String attachedFile : files) {
-				String filename = (new File(activity.getProjectDir() + "/"
+				String filename = (new File(activity.getModuleDir() + "/"
 						+ attachedFile)).getName();
 				filename = filename.substring(filename.indexOf("_") + 1);
 				if (count.get(filename) != null) {
@@ -2993,7 +2993,7 @@ public class BeanShellLinker {
 					count.put(filename, 1);
 				}
 				NameValuePair file = new NameValuePair(filename,
-						activity.getProjectDir() + "/" + attachedFile);
+						activity.getModuleDir() + "/" + attachedFile);
 				attachedFiles.add(file);
 			}
 			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -3152,7 +3152,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				String filepath = activity.getProjectDir() + "/" + dbPath;
+				String filepath = activity.getModuleDir() + "/" + dbPath;
 				mapView.setLegacyToolVisible(true);
 				mapView.addLegacySelectQueryBuilder(name, filepath, tableName,
 						builder);
@@ -3187,7 +3187,7 @@ public class BeanShellLinker {
 		try {
 			return GeometryUtil.convertFromProjToProj(fromSrid, toSrid, p);
 		} catch (Exception e) {
-			FLog.e("error converting project from " + fromSrid + " to " + toSrid, e);
+			FLog.e("error converting module from " + fromSrid + " to " + toSrid, e);
 			showWarning("Logic Error", "Error converting projection from " + fromSrid + " to " + toSrid);
 		}
 		return null;
@@ -3269,7 +3269,7 @@ public class BeanShellLinker {
 	
 	public String getAttachedFilePath(String file) {
 		try {
-			return activity.getProjectDir() + "/" + file;
+			return activity.getModuleDir() + "/" + file;
 		} catch (Exception e) {
 			FLog.e("error getting attached file path", e);
 			showWarning("Logic Error", "Error getting attached file path");
@@ -3279,7 +3279,7 @@ public class BeanShellLinker {
 	
 	public String stripAttachedFilePath(String file) {
 		try {
-			return file.replace(activity.getProjectDir() + "/", "");
+			return file.replace(activity.getModuleDir() + "/", "");
 		} catch (Exception e) {
 			FLog.e("error stripping attached file path", e);
 			showWarning("Logic Error", "Error stripping attached file path");

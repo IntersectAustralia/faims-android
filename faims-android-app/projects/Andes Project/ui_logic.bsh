@@ -4,9 +4,9 @@ DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
 
 initStatic() {
-	setFieldValue("control/static/name", getProjectName());
-	setFieldValue("control/static/id", getProjectId());
-	setFieldValue("control/static/season", getProjectSeason());
+	setFieldValue("control/static/name", getModuleName());
+	setFieldValue("control/static/id", getModuleId());
+	setFieldValue("control/static/season", getModuleSeason());
 	setFieldValue("control/static/description", getProjectDescription());
 	setFieldValue("control/static/permit_no", getPermitNo());
 	setFieldValue("control/static/permit_holder", getPermitHolder());
@@ -322,7 +322,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
 	    		geoData = new ArrayList();
 	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
-	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
+	    		p = convertFromProjToProj("4326", getModuleSrid(), p);
 	    		geoData.add(new Point(p, null, (PointStyle) null, null));
 	    	}
     	}
@@ -2776,7 +2776,7 @@ setDoorwayGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
 		p = point.getMapPos();
-		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		p = convertFromProjToProj(getModuleSrid(), "4326", p);
 		setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
 		setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
 	}
@@ -2883,7 +2883,7 @@ setLichenGPSFieldsFromPoint(geomList) {
 	if (geomList != null) {
 		point = geomList.get(0);
 		p = point.getMapPos();
-		p = convertFromProjToProj(getProjectSrid(), "4326", p);
+		p = convertFromProjToProj(getModuleSrid(), "4326", p);
 		setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
 		setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
 	}

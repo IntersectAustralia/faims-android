@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.data;
 
 import android.os.Bundle;
 
-public class ShowProjectActivityData implements ActivityData {
+public class ShowModuleActivityData implements ActivityData {
 	
 	private float syncMinInterval;
 	private float syncMaxInterval;

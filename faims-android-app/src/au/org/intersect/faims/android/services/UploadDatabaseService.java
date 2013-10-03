@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -33,15 +33,15 @@ public class UploadDatabaseService extends UploadService {
 		try {
 			String userId = intent.getStringExtra("userId");
 			Bundle extras = intent.getExtras();
-			Project project = (Project) extras.get("project");
-			String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
+			Module module = (Module) extras.get("module");
+			String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
 			
 			// create temp database to upload
 			databaseManager.init(database);
 			
-			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 	    	
-	    	dumpDatabase(tempDB, project);
+	    	dumpDatabase(tempDB, module);
 	    	
 	    	// check if database is empty
 	    	if (databaseManager.isEmpty(tempDB)) {
@@ -55,7 +55,7 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	// tar file
-	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 	    	
 	    	os = FileUtil.createTarOutputStream(tempFile.getAbsolutePath());
 	    	
@@ -67,7 +67,7 @@ public class UploadDatabaseService extends UploadService {
 	    	}
 	    	
 	    	// upload database
-			return faimsClient.uploadDatabase(project, tempFile, userId);
+			return faimsClient.uploadDatabase(module, tempFile, userId);
 		} finally {
 			if (tempDB != null) {
 				FileUtil.delete(tempDB);
@@ -88,7 +88,7 @@ public class UploadDatabaseService extends UploadService {
 		}
 	}
 
-	protected void dumpDatabase(File tempFile, Project project) throws Exception {
+	protected void dumpDatabase(File tempFile, Module module) throws Exception {
     	databaseManager.dumpDatabaseTo(tempFile);
 	}
 

@@ -18,7 +18,7 @@ import au.org.intersect.faims.android.data.ActivityData;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
 import au.org.intersect.faims.android.tasks.ExternalGPSTasks;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
 import com.google.inject.Singleton;
 
@@ -56,11 +56,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private String trackingExec;
 	private boolean isTrackingStarted;
 
-	private WeakReference<ShowProjectActivity> activityRef;
+	private WeakReference<ShowModuleActivity> activityRef;
 	
-	public void init(LocationManager manager, ShowProjectActivity activity){
+	public void init(LocationManager manager, ShowModuleActivity activity){
 		this.locationManager = manager;
-		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 	}
 	
     @Override

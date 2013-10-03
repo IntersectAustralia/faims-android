@@ -13,11 +13,11 @@ import au.org.intersect.faims.android.constants.FaimsSettings;
 
 import com.google.gson.JsonObject;
 
-public class TestProjectUtil {
+public class TestModuleUtil {
 
-	public static void createProject(String name, String key) {
+	public static void createModule(String name, String key) {
 		try {
-			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + key;
+			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + key;
 			File file = new File(dir);
 			if (!file.isDirectory())
 				file.mkdirs();
@@ -31,7 +31,7 @@ public class TestProjectUtil {
 	    	object.addProperty("name", name);
 	    	object.addProperty("key", key);
 	    	
-	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
+	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/module.settings"));
 	    	writer.write(object.toString());
 	    	writer.flush();
 	    	writer.close();
@@ -40,9 +40,9 @@ public class TestProjectUtil {
 		}
 	}
 	
-	public static void createProjectFrom(String name, String key, String dirname) {
+	public static void createModuleFrom(String name, String key, String dirname) {
 		try {
-			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + key;
+			String dir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + key;
 			File file = new File(dir);
 			if (!file.isDirectory())
 				file.mkdirs();
@@ -58,7 +58,7 @@ public class TestProjectUtil {
 	    	object.addProperty("name", name);
 	    	object.addProperty("key", key);
 	    	
-	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/project.settings"));
+	    	BufferedWriter writer = new BufferedWriter(new FileWriter(dir + "/module.settings"));
 	    	writer.write(object.toString());
 	    	writer.flush();
 	    	writer.close();

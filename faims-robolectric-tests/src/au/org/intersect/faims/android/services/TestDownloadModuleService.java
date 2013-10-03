@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.services;
 import android.content.Intent;
 import au.org.intersect.faims.android.net.FAIMSClient;
 
-public class TestDownloadProjectService extends DownloadProjectService {
+public class TestDownloadModuleService extends DownloadModuleService {
 	
 	@Override
 	public void onHandleIntent(Intent intent) {

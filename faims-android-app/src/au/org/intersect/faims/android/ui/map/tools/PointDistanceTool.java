@@ -155,7 +155,7 @@ public class PointDistanceTool extends HighlightTool {
 			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
 			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 			
-			this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), mapView.getProjectSrid());
+			this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), mapView.getModuleSrid());
 			
 		} catch (Exception e) {
 			FLog.e("error calculating point distance", e);

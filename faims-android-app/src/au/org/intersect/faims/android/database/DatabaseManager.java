@@ -18,8 +18,8 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKBUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity;
-import au.org.intersect.faims.android.ui.activity.ShowProjectActivity.SyncStatus;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.form.ArchEntity;
 import au.org.intersect.faims.android.ui.form.EntityAttribute;
 import au.org.intersect.faims.android.ui.form.Relationship;
@@ -39,14 +39,14 @@ public class DatabaseManager {
 	private String userId;
 	
 	private jsqlite.Database db;
-	private WeakReference<ShowProjectActivity> activityRef;
+	private WeakReference<ShowModuleActivity> activityRef;
 
 	public void init(String filename) {
 		this.dbname = filename;
 	}
 
-	public void setWeakReference(ShowProjectActivity activity){
-		this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+	public void setWeakReference(ShowModuleActivity activity){
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 	}
 	
 	public void setUserId(String userId) {

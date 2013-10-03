@@ -252,7 +252,7 @@ saveEntity(entityId, entityType, attributeDefs, geoData, callback) {
     		if (!isNull(getFieldValue(def.ref1)) && !isNull(getFieldValue(def.ref2))) {
 	    		geoData = new ArrayList();
 	    		p = new MapPos(Double.parseDouble(getFieldValue(def.ref1)), Double.parseDouble(getFieldValue(def.ref2)));
-	    		p = convertFromProjToProj("4326", getProjectSrid(), p);
+	    		p = convertFromProjToProj("4326", getModuleSrid(), p);
 	    		geoData.add(new Point(p, null, (PointStyle) null, null));
 	    	}
     	}

@@ -51,8 +51,8 @@ import android.widget.ImageView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
-import au.org.intersect.faims.android.data.Project;
-import au.org.intersect.faims.android.data.ShowProjectActivityData;
+import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.data.ShowModuleActivityData;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -84,13 +84,13 @@ import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
-import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.google.inject.Inject;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 
-public class ShowProjectActivity extends FragmentActivity implements IFAIMSRestorable{
+public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestorable{
 	
 	public static final String FILES = "files";
 	public static final String DATABASE = "database";
@@ -108,39 +108,39 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		public void handleComplete();
 	}
 	
-	private static abstract class ShowProjectActivityHandler extends Handler {
+	private static abstract class ShowModuleActivityHandler extends Handler {
 		
-		private WeakReference<ShowProjectActivity> activityRef;
+		private WeakReference<ShowModuleActivity> activityRef;
 
-		public ShowProjectActivityHandler(ShowProjectActivity activity) {
-			this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		public ShowModuleActivityHandler(ShowModuleActivity activity) {
+			this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		}
 		
 		public void handleMessage(Message message) {
-			ShowProjectActivity activity = activityRef.get();
+			ShowModuleActivity activity = activityRef.get();
 			if (activity == null) {
-				FLog.d("ShowProjectActivityHandler cannot get activity");
+				FLog.d("ShowModuleActivityHandler cannot get activity");
 				return;
 			}
 			
 			handleMessageSafe(activity, message);
 		}
 		
-		public abstract void handleMessageSafe(ShowProjectActivity activity, Message message);
+		public abstract void handleMessageSafe(ShowModuleActivity activity, Message message);
 		
 	}
 	
-	private static class DownloadDatabaseHandler extends ShowProjectActivityHandler {
+	private static class DownloadDatabaseHandler extends ShowModuleActivityHandler {
 
 		private String callback;
 
-		public DownloadDatabaseHandler(ShowProjectActivity activity, String callback) {
+		public DownloadDatabaseHandler(ShowModuleActivity activity, String callback) {
 			super(activity);
 			this.callback = callback;
 		}
 
 		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
+		public void handleMessageSafe(ShowModuleActivity activity,
 				Message message) {
 			activity.busyDialog.dismiss();
 			
@@ -162,17 +162,17 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 	}
 	
-	private static class UploadDatabaseHandler extends ShowProjectActivityHandler {
+	private static class UploadDatabaseHandler extends ShowModuleActivityHandler {
 
 		private String callback;
 
-		public UploadDatabaseHandler(ShowProjectActivity activity, String callback) {
+		public UploadDatabaseHandler(ShowModuleActivity activity, String callback) {
 			super(activity);
 			this.callback = callback;
 		}
 
 		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
+		public void handleMessageSafe(ShowModuleActivity activity,
 				Message message) {
 			activity.busyDialog.dismiss();
 			
@@ -188,14 +188,14 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 	}
 	
-	private static class SyncDatabaseHandler extends ShowProjectActivityHandler {
+	private static class SyncDatabaseHandler extends ShowModuleActivityHandler {
 
-		public SyncDatabaseHandler(ShowProjectActivity activity) {
+		public SyncDatabaseHandler(ShowModuleActivity activity) {
 			super(activity);
 		}
 
 		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
+		public void handleMessageSafe(ShowModuleActivity activity,
 				Message message) {
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS){
@@ -234,14 +234,14 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 	}
 
-	private static class SyncFilesHandler extends ShowProjectActivityHandler {
+	private static class SyncFilesHandler extends ShowModuleActivityHandler {
 
-		public SyncFilesHandler(ShowProjectActivity activity) {
+		public SyncFilesHandler(ShowModuleActivity activity) {
 			super(activity);
 		}
 
 		@Override
-		public void handleMessageSafe(ShowProjectActivity activity,
+		public void handleMessageSafe(ShowModuleActivity activity,
 				Message message) {
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
@@ -273,15 +273,15 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	private static class WifiBroadcastReceiver extends BroadcastReceiver {
 		
-		private WeakReference<ShowProjectActivity> activityRef;
+		private WeakReference<ShowModuleActivity> activityRef;
 
-		public WifiBroadcastReceiver(ShowProjectActivity activity) {
-			this.activityRef = new WeakReference<ShowProjectActivity>(activity);
+		public WifiBroadcastReceiver(ShowModuleActivity activity) {
+			this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		}
 		
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			ShowProjectActivity activity = this.activityRef.get();
+			ShowModuleActivity activity = this.activityRef.get();
 			if (activity == null) {
 				FLog.d("WifiBroadcastReceiver cannot get activity");
 				return;
@@ -358,7 +358,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private Arch16n arch16n;
 
-	private String projectKey;
+	private String moduleKey;
 	
 	private boolean wifiConnected;
 	
@@ -376,10 +376,10 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 	private Timer syncTaskTimer;
 
-	private ShowProjectActivityData activityData;
+	private ShowModuleActivityData activityData;
 	private FileManager fm;
 
-	private String projectDir;
+	private String moduleDir;
 
 	private boolean pathIndicatorVisible;
 
@@ -412,7 +412,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.activity_show_project);
+		setContentView(R.layout.activity_show_module);
 		
 		// inject faimsClient and serverDiscovery
 		RoboGuice.getBaseApplicationInjector(this.getApplication()).injectMembers(this);
@@ -423,7 +423,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
 		
-		this.activityData = new ShowProjectActivityData();
+		this.activityData = new ShowModuleActivityData();
 		
 		rotation = AnimationUtils.loadAnimation(this,
 				R.anim.clockwise);
@@ -435,13 +435,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		
 		setupSync();
 		setupWifiBroadcast();
-		setupProject();
+		setupModule();
 		setProgressBarIndeterminateVisibility(false);
 		
 		// set file browser to reset last location when activity is created
-		DisplayPrefs.setLastLocation(ShowProjectActivity.this, getProjectDir());
+		DisplayPrefs.setLastLocation(ShowModuleActivity.this, getModuleDir());
 		
-		busyDialog = new BusyDialog(this, getString(R.string.load_project_title), getString(R.string.load_project_message), null);
+		busyDialog = new BusyDialog(this, getString(R.string.load_module_title), getString(R.string.load_module_message), null);
 		busyDialog.show();
 		
 		new AsyncTask<Void,Void,Void>() {
@@ -478,12 +478,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		return arch16n;
 	}
 	
-	public Project getProject() {
-		return ProjectUtil.getProject(projectKey);
+	public Module getModule() {
+		return ModuleUtil.getModule(moduleKey);
 	}
 	
-	public String getProjectDir() {
-		return projectDir;
+	public String getModuleDir() {
+		return moduleDir;
 	}
 	
 	public FileManager getFileManager() {
@@ -498,7 +498,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	private void setupWifiBroadcast() {
-		broadcastReceiver = new WifiBroadcastReceiver(ShowProjectActivity.this);
+		broadcastReceiver = new WifiBroadcastReceiver(ShowModuleActivity.this);
 		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
@@ -513,24 +513,24 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		}
 	}
 	
-	private void setupProject() {
+	private void setupModule() {
 		Intent data = getIntent();
 		
-		Project project = ProjectUtil.getProject(data.getStringExtra("key"));
-		setTitle(project.name);
+		Module module = ModuleUtil.getModule(data.getStringExtra("key"));
+		setTitle(module.name);
 		
-		this.projectKey = project.key;
-		this.projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+		this.moduleKey = module.key;
+		this.moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 		
-		databaseManager.init(projectDir + "/db.sqlite3");
+		databaseManager.init(moduleDir + "/db.sqlite3");
 		databaseManager.setWeakReference(this);
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
-		arch16n = new Arch16n(projectDir, project.name);
+		arch16n = new Arch16n(moduleDir, module.name);
 		
-		SpatialiteUtil.setDatabaseName(projectDir + "/db.sqlite3");
+		SpatialiteUtil.setDatabaseName(moduleDir + "/db.sqlite3");
 		
 		// clear any lock files that may exist
-		String lock = projectDir + "/.lock";
+		String lock = moduleDir + "/.lock";
 		LockManager.clearLock(lock);
 		
 		fm = new FileManager();
@@ -571,9 +571,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			confirmDialog.dismiss();
 		}
 		// kill all services
-		Intent uploadIntent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+		Intent uploadIntent = new Intent(ShowModuleActivity.this, UploadDatabaseService.class);
 		stopService(uploadIntent);
-		Intent downloadIntent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
+		Intent downloadIntent = new Intent(ShowModuleActivity.this, DownloadDatabaseService.class);
 		stopService(downloadIntent);
 		super.onDestroy();
 	}
@@ -600,7 +600,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					public void onClick(DialogInterface dialog, int which) {
 						syncStarted = false;
 						stopSync();
-						ShowProjectActivity.super.onBackPressed();
+						ShowModuleActivity.super.onBackPressed();
 					}
 				});
 				builder.setNegativeButton("No", new OnClickListener() {
@@ -613,13 +613,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 				builder.show();
 			}else{
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("Exit Project");
-				builder.setMessage("Do you want to exit project?");
+				builder.setTitle("Exit Module");
+				builder.setMessage("Do you want to exit module?");
 				builder.setPositiveButton("Yes", new OnClickListener() {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						ShowProjectActivity.super.onBackPressed();
+						ShowModuleActivity.super.onBackPressed();
 					}
 				});
 				builder.setNegativeButton("No", new OnClickListener() {
@@ -732,7 +732,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    getMenuInflater().inflate(R.menu.activity_show_project, menu);
+	    getMenuInflater().inflate(R.menu.activity_show_module, menu);
 	    return true;
 	}
 	
@@ -868,13 +868,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void preRenderUI() {
 		try {
 			// Read, validate and parse the xforms
-			ShowProjectActivity.this.fem = FileUtil.readXmlContent(projectDir + "/ui_schema.xml");
+			ShowModuleActivity.this.fem = FileUtil.readXmlContent(moduleDir + "/ui_schema.xml");
 			
 			arch16n.generatePropertiesMap();
 			
 			// bind the logic to the ui
 			FLog.d("Binding logic to the UI");
-			linker = new BeanShellLinker(ShowProjectActivity.this, ProjectUtil.getProject(projectKey));
+			linker = new BeanShellLinker(ShowModuleActivity.this, ModuleUtil.getModule(moduleKey));
 			linker.sourceFromAssets("ui_commands.bsh");
 		} catch (Exception e) {
 			FLog.e("error pre rendering ui", e);
@@ -885,7 +885,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			builder.setMessage(getString(R.string.render_ui_failure_message));
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
-			        	   ShowProjectActivity.this.finish();
+			        	   ShowModuleActivity.this.finish();
 			           }
 			       });
 			builder.create().show();
@@ -895,12 +895,12 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	protected void renderUI(Bundle savedInstanceState) {
 		try {
 			// render the ui definition
-			ShowProjectActivity.this.renderer = new UIRenderer(ShowProjectActivity.this.fem, ShowProjectActivity.this.arch16n, ShowProjectActivity.this);
-			ShowProjectActivity.this.renderer.createUI();
+			ShowModuleActivity.this.renderer = new UIRenderer(ShowModuleActivity.this.fem, ShowModuleActivity.this.arch16n, ShowModuleActivity.this);
+			ShowModuleActivity.this.renderer.createUI();
 			if(savedInstanceState == null){
-				ShowProjectActivity.this.renderer.showTabGroup(ShowProjectActivity.this, 0);
+				ShowModuleActivity.this.renderer.showTabGroup(ShowModuleActivity.this, 0);
 			}
-			linker.execute(FileUtil.readFileIntoString(projectDir + "/ui_logic.bsh"));
+			linker.execute(FileUtil.readFileIntoString(moduleDir + "/ui_logic.bsh"));
 		} catch (Exception e) {
 			FLog.e("error rendering ui", e);
 			
@@ -910,7 +910,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			builder.setMessage(getString(R.string.render_ui_failure_message));
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 			           public void onClick(DialogInterface dialog, int id) {
-			        	   ShowProjectActivity.this.finish();
+			        	   ShowModuleActivity.this.finish();
 			           }
 			       });
 			builder.create().show();
@@ -927,16 +927,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			showBusyDownloadDatabaseDialog();
 			
 			// start service
-    		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
+    		Intent intent = new Intent(ShowModuleActivity.this, DownloadDatabaseService.class);
 			
-    		Project project = ProjectUtil.getProject(projectKey);
+    		Module module = ModuleUtil.getModule(moduleKey);
     		
-    		DownloadDatabaseHandler handler = new DownloadDatabaseHandler(ShowProjectActivity.this, callback);
+    		DownloadDatabaseHandler handler = new DownloadDatabaseHandler(ShowModuleActivity.this, callback);
     		
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", project);
-		    ShowProjectActivity.this.startService(intent);
+		    intent.putExtra("module", module);
+		    ShowModuleActivity.this.startService(intent);
 		} else {
 			showBusyLocatingServerDialog();
 			
@@ -944,7 +944,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				ShowProjectActivity.this.busyDialog.dismiss();
+    				ShowModuleActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
     					downloadDatabaseFromServer(callback);			
@@ -963,18 +963,18 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     		showBusyUploadDatabaseDialog();
 		    
 			// start service
-    		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+    		Intent intent = new Intent(ShowModuleActivity.this, UploadDatabaseService.class);
 			
-    		Project project = ProjectUtil.getProject(projectKey);
+    		Module module = ModuleUtil.getModule(moduleKey);
     		
-    		UploadDatabaseHandler handler = new UploadDatabaseHandler(ShowProjectActivity.this, callback);
+    		UploadDatabaseHandler handler = new UploadDatabaseHandler(ShowModuleActivity.this, callback);
     		
 	    	// start upload service
 	    	Messenger messenger = new Messenger(handler);
 		    intent.putExtra("MESSENGER", messenger);
-		    intent.putExtra("project", project);
+		    intent.putExtra("module", module);
 		    intent.putExtra("userId", databaseManager.getUserId());
-		    ShowProjectActivity.this.startService(intent);
+		    ShowModuleActivity.this.startService(intent);
 		   
     	} else {
     		showBusyLocatingServerDialog();
@@ -983,7 +983,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
     			@Override
     			public void handleTaskCompleted(Object result) {
-    				ShowProjectActivity.this.busyDialog.dismiss();
+    				ShowModuleActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
     					uploadDatabaseToServer(callback);
@@ -998,7 +998,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showLocateServerUploadDatabaseFailureDialog(final String callback) {
-    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+    	choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
@@ -1015,7 +1015,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showLocateServerDownloadDatabaseFailureDialog(final String callback) {
-    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+    	choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
@@ -1032,7 +1032,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showBusyLocatingServerDialog() {
-    	busyDialog = new BusyDialog(ShowProjectActivity.this, 
+    	busyDialog = new BusyDialog(ShowModuleActivity.this, 
 				getString(R.string.locate_server_title),
 				getString(R.string.locate_server_message),
 				new IDialogListener() {
@@ -1041,7 +1041,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 					public void handleDialogResponse(
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
-							ShowProjectActivity.this.locateTask.cancel(true);
+							ShowModuleActivity.this.locateTask.cancel(true);
 						}
 					}
 			
@@ -1050,7 +1050,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showBusyUploadDatabaseDialog() {
-    	busyDialog = new BusyDialog(ShowProjectActivity.this, 
+    	busyDialog = new BusyDialog(ShowModuleActivity.this, 
 				getString(R.string.upload_database_title),
 				getString(R.string.upload_database_message),
 				new IDialogListener() {
@@ -1060,7 +1060,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
 							// stop service
-				    		Intent intent = new Intent(ShowProjectActivity.this, UploadDatabaseService.class);
+				    		Intent intent = new Intent(ShowModuleActivity.this, UploadDatabaseService.class);
 				    		
 				    		stopService(intent);
 						}
@@ -1071,7 +1071,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showBusyDownloadDatabaseDialog() {
-    	busyDialog = new BusyDialog(ShowProjectActivity.this, 
+    	busyDialog = new BusyDialog(ShowModuleActivity.this, 
 				getString(R.string.download_database_title),
 				getString(R.string.download_database_message),
 				new IDialogListener() {
@@ -1081,7 +1081,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
 							// stop service
-				    		Intent intent = new Intent(ShowProjectActivity.this, DownloadDatabaseService.class);
+				    		Intent intent = new Intent(ShowModuleActivity.this, DownloadDatabaseService.class);
 				    		
 				    		stopService(intent);
 						}
@@ -1092,7 +1092,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showUploadDatabaseFailureDialog(final String callback) {
-    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+    	choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.upload_database_failure_title),
 				getString(R.string.upload_database_failure_message),
 				new IDialogListener() {
@@ -1109,7 +1109,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showDownloadDatabaseFailureDialog(final String callback) {
-    	choiceDialog = new ChoiceDialog(ShowProjectActivity.this,
+    	choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.download_database_failure_title),
 				getString(R.string.download_database_failure_message),
 				new IDialogListener() {
@@ -1126,9 +1126,9 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showBusyErrorDialog() {
-    	confirmDialog = new ConfirmDialog(ShowProjectActivity.this,
-				getString(R.string.download_busy_project_error_title),
-				getString(R.string.download_busy_project_error_message),
+    	confirmDialog = new ConfirmDialog(ShowModuleActivity.this,
+				getString(R.string.download_busy_module_error_title),
+				getString(R.string.download_busy_module_error_message),
 				new IDialogListener() {
 
 					@Override
@@ -1141,7 +1141,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
     }
 	
 	private void showDownloadDatabaseErrorDialog(final String callback) {
-    	confirmDialog = new ConfirmDialog(ShowProjectActivity.this,
+    	confirmDialog = new ConfirmDialog(ShowModuleActivity.this,
 				getString(R.string.download_database_error_title),
 				getString(R.string.download_database_error_message),
 				new IDialogListener() {
@@ -1200,20 +1200,20 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 		syncActive = false;
 		
 		// locating server
-		if (ShowProjectActivity.this.locateTask != null){
-			ShowProjectActivity.this.locateTask.cancel(true);
-			ShowProjectActivity.this.locateTask = null;
+		if (ShowModuleActivity.this.locateTask != null){
+			ShowModuleActivity.this.locateTask.cancel(true);
+			ShowModuleActivity.this.locateTask = null;
 			
 			syncLock.release();
 		}
 		
 		// stop database sync
-		Intent syncDatabaseIntent = new Intent(ShowProjectActivity.this, SyncDatabaseService.class);
-		ShowProjectActivity.this.stopService(syncDatabaseIntent);
+		Intent syncDatabaseIntent = new Intent(ShowModuleActivity.this, SyncDatabaseService.class);
+		ShowModuleActivity.this.stopService(syncDatabaseIntent);
 		
 		// stop files sync
-		Intent syncFilesIntent = new Intent(ShowProjectActivity.this, SyncFilesService.class);
-		ShowProjectActivity.this.stopService(syncFilesIntent);
+		Intent syncFilesIntent = new Intent(ShowModuleActivity.this, SyncFilesService.class);
+		ShowModuleActivity.this.stopService(syncFilesIntent);
 		
 		if (syncTaskTimer != null) {
 			syncTaskTimer.cancel();
@@ -1327,22 +1327,22 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			@Override 
 			public void run() {
 				// start sync database service
-				Intent intent = new Intent(ShowProjectActivity.this, SyncDatabaseService.class);
+				Intent intent = new Intent(ShowModuleActivity.this, SyncDatabaseService.class);
 						
-				Project project = ProjectUtil.getProject(projectKey);
+				Module module = ModuleUtil.getModule(moduleKey);
 				
-				SyncDatabaseHandler handler = new SyncDatabaseHandler(ShowProjectActivity.this);
+				SyncDatabaseHandler handler = new SyncDatabaseHandler(ShowModuleActivity.this);
 				
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
-				intent.putExtra("project", project);
+				intent.putExtra("module", module);
 				String userId = databaseManager.getUserId();
 				FLog.d("user id : " + userId);
 				if (userId == null) {
 					userId = "0"; // TODO: what should happen if user sets no user?
 				}
 				intent.putExtra("userId", userId);
-				ShowProjectActivity.this.startService(intent);
+				ShowModuleActivity.this.startService(intent);
 				
 				callSyncStart();
 			}
@@ -1399,20 +1399,20 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 
 	private boolean hasDatabaseChanges() throws Exception{
-		Project project = ProjectUtil.getProject(projectKey);
-		String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
+		Module module = ModuleUtil.getModule(moduleKey);
+		String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
 		
 		// create temp database to upload
 		databaseManager.init(database);
-		return databaseManager.hasRecordsFrom(project.timestamp);
+		return databaseManager.hasRecordsFrom(module.timestamp);
 	}
 
 	private boolean hasFileChanges(){
-		Project project = ProjectUtil.getProject(projectKey);
+		Module module = ModuleUtil.getModule(moduleKey);
 		
-		if(project.fileSyncTimeStamp != null){
-			File attachedFiles = new File(getProjectDir() + "/files");
-			return hasFileChanges(attachedFiles, project.fileSyncTimeStamp);
+		if(module.fileSyncTimeStamp != null){
+			File attachedFiles = new File(getModuleDir() + "/files");
+			return hasFileChanges(attachedFiles, module.fileSyncTimeStamp);
 		}else{
 			return true;
 		}
@@ -1472,7 +1472,7 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 	}
 	
 	public void showFileBrowser(int requestCode) {
-		Intent intent = new Intent(ShowProjectActivity.this, FileChooserActivity.class);
+		Intent intent = new Intent(ShowModuleActivity.this, FileChooserActivity.class);
 		startActivityForResult(intent, requestCode);
 	}
 	
@@ -1524,16 +1524,16 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 			@Override 
 			public void run() {
 				// start upload server directory service
-				Intent intent = new Intent(ShowProjectActivity.this, SyncFilesService.class);
+				Intent intent = new Intent(ShowModuleActivity.this, SyncFilesService.class);
 						
-				Project project = ProjectUtil.getProject(projectKey);
+				Module module = ModuleUtil.getModule(moduleKey);
 				
-				SyncFilesHandler handler = new SyncFilesHandler(ShowProjectActivity.this);
+				SyncFilesHandler handler = new SyncFilesHandler(ShowModuleActivity.this);
 				
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
-				intent.putExtra("project", project);
-				ShowProjectActivity.this.startService(intent);
+				intent.putExtra("module", module);
+				ShowModuleActivity.this.startService(intent);
 
 			}
 		});
@@ -1583,13 +1583,13 @@ public class ShowProjectActivity extends FragmentActivity implements IFAIMSResto
 
 			@Override
 			public void run() {
-				final String lock = projectDir + "/.lock";
+				final String lock = moduleDir + "/.lock";
 				
 				try {
 					
 					LockManager.waitForLock(lock);
 					
-					ShowProjectActivity.this.runOnUiThread(new Runnable() {
+					ShowModuleActivity.this.runOnUiThread(new Runnable() {
 
 						@Override
 						public void run() {

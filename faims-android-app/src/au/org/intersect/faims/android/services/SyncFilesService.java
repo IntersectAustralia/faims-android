@@ -11,7 +11,7 @@ import android.os.Message;
 import android.os.Messenger;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.LockManager;
 import au.org.intersect.faims.android.net.DownloadResult;
@@ -20,7 +20,7 @@ import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
-import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
 
@@ -57,11 +57,11 @@ public class SyncFilesService extends IntentService {
 		// 2. upload app directory
 		// 3. download app directory
 		Bundle extras = intent.getExtras();
-		Project project = (Project) extras.get("project");
+		Module module = (Module) extras.get("module");
 		String dumpTimeStamp = DateUtil.getCurrentTimestampGMT();
-		project.fileSyncTimeStamp = dumpTimeStamp;
+		module.fileSyncTimeStamp = dumpTimeStamp;
 		FLog.d("set fileSyncTimeStamp");
-		ProjectUtil.saveProject(project);
+		ModuleUtil.saveModule(module);
 		Result uploadServerResult = uploadServerDirectory(intent);
 		if (uploadServerResult.resultCode != FAIMSClientResultCode.SUCCESS) {
 			sendMessage(intent, uploadServerResult);
@@ -118,16 +118,16 @@ public class SyncFilesService extends IntentService {
 	private Result uploadDirectory(Intent intent, String uploadDir, String requestExcludePath, String uploadPath) {
 		String lock = null;
 		try {
-			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			Module module = (Module) intent.getExtras().get("module");
+			String moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 			
-			lock = projectDir + "/.lock";
+			lock = moduleDir + "/.lock";
 			waitForLock(lock);
 			
-			Result uploadResult = faimsClient.uploadDirectory(projectDir, 
+			Result uploadResult = faimsClient.uploadDirectory(moduleDir, 
 					uploadDir, 
-					"/android/project/" + project.key + "/" + requestExcludePath, 
-					"/android/project/" + project.key + "/" + uploadPath);
+					"/android/module/" + module.key + "/" + requestExcludePath, 
+					"/android/module/" + module.key + "/" + uploadPath);
 			
 			if (syncStopped) {
 	    		FLog.d("sync cancelled");
@@ -153,16 +153,16 @@ public class SyncFilesService extends IntentService {
 	private Result downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		String lock = null;
 		try {
-			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			Module module = (Module) intent.getExtras().get("module");
+			String moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 			
-			lock = projectDir + "/.lock";
+			lock = moduleDir + "/.lock";
 			waitForLock(lock);
 			
-			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
-					"/android/project/" + project.key + "/" + requestExcludePath, 
-					"/android/project/" + project.key + "/" + infoPath,
-					"/android/project/" + project.key + "/" + downloadPath);
+			DownloadResult downloadResult = faimsClient.downloadDirectory(moduleDir, downloadDir, 
+					"/android/module/" + module.key + "/" + requestExcludePath, 
+					"/android/module/" + module.key + "/" + infoPath,
+					"/android/module/" + module.key + "/" + downloadPath);
 		
 			if (downloadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();

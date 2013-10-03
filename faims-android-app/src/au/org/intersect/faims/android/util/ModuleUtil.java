@@ -13,15 +13,15 @@ import java.util.List;
 
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 
 import com.google.gson.JsonObject;
 
-public class ProjectUtil {
+public class ModuleUtil {
 
-	public static List<Project> getProjects() {
-		final File dir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir);
+	public static List<Module> getModules() {
+		final File dir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir);
 		if (!dir.isDirectory()) return null;
 		
 		String[] directories = dir.list(new FilenameFilter() {
@@ -33,20 +33,20 @@ public class ProjectUtil {
 			
 		});
 		
-		ArrayList<Project> list = new ArrayList<Project>();
+		ArrayList<Module> list = new ArrayList<Module>();
 		FileInputStream is = null;
 		
 		for (String dirname : directories) {
-			File f = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + dirname + "/project.settings");
+			File f = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + dirname + "/module.settings");
 			if (f.exists()) {
 				try {
 					is = new FileInputStream(f);
 					String config = FileUtil.convertStreamToString(is);
 					JsonObject object = JsonUtil.deserializeJson(config);
-					Project project = Project.fromJson(object);	
-					list.add(project);
+					Module module = Module.fromJson(object);	
+					list.add(module);
 				} catch (Exception e) {
-					FLog.w("cannot read projects settings " + FaimsSettings.projectsDir + dirname + "/project.settings", e);
+					FLog.w("cannot read modules settings " + FaimsSettings.modulesDir + dirname + "/module.settings", e);
 					
 					try {
 						if (is != null)
@@ -60,10 +60,10 @@ public class ProjectUtil {
 			}
 		}
 		
-		Collections.sort(list, new Comparator<Project>() {
+		Collections.sort(list, new Comparator<Module>() {
 
 			@Override
-			public int compare(Project arg0, Project arg1) {
+			public int compare(Module arg0, Module arg1) {
 				return arg0.name.compareToIgnoreCase(arg1.name);
 			}
 			
@@ -72,25 +72,25 @@ public class ProjectUtil {
 		return list;
 	}
 
-	public static Project getProject(
+	public static Module getModule(
 			String key) {
-		List<Project> projects = getProjects();
-		if (projects != null) {
-			for (Project p : projects) {
+		List<Module> modules = getModules();
+		if (modules != null) {
+			for (Module p : modules) {
 				if (p.key.equals(key)) return p;
 			}
 		}
 		return null;
 	}
 
-	public static void saveProject(Project project) {
+	public static void saveModule(Module module) {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/project.settings"));
-	    	writer.write(project.toJson().toString());
+			BufferedWriter writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/module.settings"));
+	    	writer.write(module.toJson().toString());
 	    	writer.flush();
 	    	writer.close();
 		} catch (IOException e) {
-			FLog.e("error saving project", e);
+			FLog.e("error saving module", e);
 		}
 	}
 	

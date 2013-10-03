@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.google.gson.JsonObject;
 
-public class Project implements Serializable {
+public class Module implements Serializable {
 
 	private static final long serialVersionUID = 3213578850852582553L;
 
@@ -27,17 +27,17 @@ public class Project implements Serializable {
 	public String landOwner;
 	public String hasSensitiveData;
 	
-	public Project() {
+	public Module() {
 		
 	}
 	
-	public Project(String name, String key) {
+	public Module(String name, String key) {
 		this.name = name;
 		this.key = key;
 	}
 	
-	public static Project fromJson(JsonObject object) {
-		Project p = new Project();
+	public static Module fromJson(JsonObject object) {
+		Module p = new Module();
 		if (object.has("name"))	p.name = object.get("name").getAsString();
 		if (object.has("key")) p.key = object.get("key").getAsString();
 		if (object.has("season")) p.season = object.get("season").getAsString();

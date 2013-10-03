@@ -15,9 +15,9 @@ login(){
 	setUser(user);
 	showTabGroup("tabgroup1");
 
-	setFieldValue("tabgroup1/tab1/name", getProjectName());
-	setFieldValue("tabgroup1/tab1/id", getProjectId());
-	setFieldValue("tabgroup1/tab1/season", getProjectSeason());
+	setFieldValue("tabgroup1/tab1/name", getModuleName());
+	setFieldValue("tabgroup1/tab1/id", getModuleId());
+	setFieldValue("tabgroup1/tab1/season", getModuleSeason());
 	setFieldValue("tabgroup1/tab1/description", getProjectDescription());
 	setFieldValue("tabgroup1/tab1/permit_no", getPermitNo());
 	setFieldValue("tabgroup1/tab1/permit_holder", getPermitHolder());

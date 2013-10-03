@@ -6,31 +6,31 @@ import android.content.Intent;
 import android.os.Environment;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.util.FileUtil;
 
-public class UpdateProjectDataService extends DownloadService {
+public class UpdateModuleDataService extends DownloadService {
 
-	public UpdateProjectDataService() {
-		super("UpdateProjectDataService");
+	public UpdateModuleDataService() {
+		super("UpdateModuleDataService");
 	}
 
 	@Override
 	protected DownloadResult doDownload(Intent intent) {
 		try {
-			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			Module module = (Module) intent.getExtras().get("module");
+			String moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 			
-			FLog.d("update project data for project " + project.name);
+			FLog.d("update module data for module " + module.name);
 			
 			// 0. delete data directory
-			// 1. download project data
+			// 1. download module data
 			
 			// 0.
-			File dataDir = new File(projectDir + "/" + this.getResources().getString(R.string.data_dir));
+			File dataDir = new File(moduleDir + "/" + this.getResources().getString(R.string.data_dir));
 			FileUtil.delete(dataDir);
 			dataDir.mkdirs();
 			
@@ -40,21 +40,21 @@ public class UpdateProjectDataService extends DownloadService {
 			if (downloadStopped) {
 				FileUtil.delete(dataDir);
 				dataDir.mkdirs();
-				FLog.d("update project data cancelled");
+				FLog.d("update module data cancelled");
 				return DownloadResult.INTERRUPTED;
 			}
 			
 			if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				FileUtil.delete(dataDir);
 				dataDir.mkdirs();
-				FLog.d("update project data directory failure");
+				FLog.d("update module data directory failure");
 				return result;
 			}
 			
 			return result;
 		} catch (Exception e) {
 			
-			FLog.e("error updating project", e);
+			FLog.e("error updating module", e);
 		}
 		return null;
 	}
@@ -70,13 +70,13 @@ public class UpdateProjectDataService extends DownloadService {
 
 	private DownloadResult downloadDirectory(Intent intent, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
 		try {
-			Project project = (Project) intent.getExtras().get("project");
-			String projectDir = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key;
+			Module module = (Module) intent.getExtras().get("module");
+			String moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 			
-			DownloadResult downloadResult = faimsClient.downloadDirectory(projectDir, downloadDir, 
-					"/android/project/" + project.key + "/" + requestExcludePath, 
-					"/android/project/" + project.key + "/" + infoPath,
-					"/android/project/" + project.key + "/" + downloadPath);
+			DownloadResult downloadResult = faimsClient.downloadDirectory(moduleDir, downloadDir, 
+					"/android/module/" + module.key + "/" + requestExcludePath, 
+					"/android/module/" + module.key + "/" + infoPath,
+					"/android/module/" + module.key + "/" + downloadPath);
 		
 			if (downloadResult.resultCode == FAIMSClientResultCode.FAILURE) {
 				faimsClient.invalidate();

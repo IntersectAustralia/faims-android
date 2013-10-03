@@ -14,7 +14,7 @@ import android.os.Message;
 import android.os.Messenger;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FileInfo;
-import au.org.intersect.faims.android.data.Project;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.DownloadResult;
@@ -24,7 +24,7 @@ import au.org.intersect.faims.android.net.FetchResult;
 import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
-import au.org.intersect.faims.android.util.ProjectUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
 
@@ -36,7 +36,7 @@ public class SyncDatabaseService extends IntentService {
 	@Inject
 	DatabaseManager databaseManager;
 	
-	private File tempProject;
+	private File tempModule;
 	
 	private File tempDB;
 	
@@ -68,8 +68,8 @@ public class SyncDatabaseService extends IntentService {
 				FLog.e("error closing steam", e);
 			}
 		}
-		if (tempProject != null) {
-			FileUtil.delete(tempProject);
+		if (tempModule != null) {
+			FileUtil.delete(tempModule);
 		}
 		if (tempDB != null) {
 			FileUtil.delete(tempDB);
@@ -116,19 +116,19 @@ public class SyncDatabaseService extends IntentService {
 		try {
 			Bundle extras = intent.getExtras();
 			String userId = intent.getStringExtra("userId");
-			Project project = (Project) extras.get("project");
-			String database = Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + project.key + "/db.sqlite3";
+			Module module = (Module) extras.get("module");
+			String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
 			
 			// create temp database to upload
 			String dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 			databaseManager.init(database);
 			
-			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 			
-			if (project.timestamp == null) {
+			if (module.timestamp == null) {
 				databaseManager.dumpDatabaseTo(tempDB);
 			} else {
-				databaseManager.dumpDatabaseTo(tempDB, project.timestamp); 
+				databaseManager.dumpDatabaseTo(tempDB, module.timestamp); 
 			}
 			
 	    	// check if database is empty
@@ -143,9 +143,9 @@ public class SyncDatabaseService extends IntentService {
 	    	} 
 	    	
 		    // tar file
-	    	tempProject = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir));
+	    	tempModule = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
 	    	
-	    	os = FileUtil.createTarOutputStream(tempProject.getAbsolutePath());
+	    	os = FileUtil.createTarOutputStream(tempModule.getAbsolutePath());
 	    	
 		    FileUtil.tarFile(tempDB.getAbsolutePath(), os);
 		    
@@ -154,7 +154,7 @@ public class SyncDatabaseService extends IntentService {
 	    		return Result.INTERRUPTED;
 	    	} 
 			    	
-		    Result result = faimsClient.uploadDatabase(project, tempProject, userId);
+		    Result result = faimsClient.uploadDatabase(module, tempModule, userId);
 		    
 		    if (syncStopped) {
 	    		FLog.d("sync cancelled");
@@ -167,9 +167,9 @@ public class SyncDatabaseService extends IntentService {
 				return result;
 			} 
 			
-			project = ProjectUtil.getProject(project.key); // get the latest settings
-			project.timestamp = dumpTimestamp;
-			ProjectUtil.saveProject(project);
+			module = ModuleUtil.getModule(module.key); // get the latest settings
+			module.timestamp = dumpTimestamp;
+			ModuleUtil.saveModule(module);
 			
 			FLog.d("upload success");
 			return result;
@@ -181,8 +181,8 @@ public class SyncDatabaseService extends IntentService {
 				FileUtil.delete(tempDB);
 			}
 			
-			if (tempProject != null) {
-				FileUtil.delete(tempProject);
+			if (tempModule != null) {
+				FileUtil.delete(tempModule);
 			}
 			
 			// TODO check if this is necessary as file util also closes the stream
@@ -200,13 +200,13 @@ public class SyncDatabaseService extends IntentService {
 		FLog.d("downloading database");
 		
 		try {
-			Project project = (Project) intent.getExtras().get("project");
+			Module module = (Module) intent.getExtras().get("module");
 
 			FileInfo info;
 			int syncVersion;
 				
 			// check if there is a new version to download
-			FetchResult fetchResult = faimsClient.fetchDatabaseVersion(project);
+			FetchResult fetchResult = faimsClient.fetchDatabaseVersion(module);
 			
 			if (syncStopped) {
 				FLog.d("sync cancelled");
@@ -220,19 +220,19 @@ public class SyncDatabaseService extends IntentService {
 			} else {
 				info = (FileInfo) fetchResult.data;
 				int serverVersion = Integer.parseInt(info.version == null ? "0" : info.version);
-				int projectVersion = Integer.parseInt(project.version == null ? "0" : project.version);
-				if (serverVersion == projectVersion) {
+				int moduleVersion = Integer.parseInt(module.version == null ? "0" : module.version);
+				if (serverVersion == moduleVersion) {
 					FLog.d("already up to date");
 					return Result.SUCCESS;
 				}
-				syncVersion = projectVersion + 1;
+				syncVersion = moduleVersion + 1;
 			}
 				
 			// download database from version
-			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.projectsDir + "temp_" + UUID.randomUUID());
+			tempDir = new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + "temp_" + UUID.randomUUID());
 			tempDir.mkdirs();
 			
-			DownloadResult downloadResult = faimsClient.downloadDatabase(project, String.valueOf(syncVersion), tempDir.getAbsolutePath());
+			DownloadResult downloadResult = faimsClient.downloadDatabase(module, String.valueOf(syncVersion), tempDir.getAbsolutePath());
 			
 			if (syncStopped) {
 				FLog.d("sync cancelled");
@@ -254,9 +254,9 @@ public class SyncDatabaseService extends IntentService {
 			}
 				
 			// update settings
-			project = ProjectUtil.getProject(project.key); // get the latest settings
-			project.version = downloadResult.info.version;
-			ProjectUtil.saveProject(project);
+			module = ModuleUtil.getModule(module.key); // get the latest settings
+			module.version = downloadResult.info.version;
+			ModuleUtil.saveModule(module);
 			
 			FLog.d("download success");
 			return downloadResult;

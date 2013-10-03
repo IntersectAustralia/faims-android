@@ -11,7 +11,7 @@ import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
-import au.org.intersect.faims.android.util.TestProjectUtil;
+import au.org.intersect.faims.android.util.TestModuleUtil;
 
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.shadows.ShadowActivity;
@@ -23,32 +23,32 @@ import com.xtremelabs.robolectric.tester.android.view.TestMenuItem;
 public class MainActivityTest {
 	
 	@Test
-	public void readStoredProjectsList() throws Exception {
+	public void readStoredModulesList() throws Exception {
 		
 		int count = 10;
 		for (int i = 0; i < count; i++) {
-			TestProjectUtil.createProject("Project " + i, "key" + i);
+			TestModuleUtil.createModule("Module " + i, "key" + i);
 		}
 		
 		MainActivity activity = new MainActivity();
 		activity.onCreate(null);
 		activity.onStart();
 
-		ListView projectListView = (ListView) activity
-				.findViewById(R.id.project_list);
+		ListView moduleListView = (ListView) activity
+				.findViewById(R.id.module_list);
 		
 		for (int i = 0; i < count; i++) {
-			assertEquals("Project List Item " + i, "Project " + i, ((NameValuePair)projectListView.getItemAtPosition(i)).getName());
+			assertEquals("Module List Item " + i, "Module " + i, ((NameValuePair)moduleListView.getItemAtPosition(i)).getName());
 		}
 	}
 	
 	@Test
-	public void fetchProjectMenuItemTest(){
+	public void fetchModuleMenuItemTest(){
 		
 		MainActivity activity = new MainActivity();
 		activity.onCreate(null);
 		
-		String itemTitle = "Fetch Project List";
+		String itemTitle = "Fetch Module List";
 		
 		TestMenu mainMenu = new TestMenu(activity); 
 		new MenuInflater(activity).inflate(R.menu.activity_main, mainMenu); 
@@ -62,34 +62,34 @@ public class MainActivityTest {
 		Intent startedIntent = shadowActivity.getNextStartedActivity();
 		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
 
-		assertEquals("New Activity launched ok", FetchProjectsActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
+		assertEquals("New Activity launched ok", FetchModulesActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
 	}
 	
 	@Test
-	public void loadStoredProjectTest() {
-		String projectName = "Test Project";
-		String projectKey = "123456789";
+	public void loadStoredModuleTest() {
+		String moduleName = "Test Module";
+		String moduleKey = "123456789";
 		
-		TestProjectUtil.createProject(projectName, projectKey);
+		TestModuleUtil.createModule(moduleName, moduleKey);
 		
 		MainActivity activity = new MainActivity();
 		activity.onCreate(null);
 		activity.onStart();
 		
-		ListView projectListView = (ListView) activity
-				.findViewById(R.id.project_list);
+		ListView moduleListView = (ListView) activity
+				.findViewById(R.id.module_list);
 		
-		assertEquals("Project List Item ", projectName, ((NameValuePair)projectListView.getItemAtPosition(0)).getName());
+		assertEquals("Module List Item ", moduleName, ((NameValuePair)moduleListView.getItemAtPosition(0)).getName());
 		
-		projectListView.performItemClick(null, 0, 0);
+		moduleListView.performItemClick(null, 0, 0);
 		
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedActivity();
 		ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
 
-		assertEquals("New Activity launched ok", ShowProjectActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
+		assertEquals("New Activity launched ok", ShowModuleActivity.class.getName().toString(),shadowIntent.getComponent().getClassName());
 		
-		assertEquals("Show project key", projectKey, startedIntent.getStringExtra("key"));
+		assertEquals("Show module key", moduleKey, startedIntent.getStringExtra("key"));
 	}
 	
 }
