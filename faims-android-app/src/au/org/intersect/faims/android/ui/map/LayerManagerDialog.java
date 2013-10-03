@@ -273,6 +273,14 @@ public class LayerManagerDialog extends AlertDialog {
 				layout.setOrientation(LinearLayout.VERTICAL);
 				
 				builder.setView(layout);
+				builder.setPositiveButton("Done", new OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// dismiss dialog
+					}
+				});
+
 				final Dialog d = builder.create();
 				
 				Button removeButton = new Button(context);
@@ -316,7 +324,7 @@ public class LayerManagerDialog extends AlertDialog {
 				
 				if (layer instanceof CustomGdalMapLayer){
 					CheckBox checkBox = new CheckBox(context);
-					checkBox.setText("best zoom loading");
+					checkBox.setText("Experimental Fast Raster Loading");
 					checkBox.setChecked(!((CustomGdalMapLayer)layer).isShowAlways());
 					checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 						
