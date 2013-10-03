@@ -1715,7 +1715,7 @@ public class BeanShellLinker {
 			if (obj instanceof PictureGallery) {				
 				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
 				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
-				VocabularyTerm.applyProjectDir(terms, activity.getProjectDir() + "/");
+				VocabularyTerm.applyProjectDir(terms, activity.getModuleDir() + "/");
 				
 				HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
 				gallery.setTerms(terms);
