@@ -67,7 +67,7 @@
           <label>Module Year:</label>
         </input>
         <input ref="description" faims_read_only="true">
-          <label>Module Description:</label>
+          <label>Project Description:</label>
         </input>
         <input ref="permit_no" faims_read_only="true">
           <label>Permit No:</label>
