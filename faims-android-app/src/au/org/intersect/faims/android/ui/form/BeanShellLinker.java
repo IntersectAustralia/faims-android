@@ -2711,7 +2711,7 @@ public class BeanShellLinker {
 		return this.module.getSeason();
 	}
 
-	public String getModuleDescription() {
+	public String getProjectDescription() {
 		return this.module.getDescription();
 	}
 
