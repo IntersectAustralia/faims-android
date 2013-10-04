@@ -145,12 +145,7 @@ public class BeanShellLinker {
 	}
 
 	public void execute(String code) {
-		try {
-			interpreter.eval(code);
-		} catch (EvalError e) {
-			FLog.i("error executing code", e);
-			showWarning("Logic Error", "Error encountered in logic script");
-		}
+		executeOnUiThread(code);
 	}
 	
 	public void executeOnUiThread(final String code) {
@@ -158,7 +153,12 @@ public class BeanShellLinker {
 
 			@Override
 			public void run() {
-				execute(code);
+				try {
+					interpreter.eval(code);
+				} catch (EvalError e) {
+					FLog.i("error executing code", e);
+					showWarning("Logic Error", "Error encountered in logic script");
+				}
 			}
 			
 		});
@@ -190,7 +190,13 @@ public class BeanShellLinker {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							execute(callback);
+							activity.runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									execute(callback);
+								}
+							});
 						} else {
 							showToast("No GPS signal");
 						}
@@ -1949,7 +1955,7 @@ public class BeanShellLinker {
 		return this.activity.getGPSDataManager().getGPSPosition();
 	}
 	
-	public Object getGPSPositionModuleed() {
+	public Object getGPSPositionProjected() {
 		GPSLocation l = (GPSLocation) this.activity.getGPSDataManager().getGPSPosition();
 		if (l == null) return l;
 		MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
@@ -2097,7 +2103,7 @@ public class BeanShellLinker {
 	}
 
 	public void centerOnCurrentPosition(String ref) {
-		Object currentLocation = getGPSPositionModuleed();
+		Object currentLocation = getGPSPositionProjected();
 		if (currentLocation != null) {
 			GPSLocation location = (GPSLocation) currentLocation;
 			setMapFocusPoint(ref, (float) location.getLongitude(),

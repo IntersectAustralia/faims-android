@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.widget.Toast;
 import au.org.intersect.faims.android.data.ActivityData;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.tasks.BluetoothActionListener;
@@ -61,6 +62,11 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	public void init(LocationManager manager, ShowModuleActivity activity){
 		this.locationManager = manager;
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
+		isExternalGPSStarted = false;
+		isInternalGPSStarted = false;
+		hasValidExternalGPSSignal = false;
+		hasValidInternalGPSSignal = false;
+		isTrackingStarted = false;
 	}
 	
     @Override
@@ -80,6 +86,18 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 			}
 		}
 	}
+    
+    @Override
+    public void bluetoothOff(String message) {
+    	try {
+			int duration = Toast.LENGTH_SHORT;
+			Toast toast = Toast.makeText(activityRef.get().getApplicationContext(),
+					message, duration);
+			toast.show();
+		} catch (Exception e) {
+			FLog.e("error showing toast", e);
+		}
+    }
 
     private boolean hasValidGGAMessage(){
     	GGASentence sentence = null;
@@ -151,7 +169,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		}
 	}
 
-	public void destroyInternalGPSListener(){
+	private void destroyInternalGPSListener(){
 		try{
 			if(this.locationManager != null){
 				this.locationManager.removeUpdates(this);
@@ -162,7 +180,7 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		}
 	}
 	
-	public void destroyExternalGPSListener(){
+	private void destroyExternalGPSListener(){
 		try{
 			if(this.handler != null){
 				this.externalGPSTasks.closeBluetoothConnection();
@@ -183,93 +201,124 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	}
 
 	public GPSLocation getGPSPosition(){
-		if(isUsingExternalGPS()){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double latitude = ggaSentence.getPosition().getLatitude();
-			double longitude = ggaSentence.getPosition().getLongitude();
-			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
-			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
-			return new GPSLocation(longitude, latitude, this.externalGPSTimestamp);
-		}else if(isUsingInternalGPS()){
-			return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
-		}else{
+		try{
+			if(isUsingExternalGPS()){
+				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+				double latitude = ggaSentence.getPosition().getLatitude();
+				double longitude = ggaSentence.getPosition().getLongitude();
+				latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+				longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+				FLog.d("lat:" + latitude +", long: "+ longitude);
+				return new GPSLocation(longitude, latitude, this.externalGPSTimestamp);
+			}else if(isUsingInternalGPS()){
+				return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
+			}else{
+				return null;
+			}
+		}catch(Exception e){
+			FLog.e("error when getting gps position", e);
 			return null;
 		}
 	}
 
 	public Object getGPSEstimatedAccuracy(){
-		if(isUsingExternalGPS()){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return (float) nmeaAccuracy;
-		}else if(isUsingInternalGPS()){
-			return this.accuracy;
-		}else{
+		try{
+			if(isUsingExternalGPS()){
+				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+				double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+				return (float) nmeaAccuracy;
+			}else if(isUsingInternalGPS()){
+				return this.accuracy;
+			}else{
+				return null;
+			}
+		}catch(Exception e){
+			FLog.e("error when getting gps accuracy", e);
 			return null;
 		}
 	}
 
 	public Object getGPSHeading(){
-		if(isUsingExternalGPS()){
-			if(this.BODMessage != null){
-				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
-				return bodSentence.getTrueBearing();
+		try{
+			if(isUsingExternalGPS()){
+				if(this.BODMessage != null){
+					BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+					return bodSentence.getTrueBearing();
+				}else{
+					return null;
+				}
+			}else if(isUsingInternalGPS()){
+				if (this.location.hasBearing()) {
+					return this.location.getBearing();
+				} else {
+					return null;
+				}
 			}else{
 				return null;
 			}
-		}else if(isUsingInternalGPS()){
-			if (this.location.hasBearing()) {
-				return this.location.getBearing();
-			} else {
-				return null;
-			}
-		}else{
+		}catch(Exception e){
+			FLog.e("error when getting gps heading", e);
 			return null;
 		}
 	}
 
 	public Object getGPSPosition(String gps){
-		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double latitude = ggaSentence.getPosition().getLatitude();
-			double longitude = ggaSentence.getPosition().getLongitude();
-			latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
-			longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
-			return new GPSLocation(longitude, latitude, this.externalGPSTimestamp);
-		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
-			return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
-		}else{
+		try{
+			if(EXTERNAL.equals(gps) && this.GGAMessage != null){
+				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+				double latitude = ggaSentence.getPosition().getLatitude();
+				double longitude = ggaSentence.getPosition().getLongitude();
+				latitude = CompassPoint.NORTH.equals(ggaSentence.getPosition().getLatHemisphere()) ? latitude : -latitude;
+				longitude = CompassPoint.EAST.equals(ggaSentence.getPosition().getLonHemisphere()) ? longitude : -longitude;
+				return new GPSLocation(longitude, latitude, this.externalGPSTimestamp);
+			}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
+				return new GPSLocation(this.location.getLongitude(), this.location.getLatitude(), this.internalGPSTimestamp);
+			}else{
+				return null;
+			}
+		}catch(Exception e){
+			FLog.e("error when getting gps position for " + gps, e);
 			return null;
 		}
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps){
-		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
-			GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
-			double nmeaAccuracy = ggaSentence.getHorizontalDOP();
-			return (float)nmeaAccuracy;
-		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
-			return this.accuracy;
-		}else{
+		try{
+			if(EXTERNAL.equals(gps) && this.GGAMessage != null){
+				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
+				double nmeaAccuracy = ggaSentence.getHorizontalDOP();
+				return (float)nmeaAccuracy;
+			}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
+				return this.accuracy;
+			}else{
+				return null;
+			}
+		}catch(Exception e){
+			FLog.e("error when getting gps accuracy for " + gps, e);
 			return null;
 		}
 	}
 
 	public Object getGPSHeading(String gps){
-		if(EXTERNAL.equals(gps) && this.GGAMessage != null){
-			if(this.BODMessage != null){
-				BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
-				return bodSentence.getTrueBearing();
+		try{
+			if(EXTERNAL.equals(gps) && this.GGAMessage != null){
+				if(this.BODMessage != null){
+					BODSentence bodSentence = (BODSentence) SentenceFactory.getInstance().createParser(this.BODMessage);
+					return bodSentence.getTrueBearing();
+				}else{
+					return null;
+				}
+			}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
+				if (this.location.hasBearing()) {
+					return this.location.getBearing();
+				} else {
+					return null;
+				}
 			}else{
 				return null;
 			}
-		}else if(INTERNAL.equals(gps) && isUsingInternalGPS()){
-			if (this.location.hasBearing()) {
-				return this.location.getBearing();
-			} else {
-				return null;
-			}
-		}else{
+		}catch(Exception e){
+			FLog.e("error when getting gps heading for " + gps, e);
 			return null;
 		}
 	}
@@ -416,5 +465,5 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 		setTrackingValue(savedInstanceState.getInt("trackingValue"));
 		setTrackingExec(savedInstanceState.getString("trackingExec"));
 	}
-	
+
 }

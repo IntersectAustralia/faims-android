@@ -154,6 +154,7 @@ public class ExternalGPSTasks implements Runnable {
 			this.bluetoothSocket.connect();
 		}catch(Exception e){
 			FLog.e("error when initialing bluetooth socket", e);
+			actionListener.bluetoothOff("Waiting on valid bluetooth connection.");
 		}
 	}
 
