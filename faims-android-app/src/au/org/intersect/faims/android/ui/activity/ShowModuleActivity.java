@@ -1496,11 +1496,18 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 	
 	*/
 	
-	public void setSyncStatus(SyncStatus status) {
-		if(!isSyncStarted()){
-			syncStatus = status;
-			this.invalidateOptionsMenu();
-		}
+	public void setSyncStatus(final SyncStatus status) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if(!isSyncStarted()){
+					syncStatus = status;
+					invalidateOptionsMenu();
+				}
+			}
+			
+		});
 	}
 	
 	public SyncStatus getSyncStatus() {

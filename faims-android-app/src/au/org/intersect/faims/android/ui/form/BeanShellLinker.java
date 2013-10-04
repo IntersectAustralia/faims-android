@@ -1628,11 +1628,12 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 
 			if (obj instanceof HierarchicalSpinner) {
-				HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
-				
 				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				if (terms == null) return;
+				
 				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
 				
+				HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
 				spinner.setTerms(terms);
 			} else {
 				FLog.w("cannot populate hierarchical drop down "
@@ -1714,6 +1715,8 @@ public class BeanShellLinker {
 			
 			if (obj instanceof PictureGallery) {				
 				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				if (terms == null) return;
+				
 				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
 				VocabularyTerm.applyProjectDir(terms, activity.getModuleDir() + "/");
 				

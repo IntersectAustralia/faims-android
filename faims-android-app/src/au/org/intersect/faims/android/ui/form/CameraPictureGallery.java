@@ -46,6 +46,9 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 	
 	private void previewCameraPicture(View v) {
 		CustomImageView selectedImageView = (CustomImageView) v;
+		String path = selectedImageView.getPicture().getUrl();
+		if (!new File(path).exists()) return;
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
 		builder.setTitle("Image Preview");
@@ -57,7 +60,6 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 
 		builder.setView(scrollView);
 		ImageView imageView = new ImageView(this.getContext());
-		String path = selectedImageView.getPicture().getUrl();
 		
 		imageView.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
 		layout.addView(imageView);

@@ -50,6 +50,9 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 	
 	private void previewVideo(View v) {
 		final CustomImageView selectedImageView = (CustomImageView) v;
+		String path = selectedImageView.getPicture().getUrl();
+		if (!new File(path).exists()) return;
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
 		builder.setTitle("Video Preview");
@@ -61,7 +64,7 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 
 		builder.setView(layout);
 		VideoView videoView = new VideoView(this.getContext());
-		videoView.setVideoPath(selectedImageView.getPicture().getUrl());
+		videoView.setVideoPath(path);
 		videoView.setMediaController(new MediaController(this.getContext()));
 		videoView.requestFocus();
 		videoView.start();
