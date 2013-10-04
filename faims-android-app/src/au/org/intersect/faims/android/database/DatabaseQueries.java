@@ -81,59 +81,34 @@ public final class DatabaseQueries {
 	public static final String FETCH_RELN_GEOSPATIALCOLUMN =
 		"SELECT relationshipid, HEX(asBinary(geospatialColumn)) FROM latestNonDeletedRelationship WHERE relationshipid = ?;";
 
-	public static final String FETCH_ENTITY_LIST(String type){
-		return "select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
-			"                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
-			"                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',\n" +
-			"                                                                                              vocabname  || ' (' || freetext || ')',\n" +
-			"                                                                                              measure    || ' (' || freetext || ')',\n" +
-			"                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                              measure,\n" +
-			"                                                                                              vocabname,\n" +
-			"                                                                                              freetext), ' | ') as response\n" +
-			"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp\n" +
-			"          FROM aentvalue\n" +
-			"          JOIN attributekey USING (attributeid)\n" +
-			"          join archentity USING (uuid)\n" +
-			"          join (select attributeid, aenttypeid from idealaent join aenttype using (aenttypeid) where isIdentifier is 'true' and lower(aenttypename) = lower('" + type + "')) USING (attributeid, aenttypeid)\n" +
-			"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
-			"          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp, max(aenttimestamp) as aenttimestamp\n" +
-			"                  FROM aentvalue\n" +
-			"                  JOIN archentity USING (uuid)\n" +
-			"              GROUP BY uuid, attributeid\n" +
-			"                ) USING (uuid, attributeid, valuetimestamp, aenttimestamp)\n" +
-			"          WHERE aentvalue.deleted is NULl\n" +
-			"          and archentity.deleted is NULL\n" +
-			"       ORDER BY uuid, attributename ASC)\n" +
-			"group by uuid;";
+	public static final String FETCH_ENTITY_LIST(String type) {
+		return "SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
+				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
+				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure, \n" + 
+				"	 									   vocabname, \n" + 
+				"	 									   freetext), ' | ') as response \n" + 
+				" 			FROM latestNonDeletedArchentIdentifiers\n" + 
+				"			WHERE lower(aenttypename) = lower('" + type + "')\n" + 
+				" 			GROUP BY uuid;";
 	}
 
 	public static final String FETCH_RELN_LIST(String type){
-		return "select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',\n" +
-			"                                                                                         vocabname  || ' (' || freetext || ')',\n" +
-			"                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',\n" +
-			"                                                                                         vocabname,\n" +
-			"                                                                                         freetext), ' | ') as response\n" +
-			"from (\n" +
-			"SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp\n" +
-			"    FROM relnvalue\n" +
-			"    JOIN attributekey USING (attributeid)\n" +
-			"    JOIN relationship USING (relationshipid)\n" +
-			"    join  (select attributeid, relntypeid from idealreln join relntype using (relntypeid) where isIdentifier is 'true' and lower(relntypename) = lower('" + type + "')) USING (attributeid, relntypeid)\n" +
-			"    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n" +
-			"    JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp, max(relntimestamp) as relntimestamp, relntypeid\n" +
-			"             FROM relnvalue\n" +
-			"             JOIN relationship USING (relationshipid)\n" +
-			"         GROUP BY relationshipid, attributeid\n" +
-			"      ) USING (relationshipid, attributeid, relnvaluetimestamp, relntimestamp, relntypeid)\n" +
-			"   WHERE relnvalue.deleted is NULL\n" +
-			"   and relationship.deleted is NULL\n" +
-			"ORDER BY relationshipid, attributename asc)\n" +
-			"group by relationshipid;";
+		return "SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname || ' (' || freetext || ')', \n" + 
+				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname, \n" + 
+				" 													 freetext), ' | ') as response \n" + 
+				" 		FROM latestNonDeletedRelnIdentifiers \n" + 
+				"		WHERE lower(relntypename) = lower('" + type + "')\n" + 
+				" 		GROUP BY relationshipid;";
 	}
 
 	public static final String FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
