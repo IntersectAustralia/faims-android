@@ -65,29 +65,21 @@ public final class DatabaseQueries {
 		"INSERT INTO AEntReln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, parenttimestamp) " +
 			"VALUES (?, ?, ?, ?, ?, ?);";
 
-	public static final String FETCH_AENT_VALUE = 
-		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, aentvaluedeleted, aentdirty, aentdirtyreason FROM " +
-			"(SELECT uuid, attributeid, vocabid, measure, freetext, certainty, valuetimestamp, aentvalue.deleted as aentvaluedeleted, aentvalue.isDirty as aentdirty, aentvalue.isDirtyReason as aentdirtyreason FROM aentvalue WHERE uuid || valuetimestamp || attributeid in " +
-				"(SELECT uuid || max(valuetimestamp) || attributeid FROM aentvalue WHERE uuid = ? GROUP BY uuid, attributeid) ) " +
-			"JOIN attributekey USING (attributeid) " +
-			"JOIN ArchEntity USING (uuid) " +
-			"where uuid || aenttimestamp in ( select uuid || max(aenttimestamp) from archentity group by uuid having deleted is null);";
-
+	public static final String FETCH_AENT_VALUE =
+		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, av.deleted, av.isdirty, av.isdirtyreason \n" + 
+		"FROM latestNonDeletedArchent JOIN latestNonDeletedAentvalue AS av using (uuid) JOIN attributekey using (attributeid) \n" + 
+		"WHERE uuid = ?;";
+		
 	public static final String FETCH_ARCHENTITY_GEOSPATIALCOLUMN = 
-		"SELECT uuid, HEX(AsBinary(GeoSpatialColumn)) from ArchEntity where uuid || aenttimestamp IN" +
-				"( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);";
-
+		"SELECT uuid, HEX(asBinary(geospatialColumn)) FROM latestNonDeletedArchent WHERE uuid = ?;";
+	
 	public static final String FETCH_RELN_VALUE = 
-		"SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, relnvaluedeleted, relndirty, relndirtyreason FROM " +
-			"(SELECT relationshipid, attributeid, vocabid, freetext, certainty, relnvalue.deleted as relnvaluedeleted, relnvalue.isDirty as relndirty, relnvalue.isDirtyReason as relndirtyreason FROM relnvalue WHERE relationshipid || relnvaluetimestamp || attributeid in " +
-				"(SELECT relationshipid || max(relnvaluetimestamp) || attributeid FROM relnvalue WHERE relationshipid = ? GROUP BY relationshipid, attributeid having deleted is null)) " +
-			"JOIN attributekey USING (attributeid) " +
-			"JOIN Relationship USING (relationshipid) " +
-			"where relationshipid || relntimestamp in (select relationshipid || max (relntimestamp) from relationship group by relationshipid having deleted is null )";
+		"SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, rv.deleted, rv.isdirty, rv.isdirtyreason \n" + 
+		"FROM latestNonDeletedRelationship JOIN latestNonDeletedRelnvalue AS rv using (relationshipid) JOIN attributekey using (attributeid) \n" + 
+		"WHERE relationshipid = ?;";
 
 	public static final String FETCH_RELN_GEOSPATIALCOLUMN =
-		"SELECT relationshipid, HEX(AsBinary(GeoSpatialColumn)) from relationship where relationshipid || relntimestamp IN" +
-			"( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);";
+		"SELECT relationshipid, HEX(asBinary(geospatialColumn)) FROM latestNonDeletedRelationship WHERE relationshipid = ?;";
 
 	public static final String FETCH_ENTITY_LIST(String type){
 		return "select uuid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',\n" +
