@@ -203,12 +203,7 @@ public class FetchModulesActivity extends RoboActivity {
         	}
         });
         
-    }
-    
-    @Override
-    protected void onResume() {
-    	super.onResume();
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         serverDiscovery.initiateServerIPAndPort(preferences);
         
         fetchModulesList();
