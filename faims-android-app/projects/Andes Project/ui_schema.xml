@@ -186,8 +186,7 @@
               <!-- Number or Not observable -->
               <AddWall/>
               <AddCorner/>
-              <!--<AddDoorway/>-->
-              <AddNiche/>
+              <AddDoorway/>
               <Update/>
               <Update2/>
               <!-- {Button  “Add Wall or Doorway”, “Add Niche”}              -->
@@ -263,9 +262,6 @@
               <!-- real number, 1,2,3,4 or so-->
               <MasonryType/>
               <!-- picture dictionary-->
-              <!--<DuplicateFromCorner/>-->
-              <!-- {Button.To.Pull.The.Info.For.This and the next 3 attributes from Corner if identical} -->
-              <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
               <MasonryDescription/>
               <!--  can it replicate the Corner, if that had been input?-->
               <InkaMasonry/>
@@ -298,7 +294,7 @@
               <Duplicate/>
               <NewWindow/>
               <NewNiche/>
-              <!--<NewLichen/>-->
+              <NewLichen/>
               <Update/>
               <Update2/>
               <Delete/>
@@ -364,7 +360,6 @@
               <Update2/>
               <Delete/>
               <AssociateWithList/>
-              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
             </nicheDetail>
@@ -395,7 +390,6 @@
               <Update2/>
               <Delete/>
               <AssociateWithList/>
-              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Take a point”,“Save”, “Delete”,”Associate with”} -->
             </lichenDetail>
@@ -468,9 +462,7 @@
               <Update/>
               <Update2/>
               <Delete/>
-              <!--<AssociateWithList/>
-              <AssociateWith/>-->
-              <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
+              <!-- {Button: “Save”, “Delete”,”Load”} -->
             </canalDetail>
           </canal>
           <doorway>
@@ -509,7 +501,6 @@
               <Update2/>
               <Delete/>
               <AssociateWithList/>
-              <!--<AssociateWithType/>-->
               <AssociateWith/>
               <!-- {Button: “Take a point”, “Save”, “Delete”,”Associate with”} -->
             </doorDetail>
@@ -567,8 +558,6 @@
               <Update/>
               <Update2/>
               <Delete/>
-              <!--<AssociateWithList/>
-              <AssociateWith/>-->
               <NewLot/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
             </material>
@@ -590,8 +579,6 @@
               <Update/>
               <Update2/>
               <Delete/>
-              <AssociateWithList/>
-              <AssociateWith/>
               <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
             </lotDetail>
           </lot>
@@ -602,7 +589,7 @@
       <bind nodeset="/faims/structure/info/PreservationDescription" type="string"/>
       <bind nodeset="/faims/structure/info/FormDescription" type="string"/>
       <bind nodeset="/faims/structure/component/WallsTotalCount" type="decimal"/>
-      <!--<bind nodeset="/faims/structure/component/WallsGabledCount" type="decimal"/>-->
+      <bind nodeset="/faims/structure/component/WallsGabledCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/WindowCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/NicheCount" type="decimal"/>
       <bind nodeset="/faims/structure/component/DoorwayCount" type="decimal"/>
@@ -742,12 +729,12 @@
             <trigger ref="structure">
                 <label>{Create Structure}</label>
             </trigger>
-            <!-- <trigger ref="feature">
+            <trigger ref="feature">
                 <label>{Create Feature}</label>
             </trigger>
             <trigger ref="surfaceCollection">
                 <label>{Create Surface Collection}</label>
-            </trigger> -->
+            </trigger>
         </group>
     </group>
     <group ref="control">
@@ -785,7 +772,7 @@
         <trigger ref="structureLoad">
           <label>{Load.Structure}</label>
         </trigger>
-        <!-- <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
+        <select1 ref="wallList" faims_certainty="false" faims_annotation="false">
           <label>{Walls}</label>
           <item>
             <label>{dummy}</label>
@@ -874,7 +861,7 @@
         </select1>
         <trigger ref="windowLoad">
           <label>{Load.Window}</label>
-        </trigger> -->
+        </trigger>
       </group>
       <group ref="gps">
         <label>{Communications.Control.Tab}</label>
@@ -1093,21 +1080,21 @@
         <trigger ref="Update">
           <label>{Save.Record}</label>
         </trigger>
-        <!-- <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        <input ref="WallsTotalCount" faims_attribute_name="WallsTotalCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Total.Walls.Recorded}:</label>
-        </input> -->
-        <!-- <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="WallsGabledCount" faims_attribute_name="WallsGabledCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Total.Gabled.Walls.Recorded}:</label>
-        </input> -->
-        <!-- <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Windows.Recorded}:</label>
-        </input> -->
-        <!-- <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Niches.Recorded}:</label>
-        </input> -->
-        <!-- <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Doorways.Recorded}:</label>
-        </input> -->
+        </input>
         <select1 appearance="full" ref="WallsInternalPartition" faims_attribute_name="WallsInternalPartition" faims_attribute_type="vocab">
           <label>{Number.Of.Internal.Partitions}:</label>
           <item>
@@ -1118,18 +1105,15 @@
         <input ref="PartitionDescription" faims_attribute_name="PartitionDescription" faims_attribute_type="freetext">
           <label>{Partition.Description}:</label>
         </input>
-        <!-- <trigger ref="AddWall">
+        <trigger ref="AddWall">
           <label>{Add.Wall.To.Structure}</label>
-        </trigger> -->
+        </trigger>
         <trigger ref="AddCorner">
           <label>{Add.Corner.To.Structure}</label>
         </trigger>
-        <!--<trigger ref="AddDoorway">
+        <trigger ref="AddDoorway">
           <label>{Add.Doorway.To.Structure}</label>
-        </trigger>-->
-        <!-- <trigger ref="AddNiche">
-          <label>{Add.Niche.To.Structure}</label>
-        </trigger> -->
+        </trigger>
         <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1204,7 +1188,7 @@
       </group>
       <group ref="load" faims_scrollable="true">
         <label>{Load.Structure.Items}</label>
-        <!-- <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
+        <select1 ref="structureWallList" faims_certainty="false" faims_annotation="false">
           <label>{Structure.Walls}</label>
           <item>
             <label>{dummy}</label>
@@ -1213,7 +1197,7 @@
         </select1>
         <trigger ref="structureWallLoad">
           <label>{Load.Structure.Walls}</label>
-        </trigger> -->
+        </trigger>
         <select1 ref="cornerList" faims_certainty="false" faims_annotation="false">
           <label>{Corners}</label>
           <item>
@@ -1303,13 +1287,13 @@
             <value>dummy</value>
           </item>
         </select>
-        <!-- <trigger ref="AddNiche">
+        <trigger ref="AddNiche">
           <label>{Add.Niche}</label>
-        </trigger> -->
+        </trigger>
         <!-- {Button: “Add Niche”}               -->
-        <!-- <trigger ref="Duplicate">
+        <trigger ref="Duplicate">
           <label>{Duplicate.Record}</label>
-        </trigger> -->
+        </trigger>
       <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1348,9 +1332,6 @@
             <value>dummy</value>
           </item>
         </select1>
-        <!--<trigger ref="DuplicateFromCorner">
-          <label>{Duplicate.From.Corner}</label>
-        </trigger>-->
         <!-- {Button.To.Pull.The.Info.For.This and the next 3 attributes from Corner if identical} -->
         <!--Tipo 1,Tipo 2,Tipo 3,Tipo 4,Tipo 5,Tipo 6,Tipo 7,Tipo 8,Tipo 9,Tipo 10,Tipo 11,Tipo 12,Tipo 13,Otro,No observable-->
         <input ref="MasonryDescription" faims_attribute_name="MasonryDescription" faims_attribute_type="freetext">
@@ -1395,15 +1376,15 @@
         <input ref="GableDistance" faims_attribute_name="GableDistance" faims_attribute_type="measure">
           <label>{Gable.Distance}:</label>
         </input>
-        <!-- <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        <input ref="WindowCount" faims_attribute_name="WindowCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Window.Count}:</label>
-        </input> -->
-        <!-- <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="NicheCount" faims_attribute_name="NicheCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Niche.Count}:</label>
-        </input> -->
-        <!-- <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
+        </input>
+        <input ref="DoorwayCount" faims_attribute_name="DoorwayCount" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false" faims_annotation="false">
           <label>{Doorway.Count}:</label>
-        </input> -->
+        </input>
         <trigger ref="WallPhotos">
           <label>{Wall.Photos}</label>
         </trigger>
@@ -1414,21 +1395,21 @@
             <value>dummy</value>
           </item>
         </select>
-        <!-- <trigger ref="NewWindow">
+        <trigger ref="NewWindow">
           <label>{New.Window}</label>
-        </trigger> -->
+        </trigger>
         <!-- {button}-->
-        <!-- <trigger ref="NewNiche">
+        <trigger ref="NewNiche">
           <label>{New.Niche}</label>
-        </trigger> -->
+        </trigger>
         <!-- {button}-->
-        <!--<trigger ref="NewLichen">
+        <trigger ref="NewLichen">
           <label>{New.Lichen}</label>
-        </trigger>-->
+        </trigger>
         <!-- {button}-->
-          <!-- <trigger ref="Duplicate">
+        <trigger ref="Duplicate">
           <label>{Duplicate.Record}</label>
-        </trigger> -->
+        </trigger>
         <trigger ref="Update2">
           <label>{Save.Record}</label>
         </trigger>
@@ -1510,10 +1491,10 @@
             <value>dummy</value>
           </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLong" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>{GPS.Long}:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLat" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>{GPS.Lat}:</label>
         </input>
         <trigger ref="TakePoint">
@@ -1534,13 +1515,6 @@
             <value>dummy</value>
           </item>
         </select1>
-        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-          <label>{Associate.With.Type}:</label>
-          <item>
-            <label>{dummy}</label>
-            <value>dummy</value>
-          </item>
-        </select1>-->
         <trigger ref="AssociateWith">
           <label>{Associate.With}</label>
         </trigger>
@@ -1631,23 +1605,16 @@
         <trigger ref="Delete">
           <label>{Delete.Record}</label>
         </trigger>
-        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
           <label>{Associate.With.List}:</label>
           <item>
             <label>{dummy}</label>
             <value>dummy</value>
           </item>
-        </select1>-->
-        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-          <label>{Associate.With.Type}:</label>
-          <item>
-            <label>{dummy}</label>
-            <value>dummy</value>
-          </item>
-        </select1>-->
-        <!--<trigger ref="AssociateWith">
+        </select1>
+        <trigger ref="AssociateWith">
           <label>{AssociateWith}</label>
-        </trigger>-->
+        </trigger>
         <!-- {Button: “Add another niche to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>
@@ -1715,10 +1682,10 @@
             <value>dummy</value>
           </item>
         </select>
-        <input ref="GPSLong" faims_attribute_name="GPSLong" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLong" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>{GPS.Long}:</label>
         </input>
-        <input ref="GPSLat" faims_attribute_name="GPSLat" faims_attribute_type="measure" faims_read_only="true" faims_annotation="false" faims_certainty="false">
+        <input ref="GPSLat" faims_read_only="true" faims_annotation="false" faims_certainty="false">
           <label>{GPS.Lat}:</label>
         </input>
         <trigger ref="TakePoint">
@@ -1739,13 +1706,6 @@
             <value>dummy</value>
           </item>
         </select1>
-        <!--<select1 ref="AssociateWithType" faims_annotation="false" faims_certainty="false">
-            <label>{Associate.With.Type}:</label>
-            <item>
-                <label>{dummy}</label>
-                <value>dummy</value>
-            </item>
-        </select1>-->
         <trigger ref="AssociateWith">
           <label>{Associate.With}</label>
         </trigger>
@@ -1944,18 +1904,7 @@
         <trigger ref="Delete">
           <label>{Delete.Record}</label>
         </trigger>
-        <!-- {button}-->
-        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>{Associate.With.List}:</label>
-            <item>
-                <label>{dummy}</label>
-                <value>dummy</value>
-            </item>
-        </select1>
-        <trigger ref="AssociateWith">
-          <label>{Associate.With}</label>
-        </trigger>-->
-        <!-- {Button: “Save”, “Delete”,”Load”,”Associate with”} -->
+        <!-- {Button: “Save”, “Delete”} -->
       </group>
     </group>
     <group ref="specialFind" faims_archent_type="SpecialFind">
@@ -2099,18 +2048,7 @@
         <trigger ref="Delete">
           <label>{Delete.Record}</label>
         </trigger>
-        <!-- {button}-->
-        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>{Associate.With.List}:</label>
-            <item>
-                <label>{dummy}</label>
-                <value>dummy</value>
-            </item>
-        </select1>
-        <trigger ref="AssociateWith">
-          <label>{Associate.With}</label>
-        </trigger>-->
-        <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Associate with”} -->
+        <!-- {Button: “Save”, “Delete”,”Update”,”Load”} -->
       </group>
       <group ref="load">
         <label>{Load.Lots}</label>
@@ -2159,18 +2097,7 @@
         <trigger ref="Delete">
           <label>{Delete.Record}</label>
         </trigger>
-        <!-- {button}-->
-        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
-            <label>{Associate.With.List}:</label>
-            <item>
-                <label>{dummy}</label>
-                <value>dummy</value>
-            </item>
-        </select1>
-        <trigger ref="AssociateWith">
-          <label>{Associate.With}</label>
-        </trigger>-->
-        <!-- {Button: “Save”, “Delete”,”Update”,”Load”,”Add another Lot Record to this surface collection”} -->
+        <!-- {Button: “Save”, “Delete”,”Update”,”Load”} -->
       </group>
     </group>
     <group ref="window" faims_archent_type="Window">
@@ -2232,7 +2159,7 @@
         <trigger ref="Delete">
           <label>{Delete.Record}</label>
         </trigger>
-        <!--<select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
+        <select1 ref="AssociateWithList" faims_annotation="false" faims_certainty="false">
           <label>{Associate.With.List}:</label>
           <item>
             <label>{dummy}</label>
@@ -2241,7 +2168,7 @@
         </select1>
         <trigger ref="AssociateWith">
           <label>{AssociateWith}</label>
-        </trigger>-->
+        </trigger>
         <!-- {Button: “Add another window to this wall”,“Save”, “Delete”,”Associate with”} -->
       </group>
     </group>

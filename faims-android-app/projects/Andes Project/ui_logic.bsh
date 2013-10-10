@@ -89,7 +89,7 @@ onCreateMap() {
 		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
 	} else {
 		Geometry geom = geomList.get(0);
-		/*
+		
 		if (geom instanceof Point) {
 			showTabGroup("createPoint");
 		} else if (geom instanceof Line) {
@@ -97,8 +97,7 @@ onCreateMap() {
 		} else if (geom instanceof Polygon) {
 			showTabGroup("createPolygon");
 		}
-		*/
-		showTabGroup("createPolygon");
+		
 	}
 }
 
@@ -131,7 +130,7 @@ saveDistanceGPSTrack() {
 }
 
 saveGPSTrack(List attributes) {
-	position = getGPSPosition();
+	position = getGPSPositionProjected();
 	if (position == null) return;
 
 	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
@@ -265,7 +264,7 @@ newCorner(){
     setFieldValue("corner/cornerDetail/Timestamp", getCurrentTime());
     setFieldValue("corner/cornerDetail/Author", username);
     setFieldValue("corner/cornerDetail/Device", device);
-    
+    recalcCorner();
     makeCornerNum();
 }
 
@@ -433,45 +432,57 @@ newCanal(){
 onEvent("createPolygon/tab1/structure", "click", "newStructure()");
 onEvent("createLine/tab1/wall", "click", "newFreeWall()");
 onEvent("createPoint/tab1/doorway", "click", "newDoorway()");
-//onEvent("createPolygon/tab1/feature", "click", "newFeature()");
+onEvent("createPolygon/tab1/feature", "click", "newFeature()");
 onEvent("createPoint/tab1/specialFind", "click", "newSpecialFind()");
 onEvent("createPoint/tab1/lichen", "click", "newLichen()");
-//onEvent("createPolygon/tab1/surfaceCollection", "click", "newSurfaceCollection()");
+onEvent("createPolygon/tab1/surfaceCollection", "click", "newSurfaceCollection()");
 onEvent("createLine/tab1/canal", "click", "newCanal()");
 
 
 onEvent("structure/component/AddCorner", "click", "newCorner()");
-//onEvent("structure/component/AddWall", "click", "newStructureWall()");
-//onEvent("structure/component/AddDoorway", "click", "newDoorway()");
-//onEvent("structure/component/AddNiche", "delayclick", "newStructureNiche(structure_id)");
-//onEvent("wall/structureWall/NewNiche", "delayclick", "newStructureWallNiche(structure_wall_id)");
-//onEvent("wall/structureWall/NewWindow", "click", "newStructureWindow(structure_wall_id)");
-//onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
-//onEvent("corner/cornerDetail/AddNiche", "click", "newCornerNiche(corner_id)");
+onEvent("structure/component/AddWall", "click", "newStructureWall()");
+onEvent("structure/component/AddDoorway", "click", "newDoorway()");
+onEvent("wall/structureWall/NewNiche", "delayclick", "newStructureWallNiche(structure_wall_id)");
+onEvent("wall/structureWall/NewWindow", "click", "newStructureWindow(structure_wall_id)");
+onEvent("wall/structureWall/NewLichen", "click", "newLichen()");
+onEvent("corner/cornerDetail/AddNiche", "click", "newCornerNiche(corner_id)");
 onEvent("surfaceCollection/material/Lot", "click", "newLot()");
 onEvent("structure", "show", "recalcComponents()");
+onEvent("wall/structureWall", "show", "duplicateEAID()");
+onEvent("structure/component", "show", "recalcComponents()");
+onEvent("structure/component", "show", "duplicateEAID()");
+onEvent("structure/final", "show", "duplicateEAID()");
 
 newStructureWindow(id){
-    saveStructureWall(id);
-    
-    newWindow(structure_wall_id,  getFieldValue("wall/structureWall/WallID"));
+    saveStructureWall(id,"onNewStructureWindowCreated()");
 }
 
-newStructureNiche(id){
-    saveStructure(id);
-
-    //Yes, this is a global. Sue me.
-    newNiche(structure_id, getFieldValue("structure/info/ArchaeologicalElementID"));
+onNewStructureWindowCreated(){
+	structure_wall_id = getLastSavedRecordId();
+	saveEntitiesToRel("SurfaceLot", structure_id, structure_wall_id);
+	newWindow(structure_wall_id,  getFieldValue("wall/structureWall/WallID"));
 }
 
 newStructureWallNiche(id){
-    saveStructureWall(id);
-    newNiche(structure_wall_id, getFieldValue("wall/structureWall/WallID"));
+    saveStructureWall(id,"onNewStructureWallNicheCreated()");
+}
+
+onNewStructureWallNicheCreated(){
+	structure_wall_id = getLastSavedRecordId();
+	
+	saveEntitiesToRel("SurfaceLot", structure_id, structure_wall_id);
+	newNiche(structure_wall_id, getFieldValue("wall/structureWall/WallID"));
 }
 
 newCornerNiche(id){
-    saveCorner(id);
-    newNiche(corner_id, getFieldValue("corner/cornerDetail/CornerID"));
+    saveCorner(id, "onNewCornerNicheCreated()");
+}
+
+onNewCornerNicheCreated(){
+	corner_id = getLastSavedRecordId();
+	
+	saveEntitiesToRel("StructureContains", structure_id, corner_id);
+	newNiche(corner_id, getFieldValue("corner/cornerDetail/CornerID"));
 }
 
 recalcComponents(){
@@ -541,10 +552,10 @@ recalcComponents(){
 "and archentity.deleted is null; ");
 
 
-    //setFieldValue("structure/component/WindowCount", Integer.valueOf(windowNum.get(0)));
-    //setFieldValue("structure/component/DoorwayCount", Integer.valueOf(doorwayNum.get(0)));
-    //setFieldValue("structure/component/NicheCount", Integer.valueOf(nicheNum.get(0)));
-    //setFieldValue("structure/component/WallsTotalCount", Integer.valueOf(structureWallNum.get(0)));
+    setFieldValue("structure/component/WindowCount", Integer.valueOf(windowNum.get(0)));
+    setFieldValue("structure/component/DoorwayCount", Integer.valueOf(doorwayNum.get(0)));
+    setFieldValue("structure/component/NicheCount", Integer.valueOf(nicheNum.get(0)));
+    setFieldValue("structure/component/WallsTotalCount", Integer.valueOf(structureWallNum.get(0)));
     }
 
 }
@@ -555,22 +566,33 @@ String corner_id = null;
 
 onEvent("corner/cornerDetail/CornerPhotos", "click", "attachPictureTo(\"corner/cornerDetail/PhotoGallery\")");
 
-//onEvent("corner/cornerDetail/Duplicate", "delayclick", "duplicateCorner(corner_id)");
-onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id)");
-onEvent("corner/cornerDetail/Update2", "delayclick", "saveCorner(corner_id)");
+onEvent("corner/cornerDetail/Duplicate", "delayclick", "duplicateCorner(corner_id,\"onDuplicateCornerSaved()\")");
+onEvent("corner/cornerDetail/Update", "delayclick", "saveCorner(corner_id,\"onCornerSaved()\")");
+onEvent("corner/cornerDetail/Update2", "delayclick", "saveCorner(corner_id,\"onCornerSaved()\")");
 onEvent("corner/cornerDetail/Delete", "click", "deleteCorner()");
 onEvent("corner", "show", "recalcCorner()");
+onEvent("corner/cornerDetail", "show", "duplicateEAID()");
 
-saveCorner(id) {
+saveCorner(id, callback) {
 	if (isNull(getFieldValue("corner/cornerDetail/CornerID"))) {
 		showWarning("Logic Error", "Cannot save record without id");
 		return;
 	}
-	updateCorner(id);
+	updateCorner(id, callback);
+	duplicateEAID();
 }
 
-duplicateCorner(id) {
-    saveCorner(id);
+duplicateCorner(id, callback) {
+    saveCorner(id, callback);
+}
+
+onDuplicateCornerSaved(){
+	corner_id = getLastSavedRecordId();
+	
+    saveEntitiesToRel("StructureContains", structure_id, corner_id);
+    
+    showTabGroup("corner", corner_id);
+    corner_id = null;
     makeCornerNum();
 }
 
@@ -607,13 +629,13 @@ reallyDeleteCorner(){
     cancelTabGroup("corner", false);
 }
 
-updateCorner(id) {
+updateCorner(id, callback) {
 	if (isNull(id)) id = null;
 
     if (isNull(structure_id)) {
   		showWarning("Logic Error", "Corner cannot be saved as parent structure is not saved or loaded.");
    	} else {
-   		saveTabGroup("corner", id, null, null, "onCornerSaved()");
+   		saveTabGroup("corner", id, null, null, callback);
 	}
 }
 
@@ -623,6 +645,7 @@ onCornerSaved() {
     saveEntitiesToRel("StructureContains", structure_id, corner_id);
     
     showTabGroup("corner", corner_id);
+    recalcCorner();
 }
 
 recalcCorner(){
@@ -657,9 +680,8 @@ onEvent("niche/nicheDetail/Update", "delayclick", "saveNiche(niche_id)");
 onEvent("niche/nicheDetail/Update2", "delayclick", "saveNiche(niche_id)");
 onEvent("niche/nicheDetail/Delete", "click", "deleteNiche()");
 
-//onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
+onEvent("niche/nicheDetail/AssociateWith", "click", "associateWithNiche()");
 
-/*
 associateWithNiche() {
 	id = getFieldValue("niche/nicheDetail/AssociateWithList");
 	type = "NicheIn";
@@ -678,7 +700,6 @@ associateWithNiche() {
 	saveEntitiesToRel(type, niche_id, id);
 	showToast("Successfuly associated.");
 }
-*/
 
 saveNiche(id) {
 	if (isNull(getFieldValue("niche/nicheDetail/NicheID"))) {
@@ -715,9 +736,11 @@ onNicheSaved() {
 	niche_id = getLastSavedRecordId();
 	
     showTabGroup("niche", niche_id);
+    duplicateEAID();
 }
 
 makeWindowNum(parent_id, parent_string){
+	System.out.println("parent_id = " + parent_id + ", parent_string = " + parent_string);
     if (!isNull(parent_id)){
     	fooNum = fetchOne("select count(distinct uuid)+1 "+
                     " from (select uuid, relationshipid, deleted "+
@@ -798,13 +821,12 @@ saveCanal(id) {
 updateCanal(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-
 	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		if (entity != null) {
+			data = entity.getGeometryList();
+		}
 	}
 	
 	saveTabGroup("canal", id, data, null, "onCanalSaved()");
@@ -826,8 +848,9 @@ onEvent("window/windowDetail/Update", "delayclick", "saveWindow(window_id)");
 onEvent("window/windowDetail/Update2", "delayclick", "saveWindow(window_id)");
 onEvent("window/windowDetail/Delete", "click", "deleteWindow()");
 
-//onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
-/*
+onEvent("window/windowDetail/AssociateWith", "click", "associateWithWindow()");
+onEvent("window/windowDetail", "show", "duplicateEAID()");
+
 associateWithWindow() {
 	id = getFieldValue("window/windowDetail/AssociateWithList");
 	if (isNull(id)) {
@@ -841,7 +864,6 @@ associateWithWindow() {
 	saveEntitiesToRel("WindowIn", window_id, id);
 	showToast("Successfuly associated.");
 }
-*/
 
 saveWindow(id) {
 	if (isNull(getFieldValue("window/windowDetail/WindowID"))) {
@@ -871,8 +893,6 @@ updateWindow(id) {
 onWindowSaved() {
 	window_id = getLastSavedRecordId();
 	
-	saveEntitiesToRel("WindowIn", parent_window_id, window_id);
-    
     showTabGroup("window", window_id);
 }
 
@@ -932,13 +952,12 @@ saveSpecialFind(id) {
 updateSpecialFind(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-	
 	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		if (entity != null) {
+			data = entity.getGeometryList();
+		}
 	}
 	
 	saveTabGroup("specialFind", id, data, null, "onSpecialFindSaved()");
@@ -1006,13 +1025,12 @@ saveFeature(id) {
 updateFeature(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-	
 	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		if (entity != null) {
+			data = entity.getGeometryList();
+		}
 	}
 	
     saveTabGroup("feature", id, data, null, "onFeatureSaved()");
@@ -1080,13 +1098,12 @@ saveFreeWall(id) {
 updateFreeWall(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-	
 	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		if (entity != null) {
+			data = entity.getGeometryList();
+		}
 	}
 	
     saveTabGroup("freeWall", id, data, null, "onFreeWallSaved()");
@@ -1105,7 +1122,7 @@ String doorway_id = null;
 onEvent("doorway/doorDetail/DoorPhotos", "click", "attachPictureTo(\"doorway/doorDetail/PhotoGallery\")");
 
 takeDoorywayPoint(){
-    location = getGPSPosition();
+    location = getGPSPositionProjected();
     if (location == null) {
         showWarning("Logic Error", "No GPS Signal");
     } else {
@@ -1115,10 +1132,10 @@ takeDoorywayPoint(){
         setFieldValue("doorway/doorDetail/GPSLong", longitude);
         setFieldValue("doorway/doorDetail/GPSLat", latitude);
 
-        //point = createPoint(longitude, latitude);
+        point = createPoint(longitude, latitude);
 
         // TODO make this reflect db layer when saving with db.
-        //lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
+        lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
 
     }
 }
@@ -1175,15 +1192,8 @@ saveDoorway(id) {
 updateDoorway(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-
-	// TODO update the doorway count in the structure wall and in structure
-	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
-	}
+	data = new ArrayList();
+	data.add(new Point(new MapPos(Double.parseDouble(getFieldValue("doorway/doorDetail/GPSLong")),Double.parseDouble(getFieldValue("doorway/doorDetail/GPSLat"))), null, (PointStyle) null, null));
 	
     saveTabGroup("doorway", id, data, null, "onDoorwaySaved()");
 }
@@ -1192,6 +1202,7 @@ onDoorwaySaved() {
 	doorway_id = getLastSavedRecordId();
 	
     showTabGroup("doorway", doorway_id);
+    setDoorwayGPSFields(doorway_id);
 }
 
 /*** LICHEN ***/
@@ -1201,7 +1212,7 @@ String lichen_id = null;
 onEvent("lichen/lichenDetail/Photos", "click", "attachPictureTo(\"lichen/lichenDetail/PhotoGallery\")");
 
 takeLichenPoint(){
-    location = getGPSPosition();
+    location = getGPSPositionProjected();
     if (location == null) {
         showWarning("Logic Error", "No GPS Signal");
     } else {
@@ -1211,10 +1222,10 @@ takeLichenPoint(){
         setFieldValue("lichen/lichenDetail/GPSLong", longitude);
         setFieldValue("lichen/lichenDetail/GPSLat", latitude);
 
-        //point = createPoint(longitude, latitude);
+        point = createPoint(longitude, latitude);
 
         // TODO make this reflect db layer when saving with db.
-        //lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
+        lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
 
     }
 }
@@ -1273,14 +1284,8 @@ saveLichen(id) {
 updateLichen(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-	
-	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
-	}
+	data = new ArrayList();
+	data.add(new Point(new MapPos(Double.parseDouble(getFieldValue("lichen/lichenDetail/GPSLong")),Double.parseDouble(getFieldValue("lichen/lichenDetail/GPSLat"))), null, (PointStyle) null, null));
 	
     saveTabGroup("lichen", id, data, null, "onLichenSaved()");
 }
@@ -1289,6 +1294,7 @@ onLichenSaved() {
 	lichen_id = getLastSavedRecordId();
 	
     showTabGroup("lichen", lichen_id);
+    setLichenGPSFields(lichen_id);
 }
 
 /*** SURFACE COLLECTION ***/
@@ -1328,13 +1334,12 @@ reallyDeleteSurfaceCollection(){
 updateSurfaceCollection(id) {
 	if (isNull(id)) id = null;
 	
-	if (!isNull(id)) {
-		enitty = fetchArchEnt(id);
-	}
-
 	data = getCreatedGeometry();
-	if (entity != null) {
-		data = entity.getGeometryList();
+	if (!isNull(id)) {
+		entity = fetchArchEnt(id);
+		if (entity != null) {
+			data = entity.getGeometryList();
+		}
 	}
 	
     saveTabGroup("surfaceCollection", id, data, null, "onSurfaceCollectionSaved()");
@@ -1350,8 +1355,8 @@ onSurfaceCollectionSaved() {
 
 String lot_id = null;
 
-onEvent("lot/lotDetail/Update", "click", "lot_id = saveLot(lot_id)");
-onEvent("lot/lotDetail/Update2", "click", "lot_id = saveLot(lot_id)");
+onEvent("lot/lotDetail/Update", "click", "saveLot(lot_id)");
+onEvent("lot/lotDetail/Update2", "click", "saveLot(lot_id)");
 onEvent("lot/lotDetail/Delete", "click", "deleteLot()");
 
 deleteLot(){
@@ -1398,19 +1403,21 @@ String structure_wall_id = null;
 
 onEvent("wall/structureWall/WallPhotos", "click", "attachPictureTo(\"wall/structureWall/PhotoGallery\")");
 
-//onEvent("wall/structureWall/Duplicate", "delayclick", "duplicateStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Duplicate", "delayclick", "duplicateStructureWall(structure_wall_id,\"onDuplicateStructureWallSaved()\")");
 
-onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id)");
-onEvent("wall/structureWall/Update2", "delayclick", "saveStructureWall(structure_wall_id)");
+onEvent("wall/structureWall/Update", "delayclick", "saveStructureWall(structure_wall_id,\"onStructureWallSaved()\")");
+onEvent("wall/structureWall/Update2", "delayclick", "saveStructureWall(structure_wall_id,\"onStructureWallSaved()\")");
 onEvent("wall/structureWall/Delete", "click", "deleteStructureWall()");
 onEvent("wall", "show", "recalcStructureWall()");
 
-saveStructureWall(id) {
+saveStructureWall(id, callback) {
 	if (isNull(getFieldValue("wall/structureWall/WallID"))) {
 		showWarning("Logic Error", "Cannot save record without id");
 		return;
 	}
-	updateStructureWall(id);
+	updateStructureWall(id, callback);
+	recalcStructureWall();
+	duplicateEAID();
 }
 
 setWindowCountForStructureWall(value){
@@ -1418,22 +1425,33 @@ setWindowCountForStructureWall(value){
 }
 
 setNicheCountForStructureWall(value){
-    //setFieldValue("wall/structureWall/NicheCount",value);
+    setFieldValue("wall/structureWall/NicheCount",value);
 }
 
 setDoorwayCountForStructureWall(value){
     setFieldValue("wall/structureWall/DoorwayCount",value);
 }
 
-duplicateStructureWall(id) {
+duplicateStructureWall(id, callback) {
     if (isNull(getFieldValue("wall/structureWall/WallID"))) {
         showWarning("Logic Error", "Cannot save record without id");
         return;
     }
-    updateStructureWall(id);
+    updateStructureWall(id, callback);
 
-    makeStructureWallNum();
 }
+
+onDuplicateStructureWallSaved(){
+	structure_wall_id = getLastSavedRecordId();
+	
+	saveEntitiesToRel("StructureContains", structure_id, structure_wall_id);
+	
+    showTabGroup("wall", structure_wall_id);
+    duplicateEAID();
+	structure_wall_id = null;
+	makeStructureWallNum();
+}
+
 makeStructureWallNum(){
 if (!isNull(structure_id)){
     Object wallNum = fetchOne("select count(distinct uuid)+1 "+
@@ -1467,23 +1485,24 @@ reallyDeleteStructureWall(){
     cancelTabGroup("wall", false);
 }
 
-updateStructureWall(id) {
+updateStructureWall(id, callback) {
 	if (isNull(id)) id = null;
 
    	if (isNull(structure_id)) {
   		showWarning("Logic Error", "Structure Wall cannot be saved as parent structure is not saved or loaded.");
   		return null;
    	} else {
-	    saveTabGroup("wall", id, null, null, "onStructureWallSaved()");
+	    saveTabGroup("wall", id, null, null, callback);
    	}
 }
 
 onStructureWallSaved() {
 	structure_wall_id = getLastSavedRecordId();
 	
-	saveEntitiesToRel("SurfaceLot", structure_id, structure_wall_id);
+	saveEntitiesToRel("StructureContains", structure_id, structure_wall_id);
 	
     showTabGroup("wall", structure_wall_id);
+    duplicateEAID();
 }
 
 recalcStructureWall(){
@@ -1545,6 +1564,7 @@ recalcStructureWall(){
 String structure_id = null;
 
 onFocus("structure/info/ArchaeologicalElementID", null, "duplicateEAID()");
+onEvent("structure", "show", "duplicateEAID()");
 
 onEvent("structure/final/AddAttachment", "click", "attachFileTo(\"structure/final/filelist\")");
 onEvent("structure/final/Sketch", "click", "attachFileTo(\"structure/final/sketchfilelist\")");
@@ -1552,12 +1572,12 @@ onEvent("structure/final/Photo", "click", "attachPictureTo(\"structure/final/Pho
 onEvent("structure/final/Video", "click", "attachVideoTo(\"structure/final/VideoGallery\")");
 onEvent("structure/final/Audio", "click", "attachAudioTo(\"structure/final/AudioList\")");
 
-onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/final/Update2", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/info/Update2", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/component/Update", "delayclick", "saveStructure(structure_id)");
-onEvent("structure/component/Update2", "delayclick", "saveStructure(structure_id)");
+onEvent("structure/final/Update", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
+onEvent("structure/final/Update2", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
+onEvent("structure/info/Update", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
+onEvent("structure/info/Update2", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
+onEvent("structure/component/Update", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
+onEvent("structure/component/Update2", "delayclick", "saveStructure(structure_id,\"onStructureSaved()\")");
 onEvent("structure/final/Delete", "click", "deleteStructure()");
 
 onEvent("structure/final/viewattached", "click", "viewArchEntAttachedFiles(structure_id)");
@@ -1572,14 +1592,16 @@ duplicateEAID(){
     setFieldValue("corner/cornerDetail/EAidDupe", eaid);
 }
 
-saveStructure(id) {
+saveStructure(id,callback) {
 	if ((id == null && getCreatedGeometry() == null) ||
 		isNull(getFieldValue("structure/info/ArchaeologicalElementID"))) {
 
 		showWarning("Logic Error", "Cannot save record without geometry or id");
 		return;
 	}
-	updateStructure(id);
+	updateStructure(id, callback);
+	recalcComponents();
+	duplicateEAID();
 	clearCreatedGeometry();
 }
 
@@ -1594,7 +1616,7 @@ reallyDeleteStructure(){
     cancelTabGroup("structure", false);
 }
 
-updateStructure(id){
+updateStructure(id, callback){
     if (isNull(id)) id = null;
 	
 	data = getCreatedGeometry();
@@ -1603,8 +1625,7 @@ updateStructure(id){
 		data = entity.getGeometryList();
 		System.out.println("" + entity.getGeometryList());
 	}
-	
-    saveTabGroup("structure", id, data, null, "onStructureSaved()");
+    saveTabGroup("structure", id, data, null, callback);
 }
 
 onStructureSaved() {
@@ -1632,37 +1653,20 @@ updateAllStructure() {
 	if (!isNull(structure_id)) {
 		localStructureWall = fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
 "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
-"            FROM aentvalue\n"+
-"            JOIN attributekey USING (attributeid)\n"+
-"            JOIN archentity USING (uuid)\n"+
-"            JOIN aenttype USING (aenttypeid)\n"+
-"            JOIN (select attributeid, aenttypeid\n"+
-"                    FROM idealaent\n"+
-"                    JOIN aenttype using (aenttypeid) where isIdentifier is 'true') USING (attributeid, aenttypeid)\n"+
-"            LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)\n"+
-"            JOIN (SELECT uuid, attributeid, valuetimestamp\n"+
-"                    FROM aentvalue JOIN (select uuid, attributeid, max(valuetimestamp) as valuetimestamp from aentvalue group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)\n"+
-"                    JOIN archentity USING (uuid) JOIN (select uuid, max(aenttimestamp) as aenttimestamp from archentity group by uuid) using (uuid, aenttimestamp)\n"+
-"                   WHERE archentity.deleted is NULL\n"+
-"                     ) USING (uuid, attributeid, valuetimestamp)\n"+
-"           WHERE aentvalue.deleted is NULL\n"+
-"             and aenttypename = 'StructureWall'\n"+
+"            FROM latestNonDeletedArchentIdentifiers\n"+
+"           WHERE aenttypename = 'StructureWall'\n"+
 "             AND uuid in (select uuid\n"+
-"                            FROM (select uuid, relationshipid, deleted\n"+
-"                                    FROM aentreln JOIN (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp from aentreln GROUP BY uuid, relationshipid) USING (uuid, relationshipid, aentrelntimestamp)\n"+
-"                                )\n"+
+"                            FROM latestNonDeletedAentReln\n"+
 "                           where relationshipid in (select relationshipid\n"+
-"                                                      FROM aentreln\n"+
+"                                                      FROM latestNonDeletedAentReln\n"+
 "                                                      JOIN relationship using (relationshipid)\n"+
 "                                                      JOIN relntype using (relntypeid)\n"+
 "                                                     where uuid = "+structure_id+"\n"+
 "                                                       and relntypeName = 'StructureContains')\n"+
-"                             and deleted is null\n"+
-"                             and uuid !="+structure_id+")\n"+
-"                GROUP BY uuid, attributeid\n"+
+"                             and uuid != "+structure_id+")\n"+
 "        ORDER BY uuid, attributename ASC)\n"+
 "group by uuid\n"+
-"order by valuetimestamp desc, uuid, attributename;\n");
+"order by valuetimestamp desc, uuid, attributename;");
 
     	localCorner =  fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
 "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
@@ -1699,11 +1703,11 @@ updateAllStructure() {
 "order by valuetimestamp desc, uuid, attributename;\n");
 	}
 
-	//populateDropDown("structure/load/structureWallList", localStructureWall);
+	populateDropDown("structure/load/structureWallList", localStructureWall);
     populateDropDown("structure/load/cornerList", localCorner);
 
 }
-/*
+
 updateAllWindow() {
 	Object structureWallFreeWall =   fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
@@ -1728,9 +1732,9 @@ updateAllWindow() {
         "         ORDER BY uuid, attributename ASC)\n"+
         "group by uuid;\n");
 	populateDropDown("window/windowDetail/AssociateWithList", structureWallFreeWall);
-}*/
+}
 
-/*
+
 updateAllNiche() {
 	Object sWallsAndCorners =   fetchAll("select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response\n"+
         "FROM ( SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename\n"+
@@ -1756,7 +1760,7 @@ updateAllNiche() {
         "group by uuid;\n");
 	populateDropDown("niche/nicheDetail/AssociateWithList", sWallsAndCorners);
 }
-*/
+
 
 updateAllFreeWall() {
 	Object fWallsAndStructures =  fetchAll("select '', '', '' as valuetimestamp union select uuid, aenttypename || ': ' || group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' | ') as response, valuetimestamp\n"+
@@ -1780,7 +1784,7 @@ updateAllFreeWall() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by valuetimestamp desc;\n");
+        "group by uuid order by valuetimestamp;\n");
 	populateDropDown("freeWall/freeWallDetail/AssociateWithList", fWallsAndStructures);
 }
 
@@ -1806,7 +1810,7 @@ updateAllDoorway() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by valuetimestamp desc;\n");
+        "group by uuid order by valuetimestamp;\n");
 
 	populateDropDown("doorway/doorDetail/AssociateWithList", structureStructureWallFreeWall);
 }
@@ -1832,7 +1836,7 @@ updateAllLichen() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by valuetimestamp desc;\n");
+        "group by uuid order by valuetimestamp;\n");
     populateDropDown("lichen/lichenDetail/AssociateWithList", allEntities);
 }
 
@@ -1858,7 +1862,7 @@ updateAllFeature() {
         "         WHERE aentvalue.deleted is NULL\n"+
         "           and archentity.deleted is NULL\n"+
         "         ORDER BY uuid, attributename ASC)\n"+
-        "group by uuid order by valuetimestamp desc;\n");
+        "group by uuid order by valuetimestamp;\n");
 	populateDropDown("feature/featureDetail/AssociateWithList", structure);
 }
 
@@ -1875,15 +1879,15 @@ updateAll(){
 	Object window = fetchEntityList("Window");
 
 	populateDropDown("control/data/structureList", structure);
-	//populateDropDown("control/data/wallList", wall);
-	//populateDropDown("control/data/doorwayList", doorway);
-	//populateDropDown("control/data/featureList", feature);
-	//populateDropDown("control/data/specialFindList", specialFind);
-	//populateDropDown("control/data/lichenList", lichen);
-	//populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
-	//populateDropDown("control/data/canalList", canal);
-	//populateDropDown("control/data/nicheList", niche);
-	//populateDropDown("control/data/windowList", window);
+	populateDropDown("control/data/wallList", wall);
+	populateDropDown("control/data/doorwayList", doorway);
+	populateDropDown("control/data/featureList", feature);
+	populateDropDown("control/data/specialFindList", specialFind);
+	populateDropDown("control/data/lichenList", lichen);
+	populateDropDown("control/data/surfaceCollectionList", surfaceCollection);
+	populateDropDown("control/data/canalList", canal);
+	populateDropDown("control/data/nicheList", niche);
+	populateDropDown("control/data/windowList", window);
 }
 
 onEvent("control/data", "show", "updateAll()");
@@ -1891,8 +1895,9 @@ onEvent("feature/featureDetail", "show", "updateAllFeature()");
 onEvent("lichen/lichenDetail", "show", "updateAllLichen()");
 onEvent("doorway/doorDetail", "show", "updateAllDoorway()");
 onEvent("freeWall/freeWallDetail", "show", "updateAllFreeWall()");
-//onEvent("niche/nicheDetail", "show", "updateAllNiche()");
-//onEvent("window/windowDetail", "show", "updateAllWindow()");
+onEvent("niche/nicheDetail", "show", "updateAllNiche()");
+onEvent("niche/nicheDetail", "show", "duplicateEAID()");
+onEvent("window/windowDetail", "show", "updateAllWindow()");
 onEvent("structure/load", "show", "updateAllStructure()");
 onEvent("specialFind/findDetail", "show", "updateAllSpecialFind()");
 onEvent("surfaceCollection/load", "show", "updateAllSurfaceCollection()");
@@ -1915,7 +1920,6 @@ loadStructure() {
     
 	showTabGroup("structure", structure_id);
 	
-    duplicateEAID();
 }
 
 loadWall() {
@@ -1950,7 +1954,7 @@ setDoorwayGPSFields(id) {
 }
 
 setDoorwayGPSFieldsFromPoint(geomList) {
-	if (geomList != null) {
+	if (geomList != null && !geomList.isEmpty()) {
 		point = geomList.get(0);
 		p = point.getMapPos();
 		p = convertFromProjToProj(getModuleSrid(), "4326", p);
@@ -1989,13 +1993,13 @@ loadLichen() {
 }
 
 setLichenGPSFields(id) {
-	archEntity = fetchArchEnt(lichen_id);
+	archEntity = fetchArchEnt(id);
 	geomList = archEntity.getGeometryList();
 	setLichenGPSFieldsFromPoint(geomList);
 }
 
 setLichenGPSFieldsFromPoint(geomList) {
-	if (geomList != null) {
+	if (geomList != null && !geomList.isEmpty()) {
 		point = geomList.get(0);
 		p = point.getMapPos();
 		p = convertFromProjToProj(getModuleSrid(), "4326", p);
@@ -2078,18 +2082,18 @@ loadCorner() {
 }
 
 onEvent("control/data/structureLoad", "click", "loadStructure()");
-//onEvent("control/data/wallLoad", "click", "loadWall()");
-//onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
-//onEvent("control/data/featureLoad", "click", "loadFeature()");
-//onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
-//onEvent("control/data/lichenLoad", "click", "loadLichen()");
-//onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
-//onEvent("control/data/canalLoad", "click", "loadCanal()");
-//onEvent("control/data/nicheLoad", "click", "loadNiche()");
-//onEvent("control/data/windowLoad", "click", "loadWindow()");
-//onEvent("surfaceCollection/load/lotLoad", "click", "loadLot()");
-//onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
-//onEvent("structure/load/cornerLoad", "click", "loadCorner()");
+onEvent("control/data/wallLoad", "click", "loadWall()");
+onEvent("control/data/doorwayLoad", "click", "loadDoorway()");
+onEvent("control/data/featureLoad", "click", "loadFeature()");
+onEvent("control/data/specialFindLoad", "click", "loadSpecialFind()");
+onEvent("control/data/lichenLoad", "click", "loadLichen()");
+onEvent("control/data/surfaceCollectionLoad", "click", "loadSurfaceCollection()");
+onEvent("control/data/canalLoad", "click", "loadCanal()");
+onEvent("control/data/nicheLoad", "click", "loadNiche()");
+onEvent("control/data/windowLoad", "click", "loadWindow()");
+onEvent("surfaceCollection/load/lotLoad", "click", "loadLot()");
+onEvent("structure/load/structureWallLoad", "click", "loadStructureWall()");
+onEvent("structure/load/cornerLoad", "click", "loadCorner()");
 
 doNotDelete(){
     showToast("Delete Cancelled.");
