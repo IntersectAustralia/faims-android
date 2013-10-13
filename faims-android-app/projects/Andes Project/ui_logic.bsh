@@ -65,15 +65,6 @@ initMap() {
 
 initMap();
 
-onToolEvent("control/map/map", "load", "onLoadData()");
-
-onLoadData() {
-	id = getMapGeometryLoaded();
-	is_entity = "entity".equals(getMapGeometryLoadedType());
-	
-	showToast("To load entity please use load tab");
-}
-
 onEvent("control/map/clear", "click", "onClearMap()");
 onEvent("control/map/create", "click", "onCreateMap()");
 
@@ -130,7 +121,7 @@ saveDistanceGPSTrack() {
 }
 
 saveGPSTrack(List attributes) {
-	position = getGPSPositionProjected();
+	position = getGPSPosition();
 	if (position == null) return;
 
 	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
@@ -191,7 +182,7 @@ User user;
 login(){
     if (!isNull(getFieldValue("user/tab1/devices"))){
 	    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getFieldValue("user/tab1/users") + "';");
-	    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+	    user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
 	    deviceResult = fetchOne("select vocabname from vocabulary where vocabid = '"+getFieldValue("user/tab1/devices")+"';");
 	    device = deviceResult.get(0);
 	    setUser(user);
