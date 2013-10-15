@@ -1,3 +1,4 @@
+/*** 'Editable' - you can edit the code below based on the needs ***/
 /*
 initStatic() {
 	setFieldValue("control/static/name", getModuleName());
@@ -23,53 +24,6 @@ initStatic();
 
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
-
-User user;
-
-initMap() {
-	setMapZoom("control/map/map", 19.0f);
-
-	//showBaseMap("control/map/map", "Base Layer", "files/data/maps/ZAG-TPan-3857-grass-tiled.tif");
-	createCanvasLayer("control/map/map", "Non-saved sketch layer");
-
-    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
-
-	isEntity = true;
-	queryName = "All entities";
-	querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
-		
-	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
-
-	addTrackLogLayerQuery("control/map/map", "track log entities", 
-		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
-		" FROM archentity join aenttype using (aenttypeid)\n" +
-		" where archentity.deleted is null\n" + 
-		"   and lower(aenttypename) = lower('gps_track')\n" + 
-		" group by uuid\n" + 
-		" having max(aenttimestamp)");
-		
-	addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
-		"select uuid\n" + 
-		"  from latestNonDeletedArchent\n" + 
-		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
-		"  join aenttype using (aenttypeid)\n" + 
-		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
-		"  where lower(aenttypename) = lower(?) \n" + 
-		"   group by uuid").addParameter("Type", "RemoteSensingFeature"));
-		
-	//addLegacySelectQueryBuilder("control/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
-	//	createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
-					
-	// define database layer styles for points, lines, polygons and text
-	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
-	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
-	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
-	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
-
-	showDatabaseLayer("control/map/map", "Saved Data Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
-}
-
-initMap();
 
 onToolEvent("control/map/map", "load", "onLoadData()");
 
@@ -114,47 +68,6 @@ getCreatedGeometry() {
 clearCreatedGeometry() {
 	onClearMap();
 }
-
-/*** TRACKLOG ***/
-
-setGPSUpdateInterval(4);
-
-onEvent("control/gps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
-onEvent("control/gps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
-onEvent("control/gps/stopTrackLog", "click", "stopTrackingGPS()");
-
-saveTimeGPSTrack() {
-	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
-	saveGPSTrack(attributes);
-}
-
-saveDistanceGPSTrack() {
-	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
-	saveGPSTrack(attributes);
-}
-
-saveGPSTrack(List attributes) {
-	position = getGPSPosition();
-	if (position == null) return;
-
-	//attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
-	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
-	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
-	//attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
-	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
-	
-	positionProj = getGPSPositionProjected();
-	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
-	ArrayList l = new ArrayList();
-	l.add(p);
-	
-	saveArchEnt(null, "gps_track", l, attributes);
-}
-
-
 
 zoomGPS(){
 	Object position = getGPSPositionProjected();
@@ -247,15 +160,109 @@ onEvent("RS_Feature/header11_70/Update", "click", "saveFeature()");
 onEvent("RS_Feature/header11_70/Delete", "click", "deleteFeature()");
 onEvent("control/data/RS_FeatureList", "click", "loadRSFeature()");
 
+onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
+
+/*** MISC ***/
+
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
+    return a;
+}
+
+/*** 'Uneditable' - you can edit the code below with extreme precaution ***/
+User user;
+
+initMap() {
+	setMapZoom("control/map/map", 19.0f);
+
+	//showBaseMap("control/map/map", "Base Layer", "files/data/maps/ZAG-TPan-3857-grass-tiled.tif");
+	createCanvasLayer("control/map/map", "Non-saved sketch layer");
+
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("control/map/map", DATA_ENTRY_LAYER);
+
+	isEntity = true;
+	queryName = "All entities";
+	querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
+		
+	addDatabaseLayerQuery("control/map/map", queryName, querySQL);
+
+	addTrackLogLayerQuery("control/map/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+		
+	addSelectQueryBuilder("control/map/map", "Select entity by type", createQueryBuilder(
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower(?) \n" + 
+		"   group by uuid").addParameter("Type", "RemoteSensingFeature"));
+		
+	//addLegacySelectQueryBuilder("control/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
+	//	createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
+					
+	// define database layer styles for points, lines, polygons and text
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+
+	showDatabaseLayer("control/map/map", "Saved Data Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
+
+initMap();
+
+/*** TRACKLOG ***/
+
+setGPSUpdateInterval(4);
+
+onEvent("control/gps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("control/gps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("control/gps/stopTrackLog", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	//attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	//attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
+
 /*** USER ***/
 
 getDefaultUsersList() {
 	users = fetchAll("select userid, fname ||' ' || lname from user");
 	return users;
 }
-
-onEvent("control/gps/connectexternal", "click", "startExternalGPS()");
-onEvent("control/gps/connectinternal", "click", "startInternalGPS()");
 
 populateListForUsers(){
     populateList("user/usertab/users", getDefaultUsersList());
@@ -294,11 +301,4 @@ startSync() {
 stopSync() {
     setSyncEnabled(false);
     setFileSyncEnabled(false);
-}
-
-/*** MISC ***/
-
-makeVocab(String attrib){
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '"+attrib+"' ");
-    return a;
 }
