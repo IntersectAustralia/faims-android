@@ -698,7 +698,7 @@
     <group ref="createPoint">
         <label/>
         <group ref="tab1">
-            <label>{Create Record For}</label>
+            <label>{Create.Record.For}</label>
             <trigger ref="doorway">
                 <label>{Create.Doorway}</label>
             </trigger>
@@ -713,9 +713,9 @@
     <group ref="createLine">
         <label/>
         <group ref="tab1">
-            <label>{Create Record For}</label>
+            <label>{Create.Record.For}</label>
             <trigger ref="wall">
-                <label>{Create Wall}</label>
+                <label>{Create.Wall}</label>
             </trigger>
             <trigger ref="canal">
                 <label>{Create.Canal}</label>
@@ -725,15 +725,15 @@
     <group ref="createPolygon">
         <label/>
         <group ref="tab1">
-            <label>{Create Record For}</label>
+            <label>{Create.Record.For}</label>
             <trigger ref="structure">
-                <label>{Create Structure}</label>
+                <label>{Create.Structure}</label>
             </trigger>
             <trigger ref="feature">
-                <label>{Create Feature}</label>
+                <label>{Create.Feature}</label>
             </trigger>
             <trigger ref="surfaceCollection">
-                <label>{Create Surface Collection}</label>
+                <label>{Create.Surface.Collection}</label>
             </trigger>
         </group>
     </group>
@@ -872,10 +872,10 @@
           <label>{Connect.To.Internal.GPS}</label>
         </trigger>
         <trigger ref="startsync">
-          <label>{Start.Synching}</label>
+          <label>{Start.Syncing}</label>
         </trigger>
         <trigger ref="stopsync">
-          <label>{Stop.Synching}</label>
+          <label>{Stop.Syncing}</label>
         </trigger>
         <trigger ref="startTimeLog">
           <label>{Start.Time.Log}</label>
