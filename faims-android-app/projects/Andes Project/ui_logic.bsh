@@ -1948,7 +1948,6 @@ setDoorwayGPSFieldsFromPoint(geomList) {
 	if (geomList != null && !geomList.isEmpty()) {
 		point = geomList.get(0);
 		p = point.getMapPos();
-		p = convertFromProjToProj(getModuleSrid(), "4326", p);
 		setFieldValue("doorway/doorDetail/GPSLong", "" + p.x);
 		setFieldValue("doorway/doorDetail/GPSLat", "" + p.y);
 	}
@@ -1993,7 +1992,6 @@ setLichenGPSFieldsFromPoint(geomList) {
 	if (geomList != null && !geomList.isEmpty()) {
 		point = geomList.get(0);
 		p = point.getMapPos();
-		p = convertFromProjToProj(getModuleSrid(), "4326", p);
 		setFieldValue("lichen/lichenDetail/GPSLong", "" + p.x);
 		setFieldValue("lichen/lichenDetail/GPSLat", "" + p.y);
 	}
