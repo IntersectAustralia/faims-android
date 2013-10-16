@@ -46,6 +46,7 @@ private static String dbname;
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String sql = "select st_length(transform(LineFromText(?, 4326), ?));";
 				st = db.prepare(sql);
 				st.bind(1, WKTUtil.geometryToWKT(new Line(points, null, (LineStyle) null, null)));
@@ -82,6 +83,7 @@ private static String dbname;
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String sql = "select st_length(transform(LineFromText(?, 4326), ?));";
 				st = db.prepare(sql);
 				ArrayList<MapPos> list = new ArrayList<MapPos>();
@@ -142,6 +144,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select X(pt), Y(pt) from (select centroid(GeomFromText(?, 4326)) as pt);";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(polygon));
@@ -171,6 +174,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select area(transform(GeomFromText(?, 4326), ?));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(polygon));
@@ -201,6 +205,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select Hex(AsBinary(transform(buffer(transform(GeomFromText(?, 4326), ?), ?), 4326)));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(geom));
@@ -238,6 +243,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform(GeomFromText(?, 4326), ?));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(path));
@@ -313,6 +319,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select Hex(AsBinary(transform(GeomFromText(?, ?), ?)));";
 			st = db.prepare(sql);
 			st.bind(1, WKTUtil.geometryToWKT(geom));
@@ -350,6 +357,7 @@ private static String dbname;
 		try {
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
 			String sql = "select count(srid) from spatial_ref_sys where proj4text like '%+units=m%' and srid = ?;";
 			st = db.prepare(sql);
 			st.bind(1, Integer.parseInt(srid));

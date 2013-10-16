@@ -1682,6 +1682,7 @@ public class LayerManagerDialog extends AlertDialog {
 				try {
 					db = new jsqlite.Database();
 					db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+					db.exec("PRAGMA temp_store = 2", null);
 					
 					String query = "select f_table_name from geometry_columns;";
 					st = db.prepare(query);
@@ -1727,6 +1728,7 @@ public class LayerManagerDialog extends AlertDialog {
 			try {
 				db = new jsqlite.Database();
 				db.open(spatialFile.getPath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				String query = "pragma table_info(" + tableName + ")";
 				st = db.prepare(query);

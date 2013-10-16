@@ -80,6 +80,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				String query = "select geodesiclength(linefromtext('LINESTRING("+ prevLong+" " + prevLat + ", " + curLong + " " + curLat + ")', 4326));";
 				st = db.prepare(query);
@@ -116,6 +117,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (entityId != null) {
 					String parenttimestamp = null;
@@ -176,6 +178,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (!validArchEnt(db, entityId, entityType, geometry, attributes)) {
 					FLog.d("arch entity not valid");
@@ -287,6 +290,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				String parenttimestamp = null;
 				
@@ -340,6 +344,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				String parenttimestamp = null;
 				
@@ -394,6 +399,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (relationshipId != null) {
 					String parenttimestamp = null;
@@ -454,6 +460,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (!validRel(db, relationshipId, relationshipType, geometry, attributes)) {
 					FLog.d("relationship not valid");
@@ -630,6 +637,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (!hasEntity(db, entityId) || !hasRelationship(db, relationshipId)) {
 					FLog.d("cannot add entity to relationship");
@@ -692,6 +700,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				if (!hasEntity(db, id)) {
 					return null;
 				}
@@ -782,6 +791,7 @@ public class DatabaseManager {
 			try {
 				 db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				if (!hasRelationship(db, id)) {
 					return null;
@@ -872,6 +882,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				stmt = db.prepare(query);
 				Collection<String> results = new ArrayList<String>();
 				if(stmt.step()){
@@ -907,6 +918,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				stmt = db.prepare(query);
 				Collection<List<String>> results = new ArrayList<List<String>>();
 				while(stmt.step()){
@@ -990,6 +1002,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				stmt.bind(1, list.get(0).x);
@@ -1046,6 +1059,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String query = DatabaseQueries.GET_BOUNDARY_OF_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				if(stmt.step()){
@@ -1089,6 +1103,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String query = DatabaseQueries.FETCH_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				stmt.bind(1, list.get(0).x);
@@ -1145,6 +1160,7 @@ public class DatabaseManager {
 				}
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				String query = DatabaseQueries.GET_BOUNDARY_OF_ALL_VISIBLE_RELN_GEOMETRY(userQuery);
 				stmt = db.prepare(query);
 				if(stmt.step()){
@@ -1277,6 +1293,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 	
 				String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath());
 				db.exec(query, createCallback());
@@ -1301,6 +1318,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 	
 				String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath(), fromTimestamp);
 				db.exec(query, createCallback());
@@ -1324,6 +1342,7 @@ public class DatabaseManager {
 			
 			db = new jsqlite.Database();
 			db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			db.exec("PRAGMA temp_store = 2", null);
 			
 			db.exec("select spatialite_version(), sqlite_version(), proj4_version(), geos_version(), lwgeom_version();", new Callback() {
 				@Override
@@ -1364,6 +1383,7 @@ public class DatabaseManager {
 			
 			db = new jsqlite.Database();
 			db.open(file.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			db.exec("PRAGMA temp_store = 2", null);
 			
 			db.exec("select * from archentity;", new Callback() {
 				@Override
@@ -1405,6 +1425,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(file.getAbsolutePath(), jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				if (!isTableEmpty(db, "archentity")) return false;
 				if (!isTableEmpty(db, "aentvalue")) return false;
 				if (!isTableEmpty(db, "relationship")) return false;
@@ -1446,6 +1467,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				String query = DatabaseQueries.MERGE_DATABASE_FROM(file.getAbsolutePath());
 				db.exec(query, createCallback());
 			} finally {
@@ -1468,6 +1490,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(sql);
 				for (int i = 0; i < values.size(); i++) {
@@ -1504,6 +1527,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(sql);
 				for (int i = 0; i < values.size(); i++) {
@@ -1539,6 +1563,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_ENTITY);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1575,6 +1600,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_DISTANCE_RELATIONSHIP);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1612,6 +1638,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(buffer(transform(GeomFromText(?, 4326), ?), ?), transform("+ geometryColumn + ", ?))");
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1648,6 +1675,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_ENTITY);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1681,6 +1709,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare(DatabaseQueries.RUN_INTERSECT_RELATIONSHIP);
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1715,6 +1744,7 @@ public class DatabaseManager {
 			try {
 				db = new jsqlite.Database();
 				db.open(dbPath, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 				
 				stmt = db.prepare("select " + idColumn + " from " + tableName + " where "+ geometryColumn + " is not null and st_intersects(GeomFromText(?, 4326), transform("+ geometryColumn + ", 4326))");
 				stmt.bind(1, WKTUtil.geometryToWKT(geometry));
@@ -1748,6 +1778,7 @@ public class DatabaseManager {
 				String description = null;
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 	
 				String query = DatabaseQueries.GET_ATTRIBUTE_DESCRIPTION;
 				stmt = db.prepare(query);
@@ -1786,6 +1817,7 @@ public class DatabaseManager {
 				
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READONLY);
+				db.exec("PRAGMA temp_store = 2", null);
 	
 				String query = DatabaseQueries.GET_VOCABULARIES_TERM_DESCRIPTION;
 				stmt = db.prepare(query);
@@ -1842,6 +1874,7 @@ public class DatabaseManager {
 				int count = 0;
 				db = new jsqlite.Database();
 				db.open(dbname, jsqlite.Constants.SQLITE_OPEN_READWRITE);
+				db.exec("PRAGMA temp_store = 2", null);
 	
 				String query = DatabaseQueries.COUNT_AENT_RECORDS(timestamp);
 				stmt = db.prepare(query);
