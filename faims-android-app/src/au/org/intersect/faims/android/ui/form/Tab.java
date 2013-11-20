@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
@@ -815,10 +816,22 @@ public class Tab implements Parcelable{
 	}
 	
 	public List<View> getAllChildrenViews(){
+		Stack<LinearLayout> containers = new Stack<LinearLayout>(); 
 		List<View> views = new ArrayList<View>();
-		for(int i = 0; i < linearLayout.getChildCount(); i++){
-			views.add(linearLayout.getChildAt(i));
+		if (linearLayout == null) return views;
+		containers.add(linearLayout);
+		while (!containers.isEmpty()){
+			LinearLayout layout = containers.pop();
+			for(int i = 0; i < layout.getChildCount(); i++){
+				View view = layout.getChildAt(i);
+				if (view instanceof CustomLinearLayout){
+					containers.add((LinearLayout) view);
+				} else {
+					views.add(view);
+				}
+			}
 		}
+		
 		return views;
 	}
 	public List<View> getAllViews(){

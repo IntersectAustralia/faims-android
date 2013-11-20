@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.data.FormAttribute;
 
-public class CustomCheckBoxGroup extends CustomLinearLayout implements ICustomView {
+public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
 	private String ref;
 	private List<NameValuePair> currentValues;
