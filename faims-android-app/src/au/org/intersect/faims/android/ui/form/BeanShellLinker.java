@@ -619,7 +619,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("unchecked")
 	public void saveTabGroup(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
 		try {
-			final TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity, id);
+			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error saving tab group " + id);
 				return;
