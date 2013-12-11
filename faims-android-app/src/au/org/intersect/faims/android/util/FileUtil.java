@@ -15,13 +15,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.condition.EvaluationContext;
@@ -45,13 +45,13 @@ public class FileUtil {
 	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
 		FileOutputStream out = new FileOutputStream(filename);
 		return new TarArchiveOutputStream(
-				 new GZIPOutputStream(out));
+				 new GzipCompressorOutputStream(out));
 	}
 	
 	public static TarArchiveInputStream createTarInputStream(String filename) throws IOException {
 		FileInputStream in = new FileInputStream(filename);
 		return new TarArchiveInputStream(
-				 new GZIPInputStream(in));
+				 new GzipCompressorInputStream(in));
 	}
 	
 	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
