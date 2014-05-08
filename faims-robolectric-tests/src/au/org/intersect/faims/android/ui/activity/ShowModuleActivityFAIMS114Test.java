@@ -6,13 +6,14 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 
 import android.content.Intent;
 import android.widget.Button;
-import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
-@RunWith(FAIMSRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 
 	private String moduleBaseName = "FAIMS114";
@@ -24,13 +25,10 @@ public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 		String moduleName = getNewModuleName(moduleBaseName);
 		String moduleKey = UUID.randomUUID().toString();
 				
-		ShowModuleActivity activity = new ShowModuleActivity();
-		
 		// We need name + directory in an Intent
 		
-		Intent intent = new Intent();
+		Intent intent = new Intent(Robolectric.application, ShowModuleActivity.class);
 		intent.putExtra("key", moduleKey);
-		activity.setIntent(intent);
 		
 		// We need the UI xml and logic bsh files
 		
@@ -38,7 +36,7 @@ public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		// Create the activity
 		
-		activity.onCreate(null);
+		ShowModuleActivity activity = Robolectric.buildActivity(ShowModuleActivity.class).withIntent(intent).create().get();
 		
 		// There should now be a dialog asking if we want to render the module
 		/*
@@ -80,7 +78,6 @@ public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 		
 		actualValue = (String) activity.getBeanShellLinker().getFieldValue(field2Ref);
 		assertEquals("Set field Two using button", expectedValueF1, actualValue);
-
 
 	}
 

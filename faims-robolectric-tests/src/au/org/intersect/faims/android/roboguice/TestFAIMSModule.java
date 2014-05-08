@@ -12,7 +12,7 @@ import au.org.intersect.faims.android.net.TestServerDiscovery;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
-import com.xtremelabs.robolectric.Robolectric;
+import org.robolectric.Robolectric;
 
 public class TestFAIMSModule implements Module {
 	

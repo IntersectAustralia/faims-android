@@ -4,22 +4,21 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.shadows.ShadowIntent;
+import org.robolectric.tester.android.view.TestMenu;
+import org.robolectric.tester.android.view.TestMenuItem;
 
 import android.content.Intent;
 import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
-import com.xtremelabs.robolectric.Robolectric;
-import com.xtremelabs.robolectric.shadows.ShadowActivity;
-import com.xtremelabs.robolectric.shadows.ShadowIntent;
-import com.xtremelabs.robolectric.tester.android.view.TestMenu;
-import com.xtremelabs.robolectric.tester.android.view.TestMenuItem;
-
-@RunWith(FAIMSRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
 	
 	@Test
@@ -30,9 +29,7 @@ public class MainActivityTest {
 			TestModuleUtil.createModule("Module " + i, "key" + i);
 		}
 		
-		MainActivity activity = new MainActivity();
-		activity.onCreate(null);
-		activity.onStart();
+		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().start().get();
 
 		ListView moduleListView = (ListView) activity
 				.findViewById(R.id.module_list);
@@ -45,8 +42,7 @@ public class MainActivityTest {
 	@Test
 	public void fetchModuleMenuItemTest(){
 		
-		MainActivity activity = new MainActivity();
-		activity.onCreate(null);
+		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
 		
 		String itemTitle = "Fetch Module List";
 		
@@ -72,9 +68,7 @@ public class MainActivityTest {
 		
 		TestModuleUtil.createModule(moduleName, moduleKey);
 		
-		MainActivity activity = new MainActivity();
-		activity.onCreate(null);
-		activity.onStart();
+		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().start().get();
 		
 		ListView moduleListView = (ListView) activity
 				.findViewById(R.id.module_list);

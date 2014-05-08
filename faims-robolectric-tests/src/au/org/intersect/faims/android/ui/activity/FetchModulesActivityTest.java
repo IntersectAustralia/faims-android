@@ -9,6 +9,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.shadows.ShadowAlertDialog;
+import org.robolectric.shadows.ShadowIntent;
+import org.robolectric.tester.android.view.TestMenu;
+import org.robolectric.tester.android.view.TestMenuItem;
 
 import android.content.Intent;
 import android.os.Message;
@@ -21,20 +28,12 @@ import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.TestFAIMSClient;
 import au.org.intersect.faims.android.net.TestServerDiscovery;
-import au.org.intersect.faims.android.roblectric.FAIMSRobolectricTestRunner;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
 import au.org.intersect.faims.android.services.DownloadModuleService;
 import au.org.intersect.faims.android.services.TestDownloadModuleService;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
-import com.xtremelabs.robolectric.Robolectric;
-import com.xtremelabs.robolectric.shadows.ShadowActivity;
-import com.xtremelabs.robolectric.shadows.ShadowAlertDialog;
-import com.xtremelabs.robolectric.shadows.ShadowIntent;
-import com.xtremelabs.robolectric.tester.android.view.TestMenu;
-import com.xtremelabs.robolectric.tester.android.view.TestMenuItem;
-
-@RunWith(FAIMSRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class FetchModulesActivityTest {
 	
 	@Before
@@ -51,9 +50,7 @@ public class FetchModulesActivityTest {
 	@Test
 	public void testFetchModulesList() throws Exception {
 
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null); // this automatically fetches modules
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -80,9 +77,7 @@ public class FetchModulesActivityTest {
 	@Test
 	public void refreshListMenuItemTest(){
 		
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
@@ -125,9 +120,7 @@ public class FetchModulesActivityTest {
 	
 	@Test
 	public void testServerDiscoveryFailure() throws Exception {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// set invalid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -148,16 +141,14 @@ public class FetchModulesActivityTest {
 		// show failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Server Discovery Failure Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.locate_server_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.locate_server_failure_message), choiceDialog.getMessage());
 	}
 	
 	@Test
 	public void testServerDiscoveryRetry() throws Exception {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// set invalid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -178,7 +169,7 @@ public class FetchModulesActivityTest {
 		// show failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Server Discovery Failure Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Server Discovery Failure Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.locate_server_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.locate_server_failure_message), choiceDialog.getMessage());
 		
@@ -198,9 +189,7 @@ public class FetchModulesActivityTest {
 	@Test
 	public void testFetchModulesListFailure() throws Exception {
 
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// set valid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -222,7 +211,7 @@ public class FetchModulesActivityTest {
 		// show fetch failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Could not fetch modules Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Could not fetch modules Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.fetch_modules_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.fetch_modules_failure_message), choiceDialog.getMessage());
 	}
@@ -230,9 +219,7 @@ public class FetchModulesActivityTest {
 	@Test
 	public void testFetchModulesListRetry() throws Exception {
 
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// set valid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -254,7 +241,7 @@ public class FetchModulesActivityTest {
 		// show fetch failure dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Could not fetch modules Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Could not fetch modules Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.fetch_modules_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.fetch_modules_failure_message), choiceDialog.getMessage());
 		
@@ -273,9 +260,7 @@ public class FetchModulesActivityTest {
 
 	@Test
 	public void showDownloadModuleDialog() {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null); // this automatically fetches modules
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -301,16 +286,14 @@ public class FetchModulesActivityTest {
 		// show download module dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Download module dialog", choiceDialog.isShowing());
+		assertTrue("Download module dialog", ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.confirm_download_module_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.confirm_download_module_message) + " Module 0?", choiceDialog.getMessage());
 	}
 	
 	@Test
 	public void testDownloadModuleSuccess() throws Exception {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null); // this automatically fetches modules
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
@@ -337,7 +320,7 @@ public class FetchModulesActivityTest {
 		// show download module dialog
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Download module dialog", choiceDialog.isShowing());
+		assertTrue("Download module dialog", ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.confirm_download_module_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.confirm_download_module_message) + " Module 0?", choiceDialog.getMessage());
 		
@@ -365,10 +348,8 @@ public class FetchModulesActivityTest {
 	
 	@Test
 	public void testDownloadModuleServerFailure() throws Exception {
-
-		FetchModulesActivity activity = new FetchModulesActivity();
 		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 		
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
@@ -398,7 +379,7 @@ public class FetchModulesActivityTest {
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Could not download module Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Could not download module Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.download_module_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.download_module_failure_message), choiceDialog.getMessage());
 
@@ -406,9 +387,7 @@ public class FetchModulesActivityTest {
 	
 	@Test
 	public void testDownloadModuleCorrupted() throws Exception {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
@@ -439,16 +418,14 @@ public class FetchModulesActivityTest {
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
-		assertTrue("Could not download module Dialog Showing",choiceDialog.isShowing());
+		assertTrue("Could not download module Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.download_module_failure_title), choiceDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.download_module_failure_message), choiceDialog.getMessage());
 	}
 	
 	@Test
 	public void testDownloadModuleTooBig() throws Exception {
-		FetchModulesActivity activity = new FetchModulesActivity();
-		
-		activity.onCreate(null);
+		FetchModulesActivity activity = Robolectric.buildActivity(FetchModulesActivity.class).create().get();
 
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
 		discovery.setHostValid(true);
@@ -479,7 +456,7 @@ public class FetchModulesActivityTest {
 		
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
 		
-		assertTrue("Module is too big Dialog Showing",confirmDialog.isShowing());
+		assertTrue("Module is too big Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
 		assertEquals("Dialog title", activity.getString(R.string.download_module_error_title), confirmDialog.getTitle());
 		assertEquals("Dialog message", activity.getString(R.string.download_module_error_message), confirmDialog.getMessage());
 		
