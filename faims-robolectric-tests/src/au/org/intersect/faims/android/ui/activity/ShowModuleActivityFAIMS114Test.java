@@ -8,11 +8,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import android.content.Intent;
 import android.widget.Button;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
+@Config(manifest="../faims-android-app/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 

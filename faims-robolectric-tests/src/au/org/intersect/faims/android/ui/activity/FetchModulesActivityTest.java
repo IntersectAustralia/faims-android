@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.shadows.ShadowIntent;
@@ -33,6 +34,7 @@ import au.org.intersect.faims.android.services.DownloadModuleService;
 import au.org.intersect.faims.android.services.TestDownloadModuleService;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
+@Config(manifest="../faims-android-app/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class FetchModulesActivityTest {
 	

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 import org.robolectric.shadows.ShadowIntent;
 import org.robolectric.tester.android.view.TestMenu;
@@ -18,6 +19,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
+@Config(manifest="../faims-android-app/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class MainActivityTest {
 	
