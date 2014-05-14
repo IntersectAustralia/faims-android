@@ -325,6 +325,19 @@ public class BeanShellLinker {
 										}
 
 									});
+						} else if (view instanceof PictureGallery) {
+							final PictureGallery pictureGalleryView = (PictureGallery) view;
+							pictureGalleryView.setImageListener(new OnClickListener() {
+
+								@Override
+								public void onClick(View v)
+								{
+									execute(code);
+								}
+
+							});
+							((PictureGallery) view).updateImageListeners();
+							
 						} else {
 							view.setOnClickListener(new OnClickListener() {
 

@@ -16,6 +16,21 @@ import au.org.intersect.faims.android.data.FormAttribute;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
 
+	class PictureGalleryOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v)
+		{
+			if(listener != null) {
+				listener.onClick(v);
+			}
+			if(imageListener != null) {
+				imageListener.onClick(v);
+			}
+		}
+		
+	}
+	
 	protected static final int GALLERY_SIZE = 400;
 	
 	private String ref;
@@ -31,6 +46,10 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected List<CustomImageView> selectedImages;
 	protected ArrayList<CustomImageView> galleryImages;
 	protected LinearLayout galleriesLayout;
+	
+	protected PictureGalleryOnClickListener pictureGalleryListener;
+	private OnClickListener listener;
+	protected OnClickListener imageListener;
 
 	private boolean annotationEnabled;
 
@@ -40,10 +59,12 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	public PictureGallery(Context context) {
 		super(context);
+		this.pictureGalleryListener = new PictureGalleryOnClickListener();
 	}
 
 	public PictureGallery(Context context, FormAttribute attribute, String ref, boolean isMulti) {
 		super(context);
+		this.pictureGalleryListener = new PictureGalleryOnClickListener();
 		this.attribute = attribute;
 		this.ref = ref;
 		this.isMulti = isMulti;
@@ -173,6 +194,16 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
                 view.setBackgroundColor(Color.LTGRAY);
             }
         }
+		updateImageListeners();
+	}
+	
+	protected void updateImageListeners() {
+		if (galleryImages == null) return;
+		
+		for(CustomImageView image : galleryImages)
+		{
+			image.setOnClickListener(this.pictureGalleryListener);
+		}
 	}
 	
 	public List<CustomImageView> getSelectedImages() {
@@ -308,13 +339,13 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		gallery.setPadding(10, 10, 10, 10);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
-		gallery.setOnClickListener(new OnClickListener() {
-	
+		this.listener = new OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
 				selectImage(v);
 			}
-		});
+		};
 		gallery.setOnLongClickListener(new OnLongClickListener() {
 	
 			@Override
@@ -387,4 +418,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		certaintyEnabled = enabled;
 	}
 	
+	public void setImageListener(OnClickListener imageListener)
+	{
+		this.imageListener = imageListener;
+	}
 }
