@@ -299,20 +299,29 @@ public class BeanShellLinker {
 						});
 					} else {
 						if (view instanceof CustomSpinner) {
-							((CustomSpinner) view)
-									.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+							final CustomSpinner spinner = (CustomSpinner) view;
+							spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
 										@Override
 										public void onItemSelected(
 												AdapterView<?> arg0, View arg1,
 												int arg2, long arg3) {
-											execute(code);
+											if (spinner.ignoresSelectEvents() == false) {
+												execute(code);
+											} else {
+												spinner.setIgnoreSelectEvents(false);
+											}
+											
 										}
 
 										@Override
 										public void onNothingSelected(
 												AdapterView<?> arg0) {
-											execute(code);
+											if (spinner.ignoresSelectEvents() == false) {
+												execute(code);
+											} else {
+												spinner.setIgnoreSelectEvents(false);
+											}
 										}
 
 									});

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
@@ -16,6 +17,32 @@ import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
 public class HierarchicalSpinner extends CustomSpinner {
+	
+	class HierarchicalOnItemSelectListener implements OnItemSelectedListener {
+
+		@Override
+		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+		{
+			if(selectedListener != null) {
+				selectedListener.onItemSelected(parent, view, position, id);
+			}
+			if(internalSelectedListener != null) {
+				internalSelectedListener.onItemSelected(parent, view, position, id);
+			}
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> parent)
+		{
+			if(selectedListener != null) {
+				selectedListener.onNothingSelected(parent);
+			}
+			if(internalSelectedListener != null) {
+				internalSelectedListener.onNothingSelected(parent);
+			}
+		}
+		
+	}
 
 	private List<VocabularyTerm> terms;
 	
@@ -30,12 +57,20 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private HashMap<String, VocabularyTerm> vocabIdToParentTerm;
 	private HashMap<String, List<VocabularyTerm>> vocabIdToParentTerms;
 
+	private OnItemSelectedListener selectedListener;
+	private OnItemSelectedListener internalSelectedListener;
+	private OnItemSelectedListener hierarchicalSelectedListener;
+
 	public HierarchicalSpinner(Context context) {
 		super(context);
+		hierarchicalSelectedListener = new HierarchicalOnItemSelectListener();
+		super.setOnItemSelectedListener(hierarchicalSelectedListener);
 	}
 
 	public HierarchicalSpinner(Context context, FormAttribute attribute, String ref) {
 		super(context, attribute, ref);
+		hierarchicalSelectedListener = new HierarchicalOnItemSelectListener();
+		super.setOnItemSelectedListener(hierarchicalSelectedListener);
 	}
 	
 	private void mapVocabToParent() {
@@ -60,7 +95,23 @@ public class HierarchicalSpinner extends CustomSpinner {
 			}
 		}
 	}
-
+	
+	@Override
+	public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+		this.selectedListener = listener;
+	}
+	
+	/* 
+	 * Override the setAdapter method to set ignore boolean
+	 * Without, this was causing unwanted click events when changing/loading tabs
+	 */
+	@Override
+	public void setAdapter(SpinnerAdapter adapter)
+	{
+		this.ignoreSelectOnce = true;
+		super.setAdapter(adapter);	
+	}
+	
 	public void setTerms(List<VocabularyTerm> terms) {
 		this.terms = terms;
 		
@@ -68,7 +119,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 		
 		this.parentTerms = new Stack<VocabularyTerm>();
 		
-		setOnItemSelectedListener(new OnItemSelectedListener() {
+		this.internalSelectedListener = new OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View view,
@@ -103,7 +154,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			public void onNothingSelected(AdapterView<?> arg0) {
 			}
 			
-		});
+		};
 		
 		loadTerms();
 	}

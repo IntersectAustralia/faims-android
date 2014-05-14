@@ -19,6 +19,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
+	protected boolean ignoreSelectOnce;
 	
 	public CustomSpinner(Context context) {
 		super(context);
@@ -29,6 +30,14 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+	}
+	
+	public boolean ignoresSelectEvents() {
+		return ignoreSelectOnce;
+	}
+	
+	public void setIgnoreSelectEvents(boolean value) {
+		ignoreSelectOnce = value;
 	}
 
 	public String getAttributeName() {
