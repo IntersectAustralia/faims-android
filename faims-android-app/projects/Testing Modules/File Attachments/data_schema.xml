@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataSchema name="Attachments" preparer="Vincent Tran">
+  <ArchaeologicalElement name="Entity">
+    <property name="ID" type="freetext" isIdentifier="true">
+      <description>ID</description>
+    </property>
+    <property name="Files" type="file">
+      <description>Files</description>
+    </property>
+    <property name="Photo" type="file">
+      <description>Photo</description>
+    </property>
+    <property name="Audio" type="file">
+      <description>Audio</description>
+    </property>
+    <property name="Video" type="file">
+      <description>Video</description>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>
