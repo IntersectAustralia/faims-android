@@ -2,21 +2,17 @@ package au.org.intersect.faims.android.ui.activity;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.UUID;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import android.content.Intent;
 import android.widget.Button;
-import au.org.intersect.faims.android.util.TestModuleUtil;
+import au.org.intersect.faims.android.util.TestMethodsUtil;
 
 @Config(manifest="../faims-android-app/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
-public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
+public class ShowModuleActivityFAIMS114Test {
 
 	private String moduleBaseName = "FAIMS114";
 	private String directoryName = "FAIMS114_Tests";
@@ -24,21 +20,7 @@ public class ShowModuleActivityFAIMS114Test extends FAIMSLogicTestBase {
 	@Test
 	public void showModuleTest(){
 
-		String moduleName = getNewModuleName(moduleBaseName);
-		String moduleKey = UUID.randomUUID().toString();
-				
-		// We need name + directory in an Intent
-		
-		Intent intent = new Intent(Robolectric.application, ShowModuleActivity.class);
-		intent.putExtra("key", moduleKey);
-		
-		// We need the UI xml and logic bsh files
-		
-		TestModuleUtil.createModuleFrom(moduleName, moduleKey, this.directoryName);
-		
-		// Create the activity
-		
-		ShowModuleActivity activity = Robolectric.buildActivity(ShowModuleActivity.class).withIntent(intent).create().get();
+		ShowModuleActivity activity = TestMethodsUtil.showModule(moduleBaseName, directoryName); 
 		
 		// There should now be a dialog asking if we want to render the module
 		/*
