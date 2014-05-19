@@ -86,7 +86,7 @@ public class FAIMSClient {
 	}
 	
 	public Result fetchRequestObject(String requestUri) {
-		return fetchRequestObject(requestUri, true);
+		return fetchRequestObject(requestUri, false);
 	}
 	
 	public Result fetchRequestObject(String requestUri, boolean asArray) {
