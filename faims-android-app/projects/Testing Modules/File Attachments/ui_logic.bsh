@@ -1,0 +1,55 @@
+onEvent("control", "show", "populateList(\"control/Entity/ListEntity\", fetchEntityList(\"Entity\")); entity_id = null;");
+onEvent("control/Entity/NewEntity", "click", "newEntity()");
+onEvent("control/Entity/ListEntity", "click", "loadEntity()");
+
+onEvent("Entity/Entity/AttachFiles", "click", "attachFileTo(\"Entity/Entity/Files\")");
+onEvent("Entity/Entity/AttachPhoto", "click", "attachPictureTo(\"Entity/Entity/Photo\")");
+onEvent("Entity/Entity/AttachAudio", "click", "attachAudioTo(\"Entity/Entity/Audio\")");
+onEvent("Entity/Entity/AttachVideo", "click", "attachVideoTo(\"Entity/Entity/Video\")");
+onEvent("Entity/Entity/ViewAllFiles", "click", "viewArchEntAttachedFiles(entity_id)");
+onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
+
+String entity_id = null;
+
+newEntity(){
+    cememtery_id = null;
+    newTabGroup("Entity");
+}
+loadEntity() {
+    entity_id = getListItemValue();
+    loadEntityFrom(entity_id);
+}
+loadEntityFrom(entid) {
+    entity_id = entid;
+    if (isNull(entid)) return;
+    showTabGroup("Entity", entid);
+}
+
+saveEntity() {
+    if (isNull(getFieldValue("Entity/Entity/ID"))) { 
+        showWarning("Validation Error", "Cannot save Entity without ID");
+        showTabGroup("Entity");
+        return false;
+    }
+    if (!isNull(entity_id)) {
+        entity = fetchArchEnt(entity_id);
+    }
+    saveTabGroup("Entity", entity_id, null, null, "entity_id = getLastSavedRecordId();");
+}
+
+onEvent("control/sync/startsync", "click", "startSync()");
+onEvent("control/sync/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}

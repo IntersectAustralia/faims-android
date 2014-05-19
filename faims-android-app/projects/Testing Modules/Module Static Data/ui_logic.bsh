@@ -1,0 +1,18 @@
+initStatic() {
+    setFieldValue("control/static/name", getModuleName());
+    setFieldValue("control/static/id", getModuleId());
+    setFieldValue("control/static/season", getModuleSeason());
+    setFieldValue("control/static/description", getProjectDescription());
+    setFieldValue("control/static/permit_no", getPermitNo());
+    setFieldValue("control/static/permit_holder", getPermitHolder());
+    setFieldValue("control/static/contact_address", getContactAndAddress());
+    setFieldValue("control/static/participants", getParticipants());
+    setFieldValue("control/static/permit_issued_by", getPermitIssuedBy());
+    setFieldValue("control/static/permit_type", getPermitType());
+    setFieldValue("control/static/copyright_holder", getCopyrightHolder());
+    setFieldValue("control/static/client_sponsor", getClientSponsor());
+    setFieldValue("control/static/land_owner", getLandOwner());
+    setFieldValue("control/static/has_sensitive_data", hasSensitiveData());
+}
+
+initStatic();

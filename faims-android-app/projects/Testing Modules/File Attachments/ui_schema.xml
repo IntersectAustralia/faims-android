@@ -1,0 +1,150 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>hdb FAIMS Community Server</h:title>
+    <model>
+      <instance>
+        <faims id="hdb_FAIMS_Community_Server">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <control>
+            <Entity>
+              <NewEntity/>
+              <ListEntity/>
+            </Entity>
+            <sync>
+              <startsync/>
+              <stopsync/>
+            </sync>
+          </control>
+          <Entity>
+            <Entity>
+              <ID/>
+              <Files/>
+              <AttachFiles/>
+              <Photo/>
+              <AttachPhoto/>
+              <Audio/>
+              <AttachAudio/>
+              <Video/>
+              <AttachVideo/>
+              <ViewAllFiles/>
+              <Update/>
+            </Entity>
+          </Entity>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="control">
+      <label/>
+      <group ref="Entity" faims_scrollable="false">
+        <label>Entity</label>
+        <trigger ref="NewEntity">
+          <label>New Entity</label>
+        </trigger>
+        <select1 appearance="compact" ref="ListEntity">
+          <label>Entities:</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="sync">
+        <label>Syncing</label>
+        <trigger ref="startsync">
+          <label>Start Synching</label>
+        </trigger>
+        <trigger ref="stopsync">
+          <label>Stop Synching</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="Entity" faims_archent_type="Entity">
+      <label>Entity</label>
+      <group ref="Entity">
+        <label>Entity Attached Files</label>
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+          <label> ID </label>
+        </input>
+        <select ref="Files" faims_attribute_name="Files" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="file">
+            <label>Attached Files</label>
+            <item>
+                <label>{None}</label>
+                <value>None</value>
+            </item>
+        </select>
+        <trigger ref="AttachFiles">
+          <label>Attach File</label>
+        </trigger>
+        <select ref="Photo" faims_attribute_name="Photo" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="camera">
+          <label>Attached Photos</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="AttachPhoto">
+          <label>Take Photo</label>
+        </trigger>
+        <select ref="Audio" faims_attribute_name="Audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="file">
+            <label>Attached Audio Files</label>
+            <item>
+                <label>placeholder</label>
+                <value>placeholder</value>
+            </item>
+        </select>
+        <trigger ref="AttachAudio">
+          <label>Record Audio</label>
+        </trigger>
+        <select ref="Video" faims_attribute_name="Video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="video">
+          <label>Attached Videos</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select>
+        <trigger ref="AttachVideo">
+          <label>Record Video</label>
+        </trigger>
+        <trigger ref="ViewAllFiles">
+          <label>View All Files</label>
+        </trigger>
+        <trigger ref="Update">
+          <label>Save Entity</label>
+        </trigger>
+      </group>
+    </group>
+  </h:body>
+</h:html>

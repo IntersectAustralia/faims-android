@@ -1,0 +1,5 @@
+makePictureGallery(String attrib){
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
+}
+
+populatePictureGallery("control/Files/Gallery", makePictureGallery("Pictures"));
