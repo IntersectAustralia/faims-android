@@ -290,13 +290,13 @@ onAddMember() {
 	showToast("Added relationship member");
 }
 
-onEvent("tabgroup1/tab1/type", "click", "clickEventToast(\"Hierarchical dropdown click event\")");
+onEvent("tabgroup1/tab1/type", "select", "clickEventToast(\"Hierarchical dropdown select event\")");
 
-onEvent("tabgroup1/tab1/gallery", "click", "clickEventToast(\"Gallery click event\")");
+onEvent("tabgroup1/tab1/gallery", "select", "clickEventToast(\"Gallery select event\")");
 
-onEvent("tabgroup1/tab1/rocks", "click", "clickEventToast(\"Hierarchical gallery click event\")");
+onEvent("tabgroup1/tab1/rocks", "select", "clickEventToast(\"Hierarchical gallery select event\")");
 
-onEvent("tabgroup1/tab2/entities", "click", "clickEventToast(\"Dropdown click event\")");
+onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select event\")");
 
 clickEventToast(string) {
 	showToast(string);
