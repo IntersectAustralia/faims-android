@@ -3,69 +3,43 @@ package au.org.intersect.faims.android.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.util.LinkedList;
-import java.util.List;
 
-import au.org.intersect.faims.android.data.Module;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class JsonUtil {
 
-	public static String serializeServerPacket(String ip, String port) {
-		JsonObject object = new JsonObject();
-    	object.addProperty("android_ip", ip);
-    	object.addProperty("android_port", port);
+	public static String serializeServerPacket(String ip, String port) throws JSONException {
+		JSONObject object = new JSONObject();
+    	object.put("android_ip", ip);
+    	object.put("android_port", port);
     	return object.toString();
 	}
 	
-	public static JsonObject deserializeServerPacket(String json) throws IOException {
-		return deserializeJson(json);
+	public static JSONObject deserializeServerPacket(String json) throws IOException, JSONException {
+		return deserializeJsonString(json);
 	}
 	
-	public static JsonObject deserializeJson(String json) throws IOException {
-		JsonReader reader = new JsonReader(new StringReader(json));
-        JsonParser parser = new JsonParser();
-        return parser.parse(reader).getAsJsonObject(); 
+	public static JSONObject deserializeJsonString(String json) throws IOException, JSONException {
+		return new JSONObject(json); 
 	}
 	
-	public static List<Module> deserializeModules(InputStream stream) throws IOException {
-		LinkedList<Module> modules = new LinkedList<Module>();
-		JsonArray objects = deserializeJsonArray(stream);
-		for (int i = 0; i < objects.size(); i++) {
-			modules.push(Module.fromJson(objects.get(i).getAsJsonObject()));
-		}
-		return modules;
+	public static JSONObject deserializeJsonObject(InputStream stream) throws IOException, JSONException {
+        return new JSONObject(streamToString(stream));
 	}
 	
-	public static Module deserializeModuleArchive(InputStream stream) throws IOException {
-		JsonObject object = deserializeJsonObject(stream);
-		return Module.fromJson(object);
+	public static JSONArray deserializeJsonArray(InputStream stream) throws IOException, JSONException {
+		return new JSONArray(streamToString(stream));
 	}
 	
-	public static JsonObject deserializeJsonObject(InputStream stream) throws IOException {
-        JsonReader reader = new JsonReader(streamToReader(stream));
-        JsonParser parser = new JsonParser();
-        return parser.parse(reader).getAsJsonObject(); 
-	}
-	
-	public static JsonArray deserializeJsonArray(InputStream stream) throws IOException {
-		JsonReader reader = new JsonReader(streamToReader(stream));
-	    JsonParser parser = new JsonParser();
-	    return parser.parse(reader).getAsJsonArray();
-	}
-	
-	private static StringReader streamToReader(InputStream stream) throws IOException {
+	private static String streamToString(InputStream stream) throws IOException {
 		InputStreamReader reader = new InputStreamReader(stream);
         StringBuilder sb = new StringBuilder();
         int value;
         while((value = reader.read()) > 0)
             sb.append((char) value);
-        return new StringReader(sb.toString());
+        return sb.toString();
 	}
 
 }

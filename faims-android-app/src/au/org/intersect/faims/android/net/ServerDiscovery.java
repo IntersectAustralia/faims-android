@@ -14,6 +14,9 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
@@ -22,7 +25,6 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.JsonUtil;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -211,7 +213,7 @@ public class ServerDiscovery {
 		}).start();
 	}
 	
-	private void sendBroadcast() throws SocketException, IOException {
+	private void sendBroadcast() throws SocketException, IOException, JSONException {
 		
 		DatagramSocket s = new DatagramSocket();
 		try {
@@ -232,7 +234,7 @@ public class ServerDiscovery {
 		}
 	}
 	
-	private void receivePacket(DatagramSocket r) throws SocketException, IOException {
+	private void receivePacket(DatagramSocket r) throws SocketException, IOException, JSONException {
 		
 		try {
 			r.setSoTimeout(getPacketTimeout());
@@ -242,12 +244,12 @@ public class ServerDiscovery {
 	    	
 	        r.receive(packet);
 	       
-	        JsonObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
+	        JSONObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
 	        
 	        if (data.has("server_ip"))
-	        	serverIP = data.get("server_ip").getAsString();
+	        	serverIP = data.getString("server_ip");
 	        if (data.has("server_port"))
-	        	serverPort = data.get("server_port").getAsString();
+	        	serverPort = data.getString("server_port");
 	        
 	        FLog.d("ServerIP: " + serverIP);
 	        FLog.d("ServerPort: " + serverPort);

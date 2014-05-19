@@ -377,7 +377,7 @@ public class FetchModulesActivityTest {
 		
 		Message msg = new Message();
 		msg.obj = DownloadResult.FAILURE;
-		activity.handler.handleMessage(msg);
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -416,7 +416,7 @@ public class FetchModulesActivityTest {
 		
 		Message msg = new Message();
 		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
-		activity.handler.handleMessage(msg);
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -454,7 +454,7 @@ public class FetchModulesActivityTest {
 		
 		Message msg = new Message();
 		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
-		activity.handler.handleMessage(msg);
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
 		

@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
-
-import com.google.gson.JsonObject;
 
 public class ModuleUtil {
 
@@ -42,7 +42,7 @@ public class ModuleUtil {
 				try {
 					is = new FileInputStream(f);
 					String config = FileUtil.convertStreamToString(is);
-					JsonObject object = JsonUtil.deserializeJson(config);
+					JSONObject object = JsonUtil.deserializeJsonString(config);
 					Module module = Module.fromJson(object);	
 					list.add(module);
 				} catch (Exception e) {
@@ -89,7 +89,7 @@ public class ModuleUtil {
 	    	writer.write(module.toJson().toString());
 	    	writer.flush();
 	    	writer.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			FLog.e("error saving module", e);
 		}
 	}

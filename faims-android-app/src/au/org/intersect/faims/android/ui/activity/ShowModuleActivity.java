@@ -57,8 +57,6 @@ import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
-import au.org.intersect.faims.android.managers.LockManager;
-import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
@@ -144,7 +142,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 				Message message) {
 			activity.busyDialog.dismiss();
 			
-			DownloadResult result = (DownloadResult) message.obj;
+			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				activity.linker.execute(callback);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
@@ -522,16 +520,12 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 		this.moduleKey = module.key;
 		this.moduleDir = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key;
 		
-		databaseManager.init(moduleDir + "/db.sqlite3");
+		databaseManager.init(moduleDir + "/db.sqlite");
 		databaseManager.setWeakReference(this);
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
 		arch16n = new Arch16n(moduleDir, module.name);
 		
-		SpatialiteUtil.setDatabaseName(moduleDir + "/db.sqlite3");
-		
-		// clear any lock files that may exist
-		String lock = moduleDir + "/.lock";
-		LockManager.clearLock(lock);
+		SpatialiteUtil.setDatabaseName(moduleDir + "/db.sqlite");
 		
 		fm = new FileManager();
 	}
@@ -1400,7 +1394,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 
 	private boolean hasDatabaseChanges() throws Exception{
 		Module module = ModuleUtil.getModule(moduleKey);
-		String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
+		String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite";
 		
 		// create temp database to upload
 		databaseManager.init(database);
@@ -1590,21 +1584,16 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 
 			@Override
 			public void run() {
-				final String lock = moduleDir + "/.lock";
-				
 				try {
-					
-					LockManager.waitForLock(lock);
 					
 					ShowModuleActivity.this.runOnUiThread(new Runnable() {
 
 						@Override
 						public void run() {
-							new CopyFileTask(fromFile, toFile, new ITaskListener() {
+							new CopyFileTask(new File(fromFile), new File(toFile), new ITaskListener() {
 								
 								@Override
 								public void handleTaskCompleted(Object result) {
-									LockManager.clearLock(lock);
 									activityData.setCopyFileCount(activityData.getCopyFileCount() - 1);
 									if (listener != null) {
 										listener.handleComplete();
@@ -1618,8 +1607,6 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 					
 				} catch (Exception e) {
 					FLog.e("error copying file", e);
-				} finally {
-					LockManager.clearLock(lock);
 				}
 			}
 			
