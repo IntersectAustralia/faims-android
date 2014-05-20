@@ -76,17 +76,17 @@ public class SyncDatabaseService extends UploadDatabaseService {
 		ModuleUtil.saveModule(module);
 	}
 
-	private void downloadDatabase() throws Exception {		
+	private void downloadDatabase() throws Exception {	
 		// check if there is a new version to download
-		Result infoResult = faimsClient.fetchRequestObject(Request.DATABASE_INFO_REQUEST(serviceModule));		
+		Result infoResult = faimsClient.fetchRequestObject(Request.SETTINGS_INFO_REQUEST(serviceModule));		
 		if (infoResult.resultCode != FAIMSClientResultCode.SUCCESS) {
 			serviceResult = infoResult;
 			return;
 		} 
 
-		JSONObject jsonInfo = (JSONObject) infoResult.data;		
-		int serverVersion = Integer.parseInt(jsonInfo.optString("version") == null ? "0" : jsonInfo.optString("version"));
+		JSONObject jsonInfo = (JSONObject) infoResult.data;	
 		int moduleVersion = Integer.parseInt(serviceModule.version == null ? "0" : serviceModule.version);
+		int serverVersion = Integer.parseInt(jsonInfo.optString("version") == null ? "0" : jsonInfo.optString("version"));
 		if (serverVersion == moduleVersion) {
 			FLog.d("database is up to date");
 			serviceResult = Result.SUCCESS;
