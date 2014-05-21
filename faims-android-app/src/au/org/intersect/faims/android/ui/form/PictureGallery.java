@@ -48,7 +48,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected LinearLayout galleriesLayout;
 	
 	protected PictureGalleryOnClickListener pictureGalleryListener;
-	private OnClickListener listener;
+	protected OnClickListener listener;
 	protected OnClickListener imageListener;
 
 	private boolean annotationEnabled;

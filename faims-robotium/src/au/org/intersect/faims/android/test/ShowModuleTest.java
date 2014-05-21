@@ -86,6 +86,10 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
 		solo.clickOnView(solo.getView(CustomImageView.class, 21));
+		// Check click event doesn't fire on parent item
+		assertFalse(solo.searchText("Hierarchical gallery select event"));
+		solo.scrollToTop();
+		solo.clickOnView(solo.getView(CustomImageView.class, 22));
 		
 		assertTrue(solo.searchText("Hierarchical gallery select event"));
 	}
