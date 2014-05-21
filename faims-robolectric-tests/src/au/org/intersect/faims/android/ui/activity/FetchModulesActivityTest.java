@@ -24,9 +24,9 @@ import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Module;
-import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
+import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.net.TestFAIMSClient;
 import au.org.intersect.faims.android.net.TestServerDiscovery;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
@@ -376,8 +376,8 @@ public class FetchModulesActivityTest {
 		// TODO assert no module has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = DownloadResult.FAILURE;
-		activity.handler.handleMessage(msg);
+		msg.obj = Result.FAILURE;
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -415,8 +415,8 @@ public class FetchModulesActivityTest {
 		// TODO assert no module has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
-		activity.handler.handleMessage(msg);
+		msg.obj = new Result(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
@@ -453,8 +453,8 @@ public class FetchModulesActivityTest {
 		// TODO assert no module has been downloaded
 		
 		Message msg = new Message();
-		msg.obj = new DownloadResult(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
-		activity.handler.handleMessage(msg);
+		msg.obj = new Result(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
+		activity.downloadHandler.handleMessage(msg);
 		
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
 		

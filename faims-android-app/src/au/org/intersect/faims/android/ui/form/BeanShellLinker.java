@@ -2944,7 +2944,7 @@ public class BeanShellLinker {
 			}
 
 			// create directories
-			FileUtil.makeDirs(activity.getModuleDir() + "/" + attachFile);
+			FileUtil.makeDirs(new File(activity.getModuleDir() + "/" + attachFile));
 			String name= file.getName();
 			
 			// create random file path

@@ -1,61 +1,72 @@
 package au.org.intersect.faims.android.net;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.io.File;
+import java.util.HashMap;
 
-import au.org.intersect.faims.android.data.FileInfo;
-import au.org.intersect.faims.android.data.Module;
-import au.org.intersect.faims.android.util.TestModuleUtil;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.google.inject.Provider;
 
 public class TestFAIMSClient extends FAIMSClient {
 	
-	private int modulesCount = 0;
-	private FAIMSClientResultCode modulesCode;
+	private int modulesCount;
+	private FAIMSClientResultCode fetchCode;
 	private FAIMSClientResultCode downloadResultCode;
 	private FAIMSClientErrorCode downlaodErrorCode;
-
-	@Override
-	public FetchResult fetchModuleList() {
-		ArrayList<Module> modules = new ArrayList<Module>();
-		for (int i = 0; i < modulesCount; i++) {
-			modules.add(new Module("Module " + i, UUID.randomUUID().toString()));
-		}
-		return new FetchResult(modulesCode, null, modules);
-	}
-
-	@Override
-	public DownloadResult downloadSettings(Module module) {
-		TestModuleUtil.createModuleFrom(module.name, module.key, "Common");
-		FileInfo info = new FileInfo();
-		info.version = "0";
-		return new DownloadResult(downloadResultCode, downlaodErrorCode, info);
-	}
-	
-	@Override
-	public DownloadResult downloadDatabase(Module module) {
-		return new DownloadResult(downloadResultCode, downlaodErrorCode);
-	}
-	
-	@Override
-	public DownloadResult downloadDirectory(String moduleDir, String downloadDir, String requestExcludePath, String infoPath, String downloadPath) {
-		return new DownloadResult(downloadResultCode, downlaodErrorCode);
-	}
-	
-	public void setModulesCount(int value) {
-		modulesCount = value;
-	}
-	
-	public void setModulesResultCode(FAIMSClientResultCode value) {
-		modulesCode = value;
-	}
 	
 	public void setDownloadResultCode(FAIMSClientResultCode resultCode, FAIMSClientErrorCode errorCode) {
 		downloadResultCode = resultCode;
 		downlaodErrorCode = errorCode;
 	}
 	
+	public void setModulesCount(int count) {
+		this.modulesCount = count;
+	}
+	
+	public void setModulesResultCode(FAIMSClientResultCode fetchCode) {
+		this.fetchCode = fetchCode;
+	}
+	
+	@Override
+	public Result fetchRequestArray(String requestUri) {
+		if (fetchCode == FAIMSClientResultCode.SUCCESS) {
+			Result result = Result.SUCCESS;
+			try {
+				JSONArray jsonArray = new JSONArray();
+				for (int i = 0; i < modulesCount; i++) {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("name", "Module " + i);
+					jsonArray.put(jsonObject);
+				}
+				result.data = jsonArray;
+			} catch (JSONException e) {
+				System.out.println(e);
+			}
+			return result;
+		}
+		return new Result(fetchCode);
+	}
+
+	@Override
+	public Result fetchRequestObject(String requestUri) {
+		return new Result(fetchCode);
+	}
+
+	@Override
+	public Result downloadFile(String requestUri, File location) {
+		return new Result(downloadResultCode, downlaodErrorCode);
+	}
+
+	@Override
+	public Result uploadFile(String requestUri, File uploadFile,
+			File uploadPath, HashMap<String, ContentBody> extraParts) {
+		// TODO Auto-generated method stub
+		return super.uploadFile(requestUri, uploadFile, uploadPath, extraParts);
+	}
+
 	public static Provider<TestFAIMSClient> createProvider(final int count, final FAIMSClientResultCode fetchCode, final FAIMSClientResultCode resultCode, final FAIMSClientErrorCode errorCode)
 	{
 		return new Provider<TestFAIMSClient>() {
