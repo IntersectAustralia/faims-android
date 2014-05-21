@@ -309,55 +309,61 @@ public class BeanShellLinker {
 
 						});
 					} else {
-						if (view instanceof CustomSpinner) {
-							final CustomSpinner spinner = (CustomSpinner) view;
-							spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+						view.setOnClickListener(new OnClickListener() {
 
-										@Override
-										public void onItemSelected(
-												AdapterView<?> arg0, View arg1,
-												int arg2, long arg3) {
-											if (spinner.ignoresSelectEvents() == false) {
-												execute(code);
-											} else {
-												spinner.setIgnoreSelectEvents(false);
-											}
-											
-										}
+							@Override
+							public void onClick(View v) {
+								execute(code);
+							}
+						});
+					}
+				}
+			} else if ("select".equals(type.toLowerCase(Locale.ENGLISH))) {
+				View view = activity.getUIRenderer().getViewByRef(ref);
+				if (view == null) {
+					FLog.w("cannot find view " + ref);
+					showWarning("Logic Error", "Error cannot find view " + ref);
+					return;
+				} else {
+					if (view instanceof CustomSpinner) {
+						final CustomSpinner spinner = (CustomSpinner) view;
+						spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-										@Override
-										public void onNothingSelected(
-												AdapterView<?> arg0) {
-											if (spinner.ignoresSelectEvents() == false) {
-												execute(code);
-											} else {
-												spinner.setIgnoreSelectEvents(false);
-											}
-										}
-
-									});
-						} else if (view instanceof PictureGallery) {
-							final PictureGallery pictureGalleryView = (PictureGallery) view;
-							pictureGalleryView.setImageListener(new OnClickListener() {
-
-								@Override
-								public void onClick(View v)
-								{
+							@Override
+							public void onItemSelected(
+									AdapterView<?> arg0, View arg1,
+									int arg2, long arg3) {
+								if (spinner.ignoresSelectEvents() == false) {
 									execute(code);
+								} else {
+									spinner.setIgnoreSelectEvents(false);
 								}
+								
+							}
 
-							});
-							((PictureGallery) view).updateImageListeners();
-							
-						} else {
-							view.setOnClickListener(new OnClickListener() {
-
-								@Override
-								public void onClick(View v) {
+							@Override
+							public void onNothingSelected(
+									AdapterView<?> arg0) {
+								if (spinner.ignoresSelectEvents() == false) {
 									execute(code);
+								} else {
+									spinner.setIgnoreSelectEvents(false);
 								}
-							});
-						}
+							}
+
+						});
+					} else if (view instanceof PictureGallery) {
+						final PictureGallery pictureGalleryView = (PictureGallery) view;
+						pictureGalleryView.setImageListener(new OnClickListener() {
+
+							@Override
+							public void onClick(View v)
+							{
+								execute(code);
+							}
+
+						});
+						((PictureGallery) view).updateImageListeners();
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
