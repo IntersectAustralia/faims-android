@@ -103,8 +103,12 @@ public class Database {
 	}
 	
 	protected jsqlite.Database openDB(int type) throws jsqlite.Exception {
+		return openDB(dbFile, type);
+	}
+	
+	protected jsqlite.Database openDB(File file, int type) throws jsqlite.Exception {
 		db = new jsqlite.Database();
-		db.open(dbFile.getPath(), type);
+		db.open(file.getPath(), type);
 		db.exec("PRAGMA temp_store = 2", null);
 		return db;
 	}

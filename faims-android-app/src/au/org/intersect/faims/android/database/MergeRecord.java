@@ -38,7 +38,7 @@ public class MergeRecord extends Database {
 		synchronized(DatabaseManager.class) {
 			FLog.d("checking if database " + file.getAbsolutePath() + " is empty");
 			try {
-				db = openDB();
+				db = openDB(file, jsqlite.Constants.SQLITE_OPEN_READONLY);
 				
 				if (!isTableEmpty(db, "archentity")) return false;
 				if (!isTableEmpty(db, "aentvalue")) return false;
