@@ -363,7 +363,6 @@ public class BeanShellLinker {
 							}
 
 						});
-						((PictureGallery) view).updateImageListeners();
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {

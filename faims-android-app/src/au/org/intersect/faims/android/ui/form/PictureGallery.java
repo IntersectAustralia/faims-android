@@ -421,5 +421,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	public void setImageListener(OnClickListener imageListener)
 	{
 		this.imageListener = imageListener;
+		updateImageListeners();
 	}
 }
