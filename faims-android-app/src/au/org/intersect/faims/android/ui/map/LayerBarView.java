@@ -10,22 +10,28 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.MapTask;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.map.button.LayerManagerButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
+
+import com.google.inject.Inject;
 
 public class LayerBarView extends RelativeLayout {
-
+	
 	public static final float BAR_HEIGHT = 65.0f;
-	private static final int BAR_COLOR = 0x88000000;
-	private static final int TEXT_COLOR = 0x88FFFFFF;
+	public static final int BAR_COLOR = 0x88000000;
+	public static final int TEXT_COLOR = 0x88FFFFFF;
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private MapNorthView northView;
 	private ScaleBarView scaleView;
@@ -38,6 +44,8 @@ public class LayerBarView extends RelativeLayout {
 
 	public LayerBarView(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		RelativeLayout.LayoutParams layerBarLayout = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, (int) ScaleUtil.getDip(getContext(), BAR_HEIGHT));
 		layerBarLayout.alignWithParent = true;
 		layerBarLayout.addRule(RelativeLayout.ALIGN_BOTTOM);
@@ -152,7 +160,7 @@ public class LayerBarView extends RelativeLayout {
 		int height = mapView.getHeight();
 		
 		try {
-			scaleView.setMapBoundary(mapView.getZoom(), width, height, SpatialiteUtil
+			scaleView.setMapBoundary(mapView.getZoom(), width, height, databaseManager.spatialRecord()
 					.distanceBetween(
 							GeometryUtil.convertToWgs84(mapView.screenToWorld(0, height, 0)), 
 							GeometryUtil.convertToWgs84(mapView.screenToWorld(width, height, 0)), 

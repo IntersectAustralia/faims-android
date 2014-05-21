@@ -50,8 +50,7 @@
             >
              <meta-data
             android:name="android.support.PARENT_ACTIVITY"
-            android:value="au.org.intersect.faims.android.ui.activity.MainActivity" />
-           
+            android:value="au.org.intersect.faims.android.ui.activity.MainActivity" />       
         </activity>
         
         <activity

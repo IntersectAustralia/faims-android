@@ -10,12 +10,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import roboguice.RoboGuice;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
@@ -37,13 +37,13 @@ public abstract class DownloadUploadService extends IntentService {
 
 	public DownloadUploadService(String name) {
 		super(name);
+
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		RoboGuice.getBaseApplicationInjector(this.getApplication())
-				.injectMembers(this);
 	}
 
 	@Override

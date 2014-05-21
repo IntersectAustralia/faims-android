@@ -8,16 +8,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
@@ -26,6 +28,9 @@ import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class FollowTool extends HighlightTool {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private class FollowToolCanvas extends ToolCanvas {
 		
@@ -255,7 +260,7 @@ public class FollowTool extends HighlightTool {
 
 			targetPoint = mapView.nextPointToFollow(currentPosition, mapView.getPathBuffer());
 			
-			distance = (float) SpatialiteUtil.distanceBetween(currentPosition, targetPoint, mapView.getModuleSrid());
+			distance = (float) databaseManager.spatialRecord().distanceBetween(currentPosition, targetPoint, mapView.getModuleSrid());
 			angle = SpatialiteUtil.computeAzimuth(currentPosition, targetPoint);
 		} catch (Exception e) {
 			FLog.e("error calculating distance and bearing", e);

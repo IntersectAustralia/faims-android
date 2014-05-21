@@ -7,13 +7,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
+import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
@@ -21,6 +24,9 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 
 public class DrawView extends View {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	protected static final float SCALE_FACTOR = 40.0f;
 
@@ -49,6 +55,8 @@ public class DrawView extends View {
 
 	public DrawView(Context context) {
 		super(context);
+		
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		updatePaint();
 	}
@@ -182,7 +190,7 @@ public class DrawView extends View {
 	}
 	
 	protected MapPos projectPoint(MapPos p) {
-		return GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, mapView.getModuleSrid(), p);
+		return databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG3857, mapView.getModuleSrid(), p);
 	}
 	
 	public void setDrawList(List<Geometry> geometryList) {

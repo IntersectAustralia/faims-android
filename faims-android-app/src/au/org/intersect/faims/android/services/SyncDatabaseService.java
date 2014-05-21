@@ -48,13 +48,13 @@ public class SyncDatabaseService extends UploadDatabaseService {
     	
 		dumpTimestamp = DateUtil.getCurrentTimestampGMT();
 		if (serviceModule.timestamp == null) {
-			databaseManager.dumpDatabaseTo(tempDB);
+			databaseManager.mergeRecord().dumpDatabaseTo(tempDB);
 		} else {
-			databaseManager.dumpDatabaseTo(tempDB, serviceModule.timestamp); 
+			databaseManager.mergeRecord().dumpDatabaseTo(tempDB, serviceModule.timestamp); 
 		}
 		
     	// check if database is empty
-    	if (databaseManager.isEmpty(tempDB)) {
+    	if (databaseManager.mergeRecord().isEmpty(tempDB)) {
     		FLog.d("database is empty");
     		return;
     	}
@@ -107,7 +107,7 @@ public class SyncDatabaseService extends UploadDatabaseService {
 		}
 		
 		// merge database 
-		databaseManager.mergeDatabaseFrom(new File(tempDir.getAbsoluteFile() + "/db.sqlite"));
+		databaseManager.mergeRecord().mergeDatabaseFrom(new File(tempDir.getAbsoluteFile() + "/db.sqlite"));
 		
 		// update settings
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings

@@ -5,13 +5,14 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.view.View;
 import android.view.View.OnClickListener;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.SettingsButton;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
@@ -20,6 +21,9 @@ import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class PathFollowerTool extends HighlightTool {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private class PathFollowerToolCanvas extends ToolCanvas {
 		
@@ -185,7 +189,7 @@ public class PathFollowerTool extends HighlightTool {
 		killFollowerThread = false;
 		currentPoint = p.getMapPos();
 		try {
-			bufferGeom = SpatialiteUtil.geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getModuleSrid());
+			bufferGeom = databaseManager.spatialRecord().geometryBuffer(mapView.getGeomToFollow(), buffer * 100, mapView.getModuleSrid());
 		} catch (Exception e) {
 			FLog.e("error gettting geometry buffer", e);
 		}
@@ -202,7 +206,7 @@ public class PathFollowerTool extends HighlightTool {
 						
 							double dx = point.x - currentPoint.x;
 							double dy = point.y - currentPoint.y;
-							double d = SpatialiteUtil.distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getModuleSrid());
+							double d = databaseManager.spatialRecord().distanceBetween(point, currentPoint, PathFollowerTool.this.mapView.getModuleSrid());
 							
 							double nextStep;
 							if (d == 0) {

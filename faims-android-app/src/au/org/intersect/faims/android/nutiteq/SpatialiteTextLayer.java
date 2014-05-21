@@ -3,9 +3,12 @@ package au.org.intersect.faims.android.nutiteq;
 import java.util.List;
 import java.util.Vector;
 
+import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -19,6 +22,9 @@ import com.nutiteq.style.TextStyle;
 import com.nutiteq.vectorlayers.TextLayer;
 
 public class SpatialiteTextLayer extends TextLayer {
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	private StyleSet<TextStyle> styleSet;
 	private int minZoom;
@@ -30,13 +36,15 @@ public class SpatialiteTextLayer extends TextLayer {
 
 	public SpatialiteTextLayer(Projection projection, CustomSpatialiteLayer layer, String[] userColumns, StyleSet<TextStyle> styleSet) {
 		super(projection);
+
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.spatialiteLayer = layer;
 		this.userColumns = userColumns;
 		this.styleSet = styleSet;
 		if (styleSet != null) {
 			this.minZoom = styleSet.getFirstNonNullZoomStyleZoom();
 		}
-
 	}
 	
 	public void renderOnce() {
@@ -74,7 +82,7 @@ public class SpatialiteTextLayer extends TextLayer {
 					topRight = ((Line) geom).getVertexList().get(0);
 				} else if (geom instanceof Polygon) {
 					try {
-						MapPos center = SpatialiteUtil.computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
+						MapPos center = databaseManager.spatialRecord().computeCentroid((Polygon) GeometryUtil.convertGeometryToWgs84(geom));
 						topRight = GeometryUtil.convertFromWgs84(center);
 					} catch (Exception e) {
 						topRight = new MapPos(0, 0);

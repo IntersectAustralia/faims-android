@@ -6,6 +6,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
@@ -19,6 +20,8 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 	protected RelativeLayout container;
 	
 	public MapTool(Context context, CustomMapView mapView, String name) {
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.name = name;
 		this.mapView = mapView;
 		this.context = context;

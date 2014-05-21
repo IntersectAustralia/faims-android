@@ -43,7 +43,8 @@ public class UploadDatabaseService extends DownloadUploadService {
 	protected void initService(Intent intent) {
     	super.initService(intent);
     	userId = intent.getStringExtra("userId");
-    	databaseManager.init(serviceModule.getDirectoryPath("db.sqlite").getPath());
+    	databaseManager.init(serviceModule.getDirectoryPath("db.sqlite"));
+    	databaseManager.setUserId(userId);
 	}
 
 	@Override
@@ -54,10 +55,10 @@ public class UploadDatabaseService extends DownloadUploadService {
 	private void uploadDatabase() throws Exception {
 		tempDB = File.createTempFile("temp_", ".sqlite", serviceModule.getDirectoryPath());
     	
-		databaseManager.dumpDatabaseTo(tempDB);
+		databaseManager.mergeRecord().dumpDatabaseTo(tempDB);
 		
     	// check if database is empty
-    	if (databaseManager.isEmpty(tempDB)) {
+    	if (databaseManager.mergeRecord().isEmpty(tempDB)) {
     		FLog.d("database is empty");
     		return;
     	}

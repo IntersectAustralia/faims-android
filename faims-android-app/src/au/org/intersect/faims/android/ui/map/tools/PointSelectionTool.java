@@ -12,13 +12,13 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ClearButton;
 import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.geometry.Point;

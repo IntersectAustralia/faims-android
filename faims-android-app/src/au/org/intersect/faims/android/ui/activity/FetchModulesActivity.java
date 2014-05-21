@@ -29,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
@@ -179,10 +180,10 @@ public class FetchModulesActivity extends RoboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FAIMSApplication.getInstance().setApplication(getApplication());
         
         setContentView(R.layout.activity_fetch_modules);
-        
-        serverDiscovery.setApplication(getApplication());
         
         ListView moduleList = (ListView) findViewById(R.id.module_list);
         

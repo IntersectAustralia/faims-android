@@ -10,7 +10,6 @@ import java.util.Stack;
 import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
 
-import roboguice.RoboGuice;
 import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -35,6 +34,7 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -47,7 +47,10 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 
-public class Tab implements Parcelable{
+public class Tab implements Parcelable {
+
+	@Inject
+	DatabaseManager databaseManager;
 
 	private WeakReference<ShowModuleActivity> activityRef;
 	private ScrollView scrollView;
@@ -67,16 +70,17 @@ public class Tab implements Parcelable{
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
 	private boolean tabShown;
-
-	@Inject
-	DatabaseManager databaseManager;
 	
 	public Tab(Parcel source){
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		hidden = source.readBundle().getBoolean("hidden");
 		reference = source.readString();
 	}
 	
 	public Tab(ShowModuleActivity activity, String name, String label, boolean hidden, boolean scrollable, Arch16n arch16n, String reference) {
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		this.name = name;
 		this.arch16n = arch16n;
@@ -107,8 +111,6 @@ public class Tab implements Parcelable{
         } else {
         	this.view = linearLayout;
         }
-        // inject faimsClient and serverDiscovery
-        RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
 	}
 
 	public static final Parcelable.Creator<Tab> CREATOR = new Parcelable.Creator<Tab>() {
@@ -662,8 +664,8 @@ public class Tab implements Parcelable{
 	private boolean hasAttributeDescription(String attributeName) {
 		try {
 			
-			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
-			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			String attributeDescription = databaseManager.attributeRecord().getAttributeDescription(attributeName);
+			List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 			
 			boolean termsEmpty = terms == null || terms.isEmpty();
 			boolean attributeDescriptionEmpty = attributeDescription == null || "".equals(attributeDescription);
@@ -681,7 +683,7 @@ public class Tab implements Parcelable{
 		StringBuilder description = new StringBuilder();
 		try {
 			
-			String attributeDescription = databaseManager.getAttributeDescription(attributeName);
+			String attributeDescription = databaseManager.attributeRecord().getAttributeDescription(attributeName);
 			
 			if(attributeDescription != null && !"".equals(attributeDescription)){
 				description.append("<p><i>Description:</i>");
@@ -690,7 +692,7 @@ public class Tab implements Parcelable{
 				description.append("</p>");
 			}
 			
-			List<VocabularyTerm> terms = databaseManager.getVocabularyTerms(attributeName);
+			List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 			
 			if(terms != null && !terms.isEmpty()){
 				description.append("<p><i>Glossary:</i></p>");

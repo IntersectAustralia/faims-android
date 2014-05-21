@@ -43,17 +43,19 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.data.VocabularyTerm;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
+import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
@@ -63,15 +65,23 @@ import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import bsh.EvalError;
 import bsh.Interpreter;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
 public class BeanShellLinker {
+	
+	@Inject
+	DatabaseManager databaseManager;
+	
+	@Inject
+	GPSDataManager gpsDataManager;
 
 	private Interpreter interpreter;
 
@@ -102,6 +112,7 @@ public class BeanShellLinker {
 	protected Dialog saveDialog;
 
 	public BeanShellLinker(ShowModuleActivity activity, Module module) {
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.activity = activity;
 		this.module = module;
 		this.interpreter = new Interpreter();
@@ -167,18 +178,18 @@ public class BeanShellLinker {
 	public void startTrackingGPS(final String type, final int value, final String callback) {
 		FLog.d("gps tracking is started");
 		
-		this.activity.getGPSDataManager().setTrackingType(type);
-		this.activity.getGPSDataManager().setTrackingValue(value);
-		this.activity.getGPSDataManager().setTrackingExec(callback);
+		gpsDataManager.setTrackingType(type);
+		gpsDataManager.setTrackingValue(value);
+		gpsDataManager.setTrackingExec(callback);
 
 		if (trackingHandlerThread == null && trackingHandler == null) {
-			if (!this.activity.getGPSDataManager().isExternalGPSStarted()
-					&& !this.activity.getGPSDataManager()
+			if (!gpsDataManager.isExternalGPSStarted()
+					&& !gpsDataManager
 							.isInternalGPSStarted()) {
 				showWarning("GPS", "No GPS is being used");
 				return;
 			}
-			this.activity.getGPSDataManager().setTrackingStarted(true);
+			gpsDataManager.setTrackingStarted(true);
 			this.activity.invalidateOptionsMenu();
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
@@ -251,7 +262,7 @@ public class BeanShellLinker {
 			trackingHandlerThread.quit();
 			trackingHandlerThread = null;
 		}
-		this.activity.getGPSDataManager().setTrackingStarted(false);
+		gpsDataManager.setTrackingStarted(false);
 		this.activity.invalidateOptionsMenu();
 	}
 	
@@ -452,7 +463,7 @@ public class BeanShellLinker {
 					@Override
 					public void onMapClicked(double x, double y, boolean arg2) {
 						try {
-							MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), new MapPos(x, y));
+							MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), new MapPos(x, y));
 							interpreter.set("_map_point_clicked", p);
 							execute(clickCallback);
 						} catch (Exception e) {
@@ -982,11 +993,11 @@ public class BeanShellLinker {
 	}
 
 	public int getGpsUpdateInterval() {
-		return this.activity.getGPSDataManager().getGpsUpdateInterval();
+		return gpsDataManager.getGpsUpdateInterval();
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		this.activity.getGPSDataManager().setGpsUpdateInterval(
+		gpsDataManager.setGpsUpdateInterval(
 				gpsUpdateInterval);
 	}
 
@@ -1558,8 +1569,8 @@ public class BeanShellLinker {
 	public String saveArchEnt(String entityId, String entityType,
 			List<Geometry> geometry, List<EntityAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
-			return activity.getDatabaseManager().saveArchEnt(entityId,
+			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
+			return databaseManager.entityRecord().saveArchEnt(entityId,
 					entityType, WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
@@ -1571,7 +1582,7 @@ public class BeanShellLinker {
 
 	public Boolean deleteArchEnt(String entityId){
 		try {
-			activity.getDatabaseManager().deleteArchEnt(entityId);
+			databaseManager.entityRecord().deleteArchEnt(entityId);
 			for(Tab tab : activity.getUIRenderer().getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
 					mapView.removeFromAllSelections(entityId);
@@ -1588,8 +1599,8 @@ public class BeanShellLinker {
 	public String saveRel(String relationshpId, String relationshipType,
 			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
 		try {
-			List<Geometry> geomList = GeometryUtil.convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
-			return activity.getDatabaseManager().saveRel(relationshpId, relationshipType,
+			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
+			return databaseManager.relationshipRecord().saveRel(relationshpId, relationshipType,
 					WKTUtil.collectionToWKT(geomList), attributes);
 
 		} catch (Exception e) {
@@ -1601,7 +1612,7 @@ public class BeanShellLinker {
 
 	public Boolean deleteRel(String relationshpId){
 		try {
-			activity.getDatabaseManager().deleteRel(relationshpId);
+			databaseManager.relationshipRecord().deleteRel(relationshpId);
 			for(Tab tab : activity.getUIRenderer().getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
 					mapView.removeFromAllSelections(relationshpId);
@@ -1617,7 +1628,7 @@ public class BeanShellLinker {
 	
 	public boolean addReln(String entityId, String relationshpId, String verb) {
 		try {
-			return activity.getDatabaseManager().addReln(entityId, relationshpId,
+			return databaseManager.sharedRecord().addReln(entityId, relationshpId,
 					verb);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity relationship", e);
@@ -1656,7 +1667,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 
 			if (obj instanceof HierarchicalSpinner) {
-				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 				if (terms == null) return;
 				
 				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
@@ -1742,7 +1753,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			
 			if (obj instanceof PictureGallery) {				
-				List<VocabularyTerm> terms = activity.getDatabaseManager().getVocabularyTerms(attributeName);
+				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 				if (terms == null) return;
 				
 				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
@@ -1855,11 +1866,11 @@ public class BeanShellLinker {
 
 	public Object fetchArchEnt(String id) {
 		try {
-			ArchEntity e = activity.getDatabaseManager().fetchArchEnt(id);
+			ArchEntity e = databaseManager.entityRecord().fetchArchEnt(id);
 			if (e != null) {
 				List<Geometry> geomList = e.getGeometryList();
 				if (geomList != null) {
-					e.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
+					e.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
 				}
 			}
 			return e;
@@ -1872,11 +1883,11 @@ public class BeanShellLinker {
 
 	public Object fetchRel(String id) {
 		try {
-			Relationship r = activity.getDatabaseManager().fetchRel(id);
+			Relationship r = databaseManager.relationshipRecord().fetchRel(id);
 			if (r != null) {
 				List<Geometry> geomList = r.getGeometryList();
 				if (geomList != null) {
-					r.setGeometryList(GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
+					r.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
 				}
 			}
 			return r;
@@ -1889,7 +1900,7 @@ public class BeanShellLinker {
 
 	public Object fetchOne(String query) {
 		try {
-			return activity.getDatabaseManager().fetchOne(query);
+			return databaseManager.fetchRecord().fetchOne(query);
 		} catch (Exception e) {
 			FLog.e("error fetching one", e);
 			showWarning("Logic Error", "Error fetching one");
@@ -1900,7 +1911,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchAll(String query) {
 		try {
-			return activity.getDatabaseManager().fetchAll(query);
+			return databaseManager.fetchRecord().fetchAll(query);
 		} catch (Exception e) {
 			FLog.e("error fetching all", e);
 			showWarning("Logic Error", "Error fetching all");
@@ -1911,7 +1922,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchEntityList(String type) {
 		try {
-			return activity.getDatabaseManager().fetchEntityList(type);
+			return databaseManager.fetchRecord().fetchEntityList(type);
 		} catch (Exception e) {
 			FLog.e("error fetching entity list", e);
 			showWarning("Logic Error", "Error fetching entity list");
@@ -1922,7 +1933,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public Collection fetchRelationshipList(String type) {
 		try {
-			return activity.getDatabaseManager().fetchRelationshipList(type);
+			return databaseManager.fetchRecord().fetchRelationshipList(type);
 		} catch (Exception e) {
 			FLog.e("error fetching relationship list", e);
 			showWarning("Logic Error", "Error fetching relationship list");
@@ -1948,11 +1959,9 @@ public class BeanShellLinker {
 								for (BluetoothDevice bluetoothDevice : pairedDevices) {
 									if (bluetoothDevice.getName().equals(
 											sequences.get(item))) {
-										BeanShellLinker.this.activity
-												.getGPSDataManager()
+										BeanShellLinker.this.gpsDataManager
 												.setGpsDevice(bluetoothDevice);
-										BeanShellLinker.this.activity
-												.getGPSDataManager()
+										BeanShellLinker.this.gpsDataManager
 												.startExternalGPSListener();
 										break;
 									}
@@ -1970,40 +1979,40 @@ public class BeanShellLinker {
 	}
 
 	public void startInternalGPS() {
-		this.activity.getGPSDataManager().startInternalGPSListener();
+		gpsDataManager.startInternalGPSListener();
 	}
 
 	public Object getGPSPosition() {
-		return this.activity.getGPSDataManager().getGPSPosition();
+		return gpsDataManager.getGPSPosition();
 	}
 	
 	public Object getGPSPositionProjected() {
-		GPSLocation l = (GPSLocation) this.activity.getGPSDataManager().getGPSPosition();
+		GPSLocation l = (GPSLocation) gpsDataManager.getGPSPosition();
 		if (l == null) return l;
-		MapPos p = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
+		MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
 		l.setLongitude(p.x);
 		l.setLatitude(p.y);
 		return l;
 	}
 
 	public Object getGPSEstimatedAccuracy() {
-		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy();
+		return gpsDataManager.getGPSEstimatedAccuracy();
 	}
 
 	public Object getGPSHeading() {
-		return this.activity.getGPSDataManager().getGPSHeading();
+		return gpsDataManager.getGPSHeading();
 	}
 
 	public Object getGPSPosition(String gps) {
-		return this.activity.getGPSDataManager().getGPSPosition(gps);
+		return gpsDataManager.getGPSPosition(gps);
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps) {
-		return this.activity.getGPSDataManager().getGPSEstimatedAccuracy(gps);
+		return gpsDataManager.getGPSEstimatedAccuracy(gps);
 	}
 
 	public Object getGPSHeading(String gps) {
-		return this.activity.getGPSDataManager().getGPSHeading(gps);
+		return gpsDataManager.getGPSHeading(gps);
 	}
 
 	public void showBaseMap(final String ref, String layerName,
@@ -2057,7 +2066,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				MapPos p = GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
+				MapPos p = databaseManager.spatialRecord().convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
 				mapView.setMapFocusPoint((float) p.x, (float) p.y);
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2302,7 +2311,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, point), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPoint(layerId, databaseManager.spatialRecord().convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, point), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2326,7 +2335,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawLine(layerId, databaseManager.spatialRecord().convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2350,7 +2359,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, GeometryUtil.convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
+				GeometryData geomData = (GeometryData) mapView.drawPolygon(layerId, databaseManager.spatialRecord().convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, points), style).userData;
 				return geomData.geomId;
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2409,7 +2418,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
+				return databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getGeometryList(layerId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2428,7 +2437,7 @@ public class BeanShellLinker {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
+				return databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getGeometry(geomId));
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2534,7 +2543,7 @@ public class BeanShellLinker {
 			Object obj = activity.getUIRenderer().getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				return GeometryUtil.convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
+				return databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
 						.getHighlights());
 			} else {
 				FLog.w("cannot find map view " + ref);
@@ -2842,7 +2851,7 @@ public class BeanShellLinker {
 	}
 
 	public void setUser(User user) {
-		this.activity.getDatabaseManager().setUserId(user.getUserId());
+		databaseManager.setUserId(user.getUserId());
 	}
 
 	public void showFileBrowser(String callback) {
@@ -3216,7 +3225,7 @@ public class BeanShellLinker {
 	
 	public MapPos convertFromProjToProj(String fromSrid, String toSrid, MapPos p) {
 		try {
-			return GeometryUtil.convertFromProjToProj(fromSrid, toSrid, p);
+			return databaseManager.spatialRecord().convertFromProjToProj(fromSrid, toSrid, p);
 		} catch (Exception e) {
 			FLog.e("error converting module from " + fromSrid + " to " + toSrid, e);
 			showWarning("Logic Error", "Error converting projection from " + fromSrid + " to " + toSrid);

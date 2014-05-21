@@ -3,21 +3,25 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.graphics.Canvas;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.VectorElement;
 
 public class LineDistanceTool extends HighlightTool {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private class LineDistanceToolCanvas extends ToolCanvas {
 		
@@ -142,7 +146,7 @@ public class LineDistanceTool extends HighlightTool {
 			if (mapView.getHighlights().size() < 1) return;
 			
 			Line line = (Line) mapView.getHighlights().get(0);
-			this.distance = SpatialiteUtil.computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), mapView.getModuleSrid());
+			this.distance = databaseManager.spatialRecord().computeLineDistance(GeometryUtil.convertToWgs84(line.getVertexList()), mapView.getModuleSrid());
 			
 		} catch (Exception e) {
 			FLog.e("error calculating line distance", e);
