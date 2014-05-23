@@ -72,7 +72,8 @@ public class ViewFactory {
 	}
 	
 	protected WebView createTableView() {
-		return null;
+		WebView table = new WebView(context());
+		return table;
 	}
 
 	protected CustomEditText createTextField(int type, FormAttribute attribute, String ref) {

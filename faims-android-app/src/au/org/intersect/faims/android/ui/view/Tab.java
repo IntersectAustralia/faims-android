@@ -79,14 +79,15 @@ public class Tab implements Parcelable {
 	public Tab(ShowModuleActivity activity, String name, String label, boolean hidden, boolean scrollable, String reference) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		
+		this.arch16n = activity.getArch16n();
+		this.viewFactory = new ViewFactory(new WeakReference<Context>(activity), arch16n);
+		this.beanShellLinker = activity.getBeanShellLinker();
+		
 		this.name = name;
 		this.label = arch16n.substituteValue(label);
 		this.hidden = hidden;
 		this.moduleDir = activity.getModuleDir();
-		this.reference = reference;
-		this.arch16n = activity.getArch16n();
-		this.viewFactory = new ViewFactory(new WeakReference<Context>(activity), arch16n);
-		this.beanShellLinker = activity.getBeanShellLinker();
+		this.reference = reference;	
 		
 		this.onLoadCommands = new ArrayList<String>();
 		this.onShowCommands = new ArrayList<String>();
