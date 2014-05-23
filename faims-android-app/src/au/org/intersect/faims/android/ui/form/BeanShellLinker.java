@@ -108,6 +108,9 @@ public class BeanShellLinker {
 	private String audioFileNamePath;
 	private MediaRecorder recorder;
 	private String audioCallBack;
+	
+	private String scanContents;
+	private String scanCallBack;
 
 	protected Dialog saveDialog;
 
@@ -2768,6 +2771,14 @@ public class BeanShellLinker {
 	public String getLastPictureFilePath() {
 		return cameraPicturepath;
 	}
+	
+	public String getLastScanContents() {
+		return scanContents;
+	}
+	
+	public void setLastScanContents(String contents) {
+		this.scanContents = contents;
+	}
 
 	public String getModuleName() {
 		return this.module.getName();
@@ -3381,6 +3392,24 @@ public class BeanShellLinker {
 			showWarning("Logic Error", "Error adding video to gallery");
 		}
 		return null;
+	}
+	
+	public void scanCode(String callback) {
+		scanCallBack = callback;
+		
+		Intent scanIntent = new Intent("com.google.zxing.client.android.SCAN");
+		//Scan for both barcodes and QR codes, and remove result display pause
+		scanIntent.putExtra("SCAN_MODE", "SCAN_MODE");
+		scanIntent.putExtra("RESULT_DISPLAY_DURATION_MS", 0L);
+		this.activity.startActivityForResult(scanIntent, ShowModuleActivity.SCAN_CODE_CODE);
+	}
+	
+	public void executeScanCallBack() {
+		try {
+			this.interpreter.eval(scanCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for barcode/QR scan", e);
+		}
 	}
 	
 }
