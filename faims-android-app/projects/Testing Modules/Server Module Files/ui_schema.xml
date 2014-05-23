@@ -15,7 +15,15 @@
               <layout_weight/>
             </large>
           </style>
+           <user>
+            <usertab>
+              <users/>
+            </usertab>
+          </user>
           <control>
+            <map>
+              <map/>
+            </map>
             <Files>
               <Gallery/>
             </Files>
@@ -46,8 +54,27 @@
         </input>
       </group>
     </group>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="usertab" faims_scrollable="false">
+        <label>User List</label>
+        <select1 appearance="compact" ref="users">
+          <label>Users</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
     <group ref="control" faims_archent_type="Pictures">
       <label>Server Module Files</label>
+      <group ref="map" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+          <label/>
+        </input>
+      </group>
       <group ref="Files">
         <label>Picture Gallery</label>
         <select1 ref="Gallery" faims_attribute_name="Pictures" faims_attribute_type="vocab" faims_certainty="false" faims_annotation="false" type="image">

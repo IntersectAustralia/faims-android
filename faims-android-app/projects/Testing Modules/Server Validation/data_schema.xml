@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataSchema name="Server Validation" preparer="Vincent Tran">
+  <ArchaeologicalElement name="Entity">
+    <property name="ID" type="freetext" isIdentifier="true">
+      <description> Validation schema checks if this is blank </description>
+    </property>
+    <property name="Description" type="freetext">
+      <description> Validation schema checks if everything is spelt properly </description>
+    </property>
+    <property name="Height" type="freetext">
+      <description> Validation schema checks if this is a number </description>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>

@@ -15,6 +15,11 @@
               <layout_weight/>
             </large>
           </style>
+          <user>
+            <usertab>
+              <users/>
+            </usertab>
+          </user>
           <control>
             <Entity>
               <NewEntity/>
@@ -64,6 +69,19 @@
         <input ref="layout_weight">
           <label>3</label>
         </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="usertab" faims_scrollable="false">
+        <label>User List</label>
+        <select1 appearance="compact" ref="users">
+          <label>Users</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
       </group>
     </group>
     <group ref="control">
