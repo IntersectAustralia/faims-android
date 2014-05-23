@@ -15,7 +15,6 @@ import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
@@ -25,6 +24,7 @@ import au.org.intersect.faims.android.ui.map.button.DeleteButton;
 import au.org.intersect.faims.android.ui.map.button.LockButton;
 import au.org.intersect.faims.android.ui.map.button.PropertiesButton;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nutiteq.components.MapPos;

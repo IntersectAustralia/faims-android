@@ -1,6 +1,5 @@
 package au.org.intersect.faims.android.net;
 
-
 public class Result {
 	
 	public static final Result SUCCESS = new Result(FAIMSClientResultCode.SUCCESS);
@@ -9,14 +8,20 @@ public class Result {
 	
 	public FAIMSClientResultCode resultCode;
 	public FAIMSClientErrorCode errorCode;
+	public Object data;
 	
 	public Result(FAIMSClientResultCode resultCode) {
 		this.resultCode = resultCode;
 	}
 	
 	public Result(FAIMSClientResultCode resultCode, FAIMSClientErrorCode errorCode) {
-		this.resultCode = resultCode;
+		this(resultCode);
 		this.errorCode = errorCode;
+	}
+	
+	public Result(FAIMSClientResultCode resultCode, FAIMSClientErrorCode errorCode, Object data) {
+		this(resultCode, errorCode);
+		this.data = data;
 	}
 	
 }

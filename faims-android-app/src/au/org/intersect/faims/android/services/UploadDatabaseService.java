@@ -1,22 +1,34 @@
 package au.org.intersect.faims.android.services;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Environment;
-import au.org.intersect.faims.android.constants.FaimsSettings;
-import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.net.Result;
+import au.org.intersect.faims.android.net.Request;
 import au.org.intersect.faims.android.util.FileUtil;
 
-public class UploadDatabaseService extends UploadService {
+import com.google.inject.Inject;
 
-	private File tempDB;
+public class UploadDatabaseService extends DownloadUploadService {
+
+	@Inject
+	DatabaseManager databaseManager;
+	
+	protected String userId;
+	protected File tempDB;
 	
 	public UploadDatabaseService() {
 		super("UploadDatabaseService");
+	}
+	
+	public UploadDatabaseService(String name) {
+		super(name);
 	}
 	
 	@Override
@@ -27,69 +39,41 @@ public class UploadDatabaseService extends UploadService {
 		databaseManager.interrupt();
 		super.onDestroy();
 	}
-	
-	@Override
-	protected Result doUpload(Intent intent) throws Exception {
-		try {
-			String userId = intent.getStringExtra("userId");
-			Bundle extras = intent.getExtras();
-			Module module = (Module) extras.get("module");
-			String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
-			
-			// create temp database to upload
-			databaseManager.init(database);
-			
-			tempDB = File.createTempFile("temp_", ".sqlite3", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
-	    	
-	    	dumpDatabase(tempDB, module);
-	    	
-	    	// check if database is empty
-	    	if (databaseManager.isEmpty(tempDB)) {
-	    		FLog.d("database is empty");
-	    		return Result.SUCCESS;
-	    	}
-	    	
-	    	if (uploadStopped) {
-	    		FLog.d("upload cancelled");
-	    		return Result.INTERRUPTED;
-	    	}
-	    	
-	    	// tar file
-	    	tempFile = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
-	    	
-	    	os = FileUtil.createTarOutputStream(tempFile.getAbsolutePath());
-	    	
-	    	FileUtil.tarFile(tempDB.getAbsolutePath(), os);
-	    	
-	    	if (uploadStopped) {
-	    		FLog.d("upload cancelled");
-	    		return Result.INTERRUPTED;
-	    	}
-	    	
-	    	// upload database
-			return faimsClient.uploadDatabase(module, tempFile, userId);
-		} finally {
-			if (tempDB != null) {
-				FileUtil.delete(tempDB);
-			}
 
-			if (tempFile != null) {
-				FileUtil.delete(tempFile);
-			}
-			
-			// TODO check if this is necessary as file util also closes the stream
-			if (os != null) {
-				try {
-					os.close();
-				} catch (Exception e) {
-					FLog.e("error closing steam", e);
-				}
-			}
-		}
+	protected void initService(Intent intent) {
+    	super.initService(intent);
+    	userId = intent.getStringExtra("userId");
+    	databaseManager.init(serviceModule.getDirectoryPath("db.sqlite"));
+    	databaseManager.setUserId(userId);
 	}
 
-	protected void dumpDatabase(File tempFile, Module module) throws Exception {
-    	databaseManager.dumpDatabaseTo(tempFile);
+	@Override
+	protected void performService() throws Exception {
+		uploadDatabase();
+	}
+	
+	private void uploadDatabase() throws Exception {
+		tempDB = File.createTempFile("temp_", ".sqlite", serviceModule.getDirectoryPath());
+    	
+		databaseManager.mergeRecord().dumpDatabaseTo(tempDB);
+		
+    	// check if database is empty
+    	if (databaseManager.mergeRecord().isEmpty(tempDB)) {
+    		FLog.d("database is empty");
+    		return;
+    	}
+    	
+    	ArrayList<File> files = new ArrayList<File>();
+    	files.add(tempDB);
+    	
+		HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
+		extraParts.put("user", new StringBody(userId));
+		
+    	if (!uploadFiles("db", 
+    			Request.DATABASE_UPLOAD_REQUEST(serviceModule), files, serviceModule.getDirectoryPath(), extraParts)) {
+    		FLog.d("Failed to upload database");
+			return;
+    	}
 	}
 
 }

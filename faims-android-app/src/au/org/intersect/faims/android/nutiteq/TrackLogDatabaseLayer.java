@@ -10,7 +10,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import android.graphics.Color;
 import au.org.intersect.faims.android.data.User;
-import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 
@@ -24,11 +23,11 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 	private Map<User, Boolean> users;
 
 	public TrackLogDatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type,
-			String queryName, String querySql, DatabaseManager dbmgr, int maxObjects, Map<User, Boolean> users,
+			String queryName, String querySql, int maxObjects, Map<User, Boolean> users,
 			GeometryStyle pointStyle,
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle) {
-		super(layerId, name, projection, mapView, type, queryName, querySql, dbmgr,
+		super(layerId, name, projection, mapView, type, queryName, querySql,
 				maxObjects, pointStyle, lineStyle, polygonStyle);
 		this.users = users;
 	}
@@ -56,7 +55,7 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 						pointStyle.pointColor = Color.HSVToColor(hsv);
 						this.pointStyle = pointStyle;
 
-						objectTemp = dbmgr.fetchVisibleGPSTrackingForUser(pts, maxObjects, querySql, user.getKey().getUserId());
+						objectTemp = databaseManager.fetchRecord().fetchVisibleGPSTrackingForUser(pts, maxObjects, querySql, user.getKey().getUserId());
 						createElementsInLayer(zoom, objectTemp, objects, GeometryData.Type.ENTITY);
 					}
 				}

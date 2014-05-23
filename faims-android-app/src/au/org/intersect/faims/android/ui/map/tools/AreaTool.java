@@ -3,20 +3,24 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.graphics.Canvas;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.VectorElement;
 
 public class AreaTool extends HighlightTool {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private class AreaToolCanvas extends ToolCanvas {
 		
@@ -140,7 +144,7 @@ public class AreaTool extends HighlightTool {
 		try {
 			if (mapView.getHighlights().size() < 1) return;
 			Polygon polygon = (Polygon) mapView.getHighlights().get(0);
-			area = (float) SpatialiteUtil.computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), mapView.getModuleSrid());
+			area = (float) databaseManager.spatialRecord().computePolygonArea((Polygon) GeometryUtil.convertGeometryToWgs84(polygon), mapView.getModuleSrid());
 		} catch (Exception e) {
 			FLog.e("error computing area of polygon", e);
 			showError("Error computing area of polygon");

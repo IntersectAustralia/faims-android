@@ -38,7 +38,7 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
 		solo.waitForDialogToClose();
 		// Check click event doesn't fire on tab load
-		assertFalse(solo.searchText("Dropdown click event"));
+		assertFalse(solo.searchText("Dropdown select event"));
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
@@ -46,14 +46,14 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnView(solo.getView(HierarchicalSpinner.class, 0));
 		solo.clickOnView(solo.getView(CheckedTextView.class, 1));
 		
-		assertTrue(solo.searchText("Dropdown click event"));
+		assertTrue(solo.searchText("Dropdown select event"));
 	}
 	
 	public void testHierarchicalDropdownClickEvent() throws Exception {
 		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
 		solo.waitForDialogToClose();
 		// Check click event doesn't fire on tab load
-		assertFalse(solo.searchText("Hierarchical dropdown click event"));
+		assertFalse(solo.searchText("Hierarchical dropdown select event"));
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
@@ -61,33 +61,37 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnView(solo.getView(CheckedTextView.class, 2));
 		solo.clickOnView(solo.getView(CheckedTextView.class, 2));
 		
-		assertTrue(solo.searchText("Hierarchical dropdown click event"));
+		assertTrue(solo.searchText("Hierarchical dropdown select event"));
 	}
 	
 	public void testPictureGalleryClickEvent() throws Exception {
 		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
 		solo.waitForDialogToClose();
 		// Check click event doesn't fire on tab load
-		assertFalse(solo.searchText("Gallery click event"));
+		assertFalse(solo.searchText("Gallery select event"));
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
 		solo.clickOnView(solo.getView(CustomImageView.class, 1));
 		
-		assertTrue(solo.searchText("Gallery click event"));
+		assertTrue(solo.searchText("Gallery select event"));
 	}
 	
 	public void testHierarchicalPictureGalleryClickEvent() throws Exception {
 		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
 		solo.waitForDialogToClose();
 		// Check click event doesn't fire on tab load
-		assertFalse(solo.searchText("Hierarchical gallery click event"));
+		assertFalse(solo.searchText("Hierarchical gallery select event"));
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
 		solo.clickOnView(solo.getView(CustomImageView.class, 21));
+		// Check click event doesn't fire on parent item
+		assertFalse(solo.searchText("Hierarchical gallery select event"));
+		solo.scrollToTop();
+		solo.clickOnView(solo.getView(CustomImageView.class, 22));
 		
-		assertTrue(solo.searchText("Hierarchical gallery click event"));
+		assertTrue(solo.searchText("Hierarchical gallery select event"));
 	}
 	  
 	@Override

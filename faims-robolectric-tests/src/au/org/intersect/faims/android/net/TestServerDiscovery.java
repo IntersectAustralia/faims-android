@@ -1,17 +1,11 @@
 package au.org.intersect.faims.android.net;
 
-import android.app.Application;
-
 import com.google.inject.Provider;
 
 public class TestServerDiscovery extends ServerDiscovery {
 	
 	private boolean hostValid = true;
-
-	@Override
-	public void setApplication(Application app) {
-	}
-
+	
 	@Override
 	public boolean isServerHostValid() {
 		return hostValid;

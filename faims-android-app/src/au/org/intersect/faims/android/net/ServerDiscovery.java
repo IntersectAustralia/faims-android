@@ -14,15 +14,18 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.JsonUtil;
 
-import com.google.gson.JsonObject;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -33,10 +36,7 @@ public class ServerDiscovery {
 		public void handleDiscoveryResponse(boolean success);
 	}
 	
-	private static ServerDiscovery instance;
-	
 	private LinkedList<ServerDiscoveryListener> listenerList;
-	private Application application;
 	
 	private boolean isFindingServer;
 	
@@ -50,15 +50,6 @@ public class ServerDiscovery {
 	public ServerDiscovery() {
 		listenerList = new LinkedList<ServerDiscoveryListener>();
 		isFindingServer = false;
-	}
-	
-	public static ServerDiscovery getInstance() {
-		if (instance == null) instance = new ServerDiscovery();
-		return instance;
-	}
-	
-	public void setApplication(Application application) {
-		this.application = application;
 	}
 	
 	public String getServerIP() {
@@ -211,7 +202,7 @@ public class ServerDiscovery {
 		}).start();
 	}
 	
-	private void sendBroadcast() throws SocketException, IOException {
+	private void sendBroadcast() throws SocketException, IOException, JSONException {
 		
 		DatagramSocket s = new DatagramSocket();
 		try {
@@ -232,7 +223,7 @@ public class ServerDiscovery {
 		}
 	}
 	
-	private void receivePacket(DatagramSocket r) throws SocketException, IOException {
+	private void receivePacket(DatagramSocket r) throws SocketException, IOException, JSONException {
 		
 		try {
 			r.setSoTimeout(getPacketTimeout());
@@ -242,12 +233,12 @@ public class ServerDiscovery {
 	    	
 	        r.receive(packet);
 	       
-	        JsonObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
+	        JSONObject data = JsonUtil.deserializeServerPacket(getPacketDataAsString(packet));
 	        
 	        if (data.has("server_ip"))
-	        	serverIP = data.get("server_ip").getAsString();
+	        	serverIP = data.getString("server_ip");
 	        if (data.has("server_port"))
-	        	serverPort = data.get("server_port").getAsString();
+	        	serverPort = data.getString("server_port");
 	        
 	        FLog.d("ServerIP: " + serverIP);
 	        FLog.d("ServerPort: " + serverPort);
@@ -257,7 +248,7 @@ public class ServerDiscovery {
 	}
 	
 	private String getIPAddress() throws IOException {
-		WifiManager wifiManager = (WifiManager) application.getSystemService(Application.WIFI_SERVICE);
+		WifiManager wifiManager = (WifiManager) FAIMSApplication.getInstance().getApplication().getSystemService(Application.WIFI_SERVICE);
     	DhcpInfo myDhcpInfo = wifiManager.getDhcpInfo();
     	if (myDhcpInfo == null) {
     		FLog.d("could not determine device ip");
@@ -271,23 +262,23 @@ public class ServerDiscovery {
     }
 	
 	private int getDiscoveryTime() {
-		return application.getResources().getInteger(R.integer.discovery_time) * 1000;
+		return FAIMSApplication.getInstance().getApplication().getResources().getInteger(R.integer.discovery_time) * 1000;
 	}
 	
 	private int getPacketTimeout() {
-		return application.getResources().getInteger(R.integer.packet_timeout) * 1000;
+		return FAIMSApplication.getInstance().getApplication().getResources().getInteger(R.integer.packet_timeout) * 1000;
 	}
 	
 	private int getDiscoveryPort() {
-		return application.getResources().getInteger(R.integer.discovery_port);
+		return FAIMSApplication.getInstance().getApplication().getResources().getInteger(R.integer.discovery_port);
 	}
 	
 	private int getDevicePort() {
-		return application.getResources().getInteger(R.integer.device_port);
+		return FAIMSApplication.getInstance().getApplication().getResources().getInteger(R.integer.device_port);
 	}
 	
 	private String getBroadcastAddr() {
-		return application.getResources().getString(R.string.broadcast_addr);
+		return FAIMSApplication.getInstance().getApplication().getResources().getString(R.string.broadcast_addr);
 	}
 	
 	private String getPacketDataAsString(DatagramPacket packet) throws IOException {

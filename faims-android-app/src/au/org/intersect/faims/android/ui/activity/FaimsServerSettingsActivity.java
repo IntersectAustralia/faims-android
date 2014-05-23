@@ -12,6 +12,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceFragment;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.tasks.FaimsServerConnectionTestingTask;
 import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
@@ -22,7 +23,9 @@ public class FaimsServerSettingsActivity extends Activity{
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);		
+
+        FAIMSApplication.getInstance().setApplication(getApplication());
 		
 		getFragmentManager().beginTransaction()
         	.replace(android.R.id.content, new FaimsServerSettingsFragment()).commit();

@@ -3,21 +3,25 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.graphics.Canvas;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
 public class PointDistanceTool extends HighlightTool {
+	
+	@Inject
+	DatabaseManager databaseManager;
 	
 	private class PointDistanceToolCanvas extends ToolCanvas {
 		
@@ -155,7 +159,7 @@ public class PointDistanceTool extends HighlightTool {
 			MapPos p1 = ((Point) mapView.getHighlights().get(0)).getMapPos();
 			MapPos p2 = ((Point) mapView.getHighlights().get(1)).getMapPos();
 			
-			this.distance = (float) SpatialiteUtil.computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), mapView.getModuleSrid());
+			this.distance = (float) databaseManager.spatialRecord().computePointDistance(GeometryUtil.convertToWgs84(p1), GeometryUtil.convertToWgs84(p2), mapView.getModuleSrid());
 			
 		} catch (Exception e) {
 			FLog.e("error calculating point distance", e);

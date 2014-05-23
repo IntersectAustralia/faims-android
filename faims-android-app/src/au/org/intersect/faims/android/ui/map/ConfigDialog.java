@@ -21,9 +21,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.dialog.ColorPickerDialog;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
 public class ConfigDialog extends AlertDialog {
 

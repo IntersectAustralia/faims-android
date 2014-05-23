@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
+import com.google.inject.Inject;
 import com.nutiteq.components.Envelope;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
@@ -21,6 +24,9 @@ import com.nutiteq.tasks.Task;
 import com.nutiteq.vectorlayers.GeometryLayer;
 
 public class DatabaseLayer extends GeometryLayer {
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	public enum Type {
 		ENTITY,
@@ -30,7 +36,6 @@ public class DatabaseLayer extends GeometryLayer {
 
 	protected DatabaseTextLayer textLayer;
 	protected boolean textVisible;
-	protected DatabaseManager dbmgr;
 	protected GeometryStyle pointStyle;
 	protected GeometryStyle lineStyle;
 	protected GeometryStyle polygonStyle;
@@ -46,20 +51,23 @@ public class DatabaseLayer extends GeometryLayer {
 	protected ArrayList<String> hideGeometryList;
 	
 	protected boolean renderAll;
-	private boolean renderOnce;
+	protected boolean renderOnce;
 
-	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql, DatabaseManager dbmgr,
-			int maxObjects, GeometryStyle pointStyle,
+	public DatabaseLayer(int layerId, String name, Projection projection, CustomMapView mapView, Type type, String queryName, String querySql,
+			int maxObjects, 
+			GeometryStyle pointStyle,
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle) {
 		super(projection);
+		
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.name = name;
 		this.layerId = layerId;
 		this.mapView = mapView;
 		this.queryName = queryName;
 		this.querySql = querySql;
 		this.type = type;
-		this.dbmgr = dbmgr;
 		this.pointStyle = pointStyle;
 		this.lineStyle = lineStyle;
 		this.polygonStyle = polygonStyle;
@@ -271,10 +279,10 @@ public class DatabaseLayer extends GeometryLayer {
 			GeometryData.Type dataType;
 			if (type == Type.ENTITY) {
 				dataType = GeometryData.Type.ENTITY;
-				objectTemp = dbmgr.fetchAllVisibleEntityGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
+				objectTemp = databaseManager.fetchRecord().fetchAllVisibleEntityGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
 			} else if (type == Type.RELATIONSHIP) {
 				dataType = GeometryData.Type.RELATIONSHIP;
-				objectTemp = dbmgr.fetchAllVisibleRelationshipGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
+				objectTemp = databaseManager.fetchRecord().fetchAllVisibleRelationshipGeometry(pts, querySql, renderAll ? FaimsSettings.MAX_VECTOR_OBJECTS : maxObjects);
 			}else {
 				throw new Exception("database layer has no type");
 			}

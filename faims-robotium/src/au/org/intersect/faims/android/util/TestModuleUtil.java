@@ -28,7 +28,7 @@ public class TestModuleUtil {
 			copyFile(assetManager.open(dirname + "/data_schema.xml"), new File(dir + "/data_schema.xml"));
 			copyFile(assetManager.open(dirname + "/ui_schema.xml"), new File(dir + "/ui_schema.xml"));
 			copyFile(assetManager.open(dirname + "/ui_logic.bsh"), new File(dir + "/ui_logic.bsh"));
-			copyFile(assetManager.open(dirname + "/db.sqlite3"), new File(dir + "/db.sqlite3"));
+			copyFile(assetManager.open(dirname + "/db.sqlite"), new File(dir + "/db.sqlite"));
 			
 			JsonObject object = new JsonObject();
 	    	object.addProperty("name", name);

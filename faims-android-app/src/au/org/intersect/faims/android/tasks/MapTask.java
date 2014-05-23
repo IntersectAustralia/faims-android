@@ -2,8 +2,8 @@ package au.org.intersect.faims.android.tasks;
 
 import java.util.Map;
 
-import roboguice.RoboGuice;
 import android.os.AsyncTask;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
@@ -11,9 +11,8 @@ import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialLiteDb;
 import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.util.SpatialiteUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
 import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
@@ -42,9 +41,10 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 	private boolean showToast = false;
 
 	public MapTask(CustomMapView mapView, ITaskListener listener){
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.mapView = mapView;
 		this.listener = listener;
-		RoboGuice.getBaseApplicationInjector(mapView.getActivity().getApplication()).injectMembers(this);
 	}
 	
 	@Override
@@ -72,11 +72,11 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 		double[][] boundaries = gdalMapLayer.getBoundary();
 		longitude = ((float)boundaries[0][0]+(float)boundaries[3][0])/2;
 		latitude = ((float)boundaries[0][1]+(float)boundaries[3][1])/2;
-		double mapWidth = SpatialiteUtil.distanceBetween(
+		double mapWidth = databaseManager.spatialRecord().computePointDistance(
 				new MapPos(boundaries[0][0],boundaries[0][1]), 
 				new MapPos(boundaries[2][0],boundaries[2][1]), 
 				GeometryUtil.EPSG4326) / 1000.0;
-		double mapHeight = SpatialiteUtil.distanceBetween(
+		double mapHeight = databaseManager.spatialRecord().computePointDistance(
 				new MapPos(boundaries[0][0],boundaries[0][1]), 
 				new MapPos(boundaries[1][0],boundaries[1][1]), 
 				GeometryUtil.EPSG4326) / 1000.0;
@@ -109,11 +109,11 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 	private void getZoomAndPositionFromDatabaseLayer(DatabaseLayer databaseLayer) throws Exception {
 		Geometry geometry = null;
 		if(databaseLayer.getType().equals(DatabaseLayer.Type.ENTITY)){
-			geometry = databaseManager.getBoundaryForVisibleEntityGeometry(databaseLayer.getQuerySQL());
+			geometry = databaseManager.entityRecord().getBoundaryForVisibleEntityGeometry(databaseLayer.getQuerySQL());
 		}else if(databaseLayer.getType().equals(DatabaseLayer.Type.RELATIONSHIP)){
-			geometry = databaseManager.getBoundaryForVisibleRelnGeometry(databaseLayer.getQuerySQL());
+			geometry = databaseManager.relationshipRecord().getBoundaryForVisibleRelnGeometry(databaseLayer.getQuerySQL());
 		}else if(databaseLayer.getType().equals(DatabaseLayer.Type.GPS_TRACK)){
-			geometry = databaseManager.getBoundaryForVisibleEntityGeometry(databaseLayer.getQuerySQL());
+			geometry = databaseManager.entityRecord().getBoundaryForVisibleEntityGeometry(databaseLayer.getQuerySQL());
 		}
 		if(geometry != null){
 			if(geometry instanceof Polygon){
@@ -158,11 +158,11 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 		if(min_x != null && min_y != null && max_x != null && max_y != null){
 			longitude = (float) ((min_x + max_x) / 2);
 			latitude = (float) ((min_y + max_y) / 2);
-			double mapWidth = SpatialiteUtil.distanceBetween(
+			double mapWidth = databaseManager.spatialRecord().computePointDistance(
 					new MapPos(min_x,min_y), 
 					new MapPos(max_x,min_y), 
 					GeometryUtil.EPSG4326) / 1000.0;
-			double mapHeight = SpatialiteUtil.distanceBetween(
+			double mapHeight = databaseManager.spatialRecord().computePointDistance(
 					new MapPos(min_x,min_y), 
 					new MapPos(min_x,max_y), 
 					GeometryUtil.EPSG4326) / 1000.0;
@@ -198,11 +198,11 @@ public class MapTask extends AsyncTask<Void, Void, Void> {
 	private void getZoomLevel(double mapWidth, double mapHeight, Double bestZoom) throws Exception {
 		int width = mapView.getWidth();
 		int height = mapView.getHeight();
-		double currentWidth = SpatialiteUtil.distanceBetween(
+		double currentWidth = databaseManager.spatialRecord().computePointDistance(
 				GeometryUtil.convertToWgs84(mapView.screenToWorld(0, height, 0)), 
 				GeometryUtil.convertToWgs84(mapView.screenToWorld(width, height, 0)), 
 				GeometryUtil.EPSG4326) / 1000.0;
-		double currentHeight = SpatialiteUtil.distanceBetween(
+		double currentHeight = databaseManager.spatialRecord().computePointDistance(
 				GeometryUtil.convertToWgs84(mapView.screenToWorld(0, 0, 0)), 
 				GeometryUtil.convertToWgs84(mapView.screenToWorld(0, height, 0)), 
 				GeometryUtil.EPSG4326) / 1000.0;

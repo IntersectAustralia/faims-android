@@ -48,7 +48,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected LinearLayout galleriesLayout;
 	
 	protected PictureGalleryOnClickListener pictureGalleryListener;
-	private OnClickListener listener;
+	protected OnClickListener listener;
 	protected OnClickListener imageListener;
 
 	private boolean annotationEnabled;
@@ -421,5 +421,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	public void setImageListener(OnClickListener imageListener)
 	{
 		this.imageListener = imageListener;
+		updateImageListeners();
 	}
 }

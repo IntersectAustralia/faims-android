@@ -101,6 +101,43 @@ public class HierarchicalPictureGallery extends PictureGallery {
 	}
 	
 	@Override
+	protected void updateImageListeners() {
+		if (galleryImages == null || galleryImages.size() == 0) return;
+		
+		// picture galleries
+		if (terms == null) {
+			for(CustomImageView image : galleryImages)
+			{
+				// Set listener if not already selected, otherwise remove
+				if(selectedImages == null || (selectedImages != null && !selectedImages.contains(image))) {
+					image.setOnClickListener(this.pictureGalleryListener);
+				} else {
+					image.setOnClickListener(null);
+				}
+			}
+			return;
+		}
+		
+		// hierarchical picture galleries
+		for(VocabularyTerm term : currentTerms) {
+			if(currentTerms.indexOf(term) < galleryImages.size()) {
+				// If a parent term, don't add the onClickListener
+				if(term.terms == null) {
+					CustomImageView galleryImage = galleryImages.get(currentTerms.indexOf(term));
+					// Set listener if not already selected, otherwise remove
+					if(selectedImages == null || (selectedImages != null && !selectedImages.contains(galleryImage))) {
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.pictureGalleryListener);
+					} else {
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(null);
+					}
+				} else {
+					galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.listener);
+				}
+			}
+		}
+	}
+	
+	@Override
 	protected void selectImage(View v) {
 		if (terms == null) {
 			super.selectImage(v);

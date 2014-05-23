@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 
 import jsqlite.Database;
 import jsqlite.Stmt;
-import roboguice.RoboGuice;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -35,6 +34,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -47,7 +47,6 @@ import au.org.intersect.faims.android.nutiteq.CustomSpatialiteLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
@@ -57,6 +56,7 @@ import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.TextStyleDialog;
 import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
 import au.org.intersect.faims.android.ui.form.CustomListView;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
 import com.google.inject.Inject;
 import com.nutiteq.components.MapPos;
@@ -166,6 +166,7 @@ public class LayerManagerDialog extends AlertDialog {
 	private TextView selectedFileText;
 	private Spinner tableNameSpinner;
 	private Spinner labelColumnSpinner;
+	private Spinner idColumnSpinner;
 	protected File rasterFile;
 	protected File spatialFile;
 	protected GeometryStyle pointStyle;
@@ -176,10 +177,11 @@ public class LayerManagerDialog extends AlertDialog {
 	protected LineStyleDialog lineStyleDialog;
 	protected PointStyleDialog pointStyleDialog;
 	protected TextStyleDialog textStyleDialog;
-	private Spinner idColumnSpinner;
 
 	public LayerManagerDialog(Context context) {
 		super(context);
+		
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		pointStyle = GeometryStyle.defaultPointStyle();
 		lineStyle = GeometryStyle.defaultLineStyle();
@@ -212,8 +214,6 @@ public class LayerManagerDialog extends AlertDialog {
 				}
 			}
 		});
-		
-		RoboGuice.getBaseApplicationInjector(mapView.getActivity().getApplication()).injectMembers(this);
 		
 		layout = new LinearLayout(this.getContext());
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -1104,7 +1104,7 @@ public class LayerManagerDialog extends AlertDialog {
 	private View createUserSelectionButton() throws Exception {
 		Button button = new Button(this.getContext());
 		button.setText("Show/hide user's track log");
-		List<User> users = databaseManager.fetchAllUser();
+		List<User> users = databaseManager.fetchRecord().fetchAllUser();
 		if(mapView.getUserCheckedList().isEmpty()){
 			for(User user : users){
 				mapView.putUserCheckList(user, true);
@@ -1565,8 +1565,8 @@ public class LayerManagerDialog extends AlertDialog {
 
 			double[][] originalBounds = gdalMapLayer.getBoundary();
 			
-			MapPos upperLeft = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
-			MapPos bottomRight = GeometryUtil.convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
+			MapPos upperLeft = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[0][0], originalBounds[0][1]));
+			MapPos bottomRight = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG4326, mapView.getModuleSrid(), new MapPos(originalBounds[3][0], originalBounds[3][1]));
 			
 	        TextView upperLeftTextView = new TextView(this.getContext());
 	        upperLeftTextView.setText("Upper left boundary:");

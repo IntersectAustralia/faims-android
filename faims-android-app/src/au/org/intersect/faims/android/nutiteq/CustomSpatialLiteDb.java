@@ -6,6 +6,7 @@ import java.util.Arrays;
 import jsqlite.Callback;
 import jsqlite.Exception;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.GeometryUtil;
 
 import com.nutiteq.db.DBLayer;
 import com.nutiteq.geometry.Geometry;

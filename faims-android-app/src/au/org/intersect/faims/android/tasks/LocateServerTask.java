@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.tasks;
 
 import android.os.AsyncTask;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.net.ServerDiscovery.ServerDiscoveryListener;
 
@@ -16,6 +17,8 @@ public class LocateServerTask extends AsyncTask<Void, Void, Void> implements Ser
 	private boolean searching;
 	
 	public LocateServerTask(ServerDiscovery serverDiscovery, ITaskListener listener) {
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.serverDiscovery = serverDiscovery;
 		this.listener = listener;
 	}

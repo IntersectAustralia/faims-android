@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import roboguice.RoboGuice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -29,6 +28,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -44,7 +44,6 @@ import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryUtil;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
@@ -69,6 +68,7 @@ import au.org.intersect.faims.android.ui.map.tools.PointSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.PolygonSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
 import au.org.intersect.faims.android.util.BitmapUtil;
+import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
@@ -332,6 +332,8 @@ public class CustomMapView extends MapView {
 	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout) {
 		this(activity);
 		
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 
 		layerIdMap = new SparseArray<Layer>();
@@ -368,8 +370,6 @@ public class CustomMapView extends MapView {
 		internalMapListener = new InternalMapListener();
 		getOptions().setMapListener(internalMapListener);
 		
-		RoboGuice.getBaseApplicationInjector(this.activityRef.get().getApplication()).injectMembers(this);
-		
 		// cache gps bitmaps
 		blueDot = UnscaledBitmapLoader.decodeResource(
 				getResources(), R.drawable.blue_dot);
@@ -403,7 +403,7 @@ public class CustomMapView extends MapView {
         this.getLayers().addLayer(currentPositionLayer);
         // store proper projection result
         try {
-			projectionProper = SpatialiteUtil.isProperProjection(moduleSrid);
+			projectionProper = databaseManager.spatialRecord().isProperProjection(moduleSrid);
 		} catch (Exception e) {
 			FLog.e("error checking for proper projection", e);
 		}
@@ -898,7 +898,7 @@ public class CustomMapView extends MapView {
 		raiseInvalidLayerName(layerName);
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
-				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql, databaseManager,
+				isEntity ? DatabaseLayer.Type.ENTITY : DatabaseLayer.Type.RELATIONSHIP, queryName, querySql,
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
@@ -923,7 +923,7 @@ public class CustomMapView extends MapView {
 			StyleSet<TextStyle> textStyleSet) throws Exception {
 		raiseInvalidLayerName(layerName);
 		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
-				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,  databaseManager,
+				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
@@ -1350,9 +1350,9 @@ public class CustomMapView extends MapView {
 			geomList.add(geom);
 			
 			if (data.type == GeometryData.Type.ENTITY) {
-				activityRef.get().getDatabaseManager().updateArchEnt(data.id, WKTUtil.collectionToWKT(geomList));
+				databaseManager.entityRecord().updateArchEnt(data.id, WKTUtil.collectionToWKT(geomList));
 			} else if (data.type == GeometryData.Type.RELATIONSHIP) {
-				activityRef.get().getDatabaseManager().updateRel(data.id, WKTUtil.collectionToWKT(geomList));
+				databaseManager.relationshipRecord().updateRel(data.id, WKTUtil.collectionToWKT(geomList));
 			}
 			
 			refreshMap();
@@ -1368,9 +1368,9 @@ public class CustomMapView extends MapView {
 			if (data.id == null) return;
 			
 			if (data.type == GeometryData.Type.ENTITY) {
-				activityRef.get().getDatabaseManager().deleteArchEnt(data.id);
+				databaseManager.entityRecord().deleteArchEnt(data.id);
 			} else if (data.type == GeometryData.Type.RELATIONSHIP) {
-				activityRef.get().getDatabaseManager().deleteRel(data.id);
+				databaseManager.relationshipRecord().deleteRel(data.id);
 			}
 			clearHighlights();
 			
@@ -1635,7 +1635,7 @@ public class CustomMapView extends MapView {
 					Geometry geom = getGeomToFollow();
 					Line line = (geom instanceof Line) ? (Line) geom : null;
 					
-					activityRef.get().setPathDistance((float) SpatialiteUtil.distanceBetween(currentPoint, targetPoint, moduleSrid));
+					activityRef.get().setPathDistance((float) databaseManager.spatialRecord().distanceBetween(currentPoint, targetPoint, moduleSrid));
 					activityRef.get().setPathIndex(line == null ? -1 : line.getVertexList().indexOf(targetPoint) + 1, line == null ? -1 : line.getVertexList().size());
 					activityRef.get().setPathBearing(SpatialiteUtil.computeAzimuth(currentPoint, targetPoint));
 					activityRef.get().setPathHeading(previousHeading);
@@ -1892,7 +1892,7 @@ public class CustomMapView extends MapView {
 		}
 		List<String> uuids = null;
 		try {
-			uuids = databaseManager.runSelectionQuery(qb.getSql(), values);
+			uuids = databaseManager.queryRecord().runSelectionQuery(qb.getSql(), values);
 		} catch (Exception e) {
 			FLog.e("error running selection query", e);
 			throw new MapException("Exception raised while trying to run query");
@@ -1961,7 +1961,7 @@ public class CustomMapView extends MapView {
 		}
 		List<String> uuids = null;
 		try {
-			uuids = databaseManager.runLegacySelectionQuery(qb.getDbPath(), qb.getTableName(), qb.getSql(), values);
+			uuids = databaseManager.queryRecord().runLegacySelectionQuery(qb.getDbPath(), qb.getTableName(), qb.getSql(), values);
 		} catch (Exception e) {
 			FLog.e("error running legacy selection query", e);
 			throw new MapException("Exception raised while trying to run query");
@@ -2013,15 +2013,15 @@ public class CustomMapView extends MapView {
 		List<String> uuids = new ArrayList<String>();
 		String srid = moduleSrid;
 		try {
-			uuids.addAll(databaseManager.runDistanceEntityQuery(point, distance, srid));
-			uuids.addAll(databaseManager.runDistanceRelationshipQuery(point, distance, srid));
+			uuids.addAll(databaseManager.queryRecord().runDistanceEntityQuery(point, distance, srid));
+			uuids.addAll(databaseManager.queryRecord().runDistanceRelationshipQuery(point, distance, srid));
 			
 			// for each legacy data layer do point distance query
 			List<Layer> layers = getAllLayers();
 			for (Layer layer : layers) {
 				if (layer instanceof CustomSpatialiteLayer) {
 					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
-					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
+					uuids.addAll(databaseManager.queryRecord().runDistanceLegacyQuery(spatialLayer.getDbPath(), 
 							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), point, distance, srid));
 				}
 			}
@@ -2069,15 +2069,15 @@ public class CustomMapView extends MapView {
 		List<String> uuids = new ArrayList<String>();
 		String srid = moduleSrid;
 		try {
-			uuids.addAll(databaseManager.runDistanceEntityQuery(polygon, distance, srid));
-			uuids.addAll(databaseManager.runDistanceRelationshipQuery(polygon, distance, srid));
+			uuids.addAll(databaseManager.queryRecord().runDistanceEntityQuery(polygon, distance, srid));
+			uuids.addAll(databaseManager.queryRecord().runDistanceRelationshipQuery(polygon, distance, srid));
 			
 			// for each legacy data layer do point distance query
 			List<Layer> layers = getAllLayers();
 			for (Layer layer : layers) {
 				if (layer instanceof CustomSpatialiteLayer) {
 					CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
-					uuids.addAll(databaseManager.runDistanceLegacyQuery(spatialLayer.getDbPath(), 
+					uuids.addAll(databaseManager.queryRecord().runDistanceLegacyQuery(spatialLayer.getDbPath(), 
 							spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), polygon, distance, srid));
 				}
 			}
@@ -2125,15 +2125,15 @@ public class CustomMapView extends MapView {
 		List<String> uuids = new ArrayList<String>();
 		try {
 			for(Geometry geometry : geometries){
-				uuids.addAll(databaseManager.runIntersectEntityQuery(geometry));
-				uuids.addAll(databaseManager.runIntersectRelationshipQuery(geometry));
+				uuids.addAll(databaseManager.queryRecord().runIntersectEntityQuery(geometry));
+				uuids.addAll(databaseManager.queryRecord().runIntersectRelationshipQuery(geometry));
 				
 				// for each legacy data layer do point distance query
 				List<Layer> layers = getAllLayers();
 				for (Layer layer : layers) {
 					if (layer instanceof CustomSpatialiteLayer) {
 						CustomSpatialiteLayer spatialLayer = (CustomSpatialiteLayer) layer;
-						uuids.addAll(databaseManager.runIntersectLegacyQuery(spatialLayer.getDbPath(), 
+						uuids.addAll(databaseManager.queryRecord().runIntersectLegacyQuery(spatialLayer.getDbPath(), 
 								spatialLayer.getTableName(), spatialLayer.getIdColumn(), spatialLayer.getGeometryColumn(), geometry));
 					}
 				}
@@ -2192,17 +2192,17 @@ public class CustomMapView extends MapView {
 			Point point = new Point(pos, null, (PointStyle) null, null);
 			MapPos lp = line.getVertexList().get(line.getVertexList().size()-1);
 			MapPos mp = lp;
-			double min = SpatialiteUtil.distanceBetween(pos,  lp, moduleSrid);
+			double min = databaseManager.spatialRecord().distanceBetween(pos,  lp, moduleSrid);
 			for (int i = line.getVertexList().size()-2; i >= 0; i--) {
 				MapPos p = line.getVertexList().get(i);
 				ArrayList<MapPos> pts = new ArrayList<MapPos>();
 				pts.add(p);
 				pts.add(lp);
 				Line seg = new Line(pts, null, (LineStyle) null, null);
-				if (SpatialiteUtil.isPointOnPath(point, seg, buffer, moduleSrid)) {
+				if (databaseManager.spatialRecord().isPointOnPath(point, seg, buffer, moduleSrid)) {
 					return lp;
 				} else {
-					double d = SpatialiteUtil.distanceBetween(pos, p, moduleSrid);
+					double d = databaseManager.spatialRecord().distanceBetween(pos, p, moduleSrid);
 					if (d < min) {
 						min = d;
 						mp = p;
@@ -2228,7 +2228,7 @@ public class CustomMapView extends MapView {
 	private void updateGeomBuffer() {
 		if (geomToFollow != null) {
 			try {
-				geomToFollowBuffer = SpatialiteUtil.geometryBuffer(geomToFollow, buffer, moduleSrid);
+				geomToFollowBuffer = databaseManager.spatialRecord().geometryBuffer(geomToFollow, buffer, moduleSrid);
 			} catch (Exception e) {
 				FLog.e("error getting geometry buffer", e);
 			}

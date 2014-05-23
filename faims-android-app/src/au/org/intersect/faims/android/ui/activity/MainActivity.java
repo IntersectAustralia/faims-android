@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.ui.dialog.AboutDialog;
 import au.org.intersect.faims.android.ui.form.NameValuePair;
@@ -30,6 +31,8 @@ public class MainActivity extends RoboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        FAIMSApplication.getInstance().setApplication(getApplication());
         
         setContentView(R.layout.activity_main);
         
