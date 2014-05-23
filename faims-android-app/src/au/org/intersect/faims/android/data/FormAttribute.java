@@ -20,6 +20,7 @@ public class FormAttribute {
 	public boolean readOnly;
 	public boolean info;
 	public boolean map;
+	public boolean table;
 	public Vector<SelectChoice> selectChoices;
 
 	public static FormAttribute parseFromInput(FormEntryPrompt input) {
@@ -37,6 +38,7 @@ public class FormAttribute {
 		attribute.info = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_info"));
 		attribute.readOnly = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_read_only"));
 		attribute.map = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_map"));
+		attribute.table = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_table"));
 		attribute.sync = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_sync"));
 		attribute.selectChoices = input.getSelectChoices();
 		return attribute;
