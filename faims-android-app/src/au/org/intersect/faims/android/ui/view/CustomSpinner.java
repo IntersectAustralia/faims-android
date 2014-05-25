@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.widget.Spinner;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.util.Compare;
 
 public class CustomSpinner extends Spinner implements ICustomView {
 

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.text.format.Time;
 import android.widget.DatePicker;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
 public class CustomDatePicker extends DatePicker implements ICustomView {

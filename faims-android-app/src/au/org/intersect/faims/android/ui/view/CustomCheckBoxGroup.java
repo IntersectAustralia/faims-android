@@ -7,6 +7,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.util.Compare;
 
 public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	

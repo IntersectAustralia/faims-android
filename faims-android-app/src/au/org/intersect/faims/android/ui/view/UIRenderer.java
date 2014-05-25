@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.util.Arch16n;
 
 /**
  * Class that reads the ui defintion file and render the UI

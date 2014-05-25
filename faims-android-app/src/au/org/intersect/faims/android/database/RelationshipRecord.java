@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import jsqlite.Stmt;
+import au.org.intersect.faims.android.data.Relationship;
+import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.WKBUtil;
-import au.org.intersect.faims.android.ui.view.Relationship;
-import au.org.intersect.faims.android.ui.view.RelationshipAttribute;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.GeometryUtil;
 

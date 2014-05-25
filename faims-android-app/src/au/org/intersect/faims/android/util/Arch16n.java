@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.ui.view;
+package au.org.intersect.faims.android.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

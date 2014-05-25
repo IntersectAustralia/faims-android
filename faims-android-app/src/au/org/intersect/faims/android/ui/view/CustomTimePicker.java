@@ -6,6 +6,7 @@ import android.content.Context;
 import android.text.format.Time;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
 public class CustomTimePicker extends TimePicker implements ICustomView {

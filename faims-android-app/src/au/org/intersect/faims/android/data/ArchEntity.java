@@ -1,15 +1,16 @@
-package au.org.intersect.faims.android.ui.view;
+package au.org.intersect.faims.android.data;
 
 import java.util.Collection;
 import java.util.List;
 
+
 import com.nutiteq.geometry.Geometry;
 
-public class Relationship {
+public class ArchEntity {
 
 	private String type;
 	
-	private Collection<RelationshipAttribute> attributes;
+	private Collection<EntityAttribute> attributes;
 
 	private List<Geometry> geometryList;
 
@@ -17,11 +18,11 @@ public class Relationship {
 
 	private boolean forked;
 
-	public Relationship(String id, String type, Collection<RelationshipAttribute> attributes, List<Geometry> geomList, boolean forked){
+	public ArchEntity(String id, String type, Collection<EntityAttribute> attributes, List<Geometry> geometryList, boolean forked){
 		this.id = id;
 		this.type = type;
 		this.attributes = attributes;
-		this.geometryList = geomList;
+		this.geometryList = geometryList;
 		this.forked = forked;
 	}
 	
@@ -33,7 +34,7 @@ public class Relationship {
 		return type;
 	}
 
-	public Collection<RelationshipAttribute> getAttributes() {
+	public Collection<EntityAttribute> getAttributes() {
 		return attributes;
 	}
 	

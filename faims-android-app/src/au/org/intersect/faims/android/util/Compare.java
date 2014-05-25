@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.ui.view;
+package au.org.intersect.faims.android.util;
 
 public class Compare {
 	
