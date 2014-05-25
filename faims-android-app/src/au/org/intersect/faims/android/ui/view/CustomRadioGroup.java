@@ -9,6 +9,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.util.Compare;
 
 public class CustomRadioGroup extends LinearLayout implements ICustomView {

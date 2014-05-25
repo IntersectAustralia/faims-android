@@ -1,25 +1,25 @@
-import au.org.intersect.faims.android.data.User;
-import au.org.intersect.faims.android.ui.form.EntityAttribute;
-import au.org.intersect.faims.android.ui.form.RelationshipAttribute;
-import java.util.List;
-import java.util.Collection;
-import au.org.intersect.faims.android.ui.form.NameValuePair;
+import android.app.Dialog;
 import android.graphics.Color;
-import com.nutiteq.projections.EPSG3857;
+import android.graphics.Typeface;
+import au.org.intersect.faims.android.data.EntityAttribute;
+import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.data.RelationshipAttribute;
+import au.org.intersect.faims.android.data.User;
+import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
+import au.org.intersect.faims.android.ui.map.QueryBuilder;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Line;
 import com.nutiteq.geometry.Polygon;
-import au.org.intersect.faims.android.nutiteq.GeometryStyle;
-import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
-import android.graphics.Typeface;
-import au.org.intersect.faims.android.ui.map.QueryBuilder;
-import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
+import com.nutiteq.projections.EPSG3857;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PolygonStyle;
-import android.app.Dialog;
+import java.util.Collection;
+import java.util.List;
 
 //========= Persist Functionality ==========
 /**

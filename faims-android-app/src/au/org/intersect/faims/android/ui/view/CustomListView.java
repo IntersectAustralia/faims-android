@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import au.org.intersect.faims.android.data.NameValuePair;
 
 public class CustomListView extends ListView {
 	

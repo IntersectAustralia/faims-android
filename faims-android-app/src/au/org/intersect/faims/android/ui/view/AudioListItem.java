@@ -6,6 +6,7 @@ import android.widget.AbsListView;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class AudioListItem extends LinearLayout{
