@@ -1,0 +1,19 @@
+<ValidationSchema>
+    <ArchaeologicalElement name='Entity'>
+        <property name='ID'>
+            <validator type='blankchecker'>
+                <param type='field' value='freetext' />
+            </validator>
+        </property>
+        <property name='Description'>
+            <validator type='evaluator' cmd='spell.sh ?'>
+                <param type='field' value='freetext' />
+            </validator>
+        </property>
+        <property name='Height'>
+            <validator type='typechecker' datatype='float'>
+                <param type='field' value='measure' />
+            </validator>
+        </property>
+    </ArchaeologicalElement>
+</ValidationSchema>

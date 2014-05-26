@@ -2,8 +2,7 @@ package au.org.intersect.faims.android.data;
 
 import java.util.List;
 
-import au.org.intersect.faims.android.ui.form.Arch16n;
-import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.util.Arch16n;
 
 public class VocabularyTerm extends NameValuePair {
 	

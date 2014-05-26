@@ -1,0 +1,95 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>hdb FAIMS Community Server</h:title>
+    <model>
+      <instance>
+        <faims id="hdb_FAIMS_Community_Server">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <control>
+            <Entity>
+              <NewEntity/>
+              <ListEntity/>
+            </Entity>
+          </control>
+          <Entity>
+            <Entity>
+              <ID/>
+              <Description/>
+              <Height/>
+              <Update/>
+            </Entity>
+          </Entity>
+        </faims>
+      </instance>
+      <bind nodeset="/faims/Entity/Entity/Description" type="string"/>
+      <bind nodeset="/faims/Entity/Entity/Height" type="decimal"/>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="control" faims_archent_type="Pictures">
+      <label>Server Validation</label>
+      <group ref="Entity" faims_scrollable="false">
+        <label>Entity</label>
+        <trigger ref="NewEntity">
+          <label>New Entity</label>
+        </trigger>
+        <select1 appearance="compact" ref="ListEntity">
+          <label>Entities:</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="Entity" faims_archent_type="Entity">
+      <label>Entity</label>
+      <group ref="Entity">
+        <label>Entity Attached Files</label>
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+          <label> ID </label>
+        </input>
+        <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+          <label> Description </label>
+        </input>
+        <input ref="Height" faims_attribute_name="Height" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+          <label> Height </label>
+        </input>
+        <trigger ref="Update">
+          <label>Save Entity</label>
+        </trigger>
+      </group>
+    </group>
+  </h:body>
+</h:html>

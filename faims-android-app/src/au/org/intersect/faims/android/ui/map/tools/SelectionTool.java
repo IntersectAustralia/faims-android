@@ -10,10 +10,10 @@ import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.ui.form.MapText;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
 import au.org.intersect.faims.android.ui.map.button.SelectionManagerButton;
+import au.org.intersect.faims.android.ui.view.MapText;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class SelectionTool extends MapTool {

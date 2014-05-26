@@ -54,8 +54,8 @@ import au.org.intersect.faims.android.ui.dialog.LineStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PointStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.PolygonStyleDialog;
 import au.org.intersect.faims.android.ui.dialog.TextStyleDialog;
-import au.org.intersect.faims.android.ui.form.CustomDragDropListView;
-import au.org.intersect.faims.android.ui.form.CustomListView;
+import au.org.intersect.faims.android.ui.view.CustomDragDropListView;
+import au.org.intersect.faims.android.ui.view.CustomListView;
 import au.org.intersect.faims.android.util.GeometryUtil;
 
 import com.google.inject.Inject;

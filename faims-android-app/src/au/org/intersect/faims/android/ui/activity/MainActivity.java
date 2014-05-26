@@ -20,8 +20,8 @@ import android.widget.Toast;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.ui.dialog.AboutDialog;
-import au.org.intersect.faims.android.ui.form.NameValuePair;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 public class MainActivity extends RoboActivity {

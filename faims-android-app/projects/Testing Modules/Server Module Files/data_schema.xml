@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<dataSchema name="Server Files" preparer="Vincent Tran">
+<dataSchema name="Server Module Files" preparer="Vincent Tran">
   <ArchaeologicalElement name="Pictures">
     <property name="Pictures" type="enum">
       <lookup>
-        <term pictureURL="files/data/gallery/A.png">A<description/></term>
-        <term pictureURL="files/data/gallery/B.png">B<description/></term>
-        <term pictureURL="files/data/gallery/C.png">C<description/></term>
-        <term pictureURL="files/data/gallery/D.png">D<description/></term>
+        <term pictureURL="files/data/files/gallery/A.png">A<description/></term>
+        <term pictureURL="files/data/files/gallery/B.png">B<description/></term>
+        <term pictureURL="files/data/files/gallery/C.png">C<description/></term>
+        <term pictureURL="files/data/files/gallery/D.png">D<description/></term>
       </lookup>
     </property>
   </ArchaeologicalElement>
