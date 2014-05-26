@@ -311,6 +311,12 @@ public class BeanShellLinker {
 							}
 
 						});
+					} else if (view instanceof CustomSpinner) {
+						final CustomSpinner spinner = (CustomSpinner) view;
+						addSpinnerEventClickListener(spinner, code);
+					} else if (view instanceof PictureGallery) {
+						PictureGallery pictureGalleryView = (PictureGallery) view;
+						addPictureGalleryEventClickListener(pictureGalleryView, code);
 					} else {
 						view.setOnClickListener(new OnClickListener() {
 
@@ -329,43 +335,11 @@ public class BeanShellLinker {
 					return;
 				} else {
 					if (view instanceof CustomSpinner) {
-						final CustomSpinner spinner = (CustomSpinner) view;
-						spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-							@Override
-							public void onItemSelected(
-									AdapterView<?> arg0, View arg1,
-									int arg2, long arg3) {
-								if (spinner.ignoresSelectEvents() == false) {
-									execute(code);
-								} else {
-									spinner.setIgnoreSelectEvents(false);
-								}
-								
-							}
-
-							@Override
-							public void onNothingSelected(
-									AdapterView<?> arg0) {
-								if (spinner.ignoresSelectEvents() == false) {
-									execute(code);
-								} else {
-									spinner.setIgnoreSelectEvents(false);
-								}
-							}
-
-						});
+						CustomSpinner spinner = (CustomSpinner) view;
+						addSpinnerEventClickListener(spinner, code);
 					} else if (view instanceof PictureGallery) {
-						final PictureGallery pictureGalleryView = (PictureGallery) view;
-						pictureGalleryView.setImageListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View v)
-							{
-								execute(code);
-							}
-
-						});
+						PictureGallery pictureGalleryView = (PictureGallery) view;
+						addPictureGalleryEventClickListener(pictureGalleryView, code);
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
@@ -425,6 +399,46 @@ public class BeanShellLinker {
 			FLog.e("exception binding event to view " + ref, e);
 			showWarning("Logic Error", "Error binding event to view " + ref);
 		}
+	}
+	
+	private void addSpinnerEventClickListener(final CustomSpinner spinner, final String code) {
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(
+					AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				if (spinner.ignoresSelectEvents() == false) {
+					execute(code);
+				} else {
+					spinner.setIgnoreSelectEvents(false);
+				}
+				
+			}
+
+			@Override
+			public void onNothingSelected(
+					AdapterView<?> arg0) {
+				if (spinner.ignoresSelectEvents() == false) {
+					execute(code);
+				} else {
+					spinner.setIgnoreSelectEvents(false);
+				}
+			}
+
+		});
+	}
+	
+	private void addPictureGalleryEventClickListener(final PictureGallery pictureGallery, final String code) {
+		pictureGallery.setImageListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v)
+			{
+				execute(code);
+			}
+
+		});
 	}
 
 	public void bindFocusAndBlurEvent(String ref, final String focusCallback,
