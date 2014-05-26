@@ -20,7 +20,6 @@ public class UploadDatabaseService extends DownloadUploadService {
 	@Inject
 	DatabaseManager databaseManager;
 	
-	protected String userId;
 	protected File tempDB;
 	
 	public UploadDatabaseService() {
@@ -42,9 +41,6 @@ public class UploadDatabaseService extends DownloadUploadService {
 
 	protected void initService(Intent intent) {
     	super.initService(intent);
-    	userId = intent.getStringExtra("userId");
-    	databaseManager.init(serviceModule.getDirectoryPath("db.sqlite"));
-    	databaseManager.setUserId(userId);
 	}
 
 	@Override
@@ -67,7 +63,7 @@ public class UploadDatabaseService extends DownloadUploadService {
     	files.add(tempDB);
     	
 		HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
-		extraParts.put("user", new StringBody(userId));
+		extraParts.put("user", new StringBody(databaseManager.getUserId()));
 		
     	if (!uploadFiles("db", 
     			Request.DATABASE_UPLOAD_REQUEST(serviceModule), files, serviceModule.getDirectoryPath(), extraParts)) {

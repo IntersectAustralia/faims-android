@@ -1020,7 +1020,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);
 			intent.putExtra("module", module);
-			intent.putExtra("userId", databaseManager.getUserId());
 			ShowModuleActivity.this.startService(intent);
 
 		} else {
@@ -1394,13 +1393,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("module", module);
-				String userId = databaseManager.getUserId();
-				FLog.d("user id : " + userId);
-				if (userId == null) {
-					userId = "0"; // TODO: what should happen if user sets no
-									// user?
-				}
-				intent.putExtra("userId", userId);
 				ShowModuleActivity.this.startService(intent);
 
 				callSyncStart();

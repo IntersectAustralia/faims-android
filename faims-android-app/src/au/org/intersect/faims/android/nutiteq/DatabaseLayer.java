@@ -47,7 +47,6 @@ public class DatabaseLayer extends GeometryLayer {
 	protected String queryName;
 	protected String querySql;
 	protected CustomMapView mapView;
-	protected String userid;
 	protected ArrayList<String> hideGeometryList;
 	
 	protected boolean renderAll;
@@ -132,14 +131,6 @@ public class DatabaseLayer extends GeometryLayer {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		updateTextLayer();
-	}
-
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
 	}
 
 	private void updateTextLayer() {
