@@ -332,6 +332,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
 
 	public static final int VIDEO_REQUEST_CODE = 5;
+	
+	public static final int SCAN_CODE_CODE = 6;
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -721,6 +723,14 @@ public class ShowModuleActivity extends FragmentActivity implements
 			case VIDEO_REQUEST_CODE:
 				if (resultCode == RESULT_OK) {
 					this.linker.executeVideoCallBack();
+				}
+				break;
+			case SCAN_CODE_CODE:
+				if (resultCode == RESULT_OK) {
+					String contents = data.getStringExtra("SCAN_RESULT");
+					this.linker.setLastScanContents(contents);
+					
+					this.linker.executeScanCallBack();
 				}
 			}
 		} catch (Exception e) {

@@ -166,6 +166,7 @@ onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/fil
 onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");
 onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/videos\")");
 onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
+onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
 
 onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
@@ -261,6 +262,16 @@ onEvent("tabgroup2/tab1/attachfile", "click", "attachFileTo(\"tabgroup2/tab1/fil
 onEvent("tabgroup2/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup2/tab1/pictures\")");
 onEvent("tabgroup2/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup2/tab1/videos\")");
 onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/audios\")");
+onEvent("tabgroup2/tab1/scancode", "click", "onClickScanner()");
+
+onClickScanner() {
+	scanCode("onCodeScan()");
+}
+
+onCodeScan() {
+	code = getLastScanContents();
+	showToast(code);
+}
 
 onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 

@@ -1703,6 +1703,15 @@ recordAudio(String callback){
 }
 
 /**
+  * Open the barcode scanner and then execute the callback after finish.
+  *
+  * @param callback the callback executed after operation is finish
+  */
+scanCode(String callback){
+  linker.scanCode(callback);
+}
+
+/**
   * This is used in conjunction with openCamera. This returns the file path of the last picture taken.
   *
   * @return the path of the last taken picture
@@ -1727,6 +1736,15 @@ String getLastVideoFilePath(){
   */
 String getLastAudioFilePath(){
 	return linker.getLastAudioFilePath();
+}
+
+/**
+  * This is used in conjunction with scanCode. This returns the contents of the last scan taken.
+  *
+  * @return the contents of the last scan
+  */
+String getLastScanContents(){
+  return linker.getLastScanContents();
 }
 
 /**
@@ -1872,7 +1890,7 @@ _setVideoTo(String ref) {
 /**
   * Helper method to be used with a button click event to attach audios to a view
   *
-  * @param ref the view reference to attach the videos to (must be of type file)
+  * @param ref the view reference to attach the audios to (must be of type file)
   */
 attachAudioTo(String ref) {
 	recordAudio("_setAudioTo(\""+ref+"\")");
