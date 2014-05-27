@@ -111,6 +111,13 @@
                   <add></add>
               </tab1>
           </tabgroup4>
+          <tabgroup5>
+              <tab1>
+                  <queries></queries>
+                  <load></load>
+                  <table></table>
+              </tab1>
+          </tabgroup5>
         </faims>
       </instance>
       
@@ -446,6 +453,25 @@
               <label>Add member</label>
           	</trigger>
         </group>
+    </group>
+    <group ref="tabgroup5">
+      <label>Table View</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Table View</label>
+        <select1 ref="queries">
+            <label>Queries</label>
+            <item>
+	         	<label>dummy</label>
+	         	<value>dummy</value>
+	       	</item>
+        </select1>
+        <trigger ref="load">
+        	<label>Load Query</label>
+       	</trigger>
+       	<input ref="table" faims_table="true">
+        	<label></label>
+       	</input>
+      </group>
     </group>
   </h:body>
 </h:html>

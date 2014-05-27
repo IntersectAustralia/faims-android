@@ -1845,6 +1845,44 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public void populateTableRaw(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.populate(query, headers, actionIndex, actionCallback, false);
+			} else {
+				FLog.w("Cannot populate table"
+						+ ref);
+				showWarning("Logic Error", "Cannot populate table"
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to populate table" + ref, e);
+			showWarning("Logic Error", "Error trying to populate table" + ref);
+		}
+	}
+	
+	public void populateTablePivot(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.populate(query, headers, actionIndex, actionCallback, true);
+			} else {
+				FLog.w("Cannot populate table "
+						+ ref);
+				showWarning("Logic Error", "Cannot populate table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to populate table " + ref, e);
+			showWarning("Logic Error", "Error trying to populate table " + ref);
+		}
+	}
+	
 	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
 		ArrayList<NameValuePair> pairs = null;
 		try {

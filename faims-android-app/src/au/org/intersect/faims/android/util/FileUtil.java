@@ -17,11 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.javarosa.core.model.FormDef;
 import org.javarosa.core.model.condition.EvaluationContext;
@@ -288,111 +283,111 @@ public class FileUtil {
 	
 	// Tar Helpers
 	
-	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
-		FileOutputStream out = new FileOutputStream(filename);
-		return new TarArchiveOutputStream(
-				 new GzipCompressorOutputStream(out));
-	}
-	
-	public static TarArchiveInputStream createTarInputStream(String filename) throws IOException {
-		FileInputStream in = new FileInputStream(filename);
-		return new TarArchiveInputStream(
-				 new GzipCompressorInputStream(in));
-	}
-	
-	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
-		tarFile(dir, new File(dir).getName(), os, null);
-	}
-	
-	public static void tarFile(String dir, String baseDir, TarArchiveOutputStream os, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		FLog.c();
-		
-		try {		 
-		 tarDirToStream(dir, baseDir, os, excludeFiles);
-		}
-		finally {
-			if (os != null) os.close();
-		}
-	}
-	
-	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		File d = new File(dir);
-		if (d.isDirectory()) {
-			String[] fileList = d.list();
-			
-			for (int i = 0; i < fileList.length; i++) {
-				File f = new File(d, fileList[i]);
-				if (f.isDirectory()) {
-					tarDirToStream(f.getPath(), tarname + f.getName() + "/", ts, excludeFiles);
-				} else {
-					
-					String tarFile = tarname + f.getName();
-					
-					boolean fileExcluded = false;
-					if (excludeFiles != null) {
-						
-						for (String exf : excludeFiles) {
-							if (exf.equals(tarFile)) {
-								fileExcluded = true;
-								break;
-							}
-						}
-					}
-					
-					if (!fileExcluded) {
-						tarFileToStream(f.getPath(), tarFile, ts);
-					}
-				}
-			}
-		} else {
-			tarFileToStream(d.getPath(), tarname, ts);
-		}
-	}
-	
-	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
-		FileInputStream fs = null;
-		try {
-			File f = new File(filename);
-			fs = new FileInputStream(f);
-			TarArchiveEntry te = new TarArchiveEntry(f);
-			te.setName(tarname);
-			te.setSize(f.length());
-			ts.putArchiveEntry(te);
-			IOUtils.copy(fs, ts);
-			ts.closeArchiveEntry();
-		}
-		finally {
-			if (fs != null) fs.close();
-		}
-	}
-	
-	public static void untarFile(String dir, TarArchiveInputStream is) throws IOException {
-		try {
-			TarArchiveEntry e;
-			while((e = is.getNextTarEntry()) != null) {
-				if (e.isDirectory()) {
-					makeDirs(new File(dir + "/" + e.getName()));
-				} else {
-					writeTarFile(is, e, new File(dir + "/" + e.getName()));
-				}
-			}
-		} finally {
-			if (is != null) is.close();
-		}
-	}
-	
-	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		// make sure directory path exists
-		makeDirs(file);
-		
-		FileOutputStream os = null;
-		try {
-			os = new FileOutputStream(file);
-	        IOUtils.copy(ts, os);
-		} finally {
-			if (os != null) os.close();
-		}
-	}
+//	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
+//		FileOutputStream out = new FileOutputStream(filename);
+//		return new TarArchiveOutputStream(
+//				 new GzipCompressorOutputStream(out));
+//	}
+//	
+//	public static TarArchiveInputStream createTarInputStream(String filename) throws IOException {
+//		FileInputStream in = new FileInputStream(filename);
+//		return new TarArchiveInputStream(
+//				 new GzipCompressorInputStream(in));
+//	}
+//	
+//	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
+//		tarFile(dir, new File(dir).getName(), os, null);
+//	}
+//	
+//	public static void tarFile(String dir, String baseDir, TarArchiveOutputStream os, List<String> excludeFiles) throws IOException, FileNotFoundException {
+//		FLog.c();
+//		
+//		try {		 
+//		 tarDirToStream(dir, baseDir, os, excludeFiles);
+//		}
+//		finally {
+//			if (os != null) os.close();
+//		}
+//	}
+//	
+//	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
+//		File d = new File(dir);
+//		if (d.isDirectory()) {
+//			String[] fileList = d.list();
+//			
+//			for (int i = 0; i < fileList.length; i++) {
+//				File f = new File(d, fileList[i]);
+//				if (f.isDirectory()) {
+//					tarDirToStream(f.getPath(), tarname + f.getName() + "/", ts, excludeFiles);
+//				} else {
+//					
+//					String tarFile = tarname + f.getName();
+//					
+//					boolean fileExcluded = false;
+//					if (excludeFiles != null) {
+//						
+//						for (String exf : excludeFiles) {
+//							if (exf.equals(tarFile)) {
+//								fileExcluded = true;
+//								break;
+//							}
+//						}
+//					}
+//					
+//					if (!fileExcluded) {
+//						tarFileToStream(f.getPath(), tarFile, ts);
+//					}
+//				}
+//			}
+//		} else {
+//			tarFileToStream(d.getPath(), tarname, ts);
+//		}
+//	}
+//	
+//	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
+//		FileInputStream fs = null;
+//		try {
+//			File f = new File(filename);
+//			fs = new FileInputStream(f);
+//			TarArchiveEntry te = new TarArchiveEntry(f);
+//			te.setName(tarname);
+//			te.setSize(f.length());
+//			ts.putArchiveEntry(te);
+//			IOUtils.copy(fs, ts);
+//			ts.closeArchiveEntry();
+//		}
+//		finally {
+//			if (fs != null) fs.close();
+//		}
+//	}
+//	
+//	public static void untarFile(String dir, TarArchiveInputStream is) throws IOException {
+//		try {
+//			TarArchiveEntry e;
+//			while((e = is.getNextTarEntry()) != null) {
+//				if (e.isDirectory()) {
+//					makeDirs(new File(dir + "/" + e.getName()));
+//				} else {
+//					writeTarFile(is, e, new File(dir + "/" + e.getName()));
+//				}
+//			}
+//		} finally {
+//			if (is != null) is.close();
+//		}
+//	}
+//	
+//	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
+//		// make sure directory path exists
+//		makeDirs(file);
+//		
+//		FileOutputStream os = null;
+//		try {
+//			os = new FileOutputStream(file);
+//	        IOUtils.copy(ts, os);
+//		} finally {
+//			if (os != null) os.close();
+//		}
+//	}
 	
 }
 

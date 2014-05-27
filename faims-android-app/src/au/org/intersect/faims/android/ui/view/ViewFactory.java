@@ -10,7 +10,6 @@ import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.text.InputType;
 import android.text.format.Time;
-import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -19,7 +18,6 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
-import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
@@ -73,9 +71,8 @@ public class ViewFactory {
 		return createButton("?");
 	}
 	
-	protected WebView createTableView() {
-		WebView table = new WebView(context());
-		return table;
+	protected Table createTableView() {
+		return new Table(context());
 	}
 
 	protected CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
@@ -226,10 +223,8 @@ public class ViewFactory {
 		return new VideoGallery(context(), attribute, ref);
 	}
 	 
-	protected CustomMapView createMapView(LinearLayout linearLayout) {
-		MapLayout mapLayout = new MapLayout(contextRef.get());
-		linearLayout.addView(mapLayout);
-		return mapLayout.getMapView();
+	protected MapLayout createMapView(LinearLayout linearLayout) {
+		return new MapLayout(context());
 	}
 	
 	private Button createButton(String label) {

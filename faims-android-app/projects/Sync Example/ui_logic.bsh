@@ -18,10 +18,10 @@ onEvent("user", "show", "loadUsers()");
 
 // CONTROLS
 
-createOption(id, name) {
+createOption(name, value) {
 	ArrayList option = new ArrayList();
-	option.add(id);
 	option.add(name);
+	option.add(value);
 	return option;
 }
 
@@ -29,6 +29,7 @@ options = new ArrayList();
 options.add(createOption("entity", "Create Entity"));
 options.add(createOption("relationship", "Create Relationship"));
 options.add(createOption("add", "Add Association"));
+options.add(createOption("table", "Table View"));
 options.add(createOption("controls", "Controls"));
 
 populateList("menu/tab1/options", options);
@@ -41,6 +42,8 @@ onClickOption() {
 		showTabGroup("tabgroup2");
 	} else if ("add".equals(value)) {
 		showTabGroup("tabgroup4");
+	} else if ("table".equals(value)) {
+		showTabGroup("tabgroup5");
 	} else {
 		showTabGroup("tabgroup3");
 	}
@@ -312,3 +315,164 @@ onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select 
 clickEventToast(string) {
 	showToast(string);
 }
+
+// TABLE View
+
+tableQuery = new ArrayList();
+tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
+				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
+				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure, \n" + 
+				"	 									   vocabname, \n" + 
+				"	 									   freetext), ' | ') as response \n" +
+				" 			FROM latestNonDeletedArchentIdentifiers\n" +
+				" 			GROUP BY uuid;");
+tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname || ' (' || freetext || ')', \n" + 
+				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname, \n" + 
+				" 													 freetext), ' | ') as response \n" +
+				" 		FROM latestNonDeletedRelnIdentifiers \n" +
+				" 		GROUP BY relationshipid;");
+tableQuery.add("select uuid, attributename, response\n" + 
+				"from (select attributename, attributeid\n" + 
+				"from attributekey join idealaent using (attributeid) join aenttype using (aenttypeid)\n" + 
+				"where aenttypename = 'small'), (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"left outer join \n" + 
+				"(select uuid, valuetimestamp, attributename, attributeid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||') '||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' ' || vocabname   ||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure,\n" + 
+				"                                                                                              vocabname,\n" + 
+				"                                                                                              freetext), ' | ') as response\n" + 
+				"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp          \n" + 
+				"          FROM latestnondeletedaentvalue join latestnondeletedarchent using (uuid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY uuid, attributename ASC)\n" + 
+				"group by uuid, attributeid) using (uuid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select uuid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, geospatialcolumn\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'username', fname || ' ' || lname\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, fname, lname\n" + 
+				"from latestnondeletedarchentidentifiers join user using (userid)\n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"order by uuid, attributename;");
+tableQuery.add("select relationshipid, attributename, response\n" + 
+				"from (select attributename, attributeid \n" + 
+				"from attributekey join idealreln using (attributeid) join relntype using (relntypeid)\n" + 
+				"where relntypename = 'AboveBelow'),\n" + 
+				"(select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename\n" + 
+				") left outer join (\n" + 
+				"select relationshipid, relnvaluetimestamp, attributename, attributeid, group_concat(coalesce(vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                         vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname,\n" + 
+				"                                                                                         freetext), ' | ') as response\n" + 
+				"FROM (  SELECT relationshipid, attributeid, vocabid, attributename, vocabname,  freetext, certainty, attributetype, relnvaluetimestamp, relntimestamp\n" + 
+				"          FROM latestnondeletedrelnvalue join latestnondeletedrelationship using (relationshipid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY relationshipid, attributename ASC)\n" + 
+				"group by relationshipid, attributeid) using (relationshipid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, geospatialcolumn\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'username', fname || ' ' || lname\n" + 
+				"from (select relationshipid, relntypeid, relntypename, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, fname, lname\n" + 
+				"from latestNonDeletedRelnIdentifiers join user using (userid)\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"order by relationshipid, attributename;");
+
+createTableHeaders(headers) {
+	ArrayList listHeaders = new ArrayList();
+	for (String header : headers) {
+		listHeaders.add(header);
+	}
+	return listHeaders;
+}
+
+tableHeaders = new ArrayList();
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier" }));
+tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
+
+tableList = new ArrayList();
+tableList.add(createOption("entity", "Fetch Entities"));
+tableList.add(createOption("relationship", "Fetch Relationships"));
+tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
+tableList.add(createOption("relationship-pivot", "Fetch Relationship Attributes"));
+
+onEvent("tabgroup5", "load", "onLoadTable()");
+
+onLoadTable() {
+	populateDropDown("tabgroup5/tab1/queries", tableList);
+}
+
+onEvent("tabgroup5/tab1/load", "click", "onLoadQuery()");
+
+onLoadQuery() {
+	selectedItem = getFieldValue("tabgroup5/tab1/queries");
+	
+	index = getTableIndex(selectedItem);
+	if (index < 0) return;
+
+	headers = tableHeaders.get(index);
+	query = tableQuery.get(index);
+	if (index < 2) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, -1, null);
+	} else {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, -1, null);
+	}
+}
+
+getTableIndex(selectedItem) {
+	for (int i = 0; i < tableList.size(); i++) {
+		if (tableList.get(i).get(0).equals(selectedItem)) {
+			return i;
+		}
+	}
+	return -1;
+}
+

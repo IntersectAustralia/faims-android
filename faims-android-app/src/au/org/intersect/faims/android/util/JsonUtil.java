@@ -2,7 +2,6 @@ package au.org.intersect.faims.android.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,20 +25,11 @@ public class JsonUtil {
 	}
 	
 	public static JSONObject deserializeJsonObject(InputStream stream) throws IOException, JSONException {
-        return new JSONObject(streamToString(stream));
+        return new JSONObject(StringUtil.streamToString(stream));
 	}
 	
 	public static JSONArray deserializeJsonArray(InputStream stream) throws IOException, JSONException {
-		return new JSONArray(streamToString(stream));
-	}
-	
-	private static String streamToString(InputStream stream) throws IOException {
-		InputStreamReader reader = new InputStreamReader(stream);
-        StringBuilder sb = new StringBuilder();
-        int value;
-        while((value = reader.read()) > 0)
-            sb.append((char) value);
-        return sb.toString();
+		return new JSONArray(StringUtil.streamToString(stream));
 	}
 
 }

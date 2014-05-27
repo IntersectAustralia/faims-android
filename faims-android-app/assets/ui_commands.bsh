@@ -528,6 +528,36 @@ populateList(String ref, Collection values){
 }
 
 /**
+  * Populate table from a query.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param query the query to populate the table from
+  * @param headers the columns used for the header of the table
+  * @param actionIndex the index to create actions on
+  * @param actionCallback the callback to execute when an action is triggered
+  */
+populateTableRaw(String ref, String query, List headers, int actionIndex, String actionCallback){
+  linker.populateTableRaw(ref, query, headers, actionIndex, actionCallback);
+}
+
+/**
+  * Populate table from a query by applying a pivot. The query should returns results as id, name, and value.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param query the query to populate the table from
+  * @param headers the columns used for the header of the table
+  * @param actionIndex the index to create actions on
+  * @param actionCallback the callback to execute when an action is triggered
+  */
+populateTablePivot(String ref, String query, List headers, int actionIndex, String actionCallback){
+  linker.populateTablePivot(ref, query, headers, actionIndex, actionCallback);
+}
+
+/**
   * Used in conjunction with the click event on a list. This returns last selected value in the list.
   *
   * @return the last selected value in the list

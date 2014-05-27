@@ -37,6 +37,7 @@ import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
@@ -190,10 +191,15 @@ public class Tab implements Parcelable {
 	                default:
 	                	// check for additional types
 	                	if (attribute.map) {            		
-	                		CustomMapView mapView = viewFactory.createMapView(linearLayout);
-	                		mapViewList.add(mapView);
-	                		view = mapView;
+	                		MapLayout mapLayout = viewFactory.createMapView(linearLayout);
+	                		linearLayout.addView(mapLayout);
+	                		mapViewList.add(mapLayout.getMapView());
+	                		view = mapLayout.getMapView();
 	                	} else if (attribute.table) {
+	                		if (attribute.questionText != null && !attribute.questionText.isEmpty()) {
+	                			TextView tableLabel = viewFactory.createLabel(attribute);
+	                			linearLayout.addView(tableLabel);
+	                		}
 	                		view = viewFactory.createTableView();
 	                		linearLayout.addView(view);
 	                	} else {
