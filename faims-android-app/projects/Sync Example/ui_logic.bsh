@@ -451,6 +451,9 @@ onLoadTable() {
 }
 
 onEvent("tabgroup5/tab1/load", "click", "onLoadQuery()");
+onEvent("tabgroup5/tab1/top", "click", "onScrollTop()");
+onEvent("tabgroup5/tab1/bottom", "click", "onScrollBottom()");
+onEvent("tabgroup5/tab1/row", "click", "onScrollRow()");
 
 onLoadQuery() {
 	selectedItem = getFieldValue("tabgroup5/tab1/queries");
@@ -476,3 +479,19 @@ getTableIndex(selectedItem) {
 	return -1;
 }
 
+onScrollTop() {
+	scrollTableToTop("tabgroup5/tab1/table");
+}
+
+onScrollBottom() {
+	scrollTableToBottom("tabgroup5/tab1/table");
+}
+
+onScrollRow() {
+	value = getFieldValue("tabgroup5/tab1/scrollRow");
+	row = 0;
+	if (value != null && !"".equals(value)) {
+		row = Integer.parseInt(value);
+	}
+	scrollTableToRow("tabgroup5/tab1/table", row);
+}

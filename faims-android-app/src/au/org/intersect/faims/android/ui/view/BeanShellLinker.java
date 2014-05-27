@@ -1883,6 +1883,63 @@ public class BeanShellLinker {
 		}
 	}
 	
+	public void scrollTableToTop(String ref) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.scrollToTop();
+			} else {
+				FLog.w("Cannot scroll table "
+						+ ref);
+				showWarning("Logic Error", "Cannot scroll table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to scroll table " + ref, e);
+			showWarning("Logic Error", "Error trying to scroll table " + ref);
+		}
+	}
+	
+	public void scrollTableToBottom(String ref) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.scrollToBottom();
+			} else {
+				FLog.w("Cannot scroll table "
+						+ ref);
+				showWarning("Logic Error", "Cannot scroll table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to scroll table " + ref, e);
+			showWarning("Logic Error", "Error trying to scroll table " + ref);
+		}
+	}
+	
+	public void scrollTableToRow(String ref, int row) {
+		try {
+			Object obj = activity.getUIRenderer().getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.scrollToRow(row);
+			} else {
+				FLog.w("Cannot scroll table "
+						+ ref);
+				showWarning("Logic Error", "Cannot scroll table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to scroll table " + ref, e);
+			showWarning("Logic Error", "Error trying to scroll table " + ref);
+		}
+	}
+	
 	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
 		ArrayList<NameValuePair> pairs = null;
 		try {

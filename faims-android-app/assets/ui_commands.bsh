@@ -558,6 +558,39 @@ populateTablePivot(String ref, String query, List headers, int actionIndex, Stri
 }
 
 /**
+  * Scroll table to top.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  */
+scrollTableToTop(String ref){
+  linker.scrollTableToTop(ref);
+}
+
+/**
+  * Scroll table to bottom.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  */
+scrollTableToBottom(String ref){
+  linker.scrollTableToBottom(ref);
+}
+
+  /**
+  * Scroll table to top.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  */
+scrollTableToRow(String ref, int row){
+  linker.scrollTableToRow(ref, row);
+}
+
+/**
   * Used in conjunction with the click event on a list. This returns last selected value in the list.
   *
   * @return the last selected value in the list

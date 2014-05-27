@@ -46,14 +46,14 @@
                   <attachaudio></attachaudio>
                   <viewattached></viewattached>
                   <scancode></scancode>
-                  <container2>
+                  <container>
                     <child1>
                       <save></save>
                     </child1>
                     <child2>
                       <clear></clear>
                     </child2>
-                  </container2>
+                  </container>
                   <delete></delete>
                   <close></close>
               </tab1>
@@ -81,14 +81,14 @@
                   <attachaudio></attachaudio>
                   <viewattached></viewattached>
                   <scancode></scancode>
-                  <container2>
+                  <container>
                     <child1>
                       <save></save>
                     </child1>
                     <child2>
                       <clear></clear>
                     </child2>
-                  </container2>
+                  </container>
                   <delete></delete>
                   <close></close>
               </tab1>
@@ -116,6 +116,20 @@
                   <queries></queries>
                   <load></load>
                   <table></table>
+                  <container>
+                      <child1>
+                      	<top></top>
+                      </child1>
+                      <child2>
+                      	<bottom></bottom>
+                      </child2>
+                      <child3>
+                      	<scrollRow></scrollRow>
+                      </child3>
+                      <child4>
+                      	<row></row>
+                      </child4>
+                  </container>
               </tab1>
           </tabgroup5>
         </faims>
@@ -123,6 +137,7 @@
       
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup2/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup5/tab1/container/child3/scrollRow" type="decimal"/>
       
     </model>
   </h:head>
@@ -257,7 +272,7 @@
           <trigger ref="scancode">
               <label>Scan Code</label>
           </trigger>
-	        <group ref="container2" faims_style="orientation">
+	        <group ref="container" faims_style="orientation">
 	          <label></label>
 	          <group ref="child1" faims_style="even">
 	            <label></label>
@@ -380,7 +395,7 @@
           <trigger ref="scancode">
               <label>Scan Code</label>
           </trigger>
-	        <group ref="container2" faims_style="orientation">
+	        <group ref="container" faims_style="orientation">
 	          <label></label>
 	          <group ref="child1" faims_style="even">
 	            <label></label>
@@ -471,6 +486,33 @@
        	<input ref="table" faims_table="true">
         	<label></label>
        	</input>
+       	<group ref="container" faims_style="orientation">
+        	<label></label>
+	        <group ref="child1" faims_style="even">
+	        	<label></label>
+	            <trigger ref="top">
+	              <label>Top</label>
+	            </trigger>
+	        </group>
+	        <group ref="child2" faims_style="even">
+	        	<label></label>
+	            <trigger ref="bottom">
+	              <label>Bottom</label>
+	            </trigger>
+	        </group>
+	        <group ref="child3" faims_style="even">
+	        	<label></label>
+	            <input ref="scrollRow">
+	                <label>Scroll Row:</label>
+	            </input>
+	        </group>
+	        <group ref="child4" faims_style="even">
+	        	<label></label>
+	            <trigger ref="row">
+	              <label>Row</label>
+	            </trigger>
+	        </group>
+	    </group>
       </group>
     </group>
   </h:body>

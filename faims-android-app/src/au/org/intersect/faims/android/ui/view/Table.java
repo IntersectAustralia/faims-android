@@ -6,25 +6,26 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.database.DatabaseManager;
-import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.StringUtil;
 
 import com.google.inject.Inject;
 
+@SuppressLint("SetJavaScriptEnabled")
 public class Table extends WebView {
 	
 	@Inject
 	DatabaseManager databaseManager;
 	
 	private String query;
-	private int actionIndex;
-	private String actionCallback;
+	//private int actionIndex;
+	//private String actionCallback;
 	private List<String> headers;
 	private boolean pivot;
 
@@ -34,10 +35,11 @@ public class Table extends WebView {
 		
 		setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 		
-		// initialise settings
+		// settings
 		WebSettings settings = getSettings();
 		settings.setBuiltInZoomControls(true);
 		settings.setSupportZoom(true);
+		settings.setJavaScriptEnabled(true);
 		setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 		setScrollbarFadingEnabled(false);
 	}
@@ -45,31 +47,45 @@ public class Table extends WebView {
 	public void populate(String query, List<String> headers, int actionIndex, String actionCallback, boolean pivot) throws Exception {
 		this.query = query;
 		this.headers = headers;
-		this.actionIndex = actionIndex;
-		this.actionCallback = actionCallback;
+		//this.actionIndex = actionIndex;
+		//this.actionCallback = actionCallback;
 		this.pivot = pivot;
 		
 		this.loadDataWithBaseURL("file:///android_asset/", generateTableHTML(), "text/html", "utf-8", null);
 	}
 	
+	public void scrollToTop() {
+		loadUrl("javascript:scrollToElement('page-top')");
+	}
+	
+	public void scrollToBottom() {
+		loadUrl("javascript:scrollToElement('page-bottom')");
+	}
+	
+	public void scrollToRow(int num) {
+		loadUrl("javascript:scrollToElement('row-" + num + "')");
+	}
+	
 	private String generateTableHTML() throws Exception {
 		Collection<List<String>> results = databaseManager.fetchRecord().fetchAll(query);
 		StringBuilder sb = new StringBuilder();
-		sb.append(readHtmlFromAssets("table_header.html"));
-		sb.append("<table class=\"CSSTableGenerator\">");
+		sb.append(readHtmlFromAssets("table.header.html"));
+		sb.append("<table class=\"table\">");
 		if (results != null) {
-			sb.append(generateQueryRow(headers));	
+			sb.append(generateQueryRow(headers, 0, true));	
 			
 			if (pivot) {
 				results = pivotResults(results);
 			}
 			
+			int count = 1;
 			for (List<String> row : results) {
-				sb.append(generateQueryRow(row));
+				sb.append(generateQueryRow(row, count, false));
+				count++;
 			}
 		}
 		sb.append("</table>");
-		sb.append(readHtmlFromAssets("table_footer.html"));
+		sb.append(readHtmlFromAssets("table.footer.html"));
 		return sb.toString();
 	}
 	
@@ -108,13 +124,13 @@ public class Table extends WebView {
 		return pivotResults;
 	}
 	
-	private String generateQueryRow(List<String> row) {
+	private String generateQueryRow(List<String> row, int count, boolean header) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<tr>");
+		sb.append("<tr id=\"row-" + count + "\">");
 		for (String column : row) {
-			sb.append("<td>");
+			sb.append(header ? "<th>" : "<td>");
 			sb.append(column);
-			sb.append("</td>");
+			sb.append(header ? "</th>" : "</td>");
 		}
 		sb.append("</tr>");
 		return sb.toString();
