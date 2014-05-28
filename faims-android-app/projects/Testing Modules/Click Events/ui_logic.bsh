@@ -1,0 +1,84 @@
+makeVocab(String attrib){
+    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ");
+    return a;
+}
+
+makePictureGallery(String attrib){
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
+}
+
+getAttributeName(String vocab) {
+    Object values = fetchOne("select vocabName from vocabulary where vocabid = '" + vocab + "';");   
+    return values.get(0);
+}
+
+populateDropDown("main/normal/dropDownSelect", makeVocab("dropdown"));
+populatePictureGallery("main/normal/pictureGallerySelect", makePictureGallery("pictures"));
+populateDropDown("main/normal/dropDownClick", makeVocab("dropdown"));
+populatePictureGallery("main/normal/pictureGalleryClick", makePictureGallery("pictures"));
+populateHierarchicalDropDown("main/heirarchical/hidropDownSelect", "hidropdown");
+populateHierarchicalPictureGallery("main/heirarchical/hipictureGallerySelect", "hipictures");
+populateHierarchicalDropDown("main/heirarchical/hidropDownClick", "hidropdown");
+populateHierarchicalPictureGallery("main/heirarchical/hipictureGalleryClick", "hipictures");
+
+onEvent("main/normal/dropDownSelect", "select", "incrementSelect()");
+onEvent("main/normal/dropDownClick", "click", "incrementClick()");
+onEvent("main/normal/pictureGallerySelect", "select", "incrementSelect2()");
+onEvent("main/normal/pictureGalleryClick", "click", "incrementClick2()");
+onEvent("main/heirarchical/hidropDownSelect", "select", "incrementSelect3()");
+onEvent("main/heirarchical/hidropDownClick", "click", "incrementClick3()");
+onEvent("main/heirarchical/hipictureGallerySelect", "select", "incrementSelect4()");
+onEvent("main/heirarchical/hipictureGalleryClick", "click", "incrementClick4()");
+
+int n = 0;
+int secondn = 0;
+int thirdn = 0;
+int fourthn = 0;
+
+incrementSelect(){
+    n++;
+    setFieldValue("main/normal/counter", n);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/dropDownSelect")));
+}
+
+incrementClick(){
+    n++;
+    setFieldValue("main/normal/counter", n);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/dropDownClick")));
+}
+
+incrementSelect2(){
+    secondn++;
+    setFieldValue("main/normal/counter2", secondn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/pictureGallerySelect")));
+}
+
+incrementClick2(){
+    secondn++;
+    setFieldValue("main/normal/counter2", secondn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/pictureGalleryClick")));
+}
+
+incrementSelect3(){
+    thirdn++;
+    setFieldValue("main/heirarchical/counter", thirdn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hidropDownSelect")));
+}
+
+incrementClick3(){
+    thirdn++;
+    setFieldValue("main/heirarchical/counter", thirdn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hidropDownClick")));
+}
+
+incrementSelect4(){
+    fourthn++;
+    setFieldValue("main/heirarchical/counter2", fourthn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hipictureGallerySelect")));
+}
+
+incrementClick4(){
+    fourthn++;
+    setFieldValue("main/heirarchical/counter2", fourthn);
+    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hipictureGalleryClick")));
+}

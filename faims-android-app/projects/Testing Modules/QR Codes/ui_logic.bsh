@@ -1,0 +1,86 @@
+User user; // dont touch
+String userid;
+
+onEvent("control/Entity", "show", "populateList(\"control/Entity/ListEntity\", fetchEntityList(\"Entity\"))");
+onEvent("control/Entity/ScanCode", "click", "scanCode(\"codeScannerCallback()\")");
+onEvent("control/Entity/NewEntity", "click", "newEntity()");
+onEvent("control/Entity/ListEntity", "click", "loadEntity()");
+onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
+
+String entity_id = null;
+
+newEntity(){
+    entity_id = null;
+    newTabGroup("Entity");
+}
+loadEntity() {
+    entity_id = getListItemValue();
+    loadEntityFrom(entity_id);
+}
+loadEntityFrom(entid) {
+    entity_id = entid;
+    if (isNull(entid)) return;
+    showTabGroup("Entity", entid);
+}
+
+saveEntity() {
+    if (isNull(getFieldValue("Entity/Entity/Name"))) { 
+        showWarning("Validation Error", "Cannot save Entity without Name");
+        showTabGroup("Entity");
+        return false;
+    }
+    if (!isNull(entity_id)) {
+        entity = fetchArchEnt(entity_id);
+    }
+    saveTabGroup("Entity", entity_id, null, null, "entity_id = getLastSavedRecordId();");
+}
+
+codeScannerCallback() {
+    contents = getLastScanContents();
+    showToast(contents);
+}
+
+onEvent("control/sync/startsync", "click", "startSync()");
+onEvent("control/sync/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
+/*** Uneditable - you can edit the code below with extreme precaution ***/
+/*** USER ***/
+
+getDefaultUsersList() {
+    users = fetchAll("select userid, fname || ' ' || lname from user");
+    return users;
+}
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+    userid = userResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("control");
+}
+
+onEvent("user/usertab/users", "click", "login()");

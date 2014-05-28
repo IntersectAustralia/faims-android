@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<dataSchema name="Server Validation" preparer="Vincent Tran">
+<dataSchema name="Record Operations" preparer="Vincent Tran">
   <ArchaeologicalElement name="Entity">
     <property name="ID" type="freetext" isIdentifier="true">
       <description> Validation schema checks if this is blank </description>

@@ -1,0 +1,173 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>hdb FAIMS Community Server</h:title>
+    <model>
+      <instance>
+        <faims id="hdb_FAIMS_Community_Server">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <user>
+            <usertab>
+              <users/>
+            </usertab>
+          </user>
+          <control>
+            <Entity>
+              <NewEntity/>
+              <ListEntity/>
+            </Entity>
+            <Associations>
+              <ListAssociations/>
+            </Associations>
+          </control>
+          <Entity>
+            <Entity>
+              <Name/>
+              <Description/>
+              <Update/>
+              <Delete/>
+            </Entity>
+            <Associated>
+              <container1>
+                <child1>
+                  <Relationship/>
+                </child1>
+                <child2>
+                  <ToEntity/>
+                </child2>
+              </container1>
+              <AddAssociation/>
+              <ListAssociations/>
+            </Associated>
+          </Entity>
+        </faims>
+      </instance>
+      <bind nodeset="/faims/Entity/Entity/Description" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="usertab" faims_scrollable="false">
+        <label>User List</label>
+        <select1 appearance="compact" ref="users">
+          <label>Users</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="control" faims_archent_type="Pictures">
+      <label>Server Validation</label>
+      <group ref="Entity" faims_scrollable="false">
+        <label>Entity</label>
+        <trigger ref="NewEntity">
+          <label>New Entity</label>
+        </trigger>
+        <select1 appearance="compact" ref="ListEntity">
+          <label>Entities:</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+      <group ref="Associations" faims_scrollable="false">
+        <label>Associations</label>
+        <select1 appearance="compact" ref="ListAssociations">
+          <label>Associated Entities:</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="Entity" faims_archent_type="Entity">
+      <label>Entity</label>
+      <group ref="Entity">
+        <label>Entity Attached Files</label>
+        <input ref="Name" faims_attribute_name="Name" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+          <label> Name </label>
+        </input>
+        <input ref="Description" faims_attribute_name="Description" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+          <label> Description </label>
+        </input>
+        <trigger ref="Update">
+          <label>Save Entity</label>
+        </trigger>
+        <trigger ref="Delete">
+          <label>Delete Entity</label>
+        </trigger>
+      </group>
+      <group ref="Associated" faims_scrollable="false">
+        <label>Associations</label>
+        <group faims_style="orientation" ref="container1">
+          <label/>
+          <group faims_style="even" ref="child1">
+            <label/>
+            <select1 ref="Relationship">
+              <label>Relationship:</label>
+              <item>
+                <label>placeholder</label>
+                <value>placeholder</value>
+              </item>
+            </select1>
+          </group>
+          <group faims_style="even" ref="child2">
+            <label/>
+            <select1 ref="ToEntity">
+              <label>Associate To:</label>
+              <item>
+                <label>placeholder</label>
+                <value>placeholder</value>
+              </item>
+            </select1>
+          </group>
+        </group>
+        <trigger ref="AddAssociation">
+          <label> Add Association</label>
+        </trigger>
+        <select1 appearance="compact" ref="ListAssociations">
+          <label>Associations:</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+  </h:body>
+</h:html>
