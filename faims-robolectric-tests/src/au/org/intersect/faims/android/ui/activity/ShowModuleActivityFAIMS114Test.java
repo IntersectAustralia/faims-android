@@ -43,24 +43,24 @@ public class ShowModuleActivityFAIMS114Test {
 		
 		// Test we can set Field 1 via BeanShell
 		
-		activity.getBeanShellLinker().setFieldValue(field1Ref, expectedValueF1);
+		activity.beanShellLinker.setFieldValue(field1Ref, expectedValueF1);
 		
-		String actualValue = (String) activity.getBeanShellLinker().getFieldValue(field1Ref);
+		String actualValue = (String) activity.beanShellLinker.getFieldValue(field1Ref);
 		assertEquals("Set + Get field One", expectedValueF1, actualValue);
 		
 		// Test we can set Field 2 via BeanShell
 		
-		activity.getBeanShellLinker().setFieldValue(field2Ref, expectedValueF2);
+		activity.beanShellLinker.setFieldValue(field2Ref, expectedValueF2);
 		
-		actualValue = (String) activity.getBeanShellLinker().getFieldValue(field2Ref);
+		actualValue = (String) activity.beanShellLinker.getFieldValue(field2Ref);
 		assertEquals("Set + Get field Two", expectedValueF2, actualValue);
 		
 		// Test we can set Field Two via the button
 		
-		Button button = (Button) activity.getUIRenderer().getViewByRef(buttonRef);
+		Button button = (Button) activity.uiRenderer.getViewByRef(buttonRef);
 		button.performClick();
 		
-		actualValue = (String) activity.getBeanShellLinker().getFieldValue(field2Ref);
+		actualValue = (String) activity.beanShellLinker.getFieldValue(field2Ref);
 		assertEquals("Set field Two using button", expectedValueF1, actualValue);
 
 	}

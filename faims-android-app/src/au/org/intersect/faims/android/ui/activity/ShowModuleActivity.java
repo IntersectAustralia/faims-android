@@ -252,8 +252,13 @@ public class ShowModuleActivity extends FragmentActivity implements
 		});
 
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
-		beanShellLinker.init(ShowModuleActivity.this, module);
+		
+		fileManager.init();
+		
 		arch16n.init(module.getDirectoryPath().getPath(), module.name);
+		
+		beanShellLinker.init(ShowModuleActivity.this, module);
+		
 		uiRenderer.init(ShowModuleActivity.this);
 	}
 	
@@ -705,7 +710,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	protected void preRenderUI() {
 		try {
 			// Read, validate and parse the xforms
-			uiRenderer.loadSchema(FileUtil.readXmlContent(getModule().getDirectoryPath("ui_schema.xml").getPath()));
+			uiRenderer.loadSchema(getModule().getDirectoryPath("ui_schema.xml").getPath());
 
 			arch16n.generatePropertiesMap();
 

@@ -16,7 +16,7 @@ public class FileManager {
 	
 	private SparseArray<FileManagerListener> listeners;
 
-	public FileManager() {
+	public void init() {
 		listeners = new SparseArray<FileManagerListener>();
 	}
 	

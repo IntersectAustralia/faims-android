@@ -30,6 +30,7 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.util.Arch16n;
+import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -74,14 +75,19 @@ public class UIRenderer implements IRestoreActionListener {
 	
 	public void init(ShowModuleActivity activity) {
 		FAIMSApplication.getInstance().injectMembers(this);
+		this.fem = null;
         this.activityRef = new WeakReference<ShowModuleActivity>(activity);
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
-        this.viewTabMap = new HashMap<String, Tab>();
         this.tabMap = new HashMap<String, Tab>();
         this.tabList = new LinkedList<Tab>(); 
         this.viewMap = new HashMap<String, View>();
+        this.viewTabMap = new HashMap<String, Tab>();
         this.viewList = new LinkedList<View>();
+        this.indexes = null;
+        this.currentTabGroup = null;
+        this.tabReferenceMap = null;
+        this.currentTabLabel = null;
         this.viewValues = new HashMap<String, Object>();
         this.viewCertainties = new HashMap<String, Object>();
         this.viewAnnotations = new HashMap<String, Object>();
@@ -277,7 +283,7 @@ public class UIRenderer implements IRestoreActionListener {
         if(this.currentTabGroup == null){
         	ft.add(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
         }else{
-        	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());
+        	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getGroupTag());   	
         	ft.addToBackStack(currentTabGroup.getGroupTag());
         }
         this.currentTabGroup = tabGroup;
@@ -481,7 +487,7 @@ public class UIRenderer implements IRestoreActionListener {
 		}
 	}
 
-	public void loadSchema(FormEntryController fem) {
-		this.fem = fem;
+	public void loadSchema(String filepath) {
+		this.fem = FileUtil.readXmlContent(filepath);
 	}
 }

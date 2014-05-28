@@ -104,6 +104,8 @@ public class BeanShellLinker {
 	private Interpreter interpreter;
 
 	private ShowModuleActivity activity;
+	
+	private Module module;
 
 	private String persistedObjectName;
 
@@ -121,8 +123,6 @@ public class BeanShellLinker {
 	private String videoCallBack;
 	private String cameraVideoPath;
 
-	private Module module;
-
 	private String audioFileNamePath;
 	private MediaRecorder recorder;
 	private String audioCallBack;
@@ -134,14 +134,32 @@ public class BeanShellLinker {
 
 	public void init(ShowModuleActivity activity, Module module) {
 		FAIMSApplication.getInstance().injectMembers(this);
+		this.interpreter = new Interpreter();
 		this.activity = activity;
 		this.module = module;
-		this.interpreter = new Interpreter();
+		this.persistedObjectName = null;
+		this.lastFileBrowserCallback = null;
+		this.trackingHandlerThread = null;
+		this.trackingTask = null;
+		this.prevLong = 0d;
+		this.prevLat = 0d;
+		this.cameraPicturepath = null;
+		this.cameraCallBack = null;
+		this.videoCallBack = null;
+		this.cameraVideoPath = null;
+		this.audioFileNamePath = null;
+		this.recorder = null;
+		this.audioCallBack = null;
+		this.scanContents = null;
+		this.scanCallBack = null;
+		this.saveDialog = null;
+		
 		try {
 			interpreter.set("linker", this);
 		} catch (EvalError e) {
 			FLog.e("error setting linker", e);
 		}
+		
 		fileManager.addListener(
 				ShowModuleActivity.FILE_BROWSER_REQUEST_CODE,
 				new FileManager.FileManagerListener() {

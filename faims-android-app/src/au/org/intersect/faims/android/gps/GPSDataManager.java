@@ -60,13 +60,27 @@ public class GPSDataManager implements BluetoothActionListener, LocationListener
 	private WeakReference<ShowModuleActivity> activityRef;
 	
 	public void init(LocationManager manager, ShowModuleActivity activity){
-		this.locationManager = manager;
-		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
+		GGAMessage  = null;
+		BODMessage = null;
+		externalGPSTimestamp = 0;
+		accuracy = 0;
+		location = null;
+		internalGPSTimestamp = 0;
+		gpsDevice = null;
+		handler = null;
+		externalGPSTasks = null;
+		locationManager = manager;
+		handlerThread = null;
+		gpsUpdateInterval = 10;
 		isExternalGPSStarted = false;
 		isInternalGPSStarted = false;
 		hasValidExternalGPSSignal = false;
 		hasValidInternalGPSSignal = false;
+		trackingType = null;
+		trackingValue = 0;
+		trackingExec = null;
 		isTrackingStarted = false;
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 	}
 	
     @Override
