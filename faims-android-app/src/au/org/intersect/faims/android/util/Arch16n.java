@@ -9,13 +9,16 @@ import java.util.PropertyResourceBundle;
 
 import au.org.intersect.faims.android.log.FLog;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class Arch16n {
 
 	private Map<String,String> properties;
 	private String path;
 	private String moduleName;
-
-	public Arch16n(String path, String moduleName){
+	
+	public void init(String path, String moduleName) {
 		this.properties = new HashMap<String, String>();
 		this.path = path;
 		this.moduleName = moduleName;

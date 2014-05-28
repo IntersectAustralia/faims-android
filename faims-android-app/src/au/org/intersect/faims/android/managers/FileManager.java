@@ -4,6 +4,9 @@ import java.io.File;
 
 import android.util.SparseArray;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class FileManager {
 	
 	public interface FileManagerListener {

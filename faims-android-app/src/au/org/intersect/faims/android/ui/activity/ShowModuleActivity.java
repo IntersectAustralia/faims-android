@@ -5,17 +5,13 @@ import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-import org.javarosa.form.api.FormEntryController;
-
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -32,9 +28,6 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -49,7 +42,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
-import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ShowModuleActivityData;
@@ -58,9 +50,6 @@ import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
-import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
-import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
 import au.org.intersect.faims.android.services.SyncDatabaseService;
@@ -69,6 +58,11 @@ import au.org.intersect.faims.android.services.UploadDatabaseService;
 import au.org.intersect.faims.android.tasks.CopyFileTask;
 import au.org.intersect.faims.android.tasks.ITaskListener;
 import au.org.intersect.faims.android.tasks.LocateServerTask;
+import au.org.intersect.faims.android.ui.activity.handlers.DownloadDatabaseHandler;
+import au.org.intersect.faims.android.ui.activity.handlers.SyncDatabaseHandler;
+import au.org.intersect.faims.android.ui.activity.handlers.SyncFilesHandler;
+import au.org.intersect.faims.android.ui.activity.handlers.UploadDatabaseHandler;
+import au.org.intersect.faims.android.ui.activity.handlers.WifiBroadcastReceiver;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
@@ -104,217 +98,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		public void handleComplete();
 	}
 
-	private static abstract class ShowModuleActivityHandler extends Handler {
-
-		private WeakReference<ShowModuleActivity> activityRef;
-
-		public ShowModuleActivityHandler(ShowModuleActivity activity) {
-			this.activityRef = new WeakReference<ShowModuleActivity>(activity);
-		}
-
-		public void handleMessage(Message message) {
-			ShowModuleActivity activity = activityRef.get();
-			if (activity == null) {
-				FLog.d("ShowModuleActivityHandler cannot get activity");
-				return;
-			}
-
-			handleMessageSafe(activity, message);
-		}
-
-		public abstract void handleMessageSafe(ShowModuleActivity activity,
-				Message message);
-
-	}
-
-	private static class DownloadDatabaseHandler extends
-			ShowModuleActivityHandler {
-
-		private String callback;
-
-		public DownloadDatabaseHandler(ShowModuleActivity activity,
-				String callback) {
-			super(activity);
-			this.callback = callback;
-		}
-
-		@Override
-		public void handleMessageSafe(ShowModuleActivity activity,
-				Message message) {
-			activity.busyDialog.dismiss();
-
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.linker.execute(callback);
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.showBusyErrorDialog();
-				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showDownloadDatabaseErrorDialog(callback);
-				} else {
-					activity.showDownloadDatabaseFailureDialog(callback);
-				}
-			} else {
-				// ignore
-			}
-		}
-
-	}
-
-	private static class UploadDatabaseHandler extends
-			ShowModuleActivityHandler {
-
-		private String callback;
-
-		public UploadDatabaseHandler(ShowModuleActivity activity,
-				String callback) {
-			super(activity);
-			this.callback = callback;
-		}
-
-		@Override
-		public void handleMessageSafe(ShowModuleActivity activity,
-				Message message) {
-			activity.busyDialog.dismiss();
-
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.linker.execute(callback);
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				activity.showUploadDatabaseFailureDialog(callback);
-			} else {
-				// ignore
-			}
-		}
-
-	}
-
-	private static class SyncDatabaseHandler extends ShowModuleActivityHandler {
-
-		public SyncDatabaseHandler(ShowModuleActivity activity) {
-			super(activity);
-		}
-
-		@Override
-		public void handleMessageSafe(ShowModuleActivity activity,
-				Message message) {
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				if (activity.activityData.isFileSyncEnabled()) {
-					activity.startSyncingFiles();
-				} else {
-					activity.resetSyncInterval();
-					activity.waitForNextSync();
-
-					activity.callSyncSuccess(DATABASE);
-
-					activity.syncLock.release();
-				}
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.resetSyncInterval();
-					activity.waitForNextSync();
-
-					activity.callSyncSuccess(DATABASE);
-
-					activity.syncLock.release();
-				} else {
-
-					// failure
-					activity.delaySyncInterval();
-					activity.waitForNextSync();
-
-					activity.callSyncFailure();
-
-					activity.syncLock.release();
-				}
-			} else {
-				// cancelled
-				activity.syncLock.release();
-			}
-		}
-	}
-
-	private static class SyncFilesHandler extends ShowModuleActivityHandler {
-
-		public SyncFilesHandler(ShowModuleActivity activity) {
-			super(activity);
-		}
-
-		@Override
-		public void handleMessageSafe(ShowModuleActivity activity,
-				Message message) {
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				activity.resetSyncInterval();
-				activity.waitForNextSync();
-
-				activity.callSyncSuccess(FILES);
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.resetSyncInterval();
-					activity.waitForNextSync();
-
-					activity.callSyncSuccess(FILES);
-				} else {
-					// failure
-					activity.delaySyncInterval();
-					activity.waitForNextSync();
-
-					activity.callSyncFailure();
-				}
-			} else {
-				// cancelled
-			}
-
-			activity.syncLock.release();
-		}
-
-	}
-
-	private static class WifiBroadcastReceiver extends BroadcastReceiver {
-
-		private WeakReference<ShowModuleActivity> activityRef;
-
-		public WifiBroadcastReceiver(ShowModuleActivity activity) {
-			this.activityRef = new WeakReference<ShowModuleActivity>(activity);
-		}
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			ShowModuleActivity activity = this.activityRef.get();
-			if (activity == null) {
-				FLog.d("WifiBroadcastReceiver cannot get activity");
-				return;
-			}
-
-			if (activity.serverDiscovery.isServerHostFixed()) {
-				FLog.d("Ignoring WifiBroadcastReceiver as server host is fixed");
-				return;
-			}
-
-			final String action = intent.getAction();
-			FLog.d("WifiBroadcastReceiver action " + action);
-
-			if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
-				if (intent.getBooleanExtra(
-						WifiManager.EXTRA_SUPPLICANT_CONNECTED, false)) {
-					activity.wifiConnected = true;
-					if (activity.activityData.isSyncEnabled()
-							&& activity.isActivityShowing
-							&& !activity.syncActive) {
-						activity.startSync();
-					}
-				} else {
-					activity.wifiConnected = false;
-					if (activity.syncActive) {
-						activity.stopSync();
-					}
-				}
-			}
-		}
-	}
-
 	public enum SyncStatus {
 		ACTIVE_NO_CHANGES, ACTIVE_SYNCING, INACTIVE, ERROR, ACTIVE_HAS_CHANGES;
 
@@ -324,15 +107,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	public static final int CAMERA_REQUEST_CODE = 1;
-
 	public static final int FILE_BROWSER_REQUEST_CODE = 2;
-
 	public static final int RASTER_FILE_BROWSER_REQUEST_CODE = 3;
-
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
-
-	public static final int VIDEO_REQUEST_CODE = 5;
-	
+	public static final int VIDEO_REQUEST_CODE = 5;	
 	public static final int SCAN_CODE_CODE = 6;
 
 	@Inject
@@ -343,147 +121,90 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	Arch16n arch16n;
+	
+	@Inject
+	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	UIRenderer uiRenderer;
+	
+	@Inject
+	FileManager fileManager;
 
 	private WifiBroadcastReceiver broadcastReceiver;
-
-	private FormEntryController fem;
-
-	private UIRenderer renderer;
-
-	private BeanShellLinker linker;
-
+	
 	private BusyDialog busyDialog;
 	private ChoiceDialog choiceDialog;
 	private ConfirmDialog confirmDialog;
 
 	private AsyncTask<Void, Void, Void> locateTask;
 
-	private Arch16n arch16n;
-
 	private String moduleKey;
-
+	private Module module;
+	
 	private boolean wifiConnected;
+	
+	private boolean activityShowing;
 
 	private boolean syncActive;
-
 	private float syncInterval;
-
 	private Semaphore syncLock = new Semaphore(1);
-
 	private List<SyncListener> listeners;
-
 	private SyncStatus syncStatus = SyncStatus.INACTIVE;
-
-	private boolean isActivityShowing;
-
 	private Timer syncTaskTimer;
+	private boolean delayStopSync;
+	private boolean syncStarted;
 
 	private ShowModuleActivityData activityData;
-	private FileManager fm;
-
-	private String moduleDir;
-
+	
 	private boolean pathIndicatorVisible;
-
 	private float pathDistance;
-
 	private boolean pathValid;
-
-	private BitmapDrawable whiteArrow;
-
-	private BitmapDrawable greyArrow;
-
-	private Bitmap tempBitmap;
-
 	private float pathBearing;
-
 	private Float pathHeading;
-
 	private int pathIndex;
-
 	private int pathLength;
-
-	private boolean delayStopSync;
-
-	private boolean syncStarted = false;
-
+	
+	private BitmapDrawable whiteArrow;
+	private BitmapDrawable greyArrow;
+	private Bitmap tempBitmap;
 	private Animation rotation;
 	private ImageView syncAnimImage;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
         FAIMSApplication.getInstance().setApplication(getApplication());
-
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.activity_show_module);
-		
-		// inject faimsClient and serverDiscovery
 		FAIMSApplication.getInstance().injectMembers(this);
 
-		// Need to register license for the map view before create an instance
-		// of map view
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		setProgressBarIndeterminateVisibility(false);
+		setContentView(R.layout.activity_show_module);
+
+		setupModule();
+		startRenderTask(savedInstanceState);
+		showBusyDialog();
+	}
+	
+	private void setupModule() {
+		// create activity data 
+		activityData = new ShowModuleActivityData();
+		
+		// Need to register license for the map view before create an instance of map view
 		CustomMapView.registerLicense(getApplicationContext());
-
-		this.activityData = new ShowModuleActivityData();
-
-		rotation = AnimationUtils.loadAnimation(this, R.anim.clockwise);
-		rotation.setRepeatCount(Animation.INFINITE);
-
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		syncAnimImage = (ImageView) inflater.inflate(R.layout.rotate, null);
-
+	
 		setupSync();
 		setupWifiBroadcast();
-		setupModule();
-		setProgressBarIndeterminateVisibility(false);
-
+		setupManagers();
+		cacheBitmaps();
+		
 		// set file browser to reset last location when activity is created
-		DisplayPrefs.setLastLocation(ShowModuleActivity.this, getModuleDir());
-
-		busyDialog = new BusyDialog(this,
-				getString(R.string.load_module_title),
-				getString(R.string.load_module_message), null);
-		busyDialog.show();
-
-		new AsyncTask<Void, Void, Void>() {
-
-			@Override
-			protected void onPostExecute(Void result) {
-				renderUI(savedInstanceState);
-				busyDialog.dismiss();
-			}
-
-			@Override
-			protected Void doInBackground(Void... params) {
-				preRenderUI();
-				return null;
-			};
-
-		}.execute();
+		DisplayPrefs.setLastLocation(ShowModuleActivity.this, getModule().getDirectoryPath().getPath());
 	}
-
-	public UIRenderer getUIRenderer() {
-		return renderer;
-	}
-
-	public Arch16n getArch16n() {
-		return arch16n;
-	}
-
-	public Module getModule() {
-		return ModuleUtil.getModule(moduleKey);
-	}
-
-	public String getModuleDir() {
-		return moduleDir;
-	}
-
-	public FileManager getFileManager() {
-		return fm;
-	}
-
+	
 	private void setupSync() {
 		listeners = new ArrayList<SyncListener>();
 		activityData.setSyncMinInterval(getResources().getInteger(
@@ -511,15 +232,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 
-	private void setupModule() {
+	private void setupManagers() {
 		Intent data = getIntent();
 
-		Module module = ModuleUtil.getModule(data.getStringExtra("key"));
+		this.moduleKey = data.getStringExtra("key");
+		this.module = ModuleUtil.getModule(this.moduleKey);
 		setTitle(module.name);
-
-		this.moduleKey = module.key;
-		this.moduleDir = Environment.getExternalStorageDirectory()
-				+ FaimsSettings.modulesDir + module.key;
 
 		databaseManager.init(module.getDirectoryPath("db.sqlite"));
 		databaseManager.addListener(new DatabaseChangeListener() {
@@ -533,11 +251,78 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		});
 
-		gpsDataManager.init(
-				(LocationManager) getSystemService(LOCATION_SERVICE), this);
-		arch16n = new Arch16n(moduleDir, module.name);
+		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
+		beanShellLinker.init(ShowModuleActivity.this, module);
+		arch16n.init(module.getDirectoryPath().getPath(), module.name);
+		uiRenderer.init(ShowModuleActivity.this);
+	}
+	
+	private void cacheBitmaps() {
+		rotation = AnimationUtils.loadAnimation(this, R.anim.clockwise);
+		rotation.setRepeatCount(Animation.INFINITE);
 
-		fm = new FileManager();
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		syncAnimImage = (ImageView) inflater.inflate(R.layout.rotate, null);
+	}
+	
+	private void startRenderTask(final Bundle savedInstanceState) {
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected void onPostExecute(Void result) {
+				renderUI(savedInstanceState);
+				busyDialog.dismiss();
+			}
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				preRenderUI();
+				return null;
+			};
+
+		}.execute();
+	}
+	
+	private void showBusyDialog() {
+		busyDialog = new BusyDialog(this,
+				getString(R.string.load_module_title),
+				getString(R.string.load_module_message), null);
+		busyDialog.show();
+	}
+	
+	public void hideBusyDialog() {
+		if (busyDialog != null) {
+			busyDialog.dismiss();
+			busyDialog = null;
+		}
+	}
+	
+	public String getModuleKey() {
+		return moduleKey;
+	}
+
+	public Module getModule() {
+		return module;
+	}
+	
+	public boolean isWifiConnected() {
+		return wifiConnected;
+	}
+	
+	public void setWifiConnected(boolean connected) {
+		wifiConnected = connected;
+	}
+	
+	public boolean isActivityShowing() {
+		return activityShowing;
+	}
+	
+	public boolean isSyncActive() {
+		return syncActive;
+	}
+	
+	public ShowModuleActivityData getActivityData() {
+		return activityData;
 	}
 
 	@Override
@@ -549,9 +334,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onDestroy() {
-		FLog.c();
-		if (this.linker != null) {
-			this.linker.stopTrackingGPS();
+		if (this.beanShellLinker != null) {
+			this.beanShellLinker.stopTrackingGPS();
 		}
 		if (this.gpsDataManager != null) {
 			this.gpsDataManager.destroyListener();
@@ -581,9 +365,69 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Intent downloadIntent = new Intent(ShowModuleActivity.this,
 				DownloadDatabaseService.class);
 		stopService(downloadIntent);
+		Intent syncDatabaseIntent = new Intent(ShowModuleActivity.this,
+				SyncDatabaseService.class);
+		stopService(syncDatabaseIntent);
+		Intent syncFilesIntent = new Intent(ShowModuleActivity.this,
+				SyncFilesService.class);
+		stopService(syncFilesIntent);
 		super.onDestroy();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		serverDiscovery.initiateServerIPAndPort(preferences);
+
+		activityShowing = true;
+
+		if (activityData.isSyncEnabled()) {
+			if (syncActive) {
+				delayStopSync = false;
+			} else {
+				startSync();
+			}
+		}
+		
+		if (gpsDataManager.isExternalGPSStarted()) {
+			gpsDataManager.startExternalGPSListener();
+		}
+		
+		if (gpsDataManager.isInternalGPSStarted()) {
+			gpsDataManager.startInternalGPSListener();
+		}
+		
+		if (beanShellLinker != null && gpsDataManager.isTrackingStarted()) {
+			beanShellLinker.startTrackingGPS(gpsDataManager.getTrackingType(),
+					gpsDataManager.getTrackingValue(),
+					gpsDataManager.getTrackingExec());
+		}
+		
+		invalidateOptionsMenu();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		activityShowing = false;
+
+		if (syncStarted) {
+			stopSyncAfterCompletion();
+		} else {
+			stopSync();
+		}
+
+		if (this.beanShellLinker != null) {
+			this.beanShellLinker.stopTrackingGPSForOnPause();
+		}
+		if (this.gpsDataManager != null) {
+			this.gpsDataManager.destroyListener();
+		}
+	}
+	
 	@Override
 	public void onBackPressed() {
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -593,8 +437,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 							fragmentManager.getBackStackEntryCount() - 1)
 							.getName());
 			if (currentTabGroup != null) {
-				renderer.invalidateListViews(currentTabGroup);
-				renderer.setCurrentTabGroup(currentTabGroup);
+				uiRenderer.invalidateListViews(currentTabGroup);
+				uiRenderer.setCurrentTabGroup(currentTabGroup);
 				getActionBar().setTitle(currentTabGroup.getLabel());
 			}
 			super.onBackPressed();
@@ -644,57 +488,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getApplicationContext());
-		serverDiscovery.initiateServerIPAndPort(preferences);
-
-		isActivityShowing = true;
-
-		if (activityData.isSyncEnabled()) {
-			if (syncActive) {
-				delayStopSync = false;
-			} else {
-				startSync();
-			}
-		}
-		if (gpsDataManager.isExternalGPSStarted()) {
-			gpsDataManager.startExternalGPSListener();
-		}
-		if (gpsDataManager.isInternalGPSStarted()) {
-			gpsDataManager.startInternalGPSListener();
-		}
-		if (linker != null && gpsDataManager.isTrackingStarted()) {
-			linker.startTrackingGPS(gpsDataManager.getTrackingType(),
-					gpsDataManager.getTrackingValue(),
-					gpsDataManager.getTrackingExec());
-		}
-		invalidateOptionsMenu();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-
-		isActivityShowing = false;
-
-		if (syncStarted) {
-			stopSyncAfterCompletion();
-		} else {
-			stopSync();
-		}
-
-		if (this.linker != null) {
-			this.linker.stopTrackingGPSForOnPause();
-		}
-		if (this.gpsDataManager != null) {
-			this.gpsDataManager.destroyListener();
-		}
-	}
-
-	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		try {
 			if (resultCode == RESULT_CANCELED) {
@@ -711,26 +504,26 @@ public class ShowModuleActivity extends FragmentActivity implements
 					List<LocalFile> files = (List<LocalFile>) data
 							.getSerializableExtra(FileChooserActivity._Results);
 					if (files != null && files.size() > 0) {
-						fm.selectFile(requestCode, files.get(0));
+						fileManager.selectFile(requestCode, files.get(0));
 					}
 				}
 				break;
 			case CAMERA_REQUEST_CODE:
 				if (resultCode == RESULT_OK) {
-					this.linker.executeCameraCallBack();
+					this.beanShellLinker.executeCameraCallBack();
 				}
 				break;
 			case VIDEO_REQUEST_CODE:
 				if (resultCode == RESULT_OK) {
-					this.linker.executeVideoCallBack();
+					this.beanShellLinker.executeVideoCallBack();
 				}
 				break;
 			case SCAN_CODE_CODE:
 				if (resultCode == RESULT_OK) {
 					String contents = data.getStringExtra("SCAN_RESULT");
-					this.linker.setLastScanContents(contents);
+					this.beanShellLinker.setLastScanContents(contents);
 					
-					this.linker.executeScanCallBack();
+					this.beanShellLinker.executeScanCallBack();
 				}
 			}
 		} catch (Exception e) {
@@ -912,21 +705,17 @@ public class ShowModuleActivity extends FragmentActivity implements
 	protected void preRenderUI() {
 		try {
 			// Read, validate and parse the xforms
-			ShowModuleActivity.this.fem = FileUtil.readXmlContent(moduleDir
-					+ "/ui_schema.xml");
+			uiRenderer.loadSchema(FileUtil.readXmlContent(getModule().getDirectoryPath("ui_schema.xml").getPath()));
 
 			arch16n.generatePropertiesMap();
 
 			// bind the logic to the ui
 			FLog.d("Binding logic to the UI");
-			linker = new BeanShellLinker(ShowModuleActivity.this,
-					ModuleUtil.getModule(moduleKey));
-			linker.sourceFromAssets("ui_commands.bsh");
+			beanShellLinker.sourceFromAssets("ui_commands.bsh");
 		} catch (Exception e) {
 			FLog.e("error pre rendering ui", e);
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
 			builder.setTitle(getString(R.string.render_ui_failure_title));
 			builder.setMessage(getString(R.string.render_ui_failure_message));
 			builder.setNeutralButton("OK",
@@ -942,16 +731,11 @@ public class ShowModuleActivity extends FragmentActivity implements
 	protected void renderUI(Bundle savedInstanceState) {
 		try {
 			// render the ui definition
-			ShowModuleActivity.this.renderer = new UIRenderer(
-					ShowModuleActivity.this.fem,
-					ShowModuleActivity.this.arch16n, ShowModuleActivity.this);
-			ShowModuleActivity.this.renderer.createUI();
+			uiRenderer.createUI();
 			if (savedInstanceState == null) {
-				ShowModuleActivity.this.renderer.showTabGroup(
-						ShowModuleActivity.this, 0);
+				uiRenderer.showTabGroup(ShowModuleActivity.this, 0);
 			}
-			linker.execute(FileUtil.readFileIntoString(moduleDir
-					+ "/ui_logic.bsh"));
+			beanShellLinker.execute(FileUtil.readFileIntoString(getModule().getDirectoryPath("ui_logic.bsh").getPath()));
 		} catch (Exception e) {
 			FLog.e("error rendering ui", e);
 
@@ -969,12 +753,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 
-	public BeanShellLinker getBeanShellLinker() {
-		return this.linker;
-	}
-
 	public void downloadDatabaseFromServer(final String callback) {
-
 		if (serverDiscovery.isServerHostValid()) {
 			showBusyDownloadDatabaseDialog();
 
@@ -1054,7 +833,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	}
 
-	private void showLocateServerUploadDatabaseFailureDialog(
+	public void showLocateServerUploadDatabaseFailureDialog(
 			final String callback) {
 		choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.locate_server_failure_title),
@@ -1072,7 +851,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		choiceDialog.show();
 	}
 
-	private void showLocateServerDownloadDatabaseFailureDialog(
+	public void showLocateServerDownloadDatabaseFailureDialog(
 			final String callback) {
 		choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.locate_server_failure_title),
@@ -1090,7 +869,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		choiceDialog.show();
 	}
 
-	private void showBusyLocatingServerDialog() {
+	public void showBusyLocatingServerDialog() {
 		busyDialog = new BusyDialog(ShowModuleActivity.this,
 				getString(R.string.locate_server_title),
 				getString(R.string.locate_server_message),
@@ -1107,7 +886,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		busyDialog.show();
 	}
 
-	private void showBusyUploadDatabaseDialog() {
+	public void showBusyUploadDatabaseDialog() {
 		busyDialog = new BusyDialog(ShowModuleActivity.this,
 				getString(R.string.upload_database_title),
 				getString(R.string.upload_database_message),
@@ -1128,7 +907,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		busyDialog.show();
 	}
 
-	private void showBusyDownloadDatabaseDialog() {
+	public void showBusyDownloadDatabaseDialog() {
 		busyDialog = new BusyDialog(ShowModuleActivity.this,
 				getString(R.string.download_database_title),
 				getString(R.string.download_database_message),
@@ -1149,7 +928,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		busyDialog.show();
 	}
 
-	private void showUploadDatabaseFailureDialog(final String callback) {
+	public void showUploadDatabaseFailureDialog(final String callback) {
 		choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.upload_database_failure_title),
 				getString(R.string.upload_database_failure_message),
@@ -1166,7 +945,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		choiceDialog.show();
 	}
 
-	private void showDownloadDatabaseFailureDialog(final String callback) {
+	public void showDownloadDatabaseFailureDialog(final String callback) {
 		choiceDialog = new ChoiceDialog(ShowModuleActivity.this,
 				getString(R.string.download_database_failure_title),
 				getString(R.string.download_database_failure_message),
@@ -1183,7 +962,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		choiceDialog.show();
 	}
 
-	private void showBusyErrorDialog() {
+	public void showBusyErrorDialog() {
 		confirmDialog = new ConfirmDialog(ShowModuleActivity.this,
 				getString(R.string.download_busy_module_error_title),
 				getString(R.string.download_busy_module_error_message),
@@ -1198,7 +977,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		confirmDialog.show();
 	}
 
-	private void showDownloadDatabaseErrorDialog(final String callback) {
+	public void showDownloadDatabaseErrorDialog(final String callback) {
 		confirmDialog = new ConfirmDialog(ShowModuleActivity.this,
 				getString(R.string.download_database_error_title),
 				getString(R.string.download_database_error_message),
@@ -1334,7 +1113,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}).start();
 	}
 
-	private void waitForNextSync() {
+	public void waitForNextSync() {
 		if (!syncActive)
 			return;
 
@@ -1359,7 +1138,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		if (serverDiscovery.isServerHostValid()) {
 			startSyncingDatabase();
 		} else {
-
 			locateTask = new LocateServerTask(serverDiscovery,
 					new ITaskListener() {
 
@@ -1372,9 +1150,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 							} else {
 								delaySyncInterval();
 								waitForNextSync();
-
 								callSyncFailure();
-
 								syncLock.release();
 							}
 						}
@@ -1410,11 +1186,11 @@ public class ShowModuleActivity extends FragmentActivity implements
 		});
 	}
 
-	private void resetSyncInterval() {
+	public void resetSyncInterval() {
 		syncInterval = activityData.getSyncMinInterval();
 	}
 
-	private void delaySyncInterval() {
+	public void delaySyncInterval() {
 		syncInterval += activityData.getSyncDelay();
 		if (syncInterval > activityData.getSyncMaxInterval())
 			syncInterval = activityData.getSyncMaxInterval();
@@ -1459,6 +1235,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 			stopSync();
 		}
 	}
+	
+	public void releaseSyncLock() {
+		syncLock.release();
+	}
 
 	private boolean hasDatabaseChanges() throws Exception {
 		Module module = ModuleUtil.getModule(moduleKey);
@@ -1469,7 +1249,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Module module = ModuleUtil.getModule(moduleKey);
 
 		if (module.fileSyncTimeStamp != null) {
-			File attachedFiles = new File(getModuleDir() + "/files");
+			File attachedFiles = module.getDirectoryPath("files");
 			return hasFileChanges(attachedFiles, module.fileSyncTimeStamp);
 		} else {
 			return true;
@@ -1540,17 +1320,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		return activityData.getCopyFileCount();
 	}
 
-	/*
-	 * 
-	 * @SuppressWarnings("rawtypes") private boolean isServiceRunning(Class c) {
-	 * ActivityManager manager = (ActivityManager)
-	 * getSystemService(ACTIVITY_SERVICE); for (RunningServiceInfo service :
-	 * manager.getRunningServices(Integer.MAX_VALUE)) {
-	 * FLog.d(service.service.getClassName()); if
-	 * (c.getName().equals(service.service.getClass().getName())) { return true;
-	 * } } return false; }
-	 */
-
 	public void setSyncStatus(final SyncStatus status) {
 		runOnUiThread(new Runnable() {
 
@@ -1577,7 +1346,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		activityData.setFileSyncEnabled(false);
 	}
 
-	private void startSyncingFiles() {
+	public void startSyncingFiles() {
 		FLog.d("start syncing files");
 
 		// handler must be created on ui thread
@@ -1613,11 +1382,11 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		try {
-			linker.storeBeanShellData(savedInstanceState);
-			renderer.storeBackStack(savedInstanceState,
+			beanShellLinker.storeBeanShellData(savedInstanceState);
+			uiRenderer.storeBackStack(savedInstanceState,
 					getSupportFragmentManager());
-			renderer.storeTabs(savedInstanceState);
-			renderer.storeViewValues(savedInstanceState);
+			uiRenderer.storeTabs(savedInstanceState);
+			uiRenderer.storeViewValues(savedInstanceState);
 			activityData.setUserId(databaseManager.getUserId());
 			activityData.saveTo(savedInstanceState);
 			gpsDataManager.saveTo(savedInstanceState);
@@ -1629,10 +1398,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
 		try {
-			linker.restoreBeanShellData(savedInstanceState);
-			renderer.restoreBackStack(savedInstanceState, this);
-			renderer.restoreTabs(savedInstanceState);
-			renderer.restoreViewValues(savedInstanceState);
+			beanShellLinker.restoreBeanShellData(savedInstanceState);
+			uiRenderer.restoreBackStack(savedInstanceState, this);
+			uiRenderer.restoreTabs(savedInstanceState);
+			uiRenderer.restoreViewValues(savedInstanceState);
 			activityData.restoreFrom(savedInstanceState);
 			gpsDataManager.restoreFrom(savedInstanceState);
 			this.databaseManager.setUserId(activityData.getUserId());
@@ -1641,7 +1410,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 
-	// TODO think about what happens if copy fails
 	public void copyFile(final String fromFile, final String toFile,
 			final AttachFileListener listener) {
 		activityData.setCopyFileCount(activityData.getCopyFileCount() + 1);

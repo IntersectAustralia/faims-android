@@ -158,6 +158,9 @@ public class LayerManagerDialog extends AlertDialog {
 
 	@Inject
 	DatabaseManager databaseManager;
+	
+	@Inject
+	FileManager fileManager;
 
 	private CustomMapView mapView;
 	private LinearLayout layout;
@@ -192,15 +195,14 @@ public class LayerManagerDialog extends AlertDialog {
 	public void attachToMap(CustomMapView mapView) {
 		this.mapView = mapView;
 		
-		ShowModuleActivity activity = mapView.getActivity();
-		activity.getFileManager().addListener(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+		fileManager.addListener(ShowModuleActivity.RASTER_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			@Override
 	           public void onFileSelected(File file) {
 					LayerManagerDialog.this.rasterFile = file;
 					LayerManagerDialog.this.selectedFileText.setText(file.getName());
 	           }
 		});
-		activity.getFileManager().addListener(ShowModuleActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
+		fileManager.addListener(ShowModuleActivity.SPATIAL_FILE_BROWSER_REQUEST_CODE, new FileManager.FileManagerListener() {
 			
 			@Override
 			public void onFileSelected(File file) {

@@ -16,11 +16,17 @@ import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
+import com.google.inject.Inject;
+
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
+	
+	@Inject
+	BeanShellLinker beanShellLinker;
 	
 	public static int tabGroupId = 1;
 	
@@ -38,13 +44,16 @@ public class TabGroup extends Fragment {
 	private String id;
 	
 	public TabGroup(){
-		
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public TabGroup(WeakReference<ShowModuleActivity> activityRef, String archEntType, String relType, IRestoreActionListener actionListener) {
+		FAIMSApplication.getInstance().injectMembers(this);
+		
 		if(archEntType != null && relType != null){
 			FLog.w("tabgroup can only contain either archEntId or relId not both");
 		}
+		
 		this.activityRef = activityRef;
 		this.archEntType = archEntType;
 		this.relType = relType;
@@ -202,11 +211,8 @@ public class TabGroup extends Fragment {
 	}
 	
 	private void executeCommands(List<String> commands){
-
-		BeanShellLinker linker = ((ShowModuleActivity) getActivity()).getBeanShellLinker();
-		
 		for(String command : commands){
-			linker.execute(command);	
+			beanShellLinker.execute(command);	
 		}
 	}
 

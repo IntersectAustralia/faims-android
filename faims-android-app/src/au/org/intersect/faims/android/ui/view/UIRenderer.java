@@ -26,18 +26,23 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.util.Arch16n;
 
-/**
- * Class that reads the ui defintion file and render the UI
- * 
- * @author danielt
- * 
- */
-public class UIRenderer implements IRestoreActionListener{
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
+public class UIRenderer implements IRestoreActionListener {
+
+	@Inject 
+	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	Arch16n arch16n;
+	
     private FormEntryController fem;
     
     private WeakReference<ShowModuleActivity> activityRef;
@@ -51,8 +56,6 @@ public class UIRenderer implements IRestoreActionListener{
     private HashMap<String, View> viewMap;
     private HashMap<String, Tab> viewTabMap; 
     private LinkedList<View> viewList;
-    
-    private Arch16n arch16n;
     
     protected List<Integer> indexes;
     
@@ -68,10 +71,9 @@ public class UIRenderer implements IRestoreActionListener{
 	private Map<String, String> viewDirtyReasons;
 
 	private Map<String,Map<String,String>> styles;
-
-	public UIRenderer(FormEntryController fem, Arch16n arch16n, ShowModuleActivity activity) {
-        this.fem = fem;
-        this.arch16n = arch16n;
+	
+	public void init(ShowModuleActivity activity) {
+		FAIMSApplication.getInstance().injectMembers(this);
         this.activityRef = new WeakReference<ShowModuleActivity>(activity);
         this.tabGroupMap = new HashMap<String, TabGroup>();
         this.tabGroupList = new LinkedList<TabGroup>(); 
@@ -86,11 +88,7 @@ public class UIRenderer implements IRestoreActionListener{
         this.viewDirtyReasons = new HashMap<String, String>();
         this.styles = new HashMap<String, Map<String,String>>();
     }
-
-    /**
-     * Render the tabs and questions inside the tabs
-     * 
-     */
+	
     public void createUI() {
     	
     	FormIndex currentIndex = this.fem.getModel().getFormIndex();
@@ -427,14 +425,13 @@ public class UIRenderer implements IRestoreActionListener{
 	}
 
 	public void storeViewValues(Bundle savedInstanceState){
-		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for(String reference : viewMap.keySet()){
 			Object obj = getViewByRef(reference);
 			if (obj instanceof ICustomView) {
-				viewValues.put(reference, linker.getFieldValue(reference));
-				viewCertainties.put(reference, linker.getFieldCertainty(reference));
-				viewAnnotations.put(reference, linker.getFieldAnnotation(reference));
-				viewDirtyReasons.put(reference, linker.getFieldDirty(reference));
+				viewValues.put(reference, beanShellLinker.getFieldValue(reference));
+				viewCertainties.put(reference, beanShellLinker.getFieldCertainty(reference));
+				viewAnnotations.put(reference, beanShellLinker.getFieldAnnotation(reference));
+				viewDirtyReasons.put(reference, beanShellLinker.getFieldDirty(reference));
 			}
 		}
 		savedInstanceState.putSerializable("viewValues", (Serializable) viewValues);
@@ -453,15 +450,14 @@ public class UIRenderer implements IRestoreActionListener{
 	
 	@Override
 	public void restoreViewValuesForTabGroup(TabGroup tabGroup){
-		BeanShellLinker linker = activityRef.get().getBeanShellLinker();
 		for (Tab tab : tabGroup.getTabs()) {
 			for(String reference : tab.getViewReference().values()){
 				Object obj = getViewByRef(reference);
 				if (obj instanceof ICustomView) {
-					linker.setFieldValue(reference, viewValues.get(reference));
-					linker.setFieldCertainty(reference, viewCertainties.get(reference));
-					linker.setFieldAnnotation(reference, viewAnnotations.get(reference));
-					linker.setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
+					beanShellLinker.setFieldValue(reference, viewValues.get(reference));
+					beanShellLinker.setFieldCertainty(reference, viewCertainties.get(reference));
+					beanShellLinker.setFieldAnnotation(reference, viewAnnotations.get(reference));
+					beanShellLinker.setFieldDirty(reference, viewDirtyReasons.get(reference) != null, viewDirtyReasons.get(reference));
 				}
 			}
 		}
@@ -483,5 +479,9 @@ public class UIRenderer implements IRestoreActionListener{
 				}
 			}
 		}
+	}
+
+	public void loadSchema(FormEntryController fem) {
+		this.fem = fem;
 	}
 }

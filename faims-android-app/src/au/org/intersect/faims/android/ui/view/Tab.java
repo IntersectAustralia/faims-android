@@ -47,11 +47,15 @@ public class Tab implements Parcelable {
 
 	@Inject
 	DatabaseManager databaseManager;
+	
+	@Inject
+	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	Arch16n arch16n;
 
 	private static final String FREETEXT = "freetext";
 
-	private Arch16n arch16n;
-	private BeanShellLinker beanShellLinker;
 	private ViewFactory viewFactory;
 	
 	private ScrollView scrollView;
@@ -81,14 +85,12 @@ public class Tab implements Parcelable {
 	public Tab(ShowModuleActivity activity, String name, String label, boolean hidden, boolean scrollable, String reference) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		
-		this.arch16n = activity.getArch16n();
 		this.viewFactory = new ViewFactory(new WeakReference<Context>(activity), arch16n);
-		this.beanShellLinker = activity.getBeanShellLinker();
 		
 		this.name = name;
 		this.label = arch16n.substituteValue(label);
 		this.hidden = hidden;
-		this.moduleDir = activity.getModuleDir();
+		this.moduleDir = activity.getModule().getDirectoryPath().getPath();
 		this.reference = reference;	
 		
 		this.onLoadCommands = new ArrayList<String>();

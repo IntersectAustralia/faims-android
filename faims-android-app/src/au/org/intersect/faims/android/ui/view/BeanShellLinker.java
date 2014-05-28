@@ -69,6 +69,7 @@ import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.GeometryUtil;
@@ -76,11 +77,13 @@ import bsh.EvalError;
 import bsh.Interpreter;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
+@Singleton
 public class BeanShellLinker {
 	
 	@Inject
@@ -88,6 +91,15 @@ public class BeanShellLinker {
 	
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	FileManager fileManager;
+	
+	@Inject
+	UIRenderer uiRenderer;
+	
+	@Inject
+	Arch16n arch16n;
 
 	private Interpreter interpreter;
 
@@ -120,7 +132,7 @@ public class BeanShellLinker {
 
 	protected Dialog saveDialog;
 
-	public BeanShellLinker(ShowModuleActivity activity, Module module) {
+	public void init(ShowModuleActivity activity, Module module) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.activity = activity;
 		this.module = module;
@@ -130,7 +142,7 @@ public class BeanShellLinker {
 		} catch (EvalError e) {
 			FLog.e("error setting linker", e);
 		}
-		this.activity.getFileManager().addListener(
+		fileManager.addListener(
 				ShowModuleActivity.FILE_BROWSER_REQUEST_CODE,
 				new FileManager.FileManagerListener() {
 
@@ -292,7 +304,7 @@ public class BeanShellLinker {
 		try {
 
 			if ("click".equals(type.toLowerCase(Locale.ENGLISH))) {
-				View view = activity.getUIRenderer().getViewByRef(ref);
+				View view = uiRenderer.getViewByRef(ref);
 				if (view == null) {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Error cannot find view " + ref);
@@ -328,7 +340,7 @@ public class BeanShellLinker {
 					}
 				}
 			} else if ("select".equals(type.toLowerCase(Locale.ENGLISH))) {
-				View view = activity.getUIRenderer().getViewByRef(ref);
+				View view = uiRenderer.getViewByRef(ref);
 				if (view == null) {
 					FLog.w("cannot find view " + ref);
 					showWarning("Logic Error", "Error cannot find view " + ref);
@@ -375,7 +387,7 @@ public class BeanShellLinker {
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
-					View view = activity.getUIRenderer().getViewByRef(ref);
+					View view = uiRenderer.getViewByRef(ref);
 					if (view == null) {
 						FLog.w("cannot find view " + ref);
 						showWarning("Logic Error", "Error cannot find view " + ref);
@@ -396,9 +408,9 @@ public class BeanShellLinker {
 						}
 					}
 			} else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
-				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
+				TabGroup tg = uiRenderer.getTabGroupByLabel(ref);
 				if (tg == null) {
-					Tab tb = activity.getUIRenderer().getTabByLabel(ref);
+					Tab tb = uiRenderer.getTabByLabel(ref);
 					if (tb == null) {
 						FLog.w("cannot find view " + ref);
 						showWarning("Logic Error", "Error cannot find view " + ref);
@@ -410,9 +422,9 @@ public class BeanShellLinker {
 					tg.addOnLoadCommand(code);
 				}
 			} else if ("show".equals(type.toLowerCase(Locale.ENGLISH))) {
-				TabGroup tg = activity.getUIRenderer().getTabGroupByLabel(ref);
+				TabGroup tg = uiRenderer.getTabGroupByLabel(ref);
 				if (tg == null) {
-					Tab tb = activity.getUIRenderer().getTabByLabel(ref);
+					Tab tb = uiRenderer.getTabByLabel(ref);
 					if (tb == null) {
 						FLog.w("cannot find view " + ref);
 						showWarning("Logic Error", "Error cannot find view " + ref);
@@ -436,7 +448,7 @@ public class BeanShellLinker {
 	public void bindFocusAndBlurEvent(String ref, final String focusCallback,
 			final String blurCallBack) {
 		try {
-			View view = activity.getUIRenderer().getViewByRef(ref);
+			View view = uiRenderer.getViewByRef(ref);
 			if (view == null) {
 				FLog.w("cannot find view " + ref);
 				showWarning("Logic Error", "Error cannot find view " + ref);
@@ -469,7 +481,7 @@ public class BeanShellLinker {
 	public void bindMapEvent(String ref, final String clickCallback,
 			final String selectCallback) {
 		try {
-			View view = activity.getUIRenderer().getViewByRef(ref);
+			View view = uiRenderer.getViewByRef(ref);
 			if (view instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) view;
 				mapView.setMapListener(new CustomMapView.CustomMapListener() {
@@ -544,7 +556,7 @@ public class BeanShellLinker {
 
 	public TabGroup showTabGroup(String label) {
 		try {
-			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(
+			TabGroup tabGroup = uiRenderer.showTabGroup(
 					this.activity, label);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tabgroup " + label);
@@ -561,7 +573,7 @@ public class BeanShellLinker {
 
 	public Tab showTab(String label) {
 		try {
-			Tab tab = activity.getUIRenderer().showTab(label);
+			Tab tab = uiRenderer.showTab(label);
 			if (tab == null) {
 				showWarning("Logic Error", "Error showing tab " + label);
 				return null;
@@ -576,7 +588,7 @@ public class BeanShellLinker {
 
 	public void showTabGroup(String id, String uuid) {
 		try {
-			TabGroup tabGroup = activity.getUIRenderer().showTabGroup(activity,
+			TabGroup tabGroup = uiRenderer.showTabGroup(activity,
 					id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab group " + id);
@@ -609,7 +621,7 @@ public class BeanShellLinker {
 			}
 			String groupId = ids[0];
 			String tabId = ids[1];
-			TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(
+			TabGroup tabGroup = uiRenderer.getTabGroupByLabel(
 					groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
@@ -666,7 +678,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("unchecked")
 	public void saveTabGroup(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
 		try {
-			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(id);
+			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error saving tab group " + id);
 				return;
@@ -767,7 +779,7 @@ public class BeanShellLinker {
 			}
 			String groupId = ids[0];
 			String tabId = ids[1];
-			final TabGroup tabGroup = activity.getUIRenderer().getTabGroupByLabel(groupId);
+			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error saving tab " + id);
 				return;
@@ -865,7 +877,7 @@ public class BeanShellLinker {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
 				return;
 			}
-			final TabGroup tabGroup = activity.getUIRenderer()
+			final TabGroup tabGroup = uiRenderer
 					.getTabGroupByLabel(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab group" + id);
@@ -929,7 +941,7 @@ public class BeanShellLinker {
 			}
 			String groupId = ids[0];
 			final String tabId = ids[1];
-			final TabGroup tabGroup = activity.getUIRenderer()
+			final TabGroup tabGroup = uiRenderer
 					.getTabGroupByLabel(groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error cancelling tab " + id);
@@ -1163,7 +1175,7 @@ public class BeanShellLinker {
 								String value = null;
 								
 								// attach new files
-								if (!pair.getName().contains(activity.getModuleDir() + "/files")) {
+								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
 									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
 								} else {
 									value = stripAttachedFilePath(pair.getName());
@@ -1239,7 +1251,7 @@ public class BeanShellLinker {
 								String value = null;
 								
 								// attach new files
-								if (!pair.getName().contains(activity.getModuleDir() + "/files")) {
+								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
 									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
 								} else {
 									value = stripAttachedFilePath(pair.getName());
@@ -1349,7 +1361,7 @@ public class BeanShellLinker {
 
 	public void setFieldValue(String ref, Object valueObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1361,7 +1373,7 @@ public class BeanShellLinker {
 						customView.setValues(values);
 					} else {
 						String value = valueObj == null ? null : String.valueOf(valueObj);
-						value = activity.getArch16n().substituteValue(value);
+						value = arch16n.substituteValue(value);
 						customView.setValue((String) value);
 					}
 				} else if (obj instanceof PictureGallery) {
@@ -1371,12 +1383,12 @@ public class BeanShellLinker {
 						customView.setValues(values);
 					} else {
 						String value = valueObj == null ? null : String.valueOf(valueObj);
-						value = activity.getArch16n().substituteValue(value);
+						value = arch16n.substituteValue(value);
 						customView.setValue((String) value);
 					}
 				} else {
 					String value = valueObj == null ? null : String.valueOf(valueObj);
-					value = activity.getArch16n().substituteValue(value);
+					value = arch16n.substituteValue(value);
 					customView.setValue((String) value);
 				}
 			} else {
@@ -1391,7 +1403,7 @@ public class BeanShellLinker {
 
 	public void setFieldCertainty(String ref, Object valueObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1411,7 +1423,7 @@ public class BeanShellLinker {
 
 	public void setFieldAnnotation(String ref, Object valueObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1431,12 +1443,12 @@ public class BeanShellLinker {
 	
 	public void setFieldDirty(String ref, boolean isDirty, String isDirtyReason) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
-				Button dirtyButton = activity.getUIRenderer().getTabForView(ref).getDirtyButton(ref);
+				Button dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
 					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
 				}
@@ -1455,14 +1467,14 @@ public class BeanShellLinker {
 	
 	public void appendFieldDirty(String ref, boolean isDirty, String dirtyReason) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
 				boolean isViewDirty = isDirty || customView.isDirty();
 				
-				Button dirtyButton = activity.getUIRenderer().getTabForView(ref).getDirtyButton(ref);
+				Button dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
 					dirtyButton.setVisibility(isViewDirty ? View.VISIBLE : View.GONE);
 				}
@@ -1492,7 +1504,7 @@ public class BeanShellLinker {
 
 	public Object getFieldValue(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1521,7 +1533,7 @@ public class BeanShellLinker {
 
 	public Object getFieldCertainty(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1540,7 +1552,7 @@ public class BeanShellLinker {
 
 	public Object getFieldAnnotation(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1559,7 +1571,7 @@ public class BeanShellLinker {
 	
 	public String getFieldDirty(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
@@ -1597,7 +1609,7 @@ public class BeanShellLinker {
 	public Boolean deleteArchEnt(String entityId){
 		try {
 			databaseManager.entityRecord().deleteArchEnt(entityId);
-			for(Tab tab : activity.getUIRenderer().getTabList()){
+			for(Tab tab : uiRenderer.getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
 					mapView.removeFromAllSelections(entityId);
 					mapView.updateSelections();
@@ -1627,7 +1639,7 @@ public class BeanShellLinker {
 	public Boolean deleteRel(String relationshpId){
 		try {
 			databaseManager.relationshipRecord().deleteRel(relationshpId);
-			for(Tab tab : activity.getUIRenderer().getTabList()){
+			for(Tab tab : uiRenderer.getTabList()){
 				for(CustomMapView mapView : tab.getMapViewList()){
 					mapView.removeFromAllSelections(relationshpId);
 					mapView.updateSelections();
@@ -1654,7 +1666,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public void populateDropDown(String ref, Collection valuesObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof CustomSpinner && valuesObj instanceof Collection<?>) {
 				CustomSpinner spinner = (CustomSpinner) obj;
@@ -1678,13 +1690,13 @@ public class BeanShellLinker {
 	
 	public void populateHierarchicalDropDown(String ref, String attributeName) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof HierarchicalSpinner) {
 				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 				if (terms == null) return;
 				
-				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
+				VocabularyTerm.applyArch16n(terms, arch16n);
 				
 				HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
 				spinner.setTerms(terms);
@@ -1702,7 +1714,7 @@ public class BeanShellLinker {
 	@SuppressWarnings("rawtypes")
 	public void populateList(String ref, Collection valuesObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof CustomCheckBoxGroup) {
 				CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) obj;
@@ -1727,7 +1739,7 @@ public class BeanShellLinker {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populatePictureGallery(String ref, Collection valuesObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof PictureGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
@@ -1736,7 +1748,7 @@ public class BeanShellLinker {
 						ArrayList<List<String>> arrayList = (ArrayList<List<String>>) valuesObj;
 						for (List<String> pictureList : arrayList) {
 							Picture picture = new Picture(pictureList.get(0),
-									activity.getArch16n().substituteValue(pictureList.get(1)), activity.getModuleDir() + "/" + pictureList.get(2));
+									arch16n.substituteValue(pictureList.get(1)), module.getDirectoryPath(pictureList.get(2)).getPath());
 							pictures.add(picture);
 						}
 					} catch (Exception e) {
@@ -1764,14 +1776,14 @@ public class BeanShellLinker {
 	
 	public void populateHierarchicalPictureGallery(String ref, String attributeName) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			
 			if (obj instanceof PictureGallery) {				
 				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
 				if (terms == null) return;
 				
-				VocabularyTerm.applyArch16n(terms, activity.getArch16n());
-				VocabularyTerm.applyProjectDir(terms, activity.getModuleDir() + "/");
+				VocabularyTerm.applyArch16n(terms, arch16n);
+				VocabularyTerm.applyProjectDir(terms, module.getDirectoryPath().getPath() + "/");
 				
 				HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
 				gallery.setTerms(terms);
@@ -1790,7 +1802,7 @@ public class BeanShellLinker {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populateCameraPictureGallery(String ref, Collection valuesObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof CameraPictureGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
@@ -1819,7 +1831,7 @@ public class BeanShellLinker {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populateVideoGallery(String ref, Collection valuesObj) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof VideoGallery) {
 				List<Picture> pictures = new ArrayList<Picture>();
@@ -1847,7 +1859,7 @@ public class BeanShellLinker {
 	
 	public void populateTableRaw(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
@@ -1866,7 +1878,7 @@ public class BeanShellLinker {
 	
 	public void populateTablePivot(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
@@ -1885,7 +1897,7 @@ public class BeanShellLinker {
 	
 	public void scrollTableToTop(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
@@ -1904,7 +1916,7 @@ public class BeanShellLinker {
 	
 	public void scrollTableToBottom(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
@@ -1923,7 +1935,7 @@ public class BeanShellLinker {
 	
 	public void scrollTableToRow(String ref, int row) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
@@ -1947,7 +1959,7 @@ public class BeanShellLinker {
 			List<NameValuePair> values = (List<NameValuePair>) valuesObj;
 			pairs = new ArrayList<NameValuePair>();
 			for (NameValuePair p : values) {
-				pairs.add(new NameValuePair(activity.getArch16n()
+				pairs.add(new NameValuePair(arch16n
 						.substituteValue(p.getName()), p.getValue()));
 			}
 		} catch (Exception e) {
@@ -1956,7 +1968,7 @@ public class BeanShellLinker {
 				List<List<String>> values = (List<List<String>>) valuesObj;
 				pairs = new ArrayList<NameValuePair>();
 				for (List<String> list : values) {
-					pairs.add(new NameValuePair(activity.getArch16n()
+					pairs.add(new NameValuePair(arch16n
 							.substituteValue(list.get(1)), list.get(0)));
 				}
 			} catch (Exception ee) {
@@ -1964,8 +1976,8 @@ public class BeanShellLinker {
 				List<String> values = (List<String>) valuesObj;
 				pairs = new ArrayList<NameValuePair>();
 				for (String value : values) {
-					pairs.add(new NameValuePair(activity.getArch16n()
-							.substituteValue(value), activity.getArch16n()
+					pairs.add(new NameValuePair(arch16n
+							.substituteValue(value), arch16n
 							.substituteValue(value)));
 				}
 			}
@@ -2127,11 +2139,11 @@ public class BeanShellLinker {
 	public void showBaseMap(final String ref, String layerName,
 			String filename) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getModuleDir() + "/" + filename;
+				String filepath = module.getDirectoryPath(filename).getPath();
 				mapView.addBaseMap(layerName, filepath);
 
 			} else {
@@ -2150,11 +2162,11 @@ public class BeanShellLinker {
 	public void showRasterMap(final String ref, String layerName,
 			String filename) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getModuleDir() + "/" + filename;
+				String filepath = module.getDirectoryPath(filename).getPath();
 				mapView.addRasterMap(layerName, filepath);
 
 			} else {
@@ -2172,7 +2184,7 @@ public class BeanShellLinker {
 
 	public void setMapFocusPoint(String ref, float longitude, float latitude) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				MapPos p = databaseManager.spatialRecord().convertFromProjToProj(module.getSrid(), GeometryUtil.EPSG4326, new MapPos(longitude, latitude));
@@ -2192,7 +2204,7 @@ public class BeanShellLinker {
 
 	public void setMapRotation(String ref, float rotation) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// rotation - 0 = north-up
@@ -2209,7 +2221,7 @@ public class BeanShellLinker {
 
 	public void setMapZoom(String ref, float zoom) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// zoom - 0 = world, like on most web maps
@@ -2226,7 +2238,7 @@ public class BeanShellLinker {
 
 	public void setMapTilt(String ref, float tilt) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				// tilt means perspective view. Default is 90 degrees for
@@ -2255,11 +2267,11 @@ public class BeanShellLinker {
 			GeometryStyle pointStyle, GeometryStyle lineStyle,
 			GeometryStyle polygonStyle) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getModuleDir() + "/" + filename;
+				String filepath = module.getDirectoryPath(filename).getPath();
 				return mapView.addShapeLayer(layerName, filepath,
 						pointStyle.toPointStyleSet(),
 						lineStyle.toLineStyleSet(),
@@ -2283,11 +2295,11 @@ public class BeanShellLinker {
 			GeometryStyle pointStyle, GeometryStyle lineStyle,
 			GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
-				String filepath = activity.getModuleDir() + "/" + filename;
+				String filepath = module.getDirectoryPath(filename).getPath();
 				return mapView.addSpatialLayer(layerName, filepath, tablename,
 						idColumn, labelColumn, pointStyle,
 						lineStyle,
@@ -2312,7 +2324,7 @@ public class BeanShellLinker {
 			GeometryStyle pointStyle, GeometryStyle lineStyle,
 			GeometryStyle polygonStyle, GeometryTextStyle textStyle) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2337,7 +2349,7 @@ public class BeanShellLinker {
 
 	public void removeLayer(String ref, int layerId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2357,7 +2369,7 @@ public class BeanShellLinker {
 
 	public int createCanvasLayer(String ref, String layerName) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2378,7 +2390,7 @@ public class BeanShellLinker {
 
 	public void setLayerVisible(String ref, int layerId, boolean visible) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2396,7 +2408,7 @@ public class BeanShellLinker {
 	
 	public void setGdalLayerShowAlways(String ref, String layerName, boolean showAlways) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2416,7 +2428,7 @@ public class BeanShellLinker {
 			GeometryStyle style) {
 
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2440,7 +2452,7 @@ public class BeanShellLinker {
 			GeometryStyle style) {
 
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2464,7 +2476,7 @@ public class BeanShellLinker {
 			GeometryStyle style) {
 
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2486,7 +2498,7 @@ public class BeanShellLinker {
 
 	public void clearGeometry(String ref, int geomId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2506,7 +2518,7 @@ public class BeanShellLinker {
 
 	public void clearGeometryList(String ref, List<Geometry> geomList) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				
@@ -2523,7 +2535,7 @@ public class BeanShellLinker {
 
 	public List<Geometry> getGeometryList(String ref, int layerId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2542,7 +2554,7 @@ public class BeanShellLinker {
 
 	public Geometry getGeometry(String ref, int geomId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2561,7 +2573,7 @@ public class BeanShellLinker {
 	
 	public String getGeometryLayerName(String ref, int geomId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 
@@ -2579,7 +2591,7 @@ public class BeanShellLinker {
 
 	public void lockMapView(String ref, boolean lock) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.setViewLocked(lock);
@@ -2595,7 +2607,7 @@ public class BeanShellLinker {
 
 	public void addGeometryHighlight(String ref, int geomId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addHighlight(geomId);
@@ -2614,7 +2626,7 @@ public class BeanShellLinker {
 
 	public void removeGeometryHighlight(String ref, int geomId) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.removeHighlight(geomId);
@@ -2633,7 +2645,7 @@ public class BeanShellLinker {
 
 	public void clearGeometryHighlights(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.clearHighlights();
@@ -2649,7 +2661,7 @@ public class BeanShellLinker {
 
 	public List<Geometry> getGeometryHighlights(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				return databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), mapView
@@ -2667,7 +2679,7 @@ public class BeanShellLinker {
 
 	public void prepareHighlightTransform(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.prepareHighlightTransform();
@@ -2684,7 +2696,7 @@ public class BeanShellLinker {
 
 	public void doHighlightTransform(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.doHighlightTransform();
@@ -3064,14 +3076,13 @@ public class BeanShellLinker {
 			}
 
 			// create directories
-			FileUtil.makeDirs(new File(activity.getModuleDir() + "/" + attachFile));
+			FileUtil.makeDirs(module.getDirectoryPath(attachFile));
 			String name= file.getName();
 			
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
-			activity.copyFile(filePath, activity.getModuleDir() + "/"
-					+ attachFile, new ShowModuleActivity.AttachFileListener() {
+			activity.copyFile(filePath, module.getDirectoryPath(attachFile).getPath(), new ShowModuleActivity.AttachFileListener() {
 
 						@Override
 						public void handleComplete() {
@@ -3137,8 +3148,7 @@ public class BeanShellLinker {
 			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
 			Map<String, Integer> count = new HashMap<String, Integer>();
 			for (String attachedFile : files) {
-				String filename = (new File(activity.getModuleDir() + "/"
-						+ attachedFile)).getName();
+				String filename = module.getDirectoryPath(attachedFile).getName();
 				filename = filename.substring(filename.indexOf("_") + 1);
 				if (count.get(filename) != null) {
 					int fileCount = count.get(filename);
@@ -3150,7 +3160,7 @@ public class BeanShellLinker {
 					count.put(filename, 1);
 				}
 				NameValuePair file = new NameValuePair(filename,
-						activity.getModuleDir() + "/" + attachedFile);
+						module.getDirectoryPath(attachedFile).getPath());
 				attachedFiles.add(file);
 			}
 			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -3252,7 +3262,7 @@ public class BeanShellLinker {
 
 	public void setToolsEnabled(String ref, boolean enabled) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.setToolsEnabled(enabled);
@@ -3269,7 +3279,7 @@ public class BeanShellLinker {
 
 	public void addDatabaseLayerQuery(String ref, String name, String sql) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addDatabaseLayerQuery(name, sql);
@@ -3287,7 +3297,7 @@ public class BeanShellLinker {
 	public void addSelectQueryBuilder(String ref, String name,
 			QueryBuilder builder) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addSelectQueryBuilder(name, builder);
@@ -3306,10 +3316,10 @@ public class BeanShellLinker {
 	public void addLegacySelectQueryBuilder(String ref, String name,
 			String dbPath, String tableName, LegacyQueryBuilder builder) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
-				String filepath = activity.getModuleDir() + "/" + dbPath;
+				String filepath = module.getDirectoryPath(dbPath).getPath();
 				mapView.setLegacyToolVisible(true);
 				mapView.addLegacySelectQueryBuilder(name, filepath, tableName,
 						builder);
@@ -3326,7 +3336,7 @@ public class BeanShellLinker {
 
 	public void addTrackLogLayerQuery(String ref, String name, String sql) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.addTrackLogLayerQuery(name, sql);
@@ -3352,7 +3362,7 @@ public class BeanShellLinker {
 	
 	public void bindToolEvent(String ref, String type, final String callback) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				if ("create".equals(type)) {
@@ -3400,7 +3410,7 @@ public class BeanShellLinker {
 	
 	public void refreshMap(String ref) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				mapView.refreshMap();
@@ -3426,7 +3436,7 @@ public class BeanShellLinker {
 	
 	public String getAttachedFilePath(String file) {
 		try {
-			return activity.getModuleDir() + "/" + file;
+			return module.getDirectoryPath(file).getPath();
 		} catch (Exception e) {
 			FLog.e("error getting attached file path", e);
 			showWarning("Logic Error", "Error getting attached file path");
@@ -3436,7 +3446,7 @@ public class BeanShellLinker {
 	
 	public String stripAttachedFilePath(String file) {
 		try {
-			return file.replace(activity.getModuleDir() + "/", "");
+			return file.replace(module.getDirectoryPath().getPath() + "/", "");
 		} catch (Exception e) {
 			FLog.e("error stripping attached file path", e);
 			showWarning("Logic Error", "Error stripping attached file path");
@@ -3446,7 +3456,7 @@ public class BeanShellLinker {
 	
 	public String addFile(String ref, String file) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof FileListGroup) {
 				FileListGroup filesList = (FileListGroup) obj;
 				filesList.addFile(file);
@@ -3463,7 +3473,7 @@ public class BeanShellLinker {
 	
 	public String addPicture(String ref, String file) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CameraPictureGallery) {
 				CameraPictureGallery gallery = (CameraPictureGallery) obj;
 				gallery.addPicture(file);
@@ -3480,7 +3490,7 @@ public class BeanShellLinker {
 	
 	public String addVideo(String ref, String file) {
 		try {
-			Object obj = activity.getUIRenderer().getViewByRef(ref);
+			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof VideoGallery) {
 				VideoGallery gallery = (VideoGallery) obj;
 				gallery.addVideo(file);

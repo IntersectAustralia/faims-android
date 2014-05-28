@@ -8,6 +8,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -20,12 +21,25 @@ import com.google.inject.Inject;
 @SuppressLint("SetJavaScriptEnabled")
 public class Table extends WebView {
 	
+	class TableInterface {
+		
+		@JavascriptInterface
+		public void callAction(int row) {
+			beanShellLinker.execute(actionCallback);
+		}
+		
+	}
+	
 	@Inject
 	DatabaseManager databaseManager;
 	
+	@Inject
+	BeanShellLinker beanShellLinker;
+	
 	private String query;
-	//private int actionIndex;
-	//private String actionCallback;
+	private int actionIndex;
+	private String actionCallback;
+	private List<String> actionValues;
 	private List<String> headers;
 	private boolean pivot;
 
@@ -42,16 +56,19 @@ public class Table extends WebView {
 		settings.setJavaScriptEnabled(true);
 		setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
 		setScrollbarFadingEnabled(false);
+		
+		// add java interface
+		addJavascriptInterface(new TableInterface(), "Android");
 	}
 
 	public void populate(String query, List<String> headers, int actionIndex, String actionCallback, boolean pivot) throws Exception {
 		this.query = query;
 		this.headers = headers;
-		//this.actionIndex = actionIndex;
-		//this.actionCallback = actionCallback;
+		this.actionIndex = actionIndex;
+		this.actionCallback = actionCallback;
 		this.pivot = pivot;
 		
-		this.loadDataWithBaseURL("file:///android_asset/", generateTableHTML(), "text/html", "utf-8", null);
+		this.loadDataWithBaseURL("file:///android_asset/", generateTable(), "text/html", "utf-8", null);
 	}
 	
 	public void scrollToTop() {
@@ -66,26 +83,54 @@ public class Table extends WebView {
 		loadUrl("javascript:scrollToElement('row-" + num + "')");
 	}
 	
-	private String generateTableHTML() throws Exception {
-		Collection<List<String>> results = databaseManager.fetchRecord().fetchAll(query);
+	private String generateTable() throws Exception {
 		StringBuilder sb = new StringBuilder();
-		sb.append(readHtmlFromAssets("table.header.html"));
+		sb.append(readFileFromAssets("table.header.html"));
 		sb.append("<table class=\"table\">");
+		
+		actionValues = new ArrayList<String>();
+		Collection<List<String>> results = databaseManager.fetchRecord().fetchAll(query);
 		if (results != null) {
-			sb.append(generateQueryRow(headers, 0, true));	
+			sb.append(generateTableRow(headers, -1, true));	
 			
 			if (pivot) {
 				results = pivotResults(results);
 			}
 			
-			int count = 1;
+			int count = 0;
 			for (List<String> row : results) {
-				sb.append(generateQueryRow(row, count, false));
+				sb.append(generateTableRow(row, count, false));
 				count++;
 			}
 		}
+		
 		sb.append("</table>");
-		sb.append(readHtmlFromAssets("table.footer.html"));
+		sb.append(readFileFromAssets("table.footer.html"));
+		return sb.toString();
+	}
+	
+	private String generateTableRow(List<String> row, int count, boolean header) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<tr id=\"row-" + count + "\">");
+		for (int i = 0; i < row.size(); i++) {
+			String column = row.get(i);
+			
+			sb.append(header ? "<th>" : "<td>");
+			
+			// actions are displayed as buttons
+			if (!header && i == actionIndex) {
+				// store action value
+				actionValues.add(column);
+				
+				// create button
+				sb.append("<button type=\"button\" onclick=\"callAction(" + count + ")\">Click Me!</button>");
+			} else {
+				sb.append(column);
+			}
+			
+			sb.append(header ? "</th>" : "</td>");
+		}
+		sb.append("</tr>");
 		return sb.toString();
 	}
 	
@@ -124,19 +169,7 @@ public class Table extends WebView {
 		return pivotResults;
 	}
 	
-	private String generateQueryRow(List<String> row, int count, boolean header) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<tr id=\"row-" + count + "\">");
-		for (String column : row) {
-			sb.append(header ? "<th>" : "<td>");
-			sb.append(column);
-			sb.append(header ? "</th>" : "</td>");
-		}
-		sb.append("</tr>");
-		return sb.toString();
-	}
-	
-	private String readHtmlFromAssets(String fileName) throws IOException {
+	private String readFileFromAssets(String fileName) throws IOException {
 		return StringUtil.streamToString(getContext().getAssets().open(fileName));
 	}
 
