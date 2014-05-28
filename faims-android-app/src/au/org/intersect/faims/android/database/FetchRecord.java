@@ -98,6 +98,7 @@ public class FetchRecord extends Database {
 			s = "0" + s;
 		}
 		String uuidForUser = "1" + s;
+		
 		Vector<Geometry> geometries = fetchAllVisibleEntityGeometry(list, querySql, maxObjects);
 		Vector<Geometry> userGeometries = new Vector<Geometry>();
 		for (Geometry geometry : geometries) {
@@ -243,10 +244,11 @@ public class FetchRecord extends Database {
 				return true;
 			}
 			
+			return false;
 		} finally {
+			closeStmt(stmt);
 			closeDB();
 		}
-		return false;
 	}
 
 }

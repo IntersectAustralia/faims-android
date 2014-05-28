@@ -74,11 +74,11 @@ import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
-import au.org.intersect.faims.android.ui.form.Arch16n;
-import au.org.intersect.faims.android.ui.form.BeanShellLinker;
-import au.org.intersect.faims.android.ui.form.TabGroup;
-import au.org.intersect.faims.android.ui.form.UIRenderer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.view.BeanShellLinker;
+import au.org.intersect.faims.android.ui.view.TabGroup;
+import au.org.intersect.faims.android.ui.view.UIRenderer;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -1030,7 +1030,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 			Messenger messenger = new Messenger(handler);
 			intent.putExtra("MESSENGER", messenger);
 			intent.putExtra("module", module);
-			intent.putExtra("userId", databaseManager.getUserId());
 			ShowModuleActivity.this.startService(intent);
 
 		} else {
@@ -1404,13 +1403,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("module", module);
-				String userId = databaseManager.getUserId();
-				FLog.d("user id : " + userId);
-				if (userId == null) {
-					userId = "0"; // TODO: what should happen if user sets no
-									// user?
-				}
-				intent.putExtra("userId", userId);
 				ShowModuleActivity.this.startService(intent);
 
 				callSyncStart();

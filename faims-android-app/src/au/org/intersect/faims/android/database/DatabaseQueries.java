@@ -314,14 +314,14 @@ public final class DatabaseQueries {
 			"select vocabid, vocabname, vocabdescription, pictureurl, parentvocabid from attributekey join vocabulary using (attributeid) where attributename = ?;";
 
 	public static String COUNT_AENT_RECORDS(String timestamp) {
-		return "select count (uuid) from archentity where aenttimestamp >= '" + timestamp + "';";
+		return "select count(*) from archentity where aenttimestamp >= '" + timestamp + "';";
 	}
 
 	public static String COUNT_RELN_RECORDS(String timestamp) {
-		return "select count (relationshipid) from relationship where relntimestamp >= '" + timestamp + "';";
+		return "select count(*) from relationship where relntimestamp >= '" + timestamp + "';";
 	}
 	
 	public static String COUNT_AENT_RELN_RECORDS(String timestamp) {
-		return "select count (uuid) from aentreln where aentrelntimestamp >= '" + timestamp + "';";
+		return "select count(*) from aentreln where aentrelntimestamp >= '" + timestamp + "';";
 	}
 }

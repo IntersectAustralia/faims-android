@@ -16,7 +16,7 @@ import android.content.Intent;
 import android.view.MenuInflater;
 import android.widget.ListView;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
 @Config(manifest="../faims-android-app/AndroidManifest.xml")

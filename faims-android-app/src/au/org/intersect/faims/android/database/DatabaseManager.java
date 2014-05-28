@@ -21,10 +21,13 @@ public class DatabaseManager {
 	private AttributeRecord attributeRecord;
 	private SpatialRecord spatialRecord;
 	private SharedRecord sharedRecord;
+	
+	public DatabaseManager() {
+		this.listeners = new ArrayList<DatabaseChangeListener>();
+	}
 
 	public void init(File dbFile) {
 		this.dbFile = dbFile;
-		this.listeners = new ArrayList<DatabaseChangeListener>();
 		this.fetchRecord = new FetchRecord(dbFile);
 		this.mergeRecord = new MergeRecord(dbFile);
 		this.entityRecord = new EntityRecord(dbFile);

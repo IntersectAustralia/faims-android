@@ -37,7 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 import android.widget.TextView;
-import au.org.intersect.faims.android.ui.form.NameValuePair;
+import au.org.intersect.faims.android.data.NameValuePair;
 
 @SuppressLint("DrawAllocation")
 public class ColorPickerDialog extends AlertDialog {
