@@ -450,6 +450,8 @@ onLoadTable() {
 	populateDropDown("tabgroup5/tab1/queries", tableList);
 }
 
+onEvent("tabgroup5", "show", "refreshTable(\"tabgroup5/tab1/table\")");
+
 onEvent("tabgroup5/tab1/load", "click", "onLoadQuery()");
 onEvent("tabgroup5/tab1/top", "click", "onScrollTop()");
 onEvent("tabgroup5/tab1/bottom", "click", "onScrollBottom()");
@@ -474,8 +476,7 @@ onShowRow() {
 	row = getTableRow();
 	value = getTableValue();
 
-	refreshTable("tabgroup5/tab1/table");
-	showToast(value);
+	showTabGroup("tabgroup1", value);
 }
 
 getTableIndex(selectedItem) {

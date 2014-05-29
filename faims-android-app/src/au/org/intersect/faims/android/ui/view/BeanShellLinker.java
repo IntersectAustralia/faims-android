@@ -621,11 +621,15 @@ public class BeanShellLinker {
 				return null;
 			}
 			activity.getActionBar().setTitle(tabGroup.getLabel());
-			if (tabGroup.getArchEntType() != null) {
-				showArchEntityTabGroup(uuid, tabGroup);
-			} else if (tabGroup.getRelType() != null) {
-				showRelationshipTabGroup(uuid, tabGroup);
-			}
+			tabGroup.setOnShowTask(new TabGroup.TabTask() {
+				public void onShow() {
+					if (tabGroup.getArchEntType() != null) {
+						showArchEntityTabGroup(uuid, tabGroup);
+					} else if (tabGroup.getRelType() != null) {
+						showRelationshipTabGroup(uuid, tabGroup);
+					}
+				}
+			});	
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + id, e);

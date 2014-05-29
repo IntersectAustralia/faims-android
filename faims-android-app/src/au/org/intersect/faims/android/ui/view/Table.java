@@ -91,6 +91,8 @@ public class Table extends WebView {
 	}
 
 	public void refresh() throws Exception {
+		if (this.query == null) return; // nothing to refresh
+		
 		loadUrl("javascript:saveScrollPosition()");
 		this.loadDataWithBaseURL("file:///android_asset/", generateTable(), "text/html", "utf-8", null);
 	}

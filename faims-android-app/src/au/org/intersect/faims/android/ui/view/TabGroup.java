@@ -25,6 +25,10 @@ import com.google.inject.Inject;
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
 	
+	public interface TabTask {
+		public void onShow();
+	}
+	
 	@Inject
 	BeanShellLinker beanShellLinker;
 	
@@ -42,6 +46,8 @@ public class TabGroup extends Fragment {
 	private IRestoreActionListener actionListener;
 	private Tab lastTab;
 	private String id;
+
+	private TabTask showTask;
 	
 	public TabGroup(){
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -70,7 +76,7 @@ public class TabGroup extends Fragment {
     		                  ViewGroup container,
                               Bundle savedInstanceState) {	
 		
-		if (tabHost == null){
+		if (tabHost == null) {
 			tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
 			tabHost.setup();
 			
@@ -133,6 +139,12 @@ public class TabGroup extends Fragment {
 			}
 			
 		});
+		
+		// execute a task directly after a tabgroup is shown
+		if (showTask != null) {
+			showTask.onShow();
+			showTask = null;
+		}
 		
 		onShowTabGroup();
 		
@@ -232,18 +244,17 @@ public class TabGroup extends Fragment {
 		return this.archEntType != null && this.relType == null;
 	}
 
+	public boolean isRelationship() {
+		return this.relType != null && this.archEntType == null;
+	}
+	
 	public void clearTabs() {
 		for (Tab tab : tabs) {
 			tab.clearViews();
 		}
 	}
-
-	public boolean isRelationship() {
-		return this.relType != null && this.archEntType == null;
-	}
 	
-	public void onShowTabGroup() {
-		
+	public void onShowTabGroup() {	
 		Tab tab = getCurrentTab();
 		if (tab != null) {
 			tab.onShowTab();
@@ -259,10 +270,6 @@ public class TabGroup extends Fragment {
 			lastTab = null;
 		}
 	}
-
-	public String getGroupTag() {
-		return id;
-	}
 	
 	protected void resetTabGroupOnShow(){
 		tabHost.setCurrentTab(0);
@@ -273,6 +280,14 @@ public class TabGroup extends Fragment {
 				}
 			}
 		}
+	}
+	
+	public void setOnShowTask(TabTask task) {
+		this.showTask = task;
+	}
+
+	public String getGroupTag() {
+		return id;
 	}
 
 }
