@@ -27,22 +27,18 @@ public class InputBuffer {
 		
 		if (c.equals(endOfInput)) {
 			if (listener != null) {
-				listener.onInput(bufferToString());
+				listener.onInput(buffer.toString());
 			}
 			clearBuffer();
 		} else {
 			buffer.append(c);
 			if (buffer.length() == bufferSize) {
 				if (listener != null) {
-					listener.onFull(bufferToString());
+					listener.onFull(buffer.toString());
 				}
 				clearBuffer();
 			}
 		}
-	}
-	
-	private String bufferToString() {
-		return null;
 	}
 	
 	private void clearBuffer() {
