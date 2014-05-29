@@ -24,10 +24,23 @@ public class Table extends WebView {
 	class TableInterface {
 		
 		@JavascriptInterface
-		public void callAction(int row) {
+		public void onAction(int row) {
+			beanShellLinker.set("_table_row", String.valueOf(row));
+			beanShellLinker.set("_table_value", actionValues.get(row));
 			beanShellLinker.execute(actionCallback);
 		}
-		
+
+		@JavascriptInterface
+		public void onLoad() {
+			loadUrl("javascript:restoreScrollPosition(" + scrollX + "," + scrollY + ")");
+		}
+
+		@JavascriptInterface
+		public void setScrollPosition(int x, int y) {
+			scrollX = x;
+			scrollY = y;
+		}
+
 	}
 	
 	@Inject
@@ -37,11 +50,15 @@ public class Table extends WebView {
 	BeanShellLinker beanShellLinker;
 	
 	private String query;
+	private String actionName;
 	private int actionIndex;
 	private String actionCallback;
 	private List<String> actionValues;
 	private List<String> headers;
 	private boolean pivot;
+		
+	int scrollX;
+	int scrollY;
 
 	public Table(Context context) {
 		super(context);
@@ -61,13 +78,20 @@ public class Table extends WebView {
 		addJavascriptInterface(new TableInterface(), "Android");
 	}
 
-	public void populate(String query, List<String> headers, int actionIndex, String actionCallback, boolean pivot) throws Exception {
+	public void populate(String query, List<String> headers, String actionName, int actionIndex, String actionCallback, boolean pivot) throws Exception {
 		this.query = query;
 		this.headers = headers;
+		this.actionName = actionName;
 		this.actionIndex = actionIndex;
 		this.actionCallback = actionCallback;
+		this.actionValues = new ArrayList<String>();
 		this.pivot = pivot;
 		
+		this.loadDataWithBaseURL("file:///android_asset/", generateTable(), "text/html", "utf-8", null);
+	}
+
+	public void refresh() throws Exception {
+		loadUrl("javascript:saveScrollPosition()");
 		this.loadDataWithBaseURL("file:///android_asset/", generateTable(), "text/html", "utf-8", null);
 	}
 	
@@ -86,9 +110,8 @@ public class Table extends WebView {
 	private String generateTable() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append(readFileFromAssets("table.header.html"));
-		sb.append("<table class=\"table\">");
+		sb.append("<table id=\"table\" class=\"table\">");
 		
-		actionValues = new ArrayList<String>();
 		Collection<List<String>> results = databaseManager.fetchRecord().fetchAll(query);
 		if (results != null) {
 			sb.append(generateTableRow(headers, -1, true));	
@@ -123,7 +146,7 @@ public class Table extends WebView {
 				actionValues.add(column);
 				
 				// create button
-				sb.append("<button type=\"button\" onclick=\"callAction(" + count + ")\">Click Me!</button>");
+				sb.append("<button type=\"button\" onclick=\"callAction(" + count + ")\">" + actionName + "</button>");
 			} else {
 				sb.append(column);
 			}
@@ -131,6 +154,7 @@ public class Table extends WebView {
 			sb.append(header ? "</th>" : "</td>");
 		}
 		sb.append("</tr>");
+		
 		return sb.toString();
 	}
 	
@@ -165,7 +189,6 @@ public class Table extends WebView {
 			}
 			pivotResults.add(pivotRow);
 		}
-		
 		return pivotResults;
 	}
 	

@@ -330,7 +330,7 @@ tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabnam
 				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
 				"	 									   measure, \n" + 
 				"	 									   vocabname, \n" + 
-				"	 									   freetext), ' | ') as response \n" +
+				"	 									   freetext), ' | ') as response, uuid \n" +
 				" 			FROM latestNonDeletedArchentIdentifiers\n" +
 				" 			GROUP BY uuid;");
 tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
@@ -338,7 +338,7 @@ tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' |
 				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
 				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
 				" 													 vocabname, \n" + 
-				" 													 freetext), ' | ') as response \n" +
+				" 													 freetext), ' | ') as response, relationshipid \n" +
 				" 		FROM latestNonDeletedRelnIdentifiers \n" +
 				" 		GROUP BY relationshipid;");
 tableQuery.add("select uuid, attributename, response\n" + 
@@ -433,8 +433,8 @@ createTableHeaders(headers) {
 }
 
 tableHeaders = new ArrayList();
-tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier" }));
-tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
 
@@ -464,10 +464,18 @@ onLoadQuery() {
 	headers = tableHeaders.get(index);
 	query = tableQuery.get(index);
 	if (index < 2) {
-		populateTableRaw("tabgroup5/tab1/table", query, headers, -1, null);
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRow()");
 	} else {
-		populateTablePivot("tabgroup5/tab1/table", query, headers, -1, null);
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", -1, null);
 	}
+}
+
+onShowRow() {
+	row = getTableRow();
+	value = getTableValue();
+
+	refreshTable("tabgroup5/tab1/table");
+	showToast(value);
 }
 
 getTableIndex(selectedItem) {

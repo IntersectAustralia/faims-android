@@ -535,11 +535,12 @@ populateList(String ref, Collection values){
   * @param ref the reference to the field
   * @param query the query to populate the table from
   * @param headers the columns used for the header of the table
+  * @param actionName the label for the action
   * @param actionIndex the index to create actions on
   * @param actionCallback the callback to execute when an action is triggered
   */
-populateTableRaw(String ref, String query, List headers, int actionIndex, String actionCallback){
-  linker.populateTableRaw(ref, query, headers, actionIndex, actionCallback);
+populateTableRaw(String ref, String query, List headers, String actionName, int actionIndex, String actionCallback){
+  linker.populateTableRaw(ref, query, headers, actionName, actionIndex, actionCallback);
 }
 
 /**
@@ -550,11 +551,19 @@ populateTableRaw(String ref, String query, List headers, int actionIndex, String
   * @param ref the reference to the field
   * @param query the query to populate the table from
   * @param headers the columns used for the header of the table
+  * @param actionName the label for the action
   * @param actionIndex the index to create actions on
   * @param actionCallback the callback to execute when an action is triggered
   */
-populateTablePivot(String ref, String query, List headers, int actionIndex, String actionCallback){
-  linker.populateTablePivot(ref, query, headers, actionIndex, actionCallback);
+populateTablePivot(String ref, String query, List headers, String actionName, int actionIndex, String actionCallback){
+  linker.populateTablePivot(ref, query, headers, actionName, actionIndex, actionCallback);
+}
+
+/**
+  * Refresh table results while maintaining scroll position.
+  */
+refreshTable(String ref){
+  linker.refreshTable(ref);
 }
 
 /**
@@ -579,7 +588,7 @@ scrollTableToBottom(String ref){
   linker.scrollTableToBottom(ref);
 }
 
-  /**
+/**
   * Scroll table to top.
   *
   * If the field reference is not found a logic error dialog will appear.
@@ -588,6 +597,24 @@ scrollTableToBottom(String ref){
   */
 scrollTableToRow(String ref, int row){
   linker.scrollTableToRow(ref, row);
+}
+
+/**
+  * Used in conjunction with the action callback for tables.
+  *
+  * @rerturn the last table row number.
+  */
+getTableRow(){
+  return _table_row;
+}
+
+/**
+  * Used in conjunction with the action callback for tables.
+  *
+  * @rerturn the last table row value.
+  */
+getTableValue(){
+  return _table_value;
 }
 
 /**

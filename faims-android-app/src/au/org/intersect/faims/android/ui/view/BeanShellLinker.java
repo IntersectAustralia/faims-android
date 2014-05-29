@@ -198,6 +198,15 @@ public class BeanShellLinker {
 		executeOnUiThread(code);
 	}
 	
+	public void set(String var, String value) {
+		try {
+			interpreter.set(var, value);
+		} catch (EvalError e) {
+			FLog.i("error executing code", e);
+			showWarning("Logic Error", "Error encountered in logic script");
+		}
+	}
+	
 	public void executeOnUiThread(final String code) {
 		activity.runOnUiThread(new Runnable() {
 
@@ -588,6 +597,28 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
+	
+	public TabGroup showTabGroup(String id, final String uuid) {
+		try {
+			final TabGroup tabGroup = uiRenderer.showTabGroup(activity,
+					id);
+			if (tabGroup == null) {
+				showWarning("Logic Error", "Error showing tab group " + id);
+				return null;
+			}
+			activity.getActionBar().setTitle(tabGroup.getLabel());
+			if (tabGroup.getArchEntType() != null) {
+				showArchEntityTabGroup(uuid, tabGroup);
+			} else if (tabGroup.getRelType() != null) {
+				showRelationshipTabGroup(uuid, tabGroup);
+			}
+			return tabGroup;
+		} catch (Exception e) {
+			FLog.e("error showing tabgroup " + id, e);
+			showWarning("Logic Error", "Error showing tab group " + id);
+		}
+		return null;
+	}
 
 	public Tab showTab(String label) {
 		try {
@@ -604,38 +635,16 @@ public class BeanShellLinker {
 		return null;
 	}
 
-	public void showTabGroup(String id, String uuid) {
-		try {
-			TabGroup tabGroup = uiRenderer.showTabGroup(activity,
-					id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tab group " + id);
-				return;
-			}
-			activity.getActionBar().setTitle(tabGroup.getLabel());
-			if (tabGroup.getArchEntType() != null) {
-				showArchEntityTabGroup(uuid, tabGroup);
-			} else if (tabGroup.getRelType() != null) {
-				showRelationshipTabGroup(uuid, tabGroup);
-			} else {
-				showTabGroup(id);
-			}
-		} catch (Exception e) {
-			FLog.e("error showing tabgroup " + id, e);
-			showWarning("Logic Error", "Error showing tab group " + id);
-		}
-	}
-
-	public void showTab(String id, String uuid) {
+	public Tab showTab(String id, String uuid) {
 		try {
 			if (id == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return;
+				return null;
 			}
 			String[] ids = id.split("/");
 			if (ids.length < 2) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return;
+				return null;
 			}
 			String groupId = ids[0];
 			String tabId = ids[1];
@@ -643,24 +652,24 @@ public class BeanShellLinker {
 					groupId);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return;
+				return null;
 			}
 			Tab tab = tabGroup.showTab(tabId);
 			if (tab == null) {
 				showWarning("Logic Error", "Error showing tab " + id);
-				return;
+				return null;
 			}
 			if (tabGroup.getArchEntType() != null) {
 				showArchEntityTab(uuid, tab);
 			} else if (tabGroup.getRelType() != null) {
 				showRelationshipTab(uuid, tab);
-			} else {
-				showTab(id);
 			}
+			return tab;
 		} catch (Exception e) {
 			FLog.e("error showing tab " + id, e);
 			showWarning("Logic Error", "Error showing tab " + id);
 		}
+		return null;
 	}
 	
 	private void showSaveDialog() {
@@ -1137,22 +1146,25 @@ public class BeanShellLinker {
 		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
-				if (v instanceof FileListGroup) {
-					// add full path
-					FileListGroup fileList = (FileListGroup) v;
-					fileList.addFile(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-				} else if (v instanceof CameraPictureGallery) {
-					CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
-					// add full path
-					cameraGallery.addPicture(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-				} else if (v instanceof VideoGallery) {
-					VideoGallery videoGallery = (VideoGallery) v;
-					// add full path
-					videoGallery.addVideo(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-				} else {
-					setAttributeView(customView.getRef(), attribute, customView);
+				if (customView.getAttributeName().equals(attribute.getName())) {
+					if (v instanceof FileListGroup) {
+						// add full path
+						FileListGroup fileList = (FileListGroup) v;
+						fileList.addFile(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
+					} else if (v instanceof CameraPictureGallery) {
+						CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
+						// add full path
+						cameraGallery.addPicture(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
+					} else if (v instanceof VideoGallery) {
+						VideoGallery videoGallery = (VideoGallery) v;
+						// add full path
+						videoGallery.addVideo(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
+					} else {
+						setAttributeView(customView.getRef(), attribute, customView);
+					}
+					customView.save();
+					break;
 				}
-				customView.save();
 			}
 		}
 	}
@@ -1875,13 +1887,13 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void populateTableRaw(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
+	public void populateTableRaw(String ref, String query, List<String> headers, String actionName, int actionIndex, String actionCallback) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
-				table.populate(query, headers, actionIndex, actionCallback, false);
+				table.populate(query, headers, actionName, actionIndex, actionCallback, false);
 			} else {
 				FLog.w("Cannot populate table"
 						+ ref);
@@ -1894,13 +1906,13 @@ public class BeanShellLinker {
 		}
 	}
 	
-	public void populateTablePivot(String ref, String query, List<String> headers, int actionIndex, String actionCallback) {
+	public void populateTablePivot(String ref, String query, List<String> headers, String actionName, int actionIndex, String actionCallback) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof Table) {
 				Table table = (Table) obj;
-				table.populate(query, headers, actionIndex, actionCallback, true);
+				table.populate(query, headers, actionName, actionIndex, actionCallback, true);
 			} else {
 				FLog.w("Cannot populate table "
 						+ ref);
@@ -1910,6 +1922,25 @@ public class BeanShellLinker {
 		} catch (Exception e) {
 			FLog.e("error trying to populate table " + ref, e);
 			showWarning("Logic Error", "Error trying to populate table " + ref);
+		}
+	}
+	
+	public void refreshTable(String ref) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.refresh();
+			} else {
+				FLog.w("Cannot refresh table "
+						+ ref);
+				showWarning("Logic Error", "Cannot refresh table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to refresh table " + ref, e);
+			showWarning("Logic Error", "Error trying to refresh table " + ref);
 		}
 	}
 	

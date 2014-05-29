@@ -1,12 +1,19 @@
 <div id="page-bottom"/>
 </body>
 <script type="text/javascript">
-  function scrollToTop() {
-    scrollToElement("page-top")
+  
+  function onLoad() {
+    Android.onLoad();
   }
-  function scrollToBottom() {
-    scrollToElement("page-bottom")
+
+  function saveScrollPosition() {
+    Android.setScrollPosition(window.scrollX, window.scrollY);
   }
+
+  function restoreScrollPosition(x, y) {
+    window.scrollTo(x, y);
+  }
+
   function scrollToElement(id) {
     var elem = document.getElementById(id);
     var x = 0;
@@ -17,11 +24,12 @@
         y += elem.offsetTop;
         elem = elem.offsetParent;
     }
-
     window.scrollTo(x, y);
   }
+
   function callAction(row) {
-    Android.callAction(row);
+    Android.onAction(row);
   }
+  
 </script>
 </html>
