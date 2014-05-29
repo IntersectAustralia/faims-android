@@ -10,8 +10,7 @@ public class InputBuffer {
 	private InputBufferListener listener;
 	private int bufferSize;
 	private Character endOfInput;
-	private Character[] buffer;
-	private int bufferIndex;
+	private StringBuffer buffer;
 	
 	public InputBuffer(int bufferSize, Character endOfInput) {
 		this.bufferSize = bufferSize;
@@ -32,9 +31,8 @@ public class InputBuffer {
 			}
 			clearBuffer();
 		} else {
-			buffer[bufferIndex] = c;
-			bufferIndex++;
-			if (bufferIndex == bufferSize) {
+			buffer.append(c);
+			if (buffer.length() == bufferSize) {
 				if (listener != null) {
 					listener.onFull(bufferToString());
 				}
@@ -48,8 +46,7 @@ public class InputBuffer {
 	}
 	
 	private void clearBuffer() {
-		buffer = new Character[bufferSize];
-		bufferIndex = 0;
+		buffer = new StringBuffer();
 	}
 
 }
