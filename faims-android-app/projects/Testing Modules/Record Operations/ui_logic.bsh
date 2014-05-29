@@ -1,0 +1,165 @@
+User user; // dont touch
+String userid;
+
+setSyncEnabled(true);
+setFileSyncEnabled(true);
+
+onEvent("control/Entity", "show", "populateList(\"control/Entity/ListEntity\", fetchEntityList(\"Entity\"))");
+onEvent("control/Entity/NewEntity", "click", "newEntity()");
+onEvent("control/Entity/ListEntity", "click", "loadEntity()");
+
+onEvent("control/Associations", "show", "getAllAssociated()");
+
+onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
+onEvent("Entity/Entity/Delete", "click", "deleteEntity()");
+
+onEvent("Entity/Associated", "show", "getRelationships();getOtherEntities();getAssociated()");
+onEvent("Entity/Associated/AddAssociation", "delayclick", "addAssociation()");
+
+String entity_id = null;
+
+newEntity(){
+    entity_id = null;
+    newTabGroup("Entity");
+}
+loadEntity() {
+    entity_id = getListItemValue();
+    loadEntityFrom(entity_id);
+}
+loadEntityFrom(entid) {
+    entity_id = entid;
+    if (isNull(entid)) return;
+    showTabGroup("Entity", entid);
+}
+
+saveEntity() {
+    if(isNull(getFieldValue("Entity/Entity/Name"))) {
+        showWarning("Validation Error!", "Cannot save entity without a name!");
+        return;
+    }
+    if (!isNull(entity_id)) {
+        entity = fetchArchEnt(entity_id);
+    }
+    saveTabGroup("Entity", entity_id, null, null, "entity_id = getLastSavedRecordId();");
+}
+
+deleteEntity(){
+    if (!isNull(entity_id)) {
+        showAlert("Confirm Deletion", "Press OK to Delete this Entity!", "reallyDeleteEntity()", "doNotDelete()");
+    } else {
+        cancelTabGroup("Entity", true);
+    }
+}
+
+reallyDeleteEntity(){
+    deleteArchEnt(entity_id);
+    cancelTabGroup("Entity", false);
+}
+
+doNotDelete(){
+    showToast("Delete Cancelled.");
+}
+
+getRelationships() {
+    relationshipList = fetchAll("select relntypename||'~!~'||coalesce(nullif(parent||'~!~'||child,'~!~'),relntypename||'~!~'||relntypename) as relntypeid, coalesce(nullif(parent,''), relntypename) as name, relntypeid from relntype where relntypename not like '%Context%' union select relntypename||'~!~'||coalesce(nullif(child||'~!~'||parent,'~!~'),relntypename||'~!~'||relntypename), coalesce(nullif(child,''), relntypename) as name, relntypeid from relntype order by relntypeid, name;");
+    populateDropDown("Entity/Associated/Relationship", relationshipList);
+}
+
+getOtherEntities() {
+    entityList = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from latestNonDeletedArchEntIdentifiers where aenttypename = 'Entity' and uuid != '"+entity_id+"' group by uuid;" );
+    populateDropDown("Entity/Associated/ToEntity", entityList);
+}
+
+getAssociated(){
+    Object associatedList = new ArrayList();
+    if(!isNull(entity_id)) {
+        associatedList = fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+getFieldValue("Entity/Entity/Name")+"' as response, valuetimestamp, aentrelntimestamp "+
+        "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename, participatesVerb, relationshipid,aentrelntimestamp "+
+        "            FROM latestNonDeletedArchentIdentifiers join latestNonDeletedAentReln using (uuid) "+
+        "           WHERE aenttypename = 'Entity'  "+
+        "             AND uuid in (select uuid "+
+        "                            FROM latestNonDeletedAentReln  "+
+        "                           where relationshipid in (select relationshipid  "+
+        "                                                      FROM latestNonDeletedAentReln  "+
+        "                                                      JOIN relationship using (relationshipid)  "+
+        "                                                      JOIN relntype using (relntypeid)  "+
+        "                                                     where uuid = "+entity_id+") "+
+        "                             and uuid != "+entity_id+")  "+        
+        "        ORDER BY uuid, attributename ASC "+
+        "        ) "+
+        "group by uuid, relationshipid order by aentrelntimestamp desc ; ");
+    }
+    
+    populateList("Entity/Associated/ListAssociations", associatedList);
+}
+
+addAssociation() {
+    if(isNull(entity_id)) {
+        showToast("You must save the Entity first");
+        showTab("Entity/Entity");
+        return;
+    }
+    String[] arguments = getFieldValue("Entity/Associated/Relationship").split("~!~");
+    String dest = getFieldValue("Entity/Associated/ToEntity");
+    saveEntitiesToHierRel(arguments[0], entity_id, dest, arguments[1], arguments[2]);
+    getAssociated();
+}
+
+getAllAssociated(){
+    Object associatedList = new ArrayList();
+    Object entityList = fetchEntityList("Entity");
+    for(int i = 0; i < entityList.size(); i++) {
+        associatedList.addAll(fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+ entityList.get(i).get(1) +"' as response, valuetimestamp, aentrelntimestamp "+
+        "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename, participatesVerb, relationshipid,aentrelntimestamp "+
+        "            FROM latestNonDeletedArchentIdentifiers join latestNonDeletedAentReln using (uuid) "+
+        "           WHERE aenttypename = 'Entity'  "+
+        "             AND uuid in (select uuid "+
+        "                            FROM latestNonDeletedAentReln  "+
+        "                           where relationshipid in (select relationshipid  "+
+        "                                                      FROM latestNonDeletedAentReln  "+
+        "                                                      JOIN relationship using (relationshipid)  "+
+        "                                                      JOIN relntype using (relntypeid)  "+
+        "                                                     where uuid = "+entityList.get(i).get(0)+") "+
+        "                             and uuid != "+entityList.get(i).get(0)+")  "+        
+        "        ORDER BY uuid, attributename ASC "+
+        "        ) "+
+        "group by uuid, relationshipid order by aentrelntimestamp desc ;"));
+    }
+    populateList("control/Associations/ListAssociations", associatedList);
+}
+
+saveEntitiesToHierRel(type, entity1, entity2, e1verb, e2verb) {
+    if (isNull(entity1) || isNull(entity2)) return;
+    
+    rel_id = saveRel(null, type, null, null);
+    addReln(entity1, rel_id, e1verb);
+    addReln(entity2, rel_id, e2verb);
+}
+
+/*** Uneditable - you can edit the code below with extreme precaution ***/
+/*** USER ***/
+
+getDefaultUsersList() {
+    users = fetchAll("select userid, fname || ' ' || lname from user");
+    return users;
+}
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+    userid = userResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("control");
+}
+
+onEvent("user/usertab/users", "click", "login()");

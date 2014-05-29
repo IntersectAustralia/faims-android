@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataSchema name="Server Validation" preparer="Vincent Tran">
+  <RelationshipElement name="AboveBelow" type="hierarchical">
+    <description>Implements an above-below relationship for entities.
+    </description>
+    <parent>Above</parent>
+    <child>Below</child>
+  </RelationshipElement>
+  <RelationshipElement name="Containment" type="hierarchical">
+    <description>Implements a containment relationship for entities.
+    </description>
+    <parent>Contains</parent>
+    <child>Contained By</child>
+  </RelationshipElement>
+  <RelationshipElement name="Same As" type="bidirectional">
+    <description>Implements an identity relationship as for entities
+    </description>
+  </RelationshipElement>
+  <RelationshipElement name="Bonded To" type="bidirectional">
+    <description>Implements a bonded to relationship for entities
+    </description>
+  </RelationshipElement>
+
+  <ArchaeologicalElement name="Entity">
+    <property name="Name" type="freetext" isIdentifier="true">
+      <description> Name of Entity </description>
+    </property>
+    <property name="Description" type="freetext">
+      <description> Give a brief description </description>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>

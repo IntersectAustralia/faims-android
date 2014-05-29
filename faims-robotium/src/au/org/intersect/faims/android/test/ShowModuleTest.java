@@ -5,8 +5,8 @@ import android.content.res.AssetManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.CheckedTextView;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
-import au.org.intersect.faims.android.ui.form.CustomImageView;
-import au.org.intersect.faims.android.ui.form.HierarchicalSpinner;
+import au.org.intersect.faims.android.ui.view.CustomImageView;
+import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
 import com.robotium.solo.Solo;

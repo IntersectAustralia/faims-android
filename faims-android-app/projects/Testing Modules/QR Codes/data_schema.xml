@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataSchema name="File Attachments" preparer="Vincent Tran">
+  <ArchaeologicalElement name="Entity">
+    <property name="Name" type="freetext" isIdentifier="true">
+      <description>Name</description>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>
