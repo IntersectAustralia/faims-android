@@ -132,12 +132,24 @@
                   </container>
               </tab1>
           </tabgroup5>
+          <tabgroup6>
+              <tab1>
+                  <auto></auto>
+                  <manual></manual>
+                  <stop></stop>
+                  <input></input>
+                  <read></read>
+                  <write></write>
+                  <clear/>
+              </tab1>
+          </tabgroup6>
         </faims>
       </instance>
       
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup2/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup5/tab1/container/child3/scrollRow" type="decimal"/>
+      <bind nodeset="/faims/tabgroup6/tab1/input" type="string"/>
       
     </model>
   </h:head>
@@ -514,6 +526,33 @@
 	        </group>
 	    </group>
       </group>
+    </group>
+    <group ref="tabgroup6">
+        <label></label>
+        <group ref="tab1">
+            <label>Bluetooth</label>
+            <trigger ref="auto">
+                <label>Start Bluetooth Auto</label>
+            </trigger>
+            <trigger ref="manual">
+                <label>Start Bluetooth Manual</label>
+            </trigger>
+            <trigger ref="stop">
+                <label>Stop Bluetooth</label>
+            </trigger>
+            <input ref="input">
+                <label>Input</label>
+            </input>
+            <trigger ref="read">
+                <label>Read Message</label>
+            </trigger>
+            <trigger ref="write">
+                <label>Write Message</label>
+            </trigger>
+            <trigger ref="clear">
+                <label>Clear Messages</label>
+            </trigger>
+        </group>
     </group>
   </h:body>
 </h:html>

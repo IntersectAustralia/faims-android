@@ -30,6 +30,7 @@ options.add(createOption("entity", "Create Entity"));
 options.add(createOption("relationship", "Create Relationship"));
 options.add(createOption("add", "Add Association"));
 options.add(createOption("table", "Table View"));
+options.add(createOption("bluetooth", "Bluetooth Test"));
 options.add(createOption("controls", "Controls"));
 
 populateList("menu/tab1/options", options);
@@ -44,6 +45,8 @@ onClickOption() {
 		showTabGroup("tabgroup4");
 	} else if ("table".equals(value)) {
 		showTabGroup("tabgroup5");
+	} else if ("bluetooth".equals(value)) {
+		showTabGroup("tabgroup6");
 	} else {
 		showTabGroup("tabgroup3");
 	}
@@ -503,4 +506,49 @@ onScrollRow() {
 		row = Integer.parseInt(value);
 	}
 	scrollTableToRow("tabgroup5/tab1/table", row);
+}
+
+// Bluetooth Test
+
+onEvent("tabgroup6/tab1/auto", "click", "onBluetoothStartAuto()");
+onEvent("tabgroup6/tab1/manual", "click", "onBluetoothStartManual()");
+onEvent("tabgroup6/tab1/stop", "click", "onBluetoothStop()");
+onEvent("tabgroup6/tab1/read", "click", "onBluetoothRead()");
+onEvent("tabgroup6/tab1/write", "click", "onBluetoothWrite()");
+onEvent("tabgroup6/tab1/clear", "click", "onBluetoothClear()");
+
+onBluetoothStartAuto() {
+	createBluetoothConnection("onBluetoothInput()", 1);
+}
+
+onBluetoothStartManual() {
+	createBluetoothConnection("onBluetoothInput()", 0);
+}
+
+onBluetoothStop() {
+	destroyBluetoothConnection();
+}
+
+onBluetoothRead() {
+	readBluetoothMessage();
+}
+
+onBluetoothWrite() {
+	writeBluetoothMessage(getFieldValue("tabgroup6/tab1/input"));
+}
+
+onBluetoothClear() {
+	setFieldValue("tabgroup6/tab1/input", "");
+}
+
+onBluetoothInput() {
+	message = getBluetoothMessage();
+	clearBluetoothMessages();
+	input = getFieldValue("tabgroup6/tab1/input");
+	if (input == null) {
+		input = message;
+	} else {
+		input = input + message;
+	}
+	setFieldValue("tabgroup6/tab1/input", input);
 }

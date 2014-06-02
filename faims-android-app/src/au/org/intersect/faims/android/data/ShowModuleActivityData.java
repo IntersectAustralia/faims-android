@@ -94,4 +94,16 @@ public class ShowModuleActivityData implements ActivityData {
 		this.copyFileCount = copyFileCount;
 	}
 
+	@Override
+	public void resume() {
+	}
+
+	@Override
+	public void pause() {
+	}
+
+	@Override
+	public void destroy() {
+	}
+
 }

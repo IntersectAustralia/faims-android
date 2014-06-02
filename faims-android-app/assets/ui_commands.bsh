@@ -864,6 +864,52 @@ stopTrackingGPS(){
 	linker.stopTrackingGPS();
 }
 
+//========= Bluetooth Functionality ====
+/**
+  * Create bluetooth connection to read input and write output.
+  *
+  * @param callback the handler to call when input is read
+  * @param interval the time interval (seconds) between bluetooth reads. Set to 0 if you want to manually control reads.
+  */
+createBluetoothConnection(String callback, int interval){
+  linker.createBluetoothConnection(callback, interval);
+}
+
+/**
+  * Destroy bluetooth connection.
+  */
+destroyBluetoothConnection(){
+  linker.destroyBluetoothConnection();
+}
+
+/**
+  * Read message from bluetooth connection.
+  */
+readBluetoothMessage(){
+  linker.readBluetoothMessage();
+}
+
+/**
+  * Write message to bluetooth connection.
+  */
+writeBluetoothMessage(message){
+  linker.writeBluetoothMessage(message);
+}
+
+/**
+  * Write message to bluetooth connection.
+  */
+clearBluetoothMessages(){
+  linker.clearBluetoothMessages();
+}
+
+/**
+  * Get the bluetooth message.
+  */
+getBluetoothMessage(){
+  return _bluetooth_message;
+}
+
 //========= Map Functionality ==========
 /**
   * Bind map click and select events to the map with the following reference.

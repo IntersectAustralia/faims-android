@@ -49,6 +49,7 @@ import au.org.intersect.faims.android.database.DatabaseChangeListener;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
@@ -82,8 +83,7 @@ import au.org.intersect.faims.android.util.ModuleUtil;
 import com.google.inject.Inject;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 
-public class ShowModuleActivity extends FragmentActivity implements
-		IFAIMSRestorable {
+public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestorable {
 
 	public static final String FILES = "files";
 	public static final String DATABASE = "database";
@@ -121,6 +121,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	BluetoothManager bluetoothManager;
 	
 	@Inject
 	Arch16n arch16n;
@@ -250,6 +253,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 			}
 
 		});
+		
+		bluetoothManager.init(this);
 
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
 		
@@ -339,43 +344,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onDestroy() {
-		if (this.beanShellLinker != null) {
-			this.beanShellLinker.stopTrackingGPS();
-		}
-		if (this.gpsDataManager != null) {
-			this.gpsDataManager.destroyListener();
-		}
-		if (this.locateTask != null) {
-			this.locateTask.cancel(true);
-		}
-		if (this.broadcastReceiver != null) {
-			this.unregisterReceiver(broadcastReceiver);
-		}
-		if (activityData.isSyncEnabled()) {
-			stopSync();
-		}
-		if (busyDialog != null) {
-			busyDialog.dismiss();
-		}
-		if (confirmDialog != null) {
-			confirmDialog.dismiss();
-		}
-		if (choiceDialog != null) {
-			confirmDialog.dismiss();
-		}
-		// kill all services
-		Intent uploadIntent = new Intent(ShowModuleActivity.this,
-				UploadDatabaseService.class);
-		stopService(uploadIntent);
-		Intent downloadIntent = new Intent(ShowModuleActivity.this,
-				DownloadDatabaseService.class);
-		stopService(downloadIntent);
-		Intent syncDatabaseIntent = new Intent(ShowModuleActivity.this,
-				SyncDatabaseService.class);
-		stopService(syncDatabaseIntent);
-		Intent syncFilesIntent = new Intent(ShowModuleActivity.this,
-				SyncFilesService.class);
-		stopService(syncFilesIntent);
+		bluetoothManager.destroy();
+		gpsDataManager.destroy();
+		beanShellLinker.destroy();
+		destroy();
 		super.onDestroy();
 	}
 
@@ -383,32 +355,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		serverDiscovery.initiateServerIPAndPort(preferences);
-
-		activityShowing = true;
-
-		if (activityData.isSyncEnabled()) {
-			if (syncActive) {
-				delayStopSync = false;
-			} else {
-				startSync();
-			}
-		}
-		
-		if (gpsDataManager.isExternalGPSStarted()) {
-			gpsDataManager.startExternalGPSListener();
-		}
-		
-		if (gpsDataManager.isInternalGPSStarted()) {
-			gpsDataManager.startInternalGPSListener();
-		}
-		
-		if (beanShellLinker != null && gpsDataManager.isTrackingStarted()) {
-			beanShellLinker.startTrackingGPS(gpsDataManager.getTrackingType(),
-					gpsDataManager.getTrackingValue(),
-					gpsDataManager.getTrackingExec());
-		}
+		resume();
+		bluetoothManager.resume();
+		gpsDataManager.resume();
+		beanShellLinker.resume();
 		
 		invalidateOptionsMenu();
 	}
@@ -417,20 +367,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	protected void onPause() {
 		super.onPause();
 
-		activityShowing = false;
-
-		if (syncStarted) {
-			stopSyncAfterCompletion();
-		} else {
-			stopSync();
-		}
-
-		if (this.beanShellLinker != null) {
-			this.beanShellLinker.stopTrackingGPSForOnPause();
-		}
-		if (this.gpsDataManager != null) {
-			this.gpsDataManager.destroyListener();
-		}
+		pause();
+		bluetoothManager.pause();
+		gpsDataManager.pause();
+		beanShellLinker.pause();
 	}
 	
 	@Override
@@ -1387,14 +1327,14 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
 		try {
-			beanShellLinker.storeBeanShellData(savedInstanceState);
-			uiRenderer.storeBackStack(savedInstanceState,
-					getSupportFragmentManager());
+			bluetoothManager.saveTo(savedInstanceState);
+			gpsDataManager.saveTo(savedInstanceState);
+			beanShellLinker.saveTo(savedInstanceState);
+			uiRenderer.storeBackStack(savedInstanceState, getSupportFragmentManager());
 			uiRenderer.storeTabs(savedInstanceState);
 			uiRenderer.storeViewValues(savedInstanceState);
-			activityData.setUserId(databaseManager.getUserId());
 			activityData.saveTo(savedInstanceState);
-			gpsDataManager.saveTo(savedInstanceState);
+			activityData.setUserId(databaseManager.getUserId());
 		} catch (Exception e) {
 			FLog.e("error saving bundle", e);
 		}
@@ -1403,16 +1343,79 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
 		try {
-			beanShellLinker.restoreBeanShellData(savedInstanceState);
+			bluetoothManager.restoreFrom(savedInstanceState);
+			gpsDataManager.restoreFrom(savedInstanceState);
+			beanShellLinker.restoreFrom(savedInstanceState);
 			uiRenderer.restoreBackStack(savedInstanceState, this);
 			uiRenderer.restoreTabs(savedInstanceState);
 			uiRenderer.restoreViewValues(savedInstanceState);
 			activityData.restoreFrom(savedInstanceState);
-			gpsDataManager.restoreFrom(savedInstanceState);
-			this.databaseManager.setUserId(activityData.getUserId());
+			databaseManager.setUserId(activityData.getUserId());
 		} catch (Exception e) {
 			FLog.e("error restoring bundle", e);
 		}
+	}
+	
+	@Override
+	public void resume() {
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		serverDiscovery.initiateServerIPAndPort(preferences);
+
+		activityShowing = true;
+
+		if (activityData.isSyncEnabled()) {
+			if (syncActive) {
+				delayStopSync = false;
+			} else {
+				startSync();
+			}
+		}
+	}
+	
+	@Override
+	public void pause() {
+		activityShowing = false;
+
+		if (syncStarted) {
+			stopSyncAfterCompletion();
+		} else {
+			stopSync();
+		}
+	}
+	
+	@Override 
+	public void destroy() {
+		if (this.locateTask != null) {
+			this.locateTask.cancel(true);
+		}
+		if (this.broadcastReceiver != null) {
+			this.unregisterReceiver(broadcastReceiver);
+		}
+		if (activityData.isSyncEnabled()) {
+			stopSync();
+		}
+		if (busyDialog != null) {
+			busyDialog.dismiss();
+		}
+		if (confirmDialog != null) {
+			confirmDialog.dismiss();
+		}
+		if (choiceDialog != null) {
+			confirmDialog.dismiss();
+		}
+		// kill all services
+		Intent uploadIntent = new Intent(ShowModuleActivity.this,
+				UploadDatabaseService.class);
+		stopService(uploadIntent);
+		Intent downloadIntent = new Intent(ShowModuleActivity.this,
+				DownloadDatabaseService.class);
+		stopService(downloadIntent);
+		Intent syncDatabaseIntent = new Intent(ShowModuleActivity.this,
+				SyncDatabaseService.class);
+		stopService(syncDatabaseIntent);
+		Intent syncFilesIntent = new Intent(ShowModuleActivity.this,
+				SyncFilesService.class);
+		stopService(syncFilesIntent);
 	}
 
 	public void copyFile(final String fromFile, final String toFile,

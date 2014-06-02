@@ -9,14 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -47,6 +44,7 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.EntityAttribute;
+import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.Relationship;
@@ -58,6 +56,7 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
@@ -84,13 +83,16 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.VectorElement;
 
 @Singleton
-public class BeanShellLinker {
+public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Inject
 	DatabaseManager databaseManager;
 	
 	@Inject
 	GPSDataManager gpsDataManager;
+	
+	@Inject
+	BluetoothManager bluetoothManager;
 	
 	@Inject
 	FileManager fileManager;
@@ -107,13 +109,17 @@ public class BeanShellLinker {
 	
 	private Module module;
 
-	private String persistedObjectName;
-
-	private String lastFileBrowserCallback;
-
 	private HandlerThread trackingHandlerThread;
 	private Handler trackingHandler;
 	private Runnable trackingTask;
+	private MediaRecorder recorder;
+
+	protected Dialog saveDialog;
+	
+	private String persistedObjectName;
+	
+	private String lastFileBrowserCallback;
+	
 	private Double prevLong;
 	private Double prevLat;
 
@@ -124,13 +130,10 @@ public class BeanShellLinker {
 	private String cameraVideoPath;
 
 	private String audioFileNamePath;
-	private MediaRecorder recorder;
 	private String audioCallBack;
 	
 	private String scanContents;
 	private String scanCallBack;
-
-	protected Dialog saveDialog;
 
 	public void init(ShowModuleActivity activity, Module module) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -2128,42 +2131,10 @@ public class BeanShellLinker {
 		}
 		return null;
 	}
-
-	private void initialiseBluetoohConnection(BluetoothAdapter adapter) {
-		if (adapter != null && adapter.isEnabled()) {
-			final Set<BluetoothDevice> pairedDevices = adapter
-					.getBondedDevices();
-			if (pairedDevices.size() > 0) {
-				final List<CharSequence> sequences = new ArrayList<CharSequence>();
-				for (BluetoothDevice bluetoothDevice : pairedDevices) {
-					sequences.add(bluetoothDevice.getName());
-				}
-				AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-				builder.setTitle("Select bluetooth to connect");
-				builder.setItems(
-						sequences.toArray(new CharSequence[sequences.size()]),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int item) {
-								for (BluetoothDevice bluetoothDevice : pairedDevices) {
-									if (bluetoothDevice.getName().equals(
-											sequences.get(item))) {
-										BeanShellLinker.this.gpsDataManager
-												.setGpsDevice(bluetoothDevice);
-										BeanShellLinker.this.gpsDataManager
-												.startExternalGPSListener();
-										break;
-									}
-								}
-							}
-						});
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-		}
-	}
-
+	
 	public void startExternalGPS() {
-		initialiseBluetoohConnection(BluetoothAdapter.getDefaultAdapter());
+		bluetoothManager.resetConnection(); // make sure we get users to reconnect to the correct device
+		gpsDataManager.startExternalGPSListener();	
 	}
 
 	public void startInternalGPS() {
@@ -3298,31 +3269,6 @@ public class BeanShellLinker {
 		}
 	}
 
-	public void storeBeanShellData(Bundle savedInstanceState) {
-		String persistedObjectName = getPersistedObjectName();
-		if (persistedObjectName != null) {
-			try {
-				Object persistedObject = interpreter.get(persistedObjectName);
-				savedInstanceState.putSerializable(persistedObjectName,
-						(Serializable) persistedObject);
-			} catch (EvalError e) {
-				FLog.e("error storing bean shell data", e);
-			}
-		}
-	}
-
-	public void restoreBeanShellData(Bundle savedInstanceState) {
-		if (persistedObjectName != null) {
-			Object object = savedInstanceState
-					.getSerializable(persistedObjectName);
-			try {
-				interpreter.set(persistedObjectName, object);
-			} catch (EvalError e) {
-				FLog.e("error restoring bean shell data", e);
-			}
-		}
-	}
-
 	public Geometry createGeometryPoint(MapPos point) {
 		return new Point(point, null, createPointStyle(0, 0, 0, 0).toPointStyleSet(), null);
 	}
@@ -3583,11 +3529,81 @@ public class BeanShellLinker {
 	}
 	
 	public void executeScanCallBack() {
-		try {
-			this.interpreter.eval(scanCallBack);
-		} catch (EvalError e) {
-			FLog.e("error when executing the callback for barcode/QR scan", e);
+		execute(scanCallBack);
+	}
+	
+	public void createBluetoothConnection(final String callback, int interval) {
+		bluetoothManager.resetConnection(); // make sure we get users to reconnect to the correct device
+		bluetoothManager.createConnection(new BluetoothManager.BluetoothListener() {
+			
+			@Override
+			public void onInput(String input) {
+				set("_bluetooth_message", input);
+				execute(callback);
+			}
+		}, interval * 1000);
+	}
+	
+	public void destroyBluetoothConnection() {
+		bluetoothManager.destroyConnection();
+	}
+	
+	public void readBluetoothMessage() {
+		bluetoothManager.readMessage();
+	}
+	
+	public void writeBluetoothMessage(String message) {
+		bluetoothManager.writeMessage(message);
+	}
+	
+	public void clearBluetoothMessages() {
+		bluetoothManager.clearMessages();
+	}
+	
+	@Override
+	public void saveTo(Bundle savedInstanceState) {
+		String persistedObjectName = getPersistedObjectName();
+		if (persistedObjectName != null) {
+			try {
+				Object persistedObject = interpreter.get(persistedObjectName);
+				savedInstanceState.putSerializable(persistedObjectName,
+						(Serializable) persistedObject);
+			} catch (EvalError e) {
+				FLog.e("error storing bean shell data", e);
+			}
 		}
+	}
+
+	@Override
+	public void restoreFrom(Bundle savedInstanceState) {
+		if (persistedObjectName != null) {
+			Object object = savedInstanceState
+					.getSerializable(persistedObjectName);
+			try {
+				interpreter.set(persistedObjectName, object);
+			} catch (EvalError e) {
+				FLog.e("error restoring bean shell data", e);
+			}
+		}
+	}
+	
+	@Override
+	public void pause() {
+		stopTrackingGPSForOnPause();
+	}
+	
+	@Override
+	public void resume() {
+		if (gpsDataManager.isTrackingStarted()) {
+			startTrackingGPS(gpsDataManager.getTrackingType(),
+					gpsDataManager.getTrackingValue(),
+					gpsDataManager.getTrackingExec());
+		}
+	}
+	
+	@Override
+	public void destroy() {
+		stopTrackingGPS();
 	}
 	
 }
