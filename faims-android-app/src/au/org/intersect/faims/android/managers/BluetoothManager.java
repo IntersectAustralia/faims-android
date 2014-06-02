@@ -123,6 +123,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	}
 	
 	public void resetConnection() {
+		destroyConnection();
 		this.bluetoothDevice = null;
 	}
 	
