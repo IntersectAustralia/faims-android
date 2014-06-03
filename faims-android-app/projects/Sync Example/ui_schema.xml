@@ -532,13 +532,13 @@
         <group ref="tab1">
             <label>Bluetooth</label>
             <trigger ref="auto">
-                <label>Start Bluetooth Auto</label>
+                <label>Create Bluetooth Connection (Auto)</label>
             </trigger>
             <trigger ref="manual">
-                <label>Start Bluetooth Manual</label>
+                <label>Create Bluetooth Connection (Manual)</label>
             </trigger>
             <trigger ref="stop">
-                <label>Stop Bluetooth</label>
+                <label>Destroy Bluetooth Connection</label>
             </trigger>
             <input ref="input">
                 <label>Input</label>

@@ -38,7 +38,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		public void run() {
 			readInput();
 			
-	        if (repeatable) {
+	        if (handler != null && repeatable) {
 	        	handler.postDelayed(inputRunnable, postInterval);
 	        }
 	    }
@@ -79,10 +79,12 @@ public class BluetoothManager implements IFAIMSRestorable {
 	public void init(Context context) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		contextRef = new WeakReference<Context>(context);
-	}
-	
-	public BluetoothDevice getBluetoothDevice() {
-		return bluetoothDevice;
+		postInterval = 0;
+		repeatable = false;
+		outputMessage = null;
+		clearInputOnRead = false;
+		isBluetoothConnected = false;
+		isBluetoothPaused = false;
 	}
 	
 	public void showConnectionDialog() {
@@ -144,6 +146,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 			createBluetoothHandlerThread();
 			isBluetoothConnected = true;
 			
+			clearMessages();
 			if (repeatable) {
 				readMessage();
 			}
@@ -199,6 +202,11 @@ public class BluetoothManager implements IFAIMSRestorable {
 	}
 	
 	private void destroyBluetoothHandlerThread() {
+		if (handlerThread != null) {
+			handlerThread.quit();
+			handlerThread = null;
+		}
+		
 		if (handler != null) {
 			handler.removeCallbacks(inputRunnable);
 			handler.removeCallbacks(outputRunnable);
@@ -207,11 +215,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 		
 		inputRunnable = null;
 		outputRunnable = null;
-		
-		if (handlerThread != null) {
-			handlerThread.quit();
-			handlerThread = null;
-		}
 	}
 	
 	private void createBluetoothSocket() {
@@ -221,12 +224,15 @@ public class BluetoothManager implements IFAIMSRestorable {
 					Method m = bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
 					bluetoothSocket = (BluetoothSocket) m.invoke(bluetoothDevice, 1);
 					bluetoothSocket.connect();
+					beanShellLinker.showToast("bluetooth connection established");
 				} catch (Exception e) {
 					FLog.e("error trying to create bluetooth socket", e);
 					
 					if (listener != null) {
-						beanShellLinker.showToast("Waiting on valid bluetooth connection");
+						beanShellLinker.showToast("bluetooth connection failed. waiting to retry ...");
 					}
+					
+					bluetoothSocket = null;
 				}
 			}
 		} else {
@@ -239,6 +245,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 			try {
 				bluetoothSocket.close();
 				bluetoothSocket = null;
+				beanShellLinker.showToast("bluetooth connection destroyed");
 			} catch (Exception e) {
 				FLog.e("error trying to destroy bluetooth socket", e);
 			}
@@ -264,6 +271,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	    		}
 	        } catch (Exception e) {
 	        	FLog.e("error trying to read input", e);
+	        	beanShellLinker.showToast("bluetooth read failure");
 			}
         } else {
         	FLog.d("no connection found");
@@ -278,6 +286,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 				writeStringToOutput(output, bluetoothSocket.getOutputStream());
 			} catch (Exception e) {
 				FLog.e("error trying to write output", e);
+				beanShellLinker.showToast("bluetooth write failure");
 			}
 		} else {
         	FLog.d("no connection found");

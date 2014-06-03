@@ -216,8 +216,8 @@ public class ServerDiscovery {
 	    	
 	    	s.send(p);
 	    	
-	    	FLog.d("AndroidIP: " + getIPAddress());
-	    	FLog.d("AndroidPort: " + getDevicePort());
+	    	//FLog.d("AndroidIP: " + getIPAddress());
+	    	//FLog.d("AndroidPort: " + getDevicePort());
 		} finally {
 			s.close();
 		}
@@ -240,8 +240,8 @@ public class ServerDiscovery {
 	        if (data.has("server_port"))
 	        	serverPort = data.getString("server_port");
 	        
-	        FLog.d("ServerIP: " + serverIP);
-	        FLog.d("ServerPort: " + serverPort);
+	        //FLog.d("ServerIP: " + serverIP);
+	        //FLog.d("ServerPort: " + serverPort);
 		} finally {
 			
 		}

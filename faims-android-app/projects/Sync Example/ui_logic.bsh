@@ -29,8 +29,8 @@ options = new ArrayList();
 options.add(createOption("entity", "Create Entity"));
 options.add(createOption("relationship", "Create Relationship"));
 options.add(createOption("add", "Add Association"));
-options.add(createOption("table", "Table View"));
-options.add(createOption("bluetooth", "Bluetooth Test"));
+options.add(createOption("table", "Table Example"));
+options.add(createOption("bluetooth", "Bluetooth Example"));
 options.add(createOption("controls", "Controls"));
 
 populateList("menu/tab1/options", options);
@@ -517,6 +517,20 @@ onEvent("tabgroup6/tab1/read", "click", "onBluetoothRead()");
 onEvent("tabgroup6/tab1/write", "click", "onBluetoothWrite()");
 onEvent("tabgroup6/tab1/clear", "click", "onBluetoothClear()");
 
+messageBuffer = new ArrayList();
+messageBufferSize = 5;
+addMessage(message) {
+	messageBuffer.add(message);
+	if (messageBuffer.size() > messageBufferSize) {
+		messageBuffer.remove(0);
+	}
+	value = "";
+	for (i = 0; i < messageBuffer.size(); i++) {
+		value += messageBuffer.get(i);
+	}
+	setFieldValue("tabgroup6/tab1/input", value);
+}
+
 onBluetoothStartAuto() {
 	createBluetoothConnection("onBluetoothInput()", 1);
 }
@@ -538,17 +552,12 @@ onBluetoothWrite() {
 }
 
 onBluetoothClear() {
+	messageBuffer = new ArrayList();
 	setFieldValue("tabgroup6/tab1/input", "");
 }
 
 onBluetoothInput() {
 	message = getBluetoothMessage();
 	clearBluetoothMessages();
-	input = getFieldValue("tabgroup6/tab1/input");
-	if (input == null) {
-		input = message;
-	} else {
-		input = input + message;
-	}
-	setFieldValue("tabgroup6/tab1/input", input);
+	addMessage(message);
 }
