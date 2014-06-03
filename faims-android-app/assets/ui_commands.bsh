@@ -790,6 +790,13 @@ Object getGPSPosition(){
 }
 
 /**
+  * Stops both internal and external gps.
+  */
+stopGPS() {
+  linker.stopGPS();
+}
+
+/**
   * Get the GPS position as longitude and latitude in the module projection from external GPS or internal GPS.
   *
   * @return projected GPSPosition if starting GPS or null if no GPS started or position found

@@ -2140,6 +2140,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void startInternalGPS() {
 		gpsDataManager.startInternalGPSListener();
 	}
+	
+	public void stopGPS() {
+		gpsDataManager.destroyListener();
+	}
 
 	public Object getGPSPosition() {
 		return gpsDataManager.getGPSPosition();
