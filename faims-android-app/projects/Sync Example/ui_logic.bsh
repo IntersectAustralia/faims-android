@@ -85,10 +85,10 @@ onEvent("tabgroup3/tab1/stop", "click", "stopSync()");
 String entityId = null;
 
 initEntity() {
-	clearEntity();
+ 	clearEntity();
 }
 
-onEvent("tabgroup1", "show", "initEntity()");	
+//onEvent("tabgroup1", "show", "initEntity()");	
 
 closeEntity() {
 	cancelTabGroup("tabgroup1", true);
@@ -133,7 +133,7 @@ updateEntity() {
 		entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
 		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
 	}
-	
+
 	saveTabGroup("tabgroup1", entityId, null, attributes, "entityId = getLastSavedRecordId(); reloadEntity();");
 }
 
@@ -160,7 +160,7 @@ deleteEntity(){
 	deleteArchEnt(entityId);
 	entityId = null;
 	
-    cancelTabGroup("tabgroup1", false);
+   cancelTabGroup("tabgroup1", false);
 }
 
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity()");
@@ -184,7 +184,7 @@ initRelationship() {
 	clearRelationship();
 }
 
-onEvent("tabgroup2", "show", "initRelationship()");	
+//onEvent("tabgroup2", "show", "initRelationship()");	
 
 closeRelationship() {
 	cancelTabGroup("tabgroup2", true);
@@ -468,18 +468,31 @@ onLoadQuery() {
 
 	headers = tableHeaders.get(index);
 	query = tableQuery.get(index);
-	if (index < 2) {
-		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRow()");
-	} else {
-		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", -1, null);
+	if (index == 0) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowEntityRow()");
+	} else if (index == 1) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRelationshipRow()");
+	} else if (index == 2) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 0, "onShowEntityRow()");
+	} else if (index == 3) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 0, "onShowRelationshipRow()");
 	}
 }
 
-onShowRow() {
+onShowEntityRow() {
 	row = getTableRow();
 	value = getTableValue();
 
+	entityId = value;
 	showTabGroup("tabgroup1", value);
+}
+
+onShowRelationshipRow() {
+	row = getTableRow();
+	value = getTableValue();
+
+	relationshipId = value;
+	showTabGroup("tabgroup2", value);
 }
 
 getTableIndex(selectedItem) {
