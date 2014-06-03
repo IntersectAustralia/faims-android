@@ -68,6 +68,9 @@ init() {
 	setSyncMaxInterval(20.0f);
 	setSyncDelay(5.0f);
 	startSync();
+	// reset ids
+	entityId = tableEntityId = null;
+	relationshipId = tableRelationshipId = null;
 }
 
 cleanup() {
@@ -83,12 +86,13 @@ onEvent("tabgroup3/tab1/stop", "click", "stopSync()");
 // ENTITY
 
 String entityId = null;
+String tableEntityId = null;
 
 initEntity() {
  	clearEntity();
 }
 
-//onEvent("tabgroup1", "show", "initEntity()");	
+onEvent("tabgroup1", "show", "initEntity()");	
 
 closeEntity() {
 	cancelTabGroup("tabgroup1", true);
@@ -126,6 +130,8 @@ reloadEntity() {
 
 updateEntity() {
 	if (isNull(entityId)) entityId = null;
+
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
 	
 	attributes = null;
 	if (entityId == null) {
@@ -179,12 +185,13 @@ onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity
 // RELATIONSHIP
 
 String relationshipId = null;
+String tableRelationshipId = null;
 
 initRelationship() {
 	clearRelationship();
 }
 
-//onEvent("tabgroup2", "show", "initRelationship()");	
+onEvent("tabgroup2", "show", "initRelationship()");	
 
 closeRelationship() {
 	cancelTabGroup("tabgroup2", true);
@@ -222,6 +229,8 @@ reloadRelationship() {
 
 updateRelationship() {
 	if (isNull(relationshipId)) relationshipId = null;
+
+	if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
 	
 	attributes = null;
 	if (relationshipId == null) {
@@ -483,7 +492,7 @@ onShowEntityRow() {
 	row = getTableRow();
 	value = getTableValue();
 
-	entityId = value;
+	tableEntityId = value;
 	showTabGroup("tabgroup1", value);
 }
 
@@ -491,7 +500,7 @@ onShowRelationshipRow() {
 	row = getTableRow();
 	value = getTableValue();
 
-	relationshipId = value;
+	tableRelationshipId = value;
 	showTabGroup("tabgroup2", value);
 }
 
