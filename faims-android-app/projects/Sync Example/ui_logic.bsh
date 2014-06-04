@@ -397,6 +397,11 @@ tableQuery.add("select uuid, attributename, response\n" +
 				"group by uuid\n" + 
 				"order by attributename\n" + 
 				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'action', uuid \n" + 
+				"from latestnondeletedarchent join aenttype using (aenttypeid) \n" + 
+				"where aenttypename = 'small' \n" + 
+				"group by uuid \n" + 
 				"order by uuid, attributename;");
 tableQuery.add("select relationshipid, attributename, response\n" + 
 				"from (select attributename, attributeid \n" + 
@@ -434,6 +439,11 @@ tableQuery.add("select relationshipid, attributename, response\n" +
 				"where relntypename = 'AboveBelow'\n" + 
 				"group by relationshipid\n" + 
 				"order by attributename)\n" + 
+				"union\n" + 
+				"select relationshipid, 'action', relationshipid \n" + 
+				"from latestNonDeletedRelnIdentifiers join relntype using (relntypeid) \n" + 
+				"where relntype.relntypename = 'AboveBelow' \n" + 
+				"group by relationshipid \n" + 
 				"order by relationshipid, attributename;");
 
 createTableHeaders(headers) {
@@ -447,8 +457,8 @@ createTableHeaders(headers) {
 tableHeaders = new ArrayList();
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
-tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
-tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
 
 tableList = new ArrayList();
 tableList.add(createOption("entity", "Fetch Entities"));
@@ -482,9 +492,9 @@ onLoadQuery() {
 	} else if (index == 1) {
 		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRelationshipRow()");
 	} else if (index == 2) {
-		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 0, "onShowEntityRow()");
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
 	} else if (index == 3) {
-		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 0, "onShowRelationshipRow()");
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowRelationshipRow()");
 	}
 }
 
