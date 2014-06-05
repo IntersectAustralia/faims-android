@@ -28,11 +28,12 @@ public class EntityRecord extends SharedRecord {
 	public void deleteArchEnt(String entityId) throws jsqlite.Exception {
 		FLog.d("entityId:" + entityId);
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			if (entityId != null) {
 				db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);	
-				beginTransaction();
+				beginTransaction(db);
 				
 				String parenttimestamp = null;
 				
@@ -54,12 +55,12 @@ public class EntityRecord extends SharedRecord {
 				st.close();
 				st = null;
 				
-				commitTransaction();
+				commitTransaction(db);
 				notifyListeners();
 			}
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
@@ -75,10 +76,11 @@ public class EntityRecord extends SharedRecord {
 			}
 		}
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			if (!validArchEnt(db, entityId, entityType, geometry, attributes)) {
 				FLog.d("arch entity not valid");
@@ -159,12 +161,12 @@ public class EntityRecord extends SharedRecord {
 				}
 			}
 			
-			commitTransaction();
+			commitTransaction(db);
 			notifyListeners();
 			return uuid;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
@@ -172,10 +174,11 @@ public class EntityRecord extends SharedRecord {
 		FLog.d("uuid:" + uuid);
 		FLog.d("geometry:" + geometry);
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			String parenttimestamp = null;
 			
@@ -198,12 +201,12 @@ public class EntityRecord extends SharedRecord {
 			st.close();
 			st = null;
 			
-			commitTransaction();
+			commitTransaction(db);
 			notifyListeners();
 			return uuid;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
@@ -239,6 +242,7 @@ public class EntityRecord extends SharedRecord {
 	}
 
 	public ArchEntity fetchArchEnt(String id) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -309,11 +313,12 @@ public class EntityRecord extends SharedRecord {
 			return archEntity;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public Geometry getBoundaryForVisibleEntityGeometry(String userQuery) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		Geometry result = null;
 		try {
@@ -341,7 +346,7 @@ public class EntityRecord extends SharedRecord {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 

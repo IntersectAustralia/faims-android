@@ -91,15 +91,4 @@ public class DatabaseManager {
 		return this.spatialRecord;
 	}
 
-	public void interrupt() {
-		this.fetchRecord().interrupt();
-		this.mergeRecord().interrupt();
-		this.entityRecord().interrupt();
-		this.relationshipRecord().interrupt();
-		this.sharedRecord().interrupt();
-		this.queryRecord().interrupt();
-		this.attributeRecord().interrupt();
-		this.spatialRecord().interrupt();
-	}
-
 }

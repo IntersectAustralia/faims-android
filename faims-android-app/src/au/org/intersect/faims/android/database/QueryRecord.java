@@ -17,6 +17,7 @@ public class QueryRecord extends Database {
 	}
 
 	public List<String> runSelectionQuery(String sql, ArrayList<String> values) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -32,12 +33,13 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public List<String> runLegacySelectionQuery(String dbPath,
 			String tableName, String sql, ArrayList<String> values) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -53,11 +55,12 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public List<String> runDistanceEntityQuery(Geometry geometry, float distance, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -74,11 +77,12 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public List<String> runDistanceRelationshipQuery(Geometry geometry, float distance, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -95,12 +99,13 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public Collection<? extends String> runDistanceLegacyQuery(
 			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry, float distance, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -117,11 +122,12 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public List<String> runIntersectEntityQuery(Geometry geometry) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -135,11 +141,12 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public List<String> runIntersectRelationshipQuery(Geometry geometry) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -153,12 +160,13 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public Collection<? extends String> runIntersectLegacyQuery(
 			String dbPath, String tableName, String idColumn, String geometryColumn, Geometry geometry) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -172,7 +180,7 @@ public class QueryRecord extends Database {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	

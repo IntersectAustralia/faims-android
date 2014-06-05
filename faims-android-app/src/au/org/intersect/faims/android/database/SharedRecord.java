@@ -23,55 +23,54 @@ public class SharedRecord extends Database {
 	}
 	
 	public boolean addReln(String entityId, String relationshipId, String verb) throws Exception {
-		synchronized(DatabaseManager.class) {
-			FLog.d("entityId:" + entityId);
-			FLog.d("relationshipId:" + relationshipId);
-			FLog.d("verb:" + verb);
+		FLog.d("entityId:" + entityId);
+		FLog.d("relationshipId:" + relationshipId);
+		FLog.d("verb:" + verb);
+		
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			beginTransaction(db);
 			
-			Stmt st = null;
-			try {
-				db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-				beginTransaction();
-				
-				if (!hasEntity(db, entityId) || !hasRelationship(db, relationshipId)) {
-					FLog.d("cannot add entity to relationship");
-					return false;
-				}
-				
-				String parenttimestamp = null;
-				
-				String query = DatabaseQueries.GET_AENT_RELN_PARENT_TIMESTAMP;
-				st = db.prepare(query);
-				st.bind(1, entityId);
-				st.bind(2, relationshipId);
-				if (st.step()) {
-					parenttimestamp = st.column_string(0);
-				}
-				st.close();
-				st = null;
-				
-				String currentTimestamp = DateUtil.getCurrentTimestampGMT();
-				
-				// create new entity relationship
-				query = DatabaseQueries.INSERT_AENT_RELN;
-				st = db.prepare(query);
-				st.bind(1, entityId);
-				st.bind(2, relationshipId);
-				st.bind(3, userId);
-				st.bind(4, clean(verb));
-				st.bind(5, currentTimestamp);
-				st.bind(6, parenttimestamp); 
-				st.step();
-				st.close();
-				st = null;
-				
-				commitTransaction();
-				notifyListeners();
-				return true;
-			} finally {
-				closeStmt(st);
-				closeDB();
+			if (!hasEntity(db, entityId) || !hasRelationship(db, relationshipId)) {
+				FLog.d("cannot add entity to relationship");
+				return false;
 			}
+			
+			String parenttimestamp = null;
+			
+			String query = DatabaseQueries.GET_AENT_RELN_PARENT_TIMESTAMP;
+			st = db.prepare(query);
+			st.bind(1, entityId);
+			st.bind(2, relationshipId);
+			if (st.step()) {
+				parenttimestamp = st.column_string(0);
+			}
+			st.close();
+			st = null;
+			
+			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
+			
+			// create new entity relationship
+			query = DatabaseQueries.INSERT_AENT_RELN;
+			st = db.prepare(query);
+			st.bind(1, entityId);
+			st.bind(2, relationshipId);
+			st.bind(3, userId);
+			st.bind(4, clean(verb));
+			st.bind(5, currentTimestamp);
+			st.bind(6, parenttimestamp); 
+			st.step();
+			st.close();
+			st = null;
+			
+			commitTransaction(db);
+			notifyListeners();
+			return true;
+		} finally {
+			closeStmt(st);
+			closeDB(db);
 		}
 	}
 	

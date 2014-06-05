@@ -28,6 +28,7 @@ public class SpatialRecord extends Database {
 	}
 
 	public double getDistanceBetween(String prevLong, String prevLat, String curLong, String curLat) throws jsqlite.Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		double distance = 0;
 		try {
@@ -42,7 +43,7 @@ public class SpatialRecord extends Database {
 			return distance;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
@@ -60,6 +61,7 @@ public class SpatialRecord extends Database {
 			}
 			return totalDistance;
 		} else {
+			jsqlite.Database db = null;
 			Stmt st = null;
 			try {
 				db = openDB();
@@ -71,7 +73,7 @@ public class SpatialRecord extends Database {
 				return (float) st.column_double(0);
 			} finally {
 				closeStmt(st);
-				closeDB();
+				closeDB(db);
 			}
 		}
 	}
@@ -82,6 +84,7 @@ public class SpatialRecord extends Database {
 			Location.distanceBetween(p1.y, p1.x, p2.y, p2.x, results);
 			return results[0];
 		} else {
+			jsqlite.Database db = null;
 			Stmt st = null;
 			try {
 				db = openDB();
@@ -96,12 +99,13 @@ public class SpatialRecord extends Database {
 				return st.column_double(0);
 			} finally {
 				closeStmt(st);
-				closeDB();
+				closeDB(db);
 			}
 		}
 	}
 	
 	public MapPos computeCentroid(Polygon polygon) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -112,11 +116,12 @@ public class SpatialRecord extends Database {
 			return new MapPos(st.column_double(0), st.column_double(1));
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public double computePolygonArea(Polygon polygon, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -128,11 +133,12 @@ public class SpatialRecord extends Database {
 			return st.column_double(0);
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public Geometry geometryBuffer(Geometry geom, float buffer, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -151,11 +157,12 @@ public class SpatialRecord extends Database {
 			return null;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public boolean isPointOnPath(Point point, Line path, float buffer, String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -170,7 +177,7 @@ public class SpatialRecord extends Database {
 			return st.column_int(0) == 1;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
@@ -179,6 +186,7 @@ public class SpatialRecord extends Database {
 	}
 
 	public Geometry convertFromProjToProj(String fromSrid, String toSrid, Geometry geom) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -197,11 +205,12 @@ public class SpatialRecord extends Database {
 			return null;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public boolean isProperProjection(String srid) throws Exception {
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB();
@@ -212,7 +221,7 @@ public class SpatialRecord extends Database {
 			return st.column_int(0) == 1;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	

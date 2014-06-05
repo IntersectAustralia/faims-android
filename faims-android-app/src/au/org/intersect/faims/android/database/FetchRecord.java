@@ -24,10 +24,11 @@ public class FetchRecord extends Database {
 	}
 	
 	public Object fetchOne(String query) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			stmt = db.prepare(query);
 			Collection<String> results = new ArrayList<String>();
@@ -39,19 +40,20 @@ public class FetchRecord extends Database {
 			stmt.close();
 			stmt = null;
 			
-			commitTransaction();
+			commitTransaction(db);
 			return results;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public Collection<List<String>> fetchAll(String query) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			stmt = db.prepare(query);
 			Collection<List<String>> results = new ArrayList<List<String>>();
@@ -65,11 +67,11 @@ public class FetchRecord extends Database {
 			stmt.close();
 			stmt = null;
 
-			commitTransaction();
+			commitTransaction(db);
 			return results;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
@@ -111,6 +113,7 @@ public class FetchRecord extends Database {
 	}
 	
 	public Vector<Geometry> fetchAllVisibleEntityGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -149,7 +152,7 @@ public class FetchRecord extends Database {
 			return results;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
@@ -159,6 +162,7 @@ public class FetchRecord extends Database {
 	}
 	
 	public Vector<Geometry> fetchAllVisibleRelationshipGeometry(List<MapPos> list, String userQuery, int maxObjects) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -197,11 +201,12 @@ public class FetchRecord extends Database {
 			return results;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public boolean hasRecordsFrom(String timestamp) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -247,7 +252,7 @@ public class FetchRecord extends Database {
 			return false;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 

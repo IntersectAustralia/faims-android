@@ -16,7 +16,6 @@ public class Database {
 	DatabaseManager databaseManager;
 	
 	protected File dbFile;
-	protected jsqlite.Database db;
 	
 	public Database(File dbFile) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -54,7 +53,7 @@ public class Database {
 		} catch (Exception e) {
 			FLog.e("error dumping database", e);
 		} finally {
-			closeDB();
+			closeDB(db);
 		}
 	}
 
@@ -107,13 +106,13 @@ public class Database {
 	}
 	
 	protected jsqlite.Database openDB(File file, int type) throws jsqlite.Exception {
-		db = new jsqlite.Database();
+		jsqlite.Database db = new jsqlite.Database();
 		db.open(file.getPath(), type);
 		db.exec("PRAGMA temp_store = 2", null);
 		return db;
 	}
 	
-	protected void closeDB() {
+	protected void closeDB(jsqlite.Database db) {
 		try {
 			if (db != null) {
 				db.close();
@@ -132,7 +131,7 @@ public class Database {
 		}
 	}
 	
-	protected void beginTransaction() throws jsqlite.Exception {
+	protected void beginTransaction(jsqlite.Database db) throws jsqlite.Exception {
 		if (db == null) {
 			FLog.e("Cannot begin transaction");
 			return;
@@ -140,7 +139,7 @@ public class Database {
 		db.exec("BEGIN", createCallback());
 	}
 	
-	protected void commitTransaction() throws jsqlite.Exception {
+	protected void commitTransaction(jsqlite.Database db) throws jsqlite.Exception {
 		if (db == null) {
 			FLog.e("Cannot commit transaction");
 			return;
@@ -148,8 +147,8 @@ public class Database {
 		db.exec("COMMIT", createCallback());
 	}
 	
-	public void interrupt() {
-		closeDB();
+	public void interrupt(jsqlite.Database db) {
+		closeDB(db);
 	}
 	
 	protected Callback createCallback() {

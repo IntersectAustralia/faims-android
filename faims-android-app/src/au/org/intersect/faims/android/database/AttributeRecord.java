@@ -15,6 +15,7 @@ public class AttributeRecord extends Database {
 	}
 	
 	public String getAttributeDescription(String name) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -32,11 +33,12 @@ public class AttributeRecord extends Database {
 			return description;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
 	public List<VocabularyTerm> getVocabularyTerms(String attributeName) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -76,7 +78,7 @@ public class AttributeRecord extends Database {
 			return parentIdToTerms.get(null);
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 

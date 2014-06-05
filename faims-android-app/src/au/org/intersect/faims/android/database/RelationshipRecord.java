@@ -29,10 +29,11 @@ public class RelationshipRecord extends SharedRecord {
 		FLog.d("uuid:" + uuid);
 		FLog.d("geometry:" + geometry);
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			String parenttimestamp = null;
 			
@@ -55,23 +56,24 @@ public class RelationshipRecord extends SharedRecord {
 			st.close();
 			st = null;
 			
-			commitTransaction();
+			commitTransaction(db);
 			notifyListeners();
 			return uuid;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public void deleteRel(String relationshipId) throws jsqlite.Exception {
 		FLog.d("relationshipId:" + relationshipId);
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			if (relationshipId != null) {
 				db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-				beginTransaction();
+				beginTransaction(db);
 				
 				String parenttimestamp = null;
 				
@@ -93,12 +95,12 @@ public class RelationshipRecord extends SharedRecord {
 				st.close();
 				st = null;
 				
-				commitTransaction();
+				commitTransaction(db);
 				notifyListeners();
 			}
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
@@ -114,10 +116,11 @@ public class RelationshipRecord extends SharedRecord {
 			}
 		}
 		
+		jsqlite.Database db = null;
 		Stmt st = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-			beginTransaction();
+			beginTransaction(db);
 			
 			if (!validRel(db, relationshipId, relationshipType, geometry, attributes)) {
 				FLog.d("relationship not valid");
@@ -196,12 +199,12 @@ public class RelationshipRecord extends SharedRecord {
 				}
 			}
 			
-			commitTransaction();
+			commitTransaction(db);
 			notifyListeners();
 			return uuid;
 		} finally {
 			closeStmt(st);
-			closeDB();
+			closeDB(db);
 		}
 	}
 
@@ -237,6 +240,7 @@ public class RelationshipRecord extends SharedRecord {
 	}
 	
 	public Relationship fetchRel(String id) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
 			db = openDB();
@@ -308,11 +312,12 @@ public class RelationshipRecord extends SharedRecord {
 			return relationship;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public Geometry getBoundaryForVisibleRelnGeometry(String userQuery) throws Exception {
+		jsqlite.Database db = null;
 		Stmt stmt = null;
 		Geometry result = null;
 		try {
@@ -340,7 +345,7 @@ public class RelationshipRecord extends SharedRecord {
 			return result;
 		} finally {
 			closeStmt(stmt);
-			closeDB();
+			closeDB(db);
 		}
 	}
 	

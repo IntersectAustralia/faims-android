@@ -14,42 +14,43 @@ public class MergeRecord extends Database {
 
 	public void dumpDatabaseTo(File file) throws Exception {
 		FLog.d("dumping database to " + file.getAbsolutePath());
+		jsqlite.Database db = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath());
 			db.exec(query, createCallback());
 		} finally {
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public void dumpDatabaseTo(File file, String fromTimestamp) throws Exception {
 		FLog.d("dumping database to " + file.getAbsolutePath());
+		jsqlite.Database db = null;
 		try {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			String query = DatabaseQueries.DUMP_DATABASE_TO(file.getAbsolutePath(), fromTimestamp);
 			db.exec(query, createCallback());
 		} finally {
-			closeDB();
+			closeDB(db);
 		}
 	}
 	
 	public boolean isEmpty(File file) throws Exception {
-		synchronized(DatabaseManager.class) {
-			FLog.d("checking if database " + file.getAbsolutePath() + " is empty");
-			try {
-				db = openDB(file, jsqlite.Constants.SQLITE_OPEN_READONLY);
-				
-				if (!isTableEmpty(db, "archentity")) return false;
-				if (!isTableEmpty(db, "aentvalue")) return false;
-				if (!isTableEmpty(db, "relationship")) return false;
-				if (!isTableEmpty(db, "relnvalue")) return false;
-				if (!isTableEmpty(db, "aentreln")) return false;
-				
-				return true;
-			} finally {
-				closeDB();
-			}
+		FLog.d("checking if database " + file.getAbsolutePath() + " is empty");
+		jsqlite.Database db = null;
+		try {
+			db = openDB(file, jsqlite.Constants.SQLITE_OPEN_READONLY);
+			
+			if (!isTableEmpty(db, "archentity")) return false;
+			if (!isTableEmpty(db, "aentvalue")) return false;
+			if (!isTableEmpty(db, "relationship")) return false;
+			if (!isTableEmpty(db, "relnvalue")) return false;
+			if (!isTableEmpty(db, "aentreln")) return false;
+			
+			return true;
+		} finally {
+			closeDB(db);
 		}
 	}
 	
@@ -69,17 +70,15 @@ public class MergeRecord extends Database {
 	}
 	
 	public void mergeDatabaseFrom(File file) throws Exception {
-		synchronized(DatabaseManager.class) {
-			FLog.d("merging database");
-			try {
-				db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
-				String query = DatabaseQueries.MERGE_DATABASE_FROM(file.getAbsolutePath());
-				db.exec(query, createCallback());
-			} finally {
-				closeDB();
-			}
+		FLog.d("merging database");
+		jsqlite.Database db = null;
+		try {
+			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			String query = DatabaseQueries.MERGE_DATABASE_FROM(file.getAbsolutePath());
+			db.exec(query, createCallback());
+		} finally {
+			closeDB(db);
 		}
 	}
-
 
 }

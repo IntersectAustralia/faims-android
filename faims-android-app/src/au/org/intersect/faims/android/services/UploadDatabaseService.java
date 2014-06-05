@@ -35,7 +35,6 @@ public class UploadDatabaseService extends DownloadUploadService {
 		if (tempDB != null) {
 			FileUtil.delete(tempDB);
 		}
-		databaseManager.interrupt();
 		super.onDestroy();
 	}
 
