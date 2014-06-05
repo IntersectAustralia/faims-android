@@ -558,6 +558,9 @@ addMessage(message) {
 	}
 	value = "";
 	for (i = 0; i < messageBuffer.size(); i++) {
+		if (!value.isEmpty()) {
+			value += "\n";
+		}
 		value += messageBuffer.get(i);
 	}
 	setFieldValue("tabgroup6/tab1/input", value);

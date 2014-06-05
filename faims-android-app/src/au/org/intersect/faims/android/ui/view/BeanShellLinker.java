@@ -318,8 +318,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void stopTrackingGPSForOnPause() {
-		FLog.d("gps tracking is stopped on paused");
-		
 		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;

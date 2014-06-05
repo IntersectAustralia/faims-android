@@ -74,7 +74,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 	private boolean clearInputOnRead;
 	
 	private boolean isBluetoothConnected;
-	private boolean isBluetoothPaused;
 	
 	public void init(Context context) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -84,7 +83,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 		outputMessage = null;
 		clearInputOnRead = false;
 		isBluetoothConnected = false;
-		isBluetoothPaused = false;
 	}
 	
 	public void showConnectionDialog() {
@@ -155,10 +153,14 @@ public class BluetoothManager implements IFAIMSRestorable {
 	
 	public void destroyConnection() {
 		if (isBluetoothConnected) {
-			destroyBluetoothHandlerThread();
-			destroyBluetoothSocket();
+			pauseConnection();
 			isBluetoothConnected = false;
 		}
+	}
+	
+	public void pauseConnection() {
+		destroyBluetoothHandlerThread();
+		destroyBluetoothSocket();
 	}
 	
 	public void readMessage() {
@@ -266,7 +268,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	        	}
 	        	
 	    		String input = readStringFromInput(bluetoothSocket.getInputStream());		
-	    		if (listener != null) {
+	    		if (listener != null && input != null && !input.isEmpty()) {
 	    			listener.onInput(input);
 	    		}
 	        } catch (Exception e) {
@@ -297,7 +299,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		StringBuilder sb = new StringBuilder();
 		int c;
 		while((c = inputStream.read()) != -1) {
-			if (c == Character.LINE_SEPARATOR) {
+			if (isEndOfLine((char) c)) {
 				break;
 			}
 			sb.append((char) c); // ascii char
@@ -313,7 +315,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		inputStream.skip(inputStream.available());
 		int c;
 		while((c = inputStream.read()) != -1) {
-			if (c == Character.LINE_SEPARATOR) {
+			if (isEndOfLine((char) c)) {
 				break;
 			}
 		}
@@ -321,31 +323,33 @@ public class BluetoothManager implements IFAIMSRestorable {
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
+		savedInstanceState.putBoolean("isBluetoothConnected", isBluetoothConnected);
 	}
 
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
+		isBluetoothConnected = savedInstanceState.getBoolean("isBluetoothConnected");
 	}
 
 	@Override
 	public void resume() {
-		if (isBluetoothPaused) {
+		if (isBluetoothConnected) {
 			createConnection();
-			isBluetoothPaused = false;
 		}
 	}
 
 	@Override
 	public void pause() {
-		if (isBluetoothConnected) {
-			destroyConnection();
-			isBluetoothPaused = true;
-		}
+		pauseConnection();
 	}
 
 	@Override
 	public void destroy() {
-		isBluetoothPaused = false;
+		destroyConnection();
+	}
+	
+	public boolean isEndOfLine(char c) {
+		return c == Character.LINE_SEPARATOR || c == '\n';
 	}
 
 }

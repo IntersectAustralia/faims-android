@@ -84,11 +84,14 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
         
         if (nmeaMessage.startsWith("$GPGGA")) {
             setGGAMessage(nmeaMessage);
+            setExternalGPSTimestamp(System.currentTimeMillis());
         } else if (nmeaMessage.startsWith("$GPBOD")) {
         	setBODMessage(nmeaMessage);
+        	setExternalGPSTimestamp(System.currentTimeMillis());
+        } else {
+        	setGGAMessage(null);
+        	setBODMessage(null);
         }
-		
-		setExternalGPSTimestamp(System.currentTimeMillis());
 		
 		if (!hasValidExternalGPSSignal()) {
 			if (hasValidGGAMessage()) {
@@ -109,7 +112,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	        }
         	return GGAMessage != null && sentence != null && sentence.getPosition() != null;
         } catch (Exception e){
-        	FLog.e("wrong gga format sentence", e);
+        	FLog.e("error parsing gga sentence", e);
         	return false;
         }
     }
@@ -149,9 +152,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 	
 	private void destroyInternalGPSListener(){
-		if (locationManager != null) {
-			locationManager.removeUpdates(this);
-		}
+		pauseInternalGPSListener();
 		setInternalGPSStarted(false);
 		setHasValidInternalGPSSignal(false);
 	}
@@ -163,7 +164,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 	
 	private void destroyExternalGPSListener(){
-		bluetoothManager.destroyConnection();
+		pauseExternalGPSListener();
 		setExternalGPSStarted(false);
 		setHasValidExternalGPSSignal(false);
 	}
@@ -172,10 +173,25 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 		destroyInternalGPSListener();
 		destroyExternalGPSListener();
 	}
+	
+	public void pauseListener() {
+		pauseInternalGPSListener();
+		pauseExternalGPSListener();
+	}
+	
+	public void pauseInternalGPSListener() {
+		if (locationManager != null) {
+			locationManager.removeUpdates(this);
+		}
+	}
+	
+	public void pauseExternalGPSListener() {
+		bluetoothManager.destroyConnection();
+	}
 
 	public GPSLocation getGPSPosition(String gps) {
 		try {
-			if ((gps == null || EXTERNAL.equals(gps)) && this.GGAMessage != null) {
+			if ((gps == null || EXTERNAL.equals(gps)) && hasValidGGAMessage()) {
 				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 				double latitude = ggaSentence.getPosition().getLatitude();
 				double longitude = ggaSentence.getPosition().getLongitude();
@@ -197,7 +213,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public Object getGPSEstimatedAccuracy(String gps) {
 		try {
-			if ((gps == null || EXTERNAL.equals(gps)) && this.GGAMessage != null) {
+			if ((gps == null || EXTERNAL.equals(gps)) && hasValidGGAMessage()) {
 				GGASentence ggaSentence = (GGASentence) SentenceFactory.getInstance().createParser(this.GGAMessage);
 				double nmeaAccuracy = ggaSentence.getHorizontalDOP();
 				return (float) nmeaAccuracy;
@@ -397,7 +413,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	@Override
 	public void pause() {
-		destroyListener();
+		pauseListener();
 	}
 
 	@Override
