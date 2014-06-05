@@ -267,13 +267,13 @@ public class BluetoothManager implements IFAIMSRestorable {
 	        		clearInputOnRead = false;
 	        	}
 	        	
-	    		String input = readStringFromInput(bluetoothSocket.getInputStream());		
+	    		String input = readStringFromInput(bluetoothSocket.getInputStream()); 		
 	    		if (listener != null && input != null && !input.isEmpty()) {
 	    			listener.onInput(input);
 	    		}
 	        } catch (Exception e) {
 	        	FLog.e("error trying to read input", e);
-	        	beanShellLinker.showToast("bluetooth read failure");
+	        	//beanShellLinker.showToast("bluetooth read failure");
 			}
         } else {
         	FLog.d("no connection found");
@@ -288,7 +288,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 				writeStringToOutput(output, bluetoothSocket.getOutputStream());
 			} catch (Exception e) {
 				FLog.e("error trying to write output", e);
-				beanShellLinker.showToast("bluetooth write failure");
+				//beanShellLinker.showToast("bluetooth write failure");
 			}
 		} else {
         	FLog.d("no connection found");
@@ -298,9 +298,16 @@ public class BluetoothManager implements IFAIMSRestorable {
 	private String readStringFromInput(InputStream inputStream) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int c;
+		boolean first = true;
 		while((c = inputStream.read()) != -1) {
+			// check for end of line
 			if (isEndOfLine((char) c)) {
-				break;
+				if (first) {
+					first = false;
+					continue;
+				} else {
+					break;
+				}
 			}
 			sb.append((char) c); // ascii char
 		}
