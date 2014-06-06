@@ -593,6 +593,6 @@ onBluetoothClear() {
 
 onBluetoothInput() {
 	message = getBluetoothMessage();
-	clearBluetoothMessages();
+	//clearBluetoothMessages();
 	addMessage(message);
 }
