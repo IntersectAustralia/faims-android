@@ -312,3 +312,12 @@ onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select 
 clickEventToast(string) {
 	showToast(string);
 }
+
+captureHardware("Microsoft Wired Keyboard 600", "\n", "showHardwareBuffer()");
+// captureHardware("ﾩSymbol Technologies, Inc, 2002 Symbol Bar Code Scanner", "\n", "showHardwareBuffer()");
+
+
+showHardwareBuffer() {
+	buffer = getHardwareBufferContents();
+	showToast(buffer);
+}

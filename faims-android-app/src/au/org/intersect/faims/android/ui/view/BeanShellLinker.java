@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.view.InputDevice;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -134,6 +135,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private String scanContents;
 	private String scanCallBack;
+	
+	private String hardwareBufferContents;
+	private String hardwareReadingCallBack;
 
 	public void init(ShowModuleActivity activity, Module module) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -2932,6 +2936,14 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void setLastScanContents(String contents) {
 		this.scanContents = contents;
 	}
+	
+	public String getHardwareBufferContents() {
+		return hardwareBufferContents;
+	}
+	
+	public void setHardwareBufferContents(String contents) {
+		this.hardwareBufferContents = contents;
+	}
 
 	public String getModuleName() {
 		return this.module.getName();
@@ -3606,6 +3618,38 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	@Override
 	public void destroy() {
 		stopTrackingGPS();
+	}
+
+	public void debugHardwareDevices(boolean enabled) {
+		this.activity.setHardwareDebugMode(enabled);
+	}
+	
+	public ArrayList<String> getHardwareDevices() {
+		ArrayList<String> devices  = new ArrayList<String>();
+		for(int deviceId : InputDevice.getDeviceIds()) {
+			devices.add(InputDevice.getDevice(deviceId).getName());
+		}
+		
+		return devices;
+	}
+	
+	public void captureHardware(String deviceName, String delimiter, String callback) {
+		this.activity.setHardwareToCapture(deviceName);
+		clearHardwareDeviceBuffer();
+		this.activity.setHardwareDelimiter(delimiter.charAt(0));
+		hardwareReadingCallBack = callback;
+	}
+	
+	public void executeHardwareCaptureCallBack() {
+		try {
+			this.interpreter.eval(hardwareReadingCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for hardware capture", e);
+		}
+	}
+	
+	public void clearHardwareDeviceBuffer() {
+		this.activity.clearDeviceBuffer();
 	}
 	
 }
