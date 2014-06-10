@@ -35,6 +35,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RadioGroup;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -367,6 +368,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					} else if (view instanceof PictureGallery) {
 						PictureGallery pictureGalleryView = (PictureGallery) view;
 						addPictureGalleryEventClickListener(pictureGalleryView, code);
+					} else if (view instanceof CustomRadioGroup) {
+						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
+						addRadioGroupEventClickListener(radioGroup, code);
 					} else {
 						view.setOnClickListener(new OnClickListener() {
 
@@ -390,6 +394,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					} else if (view instanceof PictureGallery) {
 						PictureGallery pictureGalleryView = (PictureGallery) view;
 						addPictureGalleryEventClickListener(pictureGalleryView, code);
+					} else if (view instanceof CustomRadioGroup) {
+						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
+						addRadioGroupEventClickListener(radioGroup, code);
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
@@ -488,6 +495,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				execute(code);
 			}
 
+		});
+	}
+	
+	private void addRadioGroupEventClickListener(final CustomRadioGroup radioGroup, final String code) {
+		radioGroup.setOnCheckChangedListener(new RadioGroup.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				execute(code);
+			}
 		});
 	}
 

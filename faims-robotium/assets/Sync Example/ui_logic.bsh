@@ -134,6 +134,7 @@ updateEntity() {
 clearEntity() {
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateRadioGroup("tabgroup1/tab1/location2", locations);
 	
 	populateHierarchicalDropDown("tabgroup1/tab1/type", "type");
 	populateHierarchicalPictureGallery("tabgroup1/tab1/rocks", "rocks");
@@ -308,6 +309,10 @@ onEvent("tabgroup1/tab1/gallery", "select", "clickEventToast(\"Gallery select ev
 onEvent("tabgroup1/tab1/rocks", "select", "clickEventToast(\"Hierarchical gallery select event\")");
 
 onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select event\")");
+
+onEvent("tabgroup1/tab1/location", "click", "clickEventToast(\"Checkbox click event\")");
+
+onEvent("tabgroup1/tab1/location2", "select", "clickEventToast(\"Radiogroup select event\")");
 
 clickEventToast(string) {
 	showToast(string);
