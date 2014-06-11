@@ -1,0 +1,51 @@
+
+onEvent ("main/tab1", "show", "prepare ()");
+onEvent ("main/tab1/device1", "select", "direct ()");
+onEvent ("main/tab1/device2", "select", "interceptListen ()"); 
+onEvent ("main/tab1/device3", "select", "delimiterListen ()");
+onEvent ("main/tab1/delimiters", "select", "delimiterListen ()");
+
+
+void prepare () {
+    populateDropDown ("main/tab1/device1", getHardwareDevices ());
+    populateDropDown ("main/tab1/device2", getHardwareDevices ());
+    populateDropDown ("main/tab1/device3", getHardwareDevices ());
+    return;
+}
+
+void direct () {
+    captureHardware (getFieldValue ("main/tab1/device1"), "\n", "showDirect ()");
+
+    return;
+}
+void showDirect () {
+    buffer = getHardwareBufferContents();
+    setFieldValue ("main/tab1/direct", buffer);
+    return;
+}
+
+void interceptListen () {
+    captureHardware (getFieldValue ("main/tab1/device2"), "\n", "intercept ()");
+    return;
+}
+void intercept () {
+    setFieldValue ("main/tab1/intercept", "Peanut Butter");
+    return;
+}
+
+String delimiter = "\n";
+String device3 = null;
+
+void delimiterListen () {
+    delimiter = getFieldValue ("main/tab1/delimiters");
+    device3 = getFieldValue ("main/tab1/device3");
+    if ("\\n".equals(delimiter)) {
+        delimiter = "\n";
+    }
+    captureHardware (device3, delimiter, "finishDelimiterListen ()");
+    return;
+}
+void finishDelimiterListen () {
+    setFieldValue ("main/tab1/text", getHardwareBufferContents ());
+    return;
+}
