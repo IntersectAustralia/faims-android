@@ -16,6 +16,8 @@
               <pictureGallerySelect/>
               <dropDownClick/>
               <pictureGalleryClick/>
+              <checkboxes/>
+              <radiobuttons/>
               <counter/>
               <counter2/>
             </normal>
@@ -64,6 +66,24 @@
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
+          </item>
+        </select1>
+        <select ref="checkboxes" faims_certainty="false">
+          <label>Checkboxes:</label>
+          <item>
+            <label>Item A</label>
+            <value>0</value>
+          </item>
+        </select>
+        <select1 ref="radiobuttons" appearance="full" faims_attribute_name="Radio" faims_certainty="false">
+          <label>Radiobuttons</label>
+          <item>
+            <label>Item A</label>
+            <value>Item A</value>
+          </item>
+          <item>
+            <label>Item B</label>
+            <value>Item B</value>
           </item>
         </select1>
         <input ref="counter" faims_certainty="false" faims_attribute_type="freetext" faims_read_only="true">

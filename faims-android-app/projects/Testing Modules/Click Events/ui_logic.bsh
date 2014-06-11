@@ -29,6 +29,28 @@ onEvent("main/heirarchical/hidropDownSelect", "select", "incrementSelect3()");
 onEvent("main/heirarchical/hidropDownClick", "click", "incrementClick3()");
 onEvent("main/heirarchical/hipictureGallerySelect", "select", "incrementSelect4()");
 onEvent("main/heirarchical/hipictureGalleryClick", "click", "incrementClick4()");
+onEvent("main/normal", "show", "populateCheckbox()");
+onEvent("main/normal/checkboxes", "click", "checkboxesClick()");
+onEvent("main/normal/radiobuttons", "click", "radiobuttonsClick()");
+
+populateCheckbox() {
+    List checkboxEntries = new ArrayList();
+    checkboxEntries.add ("ItemA");
+    checkboxEntries.add ("ItemB");
+    checkboxEntries.add ("ItemC");
+    checkboxEntries.add ("ItemD");
+    checkboxEntries.add ("ItemE");
+    populateCheckBoxGroup ("main/normal/checkboxes", checkboxEntries);
+    return;
+}
+
+checkboxesClick(){
+    showToast("You chose checkbox " + getFieldValue("main/normal/checkboxes"));
+}
+
+radiobuttonsClick(){
+    showToast("You chose a radio button " + getFieldValue("main/normal/radiobuttons"));
+}
 
 int n = 0;
 int secondn = 0;
