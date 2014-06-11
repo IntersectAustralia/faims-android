@@ -53,6 +53,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private List<VocabularyTerm> currentItems;
 
 	private boolean lastSelected;
+	
+	private VocabularyTerm lastSelectedItem;
 
 	private HashMap<String, VocabularyTerm> vocabIdToParentTerm;
 	private HashMap<String, List<VocabularyTerm>> vocabIdToParentTerms;
@@ -190,7 +192,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 			super.setSelection(position);
 			return;
 		}
-		
 		lastSelected = selected;
 		
 		try {
@@ -201,6 +202,9 @@ public class HierarchicalSpinner extends CustomSpinner {
 					parentTerms.push(selectedTerm);
 					loadTerms();
 					super.setSelection(parentTerms.size() - 1);
+					if(selected && !selectedTerm.equals(lastSelectedItem)) {
+						selectedListener.onItemSelected(this, getChildAt(position), position, 0);
+					}
 				} else {
 					super.setSelection(position);
 				}
@@ -215,7 +219,11 @@ public class HierarchicalSpinner extends CustomSpinner {
 				} else {
 					super.setSelection(parentTerms.peek().terms.indexOf(parentTerm) + parentTerms.size());
 				}
+				if(selected && !selectedTerm.equals(lastSelectedItem)) {
+					selectedListener.onItemSelected(this, getChildAt(position), position, 0);
+				}
 			}
+			lastSelectedItem = selectedTerm;
 		} catch (Exception e) {
 			FLog.e("error selecting item on hierarchical spinner", e);
 		}
@@ -277,6 +285,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 		}
 		dirty = false;
 		dirtyReason = null;
+		
+		lastSelectedItem = null;
 		
 		parentTerms.clear();
 		loadTerms();

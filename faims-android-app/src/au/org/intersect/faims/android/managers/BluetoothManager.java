@@ -143,8 +143,8 @@ public class BluetoothManager implements IFAIMSRestorable {
 			}	
 			createBluetoothHandlerThread();
 			isBluetoothConnected = true;
+			beanShellLinker.showToast("bluetooth connection established");
 			
-			clearMessages();
 			if (repeatable) {
 				readMessage();
 			}
@@ -155,6 +155,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		if (isBluetoothConnected) {
 			pauseConnection();
 			isBluetoothConnected = false;
+			beanShellLinker.showToast("bluetooth connection destroyed");
 		}
 	}
 	
@@ -226,15 +227,12 @@ public class BluetoothManager implements IFAIMSRestorable {
 					Method m = bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
 					bluetoothSocket = (BluetoothSocket) m.invoke(bluetoothDevice, 1);
 					bluetoothSocket.connect();
-					beanShellLinker.showToast("bluetooth connection established");
 				} catch (Exception e) {
 					FLog.e("error trying to create bluetooth socket", e);
 					
-					if (listener != null) {
-						beanShellLinker.showToast("bluetooth connection failed. waiting to retry ...");
+					if (!bluetoothSocket.isConnected()) {
+						bluetoothSocket = null;
 					}
-					
-					bluetoothSocket = null;
 				}
 			}
 		} else {
@@ -247,7 +245,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 			try {
 				bluetoothSocket.close();
 				bluetoothSocket = null;
-				beanShellLinker.showToast("bluetooth connection destroyed");
 			} catch (Exception e) {
 				FLog.e("error trying to destroy bluetooth socket", e);
 			}
@@ -274,6 +271,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	        } catch (Exception e) {
 	        	FLog.e("error trying to read input", e);
 	        	//beanShellLinker.showToast("bluetooth read failure");
+	        	destroyBluetoothSocket();
 			}
         } else {
         	FLog.d("no connection found");
@@ -285,10 +283,11 @@ public class BluetoothManager implements IFAIMSRestorable {
 		
 		if (bluetoothSocket != null) {
 			try {
-				writeStringToOutput(output, bluetoothSocket.getOutputStream());
+				writeStringToOutput(output + "\r", bluetoothSocket.getOutputStream());
 			} catch (Exception e) {
 				FLog.e("error trying to write output", e);
 				//beanShellLinker.showToast("bluetooth write failure");
+				destroyBluetoothSocket();
 			}
 		} else {
         	FLog.d("no connection found");

@@ -3,17 +3,14 @@ package au.org.intersect.faims.android.util;
 public class InputBuffer {
 	
 	public interface InputBufferListener {
-		public void onFull(String inputSequence);
 		public void onInput(String inputSequence);
 	}
 
 	private InputBufferListener listener;
-	private int bufferSize;
 	private Character endOfInput;
 	private StringBuffer buffer;
 	
-	public InputBuffer(int bufferSize, Character endOfInput) {
-		this.bufferSize = bufferSize;
+	public InputBuffer(Character endOfInput) {
 		this.endOfInput = endOfInput;
 		clearBuffer();
 	}
@@ -23,8 +20,6 @@ public class InputBuffer {
 	}
 	
 	public void addInput(Character c) {
-		if (bufferSize == 0) return;
-		
 		if (c.equals(endOfInput)) {
 			if (listener != null) {
 				listener.onInput(buffer.toString());
@@ -32,12 +27,6 @@ public class InputBuffer {
 			clearBuffer();
 		} else {
 			buffer.append(c);
-			if (buffer.length() == bufferSize) {
-				if (listener != null) {
-					listener.onFull(buffer.toString());
-				}
-				clearBuffer();
-			}
 		}
 	}
 	

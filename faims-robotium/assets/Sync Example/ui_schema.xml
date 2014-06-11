@@ -33,6 +33,7 @@
                   <value></value>
                   <timestamp></timestamp>
                   <location></location>
+                  <location2></location2>
                   <type></type>
                   <gallery></gallery>
                   <rocks></rocks>
@@ -183,6 +184,13 @@
                 	<value>dummy</value>
               	</item>
             </select>
+            <select1 ref="location2" appearance="full">
+            <label>Location2:</label>
+            <item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
+         </select1>
 	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
 	            <label>Type:</label>
 	            <item>

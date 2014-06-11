@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSchema name="App UI" preparer="Vincent Tran">
+
+  <ArchaeologicalElement name="App UI">
+    <description>App UI</description>
+    <property name="Description" type="freetext">
+      <description>Just a regular description box, set in the data schema.</description>
+    </property>
+    <property name="All" type="freetext">
+      <description>Has all three boxes!</description>
+    </property>
+    <property name="Read Only" type="freetext">
+      <description>You can't type in here, its read only.</description>
+    </property>
+    <property name="Input" type="freetext">
+      <description>Just a regular input box.</description>
+    </property>
+    <property name="Measure" type="freetext">
+      <description>A numberpad keyboard should pop up.</description>
+    </property>
+    <property name="String" type="freetext">
+      <description>Big block of text.</description>
+    </property>
+    <property name="Date" type="freetext">
+      <description>A Date picker.</description>
+    </property>
+    <property name="Time" type="freetext">
+      <description>A Time picker.</description>
+    </property>
+    <property name="Radio" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>Option1<description/></term>
+        <term>Option2<description/></term>
+        <term>Option3<description/></term>
+      </lookup>
+    </property>
+    <property name="Checkbox" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>Option1<description/></term>
+        <term>Option2<description/></term>
+        <term>Option3<description/></term>
+      </lookup>
+    </property>
+    <property name="Dropdown" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>Option1<description/></term>
+        <term>Option2<description/></term>
+        <term>Option3<description/></term>
+      </lookup>
+    </property>
+    <property name="Hierarchical Dropdown" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>Option1<description/>
+            <term>Option1.1<description/></term>
+            <term>Option1.2<description/></term>
+            <term>Option1.3<description/></term>
+        </term>
+        <term>Option2<description/>
+            <term>Option2.1<description/></term>
+            <term>Option2.2<description/></term>
+            <term>Option2.3<description/></term>
+         </term>
+        <term>Option3<description/>
+            <term>Option3.1<description/></term>
+            <term>Option3.2<description/></term>
+            <term>Option3.3<description/></term>
+        </term>
+      </lookup>
+    </property>
+    <property name="Picture Gallery" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term pictureURL="files/data/gallery/test1.png">Option1<description/></term>
+        <term pictureURL="files/data/gallery/test2.png">Option2<description/></term>
+        <term pictureURL="files/data/gallery/test3.png">Option3<description/></term>
+      </lookup>
+    </property>
+    <property name="Hierarchical Picture Gallery" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term pictureURL="files/data/gallery/test1.png">Option1<description/>
+            <term pictureURL="files/data/gallery/opt1/test1.png">Option1.1<description/></term>
+            <term pictureURL="files/data/gallery/opt1/test2.png">Option1.2<description/></term>
+            <term pictureURL="files/data/gallery/opt1/test3.png">Option1.3<description/></term>
+        </term>
+        <term pictureURL="files/data/gallery/test2.png">Option2<description/>
+            <term pictureURL="files/data/gallery/opt2/test1.png">Option2.1<description/></term>
+            <term pictureURL="files/data/gallery/opt2/test2.png">Option2.2<description/></term>
+            <term pictureURL="files/data/gallery/opt2/test3.png">Option2.3<description/></term>
+         </term>
+        <term pictureURL="files/data/gallery/test3.png">Option3<description/>
+            <term pictureURL="files/data/gallery/opt3/test1.png">Option3.1<description/></term>
+            <term pictureURL="files/data/gallery/opt3/test2.png">Option3.2<description/></term>
+            <term pictureURL="files/data/gallery/opt3/test3.png">Option3.3<description/></term>
+        </term>
+      </lookup>
+    </property>
+    <property name="List" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>Option A<description/></term>
+        <term>Option B<description/></term>
+        <term>Option C<description/></term>
+        <term>Option D<description/></term>
+        <term>Option E<description/></term>
+        <term>Option F<description/></term>
+        <term>Option G<description/></term>
+        <term>Option H<description/></term>
+        <term>Option I<description/></term>
+        <term>Option J<description/></term>
+        <term>Option K<description/></term>
+        <term>Option L<description/></term>
+        <term>Option M<description/></term>
+        <term>Option N<description/></term>
+        <term>Option O<description/></term>
+        <term>Option P<description/></term>
+        <term>Option Q<description/></term>
+        <term>Option R<description/></term>
+        <term>Option S<description/></term>
+        <term>Option T<description/></term>
+        <term>Option U<description/></term>
+      </lookup>
+    </property>
+  </ArchaeologicalElement>
+</dataSchema>
