@@ -12,6 +12,17 @@ import au.org.intersect.faims.android.util.Compare;
 
 public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
+	class CheckBoxGroupOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			if(onClickListener != null) {
+				onClickListener.onClick(v);
+			}
+		}
+		
+	}
+	
 	private String ref;
 	private List<NameValuePair> currentValues;
 	private float certainty;
@@ -23,6 +34,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
+	
+	private CheckBoxGroupOnClickListener listener;
+	private OnClickListener onClickListener;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
@@ -36,6 +50,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	                LayoutParams.MATCH_PARENT));
 	    setOrientation(LinearLayout.VERTICAL);
 		
+	    this.listener = new CheckBoxGroupOnClickListener();
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
@@ -225,6 +240,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 			CustomCheckBox checkBox = new CustomCheckBox(this.getContext());
 			checkBox.setText(pair.getName());
 			checkBox.setValue(pair.getValue());
+			checkBox.setOnClickListener(listener);
 			addView(checkBox);
 		}
 	}
@@ -247,6 +263,11 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Override
 	public void setCertaintyEnabled(boolean enabled) {
 		certaintyEnabled = enabled;
+	}
+	
+	public void setOnClickListener(OnClickListener onClickListener)
+	{
+		this.onClickListener = onClickListener;
 	}
 
 }

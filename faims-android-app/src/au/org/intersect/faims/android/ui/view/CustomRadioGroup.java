@@ -8,11 +8,23 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.util.Compare;
 
 public class CustomRadioGroup extends LinearLayout implements ICustomView {
+	
+	class RadioGroupOnChangeListener implements OnCheckedChangeListener {
+
+		@Override
+		public void onCheckedChanged(RadioGroup group, int checkedId) {
+			if(onCheckChangedListener != null) {
+				onCheckChangedListener.onCheckedChanged(group, checkedId);
+			}
+		}
+
+	}
 
 	private String ref;
 	private String currentValue;
@@ -25,6 +37,9 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
+	
+	private RadioGroupOnChangeListener listener;
+	private OnCheckedChangeListener onCheckChangedListener;
 
 	public CustomRadioGroup(Context context) {
 		super(context);
@@ -38,6 +53,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
                 LayoutParams.MATCH_PARENT));
 		setOrientation(LinearLayout.VERTICAL);
 		
+		this.listener = new RadioGroupOnChangeListener();
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
@@ -186,6 +202,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		addView(scrollView);
 		RadioGroup rg = new RadioGroup(this.getContext());
 		rg.setOrientation(LinearLayout.HORIZONTAL);
+		rg.setOnCheckedChangeListener(listener);
 		scrollView.addView(rg);
 		for (NameValuePair pair : pairs) {
 			CustomRadioButton radioButton = new CustomRadioButton(this.getContext());
@@ -215,4 +232,8 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		certaintyEnabled = enabled;
 	}
 
+	public void setOnCheckChangedListener(OnCheckedChangeListener onCheckChangedListener)
+	{
+		this.onCheckChangedListener = onCheckChangedListener;
+	}
 }

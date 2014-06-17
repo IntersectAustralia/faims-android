@@ -33,6 +33,8 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -77,6 +79,8 @@ import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.InputBuffer;
+import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
@@ -179,6 +183,11 @@ public class ShowModuleActivity extends FragmentActivity implements
 	private Bitmap tempBitmap;
 	private Animation rotation;
 	private ImageView syncAnimImage;
+	
+	private boolean hardwareDebugMode = false;
+	private String deviceToCapture = null;
+	private Character hardwareDelimiter;
+	private InputBuffer deviceBuffer;
 
 	public String getModuleKey() {
 		return moduleKey;
@@ -630,6 +639,41 @@ public class ShowModuleActivity extends FragmentActivity implements
 		} catch (Exception e) {
 			FLog.e("error on activity result", e);
 		}
+	}
+	
+	
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event)
+	{
+		InputDevice device = event.getDevice();
+		if(this.hardwareDebugMode && event.getAction() == KeyEvent.ACTION_UP) {
+			this.beanShellLinker.showToast("Device Name: " + String.valueOf(device.getName()));
+		}
+		
+		String deviceName = device.getName();
+		if(deviceName.equals(deviceToCapture)) {
+			if(event.getAction() == KeyEvent.ACTION_UP) {
+				if(deviceBuffer == null) {
+					InputBuffer newBuffer = new InputBuffer(hardwareDelimiter);
+					InputBufferListener bufferListener = new InputBufferListener() {
+						
+						@Override
+						public void onInput(String inputSequence) {
+							ShowModuleActivity.this.beanShellLinker.setHardwareBufferContents(inputSequence);
+							ShowModuleActivity.this.beanShellLinker.executeHardwareCaptureCallBack();
+						}
+					};
+					newBuffer.setListener(bufferListener);
+					deviceBuffer = newBuffer;
+				}
+				deviceBuffer.addInput((char) event.getUnicodeChar());
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return super.dispatchKeyEvent(event);
 	}
 
 	@Override
@@ -1458,5 +1502,22 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 		cursor.close();
 		return res;
+	}
+
+	public void setHardwareToCapture(String deviceName)
+	{
+		this.deviceToCapture = deviceName;
+	}
+	
+	public void setHardwareDebugMode(boolean enabled) {
+		this.hardwareDebugMode = enabled;
+	}
+	
+	public void setHardwareDelimiter(Character delimiter) {
+		this.hardwareDelimiter = delimiter;
+	}
+	
+	public void clearDeviceBuffer() {
+		this.deviceBuffer = null;
 	}
 }

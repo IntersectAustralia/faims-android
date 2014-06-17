@@ -1855,6 +1855,42 @@ scanCode(String callback){
 }
 
 /**
+  * Enable hardware device debug mode, which shows a toast of the device name for every input.
+  *
+  * @param enabled the boolean denoting on or off
+  */
+debugHardwareDevices(boolean enabled){
+  linker.debugHardwareDevices(enabled);
+}
+
+/**
+  * Returns a list of the names of all devices currently attached, includes defaults e.g. Virtual, Volume Buttons etc.
+  *
+  * @return list of device names
+  */
+getHardwareDevices(){
+  linker.getHardwareDevices();
+}
+
+/**
+  * Capture key events for the given device name, and then execute the callback once the delimiter is read.
+  *
+  * @param deviceName the name of the device to capture input for
+  * @param delimiter the character which denotes end of input
+  * @param callback the callback executed after delimiter is reached
+  */
+captureHardware(String deviceName, String delimiter, String callback){
+  linker.captureHardware(deviceName, delimiter, callback);
+}
+
+/**
+  * Clears the buffer for the device currently used with captureHardware()
+  */
+clearHardwareDeviceBuffer(){
+  linker.clearHardwareDeviceBuffer();
+}
+
+/**
   * This is used in conjunction with openCamera. This returns the file path of the last picture taken.
   *
   * @return the path of the last taken picture
@@ -1888,6 +1924,15 @@ String getLastAudioFilePath(){
   */
 String getLastScanContents(){
   return linker.getLastScanContents();
+}
+
+/**
+  * This is used in conjunction with captureHarware. This returns the contents of the buffer contents.
+  *
+  * @return the contents of the buffer read from a hardware device
+  */
+String getHardwareBufferContents(){
+  return linker.getHardwareBufferContents();
 }
 
 /**
