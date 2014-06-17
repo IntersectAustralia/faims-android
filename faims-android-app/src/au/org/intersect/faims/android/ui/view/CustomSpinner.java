@@ -61,12 +61,16 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	}
 
 	public void setValue(String value) {
-		for (int i = 0; i < getAdapter().getCount(); ++i) {
-			NameValuePair pair = (NameValuePair) getItemAtPosition(i);
-			if (value.equalsIgnoreCase(pair.getValue())) {
-				setSelection(i);
-				break;
+		if (value != null) {
+			for (int i = 0; i < getAdapter().getCount(); ++i) {
+				NameValuePair pair = (NameValuePair) getItemAtPosition(i);
+				if (value.equalsIgnoreCase(pair.getValue())) {
+					setSelection(i);
+					break;
+				}
 			}
+		} else {
+			setSelection(0);
 		}
 	}
 

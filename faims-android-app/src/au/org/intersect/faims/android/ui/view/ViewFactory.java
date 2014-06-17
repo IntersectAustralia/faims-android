@@ -18,6 +18,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
@@ -38,10 +39,10 @@ public class ViewFactory {
 		
 	}
 	
-	private WeakReference<Context> contextRef;
+	private WeakReference<ShowModuleActivity> contextRef;
 	private Arch16n arch16n;
 	
-	public ViewFactory(WeakReference<Context> contextRef, Arch16n arch16n) {
+	public ViewFactory(WeakReference<ShowModuleActivity> contextRef, Arch16n arch16n) {
 		this.contextRef = contextRef;
 		this.arch16n = arch16n;
 		FAIMSApplication.getInstance().injectMembers(this);

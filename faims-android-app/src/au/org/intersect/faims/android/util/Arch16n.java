@@ -22,9 +22,10 @@ public class Arch16n {
 		this.properties = new HashMap<String, String>();
 		this.path = path;
 		this.moduleName = moduleName;
+		generatePropertiesMap();
 	}
 
-	public void generatePropertiesMap() {
+	private void generatePropertiesMap() {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(path+"/faims.properties");
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
