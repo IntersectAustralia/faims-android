@@ -589,10 +589,10 @@ onBluetoothWrite() {
 onBluetoothClear() {
 	messageBuffer = new ArrayList();
 	setFieldValue("tabgroup6/tab1/input", "");
+	clearBluetoothMessages();
 }
 
 onBluetoothInput() {
 	message = getBluetoothMessage();
-	//clearBluetoothMessages();
 	addMessage(message);
 }

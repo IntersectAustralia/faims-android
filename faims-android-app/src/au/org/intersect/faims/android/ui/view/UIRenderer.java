@@ -129,14 +129,16 @@ public class UIRenderer {
     }
 
     public void invalidateListViews(TabGroup tabGroup){
-    	for(Tab tab : tabGroup.getTabs()){
-			for(View view : tab.getViews()){
-				if(view instanceof CustomListView){
-					CustomListView listView = (CustomListView) view;
-					listView.invalidateViews();
+    	if (tabGroup.getTabs() != null) {
+	    	for(Tab tab : tabGroup.getTabs()){
+				for(View view : tab.getViews()){
+					if(view instanceof CustomListView){
+						CustomListView listView = (CustomListView) view;
+						listView.invalidateViews();
+					}
 				}
 			}
-		}
+    	}
     }
     
     public Tab showTab(String label) {
@@ -245,8 +247,14 @@ public class UIRenderer {
 		}
 	}
 	
+	private void clearBackStack() {
+		FragmentManager fm = activityRef.get().getSupportFragmentManager();
+		while(fm.popBackStackImmediate());
+	}
+	
 	public void createUI() {
 		boolean showFirsTabGroup = tempSavedInstanceState == null;
+		clearBackStack();
 		createTabGroups();
 		restoreFromTempBundle();
 		
