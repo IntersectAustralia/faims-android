@@ -1065,7 +1065,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	private boolean hasChanges(Tab tab) {
-		List<View> views = tab.getViews();
+		List<View> views = tab.getAttributeViews();
 		for (View v : views) {
 			
 			if (v instanceof ICustomView) {
@@ -1226,7 +1226,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private List<EntityAttribute> getEntityAttributesFromTab(Tab tab) {
 		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
 		
-		List<View> views = tab.getViews();
+		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {
@@ -1302,7 +1302,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private List<RelationshipAttribute> getRelationshipAttributesFromTab(Tab tab) {
 		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
 		
-		List<View> views = tab.getViews();
+		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {

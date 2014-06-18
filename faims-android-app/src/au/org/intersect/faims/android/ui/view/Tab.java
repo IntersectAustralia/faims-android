@@ -591,6 +591,14 @@ public class Tab {
 	public List<View> getViews(){
 		return viewList;
 	}
+	
+	public List<View> getAttributeViews(){
+		ArrayList<View> attributeViews = new ArrayList<View>();
+		for (String attribute : attributeViewMap.keySet()) {
+			attributeViews.addAll(attributeViewMap.get(attribute));
+		}
+		return attributeViews;
+	}
 
 	public List<View> getAttributeViews(String name) {
 		return attributeViewMap.get(name);
