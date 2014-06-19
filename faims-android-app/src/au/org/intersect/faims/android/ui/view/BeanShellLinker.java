@@ -619,8 +619,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public TabGroup showTabGroup(String label) {
 		try {
-			TabGroup tabGroup = uiRenderer.showTabGroup(
-					this.activity, label);
+			TabGroup tabGroup = uiRenderer.showTabGroup(label);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tabgroup " + label);
 				return null;
@@ -636,8 +635,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public TabGroup showTabGroup(String id, final String uuid) {
 		try {
-			final TabGroup tabGroup = uiRenderer.showTabGroup(activity,
-					id);
+			final TabGroup tabGroup = uiRenderer.showTabGroup(id);
 			if (tabGroup == null) {
 				showWarning("Logic Error", "Error showing tab group " + id);
 				return null;
@@ -1067,7 +1065,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	private boolean hasChanges(Tab tab) {
-		List<View> views = tab.getAllViews();
+		List<View> views = tab.getAttributeViews();
 		for (View v : views) {
 			
 			if (v instanceof ICustomView) {
@@ -1139,7 +1137,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			tab.clearViews();
 			for (EntityAttribute attribute : archEntity.getAttributes()) {
 				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getViews(attribute.getName());
+					List<View> views = tab.getAttributeViews(attribute.getName());
 					if (views != null) {
 						setAttributeTab(attribute, views);
 					}
@@ -1169,7 +1167,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			tab.clearViews();
 			for (RelationshipAttribute attribute : relationship.getAttributes()) {
 				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getViews(attribute.getName());
+					List<View> views = tab.getAttributeViews(attribute.getName());
 					if (views != null) {
 						setAttributeTab(attribute, views);
 					}
@@ -1228,7 +1226,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private List<EntityAttribute> getEntityAttributesFromTab(Tab tab) {
 		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
 		
-		List<View> views = tab.getAllViews();
+		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {
@@ -1304,7 +1302,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private List<RelationshipAttribute> getRelationshipAttributesFromTab(Tab tab) {
 		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
 		
-		List<View> views = tab.getAllViews();
+		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {

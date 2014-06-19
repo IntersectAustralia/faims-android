@@ -1,6 +1,5 @@
 package au.org.intersect.faims.android.ui.view;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -18,7 +17,7 @@ import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.util.Arch16n;
 
 import com.google.inject.Inject;
 
@@ -32,168 +31,187 @@ public class TabGroup extends Fragment {
 	@Inject
 	BeanShellLinker beanShellLinker;
 	
-	public static int tabGroupId = 1;
+	@Inject
+	Arch16n arch16n;
 	
-	private WeakReference<ShowModuleActivity> activityRef;
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
 	private LinkedList<Tab> tabs;
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
-	private String label = "";
+	private TabTask showTask;
+	private Tab lastTab;
+	
+	private String ref;
+	private String name;
+	private String label;
 	private String archEntType;
 	private String relType;
-	private IRestoreActionListener actionListener;
-	private Tab lastTab;
-	private String id;
 
-	private TabTask showTask;
+	private Bundle tempSavedInstanceState;
 	
-	public TabGroup(){
-		FAIMSApplication.getInstance().injectMembers(this);
+	public TabGroup() {
 	}
 	
-	public TabGroup(WeakReference<ShowModuleActivity> activityRef, String archEntType, String relType, IRestoreActionListener actionListener) {
+	public TabGroup(String ref, String name, String label, String archEntType, String relType) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		
 		if(archEntType != null && relType != null){
 			FLog.w("tabgroup can only contain either archEntId or relId not both");
 		}
 		
-		this.activityRef = activityRef;
+		this.ref = ref;
+		this.name = name;
+		this.label = arch16n.substituteValue(label);
 		this.archEntType = archEntType;
 		this.relType = relType;
-		this.actionListener = actionListener;
 		this.tabMap = new HashMap<String, Tab>();
 		this.tabs = new LinkedList<Tab>();
 		this.onLoadCommands = new ArrayList<String>();
 		this.onShowCommands = new ArrayList<String>();
-		this.id = "TabGroup" + tabGroupId++;
 	}
-	
+
 	@Override
     public View onCreateView(LayoutInflater inflater, 
     		                  ViewGroup container,
-                              Bundle savedInstanceState) {	
+                              Bundle savedInstanceState) {
+		if (ref != null) {
 		
-		if (tabHost == null) {
-			tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
-			tabHost.setup();
-			
-			for (Tab tab : tabs) {
-				tabHost.addTab(tab.createTabSpec(tabHost));
-			}
-			
-			TabWidget widget = tabHost.getTabWidget();
-			if (widget != null) {
-				boolean first = true;
-				for (int i = 0; i < widget.getChildCount(); i++) {
-					Tab tab = tabs.get(i);
-					if (tab.getHidden()) {
-						widget.getChildAt(i).setVisibility(View.GONE);
-					} else if (first) {
-						tabHost.setCurrentTab(i);
-						first = false;
-					}
-				}
-				if (first == true) {
-					// all tabs are hidden
-					// TODO: maybe hide the frame layout
-				}
-			}
-			
-			if(this.onLoadCommands.size() > 0){
-				executeCommands(this.onLoadCommands);
-			}
-		}
-		
-		if(this.onShowCommands.size() > 0){
-			executeCommands(this.onShowCommands);
-		}
-		
-		if(savedInstanceState != null && !savedInstanceState.isEmpty()){
-			this.actionListener.restoreViewValuesForTabGroup(this);
-			this.actionListener.restoreTabsForTabGroup(this);
-		}
-		
-		// Solves a prob the back button gives us with the TabHost already having a parent
-		if (tabHost.getParent() != null){
-			((ViewGroup) tabHost.getParent()).removeView(tabHost);
-		}
-		
-		// TODO does this listener need to be removed?
-		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
-
-			@Override
-			public void onTabChanged(String arg0) {
-				if (lastTab != null) {
-					lastTab.onHideTab();
-					lastTab = null;
+			if (tabHost == null) {
+				tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
+				tabHost.setup();
+				
+				for (Tab tab : tabs) {
+					tabHost.addTab(tab.createTabSpec(tabHost));
 				}
 				
-				Tab tab = getCurrentTab();
-				if (tab != null) {
-					tab.onShowTab();
-					lastTab = tab;
+				TabWidget widget = tabHost.getTabWidget();
+				if (widget != null) {
+					boolean first = true;
+					for (int i = 0; i < widget.getChildCount(); i++) {
+						Tab tab = tabs.get(i);
+						if (tab.getHidden()) {
+							widget.getChildAt(i).setVisibility(View.GONE);
+						} else if (first) {
+							tabHost.setCurrentTab(i);
+							first = false;
+						}
+					}
+					if (first == true) {
+						// all tabs are hidden
+					}
+				}
+				
+				if(this.onLoadCommands.size() > 0){
+					executeCommands(this.onLoadCommands);
 				}
 			}
 			
-		});
-		
-		// execute a task directly after a tabgroup is shown
-		if (showTask != null) {
-			showTask.onShow();
-			showTask = null;
+			if(this.onShowCommands.size() > 0){
+				executeCommands(this.onShowCommands);
+			}
+			
+			// TODO does this listener need to be removed?
+			tabHost.setOnTabChangedListener(new OnTabChangeListener() {
+	
+				@Override
+				public void onTabChanged(String arg0) {
+					if (lastTab != null) {
+						lastTab.onHideTab();
+						lastTab = null;
+					}
+					
+					Tab tab = getCurrentTab();
+					if (tab != null) {
+						tab.onShowTab();
+						lastTab = tab;
+					}
+				}
+				
+			});
+			
+			// restore after tabgroup is shown
+			restoreFromTempBundle();
+			
+			// execute a task after tabgroup is shown
+			if (showTask != null) {
+				showTask.onShow();
+				showTask = null;
+			}
+			
+			// Solves a prob the back button gives us with the TabHost already having a parent
+			if (tabHost.getParent() != null){
+				((ViewGroup) tabHost.getParent()).removeView(tabHost);
+			}
+			
+			onShowTabGroup();
+			
+			return tabHost;
 		}
 		
-		onShowTabGroup();
-		
-		return tabHost;
+		return null;
     }
 	
 	@Override
 	public void onDestroyView() {
+		if (ref != null) {
+			onHideTabGroup();
+		}
 		super.onDestroyView();
-		
-		onHideTabGroup();
 	}
 	
-	public Tab createTab(String name, String label, boolean hidden, boolean scrollable, String reference) {
-		Tab tab = new Tab(activityRef.get(), name, label, hidden, scrollable, reference);
+	public Tab addTab(Tab tab) {
 		tabMap.put(name, tab);
 		tabs.add(tab);
         return tab;
 	}
 	
 	public Tab showTab(String name) {
-		for (int i = 0; i < tabs.size(); i++) {
-			Tab tab = tabs.get(i);
-			if (tab.getName().equals(name)) {
-				TabWidget widget = tabHost.getTabWidget();
-				widget.getChildAt(i).setVisibility(View.VISIBLE);
-				tab.setHidden(false);
-				tabHost.setCurrentTab(i);
-				if(tab.getScrollViewForTab() != null){
-					tab.getScrollViewForTab().scrollTo(0, 0);
+		if (tabHost != null) {
+			for (int i = 0; i < tabs.size(); i++) {
+				Tab tab = tabs.get(i);
+				if (tab.getName().equals(name)) {
+					TabWidget widget = tabHost.getTabWidget();
+					widget.getChildAt(i).setVisibility(View.VISIBLE);
+					tab.setHidden(false);
+					tabHost.setCurrentTab(i);
+					if(tab.getScrollViewForTab() != null){
+						tab.getScrollViewForTab().scrollTo(0, 0);
+					}
+					return tab;
 				}
-				return tab;
 			}
 		}
 		return null;
 	}
-
-	public Tab getCurrentTab(){
-		return tabs.get(tabHost.getCurrentTab());
-	}
 	
 	public void hideTab(String name){
-		for (int i = 0; i < tabs.size(); i++) {
-			Tab tab = tabs.get(i);
-			if (tab.getName().equals(name)) {
-				TabWidget widget = tabHost.getTabWidget();
-				widget.getChildAt(i).setVisibility(View.GONE);
+		if (tabHost != null) {
+			for (int i = 0; i < tabs.size(); i++) {
+				Tab tab = tabs.get(i);
+				if (tab.getName().equals(name)) {
+					TabWidget widget = tabHost.getTabWidget();
+					widget.getChildAt(i).setVisibility(View.GONE);
+				}
 			}
 		}
+	}
+	
+	public void clearTabs() {
+		for (Tab tab : tabs) {
+			tab.clearViews();
+		}
+	}
+	
+	public Tab getCurrentTab(){
+		if (tabHost != null) {
+			return tabs.get(tabHost.getCurrentTab());
+		}
+		return null;
+	}
+	
+	public void setCurrentTab(Tab tab) {
+		showTab(tab.getName());
 	}
 
 	public Tab getTab(String name){
@@ -206,8 +224,16 @@ public class TabGroup extends Fragment {
 		return null;
 	}
 
-	public void setLabel(String label) {
-		this.label = label;
+	public LinkedList<Tab> getTabs() {
+		return tabs;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+
+	public String getRef() {
+		return this.ref;
 	}
 	
 	public String getLabel(){
@@ -228,10 +254,6 @@ public class TabGroup extends Fragment {
 		}
 	}
 
-	public LinkedList<Tab> getTabs() {
-		return tabs;
-	}
-
 	public String getArchEntType() {
 		return archEntType;
 	}
@@ -246,12 +268,6 @@ public class TabGroup extends Fragment {
 
 	public boolean isRelationship() {
 		return this.relType != null && this.archEntType == null;
-	}
-	
-	public void clearTabs() {
-		for (Tab tab : tabs) {
-			tab.clearViews();
-		}
 	}
 	
 	public void onShowTabGroup() {	
@@ -271,12 +287,14 @@ public class TabGroup extends Fragment {
 		}
 	}
 	
-	protected void resetTabGroupOnShow(){
-		tabHost.setCurrentTab(0);
-		if(!getTabs().isEmpty()){
-			for (Tab tab : getTabs()) {
-				if(tab.getScrollViewForTab() != null){
-					tab.getScrollViewForTab().scrollTo(0, 0);
+	protected void resetTabGroupOnShow() {
+		if (tabHost != null) {
+			tabHost.setCurrentTab(0);
+			if(!getTabs().isEmpty()){
+				for (Tab tab : getTabs()) {
+					if(tab.getScrollViewForTab() != null){
+						tab.getScrollViewForTab().scrollTo(0, 0);
+					}
 				}
 			}
 		}
@@ -285,9 +303,35 @@ public class TabGroup extends Fragment {
 	public void setOnShowTask(TabTask task) {
 		this.showTask = task;
 	}
+	
+	public void saveTo(Bundle savedInstanceState){
+		for (Tab tab : tabs) {
+			tab.saveTo(savedInstanceState);
+		}
+		
+		Tab tab = getCurrentTab();
+		if (tab != null) {
+			String tabLabel = tab.getName();
+			savedInstanceState.putString("currentTabLabel", tabLabel);
+		}
+	}
 
-	public String getGroupTag() {
-		return id;
+	public void restoreFrom(Bundle savedInstanceState){
+		tempSavedInstanceState = savedInstanceState;
+	}
+	
+	public void restoreFromTempBundle() {
+		if (tempSavedInstanceState != null) {
+			for(Tab tab : tabs){
+				tab.restoreFrom(tempSavedInstanceState);
+			}
+			
+			String tabLabel = tempSavedInstanceState.getString("currentTabLabel");
+			if (tabLabel != null) {
+				setCurrentTab(getTab(tabLabel));
+			}
+			tempSavedInstanceState = null;
+		}
 	}
 
 }
