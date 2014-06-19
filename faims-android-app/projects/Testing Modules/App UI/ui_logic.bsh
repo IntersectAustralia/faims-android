@@ -25,7 +25,7 @@ loadAttributes(){
     populateHierarchicalDropDown("App/Selects/HeirarchicalDropdown", "Hierarchical Dropdown");
     populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("Picture Gallery"));
     populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "Hierarchical Picture Gallery"); 
-    populatePictureGallery("main/normal/pictureGallerySelect", makePictureGallery("pictures"));
+    populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("pictures"));
     populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "hipictures");
     populateList("App/Lists/List", makeVocab("List"));  
 }
