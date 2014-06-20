@@ -42,6 +42,14 @@
             <Lists>
               <List/>
             </Lists>
+            <Maps>
+              <map/>
+              <startTimeLog/>
+              <startDistanceLog/>
+              <stopTrackLog/>
+              <gpsgo/>
+              <text/>
+            </Maps>
           </App>
         </faims>
       </instance>
@@ -59,7 +67,7 @@
         <input ref="Annotation" faims_certainty="false" faims_annotation="true" faims_attribute_type="measure">
           <label>Annotation Only</label>
         </input>
-        <input ref="Certainty" faims_certainty="true" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Certainty" faims_annotation="false" faims_attribute_type="freetext">
           <label>Certainty Only</label>
         </input>
         <input ref="Description" faims_attribute_name="Description" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
@@ -114,15 +122,15 @@
       </group>
       <group ref="Selects">
         <label>Selects</label>
-        <select1 ref="Radio" appearance="full" faims_attribute_name="Radio" faims_certainty="true" faims_annotation="true" faims_attribute_type="vocab">
-          <label>Radio</label>
+        <select1 ref="Radio" appearance="full" faims_attribute_name="Radio" faims_certainty="true" faims_attribute_type="vocab">
+          <label>Radio with annotations by default</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
           </item>
         </select1>
-        <select ref="Checkbox" faims_attribute_name="Checkbox" faims_certainty="true" faims_annotation="true" faims_attribute_type="vocab">
-          <label>Checkbox</label>
+        <select ref="Checkbox" faims_attribute_name="Checkbox" faims_certainty="true" faims_annotation="false" faims_attribute_type="vocab">
+          <label>Checkbox with no annotations by specification</label>
           <item>
             <label>placeholder</label>
             <value>placeholder</value>
@@ -166,6 +174,27 @@
             <value>placeholder</value>
           </item>
         </select1>
+      </group>
+      <group ref="Maps" faims_scrollable="false">
+        <label>maps</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+          <label>stuff</label>
+        </input>
+        <trigger ref="startTimeLog">
+          <label>start time log</label>
+        </trigger>
+        <trigger ref="startDistanceLog">
+          <label>start distance log</label>
+        </trigger>
+        <trigger ref="stopTrackLog">
+          <label>stop track log</label>
+        </trigger>
+        <trigger ref="gpsgo">
+          <label>internal gps</label>
+        </trigger>
+        <input ref="text" faims_attribute_type="freetext">
+          <label>stuff</label>
+        </input>
       </group>
     </group>
   </h:body>
