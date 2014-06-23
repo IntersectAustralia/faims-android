@@ -955,6 +955,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					for (Tab tab : tabGroup.getTabs()) {
 						if (hasChanges(tab)) {
 							hasChanges = true;
+							break;
 						}
 					}
 				}
