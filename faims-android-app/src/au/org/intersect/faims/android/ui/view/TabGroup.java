@@ -49,6 +49,8 @@ public class TabGroup extends Fragment {
 	private String relType;
 
 	private Bundle tempSavedInstanceState;
+
+	private boolean isVisible;
 	
 	public TabGroup() {
 	}
@@ -148,7 +150,6 @@ public class TabGroup extends Fragment {
 			
 			return tabHost;
 		}
-		
 		return null;
     }
 	
@@ -277,6 +278,7 @@ public class TabGroup extends Fragment {
 			lastTab = getCurrentTab();
 		}
 		resetTabGroupOnShow();
+		isVisible = true;
 	}
 	
 	public void onHideTabGroup() {
@@ -285,6 +287,7 @@ public class TabGroup extends Fragment {
 			tab.onHideTab();
 			lastTab = null;
 		}
+		isVisible = false;
 	}
 	
 	protected void resetTabGroupOnShow() {
@@ -301,7 +304,11 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void setOnShowTask(TabTask task) {
-		this.showTask = task;
+		if (isVisible) {
+			task.onShow();
+		} else {
+			this.showTask = task;
+		}
 	}
 	
 	public void saveTo(Bundle savedInstanceState){
