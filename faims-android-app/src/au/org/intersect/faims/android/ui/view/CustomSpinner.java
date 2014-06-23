@@ -116,7 +116,6 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	}
 
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

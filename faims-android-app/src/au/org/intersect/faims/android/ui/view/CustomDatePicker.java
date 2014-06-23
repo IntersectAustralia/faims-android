@@ -87,7 +87,6 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	}
 
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getCertainty(), currentCertainty);
 	}

@@ -98,7 +98,6 @@ public class EntityRecord extends SharedRecord {
 			}
 			
 			String parenttimestamp = null;
-			
 			String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);
@@ -110,17 +109,22 @@ public class EntityRecord extends SharedRecord {
 			
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 			
-			query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, clean(geometry));
-			st.bind(4, currentTimestamp);
-			st.bind(5, parenttimestamp);
-			st.bind(6, entityType);
-			st.step();
-			st.close();
-			st = null;
+			geometry = clean(geometry);
+			if (entityId == null || geometry != null) {
+				FLog.d("entity saved");	
+				
+				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				st.bind(2, userId);
+				st.bind(3, geometry);
+				st.bind(4, currentTimestamp);
+				st.bind(5, parenttimestamp);
+				st.bind(6, entityType);
+				st.step();
+				st.close();
+				st = null;
+			}
 			
 			HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 			// save entity attributes
@@ -180,8 +184,7 @@ public class EntityRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			String parenttimestamp = null;
-			
+			String parenttimestamp = null;			
 			String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);

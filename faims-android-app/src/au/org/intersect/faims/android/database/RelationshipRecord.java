@@ -136,8 +136,7 @@ public class RelationshipRecord extends SharedRecord {
 				uuid = relationshipId;
 			}
 			
-			String parenttimestamp = null;
-			
+			String parenttimestamp = null;			
 			String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);
@@ -149,17 +148,22 @@ public class RelationshipRecord extends SharedRecord {
 			
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 
-			query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, clean(geometry));
-			st.bind(4, currentTimestamp);
-			st.bind(5, parenttimestamp);
-			st.bind(6, relationshipType);
-			st.step();
-			st.close();
-			st = null;
+			geometry = clean(geometry);
+			if (relationshipId == null || geometry != null) {
+				FLog.d("relationship saved");
+				
+				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				st.bind(2, userId);
+				st.bind(3, geometry);
+				st.bind(4, currentTimestamp);
+				st.bind(5, parenttimestamp);
+				st.bind(6, relationshipType);
+				st.step();
+				st.close();
+				st = null;
+			}
 			
 			HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 			// save relationship attributes

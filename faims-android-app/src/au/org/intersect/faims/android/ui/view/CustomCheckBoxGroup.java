@@ -182,7 +182,6 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
 	@Override
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !(compareValues()) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);

@@ -104,12 +104,11 @@ saveEntity(tabgroup) {
 }
 
 loadEntity(tabgroup) {
-	clearEntity(tabgroup);
+	localId = getFieldValue(tabgroup + "/tab2/entities");
+	if (isNull(localId)) return;
 
-	entityId = getFieldValue(tabgroup + "/tab2/entities");
-	
-	if (isNull(entityId)) return;
-	
+	clearEntity(tabgroup);
+	entityId = localId;	
 	showTabGroup(tabgroup, entityId);
 }
 
@@ -220,12 +219,11 @@ saveRelationship(tabgroup) {
 }
 
 loadRelationship(tabgroup) {
-	clearRelationship(tabgroup);
+	localId = getFieldValue(tabgroup + "/tab2/relationships");
+	if (isNull(localId)) return;
 
-	relationshipId = getFieldValue(tabgroup + "/tab2/relationships");
-	
-	if (isNull(relationshipId)) return;
-	
+	clearRelationship(tabgroup);	
+	relationshipId = localId;
 	showTabGroup(tabgroup, relationshipId);
 }
 
