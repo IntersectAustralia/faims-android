@@ -79,7 +79,6 @@ import au.org.intersect.faims.android.ui.view.CustomSpinner;
 import au.org.intersect.faims.android.ui.view.FileListGroup;
 import au.org.intersect.faims.android.ui.view.HierarchicalPictureGallery;
 import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
-import au.org.intersect.faims.android.ui.view.ICustomFileView;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Picture;
 import au.org.intersect.faims.android.ui.view.PictureGallery;
@@ -206,6 +205,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			FLog.w("error sourcing script from assets", e);
 			showWarning("Logic Error", "Error encountered in logic commands");
 		}
+	}
+	
+	public Interpreter getInterpreter() {
+		return interpreter;
 	}
 
 	public void persistObject(String name) {
@@ -603,15 +606,42 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					+ ref);
 		}
 	}
+	
+	private TabGroup getTabGroup(String ref) throws Exception {
+		TabGroup tabGroup = uiRenderer.showTabGroup(ref);
+		if (tabGroup == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		return tabGroup;
+	}
+	
+	private Tab getTab(String ref) throws Exception {
+		Tab tab = uiRenderer.showTab(ref);
+		if (tab == null) {
+			throw new Exception("Cannot find tab " + ref);
+		}
+		return tab;
+	}
+	
+	private TabGroup getTabGroupFromTabLabel(String ref) throws Exception {
+		if (ref == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		String[] ids = ref.split("/");
+		if (ids.length < 2) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		String groupId = ids[0];
+		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
+		if (tabGroup == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		return tabGroup;
+	}
 
 	public void newTabGroup(String label) {
 		try {
 			TabGroup tabGroup = showTabGroup(label);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing new tab group "
-						+ label);
-				return;
-			}
 			tabGroup.clearTabs();
 		} catch (Exception e) {
 			FLog.e("error showing new tabgroup " + label, e);
@@ -622,12 +652,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void newTab(String label) {
 		try {
 			Tab tab = showTab(label);
-			if (tab == null) {
-				showWarning("Logic Error", "Error showing new tab group "
-						+ label);
-				return;
-			}
-
 			tab.clearViews();
 		} catch (Exception e) {
 			FLog.e("error showing new tab " + label, e);
@@ -637,11 +661,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public TabGroup showTabGroup(String label) {
 		try {
-			TabGroup tabGroup = uiRenderer.showTabGroup(label);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tabgroup " + label);
-				return null;
-			}
+			TabGroup tabGroup = getTabGroup(label);
 			activity.getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
@@ -651,38 +671,35 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public TabGroup showTabGroup(String id, final String uuid) {
+	public TabGroup showTabGroup(final String label, final String uuid) {
 		try {
-			final TabGroup tabGroup = uiRenderer.showTabGroup(id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tab group " + id);
-				return null;
-			}
+			final TabGroup tabGroup = getTabGroup(label);
 			activity.getActionBar().setTitle(tabGroup.getLabel());
 			tabGroup.setOnShowTask(new TabGroup.TabTask() {
 				public void onShow() {
-					if (tabGroup.getArchEntType() != null) {
-						showArchEntityTabGroup(uuid, tabGroup);
-					} else if (tabGroup.getRelType() != null) {
-						showRelationshipTabGroup(uuid, tabGroup);
+					try {
+						if (tabGroup.getArchEntType() != null) {
+							TabGroupHelper.showArchEntityTabGroup(BeanShellLinker.this, uuid, tabGroup);
+						} else if (tabGroup.getRelType() != null) {
+							TabGroupHelper.showRelationshipTabGroup(BeanShellLinker.this, uuid, tabGroup);
+						}
+					} catch (Exception e) {
+						FLog.e("error showing tabgroup " + label, e);
+						showWarning("Logic Error", "Error showing tab group " + label);
 					}
 				}
 			});	
 			return tabGroup;
 		} catch (Exception e) {
-			FLog.e("error showing tabgroup " + id, e);
-			showWarning("Logic Error", "Error showing tab group " + id);
+			FLog.e("error showing tabgroup " + label, e);
+			showWarning("Logic Error", "Error showing tab group " + label);
 		}
 		return null;
 	}
 
 	public Tab showTab(String label) {
 		try {
-			Tab tab = uiRenderer.showTab(label);
-			if (tab == null) {
-				showWarning("Logic Error", "Error showing tab " + label);
-				return null;
-			}
+			Tab tab = getTab(label);
 			return tab;
 		} catch (Exception e) {
 			FLog.e("error showing tab " + label, e);
@@ -691,39 +708,19 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 
-	public Tab showTab(String id, String uuid) {
+	public Tab showTab(String label, String uuid) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			String groupId = ids[0];
-			String tabId = ids[1];
-			TabGroup tabGroup = uiRenderer.getTabGroupByLabel(
-					groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			Tab tab = tabGroup.showTab(tabId);
-			if (tab == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
+			TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			Tab tab = getTab(label);
 			if (tabGroup.getArchEntType() != null) {
-				showArchEntityTab(uuid, tab);
+				TabGroupHelper.showArchEntityTab(this, uuid, tab);
 			} else if (tabGroup.getRelType() != null) {
-				showRelationshipTab(uuid, tab);
+				TabGroupHelper.showRelationshipTab(this, uuid, tab);
 			}
 			return tab;
 		} catch (Exception e) {
-			FLog.e("error showing tab " + id, e);
-			showWarning("Logic Error", "Error showing tab " + id);
+			FLog.e("error showing tab " + label, e);
+			showWarning("Logic Error", "Error showing tab " + label);
 		}
 		return null;
 	}
@@ -758,214 +755,65 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void saveTabGroup(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
 		try {
-			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error saving tab group " + id);
-				return;
-			}
-			if (tabGroup.getArchEntType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
+			final TabGroup tabGroup = getTabGroup(id);
+			HandlerThread thread = new HandlerThread("saving");
+			thread.start();
+			Handler handler = new Handler(thread.getLooper());
+			handler.post(new Runnable() {
 
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-								if (attributes != null) {
-									entityAttributes.addAll((List<EntityAttribute>) attributes);
-								}
-								
-								entityAttributes.addAll(getEntityAttributesFromTabGroup(tabGroup));
-								
-								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-								
-								interpreter.set("_saved_record_id", entityId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tabgroup " + id, e);
-								showWarning("Logic Error", "Error saving tab group " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id, e);
-							showWarning("Logic Error", "Error saving tab group " + id);
-						}
+				@Override
+				public void run() {
+					try {
+						showSaveDialog();
+						TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes);
+						hideSaveDialog();
+						executeOnUiThread(callback);					
+					} catch (Exception e) {
+						FLog.e("error saving tabgroup " + id, e);
+						showWarning("Logic Error", "Error saving tab group " + id);
 					}
+				}
 					
-				});
-			} else if (tabGroup.getRelType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-								if (attributes != null) {
-									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-								}
-								
-								relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(tabGroup));
-								
-								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-								
-								interpreter.set("_saved_record_id", relationshipId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tabgroup " + id, e);
-								showWarning("Logic Error", "Error saving tab group " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id, e);
-							showWarning("Logic Error", "Error saving tab group " + id);
-						}
-					}
-					
-				});
-			} else {
-				FLog.e("cannot save tabgroup with no type");
-				showWarning("Logic Error", "Cannot save tabgroup with no type");
-			}
+			});
 		} catch (Exception e) {
 			FLog.e("error saving tabgroup " + id, e);
 			showWarning("Logic Error", "Error saving tab group " + id);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public void saveTab(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			String groupId = ids[0];
-			String tabId = ids[1];
-			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			final Tab tab = tabGroup.getTab(tabId);
-			if (tab == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			if (tabGroup.getArchEntType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
+			final TabGroup tabGroup = getTabGroupFromTabLabel(id);
+			final Tab tab = getTab(id);
+			HandlerThread thread = new HandlerThread("saving");
+			thread.start();
+			Handler handler = new Handler(thread.getLooper());
+			handler.post(new Runnable() {
 
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-								if (attributes != null) {
-									entityAttributes.addAll((List<EntityAttribute>) attributes);
-								}
-								
-								entityAttributes.addAll(getEntityAttributesFromTab(tab));
-								
-								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-								
-								interpreter.set("_saved_record_id", entityId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tab " + id, e);
-								showWarning("Logic Error", "Error saving tab " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tab " + id, e);
-							showWarning("Logic Error", "Error saving tab " + id);
-						}
+				@Override
+				public void run() {
+					try {
+						showSaveDialog();
+						TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes);
+						hideSaveDialog();
+						executeOnUiThread(callback);	
+					} catch (Exception e) {
+						FLog.e("error saving tab " + id, e);
+						showWarning("Logic Error", "Error saving tab " + id);
 					}
-					
-				});
-			} else if (tabGroup.getRelType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-								if (attributes != null) {
-									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-								}
-								
-								relationshipAttributes.addAll(getRelationshipAttributesFromTab(tab));
-								
-								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-								
-								interpreter.set("_saved_record_id", relationshipId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tab " + id, e);
-								showWarning("Logic Error", "Error saving tab " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tab " + id, e);
-							showWarning("Logic Error", "Error saving tab " + id);
-						}
-					}
-					
-				});
-			} else {
-				FLog.e("cannot save tab with no type");
-				showWarning("Logic Error", "Cannot save tab with no type");
-			}
+				}
+			});
 		} catch (Exception e) {
 			FLog.e("error saving tab " + id, e);
 			showWarning("Logic Error", "Error saving tab " + id);
 		}
 	}
 
-	public void cancelTabGroup(String id, boolean warn) {
+	public void cancelTabGroup(String label, boolean warn) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return;
-			}
-			final TabGroup tabGroup = uiRenderer
-					.getTabGroupByLabel(id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return;
-			}
+			TabGroup tabGroup = getTabGroup(label);
 			if (warn) {
 				boolean hasChanges = false;
 				if (tabGroup.getArchEntType() != null
@@ -1007,38 +855,20 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				goBack();
 			}
 		} catch (Exception e) {
-			FLog.e("error cancelling tab group " + id, e);
-			showWarning("Logic Error", "Error cancelling tab group " + id);
+			FLog.e("error cancelling tab group " + label, e);
+			showWarning("Logic Error", "Error cancelling tab group " + label);
 		}
 	}
 
-	public void cancelTab(String id, boolean warn) {
+	public void cancelTab(String label, boolean warn) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			String groupId = ids[0];
-			final String tabId = ids[1];
-			final TabGroup tabGroup = uiRenderer
-					.getTabGroupByLabel(groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			Tab tab = tabGroup.getTab(tabId);
+			final TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			final Tab tab = getTab(label);
 			if (warn) {
 				if (hasChanges(tab)
 						&& (tabGroup.getArchEntType() != null || tabGroup
 								.getRelType() != null)) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(
-							this.activity);
-
+					AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
 					builder.setPositiveButton("OK",
@@ -1049,7 +879,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 									if (tabGroup.getTabs().size() == 1) {
 										goBack();
 									} else {
-										tabGroup.hideTab(tabId);
+										tabGroup.hideTab(tab.getName());
 									}
 								}
 							});
@@ -1058,7 +888,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									// User cancelled the dialog
-									tabGroup.showTab(tabId);
+									tabGroup.showTab(tab.getName());
 								}
 							});
 
@@ -1067,19 +897,19 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					if (tabGroup.getTabs().size() == 1) {
 						goBack();
 					} else {
-						tabGroup.hideTab(tabId);
+						tabGroup.hideTab(tab.getName());
 					}
 				}
 			} else {
 				if (tabGroup.getTabs().size() == 1) {
 					goBack();
 				} else {
-					tabGroup.hideTab(tabId);
+					tabGroup.hideTab(tab.getName());
 				}
 			}
 		} catch (Exception e) {
-			FLog.e("error cancelling tab " + id, e);
-			showWarning("Logic Error", "Error cancelling tab " + id);
+			FLog.e("error cancelling tab " + label, e);
+			showWarning("Logic Error", "Error cancelling tab " + label);
 		}
 	}
 
@@ -1110,275 +940,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		gpsDataManager.setGpsUpdateInterval(
 				gpsUpdateInterval);
 	}
-
-	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
-		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showArchEntityTab((ArchEntity) archEntityObj, tab);
-			}
-		} else {
-			FLog.w("cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
-			return;
-		}
-	}
-
-	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
-		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showRelationshipTab((Relationship) relationshipObj, tab);
-			}
-		} else {
-			FLog.w("cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
-			return;
-		}
-	}
-
-	private void showArchEntityTab(String uuid, Tab tab) {
-		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			showArchEntityTab((ArchEntity) archEntityObj, tab);
-		} else {
-			FLog.w("cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
-			return;
-		}
-	}
 	
-	private void showArchEntityTab(ArchEntity archEntity, Tab tab) {
-		try {
-			tab.clearViews();
-			for (EntityAttribute attribute : archEntity.getAttributes()) {
-				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getAttributeViews(attribute.getName());
-					if (views != null) {
-						setAttributeTab(attribute, views);
-					}
-				}
-			}
-		} catch (Exception e) {
-			FLog.e("error showing arch entity tab " + tab.getLabel(), e);
-			showWarning("Logic Error",
-					"Error showing tab " + tab.getLabel());
-		}
-	}
-	
-	private void showRelationshipTab(String uuid, Tab tab) {
-		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			showRelationshipTab((Relationship) relationshipObj, tab);
-		} else {
-			FLog.w("cannot show tab " + tab.getLabel() + " with relationship " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab " + tab.getLabel() + " with relationship " + uuid);
-			return;
-		}
-	}
-	
-	private void showRelationshipTab(Relationship relationship, Tab tab) {
-		try {
-			tab.clearViews();
-			for (RelationshipAttribute attribute : relationship.getAttributes()) {
-				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getAttributeViews(attribute.getName());
-					if (views != null) {
-						setAttributeTab(attribute, views);
-					}
-				}
-			}
-		} catch (Exception e) {
-			FLog.e("error showing relationship tab " + tab.getLabel(), e);
-			showWarning("Logic Error",
-					"Error showing tab " + tab.getLabel());
-		}
-	}
-
-	private void setAttributeTab(Attribute attribute, List<View> views) {
-		for (View v : views) {
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				if (customView.getAttributeName().equals(attribute.getName())) {
-					if (v instanceof FileListGroup) {
-						// add full path
-						FileListGroup fileList = (FileListGroup) v;
-						fileList.addFile(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof CameraPictureGallery) {
-						CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
-						// add full path
-						cameraGallery.addPicture(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof VideoGallery) {
-						VideoGallery videoGallery = (VideoGallery) v;
-						// add full path
-						videoGallery.addVideo(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else {
-						setAttributeView(customView.getRef(), attribute, customView);
-					}
-					customView.save();
-					break;
-				}
-			}
-		}
-	}
-
-	private void setAttributeView(String ref, Attribute attribute, ICustomView customView) {
-		setFieldValue(ref, attribute.getValue(customView.getAttributeType()));
-		setFieldCertainty(ref, attribute.getCertainty());
-		setFieldAnnotation(ref, attribute.getAnnotation(customView.getAttributeType()));
-		appendFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
-	}
-	
-	private List<EntityAttribute> getEntityAttributesFromTabGroup(TabGroup tabGroup) {
-		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getEntityAttributesFromTab(tab));
-		}
-		return attributes;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<EntityAttribute> getEntityAttributesFromTab(Tab tab) {
-		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		
-		List<View> views = tab.getAttributeViews();
-		if (views != null) {
-			for (View v : views) {
-				if (v instanceof ICustomView) {
-					ICustomView customView = (ICustomView) v;
-					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
-					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if (customView instanceof ICustomFileView) {
-						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								// strip out full path
-								String value = null;
-								
-								// attach new files
-								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
-									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-								} else {
-									value = stripAttachedFilePath(pair.getName());
-								}
-								
-								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, value, null, certainty));
-								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, value, certainty));
-								} else {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
-								}
-							}
-						}
-					} else if (v instanceof CustomCheckBoxGroup) {
-						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
-						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, pair.getName(), null, certainty));
-								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, pair.getName(), certainty));
-								} else {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), pair.getName(), null, null, certainty));
-								}
-							}
-						}
-					} else {
-						if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, customView.getValue(), null, certainty));
-						} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, customView.getValue(), certainty));
-						} else {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), customView.getValue(), null, null, certainty));
-						}
-					}
-				}
-			}
-		} 
-		
-		return attributes;
-	}
-
-	private List<RelationshipAttribute> getRelationshipAttributesFromTabGroup(TabGroup tabGroup) {
-		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getRelationshipAttributesFromTab(tab));
-		}
-		return attributes;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<RelationshipAttribute> getRelationshipAttributesFromTab(Tab tab) {
-		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-		
-		List<View> views = tab.getAttributeViews();
-		if (views != null) {
-			for (View v : views) {
-				if (v instanceof ICustomView) {
-					ICustomView customView = (ICustomView) v;
-					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
-					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if (customView instanceof ICustomFileView) {
-						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								// strip out full path
-								String value = null;
-								
-								// attach new files
-								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
-									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-								} else {
-									value = stripAttachedFilePath(pair.getName());
-								}
-								
-								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, value, certainty));
-								} else {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
-								}
-							}
-						}
-					} else if (v instanceof CustomCheckBoxGroup) {
-						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
-						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, pair.getName(), certainty));
-								} else {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), pair.getName(), null, certainty));
-								}
-							}
-						}
-					} else {
-						if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, customView.getValue(), certainty));
-						} else {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), customView.getValue(), null, certainty));
-						}
-					}
-				}
-			}
-		} 
-		
-		return attributes;
-	}
-
 	public void showToast(String message) {
 		try {
 			int duration = Toast.LENGTH_SHORT;
@@ -2977,6 +2539,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public void setHardwareBufferContents(String contents) {
 		this.hardwareBufferContents = contents;
+	}
+	
+	public Module getModule() {
+		return this.module;
 	}
 
 	public String getModuleName() {
