@@ -13,6 +13,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.util.StringUtil;
 

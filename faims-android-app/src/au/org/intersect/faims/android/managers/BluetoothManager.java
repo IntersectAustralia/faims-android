@@ -18,9 +18,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.ui.view.BeanShellLinker;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
