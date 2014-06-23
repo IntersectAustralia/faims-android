@@ -310,6 +310,25 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 			}
 		}
 	}
+	
+	public List<NameValuePair> getPairs() {
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		for (CustomImageView imageView : galleryImages) {
+			String name = imageView.getPicture().getId();
+			String value = name; // id == url
+			pairs.add(new NameValuePair(name, value));
+		}
+		return pairs;
+	}
+	
+	public void setPairs(List<NameValuePair> pairs) {
+		ArrayList<Picture> pictures = new ArrayList<Picture>();
+		for (NameValuePair pair : pairs) {
+			Picture picture = new Picture(pair.getName(), null, pair.getValue());
+			pictures.add(picture);
+		}
+		populate(pictures);
+	}
 
 	public void populate(List<Picture> pictures) {
 		removeSelectedImages();

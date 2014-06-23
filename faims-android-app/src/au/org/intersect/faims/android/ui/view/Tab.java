@@ -29,6 +29,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -678,6 +679,7 @@ public class Tab {
 	}
 	
 	public void saveTo(Bundle savedInstanceState) {
+		HashMap<String, Object> viewPairs = new HashMap<String, Object>();
 		HashMap<String, Object> viewValues = new HashMap<String, Object>(); 
 		HashMap<String, Object> viewCertainties = new HashMap<String, Object>(); 
 		HashMap<String, Object> viewAnnotations = new HashMap<String, Object>(); 
@@ -685,12 +687,23 @@ public class Tab {
 		for (View view : viewList) {
 			if (view instanceof ICustomView) {
 				String ref = ((ICustomView) view).getRef();
+				if (view instanceof FileListGroup) {
+					FileListGroup fileList = (FileListGroup) view;
+					viewPairs.put(ref, fileList.getPairs());
+				} else if (view instanceof CameraPictureGallery) {
+					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
+					viewPairs.put(ref, cameraGallery.getPairs());
+				} else if (view instanceof VideoGallery) {
+					VideoGallery videoGallery = (VideoGallery) view;
+					viewPairs.put(ref, videoGallery.getPairs());
+				}
 				viewValues.put(ref, beanShellLinker.getFieldValue(ref));
 				viewCertainties.put(ref, beanShellLinker.getFieldCertainty(ref));
 				viewAnnotations.put(ref, beanShellLinker.getFieldAnnotation(ref));
 				viewDirtyReasons.put(ref, beanShellLinker.getFieldDirty(ref));
 			}
 		}
+		savedInstanceState.putSerializable(getRef() + ":viewPairs", (Serializable) viewPairs);
 		savedInstanceState.putSerializable(getRef() + ":viewValues", (Serializable) viewValues);
 		savedInstanceState.putSerializable(getRef() + ":viewCertainties", (Serializable) viewCertainties);
 		savedInstanceState.putSerializable(getRef() + ":viewAnnotations", (Serializable) viewAnnotations);
@@ -701,6 +714,7 @@ public class Tab {
 
 	@SuppressWarnings("unchecked")
 	public void restoreFrom(Bundle savedInstanceState){
+		HashMap<String, Object> viewPairs = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewPairs");
 		HashMap<String, Object> viewValues = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewValues");
 		HashMap<String, Object> viewCertainties = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewCertainties");
 		HashMap<String, Object> viewAnnotations = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewAnnotations");
@@ -708,6 +722,16 @@ public class Tab {
 		for(View view : viewList){
 			if (view instanceof ICustomView) {
 				String ref = ((ICustomView) view).getRef();
+				if (view instanceof FileListGroup) {
+					FileListGroup fileList = (FileListGroup) view;
+					fileList.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				} else if (view instanceof CameraPictureGallery) {
+					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
+					cameraGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				} else if (view instanceof VideoGallery) {
+					VideoGallery videoGallery = (VideoGallery) view;
+					videoGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				}
 				beanShellLinker.setFieldValue(ref, viewValues.get(ref));
 				beanShellLinker.setFieldCertainty(ref, viewCertainties.get(ref));
 				beanShellLinker.setFieldAnnotation(ref, viewAnnotations.get(ref));

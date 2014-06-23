@@ -233,6 +233,27 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 			}
 		}
 	}
+	
+	public List<NameValuePair> getPairs() {
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+
+			if (view instanceof CustomCheckBox) {
+				CustomCheckBox cb = (CustomCheckBox) view;
+				String name = cb.getText().toString();
+				String value = cb.getValue();
+				pairs.add(new NameValuePair(name, value));
+			}
+		}
+		
+		return pairs;
+	}
+	
+	public void setPairs(List<NameValuePair> pairs) {
+		populate(pairs);
+	}
 
 	public void populate(List<NameValuePair> pairs) {
 		removeAllViews();
