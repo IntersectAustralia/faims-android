@@ -101,5 +101,10 @@
     <string name="sync_has_changes">Ready to sync</string>
     <string name="sync_syncing">Sync in progress</string>
     <string name="sync_error">Sync error</string>
+    
+    <string name="bluetooth_active">Bluetooth active</string>
+    <string name="bluetooth_connected">Bluetooth connected</string>
+    <string name="bluetooth_disconnected">Bluetooth disconnected</string>
+    <string name="bluetooth_error">Bluetooth error</string>
 
 </resources>
