@@ -29,7 +29,9 @@ import com.google.inject.Singleton;
 public class BluetoothManager implements IFAIMSRestorable {
 	
 	public interface BluetoothListener {
+		public void onConnect();
 		public void onInput(String input);
+		public void onDisconnect();
 	}
 	
 	public enum BluetoothStatus {
@@ -240,6 +242,9 @@ public class BluetoothManager implements IFAIMSRestorable {
 					bluetoothSocket = (BluetoothSocket) m.invoke(bluetoothDevice, 1);
 					bluetoothSocket.connect();
 					updateBluetoothStatus(BluetoothStatus.ACTIVE);
+					if (listener != null) {
+						listener.onConnect();
+					}
 				} catch (Exception e) {
 					FLog.e("error trying to create bluetooth socket", e);
 					
@@ -260,6 +265,9 @@ public class BluetoothManager implements IFAIMSRestorable {
 				bluetoothSocket.close();
 				bluetoothSocket = null;
 				updateBluetoothStatus(BluetoothStatus.CONNECTED);
+				if (listener != null) {
+					listener.onDisconnect();
+				}
 			} catch (Exception e) {
 				FLog.e("error trying to destroy bluetooth socket", e);
 				updateBluetoothStatus(BluetoothStatus.ERROR);
@@ -286,7 +294,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 	    		}
 	        } catch (Exception e) {
 	        	FLog.e("error trying to read input", e);
-	        	//beanShellLinker.showToast("bluetooth read failure");
 	        	destroyBluetoothSocket();
 			}
         } else {
@@ -302,7 +309,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 				writeStringToOutput(output + "\r", bluetoothSocket.getOutputStream());
 			} catch (Exception e) {
 				FLog.e("error trying to write output", e);
-				//beanShellLinker.showToast("bluetooth write failure");
 				destroyBluetoothSocket();
 			}
 		} else {

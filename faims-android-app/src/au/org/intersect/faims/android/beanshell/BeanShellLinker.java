@@ -3155,6 +3155,14 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				set("_bluetooth_message", input);
 				execute(callback);
 			}
+			
+			@Override
+			public void onConnect() {	
+			}
+			
+			@Override
+			public void onDisconnect() {	
+			}
 		}, interval * 1000);
 	}
 	

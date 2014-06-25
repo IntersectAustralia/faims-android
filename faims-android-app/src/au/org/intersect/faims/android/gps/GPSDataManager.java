@@ -91,8 +91,27 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
         } else {
         	return;
         }
-		
-		if (!hasValidExternalGPSSignal()) {
+        
+		checkValidExternalGPSSignal();		
+		bluetoothManager.clearMessages();
+	}
+    
+    @Override
+    public void onConnect() {
+    	setGGAMessage(null);
+    	setBODMessage(null);
+    	checkValidExternalGPSSignal();
+    }
+    
+    @Override
+    public void onDisconnect() {
+    	setGGAMessage(null);
+    	setBODMessage(null);
+    	checkValidExternalGPSSignal();
+    }
+    
+    private void checkValidExternalGPSSignal() {
+    	if (!hasValidExternalGPSSignal()) {
 			if (hasValidGGAMessage()) {
 				setHasValidExternalGPSSignal(true);
 			}
@@ -101,9 +120,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 				setHasValidExternalGPSSignal(false);
 			}
 		}
-		
-		bluetoothManager.clearMessages();
-	}
+    }
     
     private boolean hasValidGGAMessage() {
     	GGASentence sentence = null;
