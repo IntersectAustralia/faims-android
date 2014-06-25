@@ -750,6 +750,27 @@ public class ShowModuleActivity extends FragmentActivity implements
 			menu.findItem(R.id.action_sync_inactive).setVisible(true);
 			break;
 		}
+		
+		// bluetooth status
+		menu.findItem(R.id.action_bluetooth_active).setVisible(false);
+		menu.findItem(R.id.action_bluetooth_connected).setVisible(false);
+		menu.findItem(R.id.action_bluetooth_disconnected).setVisible(false);
+		menu.findItem(R.id.action_bluetooth_error).setVisible(false);
+		
+		switch (bluetoothManager.getBluetoothStatus()) {
+		case ACTIVE:
+			menu.findItem(R.id.action_bluetooth_active).setVisible(true);
+			break;
+		case CONNECTED:
+			menu.findItem(R.id.action_bluetooth_connected).setVisible(true);
+			break;
+		case ERROR:
+			menu.findItem(R.id.action_bluetooth_error).setVisible(true);
+			break;
+		default:
+			menu.findItem(R.id.action_bluetooth_disconnected).setVisible(true);
+			break;
+		}
 
 		// follow status
 		MenuItem distance_text = menu.findItem(R.id.distance_text);

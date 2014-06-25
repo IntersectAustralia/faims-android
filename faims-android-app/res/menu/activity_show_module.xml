@@ -1,5 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
+    
+  <item android:id="@+id/action_bluetooth_active"
+    android:title="@string/bluetooth_active"
+    android:icon="@drawable/action_bluetooth_a" 
+    android:showAsAction="ifRoom"/>
+  <item android:id="@+id/action_bluetooth_connected"
+    android:title="@string/bluetooth_connected"
+    android:icon="@drawable/action_bluetooth" 
+    android:showAsAction="ifRoom"/>
+  <item android:id="@+id/action_bluetooth_disconnected"
+    android:title="@string/bluetooth_disconnected"
+    android:icon="@drawable/action_bluetooth_d" 
+    android:showAsAction="ifRoom"/>
+  <item android:id="@+id/action_bluetooth_error"
+    android:title="@string/bluetooth_error"
+    android:icon="@drawable/action_bluetooth_e" 
+    android:showAsAction="ifRoom"/>
   <item android:id="@+id/action_gps_inactive"
     android:title="@string/gps_inactive"
     android:icon="@drawable/action_gps_inactive" 

@@ -25,9 +25,48 @@ loadAttributes(){
     populateHierarchicalDropDown("App/Selects/HeirarchicalDropdown", "Hierarchical Dropdown");
     populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("Picture Gallery"));
     populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "Hierarchical Picture Gallery"); 
-    populatePictureGallery("main/normal/pictureGallerySelect", makePictureGallery("pictures"));
+    populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("pictures"));
     populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "hipictures");
     populateList("App/Lists/List", makeVocab("List"));  
 }
 
 loadAttributes();
+onEvent("App/Maps/gpsgo", "click", "startInternalGPS()");
+
+setGPSUpdateInterval(4);
+
+onEvent("App/Maps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("App/Maps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("App/Maps/stopTrackLog", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+    List attributes = createAttributeList();
+    attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+    saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+    List attributes = createAttributeList();
+    attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+    saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+    position = getGPSPosition();
+    if (position == null) return;
+
+    attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+    attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+    attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+    attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+    attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+    attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+    
+    positionProj = getGPSPositionProjected();
+    Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+    ArrayList l = new ArrayList();
+    l.add(p);
+    
+    saveArchEnt(null, "gps_track", l, attributes);
+}
+
