@@ -89,8 +89,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
         	setBODMessage(nmeaMessage);
         	setExternalGPSTimestamp(System.currentTimeMillis());
         } else {
-        	setGGAMessage(null);
-        	setBODMessage(null);
+        	return;
         }
 		
 		if (!hasValidExternalGPSSignal()) {
@@ -102,6 +101,8 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 				setHasValidExternalGPSSignal(false);
 			}
 		}
+		
+		bluetoothManager.clearMessages();
 	}
     
     private boolean hasValidGGAMessage() {
