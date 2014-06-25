@@ -24,48 +24,52 @@ import com.nutiteq.geometry.Geometry;
 public class TabGroupHelper {
 	
 	@SuppressWarnings("unchecked")
-	public static void saveTabGroup(BeanShellLinker linker, TabGroup tabGroup, String uuid, List<Geometry> geometry, final List<? extends Attribute> attributes) throws Exception {
-		if (tabGroup.getArchEntType() != null) {
-			List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-			if (attributes != null) {
-				entityAttributes.addAll((List<EntityAttribute>) attributes);
+	public static void saveTabGroup(BeanShellLinker linker, TabGroup tabGroup, String uuid, List<Geometry> geometry, final List<? extends Attribute> attributes, boolean newRecord) throws Exception {
+		synchronized(TabGroupHelper.class) {
+			if (tabGroup.getArchEntType() != null) {
+				List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+				if (attributes != null) {
+					entityAttributes.addAll((List<EntityAttribute>) attributes);
+				}
+				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));			
+				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);			
+				linker.getInterpreter().set("_saved_record_id", entityId);
+			} else if (tabGroup.getRelType() != null) {
+				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+				if (attributes != null) {
+					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+				}	
+				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
+				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);
+				linker.getInterpreter().set("_saved_record_id", relationshipId);
+			} else {
+				throw new Exception("no type specified for tabgroup");
 			}
-			entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));			
-			String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);			
-			linker.getInterpreter().set("_saved_record_id", entityId);
-		} else if (tabGroup.getRelType() != null) {
-			List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-			if (attributes != null) {
-				relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-			}	
-			relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
-			String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-			linker.getInterpreter().set("_saved_record_id", relationshipId);
-		} else {
-			throw new Exception("no type specified for tabgroup");
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void saveTab(BeanShellLinker linker, TabGroup tabGroup, Tab tab, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes) throws Exception {	
-		if (tabGroup.getArchEntType() != null) {
-			List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-			if (attributes != null) {
-				entityAttributes.addAll((List<EntityAttribute>) attributes);
+	public static void saveTab(BeanShellLinker linker, TabGroup tabGroup, Tab tab, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes, boolean newRecord) throws Exception {
+		synchronized(TabGroupHelper.class) {
+			if (tabGroup.getArchEntType() != null) {
+				List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+				if (attributes != null) {
+					entityAttributes.addAll((List<EntityAttribute>) attributes);
+				}
+				entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab));
+				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
+				linker.getInterpreter().set("_saved_record_id", entityId);
+			} else if (tabGroup.getRelType() != null) {			
+				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+				if (attributes != null) {
+					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+				}		
+				relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));			
+				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);		
+				linker.getInterpreter().set("_saved_record_id", relationshipId);
+			} else {
+				throw new Exception("no type specified for tabgroup");
 			}
-			entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab));
-			String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-			linker.getInterpreter().set("_saved_record_id", entityId);
-		} else if (tabGroup.getRelType() != null) {			
-			List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-			if (attributes != null) {
-				relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-			}		
-			relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));			
-			String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);		
-			linker.getInterpreter().set("_saved_record_id", relationshipId);
-		} else {
-			throw new Exception("no type specified for tabgroup");
 		}
 	}
 	

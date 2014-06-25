@@ -103,6 +103,26 @@ showTab(String ref, String id) {
 }
 
 /**
+  * Enables Autosaving for a tab group with the following reference.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship. Can be null to save new record
+  * @return the id of the entity or relationship to be saved. This will not generate a new entity or relationship immediately.
+  */
+enableAutoSaveOnTabGroup(String ref, String id){
+    return linker.enableAutoSaveOnTabGroup(ref, id);
+}
+
+/**
+  * Disable Autosaving for a tab group with the following reference.
+  *
+  * @param ref the reference of the tab group
+  */
+disableAutoSaveOnTabGroup(String ref){
+    linker.disableAutoSaveOnTabGroup(ref);
+}
+
+/**
   * Save the tab group with the following reference.
   *
   * @param ref the reference of the tab group

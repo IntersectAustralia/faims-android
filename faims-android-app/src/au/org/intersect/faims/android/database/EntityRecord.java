@@ -65,7 +65,7 @@ public class EntityRecord extends SharedRecord {
 	}
 
 	public String saveArchEnt(String entityId, String entityType,
-			String geometry, List<EntityAttribute> attributes) throws Exception {
+			String geometry, List<EntityAttribute> attributes, boolean newEntity) throws Exception {
 		FLog.d("entityId:" + entityId);
 		FLog.d("entityType:" + entityType);
 		FLog.d("geometry:" + geometry);
@@ -110,7 +110,7 @@ public class EntityRecord extends SharedRecord {
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 			
 			geometry = clean(geometry);
-			if (entityId == null || geometry != null) {
+			if (newEntity || geometry != null) {
 				FLog.d("entity saved");	
 				
 				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;

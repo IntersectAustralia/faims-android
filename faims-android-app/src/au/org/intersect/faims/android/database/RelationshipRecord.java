@@ -105,7 +105,7 @@ public class RelationshipRecord extends SharedRecord {
 	}
 	
 	public String saveRel(String relationshipId, String relationshipType,
-			String geometry, List<RelationshipAttribute> attributes) throws Exception {
+			String geometry, List<RelationshipAttribute> attributes, boolean newRelationship) throws Exception {
 		FLog.d("relationshipId:" + relationshipId);
 		FLog.d("relationshipType:" + relationshipType);
 		FLog.d("geometry:" + geometry);
@@ -149,7 +149,7 @@ public class RelationshipRecord extends SharedRecord {
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 
 			geometry = clean(geometry);
-			if (relationshipId == null || geometry != null) {
+			if (newRelationship || geometry != null) {
 				FLog.d("relationship saved");
 				
 				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;

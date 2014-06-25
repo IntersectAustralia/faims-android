@@ -15,19 +15,28 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
+
+import com.google.inject.Inject;
 
 public class CameraPictureGallery extends PictureGallery implements ICustomFileView {
 
+	@Inject
+	AutoSaveManager autoSaveManager;
+	
 	private boolean sync;
 
 	public CameraPictureGallery(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public CameraPictureGallery(Context context, FormAttribute attribute, String ref) {
 		super(context, attribute, ref, true);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = attribute.sync;
 	}
 	
@@ -137,6 +146,7 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 	public void addPicture(String value) {
 		Picture picture = new Picture(value, null, value);
 		addSelectedImage(addGallery(picture));
+		autoSaveManager.save();
 	}
 
 }

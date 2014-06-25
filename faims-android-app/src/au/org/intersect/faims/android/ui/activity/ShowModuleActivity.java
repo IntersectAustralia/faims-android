@@ -52,6 +52,7 @@ import au.org.intersect.faims.android.database.DatabaseChangeListener;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.net.ServerDiscovery;
@@ -144,6 +145,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Inject
 	UIRenderer uiRenderer;
 
+	@Inject
+	AutoSaveManager autoSaveManager;
+	
 	private WifiBroadcastReceiver broadcastReceiver;
 
 	private BusyDialog busyDialog;
@@ -376,6 +380,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 				(LocationManager) getSystemService(LOCATION_SERVICE), this);
 		beanShellLinker.init(ShowModuleActivity.this, module);
 		uiRenderer.init(ShowModuleActivity.this);
+		autoSaveManager.init();
 	}
 
 	private void setupBeanshell() {
@@ -434,6 +439,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		bluetoothManager.destroy();
 		gpsDataManager.destroy();
 		beanShellLinker.destroy();
+		autoSaveManager.destroy();
 		destroy();
 		super.onDestroy();
 	}
@@ -460,6 +466,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			activityData.saveTo(savedInstanceState);
 			activityData.setUserId(databaseManager.getUserId());
 			uiRenderer.saveTo(savedInstanceState);
+			autoSaveManager.saveTo(savedInstanceState);
 		} catch (Exception e) {
 			FLog.e("error saving bundle", e);
 		}
@@ -474,6 +481,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			activityData.restoreFrom(savedInstanceState);
 			databaseManager.setUserId(activityData.getUserId());
 			uiRenderer.restoreFrom(savedInstanceState);
+			autoSaveManager.restoreFrom(savedInstanceState);
 		} catch (Exception e) {
 			FLog.e("error restoring bundle", e);
 		}

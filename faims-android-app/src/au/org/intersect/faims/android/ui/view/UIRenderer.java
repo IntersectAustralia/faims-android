@@ -81,6 +81,10 @@ public class UIRenderer {
         this.currentTabGroup = null;
         this.styles = new HashMap<String, Map<String,String>>();
     }
+	
+	public TabGroup getTabGroup(String name) {
+		return this.tabGroupMap.get(name);
+	}
 
     public TabGroup showTabGroup(int index) {
     	FragmentManager fm = activityRef.get().getSupportFragmentManager();
@@ -89,7 +93,7 @@ public class UIRenderer {
     	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
     	if (tabGroup == this.currentTabGroup) {
-    		tabGroup.resetTabGroupOnShow();
+    		tabGroup.onShowTabGroup();
     		return currentTabGroup;
     	}
 	    
@@ -113,7 +117,7 @@ public class UIRenderer {
     	if (tabGroup == null) return null;
     	invalidateListViews(tabGroup);
     	if (tabGroup == this.currentTabGroup){
-    		tabGroup.resetTabGroupOnShow();
+    		tabGroup.onShowTabGroup();
     		return currentTabGroup;
     	}
     	
