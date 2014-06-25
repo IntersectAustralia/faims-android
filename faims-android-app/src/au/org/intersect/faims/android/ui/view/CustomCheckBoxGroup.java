@@ -6,9 +6,13 @@ import java.util.List;
 import android.content.Context;
 import android.view.View;
 import android.widget.LinearLayout;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
+
+import com.google.inject.Inject;
 
 public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
@@ -16,12 +20,16 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 
 		@Override
 		public void onClick(View v) {
-			if(onClickListener != null) {
-				onClickListener.onClick(v);
+			if(listener != null) {
+				listener.onClick(v);
 			}
+			notifySave();
 		}
 		
 	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 	
 	private String ref;
 	private List<NameValuePair> currentValues;
@@ -34,26 +42,29 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
-	
-	private CheckBoxGroupOnClickListener listener;
-	private OnClickListener onClickListener;
+
+	private OnClickListener listener;
+	private CheckBoxGroupOnClickListener customListener;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
+		this.customListener = new CheckBoxGroupOnClickListener();
 	}
 	
 	public CustomCheckBoxGroup(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		setLayoutParams(new LayoutParams(
 	                LayoutParams.MATCH_PARENT,
 	                LayoutParams.MATCH_PARENT));
 	    setOrientation(LinearLayout.VERTICAL);
 		
-	    this.listener = new CheckBoxGroupOnClickListener();
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+	    this.customListener = new CheckBoxGroupOnClickListener();
 	}
 
 	@Override
@@ -100,6 +111,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 				}
 			}
 		}
+		notifySave();
 	}
 
 	@Override
@@ -110,6 +122,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	@Override
@@ -120,6 +133,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		notifySave();
 	}
 
 	@Override
@@ -231,6 +245,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 				}
 			}
 		}
+		notifySave();
 	}
 	
 	public List<NameValuePair> getPairs() {
@@ -260,7 +275,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 			CustomCheckBox checkBox = new CustomCheckBox(this.getContext());
 			checkBox.setText(pair.getName());
 			checkBox.setValue(pair.getValue());
-			checkBox.setOnClickListener(listener);
+			checkBox.setOnClickListener(customListener);
 			addView(checkBox);
 		}
 	}
@@ -285,9 +300,16 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		certaintyEnabled = enabled;
 	}
 	
-	public void setOnClickListener(OnClickListener onClickListener)
+	@Override
+	public void setOnClickListener(OnClickListener l)
 	{
-		this.onClickListener = onClickListener;
+		this.listener = l;
+	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
 	}
 
 }

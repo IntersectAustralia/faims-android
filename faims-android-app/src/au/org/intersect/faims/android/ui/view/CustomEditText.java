@@ -3,11 +3,39 @@ package au.org.intersect.faims.android.ui.view;
 import java.util.List;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.EditText;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
+import com.google.inject.Inject;
+
 public class CustomEditText extends EditText implements ICustomView {
+	
+	private class CustomEditTextTextWatcher implements TextWatcher {
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			notifySave();
+		}
+
+		@Override
+		public void afterTextChanged(Editable s) {
+		}
+		
+	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 
 	private String ref;
 	private String currentValue;
@@ -21,15 +49,21 @@ public class CustomEditText extends EditText implements ICustomView {
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
 	
+	private CustomEditTextTextWatcher customTextWatcher;
+	
 	public CustomEditText(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
-	
+
 	public CustomEditText(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+		customTextWatcher = new CustomEditTextTextWatcher();
+		addTextChangedListener(customTextWatcher);
 	}
 
 	public String getAttributeName() {
@@ -50,6 +84,7 @@ public class CustomEditText extends EditText implements ICustomView {
 	
 	public void setValue(String value) {
 		setText(value);
+		notifySave();
 	}
 
 	public float getCertainty() {
@@ -58,6 +93,7 @@ public class CustomEditText extends EditText implements ICustomView {
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	public String getAnnotation() {
@@ -66,6 +102,7 @@ public class CustomEditText extends EditText implements ICustomView {
 
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		notifySave();
 	}
 	
 	public boolean isDirty() {
@@ -137,4 +174,11 @@ public class CustomEditText extends EditText implements ICustomView {
 	public void setCertaintyEnabled(boolean enabled) {
 		certaintyEnabled = enabled;
 	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
+	
 }

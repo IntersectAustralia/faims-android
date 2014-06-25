@@ -3,13 +3,29 @@ package au.org.intersect.faims.android.ui.view;
 import java.util.List;
 
 import android.content.Context;
-import android.text.format.Time;
 import android.widget.DatePicker;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
+import com.google.inject.Inject;
+
 public class CustomDatePicker extends DatePicker implements ICustomView {
+	
+	private class CustomDatePickerOnDateChangedListener implements OnDateChangedListener {
+
+		@Override
+		public void onDateChanged(DatePicker view, int year, int monthOfYear,
+				int dayOfMonth) {
+			notifySave();
+		}
+		
+	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 
 	private String ref;
 	private String currentValue;
@@ -20,16 +36,23 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
+
+	private CustomDatePickerOnDateChangedListener customChangeListener;
 	
 	public CustomDatePicker(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public CustomDatePicker(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+		customChangeListener = new CustomDatePickerOnDateChangedListener();
+		init(0, 0, 0, customChangeListener);
+		DateUtil.setDatePicker(this, DateUtil.getCurrentTimestampGMT());
 	}
 
 	public String getAttributeName() {
@@ -50,6 +73,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	public boolean isDirty() {
@@ -74,14 +98,13 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	
 	public void setValue(String value) {
 		DateUtil.setDatePicker(this, value);
+		notifySave();
 	}
 
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
-		Time now = new Time();
-		now.setToNow();
-		updateDate(now.year, now.month, now.monthDay);
+		setValue(DateUtil.getCurrentTimestampGMT());
 		setCertainty(1);
 		save();
 	}
@@ -140,4 +163,11 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	public void setCertaintyEnabled(boolean enabled) {
 		certaintyEnabled = enabled;
 	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
+	
 }

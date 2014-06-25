@@ -106,15 +106,14 @@ public class HierarchicalPictureGallery extends PictureGallery {
 		
 		// picture galleries
 		if (terms == null) {
-			for(CustomImageView image : galleryImages)
-			{
+			for (CustomImageView image : galleryImages) {
 				// Set listener if not already selected, otherwise remove
 				if(selectedImages == null || (selectedImages != null && !selectedImages.contains(image))) {
-					image.setOnClickListener(this.pictureGalleryListener);
+					image.setOnClickListener(this.customListener);
 				} else {
 					image.setOnClickListener(null);
 				}
-			}
+	        }
 		} else {
 			// hierarchical picture galleries
 			for(VocabularyTerm term : currentTerms) {
@@ -127,9 +126,9 @@ public class HierarchicalPictureGallery extends PictureGallery {
 						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(null);						
 					} else if(isParentTerm && selected) {
 						// set only internal listener if a parent term and is selected
-						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.listener);
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.internalListener);
 					} else {
-						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.pictureGalleryListener);
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.customListener);
 					}
 				}
 			}
@@ -217,6 +216,7 @@ public class HierarchicalPictureGallery extends PictureGallery {
 			}
 			index++;
 		}
+		notifySave();
 	}
 	
 	@Override
