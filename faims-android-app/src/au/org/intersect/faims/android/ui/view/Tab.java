@@ -53,7 +53,7 @@ public class Tab {
 	@Inject
 	Arch16n arch16n;
 
-	private static final String FREETEXT = "freetext";
+	public static final String FREETEXT = "freetext";
 
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;

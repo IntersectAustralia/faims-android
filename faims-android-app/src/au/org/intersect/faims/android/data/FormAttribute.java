@@ -5,6 +5,8 @@ import java.util.Vector;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.form.api.FormEntryPrompt;
 
+import au.org.intersect.faims.android.ui.view.Tab;
+
 public class FormAttribute {
 	
 	public int controlType;
@@ -32,7 +34,7 @@ public class FormAttribute {
 		attribute.questionAppearance = input.getQuestion().getAppearanceAttr();
 		attribute.name = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		attribute.type = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
-		if (attribute.type == null) attribute.type = "freetext";
+		if (attribute.type == null) attribute.type = Tab.FREETEXT;
 		attribute.certainty = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_certainty"));
 		attribute.annotation = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_annotation"));
 		attribute.info = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_info"));
