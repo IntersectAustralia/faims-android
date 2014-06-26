@@ -31,6 +31,8 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	private String currentValue;
 	private float certainty;
 	private float currentCertainty;
+	private String annotation;
+	private String currentAnnotation;
 	private boolean dirty;
 	private String dirtyReason;
 	private boolean annotationEnabled;
@@ -106,30 +108,32 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		dirtyReason = null;
 		DateUtil.setDatePicker(this);
 		setCertainty(1);
+		setAnnotation("");
 		save();
 	}
 
 	public boolean hasChanges() {
 		return !Compare.equal(getValue(), currentValue) || 
-				!Compare.equal(getCertainty(), currentCertainty);
+				!Compare.equal(getCertainty(), currentCertainty) ||
+				!Compare.equal(getAnnotation(), currentAnnotation);
 	}
 	
 	@Override
 	public void save() {
 		currentValue = getValue();
 		currentCertainty = getCertainty();
+		currentAnnotation = getAnnotation();
 	}
 
 	@Override
 	public String getAnnotation() {
-		// TODO Auto-generated method stub
-		return null;
+		return annotation;
 	}
 
 	@Override
 	public void setAnnotation(String annotation) {
-		// TODO Auto-generated method stub
-		
+		this.annotation = annotation;
+		notifySave();
 	}
 
 	@Override
