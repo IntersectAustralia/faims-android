@@ -51,7 +51,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 		reset();
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		setOnTimeChangedListener(customChangeListener);
-		DateUtil.setTimePicker(this, DateUtil.getCurrentTimestampGMT());
+		DateUtil.setTimePicker(this);
 	}
 
 	public String getAttributeName() {

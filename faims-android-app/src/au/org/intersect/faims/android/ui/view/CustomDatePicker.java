@@ -52,7 +52,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		reset();
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		init(0, 0, 0, customChangeListener);
-		DateUtil.setDatePicker(this, DateUtil.getCurrentTimestampGMT());
+		DateUtil.setDatePicker(this);
 	}
 
 	public String getAttributeName() {

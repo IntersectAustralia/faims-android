@@ -13,13 +13,31 @@ public class DateUtil {
 	
 	public static void setDatePicker(DatePicker date, String value) {
 		String[] tokens = value.split("/");
-		date.updateDate(Integer.valueOf(tokens[2]), Integer.valueOf(tokens[1]) - 1, Integer.valueOf(tokens[0]));
+		if (tokens.length == 3) {
+			date.updateDate(Integer.valueOf(tokens[2]), Integer.valueOf(tokens[1]) - 1, Integer.valueOf(tokens[0]));
+		} else {
+			FLog.e("cannot set datepicker with value " + value);
+		}
+	}
+	
+	public static void setDatePicker(DatePicker date) {
+		String currentDate = getCurrentTimestampGMT("dd/MM/yyyy");
+		setDatePicker(date, currentDate);
 	}
 	
 	public static void setTimePicker(TimePicker time, String value) {
 		String[] tokens = value.split(":");
-		time.setCurrentHour(Integer.valueOf(tokens[0]));
-		time.setCurrentMinute(Integer.valueOf(tokens[1]));
+		if (tokens.length == 2) {
+			time.setCurrentHour(Integer.valueOf(tokens[0]));
+			time.setCurrentMinute(Integer.valueOf(tokens[1]));
+		} else {
+			FLog.e("cannot set timepicker with value " + value);
+		}
+	}
+	
+	public static void setTimePicker(TimePicker time) {
+		String currentTime = getCurrentTimestampGMT("HH:mm");
+		setTimePicker(time, currentTime);
 	}
 	
 	public static String getDate(DatePicker date) {
