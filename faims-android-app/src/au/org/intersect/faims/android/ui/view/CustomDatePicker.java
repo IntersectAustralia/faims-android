@@ -104,7 +104,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
-		setValue(DateUtil.getCurrentTimestampGMT());
+		DateUtil.setDatePicker(this);
 		setCertainty(1);
 		save();
 	}

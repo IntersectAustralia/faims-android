@@ -103,7 +103,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
-		setValue(DateUtil.getCurrentTimestampGMT());
+		DateUtil.setTimePicker(this);
 		setCertainty(1);
 		save();
 	}
