@@ -376,11 +376,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 		arch16n.init(module.getDirectoryPath().getPath(), module.name);
 		fileManager.init();
 		bluetoothManager.init(this);
-		gpsDataManager.init(
-				(LocationManager) getSystemService(LOCATION_SERVICE), this);
-		beanShellLinker.init(ShowModuleActivity.this, module);
-		uiRenderer.init(ShowModuleActivity.this);
-		autoSaveManager.init();
+		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
+		beanShellLinker.init(this, module);
+		uiRenderer.init(this);
+		autoSaveManager.init(this);
 	}
 
 	private void setupBeanshell() {

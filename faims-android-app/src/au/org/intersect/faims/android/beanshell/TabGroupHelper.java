@@ -32,8 +32,13 @@ public class TabGroupHelper {
 					entityAttributes.addAll((List<EntityAttribute>) attributes);
 				}
 				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));			
-				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);			
-				linker.getInterpreter().set("_saved_record_id", entityId);
+				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
+				if (entityId != null) {
+					linker.getInterpreter().set("_saved_record_id", entityId);
+					setTabGroupSaved(tabGroup);
+				} else {
+					throw new Exception("error trying to save entity");
+				}
 			} else if (tabGroup.getRelType() != null) {
 				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
 				if (attributes != null) {
@@ -41,7 +46,12 @@ public class TabGroupHelper {
 				}	
 				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
 				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);
-				linker.getInterpreter().set("_saved_record_id", relationshipId);
+				if (relationshipId != null) {
+					linker.getInterpreter().set("_saved_record_id", relationshipId);
+					setTabGroupSaved(tabGroup);
+				} else {
+					throw new Exception("error trying to save relationship");
+				}
 			} else {
 				throw new Exception("no type specified for tabgroup");
 			}
@@ -58,7 +68,12 @@ public class TabGroupHelper {
 				}
 				entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab));
 				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
-				linker.getInterpreter().set("_saved_record_id", entityId);
+				if (entityId != null) {
+					linker.getInterpreter().set("_saved_record_id", entityId);
+					setTabSaved(tab);
+				} else {
+					throw new Exception("error trying to save entity");
+				}
 			} else if (tabGroup.getRelType() != null) {			
 				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
 				if (attributes != null) {
@@ -66,9 +81,31 @@ public class TabGroupHelper {
 				}		
 				relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));			
 				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);		
-				linker.getInterpreter().set("_saved_record_id", relationshipId);
+				if (relationshipId != null) {
+					linker.getInterpreter().set("_saved_record_id", relationshipId);
+					setTabSaved(tab);
+				} else {
+					throw new Exception("error trying to save relationship");
+				}
 			} else {
 				throw new Exception("no type specified for tabgroup");
+			}
+		}
+	}
+	
+	private static void setTabGroupSaved(TabGroup tabGroup) {
+		List<Tab> tabs = tabGroup.getTabs();
+		for (Tab tab : tabs) {
+			setTabSaved(tab);
+		}
+	}
+	
+	private static void setTabSaved(Tab tab) {
+		List<View> views = tab.getAttributeViews();
+		for (View view : views) {
+			if (view instanceof ICustomView) {
+				ICustomView customView = (ICustomView) view;
+				customView.save();
 			}
 		}
 	}
@@ -260,7 +297,7 @@ public class TabGroupHelper {
 			if (tab.hasView(attribute.getName())) {
 				List<View> views = tab.getAttributeViews(attribute.getName());
 				if (views != null) {
-					setAttributeTab(linker, attribute, views);
+					setAttribute(linker, attribute, views);
 				}
 			}
 		}
@@ -281,13 +318,13 @@ public class TabGroupHelper {
 			if (tab.hasView(attribute.getName())) {
 				List<View> views = tab.getAttributeViews(attribute.getName());
 				if (views != null) {
-					setAttributeTab(linker, attribute, views);
+					setAttribute(linker, attribute, views);
 				}
 			}
 		}
 	}
 
-	private static void setAttributeTab(BeanShellLinker linker, Attribute attribute, List<View> views) {
+	private static void setAttribute(BeanShellLinker linker, Attribute attribute, List<View> views) {
 		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;

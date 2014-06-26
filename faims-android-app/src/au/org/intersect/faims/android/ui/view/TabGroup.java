@@ -18,6 +18,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Arch16n;
 
 import com.google.inject.Inject;
@@ -34,6 +35,9 @@ public class TabGroup extends Fragment {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	@Inject 
+	AutoSaveManager autoSaveManager;
 	
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
@@ -200,8 +204,13 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void clearTabs() {
-		for (Tab tab : tabs) {
-			tab.clearViews();
+		try {
+			autoSaveManager.pause();
+			for (Tab tab : tabs) {
+				tab.clearViews();
+			}	
+		} finally {
+			autoSaveManager.resume();
 		}
 	}
 	
@@ -272,9 +281,9 @@ public class TabGroup extends Fragment {
 		return this.relType != null && this.archEntType == null;
 	}
 	
-	public void onShowTabGroup() {	
+	public void onShowTabGroup() {
 		Tab tab = getCurrentTab();
-		if (tab != null) {
+		if (tab != null && tab != lastTab) {
 			tab.onShowTab();
 			lastTab = getCurrentTab();
 		}
@@ -283,6 +292,7 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void onHideTabGroup() {
+		autoSaveManager.flush();
 		Tab tab = getCurrentTab();
 		if (tab != null) {
 			tab.onHideTab();
@@ -291,7 +301,7 @@ public class TabGroup extends Fragment {
 		isVisible = false;
 	}
 	
-	protected void resetTabGroupOnShow() {
+	private void resetTabGroupOnShow() {
 		if (tabHost != null) {
 			tabHost.setCurrentTab(0);
 			if(!getTabs().isEmpty()){
@@ -313,6 +323,8 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void saveTo(Bundle savedInstanceState){
+		autoSaveManager.flush(false);
+		
 		for (Tab tab : tabs) {
 			tab.saveTo(savedInstanceState);
 		}
@@ -330,15 +342,20 @@ public class TabGroup extends Fragment {
 	
 	public void restoreFromTempBundle() {
 		if (tempSavedInstanceState != null) {
-			for(Tab tab : tabs){
-				tab.restoreFrom(tempSavedInstanceState);
+			try {
+				autoSaveManager.pause();
+				for(Tab tab : tabs){
+					tab.restoreFrom(tempSavedInstanceState);
+				}
+				
+				String tabLabel = tempSavedInstanceState.getString("currentTabLabel");
+				if (tabLabel != null) {
+					setCurrentTab(getTab(tabLabel));
+				}
+				tempSavedInstanceState = null;
+			} finally {
+				autoSaveManager.resume();
 			}
-			
-			String tabLabel = tempSavedInstanceState.getString("currentTabLabel");
-			if (tabLabel != null) {
-				setCurrentTab(getTab(tabLabel));
-			}
-			tempSavedInstanceState = null;
 		}
 	}
 

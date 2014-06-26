@@ -24,6 +24,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -39,6 +40,9 @@ public class UIRenderer {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 	
     private FormEntryController fem;
     
@@ -258,13 +262,19 @@ public class UIRenderer {
 	}
 	
 	public void createUI() {
-		boolean showFirsTabGroup = tempSavedInstanceState == null;
-		clearBackStack();
-		createTabGroups();
-		restoreFromTempBundle();
-		
-		if (showFirsTabGroup) {
-			showTabGroup(0);
+		try {
+			autoSaveManager.pause();
+			
+			boolean showFirsTabGroup = tempSavedInstanceState == null;
+			clearBackStack();
+			createTabGroups();
+			restoreFromTempBundle();
+			
+			if (showFirsTabGroup) {
+				showTabGroup(0);
+			}
+		} finally {
+			autoSaveManager.resume();
 		}
 	}
 	

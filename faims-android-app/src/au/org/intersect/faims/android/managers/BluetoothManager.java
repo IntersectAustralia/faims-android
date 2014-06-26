@@ -15,7 +15,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -71,7 +70,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 	private BluetoothDevice bluetoothDevice;
 	private BluetoothSocket bluetoothSocket;
 	
-	private HandlerThread handlerThread;
 	private Handler handler;
 	private BluetoothInputRunnable inputRunnable;
 	private BluetoothOutputRunnable outputRunnable;
@@ -200,11 +198,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 	}
 	
 	private void createBluetoothHandlerThread() {
-		if (handlerThread == null) {
-			handlerThread = new HandlerThread("BluetoothHandler");
-			handlerThread.start();
-		}
-		
 		if (inputRunnable == null) {
 			inputRunnable = new BluetoothInputRunnable();
 		}
@@ -214,16 +207,11 @@ public class BluetoothManager implements IFAIMSRestorable {
 		}
 		
 		if (handler == null ) {
-			handler = new Handler(handlerThread.getLooper());
+			handler = new Handler(activityRef.get().getMainLooper());
 		}
 	}
 	
 	private void destroyBluetoothHandlerThread() {
-		if (handlerThread != null) {
-			handlerThread.quit();
-			handlerThread = null;
-		}
-		
 		if (handler != null) {
 			handler.removeCallbacks(inputRunnable);
 			handler.removeCallbacks(outputRunnable);
