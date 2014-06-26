@@ -11,6 +11,34 @@
       <instance>
         <faims id="hdb_FAIMS_Community_Server">
           <App>
+            <InputDefaults>
+              <Decimal/>
+              <String/>
+              <TextField/>
+              <Checkbox/>
+              <RadioButton/>
+              <Dropdown/>
+              <PictureGallery/>
+              <DatePicker/>
+              <TimePicker/>
+              <FileList/>
+              <Camera/>
+              <Video/>
+            </InputDefaults>
+            <Annotation>
+              <Decimal/>
+              <String/>
+              <TextField/>
+              <Checkbox/>
+              <RadioButton/>
+              <Dropdown/>
+              <PictureGallery/>
+              <DatePicker/>
+              <TimePicker/>
+              <FileList/>
+              <Camera/>
+              <Video/>
+            </Annotation>
             <Inputs>
               <Annotation/>
               <Certainty/>
@@ -57,11 +85,249 @@
       <bind nodeset="/faims/App/Inputs/String" type="string"/>
       <bind nodeset="/faims/App/Inputs/Date" type="date"/>
       <bind nodeset="/faims/App/Inputs/Time" type="time"/>
+      <bind nodeset="/faims/App/InputDefaults/Decimal" type="decimal"/>
+      <bind nodeset="/faims/App/InputDefaults/String" type="string"/>
+      <bind nodeset="/faims/App/InputDefaults/DatePicker" type="date"/>
+      <bind nodeset="/faims/App/InputDefaults/TimePicker" type="time"/>
+      <bind nodeset="/faims/App/Annotation/Decimal" type="decimal"/>
+      <bind nodeset="/faims/App/Annotation/String" type="string"/>
+      <bind nodeset="/faims/App/Annotation/DatePicker" type="date"/>
+      <bind nodeset="/faims/App/Annotation/TimePicker" type="time"/>
     </model>
   </h:head>
   <h:body>
     <group ref="App" faims_archent_type="App UI">
       <label>App</label>
+      <group ref="InputDefaults">
+        <label>InputDefaults</label>
+         <input ref="Decimal" >
+          <label>Decimal</label>
+        </input>
+        <input ref="String" >
+          <label>String</label>
+        </input>
+        <input ref="TextField" >
+          <label>TextField</label>
+        </input>
+        <select ref="Checkbox">
+          <label>Checkbox</label>
+          	<item>
+            	<label>Item A</label>
+            	<value>0</value>
+        	</item>
+        	<item>
+            	<label>Item B</label>
+            	<value>1</value>
+         	</item>
+         	<item>
+            	<label>Item C</label>
+            	<value>2</value>
+        	</item>
+        	<item>
+            	<label>Item D</label>
+            	<value>3</value>
+        	</item>
+        </select>
+        <select1 ref="RadioButton" appearance="full">
+            <label>Radio Button:</label>
+            <item>
+                <label>Item A</label>
+                <value>0</value>
+            </item>
+            <item>
+                <label>Item B</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Item C</label>
+                <value>2</value>
+            </item>
+            <item>
+                <label>Item D</label>
+                <value>3</value>
+            </item>
+         </select1>
+        <select1 ref="Dropdown">
+          <label>Dropdown</label>
+          <item>
+            <label>Item A</label>
+            <value>0</value>
+        </item>
+        <item>
+            <label>Item B</label>
+            <value>1</value>
+        </item>
+        <item>
+            <label>Item C</label>
+            <value>2</value>
+        </item>
+        <item>
+            <label>Item D</label>
+            <value>3</value>
+        </item>
+        </select1>
+        <select1 ref="PictureGallery" type="image">
+          <label>Picture Gallery</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="DatePicker" >
+          <label>Date Picker</label>
+        </input>
+        <input ref="TimePicker" >
+          <label>Time Picker</label>
+        </input>
+        <select ref="FileList" type="file" >
+          <label>File List</label>
+          <item>
+                <label>Item A</label>
+                <value>0</value>
+            </item>
+            <item>
+                <label>Item B</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Item C</label>
+                <value>2</value>
+            </item>
+            <item>
+                <label>Item D</label>
+                <value>3</value>
+            </item>
+        </select>
+        <select ref="Camera" type="camera" >
+          <label>Camera</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <select ref="Video" type="video">
+          <label>Video</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+      </group>
+      <group ref="Annotation" >
+        <label>Annotation</label>
+         <input ref="Decimal" faims_attribute_type="vocab">
+          <label>Decimal</label>
+        </input>
+        <input ref="String" faims_attribute_type="vocab">
+          <label>String</label>
+        </input>
+        <input ref="TextField" faims_attribute_type="vocab">
+          <label>TextField</label>
+        </input>
+        <select ref="Checkbox" faims_attribute_type="vocab">
+          <label>Checkbox</label>
+          	<item>
+            	<label>Item A</label>
+            	<value>0</value>
+        	</item>
+        	<item>
+            	<label>Item B</label>
+            	<value>1</value>
+         	</item>
+         	<item>
+            	<label>Item C</label>
+            	<value>2</value>
+        	</item>
+        	<item>
+            	<label>Item D</label>
+            	<value>3</value>
+        	</item>
+        </select>
+        <select1 ref="RadioButton" appearance="full" faims_attribute_type="vocab">
+            <label>Radio Button:</label>
+            <item>
+                <label>Item A</label>
+                <value>0</value>
+            </item>
+            <item>
+                <label>Item B</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Item C</label>
+                <value>2</value>
+            </item>
+            <item>
+                <label>Item D</label>
+                <value>3</value>
+            </item>
+         </select1>
+        <select1 ref="Dropdown" faims_attribute_type="certainity">
+          <label>Dropdown</label>
+          <item>
+            <label>Item A</label>
+            <value>0</value>
+        </item>
+        <item>
+            <label>Item B</label>
+            <value>1</value>
+        </item>
+        <item>
+            <label>Item C</label>
+            <value>2</value>
+        </item>
+        <item>
+            <label>Item D</label>
+            <value>3</value>
+        </item>
+        </select1>
+        <select1 ref="PictureGallery" type="image" faims_attribute_type="vocab">
+          <label>Picture Gallery</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+          </item>
+        </select1>
+        <input ref="DatePicker" faims_attribute_type="measure">
+          <label>Date Picker</label>
+        </input>
+        <input ref="TimePicker" faims_attribute_type="vocab">
+          <label>Time Picker</label>
+        </input>
+        <select ref="FileList" type="file"  faims_attribute_type="vocab">
+          <label>File List</label>
+          <item>
+                <label>Item A</label>
+                <value>0</value>
+            </item>
+            <item>
+                <label>Item B</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Item C</label>
+                <value>2</value>
+            </item>
+            <item>
+                <label>Item D</label>
+                <value>3</value>
+            </item>
+        </select>
+        <select ref="Camera" type="camera" faims_attribute_type="vocab" >
+          <label>Camera</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <select ref="Video" type="video" faims_attribute_type="vocab">
+          <label>Video</label>
+          <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+      </group>
       <group ref="Inputs">
         <label>Inputs</label>
         <input ref="Annotation" faims_certainty="false" faims_annotation="true" faims_attribute_type="measure">
