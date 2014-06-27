@@ -1,0 +1,111 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>hdb FAIMS Community Server</h:title>
+    <model>
+      <instance>
+        <faims id="hdb_FAIMS_Community_Server">
+          <style>
+            <orientation>
+              <orientation/>
+            </orientation>
+            <even>
+              <layout_weight/>
+            </even>
+            <large>
+              <layout_weight/>
+            </large>
+          </style>
+          <control>
+            <static>
+              <name/>
+              <id/>
+              <season/>
+              <description/>
+              <permit_no/>
+              <permit_holder/>
+              <permit_issued_by/>
+              <permit_type/>
+              <contact_address/>
+              <participants/>
+              <copyright_holder/>
+              <client_sponsor/>
+              <land_owner/>
+              <has_sensitive_data/>
+            </static>
+          </control>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+  <h:body>
+    <group ref="style">
+      <label/>
+      <group ref="orientation">
+        <label/>
+        <input ref="orientation">
+          <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label/>
+        <input ref="layout_weight">
+          <label>1</label>
+        </input>
+      </group>
+      <group ref="large">
+        <label/>
+        <input ref="layout_weight">
+          <label>3</label>
+        </input>
+      </group>
+    </group>
+    <group ref="control">
+      <label>Control</label>
+      <group ref="static">
+        <label>Static Data EDITED</label>
+        <input ref="name" faims_read_only="true">
+          <label>Module Name NEW:</label>
+        </input>
+        <input ref="id" faims_read_only="true">
+          <label>Module Id NEW:</label>
+        </input>
+        <input ref="season" faims_read_only="true">
+          <label>Module Year NEW:</label>
+        </input>
+        <input ref="description" faims_read_only="true">
+          <label>Module Description NEW:</label>
+        </input>
+        <input ref="permit_no" faims_read_only="true">
+          <label>Permit No NEW:</label>
+        </input>
+        <input ref="permit_holder" faims_read_only="true">
+          <label>Permit Holder NEW:</label>
+        </input>
+        <input ref="permit_issued_by" faims_read_only="true">
+          <label>Permit Issued by NEW:</label>
+        </input>
+        <input ref="permit_type" faims_read_only="true">
+          <label>Permit Type NEW:</label>
+        </input>
+        <input ref="contact_address" faims_read_only="true">
+          <label>Contact and Address NEW:</label>
+        </input>
+        <input ref="participants" faims_read_only="true">
+          <label>Participants NEW:</label>
+        </input>
+        <input ref="copyright_holder" faims_read_only="true">
+          <label>Copyright Holder NEW:</label>
+        </input>
+        <input ref="client_sponsor" faims_read_only="true">
+          <label>Client/Sponsor NEW:</label>
+        </input>
+        <input ref="land_owner" faims_read_only="true">
+          <label>Land Owner NEW:</label>
+        </input>
+        <input ref="has_sensitive_data" faims_read_only="true">
+          <label>Has Sensitive Data NEW:</label>
+        </input>
+      </group>
+    </group>
+  </h:body>
+</h:html>
