@@ -39,6 +39,12 @@
               <Camera/>
               <Video/>
             </Annotation>
+            <Define>
+              <TextField/>
+              <PictureGallery/>
+              <Map/>
+              <ItemList/>
+            </Define>
             <Inputs>
               <Annotation/>
               <Certainty/>
@@ -288,6 +294,7 @@
                 <value>dummy</value>
           </item>
         </select1>
+
         <input ref="DatePicker" faims_attribute_type="measure">
           <label>Date Picker</label>
         </input>
@@ -327,6 +334,41 @@
                 <value>dummy</value>
             </item>
         </select>
+      </group>
+      <group ref="Define" faims_scrollable="false">
+        <label> Define </label>
+        <input ref="TextField" faims_read_only="true">
+          <label>Text:</label>
+        </input>
+        <select1 ref="PictureGallery" type="image" faims_attribute_type="vocab">
+          <label>Picture:</label>
+            <item>
+                <label>pic1</label>
+                <value>pic2</value>
+            </item>
+        </select1>
+        <input ref="Map" faims_map="true">
+          <label>Map:</label>
+        </input>
+        <select1 ref="ItemList" appearance="compact">
+          <label>Item List:</label>
+            <item>
+              <label>Item A</label>
+              <value>0</value>
+            </item>
+            <item>
+              <label>Item B</label>
+              <value>1</value>
+          </item>
+            <item>
+              <label>Item C</label>
+              <value>2</value>
+          </item>
+          <item>
+              <label>Item D</label>
+              <value>3</value>
+          </item>
+         </select1>
       </group>
       <group ref="Inputs">
         <label>Inputs</label>

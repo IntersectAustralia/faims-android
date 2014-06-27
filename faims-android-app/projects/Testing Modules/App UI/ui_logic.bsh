@@ -19,6 +19,8 @@ onEvent("App/Hidden/HideTab", "click", "cancelTab(\"App/Hidden\", false);showTab
 
 loadAttributes(){
     setFieldValue("App/Inputs/ReadOnly", "This is Read Only.");
+    setFieldValue("App/Define/TextField", "You can not write here!");
+    populatePictureGallery("App/Define/PictureGallery", makePictureGallery("pictures"));
     populateRadioGroup("App/Selects/Radio", makeVocab("Radio"));
     populateCheckBoxGroup("App/Selects/Checkbox", makePictureGallery("Checkbox"));
     populateDropDown("App/Selects/Dropdown", makeVocab("Dropdown"));
