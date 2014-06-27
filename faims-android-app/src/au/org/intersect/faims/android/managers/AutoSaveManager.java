@@ -1,15 +1,19 @@
 package au.org.intersect.faims.android.managers;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.os.Handler;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.nutiteq.geometry.Geometry;
 
 @Singleton
 public class AutoSaveManager implements IFAIMSRestorable {
@@ -18,7 +22,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 
 		@Override
 		public void run() {
-			flush(false);
+			autosave(false, false);
 		}
 		
 	}
@@ -31,6 +35,9 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	
 	private String tabGroupRef;
 	private String uuid;
+	private List<Geometry> geometry;
+	private List<? extends Attribute> attributes;
+	private String callback;
 	private boolean newRecord;
 
 	private boolean enabled;
@@ -87,16 +94,22 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	private void clear() {
 		this.tabGroupRef = null;
 		this.uuid = null;
+		this.geometry = null;
+		this.attributes = null;
+		this.callback = null;
 		this.newRecord = false;
 		this.enabled = false;
 		this.pauseCounter = 0;
 		clearSaveCallbacks();
 	}
 
-	public void enable(String tabGroupRef, String uuid, boolean newRecord) {
+	public void enable(String tabGroupRef, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes, String callback, boolean newRecord) {
 		FLog.d("enable autosave on tabgroup " + tabGroupRef + " to uuid " + uuid);
 		this.tabGroupRef = tabGroupRef;
 		this.uuid = uuid;
+		this.geometry = geometry;
+		this.attributes = attributes;
+		this.callback = callback;
 		this.newRecord = newRecord;
 		this.enabled = true;
 		this.pauseCounter = 0;
@@ -112,23 +125,28 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	}
 
 	public void flush() {
-		flush(true);
+		autosave(true, true);
+	}
+	
+	public void flush(boolean disableAutoSave) {
+		autosave(true, disableAutoSave);
 	}
 
-	public void flush(boolean disableAutoSave) {
+	public void autosave(boolean blocking, boolean disableAutoSave) {
 		if (enabled) {
 			clearSaveCallbacks();
 			
-			if (disableAutoSave) {
-				disable(tabGroupRef);
-			}
-			
 			if (pauseCounter == 0) {
-				FLog.d("autosaving...");
-				linker.showToast("autosaving...");
+				linker.saveTabGroupInBackground(tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
+				geometry = null;
+				attributes = null;
 				newRecord = false;
 			} else {
 				FLog.d("ignore autosave");
+			}
+			
+			if (disableAutoSave) {
+				disable(tabGroupRef);
 			}
 		}
 	}

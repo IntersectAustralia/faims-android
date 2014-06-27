@@ -18,16 +18,16 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	AutoSaveManager autoSaveManager;
 
 	private String ref;
-	private String currentValue;
-	private float certainty;
-	private float currentCertainty;
-	private String annotation;
-	private String currentAnnotation;
+	protected String currentValue;
+	protected float certainty;
+	protected float currentCertainty;
+	protected String annotation;
+	protected String currentAnnotation;
 	protected boolean dirty;
 	protected String dirtyReason;
-	private boolean annotationEnabled;
-	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	protected boolean annotationEnabled;
+	protected boolean certaintyEnabled;
+	protected FormAttribute attribute;
 	protected boolean ignoreSelectOnce;
 	
 	public CustomSpinner(Context context) {
@@ -125,6 +125,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		setCertainty(1);
 		setAnnotation("");
 		save();
+		currentValue = null;
 	}
 
 	public boolean hasChanges() {

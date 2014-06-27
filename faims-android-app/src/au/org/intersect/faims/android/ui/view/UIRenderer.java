@@ -85,10 +85,6 @@ public class UIRenderer {
         this.currentTabGroup = null;
         this.styles = new HashMap<String, Map<String,String>>();
     }
-	
-	public TabGroup getTabGroup(String name) {
-		return this.tabGroupMap.get(name);
-	}
 
     public TabGroup showTabGroup(int index) {
     	FragmentManager fm = activityRef.get().getSupportFragmentManager();

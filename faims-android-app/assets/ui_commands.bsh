@@ -103,23 +103,17 @@ showTab(String ref, String id) {
 }
 
 /**
-  * Enables Autosaving for a tab group with the following reference.
+  * Save the tab group with the following reference.
   *
   * @param ref the reference of the tab group
   * @param id the id of the entity or relationship. Can be null to save new record
-  * @return the id of the entity or relationship to be saved. This will not generate a new entity or relationship immediately.
+  * @param geometry the geometry list of the record
+  * @param attributes additional attributes to save for the record
+  * @param callback code to execute when saving is finished
+  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
-enableAutoSaveOnTabGroup(String ref, String id){
-    return linker.enableAutoSaveOnTabGroup(ref, id);
-}
-
-/**
-  * Disable Autosaving for a tab group with the following reference.
-  *
-  * @param ref the reference of the tab group
-  */
-disableAutoSaveOnTabGroup(String ref){
-    linker.disableAutoSaveOnTabGroup(ref);
+saveTabGroup(String ref, String id, List geometry, List attributes, String callback){
+  return linker.saveTabGroup(ref, id, geometry, attributes, callback);
 }
 
 /**
@@ -130,9 +124,11 @@ disableAutoSaveOnTabGroup(String ref){
   * @param geometry the geometry list of the record
   * @param attributes additional attributes to save for the record
   * @param callback code to execute when saving is finished
+  * @param enableAutoSave specify if you want to enable autosaving
+  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
-saveTabGroup(String ref, String id, List geometry, List attributes, String callback){
-    linker.saveTabGroup(ref, id, geometry, attributes, callback);
+saveTabGroup(String ref, String id, List geometry, List attributes, String callback, boolean enableAutoSave){
+  return linker.saveTabGroup(ref, id, geometry, attributes, callback, enableAutoSave);
 }
 
 /**
@@ -143,9 +139,10 @@ saveTabGroup(String ref, String id, List geometry, List attributes, String callb
   * @param geometry the geometry list of the record
   * @param attributes additional attributes to save for the record
   * @param callback code to execute when saving is finished
+  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
 saveTab(String ref, String id, List geometry, List attributes, String callback){
-    linker.saveTab(ref, id, geometry, attributes, callback);
+  return linker.saveTab(ref, id, geometry, attributes, callback);
 }
 
 /**

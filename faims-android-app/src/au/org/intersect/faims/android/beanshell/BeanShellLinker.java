@@ -594,7 +594,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	private TabGroup getTabGroup(String ref) throws Exception {
-		TabGroup tabGroup = uiRenderer.showTabGroup(ref);
+		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
 		if (tabGroup == null) {
 			throw new Exception("Cannot find tabgroup " + ref);
 		}
@@ -602,7 +602,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	private Tab getTab(String ref) throws Exception {
-		Tab tab = uiRenderer.showTab(ref);
+		Tab tab = uiRenderer.getTabByLabel(ref);
 		if (tab == null) {
 			throw new Exception("Cannot find tab " + ref);
 		}
@@ -649,7 +649,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			autoSaveManager.flush();
 			
-			TabGroup tabGroup = getTabGroup(label);
+			final TabGroup tabGroup = uiRenderer.showTabGroup(label);
+			if (tabGroup == null) {
+				throw new Exception("cannot find tabgroup " + label);
+			}
 			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
@@ -663,8 +666,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			autoSaveManager.flush();
 			
-			final TabGroup tabGroup = getTabGroup(label);
-			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
+			final TabGroup tabGroup = uiRenderer.showTabGroup(label);
+			if (tabGroup == null) {
+				throw new Exception("cannot find tabgroup " + label);
+			}
 			tabGroup.setOnShowTask(new TabGroup.TabTask() {
 				public void onShow() {
 					try {
@@ -681,7 +686,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						autoSaveManager.resume();
 					}
 				}
-			});	
+			});
+			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -692,7 +698,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public Tab showTab(String label) {
 		try {
-			Tab tab = getTab(label);
+			Tab tab = uiRenderer.showTab(label);
+			if (tab == null) {
+				throw new Exception("cannot show tab " + label);
+			}
 			return tab;
 		} catch (Exception e) {
 			FLog.e("error showing tab " + label, e);
@@ -704,7 +713,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public Tab showTab(String label, String uuid) {
 		try {
 			TabGroup tabGroup = getTabGroupFromTabLabel(label);
-			Tab tab = getTab(label);
+			Tab tab = uiRenderer.showTab(label);
+			if (tab == null) {
+				throw new Exception("cannot show tab " + label);
+			}
 			if (tabGroup.getArchEntType() != null) {
 				TabGroupHelper.showArchEntityTab(this, uuid, tab);
 			} else if (tabGroup.getRelType() != null) {
@@ -718,33 +730,46 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public void saveTabGroup(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
-		saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, uuid == null, false);
-	}
-
-	public void saveTab(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
-		saveTabInBackground(ref, uuid, geometry, attributes, callback, uuid == null, false);
-	}
-	
-	public String enableAutoSaveOnTabGroup(String ref, String uuid) {
+	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback) {
 		boolean newRecord = uuid == null;
 		if (newRecord) {
 			uuid = databaseManager.sharedRecord().generateUUID();
 		}
-		autoSaveManager.enable(ref, uuid, newRecord);
+		saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
+		return uuid;
+	}
+
+	public String saveTab(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback) {
+		boolean newRecord = uuid == null;
+		if (newRecord) {
+			uuid = databaseManager.sharedRecord().generateUUID();
+		}
+		saveTabInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
 		return uuid;
 	}
 	
-	public void disableAutoSaveOnTabGroup(String ref) {
-		autoSaveManager.flush();
+	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback, boolean enableAutoSave) {
+		boolean newRecord = uuid == null;
+		if (newRecord) {
+			uuid = databaseManager.sharedRecord().generateUUID();
+		}
+		if (enableAutoSave) {
+			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, newRecord);
+		} else {
+			saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
+		}
+		return uuid;
 	}
 	
 	public void saveTabGroupInBackground(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, 
 			final String callback, final boolean newRecord, boolean blocking) {
 		try {
-			final TabGroup tabGroup = uiRenderer.getTabGroup(ref);
+			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
 			if (tabGroup == null) {
-				throw new Exception("Cannot find tabgroup " + ref);
+				throw new Exception("cannot find tabgroup " + ref);
 			}
 			if (blocking) {
 				try {
@@ -754,6 +779,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 				} catch (Exception e) {
 					FLog.e("error saving tabgroup " + ref, e);
+					showWarning("Logic Error", "Error saving tab group " + ref);
 				}
 			} else {
 				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
@@ -780,6 +806,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}	
 		} catch (Exception e) {
 			FLog.e("error saving tabgroup " + ref, e);
+			showWarning("Logic Error", "Error saving tab group " + ref);
 		}
 	}
 	
@@ -799,6 +826,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 				} catch (Exception e) {
 					FLog.e("error saving tab " + ref, e);
+					showWarning("Logic Error", "Error saving tab " + ref);
 				}
 			} else {
 				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
@@ -825,6 +853,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}	
 		} catch (Exception e) {
 			FLog.e("error saving tab " + ref, e);
+			showWarning("Logic Error", "Error saving tab " + ref);
 		}
 	}
 

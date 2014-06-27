@@ -122,7 +122,7 @@ public class RelationshipRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			if (!validRel(db, relationshipId, relationshipType, geometry, attributes)) {
+			if (!validRel(db, relationshipId, relationshipType, geometry, attributes, newRelationship)) {
 				FLog.d("relationship not valid");
 				return null;
 			}
@@ -212,12 +212,13 @@ public class RelationshipRecord extends SharedRecord {
 		}
 	}
 
-	private boolean validRel(jsqlite.Database db, String relationshipId, String relationshipType, String geometry, List<RelationshipAttribute> attributes) throws Exception {
+	private boolean validRel(jsqlite.Database db, String relationshipId, String relationshipType, String geometry, 
+			List<RelationshipAttribute> attributes, boolean newRelationship) throws Exception {
 		Stmt st = null;
 		try {
-			if (relationshipId == null && !hasRelationshipType(db, relationshipType)) {
+			if (newRelationship && !hasRelationshipType(db, relationshipType)) {
 				return false;
-			} else if (relationshipId != null && !hasRelationship(db, relationshipId)) {
+			} else if (!newRelationship && !hasRelationship(db, relationshipId)) {
 				return false;
 			}
 			

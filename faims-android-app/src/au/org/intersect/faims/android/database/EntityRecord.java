@@ -82,7 +82,7 @@ public class EntityRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			if (!validArchEnt(db, entityId, entityType, geometry, attributes)) {
+			if (!validArchEnt(db, entityId, entityType, geometry, attributes, newEntity)) {
 				FLog.d("arch entity not valid");
 				return null;
 			}
@@ -213,12 +213,12 @@ public class EntityRecord extends SharedRecord {
 		}
 	}
 	
-	private boolean validArchEnt(jsqlite.Database db, String entityId, String entityType, String geometry, List<EntityAttribute> attributes) throws Exception {
+	private boolean validArchEnt(jsqlite.Database db, String entityId, String entityType, String geometry, List<EntityAttribute> attributes, boolean newEntity) throws Exception {
 		Stmt st = null;
 		try {
-			if (entityId == null && !hasEntityType(db, entityType)) {
+			if (newEntity && !hasEntityType(db, entityType)) {
 				return false;
-			} else if (entityId != null && !hasEntity(db, entityId)) {
+			} else if (!newEntity && !hasEntity(db, entityId)) {
 				return false;
 			}
 			

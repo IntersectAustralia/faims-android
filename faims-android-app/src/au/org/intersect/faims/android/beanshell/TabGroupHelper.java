@@ -32,12 +32,14 @@ public class TabGroupHelper {
 					entityAttributes.addAll((List<EntityAttribute>) attributes);
 				}
 				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));			
-				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
-				if (entityId != null) {
-					linker.getInterpreter().set("_saved_record_id", entityId);
-					setTabGroupSaved(tabGroup);
-				} else {
-					throw new Exception("error trying to save entity");
+				if (geometry != null || !entityAttributes.isEmpty()) {
+					String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
+					if (entityId != null) {
+						linker.getInterpreter().set("_saved_record_id", entityId);
+						setTabGroupSaved(tabGroup);
+					} else {
+						throw new Exception("error trying to save entity");
+					}
 				}
 			} else if (tabGroup.getRelType() != null) {
 				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
@@ -45,12 +47,14 @@ public class TabGroupHelper {
 					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
 				}	
 				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
-				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);
-				if (relationshipId != null) {
-					linker.getInterpreter().set("_saved_record_id", relationshipId);
-					setTabGroupSaved(tabGroup);
-				} else {
-					throw new Exception("error trying to save relationship");
+				if (!relationshipAttributes.isEmpty()) {
+					String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);
+					if (geometry != null || relationshipId != null) {
+						linker.getInterpreter().set("_saved_record_id", relationshipId);
+						setTabGroupSaved(tabGroup);
+					} else {
+						throw new Exception("error trying to save relationship");
+					}
 				}
 			} else {
 				throw new Exception("no type specified for tabgroup");
@@ -67,25 +71,29 @@ public class TabGroupHelper {
 					entityAttributes.addAll((List<EntityAttribute>) attributes);
 				}
 				entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab));
-				String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
-				if (entityId != null) {
-					linker.getInterpreter().set("_saved_record_id", entityId);
-					setTabSaved(tab);
-				} else {
-					throw new Exception("error trying to save entity");
+				if (geometry != null || !entityAttributes.isEmpty()) {
+					String entityId = linker.saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes, newRecord);
+					if (entityId != null) {
+						linker.getInterpreter().set("_saved_record_id", entityId);
+						setTabSaved(tab);
+					} else {
+						throw new Exception("error trying to save entity");
+					}
 				}
 			} else if (tabGroup.getRelType() != null) {			
 				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
 				if (attributes != null) {
 					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
 				}		
-				relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));			
-				String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);		
-				if (relationshipId != null) {
-					linker.getInterpreter().set("_saved_record_id", relationshipId);
-					setTabSaved(tab);
-				} else {
-					throw new Exception("error trying to save relationship");
+				relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));	
+				if (geometry != null || !relationshipAttributes.isEmpty()) {
+					String relationshipId = linker.saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes, newRecord);		
+					if (relationshipId != null) {
+						linker.getInterpreter().set("_saved_record_id", relationshipId);
+						setTabSaved(tab);
+					} else {
+						throw new Exception("error trying to save relationship");
+					}
 				}
 			} else {
 				throw new Exception("no type specified for tabgroup");

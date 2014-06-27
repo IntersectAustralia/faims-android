@@ -181,7 +181,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			currentTerms = terms;
 			currentItems = terms;
 			
-			super.setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
+			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		} else {
 			VocabularyTerm selectedTerm = parentTerms.peek();
 			currentTerms = new ArrayList<VocabularyTerm>();
@@ -193,7 +193,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			currentTerms.addAll(selectedTerm.terms);
 			currentItems.addAll(selectedTerm.terms);
 			
-			super.setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
+			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		}
 	}
 	
@@ -217,7 +217,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 					parentTerms.push(selectedTerm);
 					loadTerms();
 					super.setSelection(parentTerms.size() - 1);
-					if(selected && !selectedTerm.equals(lastSelectedItem)) {
+					if(listener != null && selected && !selectedTerm.equals(lastSelectedItem)) {
 						listener.onItemSelected(this, getChildAt(position), position, 0);
 					}
 				} else {
@@ -234,7 +234,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 				} else {
 					super.setSelection(parentTerms.peek().terms.indexOf(parentTerm) + parentTerms.size());
 				}
-				if(selected && !selectedTerm.equals(lastSelectedItem)) {
+				if(listener != null && selected && !selectedTerm.equals(lastSelectedItem)) {
 					listener.onItemSelected(this, getChildAt(position), position, 0);
 				}
 			}
@@ -312,5 +312,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		setAnnotation("");
 		
 		save();
+		currentValue = null;
 	}
 }

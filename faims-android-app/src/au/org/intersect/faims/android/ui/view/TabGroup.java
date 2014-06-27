@@ -114,10 +114,6 @@ public class TabGroup extends Fragment {
 				}
 			}
 			
-			if(this.onShowCommands.size() > 0){
-				executeCommands(this.onShowCommands);
-			}
-			
 			// TODO does this listener need to be removed?
 			tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 	
@@ -140,15 +136,19 @@ public class TabGroup extends Fragment {
 			// restore after tabgroup is shown
 			restoreFromTempBundle();
 			
+			// Solves a prob the back button gives us with the TabHost already having a parent
+			if (tabHost.getParent() != null){
+				((ViewGroup) tabHost.getParent()).removeView(tabHost);
+			}
+			
+			if(this.onShowCommands.size() > 0){
+				executeCommands(this.onShowCommands);
+			}
+			
 			// execute a task after tabgroup is shown
 			if (showTask != null) {
 				showTask.onShow();
 				showTask = null;
-			}
-			
-			// Solves a prob the back button gives us with the TabHost already having a parent
-			if (tabHost.getParent() != null){
-				((ViewGroup) tabHost.getParent()).removeView(tabHost);
 			}
 			
 			onShowTabGroup();
