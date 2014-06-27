@@ -30,6 +30,9 @@ options.add(createOption("entity", "Save and Load Entity"));
 options.add(createOption("relationship", "Save and Load Relationship"));
 options.add(createOption("entity_childview", "Save and Load Entity - Child Views"));
 options.add(createOption("relationship_childview", "Save and Load Relationship - Child Views"));
+options.add(createOption("entity_autosave", "Save and Load Entity - AutoSave"));
+options.add(createOption("relationship_autosave", "Save and Load Relationship - AutoSave"));
+
 options.add(createOption("associations", "Associations"));
 
 loadOptions() {
@@ -48,6 +51,10 @@ onClickOption() {
 		showTabGroup("tabgroup3");
 	} else if ("relationship_childview".equals(value)) {
 		showTabGroup("tabgroup4");
+	} else if ("entity_autosave".equals(value)) {
+		showTabGroup("tabgroup5");
+	} else if ("relationship_autosave".equals(value)) {
+		showTabGroup("tabgroup6");
 	} else if ("associations".equals(value)) {
 		showTabGroup("tabgroup5");
 	}
@@ -56,12 +63,12 @@ onClickOption() {
 onEvent("menu/tab1/options", "click", "onClickOption()");
 
 startSync() {
-	setSyncEnabled(true);
-	setFileSyncEnabled(true);
+	//setSyncEnabled(true);
+	//setFileSyncEnabled(true);
 }
 
 stopSync() {
-	setSyncEnabled(false);
+	//setSyncEnabled(false);
 }
 
 init() {
@@ -87,7 +94,11 @@ String entityId = null;
 String tableEntityId = null;
 
 initEntity(tabgroup) {
- 	clearEntity(tabgroup);
+ 	newEntity(tabgroup);
+}
+
+initAutoEntity(tabgroup) {
+	clearEntity(tabgroup);
 }
 
 closeEntity(tabgroup) {
@@ -107,9 +118,9 @@ loadEntity(tabgroup) {
 	localId = getFieldValue(tabgroup + "/tab2/entities");
 	if (isNull(localId)) return;
 
-	clearEntity(tabgroup);
-	entityId = localId;	
-	showTabGroup(tabgroup, entityId);
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = saveTabGroup(tabgroup, localId, null, null, null, true);
 }
 
 reloadEntity(tabgroup) {
@@ -118,22 +129,32 @@ reloadEntity(tabgroup) {
 	showTabGroup(tabgroup, entityId);
 }
 
-updateEntity(tabgroup) {
-	if (isNull(entityId)) entityId = null;
-
-	//if (entityId == null && tableEntityId != null) entityId = tableEntityId;
-	
+getEntityIdentifier() {
 	attributes = null;
 	if (entityId == null) {
 		attributes = createAttributeList();
 		entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
 		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
 	}
+	return attributes;
+}
 
-	saveTabGroup(tabgroup, entityId, null, attributes, "entityId = getLastSavedRecordId(); reloadEntity(\""+tabgroup+"\");");
+updateEntity(tabgroup) {
+	if (isNull(entityId)) entityId = null;
+
+	//if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	
+	saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(), "entityId = getLastSavedRecordId(); reloadEntity(\""+tabgroup+"\");");
 }
 
 clearEntity(tabgroup) {
+	newEntity(tabgroup);
+	entityId = saveTabGroup(tabgroup, null, null, getEntityIdentifier(), null, true);
+}
+
+newEntity(tabgroup) {
+	newTabGroup(tabgroup);
+	
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	populateCheckBoxGroup(tabgroup + "/tab1/location", locations);
 
@@ -150,11 +171,9 @@ clearEntity(tabgroup) {
 	
 	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
 	
-	entityId = null;
-	
-	newTabGroup(tabgroup);
-	
 	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	entityId = null;
 }
 
 deleteEntity(tabgroup){
@@ -196,12 +215,31 @@ onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity
 
 onEvent("tabgroup3/tab2", "show", "loadEntities(\"tabgroup3\")");
 
+onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
+//onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab2/load", "click", "loadEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
+
+onEvent("tabgroup5/tab1/attachfile", "click", "attachFileTo(\"tabgroup5/tab1/files\")");
+onEvent("tabgroup5/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup5/tab1/pictures\")");
+onEvent("tabgroup5/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup5/tab1/videos\")");
+onEvent("tabgroup5/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup5/tab1/audios\")");
+onEvent("tabgroup5/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+onEvent("tabgroup5/tab2", "show", "loadEntities(\"tabgroup5\")");
+
 // RELATIONSHIP
 
 String relationshipId = null;
 String tableRelationshipId = null;
 
 initRelationship(tabgroup) {
+	newRelationship(tabgroup);
+}
+
+initAutoRelationship(tabgroup) {
 	clearRelationship(tabgroup);
 }
 
@@ -222,9 +260,10 @@ loadRelationship(tabgroup) {
 	localId = getFieldValue(tabgroup + "/tab2/relationships");
 	if (isNull(localId)) return;
 
-	clearRelationship(tabgroup);	
+	newRelationship(tabgroup);	
 	relationshipId = localId;
-	showTabGroup(tabgroup, relationshipId);
+	showTabGroup(tabgroup, localId);
+	relationshipId = saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(), null, true);
 }
 
 reloadRelationship(tabgroup) {
@@ -233,22 +272,32 @@ reloadRelationship(tabgroup) {
 	showTabGroup(tabgroup, relationshipId);
 }
 
-updateRelationship(tabgroup) {
-	if (isNull(relationshipId)) relationshipId = null;
-
-	//if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
-	
+getRelationshipIdentifier() {
 	attributes = null;
 	if (relationshipId == null) {
 		attributes = createAttributeList();
 		relationshipCount = Integer.valueOf(fetchOne("select count(distinct(relationshipid)) from relationship;").get(0)) + 1;
 		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relationshipCount, null, null));
 	}
+	return attributes;
+}
+
+updateRelationship(tabgroup) {
+	if (isNull(relationshipId)) relationshipId = null;
+
+	//if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
 	
-	saveTabGroup(tabgroup, relationshipId, null, attributes, "relationshipId = getLastSavedRecordId(); reloadRelationship(\""+tabgroup+"\");");
+	saveTabGroup(tabgroup, relationshipId, null, getRelationshipIdentifier(), "relationshipId = getLastSavedRecordId(); reloadRelationship(\""+tabgroup+"\");");
 }
 
 clearRelationship(tabgroup) {
+	newRelationship(tabgroup);
+	relationshipId = saveTabGroup(tabgroup, null, null, getRelationshipIdentifier(), null, true);
+}
+
+newRelationship(tabgroup) {
+	newTabGroup(tabgroup);
+
 	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
 	populateCheckBoxGroup(tabgroup + "/tab1/location", locations);
 
@@ -264,12 +313,10 @@ clearRelationship(tabgroup) {
 	populatePictureGallery(tabgroup + "/tab1/gallery", pictures);
 	
 	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
-	
-	relationshipId = null;
-	
-	newTabGroup(tabgroup);
-	
+
 	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	relationshipId = null;
 }
 
 deleteRelationship(tabgroup){
@@ -311,26 +358,41 @@ onEvent("tabgroup4/tab1/viewattached", "click", "viewRelAttachedFiles(relationsh
 
 onEvent("tabgroup4/tab2", "show", "loadRelationships(\"tabgroup4\")");
 
+onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
+//onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab2/load", "click", "loadRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab1/close", "click", "closeRelationship(\"tabgroup6\")");
+
+onEvent("tabgroup6/tab1/attachfile", "click", "attachFileTo(\"tabgroup6/tab1/files\")");
+onEvent("tabgroup6/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup6/tab1/pictures\")");
+onEvent("tabgroup6/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup6/tab1/videos\")");
+onEvent("tabgroup6/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup6/tab1/audios\")");
+onEvent("tabgroup6/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
+
+onEvent("tabgroup6/tab2", "show", "loadRelationships(\"tabgroup6\")");
+
 // ASSOCIATIONS
 
 loadMembers() {
 	Object entities = fetchEntityList("small");
-	populateDropDown("tabgroup5/tab1/entities", entities);
+	populateDropDown("tabgroup7/tab1/entities", entities);
 	
 	Object relationships = fetchRelationshipList("abovebelow");
-	populateDropDown("tabgroup5/tab1/relationships", relationships);
+	populateDropDown("tabgroup7/tab1/relationships", relationships);
 }
 
-onEvent("tabgroup5", "show", "loadMembers()");
+onEvent("tabgroup7", "show", "loadMembers()");
 
-onEvent("tabgroup5/tab1/add", "click", "onAddMember()");
+onEvent("tabgroup7/tab1/add", "click", "onAddMember()");
 
 onAddMember() {
-	eid = getFieldValue("tabgroup5/tab1/entities");
-	rid = getFieldValue("tabgroup5/tab1/relationships");
+	eid = getFieldValue("tabgroup7/tab1/entities");
+	rid = getFieldValue("tabgroup7/tab1/relationships");
 	if (isNull(eid) || isNull(rid)) return;
 	
-	verb = getFieldValue("tabgroup5/tab1/verb");
+	verb = getFieldValue("tabgroup7/tab1/verb");
 	
 	addReln(eid, rid, verb);
 	

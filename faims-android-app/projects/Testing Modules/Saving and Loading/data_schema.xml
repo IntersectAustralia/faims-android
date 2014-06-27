@@ -25,6 +25,12 @@
     <property type="string" name="timestamp">
       <bundle>DOI</bundle>
     </property>
+    <property type="string" name="date">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="time">
+      <bundle>DOI</bundle>
+    </property>
     <property type="string" name="description">
         <bundle>DOI</bundle>
     </property>
@@ -244,6 +250,12 @@
       <bundle>DOI</bundle>
     </property>
     <property type="string" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="date">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="time">
       <bundle>DOI</bundle>
     </property>
     <property type="string" name="description">
