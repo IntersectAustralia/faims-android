@@ -187,6 +187,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	private Bitmap tempBitmap;
 	private Animation rotation;
 	private ImageView syncAnimImage;
+	private ImageView autoSaveImage;
 	
 	private boolean hardwareDebugMode = false;
 	private String deviceToCapture = null;
@@ -330,7 +331,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 		rotation.setRepeatCount(Animation.INFINITE);
 
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		syncAnimImage = (ImageView) inflater.inflate(R.layout.rotate, null);
+		syncAnimImage = (ImageView) inflater.inflate(R.layout.sync_rotate, null);
+		autoSaveImage = (ImageView) inflater.inflate(R.layout.autosave_rotate, null);
 	}
 
 	private void setupSync() {
@@ -827,6 +829,35 @@ public class ShowModuleActivity extends FragmentActivity implements
 					tempBitmap));
 		} else {
 			direction_indicator.setVisible(false);
+		}
+		
+		// autosave status
+		menu.findItem(R.id.action_autosave).setVisible(false);
+		menu.findItem(R.id.action_autosave_inactive).setVisible(false);
+		menu.findItem(R.id.action_autosave_ready).setVisible(false);
+		menu.findItem(R.id.action_autosave_saving).setVisible(false);
+		menu.findItem(R.id.action_autosave_error).setVisible(false);
+
+		autoSaveImage.clearAnimation();
+
+		switch (autoSaveManager.getStatus()) {
+		case SAVING:
+			MenuItem autosaveItem = menu.findItem(R.id.action_autosave_saving).setVisible(true);
+			autoSaveImage.startAnimation(rotation);
+			autosaveItem.setActionView(autoSaveImage);
+			break;
+		case READY:
+			menu.findItem(R.id.action_autosave_ready).setVisible(true);
+			break;
+		case ACTIVE:
+			menu.findItem(R.id.action_autosave).setVisible(true);
+			break;
+		case ERROR:
+			menu.findItem(R.id.action_autosave_error).setVisible(true);
+			break;
+		default:
+			menu.findItem(R.id.action_autosave_inactive).setVisible(true);
+			break;
 		}
 
 		return true;

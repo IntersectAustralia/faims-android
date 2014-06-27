@@ -774,10 +774,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (blocking) {
 				try {
 					TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
+					autoSaveManager.reportSaved();
 					if (callback != null) {
 						execute(callback);
 					}
 				} catch (Exception e) {
+					autoSaveManager.reportError();
 					FLog.e("error saving tabgroup " + ref, e);
 					showWarning("Logic Error", "Error saving tab group " + ref);
 				}
@@ -788,7 +790,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					protected Void doInBackground(Void... params) {
 						try {
 							TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
+							autoSaveManager.reportSaved();
 						} catch (Exception e) {
+							autoSaveManager.reportError();
 							FLog.e("error saving tabgroup " + ref, e);
 						}
 						return null;
@@ -821,10 +825,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (blocking) {
 				try {
 					TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
+					autoSaveManager.reportSaved();
 					if (callback != null) {
 						execute(callback);
-					}
+					}		
 				} catch (Exception e) {
+					autoSaveManager.reportError();
 					FLog.e("error saving tab " + ref, e);
 					showWarning("Logic Error", "Error saving tab " + ref);
 				}
@@ -835,7 +841,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					protected Void doInBackground(Void... params) {
 						try {
 							TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
+							autoSaveManager.reportSaved();
 						} catch (Exception e) {
+							autoSaveManager.reportError();
 							FLog.e("error saving tab " + ref, e);
 						}
 						return null;
