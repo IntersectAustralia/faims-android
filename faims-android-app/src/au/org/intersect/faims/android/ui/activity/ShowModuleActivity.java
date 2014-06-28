@@ -12,15 +12,12 @@ import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -35,13 +32,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
@@ -77,16 +69,13 @@ import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.view.TabGroup;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
 import au.org.intersect.faims.android.util.Arch16n;
-import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.InputBuffer;
 import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
-import au.org.intersect.faims.android.util.MeasurementUtil;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
-import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class ShowModuleActivity extends FragmentActivity implements
 		IFAIMSRestorable {
@@ -173,25 +162,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 	private boolean syncStarted;
 
 	private ShowModuleActivityData activityData;
-
-	private boolean pathIndicatorVisible;
-	private float pathDistance;
-	private boolean pathValid;
-	private float pathBearing;
-	private Float pathHeading;
-	private int pathIndex;
-	private int pathLength;
-
-	private BitmapDrawable whiteArrow;
-	private BitmapDrawable greyArrow;
-	private Bitmap tempBitmap;
-	private Animation rotation;
-	private ImageView syncAnimImage;
 	
 	private boolean hardwareDebugMode = false;
 	private String deviceToCapture = null;
 	private Character hardwareDelimiter;
 	private InputBuffer deviceBuffer;
+	private ShowModuleMenuManager menuManager;
 
 	public String getModuleKey() {
 		return moduleKey;
@@ -251,7 +227,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		DisplayPrefs.setLastLocation(ShowModuleActivity.this, module
 				.getDirectoryPath().getPath());
 					
-		cacheBitmaps();
 		setupSync();
 		setupWifiBroadcast();
 		setupManagers();
@@ -324,15 +299,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			builder.create().show();
 		}
 	}
-
-	private void cacheBitmaps() {
-		rotation = AnimationUtils.loadAnimation(this, R.anim.clockwise);
-		rotation.setRepeatCount(Animation.INFINITE);
-
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		syncAnimImage = (ImageView) inflater.inflate(R.layout.rotate, null);
-	}
-
+	
 	private void setupSync() {
 		listeners = new ArrayList<SyncListener>();
 		activityData.setSyncMinInterval(getResources().getInteger(
@@ -690,145 +657,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		// gps status
-		menu.findItem(R.id.action_gps_inactive).setVisible(false);
-		menu.findItem(R.id.action_gps_active_has_signal).setVisible(false);
-		menu.findItem(R.id.action_gps_active_no_signal).setVisible(false);
-		if (gpsDataManager.isExternalGPSStarted()
-				|| gpsDataManager.isInternalGPSStarted()) {
-			if (gpsDataManager.hasValidExternalGPSSignal()
-					|| gpsDataManager.hasValidInternalGPSSignal()) {
-				menu.findItem(R.id.action_gps_active_has_signal).setVisible(
-						true);
-			} else {
-				menu.findItem(R.id.action_gps_active_no_signal)
-						.setVisible(true);
-			}
-		} else {
-			menu.findItem(R.id.action_gps_inactive).setVisible(true);
+		if (menuManager == null) {
+			menuManager = new ShowModuleMenuManager(this);
 		}
-
-		// tracker status
-		menu.findItem(R.id.action_tracker_active_no_gps).setVisible(false);
-		menu.findItem(R.id.action_tracker_active_has_gps).setVisible(false);
-		menu.findItem(R.id.action_tracker_inactive).setVisible(false);
-		if (gpsDataManager.isTrackingStarted()) {
-			if (gpsDataManager.hasValidExternalGPSSignal()
-					|| gpsDataManager.hasValidInternalGPSSignal()) {
-				menu.findItem(R.id.action_tracker_active_has_gps).setVisible(
-						true);
-			} else {
-				menu.findItem(R.id.action_tracker_active_no_gps).setVisible(
-						true);
-			}
-		} else {
-			menu.findItem(R.id.action_tracker_inactive).setVisible(true);
-		}
-
-		// sync status
-		menu.findItem(R.id.action_sync).setVisible(false);
-		menu.findItem(R.id.action_sync_active).setVisible(false);
-		menu.findItem(R.id.action_sync_error).setVisible(false);
-		menu.findItem(R.id.action_sync_has_changes).setVisible(false);
-		menu.findItem(R.id.action_sync_inactive).setVisible(false);
-
-		syncAnimImage.clearAnimation();
-
-		switch (syncStatus) {
-		case ACTIVE_SYNCING:
-			MenuItem syncItem = menu.findItem(R.id.action_sync_active)
-					.setVisible(true);
-
-			syncAnimImage.startAnimation(rotation);
-
-			syncItem.setActionView(syncAnimImage);
-
-			break;
-		case ERROR:
-			menu.findItem(R.id.action_sync_error).setVisible(true);
-			break;
-		case ACTIVE_NO_CHANGES:
-			menu.findItem(R.id.action_sync).setVisible(true);
-			break;
-		case ACTIVE_HAS_CHANGES:
-			menu.findItem(R.id.action_sync_has_changes).setVisible(true);
-			break;
-		default:
-			menu.findItem(R.id.action_sync_inactive).setVisible(true);
-			break;
-		}
-		
-		// bluetooth status
-		menu.findItem(R.id.action_bluetooth_active).setVisible(false);
-		menu.findItem(R.id.action_bluetooth_connected).setVisible(false);
-		menu.findItem(R.id.action_bluetooth_disconnected).setVisible(false);
-		menu.findItem(R.id.action_bluetooth_error).setVisible(false);
-		
-		switch (bluetoothManager.getBluetoothStatus()) {
-		case ACTIVE:
-			menu.findItem(R.id.action_bluetooth_active).setVisible(true);
-			break;
-		case CONNECTED:
-			menu.findItem(R.id.action_bluetooth_connected).setVisible(true);
-			break;
-		case ERROR:
-			menu.findItem(R.id.action_bluetooth_error).setVisible(true);
-			break;
-		default:
-			menu.findItem(R.id.action_bluetooth_disconnected).setVisible(true);
-			break;
-		}
-
-		// follow status
-		MenuItem distance_text = menu.findItem(R.id.distance_text);
-		distance_text.setVisible(pathIndicatorVisible);
-		String distanceInfo = pathIndex < 0 ? "" : " to point (" + pathIndex
-				+ "/" + pathLength + ")";
-		if (pathDistance > 1000) {
-			distance_text.setTitle(MeasurementUtil.displayAsKiloMeters(
-					pathDistance / 1000, "###,###,###,###.0") + distanceInfo);
-		} else {
-			distance_text.setTitle(MeasurementUtil.displayAsMeters(
-					pathDistance, "###,###,###,###") + distanceInfo);
-		}
-
-		MenuItem direction_text = menu.findItem(R.id.direction_text);
-		direction_text.setVisible(pathIndicatorVisible);
-		direction_text.setTitle(MeasurementUtil.displayAsDegrees(pathBearing,
-				"###"));
-
-		MenuItem direction_indicator = menu.findItem(R.id.direction_indicator);
-		direction_indicator.setVisible(pathIndicatorVisible);
-		if (pathHeading != null) {
-			if (tempBitmap != null) {
-				tempBitmap.recycle();
-			}
-			if (whiteArrow == null) {
-				whiteArrow = new BitmapDrawable(
-						getResources(),
-						UnscaledBitmapLoader
-								.decodeResource(
-										getResources(),
-										au.org.intersect.faims.android.R.drawable.white_arrow));
-			}
-			if (greyArrow == null) {
-				greyArrow = new BitmapDrawable(
-						getResources(),
-						UnscaledBitmapLoader
-								.decodeResource(
-										getResources(),
-										au.org.intersect.faims.android.R.drawable.grey_arrow));
-			}
-
-			this.tempBitmap = BitmapUtil.rotateBitmap(
-					pathValid ? whiteArrow.getBitmap() : greyArrow.getBitmap(),
-					pathBearing - pathHeading);
-			direction_indicator.setIcon(new BitmapDrawable(getResources(),
-					tempBitmap));
-		} else {
-			direction_indicator.setVisible(false);
-		}
-
+		menuManager.prepare(menu);
 		return true;
 	}
 
@@ -837,28 +669,27 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	public void setPathVisible(boolean value) {
-		this.pathIndicatorVisible = value;
+		menuManager.setPathVisible(value);
 	}
 
 	public void setPathDistance(float value) {
-		this.pathDistance = value;
+		menuManager.setPathDistance(value);
 	}
 
 	public void setPathIndex(int value, int length) {
-		this.pathIndex = value;
-		this.pathLength = length;
+		menuManager.setPathIndex(value, length);
 	}
 
 	public void setPathBearing(float value) {
-		this.pathBearing = value;
+		menuManager.setPathBearing(value);
 	}
 
 	public void setPathHeading(Float heading) {
-		this.pathHeading = heading;
+		menuManager.setPathHeading(heading);
 	}
 
 	public void setPathValid(boolean value) {
-		this.pathValid = value;
+		menuManager.setPathValid(value);
 	}
 
 	public void downloadDatabaseFromServer(final String callback) {

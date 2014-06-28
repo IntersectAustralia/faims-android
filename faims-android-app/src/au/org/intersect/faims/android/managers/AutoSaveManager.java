@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.managers;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import android.os.Bundle;
@@ -27,6 +28,10 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		
 	}
 	
+	public enum Status {
+		ACTIVE, READY, SAVING, ERROR, INACTIVE
+	}
+	
 	private static final String TAG = "autosave:";
 	private static final int SAVE_AFTER_CHANGE_DELAY = 5000;
 	
@@ -45,12 +50,16 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	
 	private Handler handler;
 	private DelayAutoSave delayAutoSaveRunnable;
+	
+	private Status status;
+	private WeakReference<ShowModuleActivity> activityRef;
 
 	public void init(ShowModuleActivity activity) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		destroy();
 		this.handler = new Handler(activity.getMainLooper());
 		this.delayAutoSaveRunnable = new DelayAutoSave();
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 	}
 
 	@Override
@@ -100,6 +109,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		this.newRecord = false;
 		this.enabled = false;
 		this.pauseCounter = 0;
+		setStatus(Status.INACTIVE);
 		clearSaveCallbacks();
 	}
 
@@ -113,6 +123,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		this.newRecord = newRecord;
 		this.enabled = true;
 		this.pauseCounter = 0;
+		setStatus(Status.ACTIVE);
 	}
 	
 	public void disable(String tabGroupRef) {
@@ -134,6 +145,8 @@ public class AutoSaveManager implements IFAIMSRestorable {
 
 	public void autosave(boolean blocking, boolean disableAutoSave) {
 		if (enabled) {
+			setStatus(Status.SAVING);
+			
 			clearSaveCallbacks();
 			
 			if (pauseCounter == 0) {
@@ -157,8 +170,22 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		}
 	}
 	
+	public void reportError() {
+		if (enabled) {
+			setStatus(Status.ERROR);
+		}
+	}
+	
+	public void reportSaved() {
+		if (enabled) {
+			setStatus(Status.ACTIVE);
+		}
+	}
+	
 	private void postSaveCallback(long time) {
 		if (handler != null) {
+			setStatus(Status.READY);
+			
 			handler.removeCallbacks(delayAutoSaveRunnable);
 			handler.postDelayed(delayAutoSaveRunnable, time);
 		}
@@ -169,4 +196,16 @@ public class AutoSaveManager implements IFAIMSRestorable {
 			handler.removeCallbacks(delayAutoSaveRunnable);
 		}
 	}
+	
+	public void setStatus(Status status) {
+		this.status = status;
+		if (this.activityRef != null) {
+			this.activityRef.get().updateActionBar();
+		}
+	}
+	
+	public Status getStatus() {
+		return status;
+	}
+	
 }
