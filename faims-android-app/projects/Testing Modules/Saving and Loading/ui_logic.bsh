@@ -120,6 +120,15 @@ loadEntity(tabgroup) {
 
 	newEntity(tabgroup);
 	showTabGroup(tabgroup, localId);
+	entityId = localId;
+}
+
+loadEntityAuto(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/entities");
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
 	entityId = saveTabGroup(tabgroup, localId, null, null, null, true);
 }
 
@@ -187,7 +196,7 @@ deleteEntity(tabgroup){
 
 onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");	
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
-onEvent("tabgroup1/tab1/clear", "click", "clearEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");
@@ -202,7 +211,7 @@ onEvent("tabgroup1/tab2", "show", "loadEntities(\"tabgroup1\")");
 
 onEvent("tabgroup3", "show", "initEntity(\"tabgroup3\")");	
 onEvent("tabgroup3/tab1/save", "delayclick", "saveEntity(\"tabgroup3\")");
-onEvent("tabgroup3/tab1/clear", "click", "clearEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab1/clear", "click", "newEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab2/load", "click", "loadEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/delete", "click", "deleteEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/close", "click", "closeEntity(\"tabgroup3\")");
@@ -218,7 +227,7 @@ onEvent("tabgroup3/tab2", "show", "loadEntities(\"tabgroup3\")");
 onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
 //onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
-onEvent("tabgroup5/tab2/load", "click", "loadEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab2/load", "click", "loadEntityAuto(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
 
@@ -261,7 +270,15 @@ loadRelationship(tabgroup) {
 	if (isNull(localId)) return;
 
 	newRelationship(tabgroup);	
+	showTabGroup(tabgroup, localId);
 	relationshipId = localId;
+}
+
+loadRelationshipAuto(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/relationships");
+	if (isNull(localId)) return;
+
+	newRelationship(tabgroup);	
 	showTabGroup(tabgroup, localId);
 	relationshipId = saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(), null, true);
 }
@@ -330,7 +347,7 @@ deleteRelationship(tabgroup){
 
 onEvent("tabgroup2", "show", "initRelationship(\"tabgroup2\")");	
 onEvent("tabgroup2/tab1/save", "delayclick", "saveRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab1/clear", "click", "clearRelationship(\"tabgroup2\")");
+onEvent("tabgroup2/tab1/clear", "click", "newRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab2/load", "click", "loadRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/delete", "click", "deleteRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/close", "click", "closeRelationship(\"tabgroup2\")");
@@ -345,7 +362,7 @@ onEvent("tabgroup2/tab2", "show", "loadRelationships(\"tabgroup2\")");
 
 onEvent("tabgroup4", "show", "initRelationship(\"tabgroup4\")");	
 onEvent("tabgroup4/tab1/save", "delayclick", "saveRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab1/clear", "click", "clearRelationship(\"tabgroup4\")");
+onEvent("tabgroup4/tab1/clear", "click", "newRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab2/load", "click", "loadRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/delete", "click", "deleteRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/close", "click", "closeRelationship(\"tabgroup4\")");
@@ -361,7 +378,7 @@ onEvent("tabgroup4/tab2", "show", "loadRelationships(\"tabgroup4\")");
 onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
 //onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab2/load", "click", "loadRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab2/load", "click", "loadRelationshipAuto(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/close", "click", "closeRelationship(\"tabgroup6\")");
 
