@@ -373,7 +373,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		beanShellLinker.resume();
 
 		// update action bar
-		invalidateOptionsMenu();
+		updateActionBar();
 	}
 
 	@Override
@@ -1266,7 +1266,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			public void run() {
 				if (!isSyncStarted()) {
 					syncStatus = status;
-					invalidateOptionsMenu();
+					updateActionBar();
 				}
 			}
 

@@ -15,6 +15,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
@@ -67,6 +68,8 @@ public class BluetoothManager implements IFAIMSRestorable {
 	BeanShellLinker beanShellLinker;
 	
 	private WeakReference<ShowModuleActivity> activityRef;
+	
+	private HandlerThread handlerThread;
 	private BluetoothDevice bluetoothDevice;
 	private BluetoothSocket bluetoothSocket;
 	
@@ -80,10 +83,8 @@ public class BluetoothManager implements IFAIMSRestorable {
 	private boolean repeatable;
 	private String outputMessage;
 	private boolean clearInputOnRead;
-	
 	private boolean isBluetoothConnected;
-	
-	private BluetoothStatus bluetoothStatus = BluetoothStatus.DISCONNECTED;
+	private BluetoothStatus bluetoothStatus;
 	
 	public void init(ShowModuleActivity activity) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -93,6 +94,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		outputMessage = null;
 		clearInputOnRead = false;
 		isBluetoothConnected = false;
+		bluetoothStatus = BluetoothStatus.DISCONNECTED;
 	}
 	
 	public void showConnectionDialog() {
@@ -198,6 +200,11 @@ public class BluetoothManager implements IFAIMSRestorable {
 	}
 	
 	private void createBluetoothHandlerThread() {
+		if (handlerThread == null) {
+			 handlerThread = new HandlerThread("BluetoothHandler");
+			 handlerThread.start();
+		}
+		
 		if (inputRunnable == null) {
 			inputRunnable = new BluetoothInputRunnable();
 		}
@@ -207,11 +214,16 @@ public class BluetoothManager implements IFAIMSRestorable {
 		}
 		
 		if (handler == null ) {
-			handler = new Handler(activityRef.get().getMainLooper());
+			handler = new Handler(handlerThread.getLooper());
 		}
 	}
 	
 	private void destroyBluetoothHandlerThread() {
+		if (handlerThread != null) {
+			 handlerThread.quit();
+			 handlerThread = null;
+		}
+		
 		if (handler != null) {
 			handler.removeCallbacks(inputRunnable);
 			handler.removeCallbacks(outputRunnable);

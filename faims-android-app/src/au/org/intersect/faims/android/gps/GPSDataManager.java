@@ -328,7 +328,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public void setHasValidExternalGPSSignal(boolean hasValidExternalGPSSignal) {
 		this.hasValidExternalGPSSignal = hasValidExternalGPSSignal;
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 
 	public boolean hasValidInternalGPSSignal() {
@@ -337,7 +337,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public void setHasValidInternalGPSSignal(boolean hasValidInternalGPSSignal) {
 		this.hasValidInternalGPSSignal = hasValidInternalGPSSignal;
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 
 	public int getGpsUpdateInterval() {
@@ -353,7 +353,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public void setExternalGPSStarted(boolean isExternalGPSStarted) {
 		this.isExternalGPSStarted = isExternalGPSStarted;
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 
 	public boolean isInternalGPSStarted() {
@@ -362,7 +362,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public void setInternalGPSStarted(boolean isInternalGPSStarted) {
 		this.isInternalGPSStarted = isInternalGPSStarted;
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 
 	public String getTrackingType() {
@@ -395,7 +395,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	public void setTrackingStarted(boolean isTrackingStarted) {
 		this.isTrackingStarted = isTrackingStarted;
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 
 	@Override

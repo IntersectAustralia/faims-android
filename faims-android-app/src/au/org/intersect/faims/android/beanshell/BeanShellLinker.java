@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.provider.MediaStore;
 import android.view.InputDevice;
 import android.view.View;
@@ -133,6 +134,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private Module module;
 
+	private HandlerThread trackingHandlerThread;
 	private Handler trackingHandler;
 	private Runnable trackingTask;
 	private MediaRecorder recorder;
@@ -263,7 +265,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		gpsDataManager.setTrackingValue(value);
 		gpsDataManager.setTrackingExec(callback);
 
-		if (trackingHandler == null) {
+		if (trackingHandlerThread == null && trackingHandler == null) {
 			if (!gpsDataManager.isExternalGPSStarted()
 					&& !gpsDataManager
 							.isInternalGPSStarted()) {
@@ -271,8 +273,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				return;
 			}
 			gpsDataManager.setTrackingStarted(true);
-			this.activityRef.get().invalidateOptionsMenu();
-			trackingHandler = new Handler(activityRef.get().getMainLooper());
+			activityRef.get().updateActionBar();
+			trackingHandlerThread = new HandlerThread("tracking");
+			trackingHandlerThread.start();
+			trackingHandler = new Handler(trackingHandlerThread.getLooper());
 			if ("time".equals(type)) {
 				trackingTask = new Runnable() {
 
@@ -280,8 +284,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							activityRef.get().runOnUiThread(new Runnable() {
-								
+							activityRef.get().runOnUiThread(new Runnable() {						
 								@Override
 								public void run() {
 									execute(callback);
@@ -333,13 +336,18 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void stopTrackingGPS() {
 		FLog.d("gps tracking is stopped");
 		
+		if (trackingHandlerThread != null) {
+			trackingHandlerThread.quit();
+			trackingHandlerThread = null;
+		}
+		
 		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;
 		}
 		
 		gpsDataManager.setTrackingStarted(false);
-		activityRef.get().invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 	
 	public void stopTrackingGPSForOnPause() {
