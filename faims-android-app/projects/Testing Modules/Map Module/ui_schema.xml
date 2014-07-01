@@ -16,6 +16,15 @@
               <clear/>
               <create/>
             </map>
+            <gps>
+              <connectexternal/>
+              <connectinternal/>
+              <startsync/>
+              <stopsync/>
+              <startTimeLog/>
+              <startDistanceLog/>
+              <stopTrackLog/>
+            </gps>
           </main>
         </faims>
       </instance>
@@ -26,7 +35,7 @@
     <group ref="main" faims_archent_type="main">
       <label>Map</label>
         <group ref="map" faims_scrollable="false">
-        <label>{Map}</label>
+        <label>Map</label>
         <input ref="map" faims_map="true" faims_certainty="false">
           <label/>
         </input>
@@ -36,8 +45,33 @@
         <trigger ref="create">
             <label>Create</label>
         </trigger>
-
       </group>
+
+      <group ref="gps">
+        <label>GPS</label>
+        <trigger ref="connectexternal">
+          <label>Connect To External GPS</label>
+        </trigger>
+        <trigger ref="connectinternal">
+          <label>Connect To Internal GPS</label>
+        </trigger>
+        <trigger ref="startsync">
+          <label>Start Syncing</label>
+        </trigger>
+        <trigger ref="stopsync">
+          <label>Stop Syncing</label>
+        </trigger>
+        <trigger ref="startTimeLog">
+          <label>Start Time Log</label>
+        </trigger>
+        <trigger ref="startDistanceLog">
+          <label>Start Distance Log</label>
+        </trigger>
+        <trigger ref="stopTrackLog">
+          <label>Stop Track Log</label>
+        </trigger>
+      </group>
+
     </group>
   </h:body>
 </h:html>
