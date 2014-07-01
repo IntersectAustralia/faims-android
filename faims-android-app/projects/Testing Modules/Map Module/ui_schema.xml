@@ -11,7 +11,11 @@
       <instance>
         <faims id="hdb_FAIMS_Community_Server">
           <main>
-            
+            <map>
+              <map/>
+              <clear/>
+              <create/>
+            </map>
           </main>
         </faims>
       </instance>
@@ -21,7 +25,19 @@
   <h:body>
     <group ref="main" faims_archent_type="main">
       <label>Map</label>
-        
+        <group ref="map" faims_scrollable="false">
+        <label>{Map}</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+          <label/>
+        </input>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+        <trigger ref="create">
+            <label>Create</label>
+        </trigger>
+
+      </group>
     </group>
   </h:body>
 </h:html>

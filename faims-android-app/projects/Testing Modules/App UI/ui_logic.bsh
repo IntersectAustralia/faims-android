@@ -12,15 +12,13 @@ getAttributeName(String vocab) {
     return values.get(0);
 }
 
-onEvent("App/Inputs/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
-onEvent("App/Inputs/ShowToast", "click", "showToast(\"Would you like some butter?\")");
-onEvent("App/Inputs/ShowHidden", "click", "showTab(\"App/Hidden\")");
+onEvent("App/LogicTriggered/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
+onEvent("App/LogicTriggered/ShowToast", "click", "showToast(\"Would you like some butter?\")");
+onEvent("App/LogicTriggered/ShowHidden", "click", "showTab(\"App/Hidden\")");
 onEvent("App/Hidden/HideTab", "click", "cancelTab(\"App/Hidden\", false);showTab(\"App/Inputs\")");
 
 loadAttributes(){
     setFieldValue("App/Inputs/ReadOnly", "This is Read Only.");
-    setFieldValue("App/Define/TextField", "You can not write here!");
-    populatePictureGallery("App/Define/PictureGallery", makePictureGallery("pictures"));
     populateRadioGroup("App/Selects/Radio", makeVocab("Radio"));
     populateCheckBoxGroup("App/Selects/Checkbox", makePictureGallery("Checkbox"));
     populateDropDown("App/Selects/Dropdown", makeVocab("Dropdown"));
