@@ -10,41 +10,16 @@
     <model>
       <instance>
         <faims id="hdb_FAIMS_Community_Server">
+        <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
+
           <App>
-            <InputDefaults>
-              <Decimal/>
-              <String/>
-              <TextField/>
-              <Checkbox/>
-              <RadioButton/>
-              <Dropdown/>
-              <PictureGallery/>
-              <DatePicker/>
-              <TimePicker/>
-              <FileList/>
-              <Camera/>
-              <Video/>
-            </InputDefaults>
-            <Annotation>
-              <Decimal/>
-              <String/>
-              <TextField/>
-              <Checkbox/>
-              <RadioButton/>
-              <Dropdown/>
-              <PictureGallery/>
-              <DatePicker/>
-              <TimePicker/>
-              <FileList/>
-              <Camera/>
-              <Video/>
-            </Annotation>
-            <Define>
-              <TextField/>
-              <PictureGallery/>
-              <Map/>
-              <ItemList/>
-            </Define>
             <Inputs>
               <Annotation/>
               <Certainty/>
@@ -57,10 +32,17 @@
               <String/>
               <Date/>
               <Time/>
-              <ShowWarning/>
-              <ShowToast/>
-              <ShowHidden/>
             </Inputs>
+            <Styling>
+            <container>
+                    <child1>
+                      <save></save>
+                    </child1>
+                    <child2>
+                      <clear></clear>
+                    </child2>
+                  </container>
+            </Styling>
             <Hidden>
               <HiddenMessage/>
               <HideTab/>
@@ -84,6 +66,11 @@
               <gpsgo/>
               <text/>
             </Maps>
+			<LogicTriggered>
+			 <ShowWarning/>
+              <ShowToast/>
+              <ShowHidden/>
+			</LogicTriggered>
           </App>
         </faims>
       </instance>
@@ -102,274 +89,23 @@
     </model>
   </h:head>
   <h:body>
+  <group ref="style">
+        <label></label>
+        <group ref="orientation">
+            <label></label>
+            <input ref="orientation">
+                <label>horizontal</label>
+            </input>
+        </group>
+        <group ref="even">
+            <label></label>
+            <input ref="layout_weight">
+                <label>1</label>
+            </input>
+        </group>
+    </group>
     <group ref="App" faims_archent_type="App UI">
       <label>App</label>
-      <group ref="InputDefaults">
-        <label>InputDefaults</label>
-         <input ref="Decimal" >
-          <label>Decimal</label>
-        </input>
-        <input ref="String" >
-          <label>String</label>
-        </input>
-        <input ref="TextField" >
-          <label>TextField</label>
-        </input>
-        <select ref="Checkbox">
-          <label>Checkbox</label>
-          	<item>
-            	<label>Item A</label>
-            	<value>0</value>
-        	</item>
-        	<item>
-            	<label>Item B</label>
-            	<value>1</value>
-         	</item>
-         	<item>
-            	<label>Item C</label>
-            	<value>2</value>
-        	</item>
-        	<item>
-            	<label>Item D</label>
-            	<value>3</value>
-        	</item>
-        </select>
-        <select1 ref="RadioButton" appearance="full">
-            <label>Radio Button:</label>
-            <item>
-                <label>Item A</label>
-                <value>0</value>
-            </item>
-            <item>
-                <label>Item B</label>
-                <value>1</value>
-            </item>
-            <item>
-                <label>Item C</label>
-                <value>2</value>
-            </item>
-            <item>
-                <label>Item D</label>
-                <value>3</value>
-            </item>
-         </select1>
-        <select1 ref="Dropdown">
-          <label>Dropdown</label>
-          <item>
-            <label>Item A</label>
-            <value>0</value>
-        </item>
-        <item>
-            <label>Item B</label>
-            <value>1</value>
-        </item>
-        <item>
-            <label>Item C</label>
-            <value>2</value>
-        </item>
-        <item>
-            <label>Item D</label>
-            <value>3</value>
-        </item>
-        </select1>
-        <select1 ref="PictureGallery" type="image">
-          <label>Picture Gallery</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-          </item>
-        </select1>
-        <input ref="DatePicker" >
-          <label>Date Picker</label>
-        </input>
-        <input ref="TimePicker" >
-          <label>Time Picker</label>
-        </input>
-        <select ref="FileList" type="file" >
-          <label>File List</label>
-          <item>
-                <label>Item A</label>
-                <value>0</value>
-            </item>
-            <item>
-                <label>Item B</label>
-                <value>1</value>
-            </item>
-            <item>
-                <label>Item C</label>
-                <value>2</value>
-            </item>
-            <item>
-                <label>Item D</label>
-                <value>3</value>
-            </item>
-        </select>
-        <select ref="Camera" type="camera" >
-          <label>Camera</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <select ref="Video" type="video">
-          <label>Video</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-      </group>
-      <group ref="Annotation" >
-        <label>Annotation</label>
-         <input ref="Decimal" faims_attribute_type="vocab">
-          <label>Decimal</label>
-        </input>
-        <input ref="String" faims_attribute_type="vocab">
-          <label>String</label>
-        </input>
-        <input ref="TextField" faims_attribute_type="vocab">
-          <label>TextField</label>
-        </input>
-        <select ref="Checkbox" faims_attribute_type="vocab">
-          <label>Checkbox</label>
-          	<item>
-            	<label>Item A</label>
-            	<value>0</value>
-        	</item>
-        	<item>
-            	<label>Item B</label>
-            	<value>1</value>
-         	</item>
-         	<item>
-            	<label>Item C</label>
-            	<value>2</value>
-        	</item>
-        	<item>
-            	<label>Item D</label>
-            	<value>3</value>
-        	</item>
-        </select>
-        <select1 ref="RadioButton" appearance="full" faims_attribute_type="vocab">
-            <label>Radio Button:</label>
-            <item>
-                <label>Item A</label>
-                <value>0</value>
-            </item>
-            <item>
-                <label>Item B</label>
-                <value>1</value>
-            </item>
-            <item>
-                <label>Item C</label>
-                <value>2</value>
-            </item>
-            <item>
-                <label>Item D</label>
-                <value>3</value>
-            </item>
-         </select1>
-        <select1 ref="Dropdown" faims_attribute_type="certainity">
-          <label>Dropdown</label>
-          <item>
-            <label>Item A</label>
-            <value>0</value>
-        </item>
-        <item>
-            <label>Item B</label>
-            <value>1</value>
-        </item>
-        <item>
-            <label>Item C</label>
-            <value>2</value>
-        </item>
-        <item>
-            <label>Item D</label>
-            <value>3</value>
-        </item>
-        </select1>
-        <select1 ref="PictureGallery" type="image" faims_attribute_type="vocab">
-          <label>Picture Gallery</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-          </item>
-        </select1>
-
-        <input ref="DatePicker" faims_attribute_type="measure">
-          <label>Date Picker</label>
-        </input>
-        <input ref="TimePicker" faims_attribute_type="vocab">
-          <label>Time Picker</label>
-        </input>
-        <select ref="FileList" type="file"  faims_attribute_type="vocab">
-          <label>File List</label>
-          <item>
-                <label>Item A</label>
-                <value>0</value>
-            </item>
-            <item>
-                <label>Item B</label>
-                <value>1</value>
-            </item>
-            <item>
-                <label>Item C</label>
-                <value>2</value>
-            </item>
-            <item>
-                <label>Item D</label>
-                <value>3</value>
-            </item>
-        </select>
-        <select ref="Camera" type="camera" faims_attribute_type="vocab" >
-          <label>Camera</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-        <select ref="Video" type="video" faims_attribute_type="vocab">
-          <label>Video</label>
-          <item>
-                <label>dummy</label>
-                <value>dummy</value>
-            </item>
-        </select>
-      </group>
-      <group ref="Define" faims_scrollable="false">
-        <label> Define </label>
-        <input ref="TextField" faims_read_only="true">
-          <label>Text:</label>
-        </input>
-        <select1 ref="PictureGallery" type="image" faims_attribute_type="vocab">
-          <label>Picture:</label>
-            <item>
-                <label>pic1</label>
-                <value>pic2</value>
-            </item>
-        </select1>
-        <input ref="Map" faims_map="true">
-          <label>Map:</label>
-        </input>
-        <select1 ref="ItemList" appearance="compact">
-          <label>Item List:</label>
-            <item>
-              <label>Item A</label>
-              <value>0</value>
-            </item>
-            <item>
-              <label>Item B</label>
-              <value>1</value>
-          </item>
-            <item>
-              <label>Item C</label>
-              <value>2</value>
-          </item>
-          <item>
-              <label>Item D</label>
-              <value>3</value>
-          </item>
-         </select1>
-      </group>
       <group ref="Inputs">
         <label>Inputs</label>
         <input ref="Annotation" faims_certainty="false" faims_annotation="true" faims_attribute_type="measure">
@@ -405,15 +141,6 @@
         <input ref="Time" faims_attribute_name="Time" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
           <label>Time</label>
         </input>
-        <trigger ref="ShowWarning">
-          <label>Show Warning</label>
-        </trigger>
-        <trigger ref="ShowToast">
-          <label>Show Toast</label>
-        </trigger>
-        <trigger ref="ShowHidden">
-          <label>Show Hidden Tab</label>
-        </trigger>
       </group>
       <group ref="Hidden" faims_hidden="true">
         <label>Hidden</label>
@@ -427,6 +154,24 @@
         <trigger ref="HideTab">
           <label>Hide Tab</label>
         </trigger>
+      </group>
+      <group ref="Styling">
+      <label>Styling</label>
+      	<group ref="container" faims_style="orientation">
+	          <label></label>
+	          <group ref="child1" faims_style="even">
+	            <label></label>
+	            <trigger ref="save">
+	              <label>Horizontal 1</label>
+	            </trigger>
+	          </group>
+	          <group ref="child2" faims_style="even">
+	            <label></label>
+	            <trigger ref="clear">
+	              <label>Horizontal 2</label>
+	            </trigger>
+	          </group>
+	        </group>
       </group>
       <group ref="Selects">
         <label>Selects</label>
@@ -503,6 +248,18 @@
         <input ref="text" faims_attribute_type="freetext">
           <label>stuff</label>
         </input>
+      </group>
+      <group ref="LogicTriggered">
+      <label>Logic Triggered</label>
+      <trigger ref="ShowWarning">
+          <label>Show Warning</label>
+        </trigger>
+        <trigger ref="ShowToast">
+          <label>Show Toast</label>
+        </trigger>
+        <trigger ref="ShowHidden">
+          <label>Show Hidden Tab</label>
+        </trigger>
       </group>
     </group>
   </h:body>
