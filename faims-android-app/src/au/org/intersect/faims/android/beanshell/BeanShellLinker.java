@@ -22,7 +22,6 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -66,7 +65,6 @@ import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
-import au.org.intersect.faims.android.nutiteq.WKTUtil;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
@@ -138,15 +136,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private Handler trackingHandler;
 	private Runnable trackingTask;
 	private MediaRecorder recorder;
-
-	protected Dialog saveDialog;
 	
 	private String persistedObjectName;
 	
-	private String lastFileBrowserCallback;
-	
 	private Double prevLong;
 	private Double prevLat;
+
+	private String lastFileBrowserCallback;
 
 	private String cameraPicturepath;
 	private String cameraCallBack;
@@ -184,7 +180,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.audioCallBack = null;
 		this.scanContents = null;
 		this.scanCallBack = null;
-		this.saveDialog = null;
 		
 		try {
 			interpreter.set("linker", this);
@@ -215,6 +210,18 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public Interpreter getInterpreter() {
 		return interpreter;
+	}
+	
+	public DatabaseManager getDatabaseManager() {
+		return databaseManager;
+	}
+	
+	public AutoSaveManager getAutoSaveManager() {
+		return autoSaveManager;
+	}
+	
+	public ShowModuleActivity getActivity() {
+		return activityRef.get();
 	}
 
 	public void persistObject(String name) {
@@ -601,15 +608,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	private TabGroup getTabGroup(String ref) throws Exception {
+	protected TabGroup getTabGroup(String ref) throws Exception {
 		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
 		if (tabGroup == null) {
-			throw new Exception("Cannot find tabgroup " + ref);
+			throw new Exception("Cannot find tab group " + ref);
 		}
 		return tabGroup;
 	}
 	
-	private Tab getTab(String ref) throws Exception {
+	protected Tab getTab(String ref) throws Exception {
 		Tab tab = uiRenderer.getTabByLabel(ref);
 		if (tab == null) {
 			throw new Exception("Cannot find tab " + ref);
@@ -617,18 +624,18 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return tab;
 	}
 	
-	private TabGroup getTabGroupFromTabLabel(String ref) throws Exception {
+	protected TabGroup getTabGroupFromTabLabel(String ref) throws Exception {
 		if (ref == null) {
-			throw new Exception("Cannot find tabgroup " + ref);
+			throw new Exception("Cannot find tab group " + ref);
 		}
 		String[] ids = ref.split("/");
 		if (ids.length < 2) {
-			throw new Exception("Cannot find tabgroup " + ref);
+			throw new Exception("Cannot find tab group " + ref);
 		}
 		String groupId = ids[0];
 		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
 		if (tabGroup == null) {
-			throw new Exception("Cannot find tabgroup " + ref);
+			throw new Exception("Cannot find tab group " + ref);
 		}
 		return tabGroup;
 	}
@@ -738,139 +745,29 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, String callback) {
-		boolean newRecord = uuid == null;
-		if (newRecord) {
-			uuid = databaseManager.sharedRecord().generateUUID();
-		}
-		saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
-		return uuid;
-	}
-
-	public String saveTab(String ref, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, String callback) {
-		boolean newRecord = uuid == null;
-		if (newRecord) {
-			uuid = databaseManager.sharedRecord().generateUUID();
-		}
-		saveTabInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
-		return uuid;
+	public void autoSaveTabGroup(String tabGroupRef, String uuid,
+			List<Geometry> geometry, List<? extends Attribute> attributes,
+			SaveCallback callback, boolean newRecord, boolean blocking) {
+		TabGroupHelper.saveTabGroupInBackground(this, tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
 	}
 	
-	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, String callback, boolean enableAutoSave) {
-		boolean newRecord = uuid == null;
-		if (newRecord) {
-			uuid = databaseManager.sharedRecord().generateUUID();
-		}
+	public void saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, SaveCallback callback) {
+		TabGroupHelper.saveTabGroupInBackground(this, ref, uuid, geometry, attributes, callback, uuid == null, false);
+	}
+	
+	public void saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, SaveCallback callback, boolean enableAutoSave) {
 		if (enableAutoSave) {
-			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, newRecord);
+			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, uuid == null);
 		} else {
-			saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
-		}
-		return uuid;
-	}
-	
-	public void saveTabGroupInBackground(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, 
-			final String callback, final boolean newRecord, boolean blocking) {
-		try {
-			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
-			if (tabGroup == null) {
-				throw new Exception("cannot find tabgroup " + ref);
-			}
-			if (blocking) {
-				try {
-					TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
-					autoSaveManager.reportSaved();
-					if (callback != null) {
-						execute(callback);
-					}
-				} catch (Exception e) {
-					autoSaveManager.reportError();
-					FLog.e("error saving tabgroup " + ref, e);
-					showWarning("Logic Error", "Error saving tab group " + ref);
-				}
-			} else {
-				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
-
-					@Override
-					protected Void doInBackground(Void... params) {
-						try {
-							TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
-							autoSaveManager.reportSaved();
-						} catch (Exception e) {
-							autoSaveManager.reportError();
-							FLog.e("error saving tabgroup " + ref, e);
-						}
-						return null;
-					}
-
-					@Override
-					protected void onPostExecute(Void result) {
-						if (callback != null) {
-							BeanShellLinker.this.execute(callback);
-						}
-					}
-					
-				};
-				autoSaveTask.execute();
-			}	
-		} catch (Exception e) {
-			FLog.e("error saving tabgroup " + ref, e);
-			showWarning("Logic Error", "Error saving tab group " + ref);
+			TabGroupHelper.saveTabGroupInBackground(this, ref, uuid, geometry, attributes, callback, uuid == null, false);
 		}
 	}
-	
-	public void saveTabInBackground(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, 
-			final String callback, final boolean newRecord, boolean blocking) {
-		try {
-			final TabGroup tabGroup = getTabGroupFromTabLabel(ref);
-			final Tab tab = uiRenderer.getTabByLabel(ref);
-			if (tab == null) {
-				throw new Exception("cannot find tab " + ref);
-			}
-			if (blocking) {
-				try {
-					TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
-					autoSaveManager.reportSaved();
-					if (callback != null) {
-						execute(callback);
-					}		
-				} catch (Exception e) {
-					autoSaveManager.reportError();
-					FLog.e("error saving tab " + ref, e);
-					showWarning("Logic Error", "Error saving tab " + ref);
-				}
-			} else {
-				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
 
-					@Override
-					protected Void doInBackground(Void... params) {
-						try {
-							TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
-							autoSaveManager.reportSaved();
-						} catch (Exception e) {
-							autoSaveManager.reportError();
-							FLog.e("error saving tab " + ref, e);
-						}
-						return null;
-					}
-					
-					@Override
-					protected void onPostExecute(Void result) {
-						if (callback != null) {
-							BeanShellLinker.this.execute(callback);
-						}
-					}
-					
-				};
-				autoSaveTask.execute();
-			}	
-		} catch (Exception e) {
-			FLog.e("error saving tab " + ref, e);
-			showWarning("Logic Error", "Error saving tab " + ref);
-		}
+	public void saveTab(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, SaveCallback callback) {
+		TabGroupHelper.saveTabInBackground(this, ref, uuid, geometry, attributes, callback, uuid == null, false);
 	}
 
 	public void cancelTabGroup(String label, boolean warn) {
@@ -1009,7 +906,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 
-	public void showAlert(final String title, final String message,
+	public Dialog showAlert(final String title, final String message,
 			final String okCallback, final String cancelCallback) {
 		try {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
@@ -1030,13 +927,17 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						}
 					});
 	
-			builder.create().show();
+			Dialog dialog = builder.create();
+			dialog.show();
+			return dialog;
 		} catch (Exception e) {
 			FLog.e("error showing alert", e);
+			showWarning("Logic Error", "Error show alert dialog");
 		}
+		return null;
 	}
 
-	public void showWarning(final String title, final String message) {
+	public Dialog showWarning(final String title, final String message) {
 		try {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 	
@@ -1047,21 +948,47 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					// User clicked OK button
 				}
 			});
-			builder.create().show();
+			Dialog dialog = builder.create();
+			dialog.show();
+			return dialog;
 		} catch (Exception e) {
 			FLog.e("error showing warning", e);
+			showWarning("Logic Error", "Error show warning dialog");
 		}
+		return null;
 	}
 	
 	public Dialog showBusy(final String title, final String message) {
 		try {
-			BusyDialog d = new BusyDialog(this.activityRef.get(), title, message, null);
-			d.show();
-			return d;
+			BusyDialog dialog = new BusyDialog(this.activityRef.get(), title, message, null);
+			dialog.show();
+			return dialog;
 		} catch (Exception e) {
 			FLog.e("error showing busy", e);
+			showWarning("Logic Error", "Error show busy dialog");
 		}
 		return null;
+	}
+	
+	protected void reportError(Exception e) {
+		reportError(e, e.getMessage());
+	}
+	
+	protected void reportError(Exception e, final String message) {
+		FLog.e(message, e);
+		ShowModuleActivity activity = activityRef.get();
+		if (activity != null) {
+			activity.runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					showWarning("Logic Error", message);
+				}
+				
+			});
+		} else {
+			FLog.d("cannot report error due to missing activity");
+		}
 	}
 
 	public void setFieldValue(String ref, Object valueObj) {
@@ -1170,7 +1097,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void appendFieldDirty(String ref, boolean isDirty, String dirtyReason) {
+	protected void appendFieldDirty(String ref, boolean isDirty, String dirtyReason) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 			
@@ -1293,29 +1220,17 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 
-	public String getCurrentTime() {
-		return DateUtil.getCurrentTimestampGMT();
+	public void saveArchEnt(String entityId, String entityType,
+			List<Geometry> geometry, List<EntityAttribute> attributes, SaveCallback callback) {
+		DatabaseHelper.saveArchEnt(this, entityId, entityType, geometry, attributes, callback, entityId == null, false);
 	}
 	
-	public String saveArchEnt(String entityId, String entityType,
-			List<Geometry> geometry, List<EntityAttribute> attributes, boolean newEntity) {
-		try {
-			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
-			return databaseManager.entityRecord().saveArchEnt(entityId,
-					entityType, WKTUtil.collectionToWKT(geomList), attributes, newEntity);
-		} catch (Exception e) {
-			FLog.e("error saving arch entity", e);
-			showWarning("Logic Error", "Error saving arch entity");
-		}
-		return null;
+	public void saveRel(String relationshipId, String relationshipType,
+			List<Geometry> geometry, List<RelationshipAttribute> attributes, SaveCallback callback) {
+		DatabaseHelper.saveRel(this, relationshipId, relationshipType, geometry, attributes, callback, relationshipId == null, false);
 	}
-
-	public String saveArchEnt(String entityId, String entityType,
-			List<Geometry> geometry, List<EntityAttribute> attributes) {
-		return saveArchEnt(entityId, entityType, geometry, attributes, entityId == null);
-	}
-
-	public Boolean deleteArchEnt(String entityId){
+	
+	public Boolean deleteArchEnt(String entityId) {
 		try {
 			databaseManager.entityRecord().deleteArchEnt(entityId);
 			for(Tab tab : uiRenderer.getTabList()){
@@ -1326,27 +1241,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 			return true;
 		} catch (jsqlite.Exception e) {
-			FLog.e("can not delete arch entity with the supplied id", e);
+			FLog.e("error deleting arch entity", e);
+			showWarning("Logic Error", "Error deleting arch entity");
 		}
 		return false;
-	}
-
-	public String saveRel(String relationshipId, String relationshipType,
-			List<Geometry> geometry, List<RelationshipAttribute> attributes, boolean newRelationship) {
-		try {
-			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
-			return databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
-					WKTUtil.collectionToWKT(geomList), attributes, newRelationship);
-		} catch (Exception e) {
-			FLog.e("error saving relationship", e);
-			showWarning("Logic Error", "Error saving relationship");
-		}
-		return null;
-	}
-	
-	public String saveRel(String relationshipId, String relationshipType,
-			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
-		return saveRel(relationshipId, relationshipType, geometry, attributes, relationshipId == null);
 	}
 
 	public Boolean deleteRel(String relationshpId){
@@ -1360,7 +1258,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 			return true;
 		} catch (jsqlite.Exception e) {
-			FLog.e("can not delete relationship with the supplied id", e);
+			FLog.e("error deleting relationship", e);
+			showWarning("Logic Error", "Error deleting relationship");
 		}
 		return false;
 	}
@@ -2675,6 +2574,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public String hasSensitiveData() {
 		return this.module.hasSensitiveData();
+	}
+
+	public String getCurrentTime() {
+		return DateUtil.getCurrentTimestampGMT();
 	}
 
 	public void setSyncMinInterval(float value) {

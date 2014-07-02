@@ -140,10 +140,13 @@ public class SharedRecord extends Database {
 	
 	public String generateUUID() {
 		String s = userId;
-		while (s.length() < 5) {
-			s = "0" + s;
+		if (userId != null) {
+			while (s.length() < 5) {
+				s = "0" + s;
+			}
+			return "1"+ s + String.valueOf(System.currentTimeMillis());
 		}
-		return "1"+ s + String.valueOf(System.currentTimeMillis());
+		return null;
 	}
 
 }

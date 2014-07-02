@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.beanshell.SaveCallback;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.log.FLog;
@@ -42,7 +43,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	private String uuid;
 	private List<Geometry> geometry;
 	private List<? extends Attribute> attributes;
-	private String callback;
+	private SaveCallback callback;
 	private boolean newRecord;
 
 	private boolean enabled;
@@ -113,7 +114,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		clearSaveCallbacks();
 	}
 
-	public void enable(String tabGroupRef, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes, String callback, boolean newRecord) {
+	public void enable(String tabGroupRef, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes, SaveCallback callback, boolean newRecord) {
 		FLog.d("enable autosave on tabgroup " + tabGroupRef + " to uuid " + uuid);
 		this.tabGroupRef = tabGroupRef;
 		this.uuid = uuid;
@@ -150,7 +151,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 			clearSaveCallbacks();
 			
 			if (pauseCounter == 0) {
-				linker.saveTabGroupInBackground(tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
+				linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
 				geometry = null;
 				attributes = null;
 				newRecord = false;
@@ -170,7 +171,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		}
 	}
 	
-	public void reportError() {
+	public void notifyError() {
 		if (enabled) {
 			setStatus(Status.ERROR);
 		}
