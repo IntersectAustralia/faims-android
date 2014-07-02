@@ -46,6 +46,7 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		checkBox.setText(value);
 		checkBox.setValue(value);
 		checkBox.setChecked(true);
+		checkBox.setOnClickListener(customListener);
 		addView(checkBox);
 		this.invalidate();
 		autoSaveManager.save();

@@ -32,19 +32,19 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	AutoSaveManager autoSaveManager;
 	
 	private String ref;
-	private List<NameValuePair> currentValues;
-	private float certainty;
-	private float currentCertainty;
-	private String annotation;
-	private String currentAnnotation;
+	protected List<NameValuePair> currentValues;
+	protected float certainty;
+	protected float currentCertainty;
+	protected String annotation;
+	protected String currentAnnotation;
 	protected boolean dirty;
 	protected String dirtyReason;
-	private boolean annotationEnabled;
-	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	protected boolean annotationEnabled;
+	protected boolean certaintyEnabled;
+	protected FormAttribute attribute;
 
-	private OnClickListener listener;
-	private CheckBoxGroupOnClickListener customListener;
+	protected OnClickListener listener;
+	protected CheckBoxGroupOnClickListener customListener;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
