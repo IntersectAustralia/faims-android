@@ -1242,14 +1242,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		DatabaseHelper.deleteRel(this, relationshipId, callback);
 	}
 	
-	public boolean addReln(String entityId, String relationshpId, String verb) {
-		try {
-			return databaseManager.sharedRecord().addReln(entityId, relationshpId, verb);
-		} catch (Exception e) {
-			FLog.e("error saving arch entity relationship", e);
-			showWarning("Logic Error", "Error saving arch entity relationship");
-		}
-		return false;
+	public void addReln(String entityId, String relationshpId, String verb, SaveCallback callback) {
+		DatabaseHelper.addReln(this, entityId, relationshpId, verb, callback);
 	}
 
 	@SuppressWarnings("rawtypes")

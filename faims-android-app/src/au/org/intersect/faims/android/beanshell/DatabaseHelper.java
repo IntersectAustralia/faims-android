@@ -246,5 +246,52 @@ public class DatabaseHelper {
 		};
 		task.execute();
 	}
+	
+	public static void addReln(final BeanShellLinker linker, final String entityId, final String relationshpId, final String verb, 
+			final SaveCallback callback) {
+		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					linker.getDatabaseManager().sharedRecord().addReln(entityId, relationshpId, verb);
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onSaveAssociation(entityId, relationshpId);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing add reln onsaveassociation callback", e);
+								}
+							}
+							
+						});
+					}
+				} catch (Exception e) {
+					final String message = "Error saving arch entity to relationship";
+					FLog.e(message, e);
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onError(message);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing add reln onerror callback", e);
+								}
+							}
+							
+						});
+					}
+				}
+				return null;
+			}
+			
+		};
+		task.execute();
+	}
 
 }
