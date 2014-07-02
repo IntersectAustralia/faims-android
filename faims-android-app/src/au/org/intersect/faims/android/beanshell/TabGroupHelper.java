@@ -60,7 +60,7 @@ public class TabGroupHelper {
 						try {
 							callback.onSave(uuid, newRecord);
 						} catch (Exception e) {
-							linker.reportError(e, "Error executing save tab group onsave callback");
+							linker.reportError("Error executing save tab group onsave callback", e);
 						}
 					}
 					
@@ -78,7 +78,7 @@ public class TabGroupHelper {
 						try {
 							callback.onError(message);
 						} catch (Exception ce) {
-							linker.reportError(ce, "Error executing save tab group onerror callback");
+							linker.reportError("Error executing save tab group onerror callback", ce);
 						}
 					}
 					
@@ -122,7 +122,7 @@ public class TabGroupHelper {
 						try {
 							callback.onSave(uuid, newRecord);
 						} catch (Exception e) {
-							linker.reportError(e, "Error executing save tab callback");
+							linker.reportError("Error executing save tab onsave callback", e);
 						}
 					}
 					
@@ -140,7 +140,7 @@ public class TabGroupHelper {
 						try {
 							callback.onError(message);
 						} catch (Exception ce) {
-							linker.reportError(ce, "Error executing save tab callback");
+							linker.reportError("Error executing save tab onerror callback", ce);
 						}
 					}
 					

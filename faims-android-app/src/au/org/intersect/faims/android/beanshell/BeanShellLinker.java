@@ -216,6 +216,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return databaseManager;
 	}
 	
+	public UIRenderer getUIRenderer() {
+		return uiRenderer;
+	}
+	
 	public AutoSaveManager getAutoSaveManager() {
 		return autoSaveManager;
 	}
@@ -971,10 +975,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	protected void reportError(Exception e) {
-		reportError(e, e.getMessage());
+		reportError(e.getMessage(), e);
 	}
 	
-	protected void reportError(Exception e, final String message) {
+	protected void reportError(final String message, Exception e) {
 		FLog.e(message, e);
 		ShowModuleActivity activity = activityRef.get();
 		if (activity != null) {
@@ -1230,38 +1234,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		DatabaseHelper.saveRel(this, relationshipId, relationshipType, geometry, attributes, callback, relationshipId == null, false);
 	}
 	
-	public Boolean deleteArchEnt(String entityId) {
-		try {
-			databaseManager.entityRecord().deleteArchEnt(entityId);
-			for(Tab tab : uiRenderer.getTabList()){
-				for(CustomMapView mapView : tab.getMapViewList()){
-					mapView.removeFromAllSelections(entityId);
-					mapView.updateSelections();
-				}
-			}
-			return true;
-		} catch (jsqlite.Exception e) {
-			FLog.e("error deleting arch entity", e);
-			showWarning("Logic Error", "Error deleting arch entity");
-		}
-		return false;
+	public void deleteArchEnt(String entityId, DeleteCallback callback) {
+		DatabaseHelper.deleteArchEnt(this, entityId, callback);
 	}
 
-	public Boolean deleteRel(String relationshpId){
-		try {
-			databaseManager.relationshipRecord().deleteRel(relationshpId);
-			for(Tab tab : uiRenderer.getTabList()){
-				for(CustomMapView mapView : tab.getMapViewList()){
-					mapView.removeFromAllSelections(relationshpId);
-					mapView.updateSelections();
-				}
-			}
-			return true;
-		} catch (jsqlite.Exception e) {
-			FLog.e("error deleting relationship", e);
-			showWarning("Logic Error", "Error deleting relationship");
-		}
-		return false;
+	public void deleteRel(String relationshipId, DeleteCallback callback){
+		DatabaseHelper.deleteRel(this, relationshipId, callback);
 	}
 	
 	public boolean addReln(String entityId, String relationshpId, String verb) {
