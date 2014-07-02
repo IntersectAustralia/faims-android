@@ -283,6 +283,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		try {
 			renderUI();
 			setupBeanshell();
+			restoreUI();
 		} catch (Exception e) {
 			FLog.e("error loading activity in foreground", e);
 
@@ -361,6 +362,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	private void renderUI() {
 		uiRenderer.createUI();
+	}
+	
+	private void restoreUI() {
+		uiRenderer.restoreUI();
 	}
 
 	@Override
