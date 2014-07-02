@@ -10,6 +10,11 @@
     <model>
       <instance>
         <faims id="hdb_FAIMS_Community_Server">
+          <user>
+            <usertab>
+              <users/>
+            </usertab>
+          </user>
           <main>
             <map>
               <map/>
@@ -32,7 +37,20 @@
   </h:head>
 
   <h:body>
-    <group ref="main" faims_archent_type="main">
+    <group ref="user">
+      <label>User List</label>
+      <group ref="usertab" faims_scrollable="false">
+        <label>User List</label>
+        <select1 appearance="compact" ref="users">
+          <label>Users</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="main">
       <label>Map</label>
         <group ref="map" faims_scrollable="false">
         <label>Map</label>

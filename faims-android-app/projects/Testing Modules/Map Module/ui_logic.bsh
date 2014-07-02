@@ -1,5 +1,7 @@
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
+User user; // dont touch
+String userid;
 
 initMap() {
 	setMapZoom("main/map/map", 19.0f);
@@ -93,7 +95,7 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_user", "" + userid, null, null, null));
 	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
 	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
 	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
@@ -126,3 +128,31 @@ startSync() {
 stopSync() {
     setSyncEnabled(false);
     setFileSyncEnabled(false);
+}
+/*** Uneditable - you can edit the code below with extreme precaution ***/
+/*** USER ***/
+
+getDefaultUsersList() {
+    users = fetchAll("select userid, fname || ' ' || lname from user");
+    return users;
+}
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+    userid = userResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("main");
+}
+
+onEvent("user/usertab/users", "click", "login()");
