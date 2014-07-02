@@ -258,17 +258,19 @@ public class UIRenderer {
 	}
 	
 	public void createUI() {
+		boolean showFirsTabGroup = tempSavedInstanceState == null;
+		clearBackStack();
+		createTabGroups();
+		
+		if (showFirsTabGroup) {
+			showTabGroup(0);
+		}
+	}
+	
+	public void restoreUI() {
 		try {
-			autoSaveManager.pause();
-			
-			boolean showFirsTabGroup = tempSavedInstanceState == null;
-			clearBackStack();
-			createTabGroups();
+			autoSaveManager.pause();	
 			restoreFromTempBundle();
-			
-			if (showFirsTabGroup) {
-				showTabGroup(0);
-			}
 		} finally {
 			autoSaveManager.resume();
 		}
