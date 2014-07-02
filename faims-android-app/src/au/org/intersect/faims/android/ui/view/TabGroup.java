@@ -133,9 +133,6 @@ public class TabGroup extends Fragment {
 				
 			});
 			
-			// restore after tabgroup is shown
-			restoreFromTempBundle();
-			
 			// Solves a prob the back button gives us with the TabHost already having a parent
 			if (tabHost.getParent() != null){
 				((ViewGroup) tabHost.getParent()).removeView(tabHost);
@@ -153,6 +150,9 @@ public class TabGroup extends Fragment {
 			
 			onShowTabGroup();
 			
+			// restore after tabgroup is shown
+			restoreFromTempBundle();
+							
 			return tabHost;
 		}
 		return null;
