@@ -2,11 +2,11 @@ package au.org.intersect.faims.android.ui.activity.handlers;
 
 import android.os.Message;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
-import au.org.intersect.faims.android.ui.view.BeanShellLinker;
 
 import com.google.inject.Inject;
 

@@ -96,10 +96,21 @@
     <string name="tracker_active_no_gps">Track log active, GPS not connected</string>
     <string name="tracker_inactive">Track log disabled</string>
     
-    <string name="sync_no_changes">Sync active</string>
+    <string name="sync_no_changes">Sync enabled</string>
     <string name="sync_inactive">Sync disabled</string>
     <string name="sync_has_changes">Ready to sync</string>
     <string name="sync_syncing">Sync in progress</string>
     <string name="sync_error">Sync error</string>
+    
+    <string name="bluetooth_active">Bluetooth active</string>
+    <string name="bluetooth_connected">Bluetooth connected</string>
+    <string name="bluetooth_disconnected">Bluetooth disconnected</string>
+    <string name="bluetooth_error">Bluetooth error</string>
+    
+    <string name="autosave_active">Autosave enabled</string>
+    <string name="autosave_inactive">Autosave disabled</string>
+    <string name="autosave_ready">Ready to save</string>
+    <string name="autosave_saving">Autosave in progress</string>
+    <string name="autosave_error">Autosave error</string>
 
 </resources>

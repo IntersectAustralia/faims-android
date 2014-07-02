@@ -16,19 +16,28 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
+
+import com.google.inject.Inject;
 
 public class VideoGallery extends PictureGallery implements ICustomFileView {
 
+	@Inject
+	AutoSaveManager autoSaveManager;
+	
 	private boolean sync;
 
 	public VideoGallery(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public VideoGallery(Context context, FormAttribute attribute, String ref) {
 		super(context, attribute, ref, true);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = attribute.sync;
 	}
 	
@@ -162,6 +171,7 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 	public void addVideo(String value) {
 		Picture picture = new Picture(value, null, value);
 		addSelectedImage(addGallery(picture));
+		notifySave();
 	}
 
 }

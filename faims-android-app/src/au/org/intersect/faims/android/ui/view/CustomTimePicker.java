@@ -3,33 +3,57 @@ package au.org.intersect.faims.android.ui.view;
 import java.util.List;
 
 import android.content.Context;
-import android.text.format.Time;
 import android.widget.TimePicker;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
+import com.google.inject.Inject;
+
 public class CustomTimePicker extends TimePicker implements ICustomView {
 
+	private class CustomDatePickerOnDateChangedListener implements OnTimeChangedListener {
+
+		@Override
+		public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+			notifySave();
+		}
+		
+	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
+	
 	private String ref;
 	private String currentValue;
 	private float certainty;
 	private float currentCertainty;
+	private String annotation;
+	private String currentAnnotation;
 	private boolean dirty;
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
 	
+	private CustomDatePickerOnDateChangedListener customChangeListener;
+	
 	public CustomTimePicker(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public CustomTimePicker(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+		customChangeListener = new CustomDatePickerOnDateChangedListener();
+		setOnTimeChangedListener(customChangeListener);
+		DateUtil.setTimePicker(this);
 	}
 
 	public String getAttributeName() {
@@ -50,6 +74,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	public boolean isDirty() {
@@ -74,41 +99,40 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	
 	public void setValue(String value) {
 		DateUtil.setTimePicker(this, value);
+		notifySave();
 	}
 
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
-		Time now = new Time();
-		now.setToNow();
-		setCurrentHour(now.hour);
-		setCurrentMinute(now.minute);
+		DateUtil.setTimePicker(this);
 		setCertainty(1);
+		setAnnotation("");
 		save();
 	}
 
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
-				!Compare.equal(getCertainty(), currentCertainty);
+				!Compare.equal(getCertainty(), currentCertainty) ||
+				!Compare.equal(getAnnotation(), currentAnnotation);
 	}
 	
 	@Override
 	public void save() {
 		currentValue = getValue();
 		currentCertainty = getCertainty();
+		currentAnnotation = getAnnotation();
 	}
 
 	@Override
 	public String getAnnotation() {
-		// TODO Auto-generated method stub
-		return null;
+		return annotation;
 	}
 
 	@Override
 	public void setAnnotation(String annotation) {
-		// TODO Auto-generated method stub
-		
+		this.annotation = annotation;
+		notifySave();
 	}
 
 	@Override
@@ -142,5 +166,11 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	public void setCertaintyEnabled(boolean enabled) {
 		certaintyEnabled = enabled;
 	}
-
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
+	
 }

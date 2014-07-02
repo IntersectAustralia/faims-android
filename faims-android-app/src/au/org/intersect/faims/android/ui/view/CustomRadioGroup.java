@@ -8,11 +8,31 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
+import com.google.inject.Inject;
+
 public class CustomRadioGroup extends LinearLayout implements ICustomView {
+	
+	class RadioGroupOnChangeListener implements OnCheckedChangeListener {
+
+		@Override
+		public void onCheckedChanged(RadioGroup group, int checkedId) {
+			if(listener != null) {
+				listener.onCheckedChanged(group, checkedId);
+			}
+			notifySave();
+		}
+
+	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 
 	private String ref;
 	private String currentValue;
@@ -25,13 +45,19 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 	private FormAttribute attribute;
+	
+	private OnCheckedChangeListener listener;
+	private RadioGroupOnChangeListener customListener;
 
 	public CustomRadioGroup(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
+		this.customListener = new RadioGroupOnChangeListener();
 	}
 	
 	public CustomRadioGroup(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		setLayoutParams(new LayoutParams(
                 LayoutParams.MATCH_PARENT,
@@ -41,6 +67,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+		this.customListener = new RadioGroupOnChangeListener();
 	}
 
 	@Override
@@ -101,6 +128,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 			}
 			rg.addView(radioButton);
 		}
+		notifySave();
 	}
 
 	@Override
@@ -111,6 +139,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	@Override
@@ -121,6 +150,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		notifySave();
 	}
 
 	@Override
@@ -155,7 +185,6 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
 	@Override
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !(Compare.equal(getValue(), currentValue)) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);
@@ -186,6 +215,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		addView(scrollView);
 		RadioGroup rg = new RadioGroup(this.getContext());
 		rg.setOrientation(LinearLayout.HORIZONTAL);
+		rg.setOnCheckedChangeListener(customListener);
 		scrollView.addView(rg);
 		for (NameValuePair pair : pairs) {
 			CustomRadioButton radioButton = new CustomRadioButton(this.getContext());
@@ -215,4 +245,14 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		certaintyEnabled = enabled;
 	}
 
+	public void setOnCheckChangedListener(OnCheckedChangeListener l)
+	{
+		this.listener = l;
+	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
 }

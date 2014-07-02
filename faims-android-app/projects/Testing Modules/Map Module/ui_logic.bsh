@@ -1,0 +1,128 @@
+DATA_ENTRY_LAYER = "Data Entry Layer";
+DATA_ENTRY_LAYER_ID = 0;
+
+initMap() {
+	setMapZoom("main/map/map", 19.0f);
+
+	showBaseMap("main/map/map", "Base Layer", "files/data/maps/andes.tif");
+
+    DATA_ENTRY_LAYER_ID = createCanvasLayer("main/map/map", DATA_ENTRY_LAYER);
+
+	isEntity = true;
+	queryName = "All entities";
+	querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
+	addDatabaseLayerQuery("main/map/map", queryName, querySQL);
+
+	addTrackLogLayerQuery("main/map/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+		
+	addSelectQueryBuilder("main/map/map", "Select entity by type", createQueryBuilder(
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower(?) \n" + 
+		"   group by uuid").addParameter("Type", "Structure"));
+		
+	addLegacySelectQueryBuilder("main/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
+		createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
+					
+	// define database layer styles for points, lines, polygons and text
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+
+	showDatabaseLayer("main/map/map", "Entity Layer", isEntity, queryName, querySQL, ps, ls, pos, ts);
+}
+
+initMap();
+
+onEvent("main/map/clear", "click", "onClearMap()");
+onEvent("main/map/create", "click", "onCreateMap()");
+
+onClearMap() {
+	clearGeometryList("main/map/map", getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID));
+}
+
+onCreateMap() {
+	List geomList = getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID);
+	if (geomList == null || geomList.size() == 0) {
+		showWarning("Logic Error", "No geometry found on data entry layer");
+	} else if (geomList.size() > 1) {
+		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
+	} else {
+		Geometry geom = geomList.get(0);
+		
+		if (geom instanceof Point) {
+			showTabGroup("createPoint");
+		} else if (geom instanceof Line) {
+			showTabGroup("createLine");
+		} else if (geom instanceof Polygon) {
+			showTabGroup("createPolygon");
+		}
+		
+	}
+}
+
+setGPSUpdateInterval(4);
+
+onEvent("main/gps/startTimeLog", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("main/gps/startDistanceLog", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("main/gps/stopTrackLog", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
+
+
+onEvent("main/gps/connectexternal", "click", "startExternalGPS()");
+onEvent("main/gps/connectinternal", "click", "startInternalGPS()");
+onEvent("main/gps/startsync", "click", "startSync()");
+onEvent("main/gps/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);

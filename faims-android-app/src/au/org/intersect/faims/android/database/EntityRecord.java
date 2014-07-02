@@ -65,7 +65,7 @@ public class EntityRecord extends SharedRecord {
 	}
 
 	public String saveArchEnt(String entityId, String entityType,
-			String geometry, List<EntityAttribute> attributes) throws Exception {
+			String geometry, List<EntityAttribute> attributes, boolean newEntity) throws Exception {
 		FLog.d("entityId:" + entityId);
 		FLog.d("entityType:" + entityType);
 		FLog.d("geometry:" + geometry);
@@ -82,7 +82,7 @@ public class EntityRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			if (!validArchEnt(db, entityId, entityType, geometry, attributes)) {
+			if (!validArchEnt(db, entityId, entityType, geometry, attributes, newEntity)) {
 				FLog.d("arch entity not valid");
 				return null;
 			}
@@ -98,7 +98,6 @@ public class EntityRecord extends SharedRecord {
 			}
 			
 			String parenttimestamp = null;
-			
 			String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);
@@ -110,17 +109,22 @@ public class EntityRecord extends SharedRecord {
 			
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 			
-			query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, clean(geometry));
-			st.bind(4, currentTimestamp);
-			st.bind(5, parenttimestamp);
-			st.bind(6, entityType);
-			st.step();
-			st.close();
-			st = null;
+			geometry = clean(geometry);
+			if (newEntity || geometry != null) {
+				FLog.d("entity saved");	
+				
+				query = DatabaseQueries.INSERT_INTO_ARCHENTITY;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				st.bind(2, userId);
+				st.bind(3, geometry);
+				st.bind(4, currentTimestamp);
+				st.bind(5, parenttimestamp);
+				st.bind(6, entityType);
+				st.step();
+				st.close();
+				st = null;
+			}
 			
 			HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 			// save entity attributes
@@ -180,8 +184,7 @@ public class EntityRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			String parenttimestamp = null;
-			
+			String parenttimestamp = null;			
 			String query = DatabaseQueries.GET_ARCH_ENT_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);
@@ -210,12 +213,12 @@ public class EntityRecord extends SharedRecord {
 		}
 	}
 	
-	private boolean validArchEnt(jsqlite.Database db, String entityId, String entityType, String geometry, List<EntityAttribute> attributes) throws Exception {
+	private boolean validArchEnt(jsqlite.Database db, String entityId, String entityType, String geometry, List<EntityAttribute> attributes, boolean newEntity) throws Exception {
 		Stmt st = null;
 		try {
-			if (entityId == null && !hasEntityType(db, entityType)) {
+			if (newEntity && !hasEntityType(db, entityType)) {
 				return false;
-			} else if (entityId != null && !hasEntity(db, entityId)) {
+			} else if (!newEntity && !hasEntity(db, entityId)) {
 				return false;
 			}
 			

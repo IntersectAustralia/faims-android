@@ -106,32 +106,30 @@ public class HierarchicalPictureGallery extends PictureGallery {
 		
 		// picture galleries
 		if (terms == null) {
-			for(CustomImageView image : galleryImages)
-			{
+			for (CustomImageView image : galleryImages) {
 				// Set listener if not already selected, otherwise remove
 				if(selectedImages == null || (selectedImages != null && !selectedImages.contains(image))) {
-					image.setOnClickListener(this.pictureGalleryListener);
+					image.setOnClickListener(this.customListener);
 				} else {
 					image.setOnClickListener(null);
 				}
-			}
-			return;
-		}
-		
-		// hierarchical picture galleries
-		for(VocabularyTerm term : currentTerms) {
-			if(currentTerms.indexOf(term) < galleryImages.size()) {
-				// If a parent term, don't add the onClickListener
-				if(term.terms == null) {
+	        }
+		} else {
+			// hierarchical picture galleries
+			for(VocabularyTerm term : currentTerms) {
+				if(currentTerms.indexOf(term) < galleryImages.size()) {
 					CustomImageView galleryImage = galleryImages.get(currentTerms.indexOf(term));
-					// Set listener if not already selected, otherwise remove
-					if(selectedImages == null || (selectedImages != null && !selectedImages.contains(galleryImage))) {
-						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.pictureGalleryListener);
+					boolean selected = selectedImages != null && selectedImages.contains(galleryImage);
+					boolean isParentTerm = term.terms != null;
+					if(!isParentTerm && selected) {
+						// Remove listener if a selected leaf
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(null);						
+					} else if(isParentTerm && selected) {
+						// set only internal listener if a parent term and is selected
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.internalListener);
 					} else {
-						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(null);
+						galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.customListener);
 					}
-				} else {
-					galleryImages.get(currentTerms.indexOf(term)).setOnClickListener(this.listener);
 				}
 			}
 		}
@@ -218,6 +216,7 @@ public class HierarchicalPictureGallery extends PictureGallery {
 			}
 			index++;
 		}
+		notifySave();
 	}
 	
 	@Override

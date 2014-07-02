@@ -1,22 +1,19 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import org.javarosa.core.model.Constants;
 
 import android.app.ActionBar.LayoutParams;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -31,7 +28,9 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -43,7 +42,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 
-public class Tab implements Parcelable {
+public class Tab {
 
 	@Inject
 	DatabaseManager databaseManager;
@@ -54,112 +53,81 @@ public class Tab implements Parcelable {
 	@Inject
 	Arch16n arch16n;
 
-	private static final String FREETEXT = "freetext";
+	public static final String FREETEXT = "freetext";
 
 	private ViewFactory viewFactory;
-	
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
-	private Map<String, String> viewReference;
-	private Map<String, List<View>> viewMap;
-	private Map<String, Button> dirtyButtonMap;
 	private List<View> viewList;
+	private Map<String, String> viewRefMap;
+	private Map<String, List<View>> attributeViewMap;
 	private List<CustomMapView> mapViewList;
+	private Map<String, Button> dirtyButtonMap;
+
+	private String ref;
 	private String name;
 	private String label;
-	private boolean hidden;
 	private String moduleDir;
+	
 	private View view;
-	private String reference;
 	private List<String> onLoadCommands;
 	private List<String> onShowCommands;
+	
+	// restorable
 	private boolean tabShown;
+	private boolean hidden;
 	
-	public Tab(Parcel source){
+	public Tab(String ref, String name, String label, boolean hidden, boolean scrollable, WeakReference<ShowModuleActivity> activityRef) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		
-		hidden = source.readBundle().getBoolean("hidden");
-		reference = source.readString();
-	}
-	
-	public Tab(ShowModuleActivity activity, String name, String label, boolean hidden, boolean scrollable, String reference) {
-		FAIMSApplication.getInstance().injectMembers(this);
-		
-		this.viewFactory = new ViewFactory(new WeakReference<Context>(activity), arch16n);
-		
+		this.ref = ref;
 		this.name = name;
 		this.label = arch16n.substituteValue(label);
+		this.moduleDir = activityRef.get().getModule().getDirectoryPath().getPath();
+		
 		this.hidden = hidden;
-		this.moduleDir = activity.getModule().getDirectoryPath().getPath();
-		this.reference = reference;	
+		this.tabShown = false;
 		
 		this.onLoadCommands = new ArrayList<String>();
 		this.onShowCommands = new ArrayList<String>();
 		
-		this.viewReference = new HashMap<String, String>();
-		this.dirtyButtonMap = new HashMap<String, Button>();
-		this.viewMap = new HashMap<String, List<View>>();
 		this.viewList = new ArrayList<View>();	
+		this.viewRefMap = new HashMap<String, String>();
+		this.attributeViewMap = new HashMap<String, List<View>>();
 		this.mapViewList = new ArrayList<CustomMapView>();
+		this.dirtyButtonMap = new HashMap<String, Button>();
 		
-		this.linearLayout = new LinearLayout(activity);
-        linearLayout.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		linearLayout = new LinearLayout(activityRef.get());
+        linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);    
         linearLayout.setBackgroundColor(Color.WHITE);
 		
         if (scrollable) {
-        	this.scrollView = new ScrollView(this.linearLayout.getContext());
+        	scrollView = new ScrollView(this.linearLayout.getContext());
         	scrollView.addView(linearLayout);
-        	this.view = scrollView;
+        	view = scrollView;
         } else {
-        	this.view = linearLayout;
+        	view = linearLayout;
         }
+        
+        viewFactory = new ViewFactory(activityRef, arch16n);
 	}
 
-	public static final Parcelable.Creator<Tab> CREATOR = new Parcelable.Creator<Tab>() {
-		public Tab createFromParcel(Parcel source) {
-			return new Tab(source);
-		}
-
-		public Tab[] newArray(int size) {
-			return new Tab[size];
-		}
-	};
-	
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-	
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		Bundle tabBundle = new Bundle();
-		tabBundle.putBoolean("hidden", hidden);
-		dest.writeBundle(tabBundle);
-		dest.writeString(reference);
-	}
-
-	public LinearLayout addChildContainer(LinearLayout containerLayout,
-			List<Map<String, String>> styleMappings) {
-		CustomLinearLayout linearLayout = new CustomLinearLayout(this.linearLayout.getContext(), styleMappings);
-		if (containerLayout == null) {
-			this.linearLayout.addView(linearLayout);
+	public void addChildContainer(LinearLayout parentLayout, LinearLayout containerLayout) {
+		if (parentLayout == null) {
+			linearLayout.addView(containerLayout);
 		} else {
-			containerLayout.addView(linearLayout);
+			parentLayout.addView(containerLayout);
 		}
-
-		return linearLayout;
 	}
 
-	public View addCustomView(LinearLayout linearLayout, FormAttribute attribute, String ref, String viewName, 
-			boolean isArchEnt, boolean isRelationship, List<Map<String, String>> styleMappings) {
+	public View addCustomView(String ref, String name, FormAttribute attribute, boolean isArchEnt, boolean isRelationship, 
+			List<Map<String, String>> styleMappings, LinearLayout linearLayout) {
 		// check if root container
 		if (linearLayout == null) {
 			linearLayout = this.linearLayout;
 		}
 		
-		viewReference.put(viewName, ref);
 		View view = null;
 		
 		// check the control type to know the type of the question
@@ -264,6 +232,9 @@ public class Tab implements Parcelable {
                 linearLayout.addView(view);
                 break;
         }
+        
+        viewList.add(view);
+        viewRefMap.put(name, ref);
         
         if(attribute.name != null){
         	addViewMappings(attribute.name, view);
@@ -585,6 +556,10 @@ public class Tab implements Parcelable {
 		d.show();
 	}
 	
+	public String getRef() {
+		return ref;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -600,67 +575,39 @@ public class Tab implements Parcelable {
 	public void setHidden(boolean hidden){
 		this.hidden = hidden;
 	}
-
-	public String getReference() {
-		return reference;
-	}
 	
-	public String getPath(String viewName){
-		return this.viewReference.get(viewName);
-	}
-
-	public boolean hasView(String name){
-		return this.viewMap.containsKey(name);
-	}
-	
-	public Button getDirtyButton(String ref) {
-		return dirtyButtonMap.get(ref);
-	}
-
 	private void addViewMappings(String name, View view){
-		if(this.viewMap.containsKey(name)){
-			this.viewMap.get(name).add(view);
+		if(this.attributeViewMap.containsKey(name)){
+			this.attributeViewMap.get(name).add(view);
 		}else{
 			List<View> views = new ArrayList<View>();
 			views.add(view);
-			this.viewMap.put(name, views);
+			this.attributeViewMap.put(name, views);
 		}
-		viewList.add(view);
-	}
-	
-	public List<View> getAllChildrenViews(){
-		Stack<LinearLayout> containers = new Stack<LinearLayout>(); 
-		List<View> views = new ArrayList<View>();
-		if (linearLayout == null) return views;
-		containers.add(linearLayout);
-		while (!containers.isEmpty()){
-			LinearLayout layout = containers.pop();
-			for(int i = 0; i < layout.getChildCount(); i++){
-				View view = layout.getChildAt(i);
-				if (view instanceof CustomLinearLayout){
-					containers.add((LinearLayout) view);
-				} else {
-					views.add(view);
-				}
-			}
-		}
-		
-		return views;
-	}
-	public List<View> getAllViews(){
-		return this.viewList;
 	}
 
-	public List<View> getViews(String name) {
-		return this.viewMap.get(name);
+	public boolean hasView(String name){
+		return this.attributeViewMap.containsKey(name);
 	}
 	
-	public Map<String, String> getViewReference() {
-		return viewReference;
+	public List<View> getViews(){
+		return viewList;
+	}
+	
+	public List<View> getAttributeViews(){
+		ArrayList<View> attributeViews = new ArrayList<View>();
+		for (String attribute : attributeViewMap.keySet()) {
+			attributeViews.addAll(attributeViewMap.get(attribute));
+		}
+		return attributeViews;
+	}
+
+	public List<View> getAttributeViews(String name) {
+		return attributeViewMap.get(name);
 	}
 
 	public void clearViews() {
-		List<View> views = getAllChildrenViews();
+		List<View> views = getViews();
 		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
@@ -673,6 +620,10 @@ public class Tab implements Parcelable {
 	
 	public List<CustomMapView> getMapViewList(){
 		return mapViewList;
+	}
+	
+	public Button getDirtyButton(String ref) {
+		return dirtyButtonMap.get(ref);
 	}
 
 	public void onShowTab() {
@@ -726,5 +677,69 @@ public class Tab implements Parcelable {
 		for(String command : commands){
 			beanShellLinker.execute(command);	
 		}
+	}
+	
+	public void saveTo(Bundle savedInstanceState) {
+		HashMap<String, Object> viewPairs = new HashMap<String, Object>();
+		HashMap<String, Object> viewValues = new HashMap<String, Object>(); 
+		HashMap<String, Object> viewCertainties = new HashMap<String, Object>(); 
+		HashMap<String, Object> viewAnnotations = new HashMap<String, Object>(); 
+		HashMap<String, Object> viewDirtyReasons = new HashMap<String, Object>(); 
+		for (View view : viewList) {
+			if (view instanceof ICustomView) {
+				String ref = ((ICustomView) view).getRef();
+				if (view instanceof FileListGroup) {
+					FileListGroup fileList = (FileListGroup) view;
+					viewPairs.put(ref, fileList.getPairs());
+				} else if (view instanceof CameraPictureGallery) {
+					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
+					viewPairs.put(ref, cameraGallery.getPairs());
+				} else if (view instanceof VideoGallery) {
+					VideoGallery videoGallery = (VideoGallery) view;
+					viewPairs.put(ref, videoGallery.getPairs());
+				}
+				viewValues.put(ref, beanShellLinker.getFieldValue(ref));
+				viewCertainties.put(ref, beanShellLinker.getFieldCertainty(ref));
+				viewAnnotations.put(ref, beanShellLinker.getFieldAnnotation(ref));
+				viewDirtyReasons.put(ref, beanShellLinker.getFieldDirty(ref));
+			}
+		}
+		savedInstanceState.putSerializable(getRef() + ":viewPairs", (Serializable) viewPairs);
+		savedInstanceState.putSerializable(getRef() + ":viewValues", (Serializable) viewValues);
+		savedInstanceState.putSerializable(getRef() + ":viewCertainties", (Serializable) viewCertainties);
+		savedInstanceState.putSerializable(getRef() + ":viewAnnotations", (Serializable) viewAnnotations);
+		savedInstanceState.putSerializable(getRef() + ":viewDirtyReasons", (Serializable) viewDirtyReasons);
+		savedInstanceState.putBoolean(getRef() + ":tabShown", tabShown);
+		savedInstanceState.putBoolean(getRef() + ":hidden", hidden);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void restoreFrom(Bundle savedInstanceState){
+		HashMap<String, Object> viewPairs = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewPairs");
+		HashMap<String, Object> viewValues = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewValues");
+		HashMap<String, Object> viewCertainties = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewCertainties");
+		HashMap<String, Object> viewAnnotations = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewAnnotations");
+		HashMap<String, Object> viewDirtyReasons = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewDirtyReasons");
+		for(View view : viewList){
+			if (view instanceof ICustomView) {
+				String ref = ((ICustomView) view).getRef();
+				if (view instanceof FileListGroup) {
+					FileListGroup fileList = (FileListGroup) view;
+					fileList.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				} else if (view instanceof CameraPictureGallery) {
+					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
+					cameraGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				} else if (view instanceof VideoGallery) {
+					VideoGallery videoGallery = (VideoGallery) view;
+					videoGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
+				}
+				beanShellLinker.setFieldValue(ref, viewValues.get(ref));
+				beanShellLinker.setFieldCertainty(ref, viewCertainties.get(ref));
+				beanShellLinker.setFieldAnnotation(ref, viewAnnotations.get(ref));
+				beanShellLinker.setFieldDirty(ref, viewDirtyReasons.get(ref) != null, (String) viewDirtyReasons.get(ref));
+			}
+		}
+		tabShown = savedInstanceState.getBoolean(getRef() + ":tabShown");
+		hidden = savedInstanceState.getBoolean(getRef() + ":hidden");
 	}
 }

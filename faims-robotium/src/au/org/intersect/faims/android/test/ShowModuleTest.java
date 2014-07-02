@@ -5,7 +5,9 @@ import android.content.res.AssetManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.CheckedTextView;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.view.CustomCheckBox;
 import au.org.intersect.faims.android.ui.view.CustomImageView;
+import au.org.intersect.faims.android.ui.view.CustomRadioButton;
 import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 
@@ -86,12 +88,30 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
 		solo.clickOnView(solo.getView(CustomImageView.class, 21));
-		// Check click event doesn't fire on parent item
-		assertFalse(solo.searchText("Hierarchical gallery select event"));
-		solo.scrollToTop();
-		solo.clickOnView(solo.getView(CustomImageView.class, 22));
 		
 		assertTrue(solo.searchText("Hierarchical gallery select event"));
+	}
+	
+	public void testCheckboxClickEvent() throws Exception {
+		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
+		solo.waitForDialogToClose();
+		
+		solo.clickOnText("Faims Admin");
+		solo.clickOnText("Create Entity");
+		solo.clickOnView(solo.getView(CustomCheckBox.class, 2));
+		
+		assertTrue(solo.searchText("Checkbox click event"));
+	}
+	
+	public void testRadioGroupClickEvent() throws Exception {
+		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
+		solo.waitForDialogToClose();
+		
+		solo.clickOnText("Faims Admin");
+		solo.clickOnText("Create Entity");
+		solo.clickOnView(solo.getView(CustomRadioButton.class, 2));
+		
+		assertTrue(solo.searchText("Radiogroup select event"));
 	}
 	  
 	@Override

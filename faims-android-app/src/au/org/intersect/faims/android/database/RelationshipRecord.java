@@ -105,7 +105,7 @@ public class RelationshipRecord extends SharedRecord {
 	}
 	
 	public String saveRel(String relationshipId, String relationshipType,
-			String geometry, List<RelationshipAttribute> attributes) throws Exception {
+			String geometry, List<RelationshipAttribute> attributes, boolean newRelationship) throws Exception {
 		FLog.d("relationshipId:" + relationshipId);
 		FLog.d("relationshipType:" + relationshipType);
 		FLog.d("geometry:" + geometry);
@@ -122,7 +122,7 @@ public class RelationshipRecord extends SharedRecord {
 			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
 			beginTransaction(db);
 			
-			if (!validRel(db, relationshipId, relationshipType, geometry, attributes)) {
+			if (!validRel(db, relationshipId, relationshipType, geometry, attributes, newRelationship)) {
 				FLog.d("relationship not valid");
 				return null;
 			}
@@ -136,8 +136,7 @@ public class RelationshipRecord extends SharedRecord {
 				uuid = relationshipId;
 			}
 			
-			String parenttimestamp = null;
-			
+			String parenttimestamp = null;			
 			String query = DatabaseQueries.GET_RELATIONSHIP_PARENT_TIMESTAMP;
 			st = db.prepare(query);
 			st.bind(1, uuid);
@@ -149,17 +148,22 @@ public class RelationshipRecord extends SharedRecord {
 			
 			String currentTimestamp = DateUtil.getCurrentTimestampGMT();
 
-			query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
-			st = db.prepare(query);
-			st.bind(1, uuid);
-			st.bind(2, userId);
-			st.bind(3, clean(geometry));
-			st.bind(4, currentTimestamp);
-			st.bind(5, parenttimestamp);
-			st.bind(6, relationshipType);
-			st.step();
-			st.close();
-			st = null;
+			geometry = clean(geometry);
+			if (newRelationship || geometry != null) {
+				FLog.d("relationship saved");
+				
+				query = DatabaseQueries.INSERT_INTO_RELATIONSHIP;
+				st = db.prepare(query);
+				st.bind(1, uuid);
+				st.bind(2, userId);
+				st.bind(3, geometry);
+				st.bind(4, currentTimestamp);
+				st.bind(5, parenttimestamp);
+				st.bind(6, relationshipType);
+				st.step();
+				st.close();
+				st = null;
+			}
 			
 			HashMap<String, String> cacheTimestamps = new HashMap<String, String>();
 			// save relationship attributes
@@ -208,12 +212,13 @@ public class RelationshipRecord extends SharedRecord {
 		}
 	}
 
-	private boolean validRel(jsqlite.Database db, String relationshipId, String relationshipType, String geometry, List<RelationshipAttribute> attributes) throws Exception {
+	private boolean validRel(jsqlite.Database db, String relationshipId, String relationshipType, String geometry, 
+			List<RelationshipAttribute> attributes, boolean newRelationship) throws Exception {
 		Stmt st = null;
 		try {
-			if (relationshipId == null && !hasRelationshipType(db, relationshipType)) {
+			if (newRelationship && !hasRelationshipType(db, relationshipType)) {
 				return false;
-			} else if (relationshipId != null && !hasRelationship(db, relationshipId)) {
+			} else if (!newRelationship && !hasRelationship(db, relationshipId)) {
 				return false;
 			}
 			

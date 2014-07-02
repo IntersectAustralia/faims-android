@@ -1,18 +1,27 @@
 package au.org.intersect.faims.android.ui.view;
 
 import android.content.Context;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
+
+import com.google.inject.Inject;
 
 public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileView {
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 	
 	private boolean sync;
 
 	public FileListGroup(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
 	public FileListGroup(Context context, FormAttribute attribute, boolean sync, String ref) {
 		super(context, attribute, ref);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = sync;
 	}
 	
@@ -39,6 +48,7 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		checkBox.setChecked(true);
 		addView(checkBox);
 		this.invalidate();
+		autoSaveManager.save();
 	}
 
 }

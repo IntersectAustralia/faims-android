@@ -126,4 +126,37 @@
       </lookup>
     </property>
   </ArchaeologicalElement>
+    <ArchaeologicalElement name="gps_track">
+        <description>
+          A unit is a portion of trench described by this record..
+        </description>
+    
+        <property type="integer" name="gps_user" minCardinality="1" maxCardinality="n" isIdentifier="true">
+    
+        </property>
+        <property type="time" name="gps_timestamp" minCardinality="1" maxCardinality="n" isIdentifier="true">
+    
+        </property>
+    
+        <property type="text" name="gps_longitude" minCardinality="1" maxCardinality="n">
+    
+        </property>
+        <property type="text" name="gps_latitude" minCardinality="1" maxCardinality="n">
+    
+        </property>
+    
+        <property type="float" name="gps_heading" minCardinality="1" maxCardinality="n">
+    
+        </property>
+        <property type="float" name="gps_accuracy" minCardinality="1" maxCardinality="n">
+    
+        </property>
+    
+        <property type="text" name="gps_type" minCardinality="1" maxCardinality="n">
+    
+        </property>
+    
+    </ArchaeologicalElement>
+
+
 </dataSchema>

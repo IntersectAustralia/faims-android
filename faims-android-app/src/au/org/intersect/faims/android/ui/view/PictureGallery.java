@@ -12,9 +12,13 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
+
+import com.google.inject.Inject;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
 
@@ -23,15 +27,27 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		@Override
 		public void onClick(View v)
 		{
-			if(listener != null) {
-				listener.onClick(v);
-			}
+			selectImage(v);
 			if(imageListener != null) {
 				imageListener.onClick(v);
 			}
+			notifySave();
 		}
 		
 	}
+	
+	class PictureGalleryInternalOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v)
+		{
+			selectImage(v);
+		}
+		
+	}
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 	
 	protected static final int GALLERY_SIZE = 400;
 	
@@ -49,9 +65,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected ArrayList<CustomImageView> galleryImages;
 	protected LinearLayout galleriesLayout;
 	
-	protected PictureGalleryOnClickListener pictureGalleryListener;
-	protected OnClickListener listener;
 	protected OnClickListener imageListener;
+	protected PictureGalleryInternalOnClickListener internalListener;
+	protected PictureGalleryOnClickListener customListener;
 
 	private boolean annotationEnabled;
 
@@ -61,12 +77,14 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	public PictureGallery(Context context) {
 		super(context);
-		this.pictureGalleryListener = new PictureGalleryOnClickListener();
+		FAIMSApplication.getInstance().injectMembers(this);
+		this.internalListener = new PictureGalleryInternalOnClickListener();
+		this.customListener = new PictureGalleryOnClickListener();
 	}
 
 	public PictureGallery(Context context, FormAttribute attribute, String ref, boolean isMulti) {
 		super(context);
-		this.pictureGalleryListener = new PictureGalleryOnClickListener();
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
 		this.isMulti = isMulti;
@@ -74,9 +92,10 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
 	    galleryImages = new ArrayList<CustomImageView>();
-		addView(galleriesLayout);
-		
+		addView(galleriesLayout);		
 		reset();
+		this.internalListener = new PictureGalleryInternalOnClickListener();
+		this.customListener = new PictureGalleryOnClickListener();
 	}
 
 	@Override
@@ -102,6 +121,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	@Override
@@ -112,6 +132,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		notifySave();
 	}
 
 	public boolean isMulti() {
@@ -172,7 +193,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	@Override
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !(compareValues()) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);
@@ -200,11 +220,11 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	}
 	
 	protected void updateImageListeners() {
-		if (galleryImages == null) return;
+		if (galleryImages == null || galleryImages.size() == 0) return;
 		
 		for(CustomImageView image : galleryImages)
 		{
-			image.setOnClickListener(this.pictureGalleryListener);
+			image.setOnClickListener(this.customListener);
 		}
 	}
 	
@@ -280,6 +300,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				addSelectedImage(image);
 			}
 		}
+		notifySave();
 	}
 	
 	@Override
@@ -309,6 +330,26 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				}
 			}
 		}
+		notifySave();
+	}
+	
+	public List<NameValuePair> getPairs() {
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		for (CustomImageView imageView : galleryImages) {
+			String name = imageView.getPicture().getId();
+			String value = name; // id == url
+			pairs.add(new NameValuePair(name, value));
+		}
+		return pairs;
+	}
+	
+	public void setPairs(List<NameValuePair> pairs) {
+		ArrayList<Picture> pictures = new ArrayList<Picture>();
+		for (NameValuePair pair : pairs) {
+			Picture picture = new Picture(pair.getName(), null, pair.getValue());
+			pictures.add(picture);
+		}
+		populate(pictures);
 	}
 
 	public void populate(List<Picture> pictures) {
@@ -341,13 +382,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		gallery.setPadding(10, 10, 10, 10);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
-		this.listener = new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				selectImage(v);
-			}
-		};
+		gallery.setOnClickListener(this.customListener);
 		gallery.setOnLongClickListener(new OnLongClickListener() {
 	
 			@Override
@@ -425,4 +460,11 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		this.imageListener = imageListener;
 		updateImageListeners();
 	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
+	
 }

@@ -67,7 +67,6 @@ init() {
 	setSyncMinInterval(10.0f);
 	setSyncMaxInterval(20.0f);
 	setSyncDelay(5.0f);
-	startSync();
 	// reset ids
 	entityId = tableEntityId = null;
 	relationshipId = tableRelationshipId = null;
@@ -589,10 +588,10 @@ onBluetoothWrite() {
 onBluetoothClear() {
 	messageBuffer = new ArrayList();
 	setFieldValue("tabgroup6/tab1/input", "");
+	clearBluetoothMessages();
 }
 
 onBluetoothInput() {
 	message = getBluetoothMessage();
-	//clearBluetoothMessages();
 	addMessage(message);
 }

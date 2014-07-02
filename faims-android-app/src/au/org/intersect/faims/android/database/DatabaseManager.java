@@ -22,11 +22,9 @@ public class DatabaseManager {
 	private SpatialRecord spatialRecord;
 	private SharedRecord sharedRecord;
 	
-	public DatabaseManager() {
-		this.listeners = new ArrayList<DatabaseChangeListener>();
-	}
-
 	public void init(File dbFile) {
+
+		this.listeners = new ArrayList<DatabaseChangeListener>();
 		this.dbFile = dbFile;
 		this.fetchRecord = new FetchRecord(dbFile);
 		this.mergeRecord = new MergeRecord(dbFile);

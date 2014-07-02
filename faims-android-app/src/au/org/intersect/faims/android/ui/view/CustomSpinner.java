@@ -4,31 +4,40 @@ import java.util.List;
 
 import android.content.Context;
 import android.widget.Spinner;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
+import com.google.inject.Inject;
+
 public class CustomSpinner extends Spinner implements ICustomView {
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 
 	private String ref;
-	private String currentValue;
-	private float certainty;
-	private float currentCertainty;
-	private String annotation;
-	private String currentAnnotation;
+	protected String currentValue;
+	protected float certainty;
+	protected float currentCertainty;
+	protected String annotation;
+	protected String currentAnnotation;
 	protected boolean dirty;
 	protected String dirtyReason;
-	private boolean annotationEnabled;
-	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	protected boolean annotationEnabled;
+	protected boolean certaintyEnabled;
+	protected FormAttribute attribute;
 	protected boolean ignoreSelectOnce;
 	
 	public CustomSpinner(Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public CustomSpinner(Context context, FormAttribute attribute, String ref) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
@@ -61,13 +70,18 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	}
 
 	public void setValue(String value) {
-		for (int i = 0; i < getAdapter().getCount(); ++i) {
-			NameValuePair pair = (NameValuePair) getItemAtPosition(i);
-			if (value.equalsIgnoreCase(pair.getValue())) {
-				setSelection(i);
-				break;
+		if (value != null) {
+			for (int i = 0; i < getAdapter().getCount(); ++i) {
+				NameValuePair pair = (NameValuePair) getItemAtPosition(i);
+				if (value.equalsIgnoreCase(pair.getValue())) {
+					setSelection(i);
+					break;
+				}
 			}
+		} else {
+			setSelection(0);
 		}
+		notifySave();
 	}
 
 	public float getCertainty() {
@@ -76,6 +90,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		notifySave();
 	}
 
 	public String getAnnotation() {
@@ -84,6 +99,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		notifySave();
 	}
 
 	public boolean isDirty() {
@@ -109,10 +125,10 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		setCertainty(1);
 		setAnnotation("");
 		save();
+		currentValue = null;
 	}
 
 	public boolean hasChanges() {
-		if (attribute.readOnly) return false;
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);
@@ -156,4 +172,11 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	public void setCertaintyEnabled(boolean enabled) {
 		certaintyEnabled = enabled;
 	}
+	
+	protected void notifySave() {
+		if (hasChanges()) {
+			autoSaveManager.save();
+		}
+	}
+	
 }

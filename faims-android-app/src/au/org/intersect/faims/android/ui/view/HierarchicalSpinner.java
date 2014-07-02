@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
@@ -23,22 +24,36 @@ public class HierarchicalSpinner extends CustomSpinner {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 		{
-			if(selectedListener != null) {
-				selectedListener.onItemSelected(parent, view, position, id);
+			if (ignoresSelectEvents() == false) {
+				if (listener != null) {
+					listener.onItemSelected(parent, view, position, id);
+				}
+				
+				notifySave();
+			} else {
+				setIgnoreSelectEvents(false);
 			}
-			if(internalSelectedListener != null) {
-				internalSelectedListener.onItemSelected(parent, view, position, id);
+			
+			if(internalListener != null) {
+				internalListener.onItemSelected(parent, view, position, id);
 			}
 		}
 
 		@Override
 		public void onNothingSelected(AdapterView<?> parent)
 		{
-			if(selectedListener != null) {
-				selectedListener.onNothingSelected(parent);
+			if (ignoresSelectEvents() == false) {
+				if (listener != null) {
+					listener.onNothingSelected(parent);
+				}
+				
+				notifySave();
+			} else {
+				setIgnoreSelectEvents(false);
 			}
-			if(internalSelectedListener != null) {
-				internalSelectedListener.onNothingSelected(parent);
+			
+			if(internalListener != null) {
+				internalListener.onNothingSelected(parent);
 			}
 		}
 		
@@ -53,24 +68,26 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private List<VocabularyTerm> currentItems;
 
 	private boolean lastSelected;
+	
+	private VocabularyTerm lastSelectedItem;
 
 	private HashMap<String, VocabularyTerm> vocabIdToParentTerm;
 	private HashMap<String, List<VocabularyTerm>> vocabIdToParentTerms;
 
-	private OnItemSelectedListener selectedListener;
-	private OnItemSelectedListener internalSelectedListener;
-	private OnItemSelectedListener hierarchicalSelectedListener;
+	private OnItemSelectedListener listener;
+	private OnItemSelectedListener internalListener;
+	private HierarchicalOnItemSelectListener customListener;
 
 	public HierarchicalSpinner(Context context) {
 		super(context);
-		hierarchicalSelectedListener = new HierarchicalOnItemSelectListener();
-		super.setOnItemSelectedListener(hierarchicalSelectedListener);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
 	public HierarchicalSpinner(Context context, FormAttribute attribute, String ref) {
 		super(context, attribute, ref);
-		hierarchicalSelectedListener = new HierarchicalOnItemSelectListener();
-		super.setOnItemSelectedListener(hierarchicalSelectedListener);
+		FAIMSApplication.getInstance().injectMembers(this);
+		customListener = new HierarchicalOnItemSelectListener();
+		super.setOnItemSelectedListener(customListener);
 	}
 	
 	private void mapVocabToParent() {
@@ -98,7 +115,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 	
 	@Override
 	public void setOnItemSelectedListener(OnItemSelectedListener listener) {
-		this.selectedListener = listener;
+		this.listener = listener;
 	}
 	
 	/* 
@@ -119,7 +136,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 		
 		this.parentTerms = new Stack<VocabularyTerm>();
 		
-		this.internalSelectedListener = new OnItemSelectedListener() {
+		this.internalListener = new OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View view,
@@ -190,7 +207,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 			super.setSelection(position);
 			return;
 		}
-		
 		lastSelected = selected;
 		
 		try {
@@ -201,6 +217,9 @@ public class HierarchicalSpinner extends CustomSpinner {
 					parentTerms.push(selectedTerm);
 					loadTerms();
 					super.setSelection(parentTerms.size() - 1);
+					if(listener != null && selected && !selectedTerm.equals(lastSelectedItem)) {
+						listener.onItemSelected(this, getChildAt(position), position, 0);
+					}
 				} else {
 					super.setSelection(position);
 				}
@@ -215,7 +234,11 @@ public class HierarchicalSpinner extends CustomSpinner {
 				} else {
 					super.setSelection(parentTerms.peek().terms.indexOf(parentTerm) + parentTerms.size());
 				}
+				if(listener != null && selected && !selectedTerm.equals(lastSelectedItem)) {
+					listener.onItemSelected(this, getChildAt(position), position, 0);
+				}
 			}
+			lastSelectedItem = selectedTerm;
 		} catch (Exception e) {
 			FLog.e("error selecting item on hierarchical spinner", e);
 		}
@@ -257,6 +280,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			}
 			index++;
 		}
+		notifySave();
 	}
 	
 	@Override
@@ -278,6 +302,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 		dirty = false;
 		dirtyReason = null;
 		
+		lastSelectedItem = null;
+		
 		parentTerms.clear();
 		loadTerms();
 		
@@ -286,5 +312,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		setAnnotation("");
 		
 		save();
+		currentValue = null;
 	}
 }

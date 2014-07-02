@@ -1,8 +1,9 @@
-package au.org.intersect.faims.android.ui.view;
+package au.org.intersect.faims.android.beanshell;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,11 +22,13 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.view.InputDevice;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -37,6 +40,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
@@ -56,6 +60,7 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
@@ -68,6 +73,23 @@ import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
+import au.org.intersect.faims.android.ui.view.CameraPictureGallery;
+import au.org.intersect.faims.android.ui.view.CustomButton;
+import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
+import au.org.intersect.faims.android.ui.view.CustomListView;
+import au.org.intersect.faims.android.ui.view.CustomRadioGroup;
+import au.org.intersect.faims.android.ui.view.CustomSpinner;
+import au.org.intersect.faims.android.ui.view.FileListGroup;
+import au.org.intersect.faims.android.ui.view.HierarchicalPictureGallery;
+import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
+import au.org.intersect.faims.android.ui.view.ICustomView;
+import au.org.intersect.faims.android.ui.view.Picture;
+import au.org.intersect.faims.android.ui.view.PictureGallery;
+import au.org.intersect.faims.android.ui.view.Tab;
+import au.org.intersect.faims.android.ui.view.TabGroup;
+import au.org.intersect.faims.android.ui.view.Table;
+import au.org.intersect.faims.android.ui.view.UIRenderer;
+import au.org.intersect.faims.android.ui.view.VideoGallery;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
@@ -102,10 +124,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	@Inject
+	AutoSaveManager autoSaveManager;
 
 	private Interpreter interpreter;
 
-	private ShowModuleActivity activity;
+	private WeakReference<ShowModuleActivity> activityRef;
 	
 	private Module module;
 
@@ -134,15 +159,19 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private String scanContents;
 	private String scanCallBack;
+	
+	private String hardwareBufferContents;
+	private String hardwareReadingCallBack;
+
+	private Toast toast;
 
 	public void init(ShowModuleActivity activity, Module module) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.interpreter = new Interpreter();
-		this.activity = activity;
+		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		this.module = module;
 		this.persistedObjectName = null;
 		this.lastFileBrowserCallback = null;
-		this.trackingHandlerThread = null;
 		this.trackingTask = null;
 		this.prevLong = 0d;
 		this.prevLat = 0d;
@@ -177,12 +206,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void sourceFromAssets(String filename) {
 		try {
-			interpreter.eval(FileUtil.convertStreamToString(this.activity
-					.getAssets().open(filename)));
+			interpreter.eval(FileUtil.convertStreamToString(this.activityRef.get().getAssets().open(filename)));
 		} catch (Exception e) {
 			FLog.w("error sourcing script from assets", e);
 			showWarning("Logic Error", "Error encountered in logic commands");
 		}
+	}
+	
+	public Interpreter getInterpreter() {
+		return interpreter;
 	}
 
 	public void persistObject(String name) {
@@ -211,7 +243,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void executeOnUiThread(final String code) {
-		activity.runOnUiThread(new Runnable() {
+		activityRef.get().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -241,7 +273,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				return;
 			}
 			gpsDataManager.setTrackingStarted(true);
-			this.activity.invalidateOptionsMenu();
+			activityRef.get().updateActionBar();
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -252,8 +284,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
 						if (getGPSPosition() != null) {
-							activity.runOnUiThread(new Runnable() {
-								
+							activityRef.get().runOnUiThread(new Runnable() {						
 								@Override
 								public void run() {
 									execute(callback);
@@ -305,26 +336,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void stopTrackingGPS() {
 		FLog.d("gps tracking is stopped");
 		
-		if (trackingHandler != null) {
-			trackingHandler.removeCallbacks(trackingTask);
-			trackingHandler = null;
-		}
 		if (trackingHandlerThread != null) {
 			trackingHandlerThread.quit();
 			trackingHandlerThread = null;
 		}
+		
+		if (trackingHandler != null) {
+			trackingHandler.removeCallbacks(trackingTask);
+			trackingHandler = null;
+		}
+		
 		gpsDataManager.setTrackingStarted(false);
-		this.activity.invalidateOptionsMenu();
+		activityRef.get().updateActionBar();
 	}
 	
 	public void stopTrackingGPSForOnPause() {
 		if (trackingHandler != null) {
 			trackingHandler.removeCallbacks(trackingTask);
 			trackingHandler = null;
-		}
-		if (trackingHandlerThread != null) {
-			trackingHandlerThread.quit();
-			trackingHandlerThread = null;
 		}
 	}
 
@@ -363,6 +392,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					} else if (view instanceof PictureGallery) {
 						PictureGallery pictureGalleryView = (PictureGallery) view;
 						addPictureGalleryEventClickListener(pictureGalleryView, code);
+					} else if (view instanceof CustomRadioGroup) {
+						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
+						addRadioGroupEventClickListener(radioGroup, code);
 					} else {
 						view.setOnClickListener(new OnClickListener() {
 
@@ -386,6 +418,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					} else if (view instanceof PictureGallery) {
 						PictureGallery pictureGalleryView = (PictureGallery) view;
 						addPictureGalleryEventClickListener(pictureGalleryView, code);
+					} else if (view instanceof CustomRadioGroup) {
+						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
+						addRadioGroupEventClickListener(radioGroup, code);
 					}
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
@@ -454,22 +489,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			public void onItemSelected(
 					AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
-				if (spinner.ignoresSelectEvents() == false) {
-					execute(code);
-				} else {
-					spinner.setIgnoreSelectEvents(false);
-				}
-				
+				execute(code);
 			}
 
 			@Override
 			public void onNothingSelected(
 					AdapterView<?> arg0) {
-				if (spinner.ignoresSelectEvents() == false) {
-					execute(code);
-				} else {
-					spinner.setIgnoreSelectEvents(false);
-				}
+				execute(code);
 			}
 
 		});
@@ -484,6 +510,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				execute(code);
 			}
 
+		});
+	}
+	
+	private void addRadioGroupEventClickListener(final CustomRadioGroup radioGroup, final String code) {
+		radioGroup.setOnCheckChangedListener(new RadioGroup.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				execute(code);
+			}
 		});
 	}
 
@@ -564,15 +600,42 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					+ ref);
 		}
 	}
+	
+	private TabGroup getTabGroup(String ref) throws Exception {
+		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
+		if (tabGroup == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		return tabGroup;
+	}
+	
+	private Tab getTab(String ref) throws Exception {
+		Tab tab = uiRenderer.getTabByLabel(ref);
+		if (tab == null) {
+			throw new Exception("Cannot find tab " + ref);
+		}
+		return tab;
+	}
+	
+	private TabGroup getTabGroupFromTabLabel(String ref) throws Exception {
+		if (ref == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		String[] ids = ref.split("/");
+		if (ids.length < 2) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		String groupId = ids[0];
+		TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
+		if (tabGroup == null) {
+			throw new Exception("Cannot find tabgroup " + ref);
+		}
+		return tabGroup;
+	}
 
 	public void newTabGroup(String label) {
 		try {
 			TabGroup tabGroup = showTabGroup(label);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing new tab group "
-						+ label);
-				return;
-			}
 			tabGroup.clearTabs();
 		} catch (Exception e) {
 			FLog.e("error showing new tabgroup " + label, e);
@@ -583,12 +646,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void newTab(String label) {
 		try {
 			Tab tab = showTab(label);
-			if (tab == null) {
-				showWarning("Logic Error", "Error showing new tab group "
-						+ label);
-				return;
-			}
-
 			tab.clearViews();
 		} catch (Exception e) {
 			FLog.e("error showing new tab " + label, e);
@@ -598,13 +655,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public TabGroup showTabGroup(String label) {
 		try {
-			TabGroup tabGroup = uiRenderer.showTabGroup(
-					this.activity, label);
+			autoSaveManager.flush();
+			
+			final TabGroup tabGroup = uiRenderer.showTabGroup(label);
 			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tabgroup " + label);
-				return null;
+				throw new Exception("cannot find tabgroup " + label);
 			}
-			activity.getActionBar().setTitle(tabGroup.getLabel());
+			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -613,28 +670,36 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public TabGroup showTabGroup(String id, final String uuid) {
+	public TabGroup showTabGroup(final String label, final String uuid) {
 		try {
-			final TabGroup tabGroup = uiRenderer.showTabGroup(activity,
-					id);
+			autoSaveManager.flush();
+			
+			final TabGroup tabGroup = uiRenderer.showTabGroup(label);
 			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tab group " + id);
-				return null;
+				throw new Exception("cannot find tabgroup " + label);
 			}
-			activity.getActionBar().setTitle(tabGroup.getLabel());
 			tabGroup.setOnShowTask(new TabGroup.TabTask() {
 				public void onShow() {
-					if (tabGroup.getArchEntType() != null) {
-						showArchEntityTabGroup(uuid, tabGroup);
-					} else if (tabGroup.getRelType() != null) {
-						showRelationshipTabGroup(uuid, tabGroup);
+					try {
+						autoSaveManager.pause();
+						if (tabGroup.getArchEntType() != null) {
+							TabGroupHelper.showArchEntityTabGroup(BeanShellLinker.this, uuid, tabGroup);
+						} else if (tabGroup.getRelType() != null) {
+							TabGroupHelper.showRelationshipTabGroup(BeanShellLinker.this, uuid, tabGroup);
+						}
+					} catch (Exception e) {
+						FLog.e("error showing tabgroup " + label, e);
+						showWarning("Logic Error", "Error showing tab group " + label);
+					} finally {
+						autoSaveManager.resume();
 					}
 				}
-			});	
+			});
+			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
-			FLog.e("error showing tabgroup " + id, e);
-			showWarning("Logic Error", "Error showing tab group " + id);
+			FLog.e("error showing tabgroup " + label, e);
+			showWarning("Logic Error", "Error showing tab group " + label);
 		}
 		return null;
 	}
@@ -643,8 +708,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			Tab tab = uiRenderer.showTab(label);
 			if (tab == null) {
-				showWarning("Logic Error", "Error showing tab " + label);
-				return null;
+				throw new Exception("cannot show tab " + label);
 			}
 			return tab;
 		} catch (Exception e) {
@@ -654,281 +718,164 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 
-	public Tab showTab(String id, String uuid) {
+	public Tab showTab(String label, String uuid) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			String groupId = ids[0];
-			String tabId = ids[1];
-			TabGroup tabGroup = uiRenderer.getTabGroupByLabel(
-					groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
-			}
-			Tab tab = tabGroup.showTab(tabId);
+			TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			Tab tab = uiRenderer.showTab(label);
 			if (tab == null) {
-				showWarning("Logic Error", "Error showing tab " + id);
-				return null;
+				throw new Exception("cannot show tab " + label);
 			}
 			if (tabGroup.getArchEntType() != null) {
-				showArchEntityTab(uuid, tab);
+				TabGroupHelper.showArchEntityTab(this, uuid, tab);
 			} else if (tabGroup.getRelType() != null) {
-				showRelationshipTab(uuid, tab);
+				TabGroupHelper.showRelationshipTab(this, uuid, tab);
 			}
 			return tab;
 		} catch (Exception e) {
-			FLog.e("error showing tab " + id, e);
-			showWarning("Logic Error", "Error showing tab " + id);
+			FLog.e("error showing tab " + label, e);
+			showWarning("Logic Error", "Error showing tab " + label);
 		}
 		return null;
 	}
 	
-	private void showSaveDialog() {
-		try {
-			while(saveDialog != null) {
-				Thread.sleep(1);
-			}
-			
-			activity.runOnUiThread(new Runnable() {
+	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback) {
+		boolean newRecord = uuid == null;
+		if (newRecord) {
+			uuid = databaseManager.sharedRecord().generateUUID();
+		}
+		saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
+		return uuid;
+	}
+
+	public String saveTab(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback) {
+		boolean newRecord = uuid == null;
+		if (newRecord) {
+			uuid = databaseManager.sharedRecord().generateUUID();
+		}
+		saveTabInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
+		return uuid;
+	}
 	
-				@Override
-				public void run() {
-					saveDialog = showBusy("Busy", "Saving record");
+	public String saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, String callback, boolean enableAutoSave) {
+		boolean newRecord = uuid == null;
+		if (newRecord) {
+			uuid = databaseManager.sharedRecord().generateUUID();
+		}
+		if (enableAutoSave) {
+			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, newRecord);
+		} else {
+			saveTabGroupInBackground(ref, uuid, geometry, attributes, callback, newRecord, true);
+		}
+		return uuid;
+	}
+	
+	public void saveTabGroupInBackground(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, 
+			final String callback, final boolean newRecord, boolean blocking) {
+		try {
+			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(ref);
+			if (tabGroup == null) {
+				throw new Exception("cannot find tabgroup " + ref);
+			}
+			if (blocking) {
+				try {
+					TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
+					autoSaveManager.reportSaved();
+					if (callback != null) {
+						execute(callback);
+					}
+				} catch (Exception e) {
+					autoSaveManager.reportError();
+					FLog.e("error saving tabgroup " + ref, e);
+					showWarning("Logic Error", "Error saving tab group " + ref);
 				}
-				
-			});
-			
-			while(saveDialog == null) {
-				Thread.sleep(1);
-			}
-		} catch (Exception e) {
-			FLog.e("error showing saving dialog", e);
-		}
-	}
-	
-	private void hideSaveDialog() {
-		if (saveDialog != null) {
-			saveDialog.dismiss();
-			saveDialog = null;
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void saveTabGroup(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
-		try {
-			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error saving tab group " + id);
-				return;
-			}
-			if (tabGroup.getArchEntType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-								if (attributes != null) {
-									entityAttributes.addAll((List<EntityAttribute>) attributes);
-								}
-								
-								entityAttributes.addAll(getEntityAttributesFromTabGroup(tabGroup));
-								
-								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-								
-								interpreter.set("_saved_record_id", entityId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tabgroup " + id, e);
-								showWarning("Logic Error", "Error saving tab group " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id, e);
-							showWarning("Logic Error", "Error saving tab group " + id);
-						}
-					}
-					
-				});
-			} else if (tabGroup.getRelType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-								if (attributes != null) {
-									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-								}
-								
-								relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(tabGroup));
-								
-								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-								
-								interpreter.set("_saved_record_id", relationshipId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tabgroup " + id, e);
-								showWarning("Logic Error", "Error saving tab group " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tabgroup " + id, e);
-							showWarning("Logic Error", "Error saving tab group " + id);
-						}
-					}
-					
-				});
 			} else {
-				FLog.e("cannot save tabgroup with no type");
-				showWarning("Logic Error", "Cannot save tabgroup with no type");
-			}
+				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
+
+					@Override
+					protected Void doInBackground(Void... params) {
+						try {
+							TabGroupHelper.saveTabGroup(BeanShellLinker.this, tabGroup, uuid, geometry, attributes, newRecord);
+							autoSaveManager.reportSaved();
+						} catch (Exception e) {
+							autoSaveManager.reportError();
+							FLog.e("error saving tabgroup " + ref, e);
+						}
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(Void result) {
+						if (callback != null) {
+							BeanShellLinker.this.execute(callback);
+						}
+					}
+					
+				};
+				autoSaveTask.execute();
+			}	
 		} catch (Exception e) {
-			FLog.e("error saving tabgroup " + id, e);
-			showWarning("Logic Error", "Error saving tab group " + id);
+			FLog.e("error saving tabgroup " + ref, e);
+			showWarning("Logic Error", "Error saving tab group " + ref);
 		}
 	}
-
-	@SuppressWarnings("unchecked")
-	public void saveTab(final String id, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, final String callback) {
+	
+	public void saveTabInBackground(final String ref, final String uuid, final List<Geometry> geometry, final List<? extends Attribute> attributes, 
+			final String callback, final boolean newRecord, boolean blocking) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			String groupId = ids[0];
-			String tabId = ids[1];
-			final TabGroup tabGroup = uiRenderer.getTabGroupByLabel(groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
-			}
-			final Tab tab = tabGroup.getTab(tabId);
+			final TabGroup tabGroup = getTabGroupFromTabLabel(ref);
+			final Tab tab = uiRenderer.getTabByLabel(ref);
 			if (tab == null) {
-				showWarning("Logic Error", "Error saving tab " + id);
-				return;
+				throw new Exception("cannot find tab " + ref);
 			}
-			if (tabGroup.getArchEntType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-								if (attributes != null) {
-									entityAttributes.addAll((List<EntityAttribute>) attributes);
-								}
-								
-								entityAttributes.addAll(getEntityAttributesFromTab(tab));
-								
-								String entityId = saveArchEnt(uuid, tabGroup.getArchEntType(), geometry, entityAttributes);
-								
-								interpreter.set("_saved_record_id", entityId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tab " + id, e);
-								showWarning("Logic Error", "Error saving tab " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tab " + id, e);
-							showWarning("Logic Error", "Error saving tab " + id);
-						}
-					}
-					
-				});
-			} else if (tabGroup.getRelType() != null) {
-				HandlerThread thread = new HandlerThread("saving");
-				thread.start();
-				Handler handler = new Handler(thread.getLooper());
-				handler.post(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							showSaveDialog();
-							
-							try {
-								List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-								if (attributes != null) {
-									relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-								}
-								
-								relationshipAttributes.addAll(getRelationshipAttributesFromTab(tab));
-								
-								String relationshipId = saveRel(uuid, tabGroup.getRelType(), geometry, relationshipAttributes);
-								
-								interpreter.set("_saved_record_id", relationshipId);
-								executeOnUiThread(callback);
-							} catch (Exception e) {
-								FLog.e("error saving tab " + id, e);
-								showWarning("Logic Error", "Error saving tab " + id);
-							}
-							
-							hideSaveDialog();
-						} catch (Exception e) {
-							FLog.e("error saving tab " + id, e);
-							showWarning("Logic Error", "Error saving tab " + id);
-						}
-					}
-					
-				});
+			if (blocking) {
+				try {
+					TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
+					autoSaveManager.reportSaved();
+					if (callback != null) {
+						execute(callback);
+					}		
+				} catch (Exception e) {
+					autoSaveManager.reportError();
+					FLog.e("error saving tab " + ref, e);
+					showWarning("Logic Error", "Error saving tab " + ref);
+				}
 			} else {
-				FLog.e("cannot save tab with no type");
-				showWarning("Logic Error", "Cannot save tab with no type");
-			}
+				AsyncTask<Void, Void, Void> autoSaveTask = new AsyncTask<Void, Void, Void>() {
+
+					@Override
+					protected Void doInBackground(Void... params) {
+						try {
+							TabGroupHelper.saveTab(BeanShellLinker.this, tabGroup, tab, uuid, geometry, attributes, newRecord);
+							autoSaveManager.reportSaved();
+						} catch (Exception e) {
+							autoSaveManager.reportError();
+							FLog.e("error saving tab " + ref, e);
+						}
+						return null;
+					}
+					
+					@Override
+					protected void onPostExecute(Void result) {
+						if (callback != null) {
+							BeanShellLinker.this.execute(callback);
+						}
+					}
+					
+				};
+				autoSaveTask.execute();
+			}	
 		} catch (Exception e) {
-			FLog.e("error saving tab " + id, e);
-			showWarning("Logic Error", "Error saving tab " + id);
+			FLog.e("error saving tab " + ref, e);
+			showWarning("Logic Error", "Error saving tab " + ref);
 		}
 	}
 
-	public void cancelTabGroup(String id, boolean warn) {
+	public void cancelTabGroup(String label, boolean warn) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return;
-			}
-			final TabGroup tabGroup = uiRenderer
-					.getTabGroupByLabel(id);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error cancelling tab group" + id);
-				return;
-			}
+			TabGroup tabGroup = getTabGroup(label);
 			if (warn) {
 				boolean hasChanges = false;
 				if (tabGroup.getArchEntType() != null
@@ -936,12 +883,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					for (Tab tab : tabGroup.getTabs()) {
 						if (hasChanges(tab)) {
 							hasChanges = true;
+							break;
 						}
 					}
 				}
 				if (hasChanges) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
-							this.activity);
+							this.activityRef.get());
 
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab group? You have unsaved changes there.");
@@ -969,38 +917,20 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				goBack();
 			}
 		} catch (Exception e) {
-			FLog.e("error cancelling tab group " + id, e);
-			showWarning("Logic Error", "Error cancelling tab group " + id);
+			FLog.e("error cancelling tab group " + label, e);
+			showWarning("Logic Error", "Error cancelling tab group " + label);
 		}
 	}
 
-	public void cancelTab(String id, boolean warn) {
+	public void cancelTab(String label, boolean warn) {
 		try {
-			if (id == null) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			String[] ids = id.split("/");
-			if (ids.length < 2) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			String groupId = ids[0];
-			final String tabId = ids[1];
-			final TabGroup tabGroup = uiRenderer
-					.getTabGroupByLabel(groupId);
-			if (tabGroup == null) {
-				showWarning("Logic Error", "Error cancelling tab " + id);
-				return;
-			}
-			Tab tab = tabGroup.getTab(tabId);
+			final TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			final Tab tab = getTab(label);
 			if (warn) {
 				if (hasChanges(tab)
 						&& (tabGroup.getArchEntType() != null || tabGroup
 								.getRelType() != null)) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(
-							this.activity);
-
+					AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
 					builder.setPositiveButton("OK",
@@ -1011,7 +941,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 									if (tabGroup.getTabs().size() == 1) {
 										goBack();
 									} else {
-										tabGroup.hideTab(tabId);
+										tabGroup.hideTab(tab.getName());
 									}
 								}
 							});
@@ -1020,7 +950,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									// User cancelled the dialog
-									tabGroup.showTab(tabId);
+									tabGroup.showTab(tab.getName());
 								}
 							});
 
@@ -1029,24 +959,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					if (tabGroup.getTabs().size() == 1) {
 						goBack();
 					} else {
-						tabGroup.hideTab(tabId);
+						tabGroup.hideTab(tab.getName());
 					}
 				}
 			} else {
 				if (tabGroup.getTabs().size() == 1) {
 					goBack();
 				} else {
-					tabGroup.hideTab(tabId);
+					tabGroup.hideTab(tab.getName());
 				}
 			}
 		} catch (Exception e) {
-			FLog.e("error cancelling tab " + id, e);
-			showWarning("Logic Error", "Error cancelling tab " + id);
+			FLog.e("error cancelling tab " + label, e);
+			showWarning("Logic Error", "Error cancelling tab " + label);
 		}
 	}
 
 	private boolean hasChanges(Tab tab) {
-		List<View> views = tab.getAllViews();
+		List<View> views = tab.getAttributeViews();
 		for (View v : views) {
 			
 			if (v instanceof ICustomView) {
@@ -1061,290 +991,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	public void goBack() {
-		this.activity.onBackPressed();
-	}
-
-	public int getGpsUpdateInterval() {
-		return gpsDataManager.getGpsUpdateInterval();
-	}
-
-	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		gpsDataManager.setGpsUpdateInterval(
-				gpsUpdateInterval);
-	}
-
-	private void showArchEntityTabGroup(String uuid, TabGroup tabGroup) {
-		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showArchEntityTab((ArchEntity) archEntityObj, tab);
-			}
-		} else {
-			FLog.w("cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab group " + tabGroup.getLabel() + " with arch entity " + uuid);
-			return;
-		}
-	}
-
-	private void showRelationshipTabGroup(String uuid, TabGroup tabGroup) {
-		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showRelationshipTab((Relationship) relationshipObj, tab);
-			}
-		} else {
-			FLog.w("cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab group " + tabGroup.getLabel() + " with relationship " + uuid);
-			return;
-		}
-	}
-
-	private void showArchEntityTab(String uuid, Tab tab) {
-		Object archEntityObj = fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			showArchEntityTab((ArchEntity) archEntityObj, tab);
-		} else {
-			FLog.w("cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab " + tab.getLabel() + " with arch entity " + uuid);
-			return;
-		}
+		this.activityRef.get().onBackPressed();
 	}
 	
-	private void showArchEntityTab(ArchEntity archEntity, Tab tab) {
-		try {
-			tab.clearViews();
-			for (EntityAttribute attribute : archEntity.getAttributes()) {
-				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getViews(attribute.getName());
-					if (views != null) {
-						setAttributeTab(attribute, views);
-					}
-				}
-			}
-		} catch (Exception e) {
-			FLog.e("error showing arch entity tab " + tab.getLabel(), e);
-			showWarning("Logic Error",
-					"Error showing tab " + tab.getLabel());
-		}
-	}
-	
-	private void showRelationshipTab(String uuid, Tab tab) {
-		Object relationshipObj = fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			showRelationshipTab((Relationship) relationshipObj, tab);
-		} else {
-			FLog.w("cannot show tab " + tab.getLabel() + " with relationship " + uuid);
-			showWarning("Logic Error",
-					"Cannot show tab " + tab.getLabel() + " with relationship " + uuid);
-			return;
-		}
-	}
-	
-	private void showRelationshipTab(Relationship relationship, Tab tab) {
-		try {
-			tab.clearViews();
-			for (RelationshipAttribute attribute : relationship.getAttributes()) {
-				if (tab.hasView(attribute.getName())) {
-					List<View> views = tab.getViews(attribute.getName());
-					if (views != null) {
-						setAttributeTab(attribute, views);
-					}
-				}
-			}
-		} catch (Exception e) {
-			FLog.e("error showing relationship tab " + tab.getLabel(), e);
-			showWarning("Logic Error",
-					"Error showing tab " + tab.getLabel());
-		}
-	}
-
-	private void setAttributeTab(Attribute attribute, List<View> views) {
-		for (View v : views) {
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				if (customView.getAttributeName().equals(attribute.getName())) {
-					if (v instanceof FileListGroup) {
-						// add full path
-						FileListGroup fileList = (FileListGroup) v;
-						fileList.addFile(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof CameraPictureGallery) {
-						CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
-						// add full path
-						cameraGallery.addPicture(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof VideoGallery) {
-						VideoGallery videoGallery = (VideoGallery) v;
-						// add full path
-						videoGallery.addVideo(getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else {
-						setAttributeView(customView.getRef(), attribute, customView);
-					}
-					customView.save();
-					break;
-				}
-			}
-		}
-	}
-
-	private void setAttributeView(String ref, Attribute attribute, ICustomView customView) {
-		setFieldValue(ref, attribute.getValue(customView.getAttributeType()));
-		setFieldCertainty(ref, attribute.getCertainty());
-		setFieldAnnotation(ref, attribute.getAnnotation(customView.getAttributeType()));
-		appendFieldDirty(ref, attribute.isDirty(), attribute.getDirtyReason());
-	}
-	
-	private List<EntityAttribute> getEntityAttributesFromTabGroup(TabGroup tabGroup) {
-		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getEntityAttributesFromTab(tab));
-		}
-		return attributes;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<EntityAttribute> getEntityAttributesFromTab(Tab tab) {
-		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
-		
-		List<View> views = tab.getAllViews();
-		if (views != null) {
-			for (View v : views) {
-				if (v instanceof ICustomView) {
-					ICustomView customView = (ICustomView) v;
-					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
-					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if (customView instanceof ICustomFileView) {
-						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								// strip out full path
-								String value = null;
-								
-								// attach new files
-								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
-									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-								} else {
-									value = stripAttachedFilePath(pair.getName());
-								}
-								
-								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, value, null, certainty));
-								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, value, certainty));
-								} else {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
-								}
-							}
-						}
-					} else if (v instanceof CustomCheckBoxGroup) {
-						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
-						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, pair.getName(), null, certainty));
-								} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, pair.getName(), certainty));
-								} else {
-									attributes.add(new EntityAttribute(customView.getAttributeName(), pair.getName(), null, null, certainty));
-								}
-							}
-						}
-					} else {
-						if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, customView.getValue(), null, certainty));
-						} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, customView.getValue(), certainty));
-						} else {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), customView.getValue(), null, null, certainty));
-						}
-					}
-				}
-			}
-		} 
-		
-		return attributes;
-	}
-
-	private List<RelationshipAttribute> getRelationshipAttributesFromTabGroup(TabGroup tabGroup) {
-		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getRelationshipAttributesFromTab(tab));
-		}
-		return attributes;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<RelationshipAttribute> getRelationshipAttributesFromTab(Tab tab) {
-		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
-		
-		List<View> views = tab.getAllViews();
-		if (views != null) {
-			for (View v : views) {
-				if (v instanceof ICustomView) {
-					ICustomView customView = (ICustomView) v;
-					String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
-					String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
-					if (customView instanceof ICustomFileView) {
-						List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								// strip out full path
-								String value = null;
-								
-								// attach new files
-								if (!pair.getName().contains(module.getDirectoryPath("files").getPath())) {
-									value = attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-								} else {
-									value = stripAttachedFilePath(pair.getName());
-								}
-								
-								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, value, certainty));
-								} else {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
-								}
-							}
-						}
-					} else if (v instanceof CustomCheckBoxGroup) {
-						CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
-						List<NameValuePair> pairs = (List<NameValuePair>) checkboxGroup.getValues();
-						if (pairs == null || pairs.isEmpty()) {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), null, null, null, true));
-						} else {
-							for (NameValuePair pair : pairs) {
-								if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, pair.getName(), certainty));
-								} else {
-									attributes.add(new RelationshipAttribute(customView.getAttributeName(), pair.getName(), null, certainty));
-								}
-							}
-						}
-					} else {
-						if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, customView.getValue(), certainty));
-						} else {
-							attributes.add(new RelationshipAttribute(customView.getAttributeName(), customView.getValue(), null, certainty));
-						}
-					}
-				}
-			}
-		} 
-		
-		return attributes;
-	}
-
 	public void showToast(String message) {
 		try {
 			int duration = Toast.LENGTH_SHORT;
-			Toast toast = Toast.makeText(activity.getApplicationContext(),
+			if (toast != null) {
+				toast.cancel();
+			}
+			toast = Toast.makeText(activityRef.get().getBaseContext(),
 					message, duration);
 			toast.show();
 		} catch (Exception e) {
@@ -1356,7 +1012,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void showAlert(final String title, final String message,
 			final String okCallback, final String cancelCallback) {
 		try {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 	
 			builder.setTitle(title);
 			builder.setMessage(message);
@@ -1382,7 +1038,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void showWarning(final String title, final String message) {
 		try {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 	
 			builder.setTitle(title);
 			builder.setMessage(message);
@@ -1399,7 +1055,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public Dialog showBusy(final String title, final String message) {
 		try {
-			BusyDialog d = new BusyDialog(this.activity, title, message, null);
+			BusyDialog d = new BusyDialog(this.activityRef.get(), title, message, null);
 			d.show();
 			return d;
 		} catch (Exception e) {
@@ -1640,19 +1296,23 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public String getCurrentTime() {
 		return DateUtil.getCurrentTimestampGMT();
 	}
-
+	
 	public String saveArchEnt(String entityId, String entityType,
-			List<Geometry> geometry, List<EntityAttribute> attributes) {
+			List<Geometry> geometry, List<EntityAttribute> attributes, boolean newEntity) {
 		try {
 			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
 			return databaseManager.entityRecord().saveArchEnt(entityId,
-					entityType, WKTUtil.collectionToWKT(geomList), attributes);
-
+					entityType, WKTUtil.collectionToWKT(geomList), attributes, newEntity);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity", e);
 			showWarning("Logic Error", "Error saving arch entity");
 		}
 		return null;
+	}
+
+	public String saveArchEnt(String entityId, String entityType,
+			List<Geometry> geometry, List<EntityAttribute> attributes) {
+		return saveArchEnt(entityId, entityType, geometry, attributes, entityId == null);
 	}
 
 	public Boolean deleteArchEnt(String entityId){
@@ -1671,18 +1331,22 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return false;
 	}
 
-	public String saveRel(String relationshpId, String relationshipType,
-			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
+	public String saveRel(String relationshipId, String relationshipType,
+			List<Geometry> geometry, List<RelationshipAttribute> attributes, boolean newRelationship) {
 		try {
 			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(this.module.getSrid(), GeometryUtil.EPSG4326, geometry);
-			return databaseManager.relationshipRecord().saveRel(relationshpId, relationshipType,
-					WKTUtil.collectionToWKT(geomList), attributes);
-
+			return databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
+					WKTUtil.collectionToWKT(geomList), attributes, newRelationship);
 		} catch (Exception e) {
 			FLog.e("error saving relationship", e);
 			showWarning("Logic Error", "Error saving relationship");
 		}
 		return null;
+	}
+	
+	public String saveRel(String relationshipId, String relationshipType,
+			List<Geometry> geometry, List<RelationshipAttribute> attributes) {
+		return saveRel(relationshipId, relationshipType, geometry, attributes, relationshipId == null);
 	}
 
 	public Boolean deleteRel(String relationshpId){
@@ -1703,8 +1367,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public boolean addReln(String entityId, String relationshpId, String verb) {
 		try {
-			return databaseManager.sharedRecord().addReln(entityId, relationshpId,
-					verb);
+			return databaseManager.sharedRecord().addReln(entityId, relationshpId, verb);
 		} catch (Exception e) {
 			FLog.e("error saving arch entity relationship", e);
 			showWarning("Logic Error", "Error saving arch entity relationship");
@@ -1723,7 +1386,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				List<NameValuePair> pairs = convertToNameValuePairs((Collection<?>) valuesObj);
 
 				ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-						this.activity,
+						this.activityRef.get(),
 						android.R.layout.simple_spinner_dropdown_item, pairs);
 				spinner.setAdapter(arrayAdapter);
 			} else {
@@ -2128,6 +1791,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error fetching relationship list");
 		}
 		return null;
+	}
+	
+	public int getGpsUpdateInterval() {
+		return gpsDataManager.getGpsUpdateInterval();
+	}
+
+	public void setGpsUpdateInterval(int gpsUpdateInterval) {
+		gpsDataManager.setGpsUpdateInterval(
+				gpsUpdateInterval);
 	}
 	
 	public void startExternalGPS() {
@@ -2751,24 +2423,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	public void pushDatabaseToServer(final String callback) {
-		this.activity.uploadDatabaseToServer(callback);
+		this.activityRef.get().uploadDatabaseToServer(callback);
 	}
 
 	public void pullDatabaseFromServer(final String callback) {
-		this.activity.downloadDatabaseFromServer(callback);
+		this.activityRef.get().downloadDatabaseFromServer(callback);
 	}
 
 	public void setSyncEnabled(boolean value) {
 		if (value) {
-			this.activity.enableSync();
+			this.activityRef.get().enableSync();
 		} else {
-			this.activity.disableSync();
+			this.activityRef.get().disableSync();
 		}
 	}
 
 	public void addSyncListener(final String startCallback,
 			final String successCallback, final String failureCallback) {
-		this.activity.addSyncListener(new ShowModuleActivity.SyncListener() {
+		this.activityRef.get().addSyncListener(new ShowModuleActivity.SyncListener() {
 
 			@Override
 			public void handleStart() {
@@ -2795,7 +2467,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				+ System.currentTimeMillis() + ".jpg";
 		File file = new File(cameraPicturepath);
 		cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-		this.activity.startActivityForResult(cameraIntent,
+		this.activityRef.get().startActivityForResult(cameraIntent,
 				ShowModuleActivity.CAMERA_REQUEST_CODE);
 	}
 
@@ -2815,7 +2487,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				+ System.currentTimeMillis() + ".mp4";
 		File file = new File(cameraVideoPath);
 		videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-		activity.startActivityForResult(videoIntent,
+		activityRef.get().startActivityForResult(videoIntent,
 				ShowModuleActivity.VIDEO_REQUEST_CODE);
 	}
 
@@ -2831,15 +2503,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		audioCallBack = callback;
 		audioFileNamePath = Environment.getExternalStorageDirectory()
 				+ "/audio-" + System.currentTimeMillis() + ".mp4";
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		AlertDialog.Builder builder = new AlertDialog.Builder(activityRef.get());
 
 		builder.setTitle("FAIMS recording");
 
-		LinearLayout layout = new LinearLayout(activity);
+		LinearLayout layout = new LinearLayout(activityRef.get());
 		layout.setOrientation(LinearLayout.VERTICAL);
 
 		builder.setView(layout);
-		ToggleButton button = new ToggleButton(activity);
+		ToggleButton button = new ToggleButton(activityRef.get());
 		button.setTextOn("Stop Recording");
 		button.setTextOff("Start Recording");
 		button.setChecked(false);
@@ -2932,6 +2604,18 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void setLastScanContents(String contents) {
 		this.scanContents = contents;
 	}
+	
+	public String getHardwareBufferContents() {
+		return hardwareBufferContents;
+	}
+	
+	public void setHardwareBufferContents(String contents) {
+		this.hardwareBufferContents = contents;
+	}
+	
+	public Module getModule() {
+		return this.module;
+	}
 
 	public String getModuleName() {
 		return this.module.getName();
@@ -2999,16 +2683,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			return;
 		}
 
-		this.activity.setSyncMinInterval(value);
+		this.activityRef.get().setSyncMinInterval(value);
 	}
 
 	public void setSyncMaxInterval(float value) {
-		if (value < 0 || value < this.activity.getSyncMinInterval()) {
+		if (value < 0 || value < this.activityRef.get().getSyncMinInterval()) {
 			showWarning("Logic Error", "Invalid sync max interval " + value);
 			return;
 		}
 
-		this.activity.setSyncMaxInterval(value);
+		this.activityRef.get().setSyncMaxInterval(value);
 	}
 
 	public void setSyncDelay(float value) {
@@ -3016,7 +2700,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Invalid sync delay " + value);
 			return;
 		}
-		this.activity.setSyncDelay(value);
+		this.activityRef.get().setSyncDelay(value);
 	}
 
 	public void setUser(User user) {
@@ -3025,8 +2709,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void showFileBrowser(String callback) {
 		this.lastFileBrowserCallback = callback;
-		this.activity
-				.showFileBrowser(ShowModuleActivity.FILE_BROWSER_REQUEST_CODE);
+		this.activityRef.get().showFileBrowser(ShowModuleActivity.FILE_BROWSER_REQUEST_CODE);
 	}
 
 	public void setLastSelectedFile(File file) {
@@ -3087,9 +2770,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void setFileSyncEnabled(boolean enabled) {
 		if (enabled) {
-			activity.enableFileSync();
+			activityRef.get().enableFileSync();
 		} else {
-			activity.disableFileSync();
+			activityRef.get().disableFileSync();
 		}
 	}
 
@@ -3104,10 +2787,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			String attachFile = "";
 
 			if (sync) {
-				attachFile += activity.getResources().getString(
+				attachFile += activityRef.get().getResources().getString(
 						R.string.app_dir);
 			} else {
-				attachFile += activity.getResources().getString(
+				attachFile += activityRef.get().getResources().getString(
 						R.string.server_dir);
 			}
 
@@ -3122,7 +2805,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
-			activity.copyFile(filePath, module.getDirectoryPath(attachFile).getPath(), new ShowModuleActivity.AttachFileListener() {
+			activityRef.get().copyFile(filePath, module.getDirectoryPath(attachFile).getPath(), new ShowModuleActivity.AttachFileListener() {
 
 						@Override
 						public void handleComplete() {
@@ -3132,8 +2815,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						}
 				
 			});
-			if(!activity.getSyncStatus().equals(SyncStatus.INACTIVE)){
-				activity.setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
+			if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
+				activityRef.get().setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
 			return attachFile;
 		} catch (Exception e) {
@@ -3184,7 +2867,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Attached Files",
 					"There is no attached file for the record");
 		} else {
-			final ListView listView = new ListView(activity);
+			final ListView listView = new ListView(activityRef.get());
 			List<NameValuePair> attachedFiles = new ArrayList<NameValuePair>();
 			Map<String, Integer> count = new HashMap<String, Integer>();
 			for (String attachedFile : files) {
@@ -3204,7 +2887,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				attachedFiles.add(file);
 			}
 			ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-					activity, android.R.layout.simple_list_item_1,
+					activityRef.get(), android.R.layout.simple_list_item_1,
 					attachedFiles);
 			listView.setAdapter(arrayAdapter);
 			listView.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -3232,7 +2915,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 							intent.setDataAndType(data, type);
 
-							activity.startActivity(intent);
+							activityRef.get().startActivity(intent);
 						} catch (Exception e) {
 							FLog.e("Can not open file with the extension", e);
 							Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -3240,7 +2923,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 							intent.setDataAndType(data, "*/*");
 
-							activity.startActivity(intent);
+							activityRef.get().startActivity(intent);
 						}
 					} else {
 						if (file.getPath().contains("files/server")) {
@@ -3256,7 +2939,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				}
 
 			});
-			AlertDialog.Builder builder = new AlertDialog.Builder(this.activity);
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 
 			builder.setTitle("Attached Files");
 			builder.setView(listView);
@@ -3441,7 +3124,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public boolean isAttachingFiles() {
 		try {
-			return activity.getCopyFileCount() > 0;
+			return activityRef.get().getCopyFileCount() > 0;
 		} catch (Exception e) {
 			FLog.e("error checking for attached files", e);
 			showWarning("Logic Error", "Error checking for attached files");
@@ -3527,7 +3210,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		//Scan for both barcodes and QR codes, and remove result display pause
 		scanIntent.putExtra("SCAN_MODE", "SCAN_MODE");
 		scanIntent.putExtra("RESULT_DISPLAY_DURATION_MS", 0L);
-		this.activity.startActivityForResult(scanIntent, ShowModuleActivity.SCAN_CODE_CODE);
+		this.activityRef.get().startActivityForResult(scanIntent, ShowModuleActivity.SCAN_CODE_CODE);
 	}
 	
 	public void executeScanCallBack() {
@@ -3542,6 +3225,14 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			public void onInput(String input) {
 				set("_bluetooth_message", input);
 				execute(callback);
+			}
+			
+			@Override
+			public void onConnect() {	
+			}
+			
+			@Override
+			public void onDisconnect() {	
 			}
 		}, interval * 1000);
 	}
@@ -3606,6 +3297,38 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	@Override
 	public void destroy() {
 		stopTrackingGPS();
+	}
+
+	public void debugHardwareDevices(boolean enabled) {
+		this.activityRef.get().setHardwareDebugMode(enabled);
+	}
+	
+	public ArrayList<String> getHardwareDevices() {
+		ArrayList<String> devices  = new ArrayList<String>();
+		for(int deviceId : InputDevice.getDeviceIds()) {
+			devices.add(InputDevice.getDevice(deviceId).getName());
+		}
+		
+		return devices;
+	}
+	
+	public void captureHardware(String deviceName, String delimiter, String callback) {
+		this.activityRef.get().setHardwareToCapture(deviceName);
+		clearHardwareDeviceBuffer();
+		this.activityRef.get().setHardwareDelimiter(delimiter.charAt(0));
+		hardwareReadingCallBack = callback;
+	}
+	
+	public void executeHardwareCaptureCallBack() {
+		try {
+			this.interpreter.eval(hardwareReadingCallBack);
+		} catch (EvalError e) {
+			FLog.e("error when executing the callback for hardware capture", e);
+		}
+	}
+	
+	public void clearHardwareDeviceBuffer() {
+		this.activityRef.get().clearDeviceBuffer();
 	}
 	
 }
