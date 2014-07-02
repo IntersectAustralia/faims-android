@@ -31,6 +31,16 @@
               <stopTrackLog/>
             </gps>
           </main>
+
+          <Test>
+            <Test>
+              <ID/>
+              <Lat/>
+              <Long/>
+              <Update/>
+            </Test>
+          </Test>
+
         </faims>
       </instance>
     </model>
@@ -89,7 +99,24 @@
           <label>Stop Track Log</label>
         </trigger>
       </group>
-
+    </group>
+    <group ref="Test" faims_archent_type="Test">
+      <label/>
+      <group ref="Test">
+        <label>Test</label>
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>ID</label>
+        </input> 
+        <input ref="Lat" faims_attribute_name="Lat" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+          <label>Latitude</label>
+        </input>
+        <input ref="Long" faims_attribute_name="Long" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+          <label>Longitude</label>
+        </input>  
+        <trigger ref="Update">
+          <label>Save</label>
+        </trigger>
+      </group>
     </group>
   </h:body>
 </h:html>
