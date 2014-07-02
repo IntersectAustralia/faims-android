@@ -24,7 +24,9 @@
           </user>
           <menu>
               <tab1>
-                  <options></options>
+                <startsync/>
+                <stopsync/>
+                <options></options>
               </tab1>
           </menu>
           <tabgroup1>
@@ -308,6 +310,12 @@
       <label>Options</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Options</label>
+        <trigger ref="startsync">
+          <label>Start Syncing</label>
+        </trigger>
+        <trigger ref="stopsync">
+          <label>Stop Syncing</label>
+        </trigger>
         <select1 ref="options" appearance="compact">
           <label>Options:</label>
           <item>
@@ -315,6 +323,7 @@
             <value>dummy</value>
           </item>
         </select1>
+
       </group>
     </group>
     <group ref="tabgroup1" faims_archent_type="small">
