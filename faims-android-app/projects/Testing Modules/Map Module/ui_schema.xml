@@ -10,6 +10,11 @@
     <model>
       <instance>
         <faims id="hdb_FAIMS_Community_Server">
+          <user>
+            <usertab>
+              <users/>
+            </usertab>
+          </user>
           <main>
             <map>
               <map/>
@@ -26,13 +31,36 @@
               <stopTrackLog/>
             </gps>
           </main>
+
+          <Test>
+            <Test>
+              <ID/>
+              <Lat/>
+              <Long/>
+              <Update/>
+            </Test>
+          </Test>
+
         </faims>
       </instance>
     </model>
   </h:head>
 
   <h:body>
-    <group ref="main" faims_archent_type="main">
+    <group ref="user">
+      <label>User List</label>
+      <group ref="usertab" faims_scrollable="false">
+        <label>User List</label>
+        <select1 appearance="compact" ref="users">
+          <label>Users</label>
+          <item>
+            <label>placeholder</label>
+            <value>placeholder</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="main">
       <label>Map</label>
         <group ref="map" faims_scrollable="false">
         <label>Map</label>
@@ -71,7 +99,24 @@
           <label>Stop Track Log</label>
         </trigger>
       </group>
-
+    </group>
+    <group ref="Test" faims_archent_type="Test">
+      <label/>
+      <group ref="Test">
+        <label>Test</label>
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_certainty="false">
+          <label>ID</label>
+        </input> 
+        <input ref="Lat" faims_attribute_name="Lat" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+          <label>Latitude</label>
+        </input>
+        <input ref="Long" faims_attribute_name="Long" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+          <label>Longitude</label>
+        </input>  
+        <trigger ref="Update">
+          <label>Save</label>
+        </trigger>
+      </group>
     </group>
   </h:body>
 </h:html>

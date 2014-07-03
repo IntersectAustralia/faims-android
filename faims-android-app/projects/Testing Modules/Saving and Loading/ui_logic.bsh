@@ -18,6 +18,23 @@ onEvent("user", "load", "loadUsers()");
 
 // CONTROLS
 
+onEvent("menu/tab1/startsync", "click", "startSync()");
+onEvent("menu/tab1/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
 createOption(name, value) {
 	ArrayList option = new ArrayList();
 	option.add(name);
@@ -63,12 +80,12 @@ onClickOption() {
 onEvent("menu/tab1/options", "click", "onClickOption()");
 
 startSync() {
-	//setSyncEnabled(true);
-	//setFileSyncEnabled(true);
+	setSyncEnabled(true);
+	setFileSyncEnabled(true);
 }
 
 stopSync() {
-	//setSyncEnabled(false);
+	setSyncEnabled(false);
 }
 
 init() {
@@ -151,7 +168,7 @@ getEntityIdentifier() {
 updateEntity(tabgroup) {
 	if (isNull(entityId)) entityId = null;
 
-	//if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
 	
 	saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(), "entityId = getLastSavedRecordId(); reloadEntity(\""+tabgroup+"\");");
 }
@@ -225,7 +242,7 @@ onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity
 onEvent("tabgroup3/tab2", "show", "loadEntities(\"tabgroup3\")");
 
 onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
-//onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
+// onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab2/load", "click", "loadEntityAuto(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
@@ -376,7 +393,7 @@ onEvent("tabgroup4/tab1/viewattached", "click", "viewRelAttachedFiles(relationsh
 onEvent("tabgroup4/tab2", "show", "loadRelationships(\"tabgroup4\")");
 
 onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
-//onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
+// onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab2/load", "click", "loadRelationshipAuto(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");

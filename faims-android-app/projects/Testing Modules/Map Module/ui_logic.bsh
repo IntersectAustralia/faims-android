@@ -1,5 +1,7 @@
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
+User user; // dont touch
+String userid;
 
 initMap() {
 	setMapZoom("main/map/map", 19.0f);
@@ -61,14 +63,38 @@ onCreateMap() {
 		Geometry geom = geomList.get(0);
 		
 		if (geom instanceof Point) {
-			showTabGroup("createPoint");
+			newTest();
 		} else if (geom instanceof Line) {
-			showTabGroup("createLine");
+			newTest();
 		} else if (geom instanceof Polygon) {
-			showTabGroup("createPolygon");
+			newTest();
 		}
 		
 	}
+}
+
+String test_id = null;
+
+newTest(){	
+
+	newTabGroup("Test");
+	point = getCreatedGeometry().get(0);
+	p = point.getMapPos();
+	setFieldValue("Test/Test/Long", "" + p.x);
+	setFieldValue("Test/Test/Lat", "" + p.y);
+}
+
+onEvent("Test/Test/Update", "delayclick", "saveTest()");
+
+saveTest(){
+	saveTabGroup("Test", test_id, null, null, "onSave()");
+}
+onSave(){
+	test_id = getLastSavedRecordId();
+}
+
+getCreatedGeometry() {
+	return getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID);
 }
 
 setGPSUpdateInterval(4);
@@ -93,7 +119,7 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_user", "" + userid, null, null, null));
 	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
 	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
 	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
@@ -126,3 +152,31 @@ startSync() {
 stopSync() {
     setSyncEnabled(false);
     setFileSyncEnabled(false);
+}
+/*** Uneditable - you can edit the code below with extreme precaution ***/
+/*** USER ***/
+
+getDefaultUsersList() {
+    users = fetchAll("select userid, fname || ' ' || lname from user");
+    return users;
+}
+
+populateListForUsers(){
+    populateList("user/usertab/users", getDefaultUsersList());
+}
+
+populateListForUsers();
+
+String username = "";
+String device = "";
+
+login(){
+    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
+    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+    userid = userResult.get(0);
+    setUser(user);
+    username = userResult.get(1) + " " + userResult.get(2);
+    showTabGroup("main");
+}
+
+onEvent("user/usertab/users", "click", "login()");
