@@ -22,6 +22,7 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -1271,18 +1272,37 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void populateHierarchicalDropDown(String ref, String attributeName) {
+	public void populateHierarchicalDropDown(String ref, final String attributeName) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
 			if (obj instanceof HierarchicalSpinner) {
-				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
-				if (terms == null) return;
-				
-				VocabularyTerm.applyArch16n(terms, arch16n);
-				
-				HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
-				spinner.setTerms(terms);
+				final HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
+				AsyncTask<Void,Void,List<VocabularyTerm>> task = new AsyncTask<Void,Void,List<VocabularyTerm>>() {
+
+					@Override
+					protected List<VocabularyTerm> doInBackground(
+							Void... params) {
+						try {
+							return databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+						} catch (Exception e) {
+							FLog.e("Error trying to load vocabulary terms", e);
+						}
+						return null;
+					}
+					
+					@Override
+					protected void onPostExecute(List<VocabularyTerm> terms) {
+						if (terms == null) {
+							showWarning("Populate Error", "Error trying to load vocabulary terms");
+						} else {
+							VocabularyTerm.applyArch16n(terms, arch16n);
+							spinner.setTerms(terms);
+						}
+					}
+					
+				};
+				task.execute();				
 			} else {
 				FLog.w("cannot populate hierarchical drop down "
 						+ ref);
@@ -1357,19 +1377,38 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void populateHierarchicalPictureGallery(String ref, String attributeName) {
+	public void populateHierarchicalPictureGallery(String ref, final String attributeName) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 			
-			if (obj instanceof PictureGallery) {				
-				List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
-				if (terms == null) return;
-				
-				VocabularyTerm.applyArch16n(terms, arch16n);
-				VocabularyTerm.applyProjectDir(terms, module.getDirectoryPath().getPath() + "/");
-				
-				HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
-				gallery.setTerms(terms);
+			if (obj instanceof PictureGallery) {
+				final HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
+				AsyncTask<Void,Void,List<VocabularyTerm>> task = new AsyncTask<Void,Void,List<VocabularyTerm>>() {
+
+					@Override
+					protected List<VocabularyTerm> doInBackground(
+							Void... params) {
+						try {
+							return databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+						} catch (Exception e) {
+							FLog.e("Error trying to load vocabulary terms", e);
+						}
+						return null;
+					}
+					
+					@Override
+					protected void onPostExecute(List<VocabularyTerm> terms) {
+						if (terms == null) {
+							showWarning("Populate Error", "Error trying to load vocabulary terms");
+						} else {
+							VocabularyTerm.applyArch16n(terms, arch16n);
+							VocabularyTerm.applyProjectDir(terms, module.getDirectoryPath().getPath() + "/");
+							gallery.setTerms(terms);
+						}
+					}
+					
+				};
+				task.execute();
 			} else {
 				FLog.w("cannot populate hierarchical picture gallery "
 						+ ref);
