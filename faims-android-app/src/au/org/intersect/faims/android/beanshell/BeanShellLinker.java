@@ -1587,81 +1587,28 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return pairs;
 	}
 
-	public Object fetchArchEnt(String id) {
-		try {
-			ArchEntity e = databaseManager.entityRecord().fetchArchEnt(id);
-			if (e != null) {
-				List<Geometry> geomList = e.getGeometryList();
-				if (geomList != null) {
-					e.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
-				}
-			}
-			return e;
-		} catch (Exception e) {
-			FLog.e("error fetching arch entity", e);
-			showWarning("Logic Error", "Error fetching arch entity");
-		}
-		return null;
+	public void fetchArchEnt(String entityId, FetchCallback callback) {
+		DatabaseHelper.fetchArchEnt(this, entityId, callback);
 	}
 
-	public Object fetchRel(String id) {
-		try {
-			Relationship r = databaseManager.relationshipRecord().fetchRel(id);
-			if (r != null) {
-				List<Geometry> geomList = r.getGeometryList();
-				if (geomList != null) {
-					r.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), geomList));
-				}
-			}
-			return r;
-		} catch (Exception e) {
-			FLog.e("error fetching relationship", e);
-			showWarning("Logic Error", "Error fetching relationship");
-		}
-		return null;
+	public void fetchRel(String relationshipId, FetchCallback callback) {
+		DatabaseHelper.fetchRel(this, relationshipId, callback);
 	}
 
-	public Object fetchOne(String query) {
-		try {
-			return databaseManager.fetchRecord().fetchOne(query);
-		} catch (Exception e) {
-			FLog.e("error fetching one", e);
-			showWarning("Logic Error", "Error fetching one");
-		}
-		return null;
+	public void fetchOne(String query, FetchCallback callback) {
+		DatabaseHelper.fetchOne(this, query, callback);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Collection fetchAll(String query) {
-		try {
-			return databaseManager.fetchRecord().fetchAll(query);
-		} catch (Exception e) {
-			FLog.e("error fetching all", e);
-			showWarning("Logic Error", "Error fetching all");
-		}
-		return null;
+	public void fetchAll(String query, FetchCallback callback) {
+		DatabaseHelper.fetchAll(this, query, callback);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Collection fetchEntityList(String type) {
-		try {
-			return databaseManager.fetchRecord().fetchEntityList(type);
-		} catch (Exception e) {
-			FLog.e("error fetching entity list", e);
-			showWarning("Logic Error", "Error fetching entity list");
-		}
-		return null;
+	public void fetchEntityList(String entityType, FetchCallback callback) {
+		DatabaseHelper.fetchEntityList(this, entityType, callback);
 	}
 
-	@SuppressWarnings("rawtypes")
-	public Collection fetchRelationshipList(String type) {
-		try {
-			return databaseManager.fetchRecord().fetchRelationshipList(type);
-		} catch (Exception e) {
-			FLog.e("error fetching relationship list", e);
-			showWarning("Logic Error", "Error fetching relationship list");
-		}
-		return null;
+	public void fetchRelationshipList(String relationshipType, FetchCallback callback) {
+		DatabaseHelper.fetchRelationshipList(this, relationshipType, callback);
 	}
 	
 	public int getGpsUpdateInterval() {
@@ -2700,40 +2647,65 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 
-	public void viewArchEntAttachedFiles(String uuid) {
-		if (uuid == null) {
+	public void viewArchEntAttachedFiles(String entityId) {
+		if (entityId == null) {
 			showWarning("Attached Files",
 					"Please load/save a record to see attached files");
 		} else {
-			ArchEntity fetchedArchEntity = (ArchEntity) fetchArchEnt(uuid);
-			List<String> attachedFiles = new ArrayList<String>();
-			for (EntityAttribute attribute : fetchedArchEntity.getAttributes()) {
-				if ("file".equalsIgnoreCase(attribute.getType())) {
-					if (!attribute.isDeleted()) {
-						attachedFiles.add(attribute.getText());
-					}
+			fetchArchEnt(entityId, new FetchCallback() {
+
+				@Override
+				public void onError(String message) {
+					showWarning("Attached Files", "Cannot load arch entity");
 				}
-			}
-			viewAttachedFiles(attachedFiles);
+
+				@Override
+				public void onFetch(Object result) {
+					ArchEntity entity = (ArchEntity) result;
+					List<String> attachedFiles = new ArrayList<String>();
+					for (EntityAttribute attribute : entity.getAttributes()) {
+						if ("file".equalsIgnoreCase(attribute.getType())) {
+							if (!attribute.isDeleted()) {
+								attachedFiles.add(attribute.getText());
+							}
+						}
+					}
+					viewAttachedFiles(attachedFiles);
+				}
+				
+			});
+			
 		}
 	}
 
-	public void viewRelAttachedFiles(String relId) {
-		if (relId == null) {
+	public void viewRelAttachedFiles(String relationshipId) {
+		if (relationshipId == null) {
 			showWarning("Attached Files",
 					"Please load/save a record to see attached files");
 		} else {
-			Relationship fetchedRelationship = (Relationship) fetchRel(relId);
-			List<String> attachedFiles = new ArrayList<String>();
-			for (RelationshipAttribute attribute : fetchedRelationship
-					.getAttributes()) {
-				if ("file".equalsIgnoreCase(attribute.getType())) {
-					if (!attribute.isDeleted()) {
-						attachedFiles.add(attribute.getText());
-					}
+			fetchRel(relationshipId, new FetchCallback() {
+
+				@Override
+				public void onError(String message) {
+					showWarning("Attached Files", "Cannot load relationship");
 				}
-			}
-			viewAttachedFiles(attachedFiles);
+
+				@Override
+				public void onFetch(Object result) {
+					Relationship relationship = (Relationship) result;
+					List<String> attachedFiles = new ArrayList<String>();
+					for (RelationshipAttribute attribute : relationship
+							.getAttributes()) {
+						if ("file".equalsIgnoreCase(attribute.getType())) {
+							if (!attribute.isDeleted()) {
+								attachedFiles.add(attribute.getText());
+							}
+						}
+					}
+					viewAttachedFiles(attachedFiles);
+				}
+				
+			});			
 		}
 	}
 

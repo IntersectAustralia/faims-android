@@ -372,35 +372,93 @@ public class TabGroupHelper {
 		return attributes;
 	}
 	
-	protected static void showArchEntityTabGroup(BeanShellLinker linker, String uuid, TabGroup tabGroup) throws Exception {
-		Object archEntityObj = linker.fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showArchEntityTab(linker, (ArchEntity) archEntityObj, tab);
+	protected static void showArchEntityTabGroup(final BeanShellLinker linker, final String entityId, final TabGroup tabGroup) {
+		linker.fetchArchEnt(entityId, new FetchCallback() {
+
+			@Override
+			public void onError(String message) {
+				linker.showWarning("Loading Error", "Error trying to load arch entity");
 			}
-		} else {
-			throw new Exception("cannot find entity");
-		}
+
+			@Override
+			public void onFetch(Object result) {
+				ArchEntity entity = (ArchEntity) result;
+				if (entity instanceof ArchEntity) {
+					for (Tab tab : tabGroup.getTabs()) {
+						showArchEntityTab(linker, entity, tab);
+					}
+				} else {
+					linker.showWarning("Loading Error", "Error trying to load arch entity");
+				}
+			}
+			
+		});
+		
 	}
 
-	protected static void showRelationshipTabGroup(BeanShellLinker linker, String uuid, TabGroup tabGroup) throws Exception {
-		Object relationshipObj = linker.fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			for (Tab tab : tabGroup.getTabs()) {
-				showRelationshipTab(linker, (Relationship) relationshipObj, tab);
+	protected static void showRelationshipTabGroup(final BeanShellLinker linker, final String relationshipId, final TabGroup tabGroup)  {
+		linker.fetchRel(relationshipId, new FetchCallback() {
+
+			@Override
+			public void onError(String message) {
+				linker.showWarning("Loading Error", "Error trying to load relationship");
 			}
-		} else {
-			throw new Exception("cannot find relationship");
-		}
+
+			@Override
+			public void onFetch(Object result) {
+				Relationship relationship = (Relationship) result;
+				if (relationship instanceof Relationship) {
+					for (Tab tab : tabGroup.getTabs()) {
+						showRelationshipTab(linker, relationship, tab);
+					}
+				} else {
+					linker.showWarning("Loading Error", "Error trying to load relationship");
+				}
+			}
+			
+		});
 	}
 
-	protected static void showArchEntityTab(BeanShellLinker linker, String uuid, Tab tab) throws Exception {
-		Object archEntityObj = linker.fetchArchEnt(uuid);
-		if (archEntityObj instanceof ArchEntity) {
-			showArchEntityTab(linker, (ArchEntity) archEntityObj, tab);
-		} else {
-			throw new Exception("cannot find entity");
-		}
+	protected static void showArchEntityTab(final BeanShellLinker linker, final String entityId, final Tab tab) throws Exception {
+		linker.fetchArchEnt(entityId, new FetchCallback() {
+
+			@Override
+			public void onError(String message) {
+				linker.showWarning("Loading Error", "Error trying to load arch entity");
+			}
+
+			@Override
+			public void onFetch(Object result) {
+				ArchEntity entity = (ArchEntity) result;
+				if (entity instanceof ArchEntity) {
+					showArchEntityTab(linker, entity, tab);
+				} else {
+					linker.showWarning("Loading Error", "Error trying to load arch entity");
+				}
+			}
+			
+		});
+	}
+	
+	protected static void showRelationshipTab(final BeanShellLinker linker, final String relationshipId, final Tab tab) throws Exception {
+		linker.fetchRel(relationshipId, new FetchCallback() {
+
+			@Override
+			public void onError(String message) {
+				linker.showWarning("Loading Error", "Error trying to load relationship");
+			}
+
+			@Override
+			public void onFetch(Object result) {
+				Relationship relationship = (Relationship) result;
+				if (relationship instanceof Relationship) {
+					showRelationshipTab(linker, relationship, tab);
+				} else {
+					linker.showWarning("Loading Error", "Error trying to load relationship");
+				}
+			}
+			
+		});
 	}
 	
 	private static void showArchEntityTab(BeanShellLinker linker, ArchEntity archEntity, Tab tab) {
@@ -412,15 +470,6 @@ public class TabGroupHelper {
 					setAttribute(linker, attribute, views);
 				}
 			}
-		}
-	}
-	
-	protected static void showRelationshipTab(BeanShellLinker linker, String uuid, Tab tab) throws Exception {
-		Object relationshipObj = linker.fetchRel(uuid);
-		if (relationshipObj instanceof Relationship) {
-			showRelationshipTab(linker, (Relationship) relationshipObj, tab);
-		} else {
-			throw new Exception("cannot find relationship");
 		}
 	}
 	

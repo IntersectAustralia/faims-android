@@ -23,7 +23,7 @@ public class FetchRecord extends Database {
 		super(dbFile);
 	}
 	
-	public Object fetchOne(String query) throws Exception {
+	public ArrayList<String> fetchOne(String query) throws Exception {
 		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
@@ -31,7 +31,7 @@ public class FetchRecord extends Database {
 			beginTransaction(db);
 			
 			stmt = db.prepare(query);
-			Collection<String> results = new ArrayList<String>();
+			ArrayList<String> results = new ArrayList<String>();
 			if(stmt.step()){
 				for(int i = 0; i < stmt.column_count(); i++){
 					results.add(stmt.column_string(i));
@@ -48,7 +48,7 @@ public class FetchRecord extends Database {
 		}
 	}
 
-	public Collection<List<String>> fetchAll(String query) throws Exception {
+	public ArrayList<List<String>> fetchAll(String query) throws Exception {
 		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
@@ -56,7 +56,7 @@ public class FetchRecord extends Database {
 			beginTransaction(db);
 			
 			stmt = db.prepare(query);
-			Collection<List<String>> results = new ArrayList<List<String>>();
+			ArrayList<List<String>> results = new ArrayList<List<String>>();
 			while(stmt.step()){
 				List<String> result = new ArrayList<String>();
 				for(int i = 0; i < stmt.column_count(); i++){
@@ -75,9 +75,9 @@ public class FetchRecord extends Database {
 		}
 	}
 
-	public List<User> fetchAllUser() throws Exception{
+	public ArrayList<User> fetchAllUser() throws Exception {
 		Collection<List<String>> users = fetchAll("select userid, fname, lname, email from user");
-		List<User> userList = new ArrayList<User>();
+		ArrayList<User> userList = new ArrayList<User>();
 		for(List<String> userData : users){
 			User user = new User(userData.get(0), userData.get(1), userData.get(2), userData.get(3));
 			userList.add(user);
@@ -85,7 +85,7 @@ public class FetchRecord extends Database {
 		return userList;
 	}
 	
-	public Collection<List<String>> fetchEntityList(String type) throws Exception {
+	public ArrayList<List<String>> fetchEntityList(String type) throws Exception {
 		String query = DatabaseQueries.FETCH_ENTITY_LIST(type);
 		return fetchAll(query);
 	}
@@ -156,7 +156,7 @@ public class FetchRecord extends Database {
 		}
 	}
 	
-	public Collection<List<String>> fetchRelationshipList(String type) throws Exception {
+	public ArrayList<List<String>> fetchRelationshipList(String type) throws Exception {
 		String query = DatabaseQueries.FETCH_RELN_LIST(type);
 		return fetchAll(query);
 	}
