@@ -87,7 +87,7 @@ newTest(){
 onEvent("Test/Test/Update", "delayclick", "saveTest()");
 
 saveTest(){
-	saveTabGroup("Test", test_id, null, null, "onSave()");
+	saveTabGroup("Test", test_id, getCreatedGeometry(), null, "onSave()");
 }
 onSave(){
 	test_id = getLastSavedRecordId();
