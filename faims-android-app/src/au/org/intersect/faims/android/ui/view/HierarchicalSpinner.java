@@ -143,25 +143,27 @@ public class HierarchicalSpinner extends CustomSpinner {
 					int index, long arg3) {
 				try {
 					TextView text = (TextView) view;
-					StringBuilder sb = new StringBuilder();
-					
-					for (VocabularyTerm term : parentTerms) {
-						if (sb.length() != 0) sb.append(" > ");
-						sb.append(term.getName());
+					if (text != null) {
+						StringBuilder sb = new StringBuilder();
+						
+						for (VocabularyTerm term : parentTerms) {
+							if (sb.length() != 0) sb.append(" > ");
+							sb.append(term.getName());
+						}
+						
+						if (index >= parentTerms.size()) {
+							if (sb.length() != 0) sb.append(" > ");
+							sb.append(currentTerms.get(index).getName());
+						}
+						
+						text.setText(sb);
+						
+						if (lastSelected && currentTerms.get(index).terms != null) {
+							performClick();
+						}
+						
+						lastSelected = false;
 					}
-					
-					if (index >= parentTerms.size()) {
-						if (sb.length() != 0) sb.append(" > ");
-						sb.append(currentTerms.get(index).getName());
-					}
-					
-					text.setText(sb);
-					
-					if (lastSelected && currentTerms.get(index).terms != null) {
-						performClick();
-					}
-					
-					lastSelected = false;
 				} catch (Exception e) {
 					FLog.e("error on item select", e);
 				}

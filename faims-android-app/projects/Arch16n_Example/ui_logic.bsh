@@ -1,32 +1,37 @@
-getDefaultUsersList() {
-	users = fetchAll("select userid, fname ||' ' || lname from user");
+populateListForUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
 	return users;
 }
-
-usersList = getDefaultUsersList();
-
-populateListForUsers(){
-	populateList("user/tab1/users", usersList);
-}
+populateListForUsers();
 
 login(){
-	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-	setUser(user);
-	showTabGroup("tabgroup1");
+	fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+			setUser(user);
+			showTabGroup("tabgroup1");
+		}
+	});
 }
-
-populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
 
-Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
-Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
-
 initialise() {
 	setUser();
-	populateDropDown("tabgroup1/tab1/type", types);
-	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup1/tab1/type", result);
+		}
+	});
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup("tabgroup1/tab2/location", result);
+		}
+	});
 }
 
 setUser(){

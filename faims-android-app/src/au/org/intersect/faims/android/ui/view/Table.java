@@ -35,7 +35,14 @@ public class Table extends WebView {
 
 		@JavascriptInterface
 		public void onLoad() {
-			loadUrl("javascript:restoreScrollPosition(" + scrollX + "," + scrollY + ")");
+			beanShellLinker.getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					loadUrl("javascript:restoreScrollPosition(" + scrollX + "," + scrollY + ")");
+				}
+				
+			});
 		}
 
 		@JavascriptInterface
