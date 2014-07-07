@@ -80,7 +80,19 @@ showTabGroup(String ref){
   * @param id the id of the entity or relationship
   */
 showTabGroup(String ref, String id){
-    linker.showTabGroup(ref, id);
+    linker.showTabGroup(ref, id, null);
+}
+
+/**
+  * Show the tab group with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab group.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship
+  * @param callback callback to execute when finished loading
+  */
+showTabGroup(String ref, String id, FetchCallback callback){
+    linker.showTabGroup(ref, id, callback);
 }
 
 /**
@@ -102,7 +114,19 @@ showTab(String ref) {
   * @param id the id of the entity or relationship
   */
 showTab(String ref, String id) {
-	linker.showTab(ref, id);
+	linker.showTab(ref, id, null);
+}
+
+/**
+  * Show the tab with the following reference and load the values of the 
+  * supplied entity or relationship id into the tab.
+  *
+  * @param ref the reference to the tab
+  * @param id the id of the entity or relationship
+  * @param callback callback to execute when finished loading
+  */
+showTab(String ref, String id, FetchCallback callback) {
+  linker.showTab(ref, id, callback);
 }
 
 /**

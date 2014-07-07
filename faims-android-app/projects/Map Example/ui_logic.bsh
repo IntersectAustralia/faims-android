@@ -1,24 +1,22 @@
-getDefaultUsersList() {
-	users = fetchAll("select userid, fname ||' ' || lname from user");
+populateListForUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
 	return users;
 }
-
-usersList = getDefaultUsersList();
-
-populateListForUsers(){
-	populateList("user/tab1/users", usersList);
-}
-
-User user = null;
+populateListForUsers();
 
 login(){
-	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-	setUser(user);
-	showTabGroup("controls");
+	fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+			setUser(user);
+			showTabGroup("tabgroup1");
+		}
+	});
 }
-
-populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");
 
@@ -134,8 +132,16 @@ showScreen(name) {
 	sydneymap = "files/data/maps/sydney_map.tif";
 	kazmap = "files/data/maps/kaz_map.tif";
 	
-	entityCount = fetchEntityList("simpleentity").size() + 1;
-	relCount = fetchRelationshipList("abovebelow").size() + 1;
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			entityCount = result.size() + 1;
+		}
+	});
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			relCount = result.size() + 1;
+		}
+	});
 	
 	if ("tabgroup1".equals(name) && !initTabGroup1) {
 		initTabGroup1 = true;
@@ -204,7 +210,11 @@ initEntityMap() {
 	refreshGPSEntities();
 	clearGPSEntity();
 	
-	gpsEntityCount = fetchEntityList("gpsentity").size() + 1;
+	fetchEntityList("gpsentity", new FetchCallback() {
+		onFetch(result) {
+			gpsEntityCount = result.size() + 1;
+		}
+	});
 }
 
 snapToGPSPosition(){
@@ -223,7 +233,6 @@ refreshGPSEntities() {
 }
 
 saveGPSEntity() {
-
 	collection = null;
 	if (lastPointId != 0) {
 		collection = new ArrayList();
@@ -242,11 +251,12 @@ saveGPSEntity() {
 	attributes.add(createEntityAttribute("entity", "GPS " + gpsEntityCount++, null, null, null));
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
 	
-	String id = saveArchEnt(null, "gpsentity", collection, attributes);
-	
-	refreshGPSEntities();
-	
-	loadGPSEntity(id);
+	String id = saveArchEnt(null, "gpsentity", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			refreshGPSEntities();
+			loadGPSEntity(uuid);
+		}
+	});
 }
 
 setGPSEntity(entity) {
@@ -403,8 +413,16 @@ initDrawMap() {
 	refreshEntities();
 	refreshRelationships();
 	
-	entityCount = fetchEntityList("simpleentity").size() + 1;
-	relCount = fetchRelationshipList("abovebelow").size() + 1;
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			entityCount = result.size() + 1;
+		}
+	});
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			relCount = result.size() + 1;
+		}
+	});
 	
 }
 
@@ -667,9 +685,11 @@ onEvent("tabgroup2/tab3/update", "click", "updateRelationship(getFieldValue(\"ta
 onEvent("tabgroup2/tab3/load", "click", "loadRelationship()");
 
 refreshEntities() {
-	Object entities = fetchEntityList("simpleentity");
-	
-	populateDropDown("tabgroup2/tab2/entity", entities);
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup2/tab2/entity", result);
+		}
+	});
 }
 
 clearEntity() {
@@ -680,8 +700,7 @@ saveEntity() {
 	updateEntity(null);
 }
 
-updateEntity(String entityId) {
-	
+updateEntity(String entityId) {	
 	if (entityId == null || "".equals(entityId)) entityId = null;
 
 	List attributes = createAttributeList();
@@ -699,25 +718,26 @@ updateEntity(String entityId) {
 		}
 	}
 	
-	String id = saveArchEnt(entityId, "simpleentity", collection, attributes);
-	
-	refreshEntities();
-	
-	return id;
+	saveArchEnt(entityId, "simpleentity", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			entityId = uuid;
+			refreshEntities();
+		}
+	});
 }
 
 loadEntity() {
-	
 	entityId = getFieldValue("tabgroup2/tab2/entity");
 	
 	if (entityId == null || "".equals(entityId)) return;
 	
-	Object entity = fetchArchEnt(entityId);
+	Object entity = fetchArchEnt(entityId, new FetchCallback() {
+		onFetch(result) {
+			showTabGroup("tabgroup2", entityId);
 	
-	showTabGroup("tabgroup2", entityId);
-	
-	drawGeometryList(entity.getGeometryList());
-	
+			drawGeometryList(result.getGeometryList());
+		}
+	});
 }
 
 drawGeometryList(geometryList) {
@@ -733,9 +753,11 @@ drawGeometryList(geometryList) {
 }
 
 refreshRelationships() {
-	Object relationships = fetchRelationshipList("abovebelow");
-	
-	populateDropDown("tabgroup2/tab3/relationship", relationships);
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup2/tab3/relationship", result);
+		}
+	});
 }
 
 clearRelationship() {
@@ -748,7 +770,6 @@ saveRelationship() {
 }
 
 updateRelationship(String relId) {
-	
 	if (relId == null || "".equals(relId)) relId = null;	
 
 	List attributes = createAttributeList();
@@ -765,31 +786,31 @@ updateRelationship(String relId) {
 		}
 	}
 	
-	String id = saveRel(relId, "abovebelow", collection, attributes);
-	
-	refreshRelationships();
-	
-	return id;
+	String id = saveRel(relId, "abovebelow", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			relId = uuid;
+			refreshRelationships();
+		}
+	});
 }
 
 loadRelationship() {
-	
 	relId = getFieldValue("tabgroup2/tab3/relationship");
 	
 	if (relId == null || "".equals(relId)) return;
 	
-	Object relationship = fetchRel(relId);
+	Object relationship = fetchRel(relId, new FetchRecord() {
+		onFetch(result) {
+			for (Object attribute : result.getAttributes()) {
+				if ("name".equals(attribute.getName())) {
+					setFieldValue("tabgroup2/tab3/name", attribute.getText());
+					setFieldCertainty("tabgroup2/tab3/name", attribute.getCertainty());
+				}
+			}
 	
-	for (Object attribute : relationship.getAttributes()) {
-		System.out.println(attribute.toString());
-		if ("name".equals(attribute.getName())) {
-			setFieldValue("tabgroup2/tab3/name", attribute.getText());
-			setFieldCertainty("tabgroup2/tab3/name", attribute.getCertainty());
+			drawGeometryList(result.getGeometryList());
 		}
-	}
-	
-	drawGeometryList(relationship.getGeometryList());
-	
+	});
 }
 
 // POINT TEST
@@ -1013,9 +1034,11 @@ onLoadGeometry() {
 }
 
 refreshUIEntities() {
-	Object entities = fetchEntityList("simpleentity");
-	
-	populateDropDown("tabgroup5/tab2/entity", entities);
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup5/tab2/entity", result);
+		}
+	});
 }
 
 clearUIEntity() {
@@ -1027,7 +1050,6 @@ saveUIEntity() {
 }
 
 updateUIEntity(String entityId) {
-	
 	if (entityId == null || "".equals(entityId)) entityId = null;
 
 	List attributes = createAttributeList();

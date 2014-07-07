@@ -209,4 +209,8 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		return status;
 	}
 	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
 }

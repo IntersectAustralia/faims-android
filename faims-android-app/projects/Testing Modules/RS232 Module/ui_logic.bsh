@@ -1,16 +1,22 @@
 // USER
 login(){
-	Object userResult = fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0), userResult.get(1), userResult.get(2), userResult.get(3));
-	setUser(user);
-	showTabGroup("menu");
+	fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0), userResult.get(1), userResult.get(2), userResult.get(3));
+			setUser(user);
+			showTabGroup("menu");
+		}
+	});
 }
 
 onEvent("user/tab1/users", "click", "login()");
 
 loadUsers() {
-	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");
-	populateList("user/tab1/users", usersList);
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(usersList) {
+			populateList("user/tab1/users", usersList);
+		}
+	});
 }
 
 onEvent("user", "show", "loadUsers()");

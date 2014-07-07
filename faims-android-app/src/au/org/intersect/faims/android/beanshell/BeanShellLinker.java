@@ -685,7 +685,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public TabGroup showTabGroup(final String label, final String uuid) {
+	public TabGroup showTabGroup(final String label, final String uuid, final FetchCallback callback) {
 		try {
 			autoSaveManager.flush();
 			
@@ -698,9 +698,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					try {
 						autoSaveManager.pause();
 						if (tabGroup.getArchEntType() != null) {
-							TabGroupHelper.showArchEntityTabGroup(BeanShellLinker.this, uuid, tabGroup);
+							TabGroupHelper.showArchEntityTabGroup(BeanShellLinker.this, uuid, tabGroup, callback);
 						} else if (tabGroup.getRelType() != null) {
-							TabGroupHelper.showRelationshipTabGroup(BeanShellLinker.this, uuid, tabGroup);
+							TabGroupHelper.showRelationshipTabGroup(BeanShellLinker.this, uuid, tabGroup, callback);
 						}
 					} catch (Exception e) {
 						FLog.e("error showing tabgroup " + label, e);
@@ -733,7 +733,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 
-	public Tab showTab(String label, String uuid) {
+	public Tab showTab(String label, String uuid, FetchCallback callback) {
 		try {
 			TabGroup tabGroup = getTabGroupFromTabLabel(label);
 			Tab tab = uiRenderer.showTab(label);
@@ -741,9 +741,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				throw new Exception("cannot show tab " + label);
 			}
 			if (tabGroup.getArchEntType() != null) {
-				TabGroupHelper.showArchEntityTab(this, uuid, tab);
+				TabGroupHelper.showArchEntityTab(this, uuid, tab, callback);
 			} else if (tabGroup.getRelType() != null) {
-				TabGroupHelper.showRelationshipTab(this, uuid, tab);
+				TabGroupHelper.showRelationshipTab(this, uuid, tab, callback);
 			}
 			return tab;
 		} catch (Exception e) {
@@ -767,7 +767,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
 			List<? extends Attribute> attributes, SaveCallback callback, boolean enableAutoSave) {
 		if (enableAutoSave) {
-			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, uuid == null);
+			boolean newRecord = uuid == null;
+			if (newRecord) {
+				uuid = databaseManager.sharedRecord().generateUUID();
+			}
+			autoSaveManager.enable(ref, uuid, geometry, attributes, callback, newRecord);
 		} else {
 			TabGroupHelper.saveTabGroupInBackground(this, ref, uuid, geometry, attributes, callback, uuid == null, false);
 		}
@@ -899,19 +903,26 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.activityRef.get().onBackPressed();
 	}
 	
-	public void showToast(String message) {
-		try {
-			int duration = Toast.LENGTH_SHORT;
-			if (toast != null) {
-				toast.cancel();
+	public void showToast(final String message) {
+		activityRef.get().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					int duration = Toast.LENGTH_SHORT;
+					if (toast != null) {
+						toast.cancel();
+					}
+					toast = Toast.makeText(activityRef.get().getBaseContext(),
+							message, duration);
+					toast.show();
+				} catch (Exception e) {
+					FLog.e("error showing toast", e);
+					showWarning("Logic Error", "Error showing toast");
+				}
 			}
-			toast = Toast.makeText(activityRef.get().getBaseContext(),
-					message, duration);
-			toast.show();
-		} catch (Exception e) {
-			FLog.e("error showing toast", e);
-			showWarning("Logic Error", "Error showing toast");
-		}
+			
+		});
 	}
 
 	public Dialog showAlert(final String title, final String message,
@@ -1297,6 +1308,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					@Override
 					protected void onPostExecute(List<VocabularyTerm> terms) {
 						if (terms == null) {
+							FLog.w("Error trying to load vocabulary terms for attribute " + attributeName);
 							showWarning("Populate Error", "Error trying to load vocabulary terms");
 						} else {
 							VocabularyTerm.applyArch16n(terms, arch16n);
@@ -1402,6 +1414,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					@Override
 					protected void onPostExecute(List<VocabularyTerm> terms) {
 						if (terms == null) {
+							FLog.w("Error trying to load vocabulary terms for attribute " + attributeName);
 							showWarning("Populate Error", "Error trying to load vocabulary terms");
 						} else {
 							VocabularyTerm.applyArch16n(terms, arch16n);

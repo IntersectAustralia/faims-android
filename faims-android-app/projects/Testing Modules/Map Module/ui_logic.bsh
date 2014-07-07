@@ -1,7 +1,5 @@
 DATA_ENTRY_LAYER = "Data Entry Layer";
 DATA_ENTRY_LAYER_ID = 0;
-User user; // dont touch
-String userid;
 
 initMap() {
 	setMapZoom("main/map/map", 19.0f);
@@ -87,10 +85,11 @@ newTest(){
 onEvent("Test/Test/Update", "delayclick", "saveTest()");
 
 saveTest(){
-	saveTabGroup("Test", test_id, null, null, "onSave()");
-}
-onSave(){
-	test_id = getLastSavedRecordId();
+	saveTabGroup("Test", test_id, getCreatedGeometry(), null, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			test_id = uuid;
+		}
+	});
 }
 
 getCreatedGeometry() {
@@ -155,28 +154,27 @@ stopSync() {
 }
 /*** Uneditable - you can edit the code below with extreme precaution ***/
 /*** USER ***/
+User user; // dont touch
+String userid;
 
-getDefaultUsersList() {
-    users = fetchAll("select userid, fname || ' ' || lname from user");
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/usertab/users", result);
+        }
+    });
     return users;
 }
-
-populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
-}
-
 populateListForUsers();
 
-String username = "";
-String device = "";
-
 login(){
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-    userid = userResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("main");
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("main");
+        }
+    });
 }
 
 onEvent("user/usertab/users", "click", "login()");

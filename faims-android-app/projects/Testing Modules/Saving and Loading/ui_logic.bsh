@@ -1,20 +1,28 @@
 // USER
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/tab1/users", result);
+        }
+    });
+    return users;
+}
+populateListForUsers();
 
 login(){
-	Object userResult = fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0), userResult.get(1), userResult.get(2), userResult.get(3));
-	setUser(user);
-	showTabGroup("menu");
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("menu");
+        }
+    });
 }
 
 onEvent("user/tab1/users", "click", "login()");
-
-loadUsers() {
-	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");
-	populateList("user/tab1/users", usersList);
-}
-
-onEvent("user", "load", "loadUsers()");
 
 // CONTROLS
 
@@ -78,19 +86,7 @@ onClickOption() {
 
 onEvent("menu/tab1/options", "click", "onClickOption()");
 
-startSync() {
-	setSyncEnabled(true);
-	setFileSyncEnabled(true);
-}
-
-stopSync() {
-	setSyncEnabled(false);
-}
-
 init() {
-	setSyncMinInterval(10.0f);
-	setSyncMaxInterval(20.0f);
-	setSyncDelay(5.0f);
 	startSync();
 	// reset ids
 	entityId = tableEntityId = null;
@@ -122,8 +118,11 @@ closeEntity(tabgroup) {
 }
 
 loadEntities(tabgroup) {
-	Object entities = fetchEntityList("small");
-	populateDropDown(tabgroup + "/tab2/entities", entities);
+	fetchEntityList("small", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab2/entities", result);
+		}
+	});
 }
 
 saveEntity(tabgroup) {
@@ -145,7 +144,12 @@ loadEntityAuto(tabgroup) {
 
 	newEntity(tabgroup);
 	showTabGroup(tabgroup, localId);
-	entityId = saveTabGroup(tabgroup, localId, null, null, null, true);
+	entityId = localId;
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getEntityIdentifier(result), null, true);
+		}
+	});
 }
 
 reloadEntity(tabgroup) {
@@ -154,11 +158,15 @@ reloadEntity(tabgroup) {
 	showTabGroup(tabgroup, entityId);
 }
 
-getEntityIdentifier() {
+fetchEntityIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(uuid)) from archentity;", callback);
+}
+
+getEntityIdentifier(Object result) {
 	attributes = null;
 	if (entityId == null) {
 		attributes = createAttributeList();
-		entityCount = Integer.valueOf(fetchOne("select count(distinct(uuid)) from archentity;").get(0)) + 1;
+		entityCount = Integer.valueOf(result.get(0)) + 1;
 		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
 	}
 	return attributes;
@@ -167,32 +175,61 @@ getEntityIdentifier() {
 updateEntity(tabgroup) {
 	if (isNull(entityId)) entityId = null;
 
-	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	//if (entityId == null && tableEntityId != null) entityId = tableEntityId;
 	
-	saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(), "entityId = getLastSavedRecordId(); reloadEntity(\""+tabgroup+"\");");
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+					reloadEntity(tabgroup);
+				}
+			});
+		}
+	});
 }
 
 clearEntity(tabgroup) {
 	newEntity(tabgroup);
-	entityId = saveTabGroup(tabgroup, null, null, getEntityIdentifier(), null, true);
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			}, true);
+		}
+	});
 }
 
 newEntity(tabgroup) {
 	newTabGroup(tabgroup);
 	
-	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
-	populateCheckBoxGroup(tabgroup + "/tab1/location", locations);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
 
-	Object choices = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';");
-	populateRadioGroup(tabgroup + "/tab1/choice", choices);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
 
-	Object items = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';");
-	populateDropDown(tabgroup + "/tab1/item", items);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
 	
 	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
 
-	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
-	populatePictureGallery(tabgroup + "/tab1/gallery", pictures);
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
 	
 	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
 	
@@ -273,8 +310,11 @@ closeRelationship(tabgroup) {
 }
 
 loadRelationships(tabgroup) {
-	Object relationships = fetchRelationshipList("abovebelow");
-	populateDropDown(tabgroup + "/tab2/relationships", relationships);
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab2/relationships", result);
+		}
+	});
 }
 
 saveRelationship(tabgroup) {
@@ -296,7 +336,12 @@ loadRelationshipAuto(tabgroup) {
 
 	newRelationship(tabgroup);	
 	showTabGroup(tabgroup, localId);
-	relationshipId = saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(), null, true);
+	relationshipId = localId;
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(result), null, true);
+		}
+	});
 }
 
 reloadRelationship(tabgroup) {
@@ -305,11 +350,15 @@ reloadRelationship(tabgroup) {
 	showTabGroup(tabgroup, relationshipId);
 }
 
-getRelationshipIdentifier() {
+fetchRelationshipIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(relationshipid)) from relationship;", callback);
+}
+
+getRelationshipIdentifier(Object result) {
 	attributes = null;
 	if (relationshipId == null) {
 		attributes = createAttributeList();
-		relationshipCount = Integer.valueOf(fetchOne("select count(distinct(relationshipid)) from relationship;").get(0)) + 1;
+		relationshipCount = Integer.valueOf(result.get(0)) + 1;
 		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relationshipCount, null, null));
 	}
 	return attributes;
@@ -320,33 +369,63 @@ updateRelationship(tabgroup) {
 
 	//if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
 	
-	saveTabGroup(tabgroup, relationshipId, null, getRelationshipIdentifier(), "relationshipId = getLastSavedRecordId(); reloadRelationship(\""+tabgroup+"\");");
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, relationshipId, null, getRelationshipIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					relationshipId = uuid;
+					reloadRelationship(tabgroup);
+				}
+			});
+		}
+	});
+	
 }
 
 clearRelationship(tabgroup) {
 	newRelationship(tabgroup);
-	relationshipId = saveTabGroup(tabgroup, null, null, getRelationshipIdentifier(), null, true);
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getRelationshipIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					relationshipId = uuid;
+				}
+			}, true);
+		}
+	});
 }
 
 newRelationship(tabgroup) {
 	newTabGroup(tabgroup);
 
-	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
-	populateCheckBoxGroup(tabgroup + "/tab1/location", locations);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
 
-	Object choices = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';");
-	populateRadioGroup(tabgroup + "/tab1/choice", choices);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
 
-	Object items = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';");
-	populateDropDown(tabgroup + "/tab1/item", items);
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
 	
 	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
 
-	Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';");
-	populatePictureGallery(tabgroup + "/tab1/gallery", pictures);
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
 	
 	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
-
+	
 	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
 
 	relationshipId = null;
@@ -409,11 +488,16 @@ onEvent("tabgroup6/tab2", "show", "loadRelationships(\"tabgroup6\")");
 // ASSOCIATIONS
 
 loadMembers() {
-	Object entities = fetchEntityList("small");
-	populateDropDown("tabgroup7/tab1/entities", entities);
-	
-	Object relationships = fetchRelationshipList("abovebelow");
-	populateDropDown("tabgroup7/tab1/relationships", relationships);
+	fetchEntityList("small", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup7/tab1/entities", result);
+		}
+	});
+	Object relationships = fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup7/tab1/relationships", result);
+		}
+	});
 }
 
 onEvent("tabgroup7", "show", "loadMembers()");
@@ -427,7 +511,9 @@ onAddMember() {
 	
 	verb = getFieldValue("tabgroup7/tab1/verb");
 	
-	addReln(eid, rid, verb);
-	
-	showToast("Added relationship member");
+	addReln(eid, rid, verb, new SaveCallback() {
+		onSaveAssociation(entityId, relId) {
+			showToast("added association");
+		}
+	});
 }

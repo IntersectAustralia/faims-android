@@ -1,10 +1,9 @@
-makeVocab(String attrib){
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ");
-    return a;
+makeVocab(String attrib, FetchCallback callback){
+    fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ", callback);
 }
 
-makePictureGallery(String attrib){
-    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
+makePictureGallery(String attrib, FetchCallback callback){
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;", callback);
 }
 
 getAttributeName(String vocab) {
@@ -19,18 +18,43 @@ onEvent("App/Hidden/HideTab", "click", "cancelTab(\"App/Hidden\", false);showTab
 
 loadAttributes(){
     setFieldValue("App/Inputs/ReadOnly", "This is Read Only.");
-    populateRadioGroup("App/Selects/Radio", makeVocab("Radio"));
-    populateCheckBoxGroup("App/Selects/Checkbox", makePictureGallery("Checkbox"));
-    populateDropDown("App/Selects/Dropdown", makeVocab("Dropdown"));
+    makeVocab("Radio", new FetchCallback() {
+        onFetch(result) {
+            populateRadioGroup("App/Selects/Radio", result);
+        }
+    });
+    
+    makePictureGallery("Checkbox", new FetchCallback() {
+        onFetch(result) {
+            populateCheckBoxGroup("App/Selects/Checkbox", result);
+        }
+    });
+    
+    makeVocab("Dropdown", new FetchCallback() {
+        onFetch(result) {
+            populateDropDown("App/Selects/Dropdown", result);
+        }
+    });
+    
     populateHierarchicalDropDown("App/Selects/HeirarchicalDropdown", "Hierarchical Dropdown");
-    populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("Picture Gallery"));
-    populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "Hierarchical Picture Gallery"); 
-    populatePictureGallery("App/Selects/PictureGallery", makePictureGallery("pictures"));
-    populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "hipictures");
-    populateList("App/Lists/List", makeVocab("List"));  
+
+    makePictureGallery("Picture Gallery", new FetchCallback() {
+        onFetch(result) {
+            populatePictureGallery("App/Selects/PictureGallery", result);
+        }
+    });
+    
+    populateHierarchicalPictureGallery("App/Selects/HeirarchicalPictureGallery", "Hierarchical Picture Gallery");
+
+    makeVocab("List", new FetchCallback() {
+        onFetch(result) {
+            populateList("App/Lists/List", result);  
+        }
+    });
 }
 
 loadAttributes();
+
 onEvent("App/Maps/gpsgo", "click", "startInternalGPS()");
 
 setGPSUpdateInterval(4);

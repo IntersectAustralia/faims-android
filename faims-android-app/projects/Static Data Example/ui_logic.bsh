@@ -1,36 +1,36 @@
-getDefaultUsersList() {
-	users = fetchAll("select userid, fname ||' ' || lname from user");
+populateListForUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
 	return users;
 }
-
-usersList = getDefaultUsersList();
-
-populateListForUsers(){
-	populateList("user/tab1/users", usersList);
-}
+populateListForUsers();
 
 login(){
-	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-	setUser(user);
-	showTabGroup("tabgroup1");
+	fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+			setUser(user);
+			showTabGroup("tabgroup1");
 
-	setFieldValue("tabgroup1/tab1/name", getModuleName());
-	setFieldValue("tabgroup1/tab1/id", getModuleId());
-	setFieldValue("tabgroup1/tab1/season", getModuleSeason());
-	setFieldValue("tabgroup1/tab1/description", getProjectDescription());
-	setFieldValue("tabgroup1/tab1/permit_no", getPermitNo());
-	setFieldValue("tabgroup1/tab1/permit_holder", getPermitHolder());
-	setFieldValue("tabgroup1/tab1/contact_address", getContactAndAddress());
-	setFieldValue("tabgroup1/tab1/participants", getParticipants());
-	setFieldValue("tabgroup1/tab1/permit_issued_by", getPermitIssuedBy());
-	setFieldValue("tabgroup1/tab1/permit_type", getPermitType());
-	setFieldValue("tabgroup1/tab1/copyright_holder", getCopyrightHolder());
-	setFieldValue("tabgroup1/tab1/client_sponsor", getClientSponsor());
-	setFieldValue("tabgroup1/tab1/land_owner", getLandOwner());
-	setFieldValue("tabgroup1/tab1/has_sensitive_data", hasSensitiveData());
+			setFieldValue("tabgroup1/tab1/name", getModuleName());
+			setFieldValue("tabgroup1/tab1/id", getModuleId());
+			setFieldValue("tabgroup1/tab1/season", getModuleSeason());
+			setFieldValue("tabgroup1/tab1/description", getProjectDescription());
+			setFieldValue("tabgroup1/tab1/permit_no", getPermitNo());
+			setFieldValue("tabgroup1/tab1/permit_holder", getPermitHolder());
+			setFieldValue("tabgroup1/tab1/contact_address", getContactAndAddress());
+			setFieldValue("tabgroup1/tab1/participants", getParticipants());
+			setFieldValue("tabgroup1/tab1/permit_issued_by", getPermitIssuedBy());
+			setFieldValue("tabgroup1/tab1/permit_type", getPermitType());
+			setFieldValue("tabgroup1/tab1/copyright_holder", getCopyrightHolder());
+			setFieldValue("tabgroup1/tab1/client_sponsor", getClientSponsor());
+			setFieldValue("tabgroup1/tab1/land_owner", getLandOwner());
+			setFieldValue("tabgroup1/tab1/has_sensitive_data", hasSensitiveData());
+		}
+	});
 }
-
-populateListForUsers();
 
 onEvent("user/tab1/users", "click", "login()");

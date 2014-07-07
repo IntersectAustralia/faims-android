@@ -6,6 +6,7 @@ import java.util.List;
 import android.os.AsyncTask;
 import android.view.View;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.IBeanShellCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Attribute;
@@ -55,6 +56,7 @@ public class TabGroupHelper {
 
 				@Override
 				public void onError(String message) {
+					autoSaveManager.notifyError();
 				}
 
 				@Override
@@ -84,22 +86,10 @@ public class TabGroupHelper {
 				
 			}, newRecord);
 		} catch (Exception e) {
-			final String message = "Error saving tab group " + ref;
-			FLog.e(message, e);
-			autoSaveManager.notifyError();
-			if (callback != null) {
-				linker.getActivity().runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							callback.onError(message);
-						} catch (Exception ce) {
-							linker.reportError("Error executing save tab group onerror callback", ce);
-						}
-					}
-					
-				});
+			if (autoSaveManager.isEnabled()) {
+				autoSaveManager.notifyError();
+			} else {
+				onError(linker, callback, e, "Error saving tab group " + ref, "Error executing save tab group onerror callback");
 			}
 		}
 	}
@@ -132,6 +122,7 @@ public class TabGroupHelper {
 
 				@Override
 				public void onError(String message) {
+					autoSaveManager.notifyError();
 				}
 
 				@Override
@@ -161,22 +152,10 @@ public class TabGroupHelper {
 				
 			}, newRecord);
 		} catch (Exception e) {
-			final String message = "Error saving tab " + ref;
-			FLog.e(message, e);
-			autoSaveManager.notifyError();
-			if (callback != null) {
-				linker.getActivity().runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							callback.onError(message);
-						} catch (Exception ce) {
-							linker.reportError("Error executing save tab onerror callback", ce);
-						}
-					}
-					
-				});
+			if (autoSaveManager.isEnabled()) {
+				autoSaveManager.notifyError();
+			} else {
+				onError(linker, callback, e, "Error saving tab " + ref, "Error executing save tab onerror callback");
 			}
 		}
 	}
@@ -404,23 +383,38 @@ public class TabGroupHelper {
 		return attributes;
 	}
 	
-	protected static void showArchEntityTabGroup(final BeanShellLinker linker, final String entityId, final TabGroup tabGroup) {
+	protected static void showArchEntityTabGroup(final BeanShellLinker linker, final String entityId, final TabGroup tabGroup, final FetchCallback callback) {
 		linker.fetchArchEnt(entityId, new FetchCallback() {
 
 			@Override
 			public void onError(String message) {
-				linker.showWarning("Loading Error", "Error trying to load arch entity");
+				onWarning(linker, callback, "Loading Error", "Error trying to load arch entity", "Error found when executing show tab group onerror callback");
 			}
 
 			@Override
 			public void onFetch(Object result) {
-				ArchEntity entity = (ArchEntity) result;
+				final ArchEntity entity = (ArchEntity) result;
 				if (entity instanceof ArchEntity) {
 					for (Tab tab : tabGroup.getTabs()) {
 						showArchEntityTab(linker, entity, tab);
 					}
+					
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onFetch(entity);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing show tab group onfetch callback", e);
+								}
+							}
+							
+						});
+					}
 				} else {
-					linker.showWarning("Loading Error", "Error trying to load arch entity");
+					onWarning(linker, callback, "Loading Error", "Error trying to load arch entity", "Error found when executing show tab group onerror callback");
 				}
 			}
 			
@@ -428,42 +422,72 @@ public class TabGroupHelper {
 		
 	}
 
-	protected static void showRelationshipTabGroup(final BeanShellLinker linker, final String relationshipId, final TabGroup tabGroup)  {
+	protected static void showRelationshipTabGroup(final BeanShellLinker linker, final String relationshipId, final TabGroup tabGroup, final FetchCallback callback)  {
 		linker.fetchRel(relationshipId, new FetchCallback() {
 
 			@Override
 			public void onError(String message) {
-				linker.showWarning("Loading Error", "Error trying to load relationship");
+				onWarning(linker, callback, "Loading Error", "Error trying to load relationship", "Error found when executing show tab group onerror callback");
 			}
 
 			@Override
 			public void onFetch(Object result) {
-				Relationship relationship = (Relationship) result;
+				final Relationship relationship = (Relationship) result;
 				if (relationship instanceof Relationship) {
 					for (Tab tab : tabGroup.getTabs()) {
 						showRelationshipTab(linker, relationship, tab);
 					}
+					
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onFetch(relationship);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing show tab group onfetch callback", e);
+								}
+							}
+							
+						});
+					}
 				} else {
-					linker.showWarning("Loading Error", "Error trying to load relationship");
+					onWarning(linker, callback, "Loading Error", "Error trying to load relationship", "Error found when executing show tab group onerror callback");
 				}
 			}
 			
 		});
 	}
 
-	protected static void showArchEntityTab(final BeanShellLinker linker, final String entityId, final Tab tab) throws Exception {
+	protected static void showArchEntityTab(final BeanShellLinker linker, final String entityId, final Tab tab, final FetchCallback callback) throws Exception {
 		linker.fetchArchEnt(entityId, new FetchCallback() {
 
 			@Override
 			public void onError(String message) {
-				linker.showWarning("Loading Error", "Error trying to load arch entity");
+				onWarning(linker, callback, "Loading Error", "Error trying to load arch entity", "Error found when executing show tab onerror callback");
 			}
 
 			@Override
 			public void onFetch(Object result) {
-				ArchEntity entity = (ArchEntity) result;
+				final ArchEntity entity = (ArchEntity) result;
 				if (entity instanceof ArchEntity) {
 					showArchEntityTab(linker, entity, tab);
+					
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onFetch(entity);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing show tab onfetch callback", e);
+								}
+							}
+							
+						});
+					}
 				} else {
 					linker.showWarning("Loading Error", "Error trying to load arch entity");
 				}
@@ -472,19 +496,34 @@ public class TabGroupHelper {
 		});
 	}
 	
-	protected static void showRelationshipTab(final BeanShellLinker linker, final String relationshipId, final Tab tab) throws Exception {
+	protected static void showRelationshipTab(final BeanShellLinker linker, final String relationshipId, final Tab tab, final FetchCallback callback) throws Exception {
 		linker.fetchRel(relationshipId, new FetchCallback() {
 
 			@Override
 			public void onError(String message) {
-				linker.showWarning("Loading Error", "Error trying to load relationship");
+				onWarning(linker, callback, "Loading Error", "Error trying to load relationship", "Error found when executing show tab onerror callback");
 			}
 
 			@Override
 			public void onFetch(Object result) {
-				Relationship relationship = (Relationship) result;
+				final Relationship relationship = (Relationship) result;
 				if (relationship instanceof Relationship) {
 					showRelationshipTab(linker, relationship, tab);
+					
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onFetch(relationship);
+								} catch (Exception e) {
+									linker.reportError("Error found when executing show tab onfetch callback", e);
+								}
+							}
+							
+						});
+					}
 				} else {
 					linker.showWarning("Loading Error", "Error trying to load relationship");
 				}
@@ -544,6 +583,43 @@ public class TabGroupHelper {
 					break;
 				}
 			}
+		}
+	}
+	
+	private static void onWarning(final BeanShellLinker linker, final IBeanShellCallback callback, final String title, final String errorMessage, final String callbackErrorMessage) {
+		FLog.w(errorMessage);
+		linker.showWarning(title, errorMessage);
+		if (callback != null) {
+			linker.getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						callback.onError(errorMessage);
+					} catch (Exception e) {
+						linker.reportError(callbackErrorMessage, e);
+					}
+				}
+				
+			});
+		}
+	}
+	
+	private static void onError(final BeanShellLinker linker, final IBeanShellCallback callback, final Exception e, final String errorMessage, final String callbackErrorMessage) {
+		FLog.e(errorMessage, e);
+		if (callback != null) {
+			linker.getActivity().runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						callback.onError(errorMessage);
+					} catch (Exception e) {
+						linker.reportError(callbackErrorMessage, e);
+					}
+				}
+				
+			});
 		}
 	}
 

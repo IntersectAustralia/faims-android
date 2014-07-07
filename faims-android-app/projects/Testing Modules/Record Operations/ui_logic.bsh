@@ -1,10 +1,7 @@
-User user; // dont touch
-String userid;
-
 setSyncEnabled(true);
 setFileSyncEnabled(true);
 
-onEvent("control/Entity", "show", "populateList(\"control/Entity/ListEntity\", fetchEntityList(\"Entity\"))");
+onEvent("control/Entity", "show", "onShowEntity()");
 onEvent("control/Entity/NewEntity", "click", "newEntity()");
 onEvent("control/Entity/ListEntity", "click", "loadEntity()");
 
@@ -17,6 +14,14 @@ onEvent("Entity/Associated", "show", "getRelationships();getOtherEntities();getA
 onEvent("Entity/Associated/AddAssociation", "delayclick", "addAssociation()");
 
 String entity_id = null;
+
+onShowEntity() {
+    fetchEntityList("Entity", new FetchCallback() {
+        onFetch(result) {
+            populateList("control/Entity/ListEntity", result);
+        }
+    });
+}
 
 newEntity(){
     entity_id = null;
@@ -37,10 +42,11 @@ saveEntity() {
         showWarning("Validation Error!", "Cannot save entity without a name!");
         return;
     }
-    if (!isNull(entity_id)) {
-        entity = fetchArchEnt(entity_id);
-    }
-    saveTabGroup("Entity", entity_id, null, null, "entity_id = getLastSavedRecordId();");
+    saveTabGroup("Entity", entity_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            entity_id = uuid;
+        }
+    });
 }
 
 deleteEntity(){
@@ -61,19 +67,26 @@ doNotDelete(){
 }
 
 getRelationships() {
-    relationshipList = fetchAll("select relntypename||'~!~'||coalesce(nullif(parent||'~!~'||child,'~!~'),relntypename||'~!~'||relntypename) as relntypeid, coalesce(nullif(parent,''), relntypename) as name, relntypeid from relntype where relntypename not like '%Context%' union select relntypename||'~!~'||coalesce(nullif(child||'~!~'||parent,'~!~'),relntypename||'~!~'||relntypename), coalesce(nullif(child,''), relntypename) as name, relntypeid from relntype order by relntypeid, name;");
-    populateDropDown("Entity/Associated/Relationship", relationshipList);
+    fetchAll("select relntypename||'~!~'||coalesce(nullif(parent||'~!~'||child,'~!~'),relntypename||'~!~'||relntypename) as relntypeid, coalesce(nullif(parent,''), relntypename) as name, relntypeid from relntype where relntypename not like '%Context%' union select relntypename||'~!~'||coalesce(nullif(child||'~!~'||parent,'~!~'),relntypename||'~!~'||relntypename), coalesce(nullif(child,''), relntypename) as name, relntypeid from relntype order by relntypeid, name;",
+        new FetchCallback() {
+            onFetch(result) {
+                populateDropDown("Entity/Associated/Relationship", result);
+            }
+        });
 }
 
 getOtherEntities() {
-    entityList = fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from latestNonDeletedArchEntIdentifiers where aenttypename = 'Entity' and uuid != '"+entity_id+"' group by uuid;" );
-    populateDropDown("Entity/Associated/ToEntity", entityList);
+    fetchAll("select uuid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') as response from latestNonDeletedArchEntIdentifiers where aenttypename = 'Entity' and uuid != '"+entity_id+"' group by uuid;",
+        new FetchCallback() {
+            onFetch(result) {
+                populateDropDown("Entity/Associated/ToEntity", result);
+            }
+        });
 }
 
 getAssociated(){
-    Object associatedList = new ArrayList();
     if(!isNull(entity_id)) {
-        associatedList = fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+getFieldValue("Entity/Entity/Name")+"' as response, valuetimestamp, aentrelntimestamp "+
+        fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+getFieldValue("Entity/Entity/Name")+"' as response, valuetimestamp, aentrelntimestamp "+
         "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename, participatesVerb, relationshipid,aentrelntimestamp "+
         "            FROM latestNonDeletedArchentIdentifiers join latestNonDeletedAentReln using (uuid) "+
         "           WHERE aenttypename = 'Entity'  "+
@@ -87,10 +100,12 @@ getAssociated(){
         "                             and uuid != "+entity_id+")  "+        
         "        ORDER BY uuid, attributename ASC "+
         "        ) "+
-        "group by uuid, relationshipid order by aentrelntimestamp desc ; ");
+        "group by uuid, relationshipid order by aentrelntimestamp desc ; ", new FetchCallback() {
+            onFetch(result) {
+                populateList("Entity/Associated/ListAssociations", result);
+            }
+        });
     }
-    
-    populateList("Entity/Associated/ListAssociations", associatedList);
 }
 
 addAssociation() {
@@ -105,61 +120,77 @@ addAssociation() {
     getAssociated();
 }
 
+List associatedList;
+
 getAllAssociated(){
-    Object associatedList = new ArrayList();
-    Object entityList = fetchEntityList("Entity");
-    for(int i = 0; i < entityList.size(); i++) {
-        associatedList.addAll(fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+ entityList.get(i).get(1) +"' as response, valuetimestamp, aentrelntimestamp "+
-        "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename, participatesVerb, relationshipid,aentrelntimestamp "+
-        "            FROM latestNonDeletedArchentIdentifiers join latestNonDeletedAentReln using (uuid) "+
-        "           WHERE aenttypename = 'Entity'  "+
-        "             AND uuid in (select uuid "+
-        "                            FROM latestNonDeletedAentReln  "+
-        "                           where relationshipid in (select relationshipid  "+
-        "                                                      FROM latestNonDeletedAentReln  "+
-        "                                                      JOIN relationship using (relationshipid)  "+
-        "                                                      JOIN relntype using (relntypeid)  "+
-        "                                                     where uuid = "+entityList.get(i).get(0)+") "+
-        "                             and uuid != "+entityList.get(i).get(0)+")  "+        
-        "        ORDER BY uuid, attributename ASC "+
-        "        ) "+
-        "group by uuid, relationshipid order by aentrelntimestamp desc ;"));
-    }
-    populateList("control/Associations/ListAssociations", associatedList);
+    associatedList = new ArrayList();
+    count = 0;
+    fetchEntityList("Entity", new FetchCallback() {
+        onFetch(result) {
+            count = result.size();
+            for(int i = 0; i < result.size(); i++) {
+                fetchAll("select relationshipid, group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||')',  measure || ' (' || freetext ||')',  vocabname || ' (' || freetext ||')',  measure || ' ' || vocabname ,  vocabname || ' (' || freetext || ')',  measure || ' (' || freetext || ')',  measure,  vocabname,  freetext,  measure,  vocabname,  freetext), ' ') || ' ' || participatesVerb || ' "+ result.get(i).get(1) +"' as response, valuetimestamp, aentrelntimestamp "+
+                    "  FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttypename, participatesVerb, relationshipid,aentrelntimestamp "+
+                    "            FROM latestNonDeletedArchentIdentifiers join latestNonDeletedAentReln using (uuid) "+
+                    "           WHERE aenttypename = 'Entity'  "+
+                    "             AND uuid in (select uuid "+
+                    "                            FROM latestNonDeletedAentReln  "+
+                    "                           where relationshipid in (select relationshipid  "+
+                    "                                                      FROM latestNonDeletedAentReln  "+
+                    "                                                      JOIN relationship using (relationshipid)  "+
+                    "                                                      JOIN relntype using (relntypeid)  "+
+                    "                                                     where uuid = "+result.get(i).get(0)+") "+
+                    "                             and uuid != "+result.get(i).get(0)+")  "+        
+                    "        ORDER BY uuid, attributename ASC "+
+                    "        ) "+
+                    "group by uuid, relationshipid order by aentrelntimestamp desc ;", new FetchCallback() {
+                        onFetch(entities) {
+                            associatedList.addAll(entities);
+                            count--;
+                            if (count == 0) {
+                                populateList("control/Associations/ListAssociations", associatedList);
+                            }
+                        }
+                });   
+            }
+        }
+    });
 }
 
 saveEntitiesToHierRel(type, entity1, entity2, e1verb, e2verb) {
     if (isNull(entity1) || isNull(entity2)) return;
     
-    rel_id = saveRel(null, type, null, null);
-    addReln(entity1, rel_id, e1verb);
-    addReln(entity2, rel_id, e2verb);
+    saveRel(null, type, null, null, new SaveCallback() {
+        onSave(rel_id, newRecord) {
+            addReln(entity1, rel_id, e1verb);
+            addReln(entity2, rel_id, e2verb);
+        }
+    });
 }
 
 /*** Uneditable - you can edit the code below with extreme precaution ***/
 /*** USER ***/
+User user; // dont touch
+String userid;
 
-getDefaultUsersList() {
-    users = fetchAll("select userid, fname || ' ' || lname from user");
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/usertab/users", result);
+        }
+    });
     return users;
 }
-
-populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
-}
-
 populateListForUsers();
 
-String username = "";
-String device = "";
-
 login(){
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-    userid = userResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("control");
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("control");
+        }
+    });
 }
 
 onEvent("user/usertab/users", "click", "login()");

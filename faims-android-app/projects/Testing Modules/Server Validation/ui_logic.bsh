@@ -1,16 +1,21 @@
-User user; // dont touch
-String userid;
-
 setSyncEnabled(true);
 setFileSyncEnabled(true);
 
-onEvent("control", "show", "populateList(\"control/Entity/ListEntity\", fetchEntityList(\"Entity\"))");
+onEvent("control/Entity", "show", "onShowEntity()");
 onEvent("control/Entity/NewEntity", "click", "newEntity()");
 onEvent("control/Entity/ListEntity", "click", "loadEntity()");
 
 onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
 
 String entity_id = null;
+
+onShowEntity() {
+    fetchEntityList("Entity", new FetchCallback() {
+        onFetch(result) {
+            populateList("control/Entity/ListEntity", result);
+        }
+    });
+}
 
 newEntity(){
     entity_id = null;
@@ -30,33 +35,37 @@ saveEntity() {
     if (!isNull(entity_id)) {
         entity = fetchArchEnt(entity_id);
     }
-    saveTabGroup("Entity", entity_id, null, null, "entity_id = getLastSavedRecordId();");
+    saveTabGroup("Entity", entity_id, null, null, new SaveCallback() {
+        onSave(uuid, newRecord) {
+            entity_id = uuid;
+        }
+    });
 }
 
 /*** Uneditable - you can edit the code below with extreme precaution ***/
 /*** USER ***/
 
-getDefaultUsersList() {
-    users = fetchAll("select userid, fname || ' ' || lname from user");
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/usertab/users", result);
+        }
+    });
     return users;
 }
-
-populateListForUsers(){
-    populateList("user/usertab/users", getDefaultUsersList());
-}
-
 populateListForUsers();
 
-String username = "";
-String device = "";
-
 login(){
-    Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-    User user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-    userid = userResult.get(0);
-    setUser(user);
-    username = userResult.get(1) + " " + userResult.get(2);
-    showTabGroup("control");
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("control");
+        }
+    });
 }
 
 onEvent("user/usertab/users", "click", "login()");

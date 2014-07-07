@@ -1,45 +1,57 @@
-getDefaultUsersList() {
-	users = fetchAll("select userid, fname ||' ' || lname from user");
+populateListForUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
 	return users;
 }
-
-usersList = getDefaultUsersList();
-
-populateListForUsers(){
-	populateList("user/tab1/users", usersList);
-}
-
-login(){
-	Object userResult = fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';");
-	user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
-	setUser(user);
-	showTabGroup("tabgroup1");
-}
-
 populateListForUsers();
 
-onEvent("user/tab1/users", "click", "login()");
+login(){
+	fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+			setUser(user);
+			showTabGroup("tabgroup1");
+		}
+	});
+}
 
-Object types = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';");
-Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
-Object pictures = fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';");
+onEvent("user/tab1/users", "click", "login()");
 
 String entity_id;
 int entityCount;
 
 initialise() {
-	entityCount = fetchEntityList("simple").size() + 1;
+	fetchEntityList("simple", new FetchCallback() {
+		onFetch(result) {
+			entityCount = result.size() + 1;
+		}
+	});
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'type';", new FetchCallback(){
+		onFetch(result) {
+			populateDropDown("tabgroup1/tab1/type", result);
+		}
+	});
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup("tabgroup1/tab2/location", result);
+		}
+	});
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery("tabgroup1/tab1/picture", result);
+		}
+	});
+
 	refreshEntities();
 	setFieldValue("tabgroup1/tab1/time", getCurrentTime());
-	populateDropDown("tabgroup1/tab1/type", types);
-	populateCheckBoxGroup("tabgroup1/tab2/location", locations);
-	populatePictureGallery("tabgroup1/tab1/picture", pictures);
+
 }
 
 saveEntity() {
-	
-	entity_id = updateEntity(null);
-	
+	updateEntity(null);
 }
 
 updateEntity(entity_id) {
@@ -62,15 +74,21 @@ updateEntity(entity_id) {
 	
 	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, getFieldCertainty("tabgroup1/tab2/supervisor")));
 	
-	String id = saveArchEnt(entity_id, "simple", null, attributes);
-	refreshEntities();
-	return id;
+	saveArchEnt(entity_id, "simple", null, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			entity_id = uuid;
+			refreshEntities();
+		}
+	});
+	
 }
 
 refreshEntities() {
-	Object entities = fetchEntityList("simple");
-
-	populateDropDown("tabgroup1/tab3/entity", entities);
+	fetchEntityList("simple", new FetchCallback() {
+		onFetch(result) {		
+			populateDropDown("tabgroup1/tab3/entity", result);
+		}
+	});
 }
 
 loadEntity() {

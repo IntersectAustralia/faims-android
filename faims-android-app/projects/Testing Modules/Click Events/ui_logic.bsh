@@ -1,21 +1,47 @@
-makeVocab(String attrib){
-    Object a = fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ");
-    return a;
+makeVocab(String attrib, FetchCallback callback){
+    fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ", callback);
 }
 
-makePictureGallery(String attrib){
-    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;");
+makePictureGallery(String attrib, FetchCallback callback){
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;", callback);
 }
 
-getAttributeName(String vocab) {
-    Object values = fetchOne("select vocabName from vocabulary where vocabid = '" + vocab + "';");   
-    return values.get(0);
+showVocabToast(String vocab) {
+    fetchOne("select vocabName from vocabulary where vocabid = '" + vocab + "';", new FetchCallback() {
+        onFetch(result) {
+            if (result.size() > 0) {
+                showToast("You chose "+ result.get(0));
+            } else {
+                showToast("Error fetching vocab name for " + vocab);
+            }
+        }
+    }); 
 }
 
-populateDropDown("main/normal/dropDownSelect", makeVocab("dropdown"));
-populatePictureGallery("main/normal/pictureGallerySelect", makePictureGallery("pictures"));
-populateDropDown("main/normal/dropDownClick", makeVocab("dropdown"));
-populatePictureGallery("main/normal/pictureGalleryClick", makePictureGallery("pictures"));
+makeVocab("dropdown", new FetchCallback() {
+    onFetch(result) {
+        populateDropDown("main/normal/dropDownSelect", result);
+    }
+});
+
+makePictureGallery("pictures", new FetchCallback() {
+    onFetch(result) {
+        populatePictureGallery("main/normal/pictureGallerySelect", result);
+    }
+});
+
+makeVocab("dropdown", new FetchCallback() {
+    onFetch(result) {
+        populateDropDown("main/normal/dropDownClick", result);
+    }
+});
+
+makePictureGallery("pictures", new FetchCallback() {
+    onFetch(result) {
+        populatePictureGallery("main/normal/pictureGalleryClick", result);
+    }
+});
+
 populateHierarchicalDropDown("main/heirarchical/hidropDownSelect", "hidropdown");
 populateHierarchicalPictureGallery("main/heirarchical/hipictureGallerySelect", "hipictures");
 populateHierarchicalDropDown("main/heirarchical/hidropDownClick", "hidropdown");
@@ -60,47 +86,47 @@ int fourthn = 0;
 incrementSelect(){
     n++;
     setFieldValue("main/normal/counter", n);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/dropDownSelect")));
+    showVocabToast(getFieldValue("main/normal/dropDownSelect"));
 }
 
 incrementClick(){
     n++;
     setFieldValue("main/normal/counter", n);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/dropDownClick")));
+    showVocabToast(getFieldValue("main/normal/dropDownClick"));
 }
 
 incrementSelect2(){
     secondn++;
     setFieldValue("main/normal/counter2", secondn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/pictureGallerySelect")));
+    showVocabToast(getFieldValue("main/normal/pictureGallerySelect"));
 }
 
 incrementClick2(){
     secondn++;
     setFieldValue("main/normal/counter2", secondn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/normal/pictureGalleryClick")));
+    showVocabToast(getFieldValue("main/normal/pictureGalleryClick"));
 }
 
 incrementSelect3(){
     thirdn++;
     setFieldValue("main/heirarchical/counter", thirdn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hidropDownSelect")));
+    showVocabToast(getFieldValue("main/heirarchical/hidropDownSelect"));
 }
 
 incrementClick3(){
     thirdn++;
     setFieldValue("main/heirarchical/counter", thirdn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hidropDownClick")));
+    showVocabToast(getFieldValue("main/heirarchical/hidropDownClick"));
 }
 
 incrementSelect4(){
     fourthn++;
     setFieldValue("main/heirarchical/counter2", fourthn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hipictureGallerySelect")));
+    showVocabToast(getFieldValue("main/heirarchical/hipictureGallerySelect"));
 }
 
 incrementClick4(){
     fourthn++;
     setFieldValue("main/heirarchical/counter2", fourthn);
-    showToast("You chose "+ getAttributeName(getFieldValue("main/heirarchical/hipictureGalleryClick")));
+    showVocabToast(getFieldValue("main/heirarchical/hipictureGalleryClick"));
 }
