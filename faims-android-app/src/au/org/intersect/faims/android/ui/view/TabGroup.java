@@ -109,7 +109,7 @@ public class TabGroup extends Fragment {
 					}
 				}
 				
-				if(this.onLoadCommands.size() > 0){
+				if(this.tempSavedInstanceState == null && this.onLoadCommands.size() > 0){
 					executeCommands(this.onLoadCommands);
 				}
 			}
@@ -138,12 +138,12 @@ public class TabGroup extends Fragment {
 				((ViewGroup) tabHost.getParent()).removeView(tabHost);
 			}
 			
-			if(this.onShowCommands.size() > 0){
+			if(this.tempSavedInstanceState == null && this.onShowCommands.size() > 0){
 				executeCommands(this.onShowCommands);
 			}
 			
 			// execute a task after tabgroup is shown
-			if (showTask != null) {
+			if (this.tempSavedInstanceState == null && showTask != null) {
 				showTask.onShow();
 				showTask = null;
 			}

@@ -141,6 +141,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private Runnable trackingTask;
 	private MediaRecorder recorder;
 	
+	private HashMap<String, Object> beanshellVariables;
+	
 	private String persistedObjectName;
 	
 	private Double prevLong;
@@ -171,6 +173,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		this.module = module;
 		this.persistedObjectName = null;
+		this.beanshellVariables = null; 
 		this.lastFileBrowserCallback = null;
 		this.trackingTask = null;
 		this.prevLong = 0d;
@@ -3156,7 +3159,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	@Override
-	public void saveTo(Bundle savedInstanceState) {
+	public void saveTo(Bundle savedInstanceState) throws EvalError {
 		String persistedObjectName = getPersistedObjectName();
 		if (persistedObjectName != null) {
 			try {
@@ -3167,8 +3170,21 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				FLog.e("error storing bean shell data", e);
 			}
 		}
+		
+		// Save beanshell variables
+		HashMap<String, Object> beanshellVars = new HashMap<String, Object>();
+		String[] variables = (String[]) interpreter.eval("this.variables");
+		
+		for (String var: variables) {
+			if (interpreter.get(var) != BeanShellLinker.this) {
+				beanshellVars.put(var, interpreter.get(var));
+			}
+		}
+		
+		savedInstanceState.putSerializable("beanshell:variables", beanshellVars);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
 		if (persistedObjectName != null) {
@@ -3178,6 +3194,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				interpreter.set(persistedObjectName, object);
 			} catch (EvalError e) {
 				FLog.e("error restoring bean shell data", e);
+			}
+		}
+		
+		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable("beanshell:variables");
+	}
+	
+	public void restoreTempBundle() throws EvalError {
+		if (beanshellVariables != null) {
+			for (String var: beanshellVariables.keySet()) {
+				interpreter.set(var, beanshellVariables.get(var));
 			}
 		}
 	}
