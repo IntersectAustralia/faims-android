@@ -1,0 +1,121 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
+          <menu>
+              <tab1>
+                  <options></options>
+              </tab1>
+          </menu>
+          <tabgroup6>
+              <tab1>
+                  <auto></auto>
+                  <manual></manual>
+                  <stop></stop>
+                  <input></input>
+                  <read></read>
+                  <write></write>
+                  <clear/>
+              </tab1>
+          </tabgroup6>
+        </faims>
+      </instance>
+      
+
+      <bind nodeset="/faims/tabgroup6/tab1/input" type="string"/>
+      
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="style">
+      <label></label>
+      <group ref="orientation">
+        <label></label>
+        <input ref="orientation">
+            <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label></label>
+        <input ref="layout_weight">
+            <label>1</label>
+        </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>Users List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="menu">
+      <label>Options</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Options</label>
+        <select1 ref="options" appearance="compact">
+          <label>Options:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="tabgroup6">
+        <label></label>
+        <group ref="tab1">
+            <label>Bluetooth</label>
+            <trigger ref="auto">
+                <label>Create Bluetooth Connection (Auto)</label>
+            </trigger>
+            <trigger ref="manual">
+                <label>Create Bluetooth Connection (Manual)</label>
+            </trigger>
+            <trigger ref="stop">
+                <label>Destroy Bluetooth Connection</label>
+            </trigger>
+            <input ref="input">
+                <label>Input</label>
+            </input>
+            <trigger ref="read">
+                <label>Read Message</label>
+            </trigger>
+            <trigger ref="write">
+                <label>Write Message</label>
+            </trigger>
+            <trigger ref="clear">
+                <label>Clear Messages</label>
+            </trigger>
+        </group>
+    </group>
+  </h:body>
+</h:html>

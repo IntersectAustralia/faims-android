@@ -1,0 +1,96 @@
+// USER
+login(){
+	Object userResult = fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';");
+	user = new User(userResult.get(0), userResult.get(1), userResult.get(2), userResult.get(3));
+	setUser(user);
+	showTabGroup("menu");
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+loadUsers() {
+	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");
+	populateList("user/tab1/users", usersList);
+}
+
+onEvent("user", "show", "loadUsers()");
+
+
+// CONTROLS
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("bluetooth", "Bluetooth Example"));
+
+
+populateList("menu/tab1/options", options);
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("bluetooth".equals(value)) {
+		showTabGroup("tabgroup6");
+	} 
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+onEvent("tabgroup6/tab1/auto", "click", "onBluetoothStartAuto()");
+onEvent("tabgroup6/tab1/manual", "click", "onBluetoothStartManual()");
+onEvent("tabgroup6/tab1/stop", "click", "onBluetoothStop()");
+onEvent("tabgroup6/tab1/read", "click", "onBluetoothRead()");
+onEvent("tabgroup6/tab1/write", "click", "onBluetoothWrite()");
+onEvent("tabgroup6/tab1/clear", "click", "onBluetoothClear()");
+
+messageBuffer = new ArrayList();
+messageBufferSize = 5;
+addMessage(message) {
+	messageBuffer.add(message);
+	if (messageBuffer.size() > messageBufferSize) {
+		messageBuffer.remove(0);
+	}
+	value = "";
+	for (i = 0; i < messageBuffer.size(); i++) {
+		if (!value.isEmpty()) {
+			value += "\n";
+		}
+		value += messageBuffer.get(i);
+	}
+	setFieldValue("tabgroup6/tab1/input", value);
+}
+
+onBluetoothStartAuto() {
+	createBluetoothConnection("onBluetoothInput()", 1);
+}
+
+onBluetoothStartManual() {
+	createBluetoothConnection("onBluetoothInput()", 0);
+}
+
+onBluetoothStop() {
+	destroyBluetoothConnection();
+}
+
+onBluetoothRead() {
+	readBluetoothMessage();
+}
+
+onBluetoothWrite() {
+	writeBluetoothMessage(getFieldValue("tabgroup6/tab1/input"));
+}
+
+onBluetoothClear() {
+	messageBuffer = new ArrayList();
+	setFieldValue("tabgroup6/tab1/input", "");
+	clearBluetoothMessages();
+}
+
+onBluetoothInput() {
+	message = getBluetoothMessage();
+	addMessage(message);
+}

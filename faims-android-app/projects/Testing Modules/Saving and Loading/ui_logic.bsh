@@ -49,7 +49,6 @@ options.add(createOption("entity_childview", "Save and Load Entity - Child Views
 options.add(createOption("relationship_childview", "Save and Load Relationship - Child Views"));
 options.add(createOption("entity_autosave", "Save and Load Entity - AutoSave"));
 options.add(createOption("relationship_autosave", "Save and Load Relationship - AutoSave"));
-
 options.add(createOption("associations", "Associations"));
 
 loadOptions() {
@@ -73,7 +72,7 @@ onClickOption() {
 	} else if ("relationship_autosave".equals(value)) {
 		showTabGroup("tabgroup6");
 	} else if ("associations".equals(value)) {
-		showTabGroup("tabgroup5");
+		showTabGroup("tabgroup7");
 	}
 }
 
