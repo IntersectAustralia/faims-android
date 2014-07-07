@@ -5,6 +5,8 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.view.View;
+import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.EntityAttribute;
@@ -48,24 +50,39 @@ public class TabGroupHelper {
 			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
 		try {
-			TabGroup tabGroup = linker.getTabGroup(ref);
-			saveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
-			setTabGroupSaved(tabGroup);
-			autoSaveManager.reportSaved();
-			if (callback != null) {
-				linker.getActivity().runOnUiThread(new Runnable() {
+			final TabGroup tabGroup = linker.getTabGroup(ref);
+			saveTabGroup(linker, tabGroup, uuid, geometry, attributes, new SaveCallback() {
 
-					@Override
-					public void run() {
-						try {
-							callback.onSave(uuid, newRecord);
-						} catch (Exception e) {
-							linker.reportError("Error executing save tab group onsave callback", e);
-						}
+				@Override
+				public void onError(String message) {
+				}
+
+				@Override
+				public void onSave(final String uuid, final boolean newRecord) {
+					setTabGroupSaved(tabGroup);
+					autoSaveManager.reportSaved();
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onSave(uuid, newRecord);
+								} catch (Exception e) {
+									linker.reportError("Error executing save tab group onsave callback", e);
+								}
+							}
+							
+						});
 					}
-					
-				});
-			}
+				}
+
+				@Override
+				public void onSaveAssociation(String entityId,
+						String relationshpId) {					
+				}
+				
+			}, newRecord);
 		} catch (Exception e) {
 			final String message = "Error saving tab group " + ref;
 			FLog.e(message, e);
@@ -110,24 +127,39 @@ public class TabGroupHelper {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
 		try {
 			TabGroup tabGroup = linker.getTabGroupFromTabLabel(ref);
-			Tab tab = linker.getTab(ref);
-			saveTab(linker, tabGroup, tab, uuid, geometry, attributes, callback, newRecord);
-			setTabSaved(tab);
-			autoSaveManager.reportSaved();
-			if (callback != null) {
-				linker.getActivity().runOnUiThread(new Runnable() {
+			final Tab tab = linker.getTab(ref);
+			saveTab(linker, tabGroup, tab, uuid, geometry, attributes, new SaveCallback() {
 
-					@Override
-					public void run() {
-						try {
-							callback.onSave(uuid, newRecord);
-						} catch (Exception e) {
-							linker.reportError("Error executing save tab onsave callback", e);
-						}
+				@Override
+				public void onError(String message) {
+				}
+
+				@Override
+				public void onSave(final String uuid, final boolean newRecord) {
+					setTabSaved(tab);
+					autoSaveManager.reportSaved();
+					if (callback != null) {
+						linker.getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								try {
+									callback.onSave(uuid, newRecord);
+								} catch (Exception e) {
+									linker.reportError("Error executing save tab onsave callback", e);
+								}
+							}
+							
+						});
 					}
-					
-				});
-			}
+				}
+
+				@Override
+				public void onSaveAssociation(String entityId,
+						String relationshpId) {
+				}
+				
+			}, newRecord);
 		} catch (Exception e) {
 			final String message = "Error saving tab " + ref;
 			FLog.e(message, e);

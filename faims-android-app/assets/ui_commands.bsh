@@ -1,6 +1,9 @@
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.EntityAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
@@ -109,11 +112,23 @@ showTab(String ref, String id) {
   * @param id the id of the entity or relationship. Can be null to save new record
   * @param geometry the geometry list of the record
   * @param attributes additional attributes to save for the record
-  * @param callback code to execute when saving is finished
-  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
-saveTabGroup(String ref, String id, List geometry, List attributes, String callback){
-  return linker.saveTabGroup(ref, id, geometry, attributes, callback);
+saveTabGroup(String ref, String id, List geometry, List attributes){
+  linker.saveTabGroup(ref, id, geometry, attributes, null);
+}
+
+
+/**
+  * Save the tab group with the following reference.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship. Can be null to save new record
+  * @param geometry the geometry list of the record
+  * @param attributes additional attributes to save for the record
+  * @param callback code to execute when saving is finished
+  */
+saveTabGroup(String ref, String id, List geometry, List attributes, SaveCallback callback){
+  linker.saveTabGroup(ref, id, geometry, attributes, callback);
 }
 
 /**
@@ -125,10 +140,21 @@ saveTabGroup(String ref, String id, List geometry, List attributes, String callb
   * @param attributes additional attributes to save for the record
   * @param callback code to execute when saving is finished
   * @param enableAutoSave specify if you want to enable autosaving
-  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
-saveTabGroup(String ref, String id, List geometry, List attributes, String callback, boolean enableAutoSave){
-  return linker.saveTabGroup(ref, id, geometry, attributes, callback, enableAutoSave);
+saveTabGroup(String ref, String id, List geometry, List attributes, SaveCallback callback, boolean enableAutoSave){
+  linker.saveTabGroup(ref, id, geometry, attributes, callback, enableAutoSave);
+}
+
+/**
+  * Save the tab with the following reference.
+  *
+  * @param ref the reference of the tab group
+  * @param id the id of the entity or relationship. Can be null to save new record
+  * @param geometry the geometry list of the record
+  * @param attributes additional attributes to save for the record
+  */
+saveTab(String ref, String id, List geometry, List attributes){
+  linker.saveTab(ref, id, geometry, attributes, null);
 }
 
 /**
@@ -139,19 +165,9 @@ saveTabGroup(String ref, String id, List geometry, List attributes, String callb
   * @param geometry the geometry list of the record
   * @param attributes additional attributes to save for the record
   * @param callback code to execute when saving is finished
-  * @return returns the entity or relationship id. Note: this may not immediately create the entity or relationship
   */
-saveTab(String ref, String id, List geometry, List attributes, String callback){
-  return linker.saveTab(ref, id, geometry, attributes, callback);
-}
-
-/**
-  * Return the last saved record id.
-  *
-  * @return id the id of the last saved record using saveTabGroup or saveTab
-  */
-getLastSavedRecordId() {
-	return _saved_record_id;
+saveTab(String ref, String id, List geometry, List attributes, SaveCallback callback){
+  linker.saveTab(ref, id, geometry, attributes, callback);
 }
 
 /**
@@ -356,10 +372,22 @@ setUser(User user){
   * @param entityType the type of the entity to be saved, must be one specified in the data schema
   * @param geometry the list of geometries to be associated with the entity
   * @param attributes the list of attributes to be associated with the entity
-  * @return the id of the saved entity
   */
 saveArchEnt(String entityId, String entityType, List geometry, List attributes) {
-	return linker.saveArchEnt(entityId, entityType, geometry, attributes);
+	linker.saveArchEnt(entityId, entityType, geometry, attributes, null);
+}
+
+/**
+  * Insert a new or update an existing archaeological entity record and return the id of the saved record.
+  *
+  * @param entityId the id of the entity to be saved, set to null to save a new record
+  * @param entityType the type of the entity to be saved, must be one specified in the data schema
+  * @param geometry the list of geometries to be associated with the entity
+  * @param attributes the list of attributes to be associated with the entity
+  * @param callback callback to execute when saving is finished
+  */
+saveArchEnt(String entityId, String entityType, List geometry, List attributes, SaveCallback callback) {
+  linker.saveArchEnt(entityId, entityType, geometry, attributes, callback);
 }
 
 /**
@@ -369,30 +397,60 @@ saveArchEnt(String entityId, String entityType, List geometry, List attributes) 
   * @param relationshipType the type of the relationship to be saved, must be one specified in the data schema
   * @param geometry the list of geometries to be associated with the relationship
   * @param attributes the list of attributes to be associated with the relationship
-  * @return the id of the saved relationship
   */
 saveRel(String relationshipId, String relationshipType, List geometry, List attributes) {
-	return linker.saveRel(relationshipId, relationshipType, geometry, attributes);
+	linker.saveRel(relationshipId, relationshipType, geometry, attributes, null);
+}
+
+/**
+  * Insert a new or update an existing relationship record and return the id of the saved record.
+  *
+  * @param relationshipId the id of the relationship to be saved, set to null to save a new record
+  * @param relationshipType the type of the relationship to be saved, must be one specified in the data schema
+  * @param geometry the list of geometries to be associated with the relationship
+  * @param attributes the list of attributes to be associated with the relationship
+  * @param callback callback to execute when saving is finished
+  */
+saveRel(String relationshipId, String relationshipType, List geometry, List attributes, SaveCallback callback) {
+  linker.saveRel(relationshipId, relationshipType, geometry, attributes, callback);
 }
 
 /**
   * Deletes the specified archaeological entity.
   *
   * @param entityId the id of the entity to be deleted
-  * @return boolean value true if deleted, false if not
   */
 deleteArchEnt(String entityId){
-	return linker.deleteArchEnt(entityId);
+	linker.deleteArchEnt(entityId, null);
+}
+
+/**
+  * Deletes the specified archaeological entity.
+  *
+  * @param entityId the id of the entity to be deleted
+  * @param callback callback to execute when deletion is finished
+  */
+deleteArchEnt(String entityId, DeleteCallback callback){
+  linker.deleteArchEnt(entityId, callback);
 }
 
 /**
   * Deletes the specified relationship.
   *
   * @param relationshipId the id of the relationship to be deleted
-  * @return boolean value true if deleted, false if not
   */
 deleteRel(String relationshipId){
-	return linker.deleteRel(relationshipId);
+	linker.deleteRel(relationshipId, null);
+}
+
+/**
+  * Deletes the specified relationship.
+  *
+  * @param relationshipId the id of the relationship to be deleted
+  * @param callback callback to execute when deletion is finished
+  */
+deleteRel(String relationshipId, DeleteCallback callback){
+  linker.deleteRel(relationshipId, callback);
 }
 
 /**
@@ -403,7 +461,19 @@ deleteRel(String relationshipId){
   * @param verb the relation verb that is defined in the data schema for the specified relationship
   */
 addReln(String entityId, String relationshipId, String verb) {
-	linker.addReln(entityId, relationshipId, verb);
+	linker.addReln(entityId, relationshipId, verb, null);
+}
+
+/**
+  * Add an existing archaeological entity to an existing relationship and the verb of the relation.
+  *
+  * @param entityId the id of the entity
+  * @param relationshipId the id of the relationship
+  * @param verb the relation verb that is defined in the data schema for the specified relationship
+  * @param callback callback to execute when saving is finished
+  */
+addReln(String entityId, String relationshipId, String verb, SaveCallback callback) {
+  linker.addReln(entityId, relationshipId, verb, callback);
 }
 
 /**
@@ -707,60 +777,57 @@ populateAudioList(String ref, Collection values){
   * Fetch the archaeological entity record with the specified id.
   *
   * @param id the id of the entity
-  * @return an entity or null
+  * @param callback callback to execute when fetching is finished
   */
-Object fetchArchEnt(String id){
-    return linker.fetchArchEnt(id);
+fetchArchEnt(String id, FetchCallback callback){
+  linker.fetchArchEnt(id, callback);
 }
 
 /**
   * Fetch the relationship record with the specified id.
   *
   * @param id the id of the relationship
-  * @return a relationship or null
+  * @param callback callback to execute when fetching is finished
   */
-Object fetchRel(String id){
-    return linker.fetchRel(id);
+fetchRel(String id, FetchCallback callback){
+  linker.fetchRel(id, callback);
 }
 
 /**
   * Fetch the result of a query. This will return only a single row.
   *
   * @param query the query to be run against the database
-  * @return Collection of String
+  * @param callback callback to execute when fetching is finished
   */
-Object fetchOne(String query){
-    return linker.fetchOne(query);
+fetchOne(String query, FetchCallback callback){
+  linker.fetchOne(query, callback);
 }
 
 /**
   * Fetch the results of a query. This will return a collection of rows.
   *
   * @param query the query to be run against the database
-  * @return Collection of Collection of String
   */
-Collection fetchAll(String query){
-    return linker.fetchAll(query);
+fetchAll(String query, FetchCallback callback){
+  linker.fetchAll(query, callback);
 }
 
 /**
   * Fetch a list of entities. Each row in the collection is a list with the first item being the id of the entity and the second the identifier of the entity.
   *
   * @param type the type of arch entity to filter
-  * @return Collection of Collection of String
   */
-Collection fetchEntityList(String type){
-    return linker.fetchEntityList(type);
+fetchEntityList(String type, FetchCallback callback){
+  linker.fetchEntityList(type, callback);
 }
 
 /**
   * Fetch a list of relationships. Each row in the collection is a list with the first item being the id of the relationship and the second the identifier of the relationship.
   *
   * @param type the type of relationship to filter
-  * @return Collection of Collection of String
   */
-Collection fetchRelationshipList(String type){
-    return linker.fetchRelationshipList(type);
+fetchRelationshipList(String type, FetchCallback callback){
+  linker.fetchRelationshipList(type, callback);
 }
 
 //========= Navigation Functionality ==========

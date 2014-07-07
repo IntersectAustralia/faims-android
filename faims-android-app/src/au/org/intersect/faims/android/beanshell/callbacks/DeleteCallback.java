@@ -1,4 +1,4 @@
-package au.org.intersect.faims.android.beanshell;
+package au.org.intersect.faims.android.beanshell.callbacks;
 
 public interface DeleteCallback extends IBeanShellCallback {
 

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.AsyncTask;
+import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.IBeanShellCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.EntityAttribute;
 import au.org.intersect.faims.android.data.Relationship;
@@ -45,8 +49,12 @@ public class DatabaseHelper {
 			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(
 					linker.getModule().getSrid(), GeometryUtil.EPSG4326, geometry);
 			
-			databaseManager.entityRecord().saveArchEnt(
+			final String uuid = databaseManager.entityRecord().saveArchEnt(
 					entityId, entityType, WKTUtil.collectionToWKT(geomList), attributes, newEntity);
+			
+			if (uuid == null) {
+				throw new Exception();
+			}
 			
 			if (callback != null) {
 				linker.getActivity().runOnUiThread(new Runnable() {
@@ -54,7 +62,7 @@ public class DatabaseHelper {
 					@Override
 					public void run() {
 						try {
-							callback.onSave(entityId, newEntity);
+							callback.onSave(uuid, newEntity);
 						} catch (Exception e) {
 							linker.reportError("Error found when executing save arch enitty onsave callback", e);
 						}
@@ -93,8 +101,12 @@ public class DatabaseHelper {
 			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(
 					linker.getModule().getSrid(), GeometryUtil.EPSG4326, geometry);
 			
-			databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
+			final String uuid = databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
 					WKTUtil.collectionToWKT(geomList), attributes, newRelationship);
+			
+			if (uuid == null) {
+				throw new Exception();
+			}
 			
 			if (callback != null) {
 				linker.getActivity().runOnUiThread(new Runnable() {
@@ -102,7 +114,7 @@ public class DatabaseHelper {
 					@Override
 					public void run() {
 						try {
-							callback.onSave(relationshipId, newRelationship);
+							callback.onSave(uuid, newRelationship);
 						} catch (Exception e) {
 							linker.reportError("Error found when executing save relationship onsave callback", e);
 						}
@@ -198,7 +210,10 @@ public class DatabaseHelper {
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					linker.getDatabaseManager().sharedRecord().addReln(entityId, relationshpId, verb);
+					if (linker.getDatabaseManager().sharedRecord().addReln(entityId, relationshpId, verb) == false) {
+						throw new Exception();
+					}
+					
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
 
@@ -232,7 +247,9 @@ public class DatabaseHelper {
 					DatabaseManager databaseManager = linker.getDatabaseManager();
 					
 					final ArchEntity entity = databaseManager.entityRecord().fetchArchEnt(entityId);
-					if (entity != null) {
+					if (entity == null) {
+						throw new Exception();
+					} else {
 						List<Geometry> geomList = entity.getGeometryList();
 						if (geomList != null) {
 							entity.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(
@@ -260,7 +277,9 @@ public class DatabaseHelper {
 					DatabaseManager databaseManager = linker.getDatabaseManager();
 					
 					final Relationship relationship = databaseManager.relationshipRecord().fetchRel(relationshipId);
-					if (relationship != null) {
+					if (relationship == null) {
+						throw new Exception();
+					} else {
 						List<Geometry> geomList = relationship.getGeometryList();
 						if (geomList != null) {
 							relationship.setGeometryList(databaseManager.spatialRecord().convertGeometryFromProjToProj(

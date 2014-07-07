@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
-import au.org.intersect.faims.android.beanshell.SaveCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.log.FLog;
