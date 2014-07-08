@@ -202,6 +202,7 @@ onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity()");
+onEvent("tabgroup1/tab1/showEntityId", "click", "setFieldValue(\"tabgroup1/tab1/entityID\", entityId)");
 
 onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
 onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");
