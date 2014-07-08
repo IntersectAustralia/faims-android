@@ -3205,16 +3205,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
-		if (persistedObjectName != null) {
-			Object object = savedInstanceState
-					.getSerializable(persistedObjectName);
-			try {
-				interpreter.set(persistedObjectName, object);
-			} catch (EvalError e) {
-				FLog.e("error restoring bean shell data", e);
-			}
-		}
-		
 		// Beanshell variables
 		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable(TAG + "beanshellVariables");
 		
@@ -3233,6 +3223,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		scanCallBack = savedInstanceState.getString(TAG + "scanCallBack");
 		hardwareBufferContents = savedInstanceState.getString(TAG + "hardwareBufferContents");
 		hardwareReadingCallBack = savedInstanceState.getString(TAG + "hardwareReadingCallBack");
+		
+		if (persistedObjectName != null) {
+			Object object = savedInstanceState
+					.getSerializable(persistedObjectName);
+			try {
+				interpreter.set(persistedObjectName, object);
+			} catch (EvalError e) {
+				FLog.e("error restoring bean shell data", e);
+			}
+		}
 	}
 	
 	public void restoreTempBundle() throws EvalError {
