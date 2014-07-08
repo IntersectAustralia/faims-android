@@ -141,6 +141,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private Runnable trackingTask;
 	private MediaRecorder recorder;
 	
+	private static final String TAG = "beanshell_linker:";
+	
 	private HashMap<String, Object> beanshellVariables;
 	
 	private String persistedObjectName;
@@ -3171,7 +3173,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 		}
 		
-		// Save beanshell variables
+		// Beanshell variables
 		HashMap<String, Object> beanshellVars = new HashMap<String, Object>();
 		String[] variables = (String[]) interpreter.eval("this.variables");
 		
@@ -3181,7 +3183,23 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 		}
 		
-		savedInstanceState.putSerializable("beanshell:variables", beanshellVars);
+		savedInstanceState.putSerializable(TAG + "beanshellVariables", beanshellVars);
+		
+		// Beanshell linker variables
+		savedInstanceState.putString(TAG + "persistedObjectName", persistedObjectName);
+		savedInstanceState.putString(TAG + "lastFileBrowserCallback", lastFileBrowserCallback);
+		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
+		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
+		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
+		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
+		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);
+		savedInstanceState.putString(TAG + "cameraVideoPath", cameraVideoPath);
+		savedInstanceState.putString(TAG + "audioFileNamePath", audioFileNamePath);
+		savedInstanceState.putString(TAG + "audioCallBack", audioCallBack);
+		savedInstanceState.putString(TAG + "scanContents", scanContents);
+		savedInstanceState.putString(TAG + "scanCallBack", scanCallBack);
+		savedInstanceState.putString(TAG + "hardwareBufferContents", hardwareBufferContents);
+		savedInstanceState.putString(TAG + "hardwareReadingCallBack", hardwareReadingCallBack);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -3197,7 +3215,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 		}
 		
-		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable("beanshell:variables");
+		// Beanshell variables
+		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable(TAG + "beanshellVariables");
+		
+		// Beanshell linker variables
+		persistedObjectName = savedInstanceState.getString(TAG + "persistedObjectName");
+		lastFileBrowserCallback = savedInstanceState.getString(TAG + "lastFileBrowserCallback");
+		prevLong = savedInstanceState.getDouble(TAG + "prevLong");
+		prevLat = savedInstanceState.getDouble(TAG + "prevLat");
+		cameraPicturepath = savedInstanceState.getString(TAG + "cameraPicturepath");
+		cameraCallBack = savedInstanceState.getString(TAG + "cameraCallBack");
+		videoCallBack = savedInstanceState.getString(TAG + "videoCallBack");
+		cameraVideoPath = savedInstanceState.getString(TAG + "cameraVideoPath");
+		audioFileNamePath = savedInstanceState.getString(TAG + "audioFileNamePath");
+		audioCallBack = savedInstanceState.getString(TAG + "audioCallBack");
+		scanContents = savedInstanceState.getString(TAG + "scanContents");
+		scanCallBack = savedInstanceState.getString(TAG + "scanCallBack");
+		hardwareBufferContents = savedInstanceState.getString(TAG + "hardwareBufferContents");
+		hardwareReadingCallBack = savedInstanceState.getString(TAG + "hardwareReadingCallBack");
 	}
 	
 	public void restoreTempBundle() throws EvalError {
