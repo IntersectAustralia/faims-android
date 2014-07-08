@@ -1051,12 +1051,16 @@ public class CustomMapView extends MapView {
 		updateRenderer();
 	}
 
-	public void clearGeometryList(List<? extends Geometry> geomList)
+	public void clearGeometryList(List<?> geomList)
 			throws Exception {
 		for (Object geom : geomList) {
-			Geometry geometry = (Geometry) geom;
-			GeometryData data = (GeometryData) geometry.userData;
-			clearGeometry(data.geomId);
+			if (geom instanceof Geometry) {
+				clearGeometry((Geometry) geom);
+			} else if (geom instanceof Integer) {
+				clearGeometry((Integer) geom);
+			} else {
+				FLog.w("cannot clear unknown geometry");
+			}
 		}
 	}
 
