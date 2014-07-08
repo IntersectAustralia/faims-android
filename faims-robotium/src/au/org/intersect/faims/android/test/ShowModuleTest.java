@@ -5,7 +5,9 @@ import android.content.res.AssetManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.CheckedTextView;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.view.CustomButton;
 import au.org.intersect.faims.android.ui.view.CustomCheckBox;
+import au.org.intersect.faims.android.ui.view.CustomEditText;
 import au.org.intersect.faims.android.ui.view.CustomImageView;
 import au.org.intersect.faims.android.ui.view.CustomRadioButton;
 import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
@@ -112,6 +114,22 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnView(solo.getView(CustomRadioButton.class, 2));
 		
 		assertTrue(solo.searchText("Radiogroup select event"));
+	}
+	
+	public void testRecoverBeanshellLogicState() throws Exception {
+		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
+		solo.waitForDialogToClose();
+		
+		solo.clickOnText("Faims Admin");
+		solo.clickOnText("Create Entity");
+		solo.scrollToBottom();
+		solo.clickOnView(solo.getView(CustomButton.class, 6));
+		assertTrue(solo.searchText("added new record"));
+		
+		TestModuleUtil.recreateActivity(getInstrumentation(), getActivity());
+		solo.clickOnText("Show Entity ID");
+		
+		assertFalse(solo.getView(CustomEditText.class, 0).getText().toString().isEmpty());
 	}
 	  
 	@Override

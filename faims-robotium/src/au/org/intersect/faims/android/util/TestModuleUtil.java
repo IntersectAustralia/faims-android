@@ -10,6 +10,8 @@ import java.io.OutputStream;
 
 import org.apache.commons.compress.utils.IOUtils;
 
+import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.res.AssetManager;
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
@@ -64,6 +66,18 @@ public class TestModuleUtil {
 			}
 		}
 		
+	}
+	
+	public static void recreateActivity(Instrumentation instrumentation, final Activity activity) {
+		instrumentation.runOnMainSync(new Runnable() {
+			
+			@Override
+			public void run()
+			{
+				activity.recreate();
+			}
+			
+		});
 	}
 	
 	public static String getNewModuleName(String baseName) {

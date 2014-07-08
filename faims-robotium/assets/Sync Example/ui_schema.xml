@@ -55,6 +55,8 @@
                       <clear></clear>
                     </child2>
                   </container2>
+                  <showEntityId></showEntityId>
+                  <entityID></entityID>
                   <delete></delete>
                   <close></close>
               </tab1>
@@ -273,6 +275,12 @@
 	            </trigger>
 	          </group>
 	        </group>
+          <trigger ref="showEntityId">
+            <label>Show Entity ID</label>
+          </trigger>
+          <input ref="entityID" faims_attribute_type="freetext">
+              <label>Entity ID:</label>
+          </input>
 	        <trigger ref="delete">
 	          <label>Delete</label>
 	        </trigger>

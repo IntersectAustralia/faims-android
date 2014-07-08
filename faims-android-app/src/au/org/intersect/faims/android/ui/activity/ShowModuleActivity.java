@@ -74,6 +74,7 @@ import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.InputBuffer;
 import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
 import au.org.intersect.faims.android.util.ModuleUtil;
+import bsh.EvalError;
 
 import com.google.inject.Inject;
 
@@ -284,6 +285,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			renderUI();
 			setupBeanshell();
 			restoreUI();
+			restoreBeanshellLogic();
 		} catch (Exception e) {
 			FLog.e("error loading activity in foreground", e);
 
@@ -366,6 +368,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	private void restoreUI() {
 		uiRenderer.restoreUI();
+	}
+	
+	private void restoreBeanshellLogic() throws EvalError {
+		beanShellLinker.restoreTempBundle();
 	}
 
 	@Override
