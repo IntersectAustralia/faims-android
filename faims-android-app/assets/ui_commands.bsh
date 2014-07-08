@@ -979,7 +979,7 @@ stopTrackingGPS(){
 	linker.stopTrackingGPS();
 }
 
-//========= Bluetooth Functionality ====
+//========= Bluetooth Functionality ==========
 /**
   * Create bluetooth connection to read input and write output.
   *
@@ -2114,6 +2114,8 @@ attachFileTo(String ref) {
 	showFileBrowser("_setFileTo(\""+ref+"\")");
 }
 
+/**
+  */
 _setFileTo(String ref) {
 	String filePath = getLastSelectedFilepath();
 	List selectedFiles = null;
@@ -2140,6 +2142,8 @@ attachPictureTo(String ref) {
 	openCamera("_setPictureTo(\""+ref+"\")");
 }
 
+/**
+  */
 _setPictureTo(String ref) {
 	String filePath = getLastPictureFilePath();
 	List selectedFiles = null;
@@ -2166,6 +2170,8 @@ attachVideoTo(String ref) {
 	openVideo("_setVideoTo(\""+ref+"\")");
 }
 
+/**
+  */
 _setVideoTo(String ref) {
 	String filePath = getLastVideoFilePath();
 	List selectedFiles = null;
@@ -2192,6 +2198,8 @@ attachAudioTo(String ref) {
 	recordAudio("_setAudioTo(\""+ref+"\")");
 }
 
+/**
+  */
 _setAudioTo(String ref) {
 	String filePath = getLastAudioFilePath();
 	List selectedFiles = null;
@@ -2209,6 +2217,8 @@ _setAudioTo(String ref) {
     setFieldValue(ref, _convertListToPairs(selectedFiles));
 }
 
+/**
+  */
 _convertPairsToList(pairs) {
 	if (pairs == null) return new ArrayList();
 	ArrayList list = new ArrayList();
@@ -2218,6 +2228,8 @@ _convertPairsToList(pairs) {
 	return list;
 }
 
+/**
+  */
 _convertListToPairs(list) {
 	if (list == null) return new ArrayList();
 	ArrayList pairs = new ArrayList();
