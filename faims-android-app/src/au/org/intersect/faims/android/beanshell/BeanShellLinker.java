@@ -919,7 +919,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						toast.cancel();
 					}
 					toast = Toast.makeText(activityRef.get().getBaseContext(),
-							message, duration);
+							arch16n.substituteValue(message), duration);
 					toast.show();
 				} catch (Exception e) {
 					FLog.e("error showing toast", e);
@@ -935,8 +935,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 	
-			builder.setTitle(title);
-			builder.setMessage(message);
+			builder.setTitle(arch16n.substituteValue(title));
+			builder.setMessage(arch16n.substituteValue(message));
 			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					// User clicked OK button
@@ -965,8 +965,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 	
-			builder.setTitle(title);
-			builder.setMessage(message);
+			builder.setTitle(arch16n.substituteValue(title));
+			builder.setMessage(arch16n.substituteValue(message));
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					// User clicked OK button
@@ -984,7 +984,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public Dialog showBusy(final String title, final String message) {
 		try {
-			BusyDialog dialog = new BusyDialog(this.activityRef.get(), title, message, null);
+			BusyDialog dialog = new BusyDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null);
 			dialog.show();
 			return dialog;
 		} catch (Exception e) {
