@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import au.org.intersect.faims.android.log.FLog;
 
@@ -54,13 +56,18 @@ public class Arch16n {
 
 	public String substituteValue(String value){
 		if (value == null) return value;
-		if(value.contains("{") && value.contains("}")){
-			if(value.indexOf("{") < value.indexOf("}")){
-				String toBeSubbed = value.substring(value.indexOf("{"), value.indexOf("}")+1);
-				String subs = toBeSubbed.substring(1, toBeSubbed.length()-1);
-				return (getProperties(subs) != null) ? value.replace(toBeSubbed, getProperties(subs)) : value;
-			}
-		}
-		return value;
+		
+		Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+	    Matcher matcher = pattern.matcher(value);
+	    StringBuffer buffer = new StringBuffer();
+
+	    while (matcher.find()) {
+	    	String replacement = getProperties(matcher.group(1));
+	    	if (replacement != null) {
+	    		matcher.appendReplacement(buffer, Matcher.quoteReplacement(replacement));
+	    	}
+	    }
+	    matcher.appendTail(buffer);
+	    return buffer.toString();
 	}
 }
