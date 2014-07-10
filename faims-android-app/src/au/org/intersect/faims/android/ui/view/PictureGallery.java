@@ -91,6 +91,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
+	    galleriesLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		
 		reset();
@@ -398,7 +400,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				.getName() : new File(path).getName();
 		textView.setText(name);
 		textView.setGravity(Gravity.CENTER_HORIZONTAL);
-		textView.setTextSize(20);
+		textView.setTextSize(15);
+		textView.setWidth(GALLERY_SIZE);
+		textView.setPadding(10, 10, 10, 10);
 		galleryLayout.addView(textView);
 		galleryLayout.addView(gallery);
 		
