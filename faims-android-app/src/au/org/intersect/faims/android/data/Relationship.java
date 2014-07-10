@@ -1,11 +1,14 @@
 package au.org.intersect.faims.android.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 import com.nutiteq.geometry.Geometry;
 
-public class Relationship {
+public class Relationship implements Serializable {
+
+	private static final long serialVersionUID = 4505186290558078330L;
 
 	private String type;
 	

@@ -1,6 +1,10 @@
 package au.org.intersect.faims.android.data;
 
-public abstract class Attribute {
+import java.io.Serializable;
+
+public abstract class Attribute implements Serializable {
+	
+	private static final long serialVersionUID = 2835671320333437449L;
 	
 	public static final String FREETEXT = "freetext";
 	public static final String MEASURE = "measure";

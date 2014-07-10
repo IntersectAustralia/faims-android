@@ -1,12 +1,15 @@
 package au.org.intersect.faims.android.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 
 import com.nutiteq.geometry.Geometry;
 
-public class ArchEntity {
+public class ArchEntity implements Serializable {
+
+	private static final long serialVersionUID = 1815713472141263495L;
 
 	private String type;
 	

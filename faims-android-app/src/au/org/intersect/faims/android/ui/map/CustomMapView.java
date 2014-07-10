@@ -1202,7 +1202,20 @@ public class CustomMapView extends MapView {
 		this.mapListener = customMapListener;
 	}
 
-	public void setSelectedLayer(Layer layer) {
+	public void setSelectedLayer(int layerId) throws Exception {
+		Layer layer = getLayer(layerId);
+		setSelectedLayer(layer);
+	}
+	
+	public void setSelectedLayer(String layerName) throws Exception {
+		Layer layer = getLayer(layerName);
+		setSelectedLayer(layer);
+	}
+	
+	public void setSelectedLayer(Layer layer) throws Exception {
+		if (layer == null) {
+			throw new MapException("Layer does not exist");
+		}
 		selectedLayer = layer;
 	}
 

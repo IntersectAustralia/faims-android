@@ -247,7 +247,11 @@ public class LayerManagerDialog extends AlertDialog {
 				List<Layer> layers = mapView.getAllLayers();
 				int last = layers.size() - 1;
 				final Layer layer = layers.get(last - position);
-				mapView.setSelectedLayer(layer);
+				try	{
+					mapView.setSelectedLayer(layer);
+				} catch (Exception e) {
+					FLog.e("error setting selected layer of map view", e);
+				}
 				mapView.updateLayers();
 				((LayersAdapter)listView.getAdapter()).getView(position, view, listView);
 			}
