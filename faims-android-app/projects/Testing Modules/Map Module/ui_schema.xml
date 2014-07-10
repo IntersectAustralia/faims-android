@@ -20,6 +20,8 @@
               <map/>
               <clear/>
               <create/>
+              <data/>
+              <entity/>
             </map>
             <gps>
               <connectexternal/>
@@ -31,7 +33,6 @@
               <stopTrackLog/>
             </gps>
           </main>
-
           <Test>
             <Test>
               <ID/>
@@ -40,7 +41,6 @@
               <Update/>
             </Test>
           </Test>
-
         </faims>
       </instance>
     </model>
@@ -72,6 +72,12 @@
         </trigger>
         <trigger ref="create">
             <label>Create</label>
+        </trigger>
+        <trigger ref="data">
+            <label>Change to dataEntry layer</label>
+        </trigger>
+        <trigger ref="entity">
+            <label>Change to entity layer</label>
         </trigger>
       </group>
 

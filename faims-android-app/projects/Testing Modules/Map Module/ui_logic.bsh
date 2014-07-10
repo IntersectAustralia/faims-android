@@ -46,6 +46,8 @@ initMap();
 
 onEvent("main/map/clear", "click", "onClearMap()");
 onEvent("main/map/create", "click", "onCreateMap()");
+onEvent("main/map/data", "click", "setSelectedLayer(\"main/map/map\", DATA_ENTRY_LAYER_ID)");
+onEvent("main/map/entity", "click", "setSelectedLayer(\"main/map/map\", \"Entity Layer\")");
 
 onClearMap() {
 	clearGeometryList("main/map/map", getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID));
@@ -74,7 +76,6 @@ onCreateMap() {
 String test_id = null;
 
 newTest(){	
-
 	newTabGroup("Test");
 	point = getCreatedGeometry().get(0);
 	p = point.getMapPos();
@@ -85,6 +86,7 @@ newTest(){
 onEvent("Test/Test/Update", "delayclick", "saveTest()");
 
 saveTest(){
+	test_id = null;
 	saveTabGroup("Test", test_id, getCreatedGeometry(), null, new SaveCallback() {
 		onSave(uuid, newRecord) {
 			test_id = uuid;
