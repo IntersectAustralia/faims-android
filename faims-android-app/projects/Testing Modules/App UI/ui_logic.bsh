@@ -11,10 +11,30 @@ getAttributeName(String vocab) {
     return values.get(0);
 }
 
+
+
 onEvent("App/LogicTriggered/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
-onEvent("App/LogicTriggered/ShowToast", "click", "showToast(\"Would you like some butter?\")");
+onEvent("App/LogicTriggered/ShowToast", "click", "onClickButton()");
 onEvent("App/LogicTriggered/ShowHidden", "click", "showTab(\"App/Hidden\")");
 onEvent("App/Hidden/HideTab", "click", "cancelTab(\"App/Hidden\", false);showTab(\"App/Inputs\")");
+
+String printOut1 = "This is ONE";
+String printOut2 = "This is TWO";
+int i = 0;
+
+onClickButton() {
+    i = i % 3;
+
+    if(i == 0){
+        showToast(printOut1);
+    } else if (i == 1){
+        showToast(printOut2);
+    } else {
+        showToast("{printOut3}");
+    }
+
+    i++; 
+}
 
 loadAttributes(){
     setFieldValue("App/Inputs/ReadOnly", "This is Read Only.");

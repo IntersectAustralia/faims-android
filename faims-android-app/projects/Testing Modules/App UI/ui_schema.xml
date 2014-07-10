@@ -255,7 +255,7 @@
           <label>Show Warning</label>
         </trigger>
         <trigger ref="ShowToast">
-          <label>Show Toast</label>
+          <label>{Toast1}_{Toast2}</label>
         </trigger>
         <trigger ref="ShowHidden">
           <label>Show Hidden Tab</label>
