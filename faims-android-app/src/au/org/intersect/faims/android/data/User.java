@@ -1,7 +1,11 @@
 package au.org.intersect.faims.android.data;
 
-public class User {
+import java.io.Serializable;
 
+public class User implements Serializable {
+
+	private static final long serialVersionUID = 1304366100190766914L;
+	
 	private String userId;
 	private String firstName;
 	private String lastName;

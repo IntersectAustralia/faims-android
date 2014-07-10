@@ -3215,12 +3215,17 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 		
 		// Beanshell variables
-		HashMap<String, Object> beanshellVars = new HashMap<String, Object>();
+		HashMap<String, Serializable> beanshellVars = new HashMap<String, Serializable>();
 		String[] variables = (String[]) interpreter.eval("this.variables");
 		
 		for (String var: variables) {
 			if (interpreter.get(var) != BeanShellLinker.this) {
-				beanshellVars.put(var, interpreter.get(var));
+				Object obj =  interpreter.get(var);
+				if(obj instanceof Serializable) {					
+					beanshellVars.put(var, (Serializable) obj);
+				} else {
+					FLog.d("Cannot serialize " + obj);
+				}
 			}
 		}
 		

@@ -3,6 +3,8 @@ package au.org.intersect.faims.android.data;
 
 public class RelationshipAttribute extends Attribute {
 	
+	private static final long serialVersionUID = 3049444829813552636L;
+
 	public RelationshipAttribute() {
 		
 	}

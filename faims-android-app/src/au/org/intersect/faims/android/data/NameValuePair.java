@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.data;
 
 import java.io.Serializable;
 
-public class NameValuePair implements Serializable{
+public class NameValuePair implements Serializable {
 	
 	private static final long serialVersionUID = -3844093092418319974L;
 
