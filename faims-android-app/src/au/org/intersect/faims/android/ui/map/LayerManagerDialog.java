@@ -810,7 +810,7 @@ public class LayerManagerDialog extends AlertDialog {
 		AlertDialog.Builder builder = new AlertDialog.Builder(LayerManagerDialog.this.getContext());
 		
 		builder.setTitle("Layer Manager");
-		builder.setMessage("Add spatial layer:");
+		builder.setMessage("Add vector layer:");
 		
 		ScrollView scrollView = new ScrollView(this.getContext());
 		LinearLayout layout = new LinearLayout(this.getContext());
@@ -820,13 +820,13 @@ public class LayerManagerDialog extends AlertDialog {
 		builder.setView(scrollView);
 		
 		TextView textView = new TextView(this.getContext());
-		textView.setText("Spatial layer name:");
+		textView.setText("Vector layer name:");
 		layout.addView(textView);
 		final EditText editText = new EditText(LayerManagerDialog.this.getContext());
 		layout.addView(editText);
 		
 		TextView tableTextView = new TextView(this.getContext());
-		tableTextView.setText("Spatial table name:");
+		tableTextView.setText("Vector table name:");
 		layout.addView(tableTextView);
 		tableNameSpinner = new Spinner(this.getContext());
 		tableNameSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -853,14 +853,14 @@ public class LayerManagerDialog extends AlertDialog {
 		layout.addView(tableNameSpinner);
 		
 		TextView idTextView = new TextView(this.getContext());
-		idTextView.setText("Spatial id column:");
+		idTextView.setText("Vector id column:");
 		layout.addView(idTextView);
 		idColumnSpinner = new Spinner(this.getContext());
 		
 		layout.addView(idColumnSpinner);
 		
 		TextView labelTextView = new TextView(this.getContext());
-		labelTextView.setText("Spatial label column:");
+		labelTextView.setText("Vector label column:");
 		layout.addView(labelTextView);
 		labelColumnSpinner = new Spinner(this.getContext());
 		
