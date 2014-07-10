@@ -247,12 +247,23 @@ deleteEntity(tabgroup){
   cancelTabGroup(tabgroup, false);
 }
 
+onClickScanner() {
+	scanCode("onCodeScan()");
+}
+
+onCodeScan() {
+	code = getLastScanContents();
+	showToast(code);
+	setFieldValue("tabgroup1/tab1/scvalue", code);
+}
+
 onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");	
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
 
 onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
 onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");

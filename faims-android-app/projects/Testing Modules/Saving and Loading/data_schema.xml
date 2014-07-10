@@ -261,6 +261,10 @@
     <property type="string" name="description">
         <bundle>DOI</bundle>
     </property>
+     <property type="string" name="scvalue">
+      <description>This is a scan code value.</description>
+      <bundle>DOI</bundle>
+    </property>
     <property type="string" name="gallery">
       <description>This is a picture gallery</description>
       <bundle>DOI</bundle>
