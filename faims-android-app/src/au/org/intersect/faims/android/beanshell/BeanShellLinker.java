@@ -1937,6 +1937,46 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 		return 0;
 	}
+	
+	public void setSelectedLayer(String ref, int layerId) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+
+				mapView.setSelectedLayer(layerId);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (MapException e) {
+			FLog.e("error setting selected layer", e);
+			showWarning("Logic Error", e.getMessage());
+		} catch (Exception e) {
+			FLog.e("error setting selected layer " + layerId, e);
+			showWarning("Logic Error", "Error setting selected layer " + layerId);
+		}
+	}
+	
+	public void setSelectedLayer(String ref, String layerName) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				CustomMapView mapView = (CustomMapView) obj;
+
+				mapView.setSelectedLayer(layerName);
+			} else {
+				FLog.w("cannot find map view " + ref);
+				showWarning("Logic Error", "Error cannot find map view " + ref);
+			}
+		} catch (MapException e) {
+			FLog.e("error setting selected layer", e);
+			showWarning("Logic Error", e.getMessage());
+		} catch (Exception e) {
+			FLog.e("error setting selected layer " + layerName, e);
+			showWarning("Logic Error", "Error setting selected layer " + layerName);
+		}
+	}
 
 	public void removeLayer(String ref, int layerId) {
 		try {

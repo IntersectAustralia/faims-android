@@ -1192,6 +1192,26 @@ setMapTilt(String ref, float tilt) {
 }
 
 /**
+  * Sets the currently selected layer for the map view with the given reference.
+  *
+  * @param ref the reference to the map view
+  * @param layerId the layerid to be set as selected, if not found, a logic error will appear.
+  */
+setSelectedLayer(String ref, int layerId) {
+  linker.setSelectedLayer(ref, layerId);
+}
+
+/**
+  * Sets the currently selected layer for the map view with the given reference.
+  *
+  * @param ref the reference to the map view
+  * @param layerName the layer name to be set as selected, if not found, a logic error will appear.
+  */
+setSelectedLayer(String ref, String layerName) {
+  linker.setSelectedLayer(ref, layerName);
+}
+
+/**
   * Remove a layer from the map view with the given reference.
   *
   * @param ref the reference to the map view
