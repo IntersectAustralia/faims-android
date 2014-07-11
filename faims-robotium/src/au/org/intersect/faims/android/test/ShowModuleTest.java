@@ -131,6 +131,22 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		
 		assertFalse(solo.getView(CustomEditText.class, 0).getText().toString().isEmpty());
 	}
+	
+	public void testShowTextAlert() throws Exception {
+		solo.assertCurrentActivity("wrong activity", ShowModuleActivity.class);
+		solo.waitForDialogToClose();
+		
+		solo.clickOnText("Faims Admin");
+		solo.clickOnText("Create Entity");
+		solo.clickOnText("Generate Text Alert");
+		assertTrue(solo.searchText("Alert"));
+		assertTrue(solo.searchText("Message here:"));
+		
+		solo.enterText(solo.getView(CustomEditText.class, 0), "Input to display");
+		solo.clickOnText("OK");
+		
+		assertTrue(solo.searchText("Input to display"));
+	}
 	  
 	@Override
 	public void tearDown() throws Exception {

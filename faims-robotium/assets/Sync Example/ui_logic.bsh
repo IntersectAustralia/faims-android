@@ -198,6 +198,7 @@ deleteEntity(){
   cancelTabGroup("tabgroup1", false);
 }
 
+onEvent("tabgroup1/tab1/textalert", "click", "showTextAlert(\"Alert\", \"Message here:\", \"showInput()\", \"showToast('Cancel')\")");
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
@@ -211,6 +212,11 @@ onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/a
 onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
 
 onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+showInput() {
+	input = getLastTextAlertInput();
+	showToast(input);
+}
 
 // RELATIONSHIP
 
