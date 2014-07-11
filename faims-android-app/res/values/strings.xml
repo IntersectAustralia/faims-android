@@ -9,6 +9,7 @@
     <string name="choice_positive_button">YES</string>
     <string name="choice_negative_button">NO</string>
     <string name="confirm_dialog_button">OK</string>
+    <string name="cancel_dialog_button">Cancel</string>
     
     <string name="locate_server_title">Locating Server</string>
     <string name="locate_server_message">looking for server on network..</string>
