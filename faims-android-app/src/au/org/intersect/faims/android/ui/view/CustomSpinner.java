@@ -1,10 +1,12 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
 import android.widget.Spinner;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -28,7 +30,6 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	protected boolean annotationEnabled;
 	protected boolean certaintyEnabled;
 	protected FormAttribute attribute;
-	protected boolean ignoreSelectOnce;
 	
 	public CustomSpinner(Context context) {
 		super(context);
@@ -43,14 +44,6 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		reset();
 	}
 	
-	public boolean ignoresSelectEvents() {
-		return ignoreSelectOnce;
-	}
-	
-	public void setIgnoreSelectEvents(boolean value) {
-		ignoreSelectOnce = value;
-	}
-
 	public String getAttributeName() {
 		return attribute.name;
 	}
@@ -174,9 +167,14 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	}
 	
 	protected void notifySave() {
-		if (hasChanges()) {
+		if (getAttributeName() != null && hasChanges()) {
 			autoSaveManager.save();
 		}
 	}
 	
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValue(this, attributes);
+	}
 }

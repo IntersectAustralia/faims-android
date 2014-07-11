@@ -236,6 +236,8 @@ newEntity(tabgroup) {
 	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
 
 	entityId = null;
+
+	keepTabGroupChanges(tabgroup);
 }
 
 deleteEntity(tabgroup){
@@ -440,6 +442,8 @@ newRelationship(tabgroup) {
 	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
 
 	relationshipId = null;
+
+	keepTabGroupChanges(tabgroup);
 }
 
 deleteRelationship(tabgroup){

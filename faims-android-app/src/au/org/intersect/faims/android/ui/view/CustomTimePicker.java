@@ -1,10 +1,12 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
@@ -168,9 +170,14 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	}
 	
 	protected void notifySave() {
-		if (hasChanges()) {
+		if (getAttributeName() != null && hasChanges()) {
 			autoSaveManager.save();
 		}
 	}
 	
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValue(this, attributes);
+	}
 }

@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
@@ -176,9 +178,15 @@ public class CustomEditText extends EditText implements ICustomView {
 	}
 	
 	protected void notifySave() {
-		if (hasChanges()) {
+		if (getAttributeName() != null && hasChanges()) {
 			autoSaveManager.save();
 		}
+	}
+
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValue(this, attributes);
 	}
 	
 }

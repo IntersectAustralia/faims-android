@@ -9,7 +9,6 @@ import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
@@ -24,37 +23,20 @@ public class HierarchicalSpinner extends CustomSpinner {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 		{
-			if (ignoresSelectEvents() == false) {
-				if (listener != null) {
-					listener.onItemSelected(parent, view, position, id);
-				}
-				
-				notifySave();
-			} else {
-				setIgnoreSelectEvents(false);
+			if(hierarchicalSelectListener != null) {
+				hierarchicalSelectListener.onItemSelected(parent, view, position, id);
 			}
 			
-			if(internalListener != null) {
-				internalListener.onItemSelected(parent, view, position, id);
+			if (listener != null) {
+				listener.onItemSelected(parent, view, position, id);
 			}
+			
+			notifySave();
 		}
 
 		@Override
 		public void onNothingSelected(AdapterView<?> parent)
 		{
-			if (ignoresSelectEvents() == false) {
-				if (listener != null) {
-					listener.onNothingSelected(parent);
-				}
-				
-				notifySave();
-			} else {
-				setIgnoreSelectEvents(false);
-			}
-			
-			if(internalListener != null) {
-				internalListener.onNothingSelected(parent);
-			}
 		}
 		
 	}
@@ -68,14 +50,13 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private List<VocabularyTerm> currentItems;
 
 	private boolean lastSelected;
-	
 	private VocabularyTerm lastSelectedItem;
-
+	
 	private HashMap<String, VocabularyTerm> vocabIdToParentTerm;
 	private HashMap<String, List<VocabularyTerm>> vocabIdToParentTerms;
 
 	private OnItemSelectedListener listener;
-	private OnItemSelectedListener internalListener;
+	private OnItemSelectedListener hierarchicalSelectListener;
 	private HierarchicalOnItemSelectListener customListener;
 
 	public HierarchicalSpinner(Context context) {
@@ -118,25 +99,12 @@ public class HierarchicalSpinner extends CustomSpinner {
 		this.listener = listener;
 	}
 	
-	/* 
-	 * Override the setAdapter method to set ignore boolean
-	 * Without, this was causing unwanted click events when changing/loading tabs
-	 */
-	@Override
-	public void setAdapter(SpinnerAdapter adapter)
-	{
-		this.ignoreSelectOnce = true;
-		super.setAdapter(adapter);	
-	}
-	
 	public void setTerms(List<VocabularyTerm> terms) {
 		this.terms = terms;
 		
-		mapVocabToParent();
-		
+		mapVocabToParent();	
 		this.parentTerms = new Stack<VocabularyTerm>();
-		
-		this.internalListener = new OnItemSelectedListener() {
+		this.hierarchicalSelectListener = new OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View view,
@@ -158,10 +126,10 @@ public class HierarchicalSpinner extends CustomSpinner {
 						
 						text.setText(sb);
 						
-						if (lastSelected && currentTerms.get(index).terms != null) {
+						// if selected vocab has child terms and was last selected by user then popup dropdown again
+						if (currentTerms.get(index).terms != null && lastSelected) {
 							performClick();
 						}
-						
 						lastSelected = false;
 					}
 				} catch (Exception e) {
@@ -183,7 +151,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			currentTerms = terms;
 			currentItems = terms;
 			
-			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
+			super.setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		} else {
 			VocabularyTerm selectedTerm = parentTerms.peek();
 			currentTerms = new ArrayList<VocabularyTerm>();
@@ -195,7 +163,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			currentTerms.addAll(selectedTerm.terms);
 			currentItems.addAll(selectedTerm.terms);
 			
-			setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
+			super.setAdapter(new ArrayAdapter<VocabularyTerm>(this.getContext(), R.layout.multiline_spinner_dropdown_item, currentItems));
 		}
 	}
 	
@@ -282,6 +250,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 			}
 			index++;
 		}
+		
 		notifySave();
 	}
 	
@@ -303,15 +272,13 @@ public class HierarchicalSpinner extends CustomSpinner {
 		}
 		dirty = false;
 		dirtyReason = null;
-		
-		lastSelectedItem = null;
-		
-		parentTerms.clear();
-		loadTerms();
-		
 		setSelectionItem(0, false);
 		setCertainty(1);
 		setAnnotation("");
+		
+		lastSelectedItem = null;
+		parentTerms.clear();
+		loadTerms();
 		
 		save();
 		currentValue = null;
