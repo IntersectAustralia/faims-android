@@ -258,6 +258,27 @@ showBusy(String title, String message) {
 	return linker.showBusy(title, message);
 }
 
+/**
+  * Show an alert dialog to the user with the given message and a text box for input.
+  *
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
+  */
+showTextAlert(String title, String message, String okCallback, String cancelCallback) {
+  linker.showTextAlert(title, message, okCallback, cancelCallback);
+}
+
+/**
+  * This is used in conjuction with showTextAlert. This returns the input from the last text alert shown.
+  *
+  * @return input received from last text alert
+  */
+String getLastTextAlertInput() {
+  return linker.getLastTextAlertInput();
+}
+
 //========= Setter / Getter Functionality ==========
 /**
   * Set the field with the following reference to the given value.

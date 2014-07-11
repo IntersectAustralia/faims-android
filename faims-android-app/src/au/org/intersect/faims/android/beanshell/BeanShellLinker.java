@@ -72,6 +72,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
+import au.org.intersect.faims.android.ui.dialog.TextDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -149,6 +150,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private Double prevLong;
 	private Double prevLat;
+	
+	private String textAlertInput;
 
 	private String lastFileBrowserCallback;
 
@@ -180,6 +183,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.trackingTask = null;
 		this.prevLong = 0d;
 		this.prevLat = 0d;
+		this.textAlertInput = null;
 		this.cameraPicturepath = null;
 		this.cameraCallBack = null;
 		this.videoCallBack = null;
@@ -993,6 +997,35 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error show busy dialog");
 		}
 		return null;
+	}
+	
+	public Dialog showTextAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final TextDialog textDialog = new TextDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			textDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					textAlertInput = textDialog.getInputText(); 
+					execute(okCallback);
+				}
+			});
+			textDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			textDialog.show();
+			return textDialog;
+		} catch (Exception e) {
+			FLog.e("error showing text alert", e);
+			showWarning("Logic Error", "Error show text alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastTextAlertInput() {
+		return textAlertInput;
 	}
 	
 	protected void reportError(Exception e) {
@@ -3236,6 +3269,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		savedInstanceState.putString(TAG + "lastFileBrowserCallback", lastFileBrowserCallback);
 		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
 		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
+		savedInstanceState.putString(TAG + "textAlertInput", textAlertInput);
 		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
 		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
 		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);
@@ -3259,6 +3293,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		lastFileBrowserCallback = savedInstanceState.getString(TAG + "lastFileBrowserCallback");
 		prevLong = savedInstanceState.getDouble(TAG + "prevLong");
 		prevLat = savedInstanceState.getDouble(TAG + "prevLat");
+		textAlertInput = savedInstanceState.getString(TAG + "textAlertInput");
 		cameraPicturepath = savedInstanceState.getString(TAG + "cameraPicturepath");
 		cameraCallBack = savedInstanceState.getString(TAG + "cameraCallBack");
 		videoCallBack = savedInstanceState.getString(TAG + "videoCallBack");
