@@ -1,12 +1,14 @@
 package au.org.intersect.faims.android.ui.view;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -173,30 +175,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private boolean compareValues() {
-		List<NameValuePair> values = (List<NameValuePair>) getValues();
-		if (values == null && currentValues == null) return true;
-		if (values == null && currentValues != null) return false;
-		if (values != null && currentValues == null) return false;
-		if (values.size() != currentValues.size()) return false;
-			
-		for (int i = 0; i < values.size(); i++) {
-			boolean hasValue = false;
-			for (int j = 0; j < currentValues.size(); j++) {
-				if (values.get(i).equals(currentValues.get(j))) {
-					hasValue = true;
-					break;
-				}
-			}
-			if (!hasValue) return false;
-		}
-		
-		return true;
-	}
-	
 	@Override
 	public boolean hasChanges() {
-		return !(compareValues()) || 
+		return !(Compare.compareValues((List<NameValuePair>) getValues(), currentValues)) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 
 				!Compare.equal(getCertainty(), currentCertainty);
 	}
@@ -307,9 +288,15 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	}
 	
 	protected void notifySave() {
-		if (hasChanges()) {
+		if (getAttributeName() != null && hasChanges()) {
 			autoSaveManager.save();
 		}
+	}
+
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValues(this, attributes);
 	}
 
 }

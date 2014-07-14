@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.beanshell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import android.os.AsyncTask;
@@ -53,19 +54,23 @@ public class TabGroupHelper {
 		try {
 			final TabGroup tabGroup = linker.getTabGroup(ref);
 			saveTabGroup(linker, tabGroup, uuid, geometry, attributes, new SaveCallback() {
-
+	
 				@Override
 				public void onError(String message) {
-					autoSaveManager.notifyError();
+					if (autoSaveManager.isEnabled()) {
+						autoSaveManager.notifyError();
+					} else {
+						TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+					}
 				}
-
+	
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
 					setTabGroupSaved(tabGroup);
 					autoSaveManager.reportSaved();
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
-
+	
 							@Override
 							public void run() {
 								try {
@@ -78,7 +83,7 @@ public class TabGroupHelper {
 						});
 					}
 				}
-
+	
 				@Override
 				public void onSaveAssociation(String entityId,
 						String relationshpId) {					
@@ -114,7 +119,6 @@ public class TabGroupHelper {
 	
 	private static void saveTabInBackground(final BeanShellLinker linker, final String ref, final String uuid, final List<Geometry> geometry, 
 			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) {
-		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
 		try {
 			TabGroup tabGroup = linker.getTabGroupFromTabLabel(ref);
 			final Tab tab = linker.getTab(ref);
@@ -122,13 +126,12 @@ public class TabGroupHelper {
 
 				@Override
 				public void onError(String message) {
-					autoSaveManager.notifyError();
+					TabGroupHelper.onError(linker, callback, null, "Error saving tab " + ref, "Error executing save tab onerror callback");
 				}
 
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
 					setTabSaved(tab);
-					autoSaveManager.reportSaved();
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
 
@@ -152,35 +155,157 @@ public class TabGroupHelper {
 				
 			}, newRecord);
 		} catch (Exception e) {
-			if (autoSaveManager.isEnabled()) {
-				autoSaveManager.notifyError();
+			onError(linker, callback, e, "Error saving tab " + ref, "Error executing save tab onerror callback");
+		}
+	}
+	
+	private static void saveTabGroup(final BeanShellLinker linker, final TabGroup tabGroup, final String uuid, final List<Geometry> geometry, 
+			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) throws Exception {
+		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
+		if (tabGroup.hasChanges()) {
+			if (newRecord || tabGroup.hasRecord(uuid)) {
+				saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 			} else {
-				onError(linker, callback, e, "Error saving tab " + ref, "Error executing save tab onerror callback");
+				if (tabGroup.getArchEntType() != null) {
+					linker.fetchArchEnt(uuid, new FetchCallback() {
+						
+						@Override
+						public void onError(String message) {
+							if (autoSaveManager.isEnabled()) {
+								autoSaveManager.notifyError();
+							} else {
+								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+							}
+						}
+			
+						@Override
+						public void onFetch(Object result) {
+							try {
+								ArchEntity entity = (ArchEntity) result;
+								// cache entity
+								tabGroup.setArchEntity(entity);
+								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+							} catch (Exception e) {
+								if (autoSaveManager.isEnabled()) {
+									autoSaveManager.notifyError();
+								} else {
+									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+								}
+							}
+						}
+						
+					});
+				} else if (tabGroup.getRelType() != null) {
+					linker.fetchRel(uuid, new FetchCallback() {
+						
+						@Override
+						public void onError(String message) {
+							if (autoSaveManager.isEnabled()) {
+								autoSaveManager.notifyError();
+							} else {
+								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+							}
+						}
+			
+						@Override
+						public void onFetch(Object result) {
+							try {
+								Relationship relationship = (Relationship) result;
+								// cache relationship
+								tabGroup.setRelationship(relationship);
+								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+							} catch (Exception e) {
+								if (autoSaveManager.isEnabled()) {
+									autoSaveManager.notifyError();
+								} else {
+									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+								}
+							}
+						}
+						
+					});
+				} else {
+					throw new Exception("no type specified for tabgroup");
+				}
 			}
+		} else {
+			callback.onSave(uuid,  newRecord);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void saveTabGroup(BeanShellLinker linker, TabGroup tabGroup, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, SaveCallback callback, boolean newRecord) throws Exception {
+	private static void saveTabGroupAttributes(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord) throws Exception {
 		synchronized(TabGroupHelper.class) {
 			if (tabGroup.getArchEntType() != null) {
 				List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
 				if (attributes != null) {
 					entityAttributes.addAll((List<EntityAttribute>) attributes);
 				}
-				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));			
+				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));	
+				
+				final List<EntityAttribute> updatedAttributes = entityAttributes;
 				if (geometry != null || !entityAttributes.isEmpty()) {
-					DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, callback, newRecord, true);
+					DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, new SaveCallback() {
+
+						@Override
+						public void onError(String message) {
+							callback.onError(message);
+						}
+
+						@Override
+						public void onSave(String uuid, boolean newRecord) {
+							// update cached entity
+							ArchEntity entity = tabGroup.getArchEntity();
+							if (entity != null) {
+								entity.updateAttributes(updatedAttributes);
+							}
+							callback.onSave(uuid, newRecord);
+						}
+
+						@Override
+						public void onSaveAssociation(String entityId,
+								String relationshpId) {
+						}
+						
+					}, newRecord, true);
+				} else {
+					callback.onSave(uuid,  newRecord);
 				}
 			} else if (tabGroup.getRelType() != null) {
 				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
 				if (attributes != null) {
 					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-				}	
+				}
 				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
-				if (!relationshipAttributes.isEmpty()) {
-					DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, callback, newRecord, true);
+				
+				final List<RelationshipAttribute> updatedAttributes = relationshipAttributes;
+				if (geometry != null || !relationshipAttributes.isEmpty()) {
+					DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, new SaveCallback() {
+
+						@Override
+						public void onError(String message) {
+							callback.onError(message);
+						}
+
+						@Override
+						public void onSave(String uuid, boolean newRecord) {
+							// update cached relationship
+							Relationship relationship = tabGroup.getRelationship();
+							if (relationship != null) {
+								relationship.updateAttributes(updatedAttributes);
+							}
+							callback.onSave(uuid, newRecord);
+						}
+
+						@Override
+						public void onSaveAssociation(String entityId,
+								String relationshpId) {
+						}
+						
+					}, newRecord, true);
+				} else {
+					callback.onSave(uuid,  newRecord);
 				}
 			} else {
 				throw new Exception("no type specified for tabgroup");
@@ -192,26 +317,32 @@ public class TabGroupHelper {
 	private static void saveTab(BeanShellLinker linker, TabGroup tabGroup, Tab tab, String uuid, List<Geometry> geometry, 
 			List<? extends Attribute> attributes, SaveCallback callback, boolean newRecord) throws Exception {
 		synchronized(TabGroupHelper.class) {
-			if (tabGroup.getArchEntType() != null) {
-				List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-				if (attributes != null) {
-					entityAttributes.addAll((List<EntityAttribute>) attributes);
+			if (tab.hasChanges()) {
+				if (tabGroup.getArchEntType() != null) {
+					List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+					if (attributes != null) {
+						entityAttributes.addAll((List<EntityAttribute>) attributes);
+					}
+					entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab, tabGroup.getArchEntity()));
+					if (geometry != null || !entityAttributes.isEmpty()) {
+						DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, callback, newRecord, true);
+					} else {
+						callback.onSave(uuid, newRecord);
+					}
+				} else if (tabGroup.getRelType() != null) {			
+					List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+					if (attributes != null) {
+						relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+					}		
+					relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab, tabGroup.getRelationship()));	
+					if (geometry != null || !relationshipAttributes.isEmpty()) {
+						DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, callback, newRecord, true);
+					} else {
+						callback.onSave(uuid, newRecord);
+					}
+				} else {
+					throw new Exception("no type specified for tabgroup");
 				}
-				entityAttributes.addAll(TabGroupHelper.getEntityAttributesFromTab(linker, tab));
-				if (geometry != null || !entityAttributes.isEmpty()) {
-					DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, callback, newRecord, true);
-				}
-			} else if (tabGroup.getRelType() != null) {			
-				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-				if (attributes != null) {
-					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-				}		
-				relationshipAttributes.addAll(TabGroupHelper.getRelationshipAttributesFromTab(linker, tab));	
-				if (geometry != null || !relationshipAttributes.isEmpty()) {
-					DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, callback, newRecord, true);
-				}
-			} else {
-				throw new Exception("no type specified for tabgroup");
 			}
 		}
 	}
@@ -236,21 +367,26 @@ public class TabGroupHelper {
 	private static List<EntityAttribute> getEntityAttributesFromTabGroup(BeanShellLinker linker, TabGroup tabGroup) {
 		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
 		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getEntityAttributesFromTab(linker, tab));
+			attributes.addAll(getEntityAttributesFromTab(linker, tab, tabGroup.getArchEntity()));
 		}
 		return attributes;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static List<EntityAttribute> getEntityAttributesFromTab(BeanShellLinker linker, Tab tab) {
+	private static List<EntityAttribute> getEntityAttributesFromTab(BeanShellLinker linker, Tab tab, ArchEntity entity) {
 		List<EntityAttribute> attributes = new ArrayList<EntityAttribute>();
+		
+		Collection<EntityAttribute> cachedAttributes = null;
+		if (entity != null) {
+			cachedAttributes = entity.getAttributes();
+		}
 		
 		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {
 					ICustomView customView = (ICustomView) v;
-					if (customView.hasChanges()) {
+					if (cachedAttributes == null || customView.hasAttributeChanges(cachedAttributes)) {
 						String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 						String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
 						if (customView instanceof ICustomFileView) {
@@ -314,21 +450,26 @@ public class TabGroupHelper {
 	private static List<RelationshipAttribute> getRelationshipAttributesFromTabGroup(BeanShellLinker linker, TabGroup tabGroup) {
 		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
 		for (Tab tab : tabGroup.getTabs()) {
-			attributes.addAll(getRelationshipAttributesFromTab(linker, tab));
+			attributes.addAll(getRelationshipAttributesFromTab(linker, tab, tabGroup.getRelationship()));
 		}
 		return attributes;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static List<RelationshipAttribute> getRelationshipAttributesFromTab(BeanShellLinker linker, Tab tab) {
+	private static List<RelationshipAttribute> getRelationshipAttributesFromTab(BeanShellLinker linker, Tab tab, Relationship relationship) {
 		List<RelationshipAttribute> attributes = new ArrayList<RelationshipAttribute>();
+		
+		Collection<RelationshipAttribute> cachedAttributes = null;
+		if (relationship != null) {
+			cachedAttributes = relationship.getAttributes();
+		}
 		
 		List<View> views = tab.getAttributeViews();
 		if (views != null) {
 			for (View v : views) {
 				if (v instanceof ICustomView) {
 					ICustomView customView = (ICustomView) v;
-					if (customView.hasChanges()) {
+					if (cachedAttributes == null || customView.hasAttributeChanges(cachedAttributes)) {
 						String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 						String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
 						if (customView instanceof ICustomFileView) {
@@ -606,7 +747,11 @@ public class TabGroupHelper {
 	}
 	
 	private static void onError(final BeanShellLinker linker, final IBeanShellCallback callback, final Exception e, final String errorMessage, final String callbackErrorMessage) {
-		FLog.e(errorMessage, e);
+		if (e == null) {
+			FLog.e(errorMessage);
+		} else {
+			FLog.e(errorMessage, e);
+		}
 		if (callback != null) {
 			linker.getActivity().runOnUiThread(new Runnable() {
 				

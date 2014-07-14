@@ -38,6 +38,7 @@
                   <gallery></gallery>
                   <rocks></rocks>
                   <files></files>
+                  <textalert></textalert>
                   <attachfile></attachfile>
                   <pictures></pictures>
                   <attachpicture></attachpicture>
@@ -221,6 +222,9 @@
 	                <value>dummy</value>
 	            </item>
 	        </select>
+          <trigger ref="textalert">
+              <label>Generate Text Alert</label>
+          </trigger>
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>

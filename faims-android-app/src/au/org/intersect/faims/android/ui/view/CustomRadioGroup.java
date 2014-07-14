@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -251,8 +253,14 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	}
 	
 	protected void notifySave() {
-		if (hasChanges()) {
+		if (getAttributeName() != null && hasChanges()) {
 			autoSaveManager.save();
 		}
+	}
+
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValue(this, attributes);
 	}
 }

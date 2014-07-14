@@ -72,6 +72,7 @@ import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
+import au.org.intersect.faims.android.ui.dialog.TextDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -149,6 +150,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private Double prevLong;
 	private Double prevLat;
+	
+	private String textAlertInput;
 
 	private String lastFileBrowserCallback;
 
@@ -180,6 +183,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.trackingTask = null;
 		this.prevLong = 0d;
 		this.prevLat = 0d;
+		this.textAlertInput = null;
 		this.cameraPicturepath = null;
 		this.cameraCallBack = null;
 		this.videoCallBack = null;
@@ -303,16 +307,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					@Override
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
-						if (getGPSPosition() != null) {
-							activityRef.get().runOnUiThread(new Runnable() {						
-								@Override
-								public void run() {
-									execute(callback);
-								}
-							});
-						} else {
-							showToast("No GPS signal");
-						}
+						activityRef.get().runOnUiThread(new Runnable() {						
+							@Override
+							public void run() {
+								execute(callback);
+							}
+						});
 					}
 				};
 				trackingHandler.postDelayed(trackingTask, value * 1000);
@@ -340,7 +340,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 								prevLat = latitude;
 							}
 						} else {
-							showToast("No GPS signal");
+							execute(callback);
 						}
 					}
 				};
@@ -368,13 +368,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		
 		gpsDataManager.setTrackingStarted(false);
 		activityRef.get().updateActionBar();
-	}
-	
-	public void stopTrackingGPSForOnPause() {
-		if (trackingHandler != null) {
-			trackingHandler.removeCallbacks(trackingTask);
-			trackingHandler = null;
-		}
 	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
@@ -795,7 +788,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				if (tabGroup.getArchEntType() != null
 						|| tabGroup.getRelType() != null) {
 					for (Tab tab : tabGroup.getTabs()) {
-						if (hasChanges(tab)) {
+						if (tab.hasChanges()) {
 							hasChanges = true;
 							break;
 						}
@@ -841,9 +834,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			final TabGroup tabGroup = getTabGroupFromTabLabel(label);
 			final Tab tab = getTab(label);
 			if (warn) {
-				if (hasChanges(tab)
-						&& (tabGroup.getArchEntType() != null || tabGroup
-								.getRelType() != null)) {
+				if (tab.hasChanges() 
+						&& (tabGroup.getArchEntType() != null || 
+						tabGroup.getRelType() != null)) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
@@ -888,20 +881,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error cancelling tab " + label);
 		}
 	}
-
-	private boolean hasChanges(Tab tab) {
-		List<View> views = tab.getAttributeViews();
-		for (View v : views) {
-			
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				if (customView.hasChanges()) {
-					return true;
-				}
-			}
-			
+	
+	public void keepTabGroupChanges(String ref) {
+		try {
+			TabGroup tabGroup = getTabGroup(ref);
+			tabGroup.keepChanges();
+		} catch (Exception e) {
+			FLog.e("Error trying to reset tab group changes for " + ref, e);
+			showWarning("Logic Error", "Error tring to reset tab group changes for " + ref);
 		}
-		return false;
 	}
 
 	public void goBack() {
@@ -993,6 +981,35 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error show busy dialog");
 		}
 		return null;
+	}
+	
+	public Dialog showTextAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final TextDialog textDialog = new TextDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			textDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					textAlertInput = textDialog.getInputText(); 
+					execute(okCallback);
+				}
+			});
+			textDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			textDialog.show();
+			return textDialog;
+		} catch (Exception e) {
+			FLog.e("error showing text alert", e);
+			showWarning("Logic Error", "Error show text alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastTextAlertInput() {
+		return textAlertInput;
 	}
 	
 	protected void reportError(Exception e) {
@@ -3236,6 +3253,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		savedInstanceState.putString(TAG + "lastFileBrowserCallback", lastFileBrowserCallback);
 		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
 		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
+		savedInstanceState.putString(TAG + "textAlertInput", textAlertInput);
 		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
 		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
 		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);
@@ -3259,6 +3277,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		lastFileBrowserCallback = savedInstanceState.getString(TAG + "lastFileBrowserCallback");
 		prevLong = savedInstanceState.getDouble(TAG + "prevLong");
 		prevLat = savedInstanceState.getDouble(TAG + "prevLat");
+		textAlertInput = savedInstanceState.getString(TAG + "textAlertInput");
 		cameraPicturepath = savedInstanceState.getString(TAG + "cameraPicturepath");
 		cameraCallBack = savedInstanceState.getString(TAG + "cameraCallBack");
 		videoCallBack = savedInstanceState.getString(TAG + "videoCallBack");
@@ -3291,7 +3310,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Override
 	public void pause() {
-		stopTrackingGPSForOnPause();
 	}
 	
 	@Override
