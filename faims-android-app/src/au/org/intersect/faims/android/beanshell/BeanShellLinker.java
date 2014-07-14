@@ -307,16 +307,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					@Override
 					public void run() {
 						trackingHandler.postDelayed(this, value * 1000);
-						if (getGPSPosition() != null) {
-							activityRef.get().runOnUiThread(new Runnable() {						
-								@Override
-								public void run() {
-									execute(callback);
-								}
-							});
-						} else {
-							showToast("No GPS signal");
-						}
+						activityRef.get().runOnUiThread(new Runnable() {						
+							@Override
+							public void run() {
+								execute(callback);
+							}
+						});
 					}
 				};
 				trackingHandler.postDelayed(trackingTask, value * 1000);
@@ -344,7 +340,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 								prevLat = latitude;
 							}
 						} else {
-							showToast("No GPS signal");
+							execute(callback);
 						}
 					}
 				};
@@ -372,13 +368,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		
 		gpsDataManager.setTrackingStarted(false);
 		activityRef.get().updateActionBar();
-	}
-	
-	public void stopTrackingGPSForOnPause() {
-		if (trackingHandler != null) {
-			trackingHandler.removeCallbacks(trackingTask);
-			trackingHandler = null;
-		}
 	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {
@@ -3326,7 +3315,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Override
 	public void pause() {
-		stopTrackingGPSForOnPause();
 	}
 	
 	@Override
