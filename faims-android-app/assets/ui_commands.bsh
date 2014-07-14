@@ -280,7 +280,7 @@ showTextAlert(String title, String message, String okCallback, String cancelCall
 }
 
 /**
-  * This is used in conjuction with showTextAlert. This returns the input from the last text alert shown.
+  * This is used in conjunction with showTextAlert. This returns the input from the last text alert shown.
   *
   * @return input received from last text alert
   */
@@ -743,7 +743,7 @@ scrollTableToRow(String ref, int row){
 /**
   * Used in conjunction with the action callback for tables.
   *
-  * @rerturn the last table row number.
+  * @return the last table row number.
   */
 getTableRow(){
   return _table_row;
@@ -752,7 +752,7 @@ getTableRow(){
 /**
   * Used in conjunction with the action callback for tables.
   *
-  * @rerturn the last table row value.
+  * @return the last table row value.
   */
 getTableValue(){
   return _table_value;
@@ -1507,7 +1507,7 @@ removeGeometryHighlight(String ref, int geomId) {
 }
 
 /**
-  * Call this method to prepare the geometry in the highlisted list to be transformed to their new position.
+  * Call this method to prepare the geometry in the highlighted list to be transformed to their new position.
   *
   * @param ref the reference to the map view
   */
@@ -1598,7 +1598,7 @@ addLegacySelectQueryBuilder(String ref, String name, String dbPath, String table
 }
 
 /**
-  * Create a legay query builder for legacy selection tool by providing the sql query and adding parameters.
+  * Create a legacy query builder for legacy selection tool by providing the sql query and adding parameters.
   * @param sql the query to be executed when selected
   */
 createLegacyQueryBuilder(String sql) {
@@ -1651,14 +1651,14 @@ getMapGeometryCreated() {
 }
 
 /**
-  * This is used in conjunction with the tool load event. Thi will return the last selected geometry id.
+  * This is used in conjunction with the tool load event. This will return the last selected geometry id.
   */
 getMapGeometryLoaded() {
 	return _map_geometry_loaded;
 }
 
 /**
-  * This is used in conjunction with the tool load event. This will return the lsat selected geometry type (either entity or relationship).
+  * This is used in conjunction with the tool load event. This will return the last selected geometry type (either entity or relationship).
   */
 getMapGeometryLoadedType() {
 	return _map_geometry_loaded_type;
@@ -1896,7 +1896,7 @@ showFileBrowser(String callback) {
 }
 
 /**
-  * This is used in conjuction with showFileBrowser. This returns the filename of the last selected file.
+  * This is used in conjunction with showFileBrowser. This returns the filename of the last selected file.
   *
   * @return name of last selected file
   */
@@ -1905,7 +1905,7 @@ getLastSelectedFilename() {
 }
 
 /**
-  * This is used in conjuction with showFileBrowser. This returns the filepath of the last selected file.
+  * This is used in conjunction with showFileBrowser. This returns the filepath of the last selected file.
   *
   * @return path of last selected file
   */
@@ -1936,7 +1936,7 @@ attachFile(String filePath, boolean sync) {
   *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
-  * @param dir the directory to be added to the app/server folfer, can be null
+  * @param dir the directory to be added to the app/server folder, can be null
   */
 attachFile(String filePath, boolean sync, String dir) {
 	return linker.attachFile(filePath, sync, dir, null);
@@ -1951,7 +1951,7 @@ attachFile(String filePath, boolean sync, String dir) {
   *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
-  * @param dir the directory to be added to the app/server folfer, can be null
+  * @param dir the directory to be added to the app/server folder, can be null
   * @param callback code to execute when file is finished copying into the directory
   */
 attachFile(String filePath, boolean sync, String dir, String callback) {
