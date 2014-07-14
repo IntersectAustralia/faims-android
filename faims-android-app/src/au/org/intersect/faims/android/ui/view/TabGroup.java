@@ -17,6 +17,8 @@ import android.widget.TabWidget;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.data.ArchEntity;
+import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Arch16n;
@@ -52,9 +54,10 @@ public class TabGroup extends Fragment {
 	private String label;
 	private String archEntType;
 	private String relType;
+	private ArchEntity loadedEntity;
+	private Relationship loadedRelationship;
 
 	private Bundle tempSavedInstanceState;
-
 	private boolean isVisible;
 	
 	public TabGroup() {
@@ -357,6 +360,45 @@ public class TabGroup extends Fragment {
 				autoSaveManager.resume();
 			}
 		}
+	}
+	
+	public ArchEntity getArchEntity() {
+		return loadedEntity;
+	}
+	
+	public void setArchEntity(ArchEntity entity) {
+		loadedEntity = entity;
+	}
+	
+	public Relationship getRelationship() {
+		return loadedRelationship;
+	}
+	
+	public void setRelationship(Relationship relationship) {
+		loadedRelationship = relationship;
+	}
+
+	public boolean hasRecord(String uuid) {
+		if (getArchEntType() != null) {
+			return loadedEntity != null && loadedEntity.getId().equals(uuid);
+		} else if (getRelType() != null) {
+			return loadedRelationship != null && loadedRelationship.getId().equals(uuid);
+		}
+		return false;
+	}
+
+	public void keepChanges() {
+		for (Tab tab : tabs) {
+			tab.keepChanges();
+		}
+	}
+	
+	public boolean hasChanges() {
+		for (Tab tab : tabs) {
+			if (tab.hasChanges())
+				return true;
+		}
+		return false;
 	}
 
 }

@@ -742,4 +742,27 @@ public class Tab {
 		tabShown = savedInstanceState.getBoolean(getRef() + ":tabShown");
 		hidden = savedInstanceState.getBoolean(getRef() + ":hidden");
 	}
+
+	public void keepChanges() {
+		List<View> views = getAttributeViews();
+		for (View v : views) {
+			if (v instanceof ICustomView) {
+				ICustomView customView = (ICustomView) v;
+				customView.save();
+			}
+		}
+	}
+	
+	public boolean hasChanges() {
+		List<View> views = getAttributeViews();
+		for (View v : views) {
+			if (v instanceof ICustomView) {
+				ICustomView customView = (ICustomView) v;
+				if (customView.hasChanges()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

@@ -195,6 +195,15 @@ saveTab(String ref, String id, List geometry, List attributes, SaveCallback call
 }
 
 /**
+  * Keep the current changes on the tab group so auto saving is not triggerred when tab group checks if something needs to be saved.
+  *
+  * @param ref the reference to the tab group
+  */
+keepTabGroupChanges(String ref) {
+  linker.keepTabGroupChanges(ref);
+}
+
+/**
   * Close the tab group with the following reference with an option to show
   * a warning dialog if there are changes that haven't been saved. 
   *

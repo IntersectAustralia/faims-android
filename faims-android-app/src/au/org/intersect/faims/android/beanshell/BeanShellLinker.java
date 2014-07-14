@@ -788,7 +788,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				if (tabGroup.getArchEntType() != null
 						|| tabGroup.getRelType() != null) {
 					for (Tab tab : tabGroup.getTabs()) {
-						if (hasChanges(tab)) {
+						if (tab.hasChanges()) {
 							hasChanges = true;
 							break;
 						}
@@ -834,9 +834,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			final TabGroup tabGroup = getTabGroupFromTabLabel(label);
 			final Tab tab = getTab(label);
 			if (warn) {
-				if (hasChanges(tab)
-						&& (tabGroup.getArchEntType() != null || tabGroup
-								.getRelType() != null)) {
+				if (tab.hasChanges() 
+						&& (tabGroup.getArchEntType() != null || 
+						tabGroup.getRelType() != null)) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
 					builder.setTitle("Warning");
 					builder.setMessage("Are you sure you want to cancel the tab? You have unsaved changes there.");
@@ -881,20 +881,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error cancelling tab " + label);
 		}
 	}
-
-	private boolean hasChanges(Tab tab) {
-		List<View> views = tab.getAttributeViews();
-		for (View v : views) {
-			
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				if (customView.hasChanges()) {
-					return true;
-				}
-			}
-			
+	
+	public void keepTabGroupChanges(String ref) {
+		try {
+			TabGroup tabGroup = getTabGroup(ref);
+			tabGroup.keepChanges();
+		} catch (Exception e) {
+			FLog.e("Error trying to reset tab group changes for " + ref, e);
+			showWarning("Logic Error", "Error tring to reset tab group changes for " + ref);
 		}
-		return false;
 	}
 
 	public void goBack() {

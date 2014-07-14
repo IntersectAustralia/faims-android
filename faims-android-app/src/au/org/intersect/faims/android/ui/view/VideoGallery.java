@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import android.app.AlertDialog;
@@ -17,9 +18,11 @@ import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
 
@@ -172,6 +175,12 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 		Picture picture = new Picture(value, null, value);
 		addSelectedImage(addGallery(picture));
 		notifySave();
+	}
+	
+	@Override
+	public boolean hasAttributeChanges(
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareAttributeValues(this, attributes);
 	}
 
 }
