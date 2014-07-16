@@ -35,6 +35,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class UIRenderer {
 	
+	private static final String TAG = "uirenderer:";
+	
 	@Inject 
 	BeanShellLinker beanShellLinker;
 	
@@ -211,11 +213,11 @@ public class UIRenderer {
 			indexes.add(tabGroupList.indexOf(tabGroup));
 		}
 		indexes.add(tabGroupList.indexOf(currentTabGroup));
-		savedInstanceState.putIntegerArrayList("indexes", (ArrayList<Integer>) indexes);
+		savedInstanceState.putIntegerArrayList(TAG + "indexes", (ArrayList<Integer>) indexes);
 	}
 
 	private void restoreTabGroupStack(Bundle savedInstanceState){
-		indexes = savedInstanceState.getIntegerArrayList("indexes");
+		indexes = savedInstanceState.getIntegerArrayList(TAG + "indexes");
 		if(indexes != null){
 			for(int i = 0; i < indexes.size(); i++) {
 				showTabGroup(indexes.get(i));

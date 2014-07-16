@@ -4,6 +4,8 @@ import android.os.Bundle;
 
 public class ShowModuleActivityData implements ActivityData {
 	
+	private static final String TAG = "activitydata:";
+	
 	private float syncMinInterval;
 	private float syncMaxInterval;
 	private float syncDelay;
@@ -42,24 +44,24 @@ public class ShowModuleActivityData implements ActivityData {
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean("syncEnabled", syncEnabled);
-		savedInstanceState.putBoolean("fileSyncEnabled", fileSyncEnabled);
-		savedInstanceState.putString("userId", userId);
-		savedInstanceState.putFloat("syncMaxInterval", syncMaxInterval);
-		savedInstanceState.putFloat("syncMinInterval", syncMinInterval);
-		savedInstanceState.putFloat("syncDelay", syncDelay);
-		savedInstanceState.putInt("copyFileCount", copyFileCount);
+		savedInstanceState.putBoolean(TAG + "syncEnabled", syncEnabled);
+		savedInstanceState.putBoolean(TAG + "fileSyncEnabled", fileSyncEnabled);
+		savedInstanceState.putString(TAG + "userId", userId);
+		savedInstanceState.putFloat(TAG + "syncMaxInterval", syncMaxInterval);
+		savedInstanceState.putFloat(TAG + "syncMinInterval", syncMinInterval);
+		savedInstanceState.putFloat(TAG + "syncDelay", syncDelay);
+		savedInstanceState.putInt(TAG + "copyFileCount", copyFileCount);
 	}
 
 	@Override
 	public void restoreFrom(Bundle savedInstancestate) {
-		setSyncEnabled(savedInstancestate.getBoolean("syncEnabled"));
-		setFileSyncEnabled(savedInstancestate.getBoolean("fileSyncEnabled"));
-		setUserId(savedInstancestate.getString("userId"));
-		setSyncMaxInterval(savedInstancestate.getFloat("syncMaxInterval"));
-		setSyncMinInterval(savedInstancestate.getFloat("syncMinInterval"));
-		setSyncDelay(savedInstancestate.getFloat("syncDelay"));
-		setCopyFileCount(savedInstancestate.getInt("copyFileCount"));
+		setSyncEnabled(savedInstancestate.getBoolean(TAG + "syncEnabled"));
+		setFileSyncEnabled(savedInstancestate.getBoolean(TAG + "fileSyncEnabled"));
+		setUserId(savedInstancestate.getString(TAG + "userId"));
+		setSyncMaxInterval(savedInstancestate.getFloat(TAG + "syncMaxInterval"));
+		setSyncMinInterval(savedInstancestate.getFloat(TAG + "syncMinInterval"));
+		setSyncDelay(savedInstancestate.getFloat(TAG + "syncDelay"));
+		setCopyFileCount(savedInstancestate.getInt(TAG + "copyFileCount"));
 	}
 
 	public float getSyncMinInterval() {

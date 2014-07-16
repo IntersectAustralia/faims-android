@@ -1,0 +1,85 @@
+// USER
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/tab1/users", result);
+        }
+    });
+    return users;
+}
+populateListForUsers();
+
+login(){
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("menu");
+        }
+    });
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+// CONTROLS
+
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("entity", "Save and Load Entity"));
+
+loadOptions() {
+	populateList("menu/tab1/options", options);
+}
+
+onEvent("menu", "load", "loadOptions()");
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity".equals(value)) {
+		showTabGroup("tabgroup1");
+	} 
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+
+
+//DUMMY WORK
+
+//Test for Text Dialog
+displayAlert(){
+	showTextAlert("Alert", "Entity to Load:", "loadOK()", "loadCancel()");
+}
+
+loadCancel() {
+  showToast("Dialog Canceled");
+}
+loadOK() {
+  entityId = getLastTextAlertInput();
+  showToast("Entered text: "+entityId);
+}
+
+onEvent("tabgroup1/tab1/showTextAlert","click", "displayAlert()");
+
+//Test for Tracklog work with pause
+onEvent("tabgroup1/tab1/startTimeLog", "click", "startTrackAlert()");
+onEvent("tabgroup1/tab1/stopTrackLog", "click", "stopTrackingGPS()");
+
+startTrackAlert(){
+	startInternalGPS();
+	startTrackingGPS("time", 10, "saveTimeGPSTrack()");
+
+}
+saveTimeGPSTrack() {
+    showToast("still tracking");
+}

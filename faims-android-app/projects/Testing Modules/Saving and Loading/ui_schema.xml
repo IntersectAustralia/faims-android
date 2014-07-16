@@ -247,6 +247,27 @@
                   <add></add>
               </tab1>
           </tabgroup7>
+          <tabgroup8>
+              <tab1>
+                  <queries></queries>
+                  <load></load>
+                  <table></table>
+                  <container>
+                      <child1>
+                      	<top></top>
+                      </child1>
+                      <child2>
+                      	<bottom></bottom>
+                      </child2>
+                      <child3>
+                      	<scrollRow></scrollRow>
+                      </child3>
+                      <child4>
+                      	<row></row>
+                      </child4>
+                  </container>
+              </tab1>
+          </tabgroup8>
         </faims>
       </instance>
       
@@ -274,6 +295,7 @@
       <bind nodeset="/faims/tabgroup6/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup6/tab1/date" type="date"/>
       <bind nodeset="/faims/tabgroup6/tab1/time" type="time"/>
+      <bind nodeset="/faims/tabgroup8/tab1/container/child3/scrollRow" type="decimal"/>
       
     </model>
   </h:head>
@@ -1175,6 +1197,52 @@
               <label>Add member</label>
           	</trigger>
         </group>
+    </group>
+    <group ref="tabgroup8">
+      <label>Table View</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Table View</label>
+        <select1 ref="queries">
+            <label>Queries</label>
+            <item>
+	         	<label>dummy</label>
+	         	<value>dummy</value>
+	       	</item>
+        </select1>
+        <trigger ref="load">
+        	<label>Load Query</label>
+       	</trigger>
+       	<input ref="table" faims_table="true">
+        	<label></label>
+       	</input>
+       	<group ref="container" faims_style="orientation">
+        	<label></label>
+	        <group ref="child1" faims_style="even">
+	        	<label></label>
+	            <trigger ref="top">
+	              <label>Top</label>
+	            </trigger>
+	        </group>
+	        <group ref="child2" faims_style="even">
+	        	<label></label>
+	            <trigger ref="bottom">
+	              <label>Bottom</label>
+	            </trigger>
+	        </group>
+	        <group ref="child3" faims_style="even">
+	        	<label></label>
+	            <input ref="scrollRow">
+	                <label>Scroll Row:</label>
+	            </input>
+	        </group>
+	        <group ref="child4" faims_style="even">
+	        	<label></label>
+	            <trigger ref="row">
+	              <label>Row</label>
+	            </trigger>
+	        </group>
+	    </group>
+      </group>
     </group>
   </h:body>
 </h:html>

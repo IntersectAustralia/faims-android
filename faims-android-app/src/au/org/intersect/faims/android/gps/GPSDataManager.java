@@ -23,6 +23,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class GPSDataManager implements BluetoothManager.BluetoothListener, LocationListener, ActivityData, IFAIMSRestorable {
 
+	private static final String TAG = "gpsmanager:";
+	
 	@Inject
 	BluetoothManager bluetoothManager;
 	
@@ -400,22 +402,22 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean("isExternalGPSStarted", isExternalGPSStarted);
-		savedInstanceState.putBoolean("isInternalGPSStarted", isInternalGPSStarted);
-		savedInstanceState.putInt("gpsUpdateInterval", gpsUpdateInterval);
-		savedInstanceState.putString("trackingType", trackingType);
-		savedInstanceState.putInt("trackingValue", trackingValue);
-		savedInstanceState.putString("trackingExec", trackingExec);
+		savedInstanceState.putBoolean(TAG + "isExternalGPSStarted", isExternalGPSStarted);
+		savedInstanceState.putBoolean(TAG + "isInternalGPSStarted", isInternalGPSStarted);
+		savedInstanceState.putInt(TAG + "gpsUpdateInterval", gpsUpdateInterval);
+		savedInstanceState.putString(TAG + "trackingType", trackingType);
+		savedInstanceState.putInt(TAG + "trackingValue", trackingValue);
+		savedInstanceState.putString(TAG + "trackingExec", trackingExec);
 	}
 
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
-		setExternalGPSStarted(savedInstanceState.getBoolean("isExternalGPSStarted"));
-		setInternalGPSStarted(savedInstanceState.getBoolean("isInternalGPSStarted"));
-		setGpsUpdateInterval(savedInstanceState.getInt("gpsUpdateInterval"));
-		setTrackingType(savedInstanceState.getString("trackingType"));
-		setTrackingValue(savedInstanceState.getInt("trackingValue"));
-		setTrackingExec(savedInstanceState.getString("trackingExec"));
+		setExternalGPSStarted(savedInstanceState.getBoolean(TAG + "isExternalGPSStarted"));
+		setInternalGPSStarted(savedInstanceState.getBoolean(TAG + "isInternalGPSStarted"));
+		setGpsUpdateInterval(savedInstanceState.getInt(TAG + "gpsUpdateInterval"));
+		setTrackingType(savedInstanceState.getString(TAG + "trackingType"));
+		setTrackingValue(savedInstanceState.getInt(TAG + "trackingValue"));
+		setTrackingExec(savedInstanceState.getString(TAG + "trackingExec"));
 	}
 
 	@Override
