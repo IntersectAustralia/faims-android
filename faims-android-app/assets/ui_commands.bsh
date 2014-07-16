@@ -828,6 +828,39 @@ populateAudioList(String ref, Collection values){
 }
 
 /**
+  * Populate webview with the given html source file
+  *
+  * If the file is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param sourceFile the html file to render
+  */
+populateWebView(String ref, String sourceFile) {
+  linker.populateWebView(ref, sourceFile);
+}
+
+/**
+  * Populate webview with the given html
+  *
+  * If the file is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param html the html to render
+  */
+populateWebViewHtml(String ref, String html) {
+  linker.populateWebViewHtml(ref, html);
+}
+
+/**
+  * Back navigate webview if possible
+  * 
+  * @param ref the reference to the field
+  */
+navigateWebViewBack(String ref) {
+  linker.navigateWebViewBack(ref);
+}
+
+/**
   * Fetch the archaeological entity record with the specified id.
   *
   * @param id the id of the entity

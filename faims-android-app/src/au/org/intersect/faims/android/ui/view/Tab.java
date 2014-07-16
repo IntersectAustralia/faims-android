@@ -172,6 +172,13 @@ public class Tab {
 	                		}
 	                		view = viewFactory.createTableView();
 	                		linearLayout.addView(view);
+	                	} else if (attribute.web) {
+	                		if (attribute.questionText != null && !attribute.questionText.isEmpty()) {
+	                			TextView webLabel = viewFactory.createLabel(attribute);
+	                			linearLayout.addView(webLabel);
+	                		}
+	                		view = viewFactory.createWebView();
+	                		linearLayout.addView(view);
 	                	} else {
 	                		view = viewFactory.createTextField(-1, attribute, ref);
 	                		setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);

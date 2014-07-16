@@ -82,6 +82,7 @@ import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 import au.org.intersect.faims.android.ui.view.CustomListView;
 import au.org.intersect.faims.android.ui.view.CustomRadioGroup;
 import au.org.intersect.faims.android.ui.view.CustomSpinner;
+import au.org.intersect.faims.android.ui.view.CustomWebView;
 import au.org.intersect.faims.android.ui.view.FileListGroup;
 import au.org.intersect.faims.android.ui.view.HierarchicalPictureGallery;
 import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
@@ -1518,6 +1519,53 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
+	public void populateWebView(String ref, String sourceFile) {
+		try {
+			String html = FileUtil.readFileIntoString(sourceFile);
+			populateWebViewHtml(ref, html);
+		} catch (Exception e) {
+			FLog.e("error populate web view " + ref, e);
+			showWarning("Logic Error", "Error populate web view " + ref);
+		}
+	}
+	
+	public void populateWebViewHtml(String ref, String html) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			
+			if (obj instanceof CustomWebView) {
+				CustomWebView webView = (CustomWebView) obj;
+				
+				String moduleFilesPath = "file://" + this.module.getDirectoryPath().toString() + "/";
+				webView.setBaseUrl(moduleFilesPath);
+				webView.loadDataWithBaseURL(html, "text/html", "utf-8", "");
+			} else {
+				FLog.w("Cannot populate web view " + ref);
+				showWarning("Logic Error", "Cannot populate web view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate web view " + ref, e);
+			showWarning("Logic Error", "Error populate web view " + ref);
+		}
+	}
+	
+	public void navigateWebViewBack(String ref) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			
+			if (obj instanceof CustomWebView) {
+				CustomWebView webView = (CustomWebView) obj;
+				webView.goBack();
+			} else {
+				FLog.w("Cannot navigate web view " + ref);
+				showWarning("Logic Error", "Cannot navigate web view " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error navigate web view " + ref, e);
+			showWarning("Logic Error", "Error navigate web view " + ref);
+		}
+	}
+
 	public void populateTableRaw(String ref, String query, List<String> headers, String actionName, int actionIndex, String actionCallback) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
