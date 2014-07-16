@@ -30,7 +30,8 @@
           <tabgroup1>
               <tab1>
               	<showTextAlert/>
-                  
+                  <startTimeLog/>
+                  <stopTrackLog/>
               </tab1>
               <tab2>
                 
@@ -94,6 +95,12 @@
         <trigger ref="showTextAlert">
         	<label> Show Text Dialog</label>
         </trigger>	
+         <trigger ref="startTimeLog">
+        	<label> Start time log</label>
+        </trigger>
+         <trigger ref="stopTrackLog">
+        	<label> Stop Track log</label>
+        </trigger>
       </group>
       <group ref="tab2" faims_hidden="false">
         <label>Load Entity</label>

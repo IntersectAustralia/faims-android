@@ -55,6 +55,8 @@ onEvent("menu/tab1/options", "click", "onClickOption()");
 
 
 //DUMMY WORK
+
+//Test for Text Dialog
 displayAlert(){
 	showTextAlert("Alert", "Entity to Load:", "loadOK()", "loadCancel()");
 }
@@ -68,3 +70,16 @@ loadOK() {
 }
 
 onEvent("tabgroup1/tab1/showTextAlert","click", "displayAlert()");
+
+//Test for Tracklog work with pause
+onEvent("tabgroup1/tab1/startTimeLog", "click", "startTrackAlert()");
+onEvent("tabgroup1/tab1/stopTrackLog", "click", "stopTrackingGPS()");
+
+startTrackAlert(){
+	startInternalGPS();
+	startTrackingGPS("time", 10, "saveTimeGPSTrack()");
+
+}
+saveTimeGPSTrack() {
+    showToast("still tracking");
+}
