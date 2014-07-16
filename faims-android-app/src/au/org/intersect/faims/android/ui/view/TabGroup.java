@@ -335,7 +335,7 @@ public class TabGroup extends Fragment {
 		Tab tab = getCurrentTab();
 		if (tab != null) {
 			String tabLabel = tab.getName();
-			savedInstanceState.putString("currentTabLabel", tabLabel);
+			savedInstanceState.putString(getRef() + ":currentTabLabel", tabLabel);
 		}
 	}
 
@@ -351,7 +351,7 @@ public class TabGroup extends Fragment {
 					tab.restoreFrom(tempSavedInstanceState);
 				}
 				
-				String tabLabel = tempSavedInstanceState.getString("currentTabLabel");
+				String tabLabel = tempSavedInstanceState.getString(getRef() + ":currentTabLabel");
 				if (tabLabel != null) {
 					setCurrentTab(getTab(tabLabel));
 				}
