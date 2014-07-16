@@ -28,6 +28,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class BluetoothManager implements IFAIMSRestorable {
 	
+	private static final String TAG = "bluetooth:";
+	
 	public interface BluetoothListener {
 		public void onConnect();
 		public void onInput(String input);
@@ -351,12 +353,12 @@ public class BluetoothManager implements IFAIMSRestorable {
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean("isBluetoothConnected", isBluetoothConnected);
+		savedInstanceState.putBoolean(TAG + "isBluetoothConnected", isBluetoothConnected);
 	}
 
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
-		isBluetoothConnected = savedInstanceState.getBoolean("isBluetoothConnected");
+		isBluetoothConnected = savedInstanceState.getBoolean(TAG + "isBluetoothConnected");
 	}
 
 	@Override
