@@ -1,0 +1,58 @@
+// USER
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/tab1/users", result);
+        }
+    });
+    return users;
+}
+populateListForUsers();
+
+login(){
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("menu");
+        }
+    });
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+// CONTROLS
+
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("html", "Show Html Example"));
+
+loadOptions() {
+	populateList("menu/tab1/options", options);
+}
+
+onEvent("menu", "load", "loadOptions()");
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("html".equals(value)) {
+		showTabGroup("tabgroup1");
+	} 
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+htmlFile = getAttachedFilePath("files/app/web_test.html");
+populateWebView("tabgroup1/tab1/webber", htmlFile);
+populateWebViewHtml("tabgroup1/tab2/web", "<h2>Heading</h2><br/><b><i>Boldy italics</i></b>");
+//onEvent("tabgroup1/tab2/backer", "click", "navigateWebViewBack(\"tabgroup1/tab2/webber\")");
