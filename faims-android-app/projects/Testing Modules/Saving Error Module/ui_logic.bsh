@@ -1,0 +1,248 @@
+// USER
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/tab1/users", result);
+        }
+    });
+    return users;
+}
+populateListForUsers();
+
+login(){
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("menu");
+        }
+    });
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+// CONTROLS
+
+onEvent("menu/tab1/startsync", "click", "startSync()");
+onEvent("menu/tab1/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+
+options.add(createOption("entity_autosave", "Save and Load Entity - AutoSave"));
+loadOptions() {
+	populateList("menu/tab1/options", options);
+}
+
+onEvent("menu", "load", "loadOptions()");
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity_autosave".equals(value)) {
+		showTabGroup("tabgroup5");
+	}
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+init() {
+	startSync();
+	// reset ids
+	entityId = tableEntityId = null;
+	relationshipId = tableRelationshipId = null;
+}
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("menu", "show", "init()"); 
+onEvent("user", "show", "cleanup()");
+
+// ENTITY
+
+String entityId = null;
+String tableEntityId = null;
+
+
+
+initAutoEntity(tabgroup) {
+	clearEntity(tabgroup);
+}
+
+closeEntity(tabgroup) {
+	cancelTabGroup(tabgroup, true);
+}
+
+loadEntities(tabgroup) {
+	fetchEntityList("small", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab2/entities", result);
+		}
+	});
+}
+
+saveEntity(tabgroup) {
+	updateEntity(tabgroup);
+}
+
+loadEntity(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/entities");
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = localId;
+}
+
+loadEntityAuto(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/entities");
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = localId;
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getEntityIdentifier(result), null, true);
+		}
+	});
+}
+
+reloadEntity(tabgroup) {
+	if (isNull(entityId)) return;
+	
+	showTabGroup(tabgroup, entityId);
+}
+
+fetchEntityIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(uuid)) from archentity;", callback);
+}
+
+getEntityIdentifier(Object result) {
+	attributes = null;
+	if (entityId == null) {
+		attributes = createAttributeList();
+		entityCount = Integer.valueOf(result.get(0)) + 1;
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	}
+	return attributes;
+}
+
+updateEntity(tabgroup) {
+	if (isNull(entityId)) entityId = null;
+
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+					reloadEntity(tabgroup);
+				}
+			});
+		}
+	});
+}
+
+clearEntity(tabgroup) {
+	newEntity(tabgroup);
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			}, true);
+		}
+	});
+}
+
+newEntity(tabgroup) {
+	newTabGroup(tabgroup);
+	
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
+	
+	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
+
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
+	
+	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
+	
+	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	entityId = null;
+
+	keepTabGroupChanges(tabgroup);
+}
+
+deleteEntity(tabgroup){
+	if (isNull(entityId)) return;
+	
+	deleteArchEnt(entityId);
+	entityId = null;
+	
+  cancelTabGroup(tabgroup, false);
+}
+
+
+
+
+onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
+onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab2/load", "click", "loadEntityAuto(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
+
+onEvent("tabgroup5/tab1/attachfile", "click", "attachFileTo(\"tabgroup5/tab1/files\")");
+onEvent("tabgroup5/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup5/tab1/pictures\")");
+onEvent("tabgroup5/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup5/tab1/videos\")");
+onEvent("tabgroup5/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup5/tab1/audios\")");
+onEvent("tabgroup5/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+onEvent("tabgroup5/tab2", "show", "loadEntities(\"tabgroup5\")");
+
