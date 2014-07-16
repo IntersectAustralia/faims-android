@@ -50,9 +50,11 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 	
 	@Override
 	protected void setGalleryImage(CustomImageView gallery, String path) {
-		Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
-				path, MediaStore.Images.Thumbnails.MINI_KIND);
-		gallery.setImageBitmap(thumbnail);
+		if(path != null && new File(path).exists()) {
+			Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
+					path, MediaStore.Images.Thumbnails.MINI_KIND);
+			gallery.setImageBitmap(thumbnail);
+		}
 	}
 	
 	@Override

@@ -64,14 +64,14 @@ public class DatabaseHelper {
 						try {
 							callback.onSave(uuid, newEntity);
 						} catch (Exception e) {
-							linker.reportError("Error found when executing save arch enitty onsave callback", e);
+							linker.reportError("Error found when executing save arch enitty " + entityId + " onsave callback", e);
 						}
 						
 					}
 				});
 			}
 		} catch (Exception e) {
-			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty onerror callback");
+			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
 		}
 	}
 	
@@ -116,14 +116,14 @@ public class DatabaseHelper {
 						try {
 							callback.onSave(uuid, newRelationship);
 						} catch (Exception e) {
-							linker.reportError("Error found when executing save relationship onsave callback", e);
+							linker.reportError("Error found when executing save relationship " + relationshipId + " onsave callback", e);
 						}
 					}
 					
 				});	
 			}
 		} catch (Exception e) {
-			onError(linker, callback, e, "Error trying to save relationship", "Error found when executing save relationship onerror callback");
+			onError(linker, callback, e, "Error trying to save relationship", "Error found when executing save relationship " + relationshipId + " onerror callback");
 		}
 	}
 	
@@ -150,13 +150,13 @@ public class DatabaseHelper {
 								try {
 									callback.onDelete(entityId);
 								} catch (Exception e) {
-									linker.reportError("Error found when executing delete arch entity ondelete callback", e);
+									linker.reportError("Error found when executing delete arch entity " + entityId + " ondelete callback", e);
 								}
 							}
 						});
 					}
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error deleting arch entity " + entityId, "Error found when executing delete arch entity onerror callback");
+					onError(linker, callback, e, "Error deleting arch entity " + entityId, "Error found when executing delete arch entity " + entityId + " onerror callback");
 				}
 				return null;
 			}
@@ -188,13 +188,13 @@ public class DatabaseHelper {
 								try {
 									callback.onDelete(relationshipId);
 								} catch (Exception e) {
-									linker.reportError("Error found when executing delete relationship ondelete callback", e);
+									linker.reportError("Error found when executing delete relationship " + relationshipId + " ondelete callback", e);
 								}
 							}
 						});
 					}
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error deleting relationship " + relationshipId, "Error found when executing delete relationship onerror callback");
+					onError(linker, callback, e, "Error deleting relationship " + relationshipId, "Error found when executing delete relationship " + relationshipId + " onerror callback");
 				}
 				return null;
 			}
@@ -257,9 +257,9 @@ public class DatabaseHelper {
 						}
 					}
 					
-					onFetch(linker, callback, entity, "Error found when executing fetch arch entity onfetch callback");
+					onFetch(linker, callback, entity, "Error found when executing fetch arch entity " + entityId + " onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching arch entity " + entityId, "Error found when executing fetch arch entity onerror callback");
+					onError(linker, callback, e, "Error fetching arch entity " + entityId, "Error found when executing fetch arch entity " + entityId + " onerror callback");
 				}
 				return null;
 			}
@@ -287,9 +287,9 @@ public class DatabaseHelper {
 						}
 					}
 					
-					onFetch(linker, callback, relationship, "Error found when executing fetch relationship onfetch callback");
+					onFetch(linker, callback, relationship, "Error found when executing fetch relationship " + relationshipId + " onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching relationship " + relationshipId, "Error found when executing fetch relationship onerror callback");
+					onError(linker, callback, e, "Error fetching relationship " + relationshipId, "Error found when executing fetch relationship " + relationshipId + " onerror callback");
 				}
 				return null;
 			}
@@ -305,9 +305,9 @@ public class DatabaseHelper {
 			protected Void doInBackground(Void... params) {
 				try {
 					final ArrayList<String> result = linker.getDatabaseManager().fetchRecord().fetchOne(query);
-					onFetch(linker, callback, result, "Error found when executing fetch query result onfetch callback");
+					onFetch(linker, callback, result, "Error found when executing fetch " + query + " result onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching query result", "Error found when executing fetch query result onerror callback");
+					onError(linker, callback, e, "Error fetching query result", "Error found when executing fetch " + query + " result onerror callback");
 				}
 				return null;
 			}
@@ -322,9 +322,9 @@ public class DatabaseHelper {
 			protected Void doInBackground(Void... params) {
 				try {
 					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchAll(query);
-					onFetch(linker, callback, result, "Error found when executing fetch query results onfetch callback");
+					onFetch(linker, callback, result, "Error found when executing fetch " + query + " results onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching query results", "Error found when executing fetch query results onerror callback");
+					onError(linker, callback, e, "Error fetching query results", "Error found when executing fetch " + query + " results onerror callback");
 				}
 				return null;
 			}
@@ -339,9 +339,9 @@ public class DatabaseHelper {
 			protected Void doInBackground(Void... params) {
 				try {
 					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchEntityList(entityType);
-					onFetch(linker, callback, result, "Error found when executing fetch entity list onfetch callback");
+					onFetch(linker, callback, result, "Error found when executing fetch entity " + entityType + " list onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching entity list", "Error found when executing fetch entity list onerror callback");
+					onError(linker, callback, e, "Error fetching entity list", "Error found when executing fetch entity  " + entityType + " list onerror callback");
 				}
 				return null;
 			}
@@ -356,9 +356,9 @@ public class DatabaseHelper {
 			protected Void doInBackground(Void... params) {
 				try {
 					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchRelationshipList(relationshipType);
-					onFetch(linker, callback, result, "Error found when executing fetch relationship list onfetch callback");
+					onFetch(linker, callback, result, "Error found when executing fetch relationship " + relationshipType + " list onfetch callback");
 				} catch (Exception e) {
-					onError(linker, callback, e, "Error fetching relationship list", "Error found when executing fetch relationship list onerror callback");
+					onError(linker, callback, e, "Error fetching relationship list", "Error found when executing fetch relationship " + relationshipType + " list onerror callback");
 				}
 				return null;
 			}

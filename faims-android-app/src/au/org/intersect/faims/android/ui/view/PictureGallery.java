@@ -415,7 +415,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	}
 
 	protected void setGalleryImage(CustomImageView gallery, String path) {
-		if(path != null && new File(path).exists()){
+		if(path != null && new File(path).exists()) {
 			gallery.setImageURI(Uri.parse(path));
 		}
 	}

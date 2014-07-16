@@ -851,10 +851,29 @@ fetchRel(String id, FetchCallback callback){
   * Fetch the result of a query. This will return only a single row.
   *
   * @param query the query to be run against the database
+  */
+fetchOne(String query){
+  linker.fetchOne(query, null);
+}
+
+
+/**
+  * Fetch the result of a query. This will return only a single row.
+  *
+  * @param query the query to be run against the database
   * @param callback callback to execute when fetching is finished
   */
 fetchOne(String query, FetchCallback callback){
   linker.fetchOne(query, callback);
+}
+
+/**
+  * Fetch the results of a query. This will return a collection of rows.
+  *
+  * @param query the query to be run against the database
+  */
+fetchAll(String query){
+  linker.fetchAll(query, null);
 }
 
 /**

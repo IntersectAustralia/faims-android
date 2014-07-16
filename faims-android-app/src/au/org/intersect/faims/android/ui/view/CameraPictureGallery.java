@@ -47,8 +47,11 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 		return sync;
 	}
 	
+	@Override
 	protected void setGalleryImage(CustomImageView gallery, String path) {
-		gallery.setImageBitmap(decodeFile(new File(path), GALLERY_SIZE, GALLERY_SIZE));
+		if(path != null && new File(path).exists()) {
+			gallery.setImageBitmap(decodeFile(new File(path), GALLERY_SIZE, GALLERY_SIZE));
+		}
 	}
 	
 	@Override
