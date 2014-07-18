@@ -20,6 +20,9 @@ public class SyncFilesService extends DownloadUploadService {
 	protected void performService() throws Exception {
 		File serverDirectory = serviceModule.getDirectoryPath(this.getResources().getString(R.string.server_dir));
 		File appDirectory = serviceModule.getDirectoryPath(this.getResources().getString(R.string.app_dir));
+		
+		String timestamp = DateUtil.getCurrentTimestampGMT();
+		
 		// upload server directory
 		if (!uploadFiles("server", 
     			Request.SERVER_FILE_UPLOAD_REQUEST(serviceModule), 
@@ -53,7 +56,7 @@ public class SyncFilesService extends DownloadUploadService {
 		}
 		
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
-		module.fileSyncTimeStamp = DateUtil.getCurrentTimestampGMT();
+		module.fileSyncTimeStamp = timestamp;
 		ModuleUtil.saveModule(module); 
 	}
 	

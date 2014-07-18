@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import au.org.intersect.faims.android.data.Attribute;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 
@@ -33,6 +34,32 @@ public class Compare {
 			}
 		}
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static boolean compareFileAttributeValues(
+			ICustomView view,
+			Collection<? extends Attribute> attributes, Module module) {
+		String annotation = view.getAnnotationEnabled() ? view.getAnnotation() : null;
+		String certainty = view.getCertaintyEnabled() ? String.valueOf(view.getCertainty()) : null;
+		
+		ArrayList<NameValuePair> attributeValues = new ArrayList<NameValuePair>();
+		String attributeAnnotation = annotation;
+		String attributeCertainty = certainty;
+		
+		for (Attribute a : attributes) {
+			if (equal(a.getName(), view.getAttributeName())) {
+				attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
+				
+				// Note: this assumes that the annotation and certainty are the same for each multi-value
+				attributeAnnotation = a.getAnnotation(view.getAttributeType());
+				attributeCertainty = a.getCertainty();
+			}
+		}
+		
+		return !compareValues(clean(attributeValues), stripModulePath(module, clean((List<NameValuePair>) view.getValues()))) ||
+				!cleanAndEqual(attributeAnnotation, annotation) ||
+				!cleanAndEqual(attributeCertainty, certainty);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -93,6 +120,18 @@ public class Compare {
 			return null;
 		}
 		return values;
+	}
+	
+	private static List<NameValuePair> stripModulePath(Module module, List<NameValuePair> values) {
+		if (values == null) {
+			return null;
+		}
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		for (NameValuePair pair : values) {
+			String strippedName = pair.getName().replace(module.getDirectoryPath().getPath() + "/", "");
+			pairs.add(new NameValuePair(strippedName, pair.getValue()));
+		}
+		return pairs;
 	}
 	
 }

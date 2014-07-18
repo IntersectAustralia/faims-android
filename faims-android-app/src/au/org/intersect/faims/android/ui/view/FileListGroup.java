@@ -1,9 +1,14 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.util.Collection;
+
 import android.content.Context;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
 
@@ -50,6 +55,12 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		addView(checkBox);
 		this.invalidate();
 		autoSaveManager.save();
+	}
+
+	@Override
+	public boolean hasFileAttributeChanges(Module module,
+			Collection<? extends Attribute> attributes) {
+		return Compare.compareFileAttributeValues(this, attributes, module);
 	}
 
 }

@@ -22,10 +22,12 @@
                   <time></time>
                   <type></type>
                   <settype></settype>
+                  <toast></toast>
               </tab1>
               <tab2>
                   <location></location>
                   <supervisor></supervisor>
+                  <picture></picture>
               </tab2>
           </tabgroup1>
         </faims>
@@ -80,6 +82,9 @@
         <trigger ref="settype">
             <label>Set type</label>
         </trigger>
+        <trigger ref="toast">
+            <label>Show Toast</label>
+        </trigger>
 	  </group>
       <group ref="tab2">
         <label>{entity} Tab2</label>
@@ -107,6 +112,13 @@
             <item>
                 <label>{superD}</label>
                 <value>superd</value>
+            </item>
+        </select1>
+        <select1 ref="picture" type="image" faims_attribute_name="picture" faims_attribute_type="vocab" faims_annotation="false">
+            <label>Picture:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
             </item>
         </select1>
       </group>
