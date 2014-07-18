@@ -116,7 +116,7 @@
         <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
           <label> ID </label>
         </input>
-        <select ref="Files" faims_attribute_name="Files" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="file">
+        <select ref="Files" faims_attribute_name="Files" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false" type="file">
             <label>Attached Files</label>
             <item>
                 <label>{None}</label>
@@ -136,7 +136,7 @@
         <trigger ref="AttachPhoto">
           <label>Take Photo</label>
         </trigger>
-        <select ref="Audio" faims_attribute_name="Audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="file">
+        <select ref="Audio" faims_attribute_name="Audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false" type="file">
             <label>Attached Audio Files</label>
             <item>
                 <label>placeholder</label>
@@ -146,7 +146,7 @@
         <trigger ref="AttachAudio">
           <label>Record Audio</label>
         </trigger>
-        <select ref="Video" faims_attribute_name="Video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="true" type="video">
+        <select ref="Video" faims_attribute_name="Video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false" faims_sync="false" type="video">
           <label>Attached Videos</label>
           <item>
             <label>placeholder</label>
