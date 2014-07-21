@@ -22,14 +22,14 @@ public class SyncDatabaseHandler extends ShowModuleActivityHandler {
 			} else {
 				activity.resetSyncInterval();
 				activity.waitForNextSync();
-				activity.callSyncSuccess(ShowModuleActivity.DATABASE);
+				activity.callSyncSuccess();
 				activity.releaseSyncLock();
 			}
 		} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 			if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 				activity.resetSyncInterval();
 				activity.waitForNextSync();
-				activity.callSyncSuccess(ShowModuleActivity.DATABASE);
+				activity.callSyncSuccess();
 				activity.releaseSyncLock();
 			} else {
 				// failure

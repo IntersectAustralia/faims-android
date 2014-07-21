@@ -19,12 +19,12 @@ public class SyncFilesHandler extends ShowModuleActivityHandler {
 		if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 			activity.resetSyncInterval();
 			activity.waitForNextSync();
-			activity.callSyncSuccess(ShowModuleActivity.FILES);
+			activity.callSyncSuccess();
 		} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 			if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 				activity.resetSyncInterval();
 				activity.waitForNextSync();
-				activity.callSyncSuccess(ShowModuleActivity.FILES);
+				activity.callSyncSuccess();
 			} else {
 				// failure
 				activity.delaySyncInterval();

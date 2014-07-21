@@ -81,14 +81,9 @@ import com.google.inject.Inject;
 public class ShowModuleActivity extends FragmentActivity implements
 		IFAIMSRestorable {
 
-	public static final String FILES = "files";
-	public static final String DATABASE = "database";
-
 	public interface SyncListener {
 		public void handleStart();
-
 		public void handleSuccess();
-
 		public void handleFailure();
 	}
 
@@ -546,7 +541,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						syncStarted = false;
 						stopSync();
 						ShowModuleActivity.super.onBackPressed();
 					}
@@ -962,7 +956,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					activityData.setSyncEnabled(false);
-					syncStarted = false;
 					stopSync();
 				}
 			});
@@ -986,6 +979,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	public void stopSync() {
 		FLog.d("stopping sync");
 
+		syncStarted = false;
 		syncActive = false;
 
 		// locating server
@@ -1012,7 +1006,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 
 		setSyncStatus(SyncStatus.INACTIVE);
-
 	}
 
 	public void startSync() {
@@ -1021,18 +1014,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 		if (serverDiscovery.isServerHostFixed() || wifiConnected) {
 			syncActive = true;
 
+			updateSyncStatus();
 			waitForNextSync();
-			try {
-				if (hasDatabaseChanges()) {
-					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
-				} else {
-					setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES
-							: SyncStatus.ACTIVE_NO_CHANGES);
-				}
-			} catch (Exception e) {
-				FLog.e("error when checking database changes", e);
-				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
-			}
 		} else {
 			setSyncStatus(SyncStatus.INACTIVE);
 			FLog.d("cannot start sync wifi disabled");
@@ -1080,6 +1063,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		syncTaskTimer = new Timer();
 		syncTaskTimer.schedule(task, (long) syncInterval * 1000);
+	}
+	
+	public void releaseSyncLock() {
+		syncLock.release();
 	}
 
 	private void syncLocateServer() {
@@ -1151,34 +1138,44 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	public void callSyncStart() {
+		syncStarted = true;
 		for (SyncListener listener : listeners) {
 			listener.handleStart();
 		}
 		setSyncStatus(SyncStatus.ACTIVE_SYNCING);
-		syncStarted = true;
 	}
 
-	public void callSyncSuccess(String type) {
+	public void callSyncSuccess() {
+		syncStarted = false;
 		for (SyncListener listener : listeners) {
 			listener.handleSuccess();
 		}
-		syncStarted = false;
+		updateSyncStatus();
 
-		if (DATABASE.equals(type)) {
-			try {
-				if (hasDatabaseChanges()) {
-					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
-				}
-			} catch (Exception e) {
-				FLog.e("error when checking database changes", e);
+		if (delayStopSync) {
+			delayStopSync = false;
+			stopSync();
+		}
+	}
+	
+	private void updateSyncStatus() {
+		if (activityData.isSyncEnabled()) {
+			if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
+				setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+			} else {
 				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
 			}
-		} else if (FILES.equals(type)) {
-			setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES
-					: SyncStatus.ACTIVE_NO_CHANGES);
 		} else {
-			setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+			setSyncStatus(SyncStatus.INACTIVE);
 		}
+	}
+	
+	public void callSyncFailure() {
+		syncStarted = false;
+		for (SyncListener listener : listeners) {
+			listener.handleFailure();
+		}
+		setSyncStatus(SyncStatus.ERROR);
 
 		if (delayStopSync) {
 			delayStopSync = false;
@@ -1186,18 +1183,34 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 
-	public void releaseSyncLock() {
-		syncLock.release();
+	public void setSyncStatus(final SyncStatus status) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				syncStatus = status;
+				updateActionBar();
+			}
+
+		});
 	}
 
-	private boolean hasDatabaseChanges() throws Exception {
-		Module module = ModuleUtil.getModule(moduleKey);
-		return databaseManager.fetchRecord().hasRecordsFrom(module.timestamp);
+	public SyncStatus getSyncStatus() {
+		return syncStatus;
+	}
+
+	private boolean hasDatabaseChanges() {
+		try {
+			Module module = ModuleUtil.getModule(moduleKey);
+			return databaseManager.fetchRecord().hasRecordsFrom(module.timestamp);
+		} catch (Exception e) {
+			FLog.e("error getting database changed", e);
+			return false;
+		}
 	}
 
 	private boolean hasFileChanges() {
 		Module module = ModuleUtil.getModule(moduleKey);
-
 		if (module.fileSyncTimeStamp != null) {
 			File attachedFiles = module.getDirectoryPath("files");
 			return hasFileChanges(attachedFiles, module.fileSyncTimeStamp);
@@ -1210,7 +1223,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 		if (attachedFiles.isDirectory()) {
 			for (File file : attachedFiles.listFiles()) {
 				if (file.isDirectory()) {
-					return hasFileChanges(file, fileSyncTimeStamp);
+					if (hasFileChanges(file, fileSyncTimeStamp)) {
+						return true;
+					}
 				} else {
 					if (file.lastModified() > DateUtil.convertToDateGMT(
 							fileSyncTimeStamp).getTime()) {
@@ -1220,20 +1235,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 			}
 		}
 		return false;
-
-	}
-
-	public void callSyncFailure() {
-		for (SyncListener listener : listeners) {
-			listener.handleFailure();
-		}
-		syncStarted = false;
-		setSyncStatus(SyncStatus.ERROR);
-
-		if (delayStopSync) {
-			delayStopSync = false;
-			stopSync();
-		}
 	}
 
 	public void setSyncMinInterval(float value) {
@@ -1270,24 +1271,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		return activityData.getCopyFileCount();
 	}
 
-	public void setSyncStatus(final SyncStatus status) {
-		runOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				if (!isSyncStarted()) {
-					syncStatus = status;
-					updateActionBar();
-				}
-			}
-
-		});
-	}
-
-	public SyncStatus getSyncStatus() {
-		return syncStatus;
-	}
-
 	public void enableFileSync() {
 		activityData.setFileSyncEnabled(true);
 	}
@@ -1318,6 +1301,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 				intent.putExtra("module", module);
 				ShowModuleActivity.this.startService(intent);
 
+				callSyncStart();
 			}
 		});
 	}
