@@ -58,10 +58,9 @@ public class SyncFilesService extends IntentService {
 		// 3. download app directory
 		Bundle extras = intent.getExtras();
 		Module module = (Module) extras.get("module");
+		
 		String dumpTimeStamp = DateUtil.getCurrentTimestampGMT();
-		module.fileSyncTimeStamp = dumpTimeStamp;
-		FLog.d("set fileSyncTimeStamp");
-		ModuleUtil.saveModule(module);
+		
 		Result uploadServerResult = uploadServerDirectory(intent);
 		if (uploadServerResult.resultCode != FAIMSClientResultCode.SUCCESS) {
 			sendMessage(intent, uploadServerResult);
@@ -73,6 +72,9 @@ public class SyncFilesService extends IntentService {
 			sendMessage(intent, uploadAppResult);
 			return;
 		}
+		
+		module.fileSyncTimeStamp = dumpTimeStamp;
+		ModuleUtil.saveModule(module);
 		
 		Result downloadAppResult = downloadAppDirectory(intent);
 		sendMessage(intent, downloadAppResult);

@@ -46,13 +46,17 @@ import com.google.inject.Singleton;
 @Singleton
 public class FAIMSClient {
 
-	private static final int CONNECTION_TIMEOUT = 60 * 1000;
+	private static final int CONNECTION_TIMEOUT = 3600 * 1000;
 	
-	private static final int DATA_TIMEOUT = 60 * 1000;
+	private static final int DATA_TIMEOUT = 3600 * 1000;
 	
 	private static final String USERNAME = "faimsandroidapp";
 	
 	private static final String TOKEN = "YiQIeV39sdhb2ltRmOyGN";
+
+	private static final int PARAMS_STRING_LIMIT = 1800;
+
+	private static final int UPLOAD_FILE_LIMIT = 5;
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -498,31 +502,32 @@ public class FAIMSClient {
 				initClient();
 				
 				String uploadDirPath = moduleDir + "/" + uploadDir;
-				
 				if (!new File(uploadDirPath).isDirectory()) {
 					FLog.d("no files to upload");
 					return Result.SUCCESS;
 				}
 				
 				List<String> localFiles = FileUtil.listDir(uploadDirPath);
-				
 				FLog.d("local files:" + localFiles.toString());
 				
 				if (localFiles.size() == 0) {
 					FLog.d("no files to upload");
 					return Result.SUCCESS;
 				}
-				
+			
 				HttpResponse response = getRequest(getUri(requestExcludePath));
-				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+					FLog.d("request busy");
+					return new Result(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				} else if (statusCode != HttpStatus.SC_OK) {
 					FLog.d("request failed");
 					return Result.FAILURE;
 				}
-				HttpEntity entity = response.getEntity();
 				
+				HttpEntity entity = response.getEntity();
 				if (isInterrupted) {
 					FLog.d("upload directory interrupted");
-					
 					return Result.INTERRUPTED;
 				}
 				
@@ -534,35 +539,35 @@ public class FAIMSClient {
 				for (int i = 0; i < filesArray.size(); i++) {
 					serverFiles.add(filesArray.get(i).getAsString());
 				}
-				
 				FLog.d("server Files: " + serverFiles.toString());
 				
 				// check if new files to upload
-				boolean canUpload = !isListSubsetOfList(localFiles, serverFiles);
-				
-				if (!canUpload) {
+				int numOfFilesToUpload = localFiles.size() - countFilesInList(serverFiles, localFiles);
+				if (numOfFilesToUpload <= 0) {
 					FLog.d("no files to upload");
 					return Result.SUCCESS;
 				}
 				
 				uploadFileRef = File.createTempFile("temp_", ".tar.gz", new File(Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir));
-				
 				uploadFileOS = FileUtil.createTarOutputStream(uploadFileRef.getAbsolutePath());
-				
-				FileUtil.tarFile(uploadDirPath, "", uploadFileOS, serverFiles);
+				FileUtil.tarFile(uploadDirPath, "", uploadFileOS, serverFiles, UPLOAD_FILE_LIMIT);
 				
 				if (isInterrupted) {
 					FLog.d("upload directory interrupted");
-					
 					return Result.INTERRUPTED;
 				}
+					
+				Result result = uploadFile(uploadFileRef, uploadPath);
+				// check if you have more files to upload
+				if (result.resultCode == FAIMSClientResultCode.SUCCESS && numOfFilesToUpload > UPLOAD_FILE_LIMIT) {
+					return new Result(FAIMSClientResultCode.FAILURE, FAIMSClientErrorCode.BUSY_ERROR);
+				}
 				
-				return uploadFile(uploadFileRef, uploadPath);
+				return result;
 			} catch (Exception e) {
 				FLog.e("error uploading directory", e);
 				return Result.FAILURE;
 			} finally {
-				
 				if (uploadFileRef != null) {
 					FileUtil.delete(uploadFileRef);
 				}
@@ -601,10 +606,8 @@ public class FAIMSClient {
 				}
 				
 				HttpEntity entity = response.getEntity();
-				
 				if (isInterrupted) {
 					FLog.d("download directory interrupted");
-					
 					return DownloadResult.INTERRUPTED;
 				}
 				
@@ -616,7 +619,6 @@ public class FAIMSClient {
 				for (int i = 0; i < filesArray.size(); i++) {
 					serverFiles.add(filesArray.get(i).getAsString());
 				}
-				
 				FLog.d("server Files: " + serverFiles.toString());
 				
 				if (serverFiles.size() == 0) {
@@ -628,15 +630,12 @@ public class FAIMSClient {
 				
 				// make sure dir exists
 				FileUtil.makeDirs(downloadDirPath);
-				
 				List<String> localFiles = FileUtil.listDir(downloadDirPath);
-				
 				FLog.d("local Files: " + localFiles.toString());
 				
 				// check if new files to download
-				boolean canDownload = !isListSubsetOfList(serverFiles, localFiles);
-				
-				if (!canDownload) {
+				int numOfFilesToDownload = serverFiles.size() - countFilesInList(localFiles, serverFiles);
+				if (numOfFilesToDownload <= 0) {
 					FLog.d("no files to download");
 					return DownloadResult.SUCCESS;
 				}
@@ -649,7 +648,13 @@ public class FAIMSClient {
 					sb.append("&");
 				}
 				
-				return downloadFile(sb.toString(), downloadPath, downloadDirPath, true);
+				String excludeFileParams = sb.toString();
+				if (excludeFileParams.length() > PARAMS_STRING_LIMIT) {
+					FLog.d("url string to big to download");
+					return DownloadResult.SUCCESS;
+				}
+				
+				return downloadFile(excludeFileParams, downloadPath, downloadDirPath, true);
 			} catch (Exception e) {
 				FLog.e("error downloading directory", e);
 
@@ -666,20 +671,17 @@ public class FAIMSClient {
 		}
 	}
 	
-	private boolean isListSubsetOfList(List<String> subFiles, List<String> files) {
+	private int countFilesInList(List<String> subFiles, List<String> files) {
+		int count = 0;
 		for (String sf : subFiles) {
-			boolean fileInList = false;
 			for (String f : files) {
 				if (sf.equals(f)) {
-					fileInList = true;
+					count++;
 					break;
 				}
 			}
-			if (!fileInList) {
-				return false;
-			}
 		}
-		return true;
+		return count;
 	}
 	
 

@@ -15,6 +15,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -35,6 +36,16 @@ import android.os.StatFs;
 import au.org.intersect.faims.android.log.FLog;
 
 public class FileUtil {
+	
+	private static class TarFile {
+		private String directory;
+		private String name;
+		
+		public TarFile(String directory, String name) {
+			this.directory = directory;
+			this.name = name;
+		}
+	}
 
 	public static void makeDirs(String dir) {
 		File file = new File(dir);
@@ -55,59 +66,68 @@ public class FileUtil {
 	}
 	
 	public static void tarFile(String dir, TarArchiveOutputStream os) throws IOException, FileNotFoundException {
-		tarFile(dir, new File(dir).getName(), os, null);
+		tarFile(dir, new File(dir).getName(), os, null, null);
 	}
 	
-	public static void tarFile(String dir, String baseDir, TarArchiveOutputStream os, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		FLog.c();
-		
+	public static void tarFile(String dir, String baseDir, TarArchiveOutputStream os, List<String> excludeFiles, Integer fileLimit) throws IOException, FileNotFoundException {
 		try {		 
-		 tarDirToStream(dir, baseDir, os, excludeFiles);
+			tarDirToStream(dir, baseDir, os, excludeFiles, fileLimit);
 		}
 		finally {
 			if (os != null) os.close();
 		}
 	}
 	
-	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles) throws IOException, FileNotFoundException {
-		//FLog.d("add dir " + dir + "  to tarname " + tarname);
+	private static void tarDirToStream(String dir, String tarname, TarArchiveOutputStream ts, List<String> excludeFiles, Integer fileLimit) throws IOException, FileNotFoundException {
+		Stack<TarFile> tarStack = new Stack<TarFile>();
 		
-		File d = new File(dir);
-		if (d.isDirectory()) {
-			String[] fileList = d.list();
+		tarStack.push(new TarFile(dir, tarname));
+		
+		while(!tarStack.empty()) {
+			TarFile tarFile = tarStack.pop();
 			
-			for (int i = 0; i < fileList.length; i++) {
-				File f = new File(d, fileList[i]);
-				if (f.isDirectory()) {
-					tarDirToStream(f.getPath(), tarname + f.getName() + "/", ts, excludeFiles);
-				} else {
-					
-					String tarFile = tarname + f.getName();
-					
-					boolean fileExcluded = false;
-					if (excludeFiles != null) {
-						
-						for (String exf : excludeFiles) {
-							if (exf.equals(tarFile)) {
-								fileExcluded = true;
-								break;
+			File d = new File(tarFile.directory);
+			String name = tarFile.name;
+			
+			if (d.isDirectory()) {
+				String[] fileList = d.list();
+				for (int i = 0; i < fileList.length; i++) {
+					File f = new File(d, fileList[i]);
+					if (f.isDirectory()) {
+						tarStack.push(new TarFile(f.getPath(), name + f.getName() + "/"));
+					} else {	
+						String t = name + f.getName();
+						boolean fileExcluded = false;
+						if (excludeFiles != null) {
+							for (String exf : excludeFiles) {
+								if (exf.equals(t)) {
+									fileExcluded = true;
+									break;
+								}
 							}
 						}
+						
+						if (!fileExcluded) {
+							tarStack.push(new TarFile(f.getPath(), t));
+						}
 					}
-					
-					if (!fileExcluded) {
-						tarFileToStream(f.getPath(), tarFile, ts);
+				}
+			} else {
+				if (fileLimit == null) {
+					tarFileToStream(d.getPath(), name, ts);
+				} else {
+					if (fileLimit <= 0) {
+						break;
+					} else {
+						fileLimit--;
+						tarFileToStream(d.getPath(), name, ts);
 					}
 				}
 			}
-		} else {
-			tarFileToStream(d.getPath(), tarname, ts);
 		}
 	}
 	
 	private static void tarFileToStream(String filename, String tarname, TarArchiveOutputStream ts) throws IOException {
-		//FLog.d("add file " + filename + "  to tarname " + tarname);
-		
 		FileInputStream fs = null;
 		try {
 			File f = new File(filename);
@@ -125,8 +145,6 @@ public class FileUtil {
 	}
 	
 	public static void untarFile(String dir, TarArchiveInputStream is) throws IOException {
-		//FLog.d("untar file " + dir);
-		
 		try {
 			TarArchiveEntry e;
 			while((e = is.getNextTarEntry()) != null) {
@@ -179,8 +197,6 @@ public class FileUtil {
 	}
 	
 	private static void writeTarFile(TarArchiveInputStream ts, TarArchiveEntry entry, File file) throws IOException {
-		//FLog.d("writing tar file " + file.getAbsolutePath());
-		
 		// make sure directory path exists
 		makeDirs(file.getParent());
 		
@@ -319,8 +335,6 @@ public class FileUtil {
 	}
 
 	public static void copyFile(String fromPath, String toPath) throws IOException {
-		//FLog.d("copying file " + fromPath + " to " + toPath);
-		
 		FileInputStream input = null;
 		FileOutputStream output = null;
 		try {
@@ -395,7 +409,6 @@ public class FileUtil {
 	    {
 	    }
 	}
-
 	
 }
 

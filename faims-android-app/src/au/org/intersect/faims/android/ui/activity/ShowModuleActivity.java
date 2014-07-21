@@ -91,9 +91,6 @@ import com.google.inject.Inject;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 
 public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestorable{
-	
-	public static final String FILES = "files";
-	public static final String DATABASE = "database";
 
 	public interface SyncListener {
 		
@@ -205,7 +202,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess(DATABASE);
+					activity.callSyncSuccess();
 					
 					activity.syncLock.release();
 				}
@@ -214,7 +211,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess(DATABASE);
+					activity.callSyncSuccess();
 					
 					activity.syncLock.release();
 				} else {
@@ -248,13 +245,13 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 				activity.resetSyncInterval();
 				activity.waitForNextSync();
 				
-				activity.callSyncSuccess(FILES);
+				activity.callSyncSuccess();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.resetSyncInterval();
 					activity.waitForNextSync();
 					
-					activity.callSyncSuccess(FILES);
+					activity.callSyncSuccess();
 				} else {
 					// failure
 					activity.delaySyncInterval();
@@ -403,7 +400,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 
 	private boolean delayStopSync;
 
-	private boolean syncStarted = false;
+	private boolean syncStarted;
 
 	private Animation rotation;
 	private ImageView syncAnimImage;
@@ -598,7 +595,6 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						syncStarted = false;
 						stopSync();
 						ShowModuleActivity.super.onBackPressed();
 					}
@@ -1173,7 +1169,6 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					activityData.setSyncEnabled(false);
-					syncStarted = false;
 					stopSync();
 				}
 			});
@@ -1197,6 +1192,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 	public void stopSync() {
 		FLog.d("stopping sync");
 		
+		syncStarted = false;
 		syncActive = false;
 		
 		// locating server
@@ -1230,17 +1226,8 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 		if (serverDiscovery.isServerHostFixed() || wifiConnected) {
 			syncActive = true;
 			
+			updateSyncStatus();
 			waitForNextSync();
-			try {
-				if(hasDatabaseChanges()){
-					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
-				}else{
-					setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES : SyncStatus.ACTIVE_NO_CHANGES);
-				}
-			} catch (Exception e) {
-				FLog.e("error when checking database changes", e);
-				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
-			}
 		} else {
 			setSyncStatus(SyncStatus.INACTIVE);
 			FLog.d("cannot start sync wifi disabled");
@@ -1364,47 +1351,50 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 	}
 	
 	public void callSyncStart() {
+		syncStarted = true;
 		for (SyncListener listener : listeners) {
 			listener.handleStart();
 		}
 		setSyncStatus(SyncStatus.ACTIVE_SYNCING);
-		syncStarted = true;
 	}
 	
-	public void callSyncSuccess(String type) {
+	public void callSyncSuccess() {
+		syncStarted = false;
 		for (SyncListener listener : listeners) {
 			listener.handleSuccess();
 		}
-		syncStarted = false;
-		
-		if(DATABASE.equals(type)){
-			try {
-				if(hasDatabaseChanges()){
-					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
-				}
-			} catch (Exception e) {
-				FLog.e("error when checking database changes", e);
-				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
-			}
-		}else if(FILES.equals(type)){
-			setSyncStatus(hasFileChanges() ? SyncStatus.ACTIVE_HAS_CHANGES : SyncStatus.ACTIVE_NO_CHANGES);
-		}else{
-			setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
-		}
+		updateSyncStatus();
 		
 		if (delayStopSync) {
 			delayStopSync = false;
 			stopSync();
 		}
 	}
+	
+	private void updateSyncStatus() {
+		if (activityData.isSyncEnabled()) {
+			if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
+				setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+			} else {
+				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+			}
+		} else {
+			setSyncStatus(SyncStatus.INACTIVE);
+		}
+	}
 
-	private boolean hasDatabaseChanges() throws Exception{
-		Module module = ModuleUtil.getModule(moduleKey);
-		String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
-		
-		// create temp database to upload
-		databaseManager.init(database);
-		return databaseManager.hasRecordsFrom(module.timestamp);
+	private boolean hasDatabaseChanges() {
+		try {
+			Module module = ModuleUtil.getModule(moduleKey);
+			String database = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + module.key + "/db.sqlite3";
+			
+			// create temp database to upload
+			databaseManager.init(database);
+			return databaseManager.hasRecordsFrom(module.timestamp);
+		} catch (Exception e) {
+			FLog.e("error getting database changes", e);
+			return false;
+		}
 	}
 
 	private boolean hasFileChanges(){
@@ -1422,7 +1412,9 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 		if(attachedFiles.isDirectory()){
 			for(File file : attachedFiles.listFiles()){
 				if(file.isDirectory()){
-					return hasFileChanges(file, fileSyncTimeStamp);
+					if (hasFileChanges(file, fileSyncTimeStamp)) {
+						return true;
+					}
 				}else{
 					if(file.lastModified() > DateUtil.convertToDateGMT(fileSyncTimeStamp).getTime()){
 						return true;
@@ -1435,10 +1427,10 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 	}
 
 	public void callSyncFailure() {
+		syncStarted = false;
 		for (SyncListener listener : listeners) {
 			listener.handleFailure();
 		}
-		syncStarted = false;
 		setSyncStatus(SyncStatus.ERROR);
 		
 		if (delayStopSync) {
@@ -1501,10 +1493,8 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 
 			@Override
 			public void run() {
-				if(!isSyncStarted()){
-					syncStatus = status;
-					invalidateOptionsMenu();
-				}
+				syncStatus = status;
+				invalidateOptionsMenu();
 			}
 			
 		});
@@ -1542,6 +1532,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 				intent.putExtra("module", module);
 				ShowModuleActivity.this.startService(intent);
 
+				callSyncStart();
 			}
 		});
 	}
