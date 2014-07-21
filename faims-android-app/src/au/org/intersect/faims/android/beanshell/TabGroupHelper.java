@@ -67,7 +67,7 @@ public class TabGroupHelper {
 	
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
-					setTabGroupSaved(tabGroup);
+					setTabGroupSaved(linker, tabGroup);
 					autoSaveManager.reportSaved();
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
@@ -92,6 +92,7 @@ public class TabGroupHelper {
 				
 			}, newRecord);
 		} catch (Exception e) {
+			FLog.e("error saving tab group in background", e);
 			if (autoSaveManager.isEnabled()) {
 				autoSaveManager.notifyError();
 			} else {
@@ -132,7 +133,7 @@ public class TabGroupHelper {
 
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
-					setTabSaved(tab);
+					setTabSaved(linker, tab);
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
 
@@ -348,21 +349,35 @@ public class TabGroupHelper {
 		}
 	}
 	
-	private static void setTabGroupSaved(TabGroup tabGroup) {
+	private static void setTabGroupSaved(BeanShellLinker linker, TabGroup tabGroup) {
 		List<Tab> tabs = tabGroup.getTabs();
 		for (Tab tab : tabs) {
-			setTabSaved(tab);
+			setTabSaved(linker, tab);
 		}
 	}
 	
-	private static void setTabSaved(Tab tab) {
-		List<View> views = tab.getAttributeViews();
+	private static void setTabSaved(final BeanShellLinker linker, final Tab tab) {
+		final List<View> views = tab.getAttributeViews();
 		for (View view : views) {
 			if (view instanceof ICustomView) {
 				ICustomView customView = (ICustomView) view;
 				customView.save();
 			}
 		}
+		// reload files views to get updated paths
+		linker.getActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				for (View view : views) {
+					if (view instanceof ICustomFileView) {
+						ICustomFileView fileView = (ICustomFileView) view;
+						fileView.reload();
+					}
+				}
+			}
+			
+		});
 	}
 	
 	private static List<EntityAttribute> getEntityAttributesFromTabGroup(BeanShellLinker linker, TabGroup tabGroup) {
@@ -393,11 +408,12 @@ public class TabGroupHelper {
 						if (customView instanceof ICustomFileView) {
 							ICustomFileView fileView = (ICustomFileView) customView;
 							if (cachedAttributes == null || fileView.hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
-								List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-								if (pairs == null || pairs.isEmpty()) {
+								List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+								List<NameValuePair> values = (List<NameValuePair>) customView.getValues();
+								if (values == null || values.isEmpty()) {
 									attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
 								} else {
-									for (NameValuePair pair : pairs) {
+									for (NameValuePair pair : values) {
 										// strip out full path
 										String value = null;
 										
@@ -417,9 +433,11 @@ public class TabGroupHelper {
 										} else {
 											attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
 										}
+										
+										pairs.add(new NameValuePair(attachment, linker.getModule().getDirectoryPath(value).getPath()));
 									}
-									
 								}
+								fileView.setReloadPairs(pairs);
 							}
 						} else if (v instanceof CustomCheckBoxGroup) {
 							CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
@@ -482,11 +500,12 @@ public class TabGroupHelper {
 						if (customView instanceof ICustomFileView) {
 							ICustomFileView fileView = (ICustomFileView) customView;
 							if (cachedAttributes == null || fileView.hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
-								List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-								if (pairs == null || pairs.isEmpty()) {
+								List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+								List<NameValuePair> values = (List<NameValuePair>) customView.getValues();
+								if (values == null || values.isEmpty()) {
 									attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
 								} else {
-									for (NameValuePair pair : pairs) {
+									for (NameValuePair pair : values) {
 										// strip out full path
 										String value = null;
 										
@@ -504,8 +523,10 @@ public class TabGroupHelper {
 										} else {
 											attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
 										}
+										pairs.add(new NameValuePair(attachment, value));
 									}
 								}
+								fileView.setReloadPairs(pairs);
 							}
 						} else if (v instanceof CustomCheckBoxGroup) {
 							CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
