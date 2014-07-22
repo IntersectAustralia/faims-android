@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.log.FLog;
@@ -337,6 +340,35 @@ public class CustomSpatialiteLayer extends GeometryLayer {
 		}
 		if(!spatialLite.checkValidGeometry(dbLayer)){
 			throw new MapException("Table contains unsupported geometry");
+		}
+	}
+
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", getName());
+			json.put("dbPath", getDbPath());
+			json.put("type", "CustomSpatialiteLayer");
+			json.put("maxObjects", getMaxObjects());
+			JSONObject point = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("pointStyle", point);
+			JSONObject line = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("lineStyle", line);
+			JSONObject polygon = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("polygonStyle", polygon);
+			json.put("tableName", getTableName());
+			json.put("idColumn", getIdColumn());
+			json.put("labelColumn", getLabelColumn());
+			if (getTextLayer() != null) {
+				JSONObject textLayer = new JSONObject();
+				getTextLayer().saveToJSON(textLayer);
+				json.put("textLayer", textLayer);
+			}
+			json.put("visible", isVisible());
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize CustomSpatialiteLayer", e);
 		}
 	}
 

@@ -7,6 +7,9 @@ import java.util.Vector;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.graphics.Color;
 import au.org.intersect.faims.android.data.User;
@@ -72,6 +75,39 @@ public class TrackLogDatabaseLayer extends DatabaseLayer {
 		if (textLayer != null) {
 			textLayer.renderOnce();
 			textLayer.calculateVisibleElements(envelope, zoom);
+		}
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", getName());
+			json.put("type", "TrackLogDatabaseLayer");
+			json.put("queryName", getQueryName());
+			json.put("querySQL", getQuerySQL());
+			JSONObject point = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("pointStyle", point);
+			JSONObject line = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("lineStyle", line);
+			JSONObject polygon = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("polygonStyle", polygon);
+			json.put("visible", isVisible());
+			if (getTextLayer() != null) {
+				JSONObject textLayer = new JSONObject();
+				getTextLayer().saveToJSON(textLayer);
+				json.put("textLayer", textLayer);
+			}
+			JSONArray userList = new JSONArray();
+			for (Entry<User, Boolean> entry : users.entrySet()) {
+				JSONObject user = new JSONObject();
+				entry.getKey().saveToJSON(user);
+				user.put("checked", entry.getValue());
+			}
+			json.put("users", userList);
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize TrackLogDatabaseLayer", e);
 		}
 	}
 }

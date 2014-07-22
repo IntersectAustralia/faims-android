@@ -3,6 +3,9 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -262,5 +265,20 @@ public class CreatePolygonTool extends SettingsTool {
 		button.setSelectedState(R.drawable.tools_polygon_s);
 		button.setNormalState(R.drawable.tools_polygon);
 		return button;
+	}
+	
+	public void setStyle(GeometryStyle style) {
+		this.style = style;
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", name);
+			JSONObject styleSettings = new JSONObject();
+			style.saveToJSON(styleSettings);
+			json.put("style", styleSettings);
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize CreatePolygonTool", e);
+		}
 	}
 }

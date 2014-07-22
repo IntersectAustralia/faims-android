@@ -1137,6 +1137,28 @@ getMapGeometrySelected() {
 }
 
 /**
+  * Save the map view configuration to the specified file.
+  *
+  * @param ref the reference to the map view
+  * @param file the file to save the json config to, will show error if cannot create
+  * @callback the callback code to execute
+  */
+saveMapViewConfiguration(String ref, String file, String callback) {
+  linker.saveMapViewConfiguration(ref, file, callback);
+}
+
+/**
+  * Setup the map with the given reference with configuration specified in the json file.
+  *
+  * @param ref the reference to the map view
+  * @param configFile the json file with map view configuration, will show error if the file does not exist
+  * @callback the callback code to execute
+  */
+loadMapViewConfiguration(String ref, String configFile, String callback) {
+  linker.loadMapViewConfiguration(ref, configFile, callback);
+}
+
+/**
   * Add a raster map layer to the map view with the following reference and make it the base layer.
   *
   * You can only have a single base layer.

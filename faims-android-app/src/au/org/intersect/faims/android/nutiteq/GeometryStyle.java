@@ -1,5 +1,10 @@
 package au.org.intersect.faims.android.nutiteq;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import au.org.intersect.faims.android.log.FLog;
+
 import com.nutiteq.style.LineStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
@@ -106,6 +111,45 @@ public class GeometryStyle {
 		style.showPoints = false;
 		style.showStroke = true;
 		return style;
+	}
+	
+	public static GeometryStyle loadGeometryStyleFromJSON(JSONObject json) {
+		GeometryStyle style = null;
+		if (json.length() == 0) {
+			return style;
+		}
+		try {
+			style = new GeometryStyle(json.getInt("minZoom"));
+			style.pointColor = json.getInt("pointColor");
+			style.lineColor = json.getInt("lineColor");
+			style.polygonColor = json.getInt("polygonColor");
+			style.size = (float) json.getDouble("size");
+			style.pickingSize = (float) json.getDouble("pickingSize");
+			style.width = (float) json.getDouble("width");
+			style.pickingWidth = (float) json.getDouble("pickingWidth");
+			style.showPoints = json.getBoolean("showPoints");
+			style.showStroke = json.getBoolean("showStroke");
+		} catch (JSONException e) {
+			FLog.e("Couldn't load GeometryStyle from JSON", e);
+		}
+		return style;
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("pointColor", pointColor);
+			json.put("lineColor", lineColor);
+			json.put("polygonColor", polygonColor);
+			json.put("size", size);
+			json.put("pickingSize", pickingSize);
+			json.put("width", width);
+			json.put("pickingWidth", pickingWidth);
+			json.put("showPoints", showPoints);
+			json.put("showStroke", showStroke);
+			json.put("minZoom", minZoom);
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize GeometryStyle", e);
+		}
 	}
 	
 }

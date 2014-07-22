@@ -709,6 +709,9 @@ public class Tab {
 				viewCertainties.put(ref, beanShellLinker.getFieldCertainty(ref));
 				viewAnnotations.put(ref, beanShellLinker.getFieldAnnotation(ref));
 				viewDirtyReasons.put(ref, beanShellLinker.getFieldDirty(ref));
+			} else if (view instanceof CustomMapView) {
+				CustomMapView map = (CustomMapView) view;
+				map.saveTo(savedInstanceState);
 			}
 		}
 		savedInstanceState.putSerializable(getRef() + ":viewPairs", (Serializable) viewPairs);
@@ -721,7 +724,7 @@ public class Tab {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void restoreFrom(Bundle savedInstanceState){
+	public void restoreFrom(Bundle savedInstanceState) {
 		HashMap<String, Object> viewPairs = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewPairs");
 		HashMap<String, Object> viewValues = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewValues");
 		HashMap<String, Object> viewCertainties = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewCertainties");
@@ -744,6 +747,8 @@ public class Tab {
 				beanShellLinker.setFieldCertainty(ref, viewCertainties.get(ref));
 				beanShellLinker.setFieldAnnotation(ref, viewAnnotations.get(ref));
 				beanShellLinker.setFieldDirty(ref, viewDirtyReasons.get(ref) != null, (String) viewDirtyReasons.get(ref));
+			} else if (view instanceof CustomMapView) {
+				((CustomMapView) view).restoreFrom(savedInstanceState);
 			}
 		}
 		tabShown = savedInstanceState.getBoolean(getRef() + ":tabShown");

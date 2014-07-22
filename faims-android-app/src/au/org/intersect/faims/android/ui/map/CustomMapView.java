@@ -12,12 +12,17 @@ import java.util.UUID;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,6 +49,7 @@ import au.org.intersect.faims.android.nutiteq.DatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.DatabaseTextLayer;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
+import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
 import au.org.intersect.faims.android.nutiteq.SpatialiteTextLayer;
 import au.org.intersect.faims.android.nutiteq.TrackLogDatabaseLayer;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
@@ -94,13 +100,14 @@ import com.nutiteq.style.MarkerStyle;
 import com.nutiteq.style.PointStyle;
 import com.nutiteq.style.PolygonStyle;
 import com.nutiteq.style.StyleSet;
-import com.nutiteq.style.TextStyle;
 import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class CustomMapView extends MapView {
 
+	private static final String TAG = "CustomMapView:";
+	
 	private static final int MAP_OVERLAY_DELAY = 500;
 	
 	private static final int BOUNDARY_PADDING = 20;
@@ -521,6 +528,12 @@ public class CustomMapView extends MapView {
 		}
 		
 	}
+	
+	public void removeAllLayers() throws Exception {
+		for (Layer layer : getAllLayers()) {
+			removeLayer(layer);
+		}
+	}
 
 	public Layer getLayer(int layerId) {
 		return layerIdMap.get(layerId);
@@ -839,7 +852,7 @@ public class CustomMapView extends MapView {
 			String idColumn, String labelColumn, GeometryStyle pointStyle,
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle,
-			StyleSet<TextStyle> textStyleSet) throws Exception {
+			GeometryTextStyle textStyle) throws Exception {
 		if (!new File(file).exists()) {
 			throw new MapException("File " + file + " does not exist.");
 		}
@@ -867,9 +880,9 @@ public class CustomMapView extends MapView {
 		
 		this.getLayers().addLayer(spatialLayer);
 		
-		if (textStyleSet != null) {
+		if (textStyle != null) {
 			// add text layer
-			SpatialiteTextLayer textLayer = new SpatialiteTextLayer(new EPSG3857(), spatialLayer, labelColumns, textStyleSet);
+			SpatialiteTextLayer textLayer = new SpatialiteTextLayer(new EPSG3857(), spatialLayer, labelColumns, textStyle);
 			spatialLayer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
@@ -894,7 +907,7 @@ public class CustomMapView extends MapView {
 			GeometryStyle pointStyle,
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle,
-			StyleSet<TextStyle> textStyleSet) throws Exception {
+			GeometryTextStyle textStyle) throws Exception {
 		raiseInvalidLayerName(layerName);
 		
 		DatabaseLayer layer = new DatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
@@ -902,9 +915,9 @@ public class CustomMapView extends MapView {
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
-		if (textStyleSet != null) {
+		if (textStyle != null) {
 			// add text layer
-			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyleSet);
+			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyle);
 			layer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
@@ -920,16 +933,16 @@ public class CustomMapView extends MapView {
 			GeometryStyle pointStyle,
 			GeometryStyle lineStyle,
 			GeometryStyle polygonStyle,
-			StyleSet<TextStyle> textStyleSet) throws Exception {
+			GeometryTextStyle textStyle) throws Exception {
 		raiseInvalidLayerName(layerName);
 		TrackLogDatabaseLayer layer = new TrackLogDatabaseLayer(nextLayerId(), layerName, new EPSG3857(), this,
 				DatabaseLayer.Type.GPS_TRACK, queryName, querySql,
 				FaimsSettings.DEFAULT_VECTOR_OBJECTS, users, pointStyle, lineStyle, polygonStyle);
 		this.getLayers().addLayer(layer);
 		
-		if (textStyleSet != null) {
+		if (textStyle.toStyleSet() != null) {
 			// add text layer
-			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyleSet);
+			DatabaseTextLayer textLayer = new DatabaseTextLayer(new EPSG3857(), layer, textStyle);
 			layer.setTextLayer(textLayer);
 			this.getLayers().addLayer(textLayer);
 		}
@@ -1825,6 +1838,12 @@ public class CustomMapView extends MapView {
 		}
 	}
 	
+	public void removeAllSelections() {
+		for (GeometrySelection selection : getSelections()) {
+			removeSelection(selection);
+		}
+	}
+	
 	public void removeFromAllSelections(String id) {
 		for(GeometrySelection geometrySelection : selectionMap.values()){
 			geometrySelection.removeData(id);
@@ -2551,6 +2570,226 @@ public class CustomMapView extends MapView {
 
 	public void setLegacyToolVisible(boolean value) {
 		this.mapLayout.getToolsBarView().setLegacyToolVisible(value);
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			// orientation etc.
+			json.put("focusPointX", getFocusPoint().x);
+			json.put("focusPointY", getFocusPoint().y);
+			json.put("focusPointZ", getFocusPoint().z);
+			json.put("rotation", getRotation());
+			json.put("tilt", getTilt());
+			json.put("zoom", getZoom());
+			
+			// layers
+			JSONArray layers = new JSONArray();
+			for (Layer layer : getAllLayers()) {
+				JSONObject layerObject = new JSONObject();
+				if (layer instanceof CustomGdalMapLayer) {
+					((CustomGdalMapLayer) layer).saveToJSON(layerObject);
+				} else if (layer instanceof CustomSpatialiteLayer) {
+					((CustomSpatialiteLayer) layer).saveToJSON(layerObject);
+				} else if (layer instanceof CanvasLayer) {
+					((CanvasLayer) layer).saveToJSON(layerObject);
+				} else if (layer instanceof DatabaseLayer) {
+					((DatabaseLayer) layer).saveToJSON(layerObject);
+				} else if (layer instanceof TrackLogDatabaseLayer) {
+					((TrackLogDatabaseLayer) layer).saveToJSON(layerObject);
+				} else {
+					continue;
+				}
+				layers.put(layerObject);
+				
+				if (layer.equals(getSelectedLayer())) {
+					json.put("selectedLayer", getLayerName(layer));
+				}
+			}
+			json.put("layers", layers);
+			
+			// tool settings
+			JSONArray tools = new JSONArray();
+			for (MapTool tool : getTools()) {
+				JSONObject toolObject = new JSONObject();
+				if (tool instanceof CreatePointTool) {
+					((CreatePointTool) tool).saveToJSON(toolObject);
+				} else if (tool instanceof CreateLineTool) {
+					((CreateLineTool) tool).saveToJSON(toolObject);
+				} else if (tool instanceof CreatePolygonTool) {
+					((CreatePolygonTool) tool).saveToJSON(toolObject);
+				} else {
+					continue;
+				}
+				tools.put(toolObject);
+				
+				if (tool.equals(getCurrentTool())) {
+					json.put("selectedTool", tool.getName());
+				}
+			}
+			json.put("tools", tools);
+			
+			// selections
+			JSONArray selections = new JSONArray();
+			for (GeometrySelection selection : getSelections()) {
+				JSONObject selectionObject = new JSONObject();
+				selection.saveToJSON(selectionObject);
+				if (restrictedSelections != null) {
+					selectionObject.put("restricted", restrictedSelections.contains(selection));
+				} else {
+					selectionObject.put("restricted", false);
+				}
+				selections.put(selectionObject);
+				
+				if (selection.equals(getSelectedSelection())) {
+					json.put("selectedSelection", selection.getName());
+				}
+			}
+			json.put("selections", selections);
+			
+			// config dialog settings
+			JSONObject configDialogSettings = new JSONObject();
+			configDialogSettings.put("drawViewColor", getDrawViewColor());
+			configDialogSettings.put("editViewColor", getEditViewColor());
+			configDialogSettings.put("drawViewStrokeStyle", getDrawViewStrokeStyle());
+			configDialogSettings.put("vertexSize", getVertexSize());
+			configDialogSettings.put("drawViewTextSize", getDrawViewTextSize());
+			configDialogSettings.put("showDecimal", showDecimal());
+			configDialogSettings.put("showKm", showKm());
+			configDialogSettings.put("pathBuffer", getPathBuffer());
+			configDialogSettings.put("bufferColor", getBufferColor());
+			configDialogSettings.put("targetColor", getTargetColor());
+			json.put("configDialogSettings", configDialogSettings);
+			
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialise map config to JSON", e);
+		}
+	}
+	
+	public void loadFromJSON(JSONObject json) {
+		try {
+			setFocusPoint(new MapPos(json.getDouble("focusPointX"), json.getDouble("focusPointY"), json.getDouble("focusPointZ")));
+			setRotation((float) json.getDouble("rotation"));
+			setTilt((float) json.getDouble("tilt"));
+			setZoom((float) json.getDouble("zoom"));
+			
+			// layers
+			removeAllLayers();
+			JSONArray layers = json.getJSONArray("layers");
+			String selectedLayer = json.isNull("selectedLayer") ? "" : json.getString("selectedLayer"); 
+			loadLayersFromJSON(layers, selectedLayer);
+			
+			// tool settings
+			JSONArray tools = json.getJSONArray("tools");
+			for (int i=0; i < tools.length(); i++) {
+				JSONObject tool = tools.getJSONObject(i);
+				if (tool.getString("name").equals(CreatePointTool.NAME)) {
+					((CreatePointTool) getTool(CreatePointTool.NAME)).setStyle(GeometryStyle.loadGeometryStyleFromJSON(tool.getJSONObject("style")));
+				} else if (tool.getString("name").equals(CreateLineTool.NAME)) {
+					((CreateLineTool) getTool(CreateLineTool.NAME)).setStyle(GeometryStyle.loadGeometryStyleFromJSON(tool.getJSONObject("style")));
+				} else if (tool.getString("name").equals(CreatePolygonTool.NAME)) {
+					((CreatePolygonTool) getTool(CreatePolygonTool.NAME)).setStyle(GeometryStyle.loadGeometryStyleFromJSON(tool.getJSONObject("style")));
+				}
+			}
+			
+			// selections
+			removeAllSelections();
+			JSONArray selections = json.getJSONArray("selections");
+			for (int i=0; i < selections.length(); i++) {
+				JSONObject selection = selections.getJSONObject(i);
+				GeometryStyle pointStyle = GeometryStyle.loadGeometryStyleFromJSON(selection.getJSONObject("pointStyle"));
+				GeometryStyle lineStyle = GeometryStyle.loadGeometryStyleFromJSON(selection.getJSONObject("lineStyle"));
+				GeometryStyle polygonStyle = GeometryStyle.loadGeometryStyleFromJSON(selection.getJSONObject("polygonStyle"));
+				GeometrySelection newSelection = new GeometrySelection(selection.getString("name"),
+						selection.getBoolean("active"), pointStyle, lineStyle, polygonStyle, selection.getJSONArray("data"));
+				addSelection(selection.getString("name"), newSelection);
+				if (selection.getBoolean("restricted")) {
+					addRestrictedSelection(newSelection, true);
+				}
+			}
+			
+			// config dialog settings
+			JSONObject configDialogSettings = json.getJSONObject("configDialogSettings");
+			setDrawViewColor(configDialogSettings.getInt("drawViewColor"));
+			setEditViewColor(configDialogSettings.getInt("editViewColor"));
+			setDrawViewStrokeStyle((float) configDialogSettings.getDouble("drawViewStrokeStyle"));
+			setVertexSize((float) configDialogSettings.getDouble("vertexSize"));
+			setDrawViewTextSize((float) configDialogSettings.getDouble("drawViewTextSize"));
+			setShowDecimal(configDialogSettings.getBoolean("showDecimal"));
+			setShowKm(configDialogSettings.getBoolean("showKm"));
+			setPathBuffer((float) configDialogSettings.getDouble("pathBuffer"));
+			setBufferColor(configDialogSettings.getInt("bufferColor"));
+			setTargetColor(configDialogSettings.getInt("targetColor"));
+			
+		} catch (Exception e) {
+			FLog.e("Couldn't restore from JSON map config", e);
+		}
+	}
+	
+	public void loadLayersFromJSON(JSONArray layers, String selectedLayer) throws Exception {
+		for (int i=0; i < layers.length(); i++) {
+			JSONObject layer = layers.getJSONObject(i);
+			int newLayer = -1;
+			if (layer.getString("type").equals("CustomGdalMapLayer")) {
+				newLayer = addRasterMap(layer.getString("name"), layer.getString("source"));
+			} else if (layer.getString("type").equals("CustomSpatialiteLayer")) {
+				GeometryStyle pointStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("pointStyle"));
+				GeometryStyle lineStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("lineStyle"));
+				GeometryStyle polygonStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("polygonStyle"));
+				GeometryTextStyle textStyle = null;
+				if (layer.getJSONObject("textLayer") != null) {
+					textStyle = GeometryTextStyle.loadGeometryStyleFromJSON(layer.getJSONObject("textStyle"));
+				}
+				newLayer = addSpatialLayer(layer.getString("name"), layer.getString("dbPath"), layer.getString("tableName"), layer.getString("idColumn"),
+						layer.getString("labelColumn"), pointStyle, lineStyle, polygonStyle, textStyle);
+			} else if (layer.getString("type").equals("CanvasLayer")) {
+				newLayer = addCanvasLayer(layer.getString("name"));
+			} else if (layer.getString("type").equals("DatabaseLayer")) {
+				GeometryStyle pointStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("pointStyle"));
+				GeometryStyle lineStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("lineStyle"));
+				GeometryStyle polygonStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("polygonStyle"));
+				GeometryTextStyle textStyle = null;
+				if (layer.getJSONObject("textLayer") != null) {
+					textStyle = GeometryTextStyle.loadGeometryStyleFromJSON(layer.getJSONObject("textLayer").getJSONObject("textStyle"));
+				}
+				newLayer = addDatabaseLayer(layer.getString("name"), layer.getBoolean("isEntity"), layer.getString("queryName"), layer.getString("querySql"),
+						pointStyle, lineStyle, polygonStyle, textStyle);
+			} else if (layer.getString("type").equals("TrackLogDatabaseLayer")) {
+				GeometryStyle pointStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("pointStyle"));
+				GeometryStyle lineStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("lineStyle"));
+				GeometryStyle polygonStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("polygonStyle"));
+				GeometryTextStyle textStyle = null;
+				if (layer.getJSONObject("textLayer") != null) {
+					textStyle = GeometryTextStyle.loadGeometryStyleFromJSON(layer.getJSONObject("textStyle"));
+				}
+				for (int j=0; j<layer.getJSONArray("users").length(); j++) {
+					putUserCheckList(User.loadUserFromJSON(layer.getJSONArray("users").getJSONObject(j)),
+							layer.getJSONArray("users").getJSONObject(j).getBoolean("checked"));
+				}
+				newLayer = addDataBaseLayerForTrackLog(layer.getString("name"), getUserCheckedList(), layer.getString("queryName"), layer.getString("querySql"),
+						pointStyle, lineStyle, polygonStyle, textStyle);
+			} else {
+				continue;
+			}
+			getLayer(newLayer).setVisible(layer.getBoolean("visible"));
+			if (layer.getString("name").equals(selectedLayer)) {
+				setSelectedLayer(newLayer);
+			}
+		}
+	}
+
+	public void saveTo(Bundle savedInstanceState) {
+		JSONObject json = new JSONObject();
+		saveToJSON(json);
+		savedInstanceState.putString(TAG + "settings", json.toString());
+	}
+	
+	public void restoreFrom(Bundle savedInstanceState) {
+		try {
+			JSONObject json = new JSONObject(savedInstanceState.getString(TAG + "settings"));
+			loadFromJSON(json);
+		} catch (JSONException e) {
+			FLog.e("Couldn't parse JSON map config", e);
+		}
 	}
 
 }

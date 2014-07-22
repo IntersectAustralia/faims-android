@@ -3,6 +3,9 @@ package au.org.intersect.faims.android.nutiteq;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -17,8 +20,6 @@ import com.nutiteq.geometry.Point;
 import com.nutiteq.geometry.Polygon;
 import com.nutiteq.geometry.Text;
 import com.nutiteq.projections.Projection;
-import com.nutiteq.style.StyleSet;
-import com.nutiteq.style.TextStyle;
 import com.nutiteq.vectorlayers.TextLayer;
 
 public class SpatialiteTextLayer extends TextLayer {
@@ -26,7 +27,7 @@ public class SpatialiteTextLayer extends TextLayer {
 	@Inject
 	DatabaseManager databaseManager;
 
-	private StyleSet<TextStyle> styleSet;
+	private GeometryTextStyle textStyle;
 	private int minZoom;
 	private CustomSpatialiteLayer spatialiteLayer;
 	private String[] userColumns;
@@ -34,16 +35,16 @@ public class SpatialiteTextLayer extends TextLayer {
 	
 	private boolean renderOnce;
 
-	public SpatialiteTextLayer(Projection projection, CustomSpatialiteLayer layer, String[] userColumns, StyleSet<TextStyle> styleSet) {
+	public SpatialiteTextLayer(Projection projection, CustomSpatialiteLayer layer, String[] userColumns, GeometryTextStyle textStyle) {
 		super(projection);
 
 		FAIMSApplication.getInstance().injectMembers(this);
 		
 		this.spatialiteLayer = layer;
 		this.userColumns = userColumns;
-		this.styleSet = styleSet;
-		if (styleSet != null) {
-			this.minZoom = styleSet.getFirstNonNullZoomStyleZoom();
+		this.textStyle = textStyle;
+		if (textStyle != null) {
+			this.minZoom = textStyle.toStyleSet().getFirstNonNullZoomStyleZoom();
 		}
 	}
 	
@@ -92,7 +93,7 @@ public class SpatialiteTextLayer extends TextLayer {
 					FLog.e("invalid geometry type");
 				}
 	
-				Text newText = new Text(topRight, name, styleSet, null);
+				Text newText = new Text(topRight, name, textStyle.toStyleSet(), null);
 	
 				newText.attachToLayer(this);
 				newText.setActiveStyle(zoom);
@@ -103,6 +104,17 @@ public class SpatialiteTextLayer extends TextLayer {
 			setVisibleElementsList(objects);
 		}
 
+	}
+
+	public void saveToJSON(JSONObject json) {
+		try {
+			JSONObject style = new JSONObject();
+			textStyle.saveToJSON(style);
+			json.put("textStyle", style);
+			json.put("visible", isVisible());
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize SpatialiteTextLayer", e);
+		}
 	}
 
 }

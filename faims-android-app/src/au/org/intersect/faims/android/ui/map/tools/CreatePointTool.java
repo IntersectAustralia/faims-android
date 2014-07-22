@@ -1,5 +1,8 @@
 package au.org.intersect.faims.android.ui.map.tools;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -136,6 +139,21 @@ public class CreatePointTool extends SettingsTool {
 		button.setSelectedState(R.drawable.tools_point_s);
 		button.setNormalState(R.drawable.tools_point);
 		return button;
+	}
+
+	public void setStyle(GeometryStyle style) {
+		this.style = style;
+	}
+
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", name);
+			JSONObject styleSettings = new JSONObject();
+			style.saveToJSON(styleSettings);
+			json.put("style", styleSettings);
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize CreatePointTool", e);
+		}
 	}
 	
 }

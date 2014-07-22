@@ -61,6 +61,10 @@ public abstract class MapTool extends CustomMapView.CustomMapListener {
 		return container;
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
 	public ToolBarButton getButton(Context context) {
 		ToolBarButton button = new ToolBarButton(context);
 		button.setSelectedState(R.drawable.tools_select_s);
