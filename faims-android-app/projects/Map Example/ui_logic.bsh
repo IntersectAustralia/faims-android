@@ -883,8 +883,11 @@ initSpatialMap() {
 
 // Map UI Test
 
-private initUIMap() {
+initUIMap() {
 	setMapZoom("tabgroup5/tab1/map", 15.0f);
+	createCanvasLayer("tabgroup5/tab1/map", "Data entry layer");
+	setSelectedLayer("tabgroup5/tab1/map", "Data entry layer");
+
 	addDatabaseLayerQuery("tabgroup5/tab1/map", "no query", null);
 	addTrackLogLayerQuery("tabgroup5/tab1/map", "track log entities", 
 		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 

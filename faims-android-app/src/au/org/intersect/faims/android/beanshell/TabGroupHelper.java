@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.os.AsyncTask;
 import android.view.View;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.IBeanShellCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
@@ -66,7 +67,7 @@ public class TabGroupHelper {
 	
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
-					setTabGroupSaved(tabGroup);
+					setTabGroupSaved(linker, tabGroup);
 					autoSaveManager.reportSaved();
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
@@ -91,6 +92,7 @@ public class TabGroupHelper {
 				
 			}, newRecord);
 		} catch (Exception e) {
+			FLog.e("error saving tab group in background", e);
 			if (autoSaveManager.isEnabled()) {
 				autoSaveManager.notifyError();
 			} else {
@@ -131,7 +133,7 @@ public class TabGroupHelper {
 
 				@Override
 				public void onSave(final String uuid, final boolean newRecord) {
-					setTabSaved(tab);
+					setTabSaved(linker, tab);
 					if (callback != null) {
 						linker.getActivity().runOnUiThread(new Runnable() {
 
@@ -347,21 +349,35 @@ public class TabGroupHelper {
 		}
 	}
 	
-	private static void setTabGroupSaved(TabGroup tabGroup) {
+	private static void setTabGroupSaved(BeanShellLinker linker, TabGroup tabGroup) {
 		List<Tab> tabs = tabGroup.getTabs();
 		for (Tab tab : tabs) {
-			setTabSaved(tab);
+			setTabSaved(linker, tab);
 		}
 	}
 	
-	private static void setTabSaved(Tab tab) {
-		List<View> views = tab.getAttributeViews();
+	private static void setTabSaved(final BeanShellLinker linker, final Tab tab) {
+		final List<View> views = tab.getAttributeViews();
 		for (View view : views) {
 			if (view instanceof ICustomView) {
 				ICustomView customView = (ICustomView) view;
 				customView.save();
 			}
 		}
+		// reload files views to get updated paths
+		linker.getActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				for (View view : views) {
+					if (view instanceof ICustomFileView) {
+						ICustomFileView fileView = (ICustomFileView) view;
+						fileView.reload();
+					}
+				}
+			}
+			
+		});
 	}
 	
 	private static List<EntityAttribute> getEntityAttributesFromTabGroup(BeanShellLinker linker, TabGroup tabGroup) {
@@ -390,29 +406,38 @@ public class TabGroupHelper {
 						String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 						String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
 						if (customView instanceof ICustomFileView) {
-							List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-							if (pairs == null || pairs.isEmpty()) {
-								attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-							} else {
-								for (NameValuePair pair : pairs) {
-									// strip out full path
-									String value = null;
-									
-									// attach new files
-									if (!pair.getName().contains(linker.getModule().getDirectoryPath("files").getPath())) {
-										value = linker.attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-									} else {
-										value = linker.stripAttachedFilePath(pair.getName());
-									}
-									
-									if (Attribute.MEASURE.equals(customView.getAttributeType())) {
-										attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, value, null, certainty));
-									} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-										attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, value, certainty));
-									} else {
-										attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
+							ICustomFileView fileView = (ICustomFileView) customView;
+							if (cachedAttributes == null || fileView.hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
+								List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+								List<NameValuePair> values = (List<NameValuePair>) customView.getValues();
+								if (values == null || values.isEmpty()) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
+								} else {
+									for (NameValuePair pair : values) {
+										// strip out full path
+										String value = null;
+										
+										// attach new files
+										boolean sync = ((ICustomFileView) customView).getSync();
+										String attachment = pair.getName();
+										if (hasAttachment(linker, attachment, sync)) {
+											value = linker.stripAttachedFilePath(attachment);
+										} else {
+											value = linker.attachFile(attachment, sync, null, null);
+										}
+										
+										if (Attribute.MEASURE.equals(customView.getAttributeType())) {
+											attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, value, null, certainty));
+										} else if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+											attributes.add(new EntityAttribute(customView.getAttributeName(), annotation, null, value, certainty));
+										} else {
+											attributes.add(new EntityAttribute(customView.getAttributeName(), value, null, null, certainty));
+										}
+										
+										pairs.add(new NameValuePair(attachment, linker.getModule().getDirectoryPath(value).getPath()));
 									}
 								}
+								fileView.setReloadPairs(pairs);
 							}
 						} else if (v instanceof CustomCheckBoxGroup) {
 							CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
@@ -473,27 +498,35 @@ public class TabGroupHelper {
 						String annotation = customView.getAnnotationEnabled() ? customView.getAnnotation() : null;
 						String certainty = customView.getCertaintyEnabled() ? String.valueOf(customView.getCertainty()) : null;
 						if (customView instanceof ICustomFileView) {
-							List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-							if (pairs == null || pairs.isEmpty()) {
-								attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
-							} else {
-								for (NameValuePair pair : pairs) {
-									// strip out full path
-									String value = null;
-									
-									// attach new files
-									if (!pair.getName().contains(linker.getModule().getDirectoryPath("files").getPath())) {
-										value = linker.attachFile(pair.getName(), ((ICustomFileView) customView).getSync(), null, null);
-									} else {
-										value = linker.stripAttachedFilePath(pair.getName());
-									}
-									
-									if (Attribute.VOCAB.equals(customView.getAttributeType())) {
-										attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, value, certainty));
-									} else {
-										attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
+							ICustomFileView fileView = (ICustomFileView) customView;
+							if (cachedAttributes == null || fileView.hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
+								List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+								List<NameValuePair> values = (List<NameValuePair>) customView.getValues();
+								if (values == null || values.isEmpty()) {
+									attributes.add(new EntityAttribute(customView.getAttributeName(), null, null, null, null, true));
+								} else {
+									for (NameValuePair pair : values) {
+										// strip out full path
+										String value = null;
+										
+										// attach new files
+										boolean sync = ((ICustomFileView) customView).getSync();
+										String attachment = pair.getName();
+										if (hasAttachment(linker, attachment, sync)) {
+											value = linker.stripAttachedFilePath(attachment);
+										} else {
+											value = linker.attachFile(attachment, sync, null, null);
+										}
+										
+										if (Attribute.VOCAB.equals(customView.getAttributeType())) {
+											attributes.add(new RelationshipAttribute(customView.getAttributeName(), annotation, value, certainty));
+										} else {
+											attributes.add(new RelationshipAttribute(customView.getAttributeName(), value, null, certainty));
+										}
+										pairs.add(new NameValuePair(attachment, value));
 									}
 								}
+								fileView.setReloadPairs(pairs);
 							}
 						} else if (v instanceof CustomCheckBoxGroup) {
 							CustomCheckBoxGroup checkboxGroup = (CustomCheckBoxGroup) v;
@@ -522,6 +555,21 @@ public class TabGroupHelper {
 		} 
 		
 		return attributes;
+	}
+	
+	private static boolean hasAttachment(BeanShellLinker linker, String filename, boolean sync) {
+		if (filename == null) return false;
+		// strip the module path from filename if it exists
+		String strippedFilename = linker.stripAttachedFilePath(filename);
+		// get directory to attach to
+		String directory;
+		if (sync) {
+			directory = linker.getActivity().getResources().getString(R.string.app_dir);
+		} else {
+			directory = linker.getActivity().getResources().getString(R.string.server_dir);
+		}
+		// check if file exists and is in correct directory
+		return linker.getModule().getDirectoryPath(strippedFilename).exists() && strippedFilename.contains(directory);
 	}
 	
 	protected static void showArchEntityTabGroup(final BeanShellLinker linker, final String entityId, final TabGroup tabGroup, final FetchCallback callback) {

@@ -32,6 +32,11 @@ initialise() {
 			populateCheckBoxGroup("tabgroup1/tab2/location", result);
 		}
 	});
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'picture';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery("tabgroup1/tab2/picture", result);
+		}
+	});
 }
 
 setUser(){
@@ -40,4 +45,16 @@ setUser(){
 }
 
 onEvent("tabgroup1", "load", "initialise()");
-onEvent("tabgroup1/tab1/settype", "click", "setFieldValue(\"tabgroup1/tab1/name\",\"{typeC}\")");
+onEvent("tabgroup1/tab1/settype", "click", "setText()");
+onEvent("tabgroup1/tab1/toast", "click", "showMessage()");
+
+setText() {
+	setFieldValue("tabgroup1/tab1/name","text now has multi arch16n messages '{message1}' and '{message2}'");
+}
+
+count = 0;
+
+showMessage() {
+	count++;
+	showToast("{hello.world} shown " + count + " times");
+}

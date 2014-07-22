@@ -36,8 +36,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class FAIMSClient {
 
-	private static final int CONNECTION_TIMEOUT = 60 * 1000;	
-	private static final int DATA_TIMEOUT = 60 * 1000;
+	private static final int CONNECTION_TIMEOUT = 3600 * 1000;	
+	private static final int DATA_TIMEOUT = 3600 * 1000;
 	
 	// Note: this is temporary 	
 	private static final String USERNAME = "faimsandroidapp";	

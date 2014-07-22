@@ -53,13 +53,13 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	protected static final int GALLERY_SIZE = 400;
 	
-	private String ref;
-	private List<NameValuePair> currentValues;
-	private float certainty;
-	private float currentCertainty;
-	private String annotation;
-	private String currentAnnotation;
-	private boolean isMulti;
+	protected String ref;
+	protected List<NameValuePair> currentValues;
+	protected float certainty;
+	protected float currentCertainty;
+	protected String annotation;
+	protected String currentAnnotation;
+	protected boolean isMulti;
 	protected boolean dirty;
 	protected String dirtyReason;
 	
@@ -72,7 +72,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	protected PictureGalleryOnClickListener customListener;
 
 	private boolean annotationEnabled;
-
 	private boolean certaintyEnabled;
 
 	private FormAttribute attribute;
@@ -301,6 +300,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setValues(List<?> values) {
+		if (values == null) return;
 		List<NameValuePair> pairs = (List<NameValuePair>) values;
 		for (NameValuePair pair : pairs) {
 			for (CustomImageView imageView : galleryImages) {
@@ -327,6 +327,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	}
 	
 	public void setPairs(List<NameValuePair> pairs) {
+		if (pairs == null) return;
 		ArrayList<Picture> pictures = new ArrayList<Picture>();
 		for (NameValuePair pair : pairs) {
 			Picture picture = new Picture(pair.getName(), null, pair.getValue());

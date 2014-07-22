@@ -211,6 +211,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setValues(List<?> values) {
+		if (values == null) return;
 		List<NameValuePair> pairs = (List<NameValuePair>) values;
 		for (NameValuePair pair : pairs) {
 			for (int i = 0; i < getChildCount(); ++i) {
@@ -251,6 +252,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	}
 
 	public void populate(List<NameValuePair> pairs) {
+		if (pairs == null) return;
 		removeAllViews();
 		for (NameValuePair pair : pairs) {
 			CustomCheckBox checkBox = new CustomCheckBox(this.getContext());
