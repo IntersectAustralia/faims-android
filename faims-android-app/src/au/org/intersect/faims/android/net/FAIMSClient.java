@@ -46,9 +46,9 @@ import com.google.inject.Singleton;
 @Singleton
 public class FAIMSClient {
 
-	private static final int CONNECTION_TIMEOUT = 3600 * 1000;
+	private static final int CONNECTION_TIMEOUT = 300 * 1000; // 5 minutes
 	
-	private static final int DATA_TIMEOUT = 3600 * 1000;
+	private static final int DATA_TIMEOUT = 3600 * 1000; // 10 hours
 	
 	private static final String USERNAME = "faimsandroidapp";
 	
@@ -418,11 +418,7 @@ public class FAIMSClient {
 		InputStream stream = null;
 		tempArchive = null;
 		try {
-			HttpParams params = new BasicHttpParams();
-			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
-			HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
-			
-			HttpResponse response = getRequest(getUri(path), params);
+			HttpResponse response = getRequest(getUri(path));
 			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 				FLog.d("request failed");
 				return null;
@@ -479,17 +475,14 @@ public class FAIMSClient {
 	}
 	
 	private HttpResponse getRequest(String uri) throws IOException {
-		return getRequest(uri, null);
-	}
-	
-	private HttpResponse getRequest(String uri, HttpParams params) throws IOException {
 		FLog.d(uri);
 		
 		HttpGet get = createGetRequest(uri);
 		
-		if (params != null) {
-			get.setParams(params);
-		}
+		HttpParams params = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
+		get.setParams(params);
 
 		HttpResponse response = httpClient.execute(get);
 		return response;
