@@ -234,8 +234,8 @@ public class FetchModulesActivity extends RoboActivity {
 
 	protected void showUpdateOrDownloadModuleDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Download");
-		builder.setMessage("Do you want to download or update module?");
+		builder.setTitle(R.string.confirm_download_or_update_module_title);
+		builder.setMessage(getString(R.string.confirm_download_or_update_module_message)  + " " + selectedItem + "?");
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			
@@ -245,7 +245,7 @@ public class FetchModulesActivity extends RoboActivity {
 			}
 		});
 		
-		builder.setNeutralButton("Download", new OnClickListener() {
+		builder.setNeutralButton("Restore", new OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -258,7 +258,20 @@ public class FetchModulesActivity extends RoboActivity {
 							public void handleDialogResponse(
 									DialogResultCode resultCode) {
 								if (resultCode == DialogResultCode.SELECT_YES) {
-									downloadModuleArchive();
+									choiceDialog = new ChoiceDialog(FetchModulesActivity.this, 
+											getString(R.string.confirm_download_warning_module_title),
+											getString(R.string.confirm_download_warning_module_message),
+											new IDialogListener() {
+	
+												@Override
+												public void handleDialogResponse(
+														DialogResultCode resultCode) {
+													if (resultCode == DialogResultCode.SELECT_YES) {
+														downloadModuleArchive();
+													}
+												}	
+									});
+									choiceDialog.show();
 								}
 							}
 					
@@ -280,8 +293,8 @@ public class FetchModulesActivity extends RoboActivity {
 
 	protected void showUpdateModuleDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Update");
-		builder.setMessage("Do you want to update module settings or module data?");
+		builder.setTitle(R.string.select_update_module_title);
+		builder.setMessage(R.string.select_update_module_message);
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			

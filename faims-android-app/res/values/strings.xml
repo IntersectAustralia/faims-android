@@ -23,10 +23,19 @@
     <string name="fetch_modules_failure_message">Would you like to try again?</string>
     
     <string name="confirm_download_module_title">Download Module</string>
-    <string name="confirm_download_module_message">Would you like to download</string>
+    <string name="confirm_download_module_message">Would you like to download module</string>
+    
+    <string name="confirm_download_or_update_module_title">Update or Restore Module</string>
+    <string name="confirm_download_or_update_module_message">Would you like to update or restore module</string>
+    
+    <string name="confirm_download_warning_module_title">Restore Module</string>
+    <string name="confirm_download_warning_module_message">Restoring a module from the server will DELETE ALL UNSYNCHRONIZED DATA and custom module settings. It should only be used for emergency restoration of your module. We recommend synchronising or manually backing up data on your device before you Restore.</string>
     
     <string name="download_module_title">Downloading Module</string>
     <string name="download_module_message">please wait..</string>
+    
+    <string name="select_update_module_title">Update Module</string>
+    <string name="select_update_module_message">Do you want to update module settings or module data?</string>
     
     <string name="download_module_failure_title">Could not download module</string>
     <string name="download_module_failure_message">Would you like to try again?</string>
@@ -56,7 +65,7 @@
     <string name="update_busy_module_error_message">Please wait until module has finished archiving on the server and try again</string>
 
     <string name="render_module_title">Show Module</string>
-    <string name="render_module_message">Do you want to render module?</string>
+    <string name="render_module_message">Do you want to open module?</string>
     
     <string name="upload_database_title">Uploading Database</string>
     <string name="upload_database_message">please wait..</string>
