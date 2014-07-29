@@ -12,7 +12,19 @@ getAttributeName(String vocab) {
 }
 
 
+displayAlert(){
+	showTextAlert("Alert", "Entity to Load:", "loadOK()", "loadCancel()");
+}
 
+loadCancel() {
+  showToast("Dialog Canceled");
+}
+loadOK() {
+  entityId = getLastTextAlertInput();
+  showToast("Entered text: "+entityId);
+}
+
+onEvent("App/LogicTriggered/ShowWarning","click", "displayAlert()");
 onEvent("App/LogicTriggered/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
 onEvent("App/LogicTriggered/ShowToast", "click", "onClickButton()");
 onEvent("App/LogicTriggered/ShowHidden", "click", "showTab(\"App/Hidden\")");

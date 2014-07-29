@@ -67,6 +67,7 @@
               <text/>
             </Maps>
 			<LogicTriggered>
+			<ShowTextWarning/>
 			 <ShowWarning/>
               <ShowToast/>
               <ShowHidden/>
@@ -251,6 +252,9 @@
       </group>
       <group ref="LogicTriggered">
       <label>Logic Triggered</label>
+      <trigger ref="ShowTextWarning">
+          <label>Show Text Warning</label>
+        </trigger>
       <trigger ref="ShowWarning">
           <label>Show Warning</label>
         </trigger>
