@@ -4,19 +4,16 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.javarosa.core.model.SelectChoice;
-
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.text.InputType;
 import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.MapLayout;
@@ -48,7 +45,7 @@ public class ViewFactory {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	protected TextView createLabel(FormAttribute attribute) {
+	protected TextView createLabel(FormInputDef attribute) {
 		TextView textView = new TextView(context());
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
@@ -72,16 +69,16 @@ public class ViewFactory {
 		return createButton("?");
 	}
 	
-	protected Table createTableView() {
-		return new Table(context());
+	protected Table createTableView(String ref, boolean dynamic) {
+		return new Table(context(), ref, dynamic);
 	}
 	
-	protected CustomWebView createWebView() {
-		return new CustomWebView(context());
+	protected CustomWebView createWebView(String ref, boolean dynamic) {
+		return new CustomWebView(context(), ref, dynamic);
 	}
 
-	protected CustomEditText createTextField(int type, FormAttribute attribute, String ref) {
-		CustomEditText text = new CustomEditText(context(), attribute, ref);
+	protected CustomEditText createTextField(int type, FormInputDef attribute, String ref, boolean dynamic) {
+		CustomEditText text = new CustomEditText(context(), attribute, ref, dynamic);
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
@@ -89,26 +86,26 @@ public class ViewFactory {
     	return text;
 	}
 	
-	protected CustomEditText createIntegerTextField(FormAttribute attribute, String ref) {
-    	return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref);
+	protected CustomEditText createIntegerTextField(FormInputDef attribute, String ref, boolean dynamic) {
+    	return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref, dynamic);
 	}
 	
-	protected CustomEditText createDecimalTextField(FormAttribute attribute, String ref) {
-        return createTextField(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, attribute, ref);
+	protected CustomEditText createDecimalTextField(FormInputDef attribute, String ref, boolean dynamic) {
+        return createTextField(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, attribute, ref, dynamic);
 	}
 	
-	protected CustomEditText createLongTextField(FormAttribute attribute, String ref) {
-        return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref);
+	protected CustomEditText createLongTextField(FormInputDef attribute, String ref, boolean dynamic) {
+        return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref, dynamic);
 	}
 	
-	protected CustomEditText createTextArea(FormAttribute attribute, String ref) {
-		CustomEditText text = createTextField(-1, attribute, ref);
+	protected CustomEditText createTextArea(FormInputDef attribute, String ref, boolean dynamic) {
+		CustomEditText text = createTextField(-1, attribute, ref, dynamic);
     	text.setLines(TEXT_AREA_SIZE);
     	return text;
 	}
 	
-	protected CustomDatePicker createDatePicker(FormAttribute attribute, String ref) {
-		CustomDatePicker date = new CustomDatePicker(context(), attribute, ref);
+	protected CustomDatePicker createDatePicker(FormInputDef attribute, String ref, boolean dynamic) {
+		CustomDatePicker date = new CustomDatePicker(context(), attribute, ref, dynamic);
     	Time now = new Time();
 		now.setToNow();
 		date.updateDate(now.year, now.month, now.monthDay);
@@ -118,8 +115,8 @@ public class ViewFactory {
     	return date;
 	}
 	
-	protected CustomTimePicker createTimePicker(FormAttribute attribute, String ref) {
-		CustomTimePicker time = new CustomTimePicker(context(), attribute, ref);
+	protected CustomTimePicker createTimePicker(FormInputDef attribute, String ref, boolean dynamic) {
+		CustomTimePicker time = new CustomTimePicker(context(), attribute, ref, dynamic);
     	Time timeNow = new Time();
         timeNow.setToNow();
 		time.setCurrentHour(timeNow.hour);
@@ -130,29 +127,33 @@ public class ViewFactory {
 		return time;
 	}
 	
-	protected CustomRadioGroup createRadioGroup(FormAttribute attribute, String ref) {
-		CustomRadioGroup radioGroup = new CustomRadioGroup(context(), attribute, ref);
+	protected CustomRadioGroup createRadioGroup(FormInputDef attribute, String ref, boolean dynamic) {
+		CustomRadioGroup radioGroup = new CustomRadioGroup(context(), attribute, ref, dynamic);
 		
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-		for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	String innerText = selectChoice.getLabelInnerText();
-        	innerText = arch16n.substituteValue(innerText);
-        	pairs.add(new NameValuePair(innerText, selectChoice.getValue()));
-        }
+		if (attribute.selectChoices != null) {
+			for (final NameValuePair selectChoice : attribute.selectChoices) {
+	        	String innerText = selectChoice.getName();
+	        	innerText = arch16n.substituteValue(innerText);
+	        	pairs.add(new NameValuePair(innerText, selectChoice.getValue()));
+	        }
+		}
 		radioGroup.populate(pairs);
 		
 		return radioGroup;  
 	}
 	
-	protected HierarchicalSpinner createDropDown(FormAttribute attribute, String ref) {
-		HierarchicalSpinner spinner = new HierarchicalSpinner(context(), attribute, ref);
+	protected HierarchicalSpinner createDropDown(FormInputDef attribute, String ref, boolean dynamic) {
+		HierarchicalSpinner spinner = new HierarchicalSpinner(context(), attribute, ref, dynamic);
 		
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	String innerText = selectChoice.getLabelInnerText();
-        	innerText = arch16n.substituteValue(innerText);
-        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-            choices.add(pair);
+        if (attribute.selectChoices != null) {
+	        for (final NameValuePair selectChoice : attribute.selectChoices) {
+	        	String innerText = selectChoice.getName();
+	        	innerText = arch16n.substituteValue(innerText);
+	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+	            choices.add(pair);
+	        }
         }
         
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -165,36 +166,40 @@ public class ViewFactory {
         return spinner;
 	}
 	
-	protected CustomCheckBoxGroup createCheckListGroup(FormAttribute attribute, String ref) {
+	protected CustomCheckBoxGroup createCheckListGroup(FormInputDef attribute, String ref, boolean dynamic) {
 		CustomCheckBoxGroup checkboxGroup = new CustomCheckBoxGroup(
-                context(), attribute, ref);
+                context(), attribute, ref, dynamic);
         
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	String innerText = selectChoice.getLabelInnerText();
-        	innerText = arch16n.substituteValue(innerText);
-        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-            choices.add(pair);
+        if (attribute.selectChoices != null) {
+	        for (final NameValuePair selectChoice : attribute.selectChoices) {
+	        	String innerText = selectChoice.getName();
+	        	innerText = arch16n.substituteValue(innerText);
+	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+	            choices.add(pair);
+	        }
         }
         
         return checkboxGroup;
 	}
 	
-	protected FileListGroup createFileListGroup(FormAttribute attribute, String ref) {
+	protected FileListGroup createFileListGroup(FormInputDef attribute, String ref, boolean dynamic) {
 		FileListGroup audioListGroup = new FileListGroup(
-                context(), attribute, attribute.sync, ref);
+                context(), attribute, attribute.sync, ref, dynamic);
         return audioListGroup;
 	}
 	
-	protected CustomListView createList(FormAttribute attribute) {
-		CustomListView list = new CustomListView(context());
+	protected CustomListView createList(FormInputDef attribute, String ref, boolean dynamic) {
+		CustomListView list = new CustomListView(context(), ref, dynamic);
 		
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        for (final SelectChoice selectChoice : attribute.selectChoices) {
-        	String innerText = selectChoice.getLabelInnerText();
-        	innerText = arch16n.substituteValue(innerText);
-        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-            choices.add(pair);
+        if (attribute.selectChoices != null) {
+	        for (final NameValuePair selectChoice : attribute.selectChoices) {
+	        	String innerText = selectChoice.getName();
+	        	innerText = arch16n.substituteValue(innerText);
+	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
+	            choices.add(pair);
+	        }
         }
         
         ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
@@ -206,30 +211,30 @@ public class ViewFactory {
         return list;
 	}
 	
-	protected Button createTrigger(FormAttribute attribute) {
-		 CustomButton button = new CustomButton(context());
+	protected Button createTrigger(FormInputDef attribute, String ref, boolean dynamic) {
+		 CustomButton button = new CustomButton(context(), ref, dynamic);
          String questionText = arch16n.substituteValue(attribute.questionText);
          button.setText(questionText);
          return button;
 	}
 	
-	protected PictureGallery createPictureGallery(FormAttribute attribute, String ref, boolean isMulti) {
+	protected PictureGallery createPictureGallery(FormInputDef attribute, String ref, boolean dynamic, boolean isMulti) {
     	if (isMulti) {
-    		return new PictureGallery(context(), attribute, ref, isMulti);
+    		return new PictureGallery(context(), attribute, ref, dynamic, isMulti);
     	}
-    	return new HierarchicalPictureGallery(context(), attribute, ref);
+    	return new HierarchicalPictureGallery(context(), attribute, ref, dynamic);
 	}
 	    
-	protected CameraPictureGallery createCameraPictureGallery(FormAttribute attribute, String ref) {
-		return new CameraPictureGallery(context(), attribute, ref);
+	protected CameraPictureGallery createCameraPictureGallery(FormInputDef attribute, String ref, boolean dynamic) {
+		return new CameraPictureGallery(context(), attribute, ref, dynamic);
 	}
 	    
-	protected VideoGallery createVideoGallery(FormAttribute attribute, String ref) {
-		return new VideoGallery(context(), attribute, ref);
+	protected VideoGallery createVideoGallery(FormInputDef attribute, String ref, boolean dynamic) {
+		return new VideoGallery(context(), attribute, ref, dynamic);
 	}
 	 
-	protected MapLayout createMapView(LinearLayout linearLayout) {
-		return new MapLayout(context());
+	protected MapLayout createMapView(String ref, boolean dynamic) {
+		return new MapLayout(context(), ref, dynamic);
 	}
 	
 	private Button createButton(String label) {

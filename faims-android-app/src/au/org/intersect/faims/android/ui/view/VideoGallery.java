@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.VideoView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.log.FLog;
@@ -43,8 +43,8 @@ public class VideoGallery extends PictureGallery implements ICustomFileView {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public VideoGallery(Context context, FormAttribute attribute, String ref) {
-		super(context, attribute, ref, true);
+	public VideoGallery(Context context, FormInputDef attribute, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic, true);
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = attribute.sync;
 	}

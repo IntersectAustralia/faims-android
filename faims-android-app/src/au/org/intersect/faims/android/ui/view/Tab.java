@@ -16,6 +16,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,7 +31,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -58,11 +60,14 @@ public class Tab {
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
+	
 	private List<View> viewList;
-	private Map<String, String> viewRefMap;
 	private Map<String, List<View>> attributeViewMap;
 	private List<CustomMapView> mapViewList;
 	private Map<String, Button> dirtyButtonMap;
+	private Map<String, LinearLayout> viewLayoutMap;
+	
+	private Map<String, LinearLayout> containerMap;
 
 	private String ref;
 	private String name;
@@ -92,10 +97,11 @@ public class Tab {
 		this.onShowCommands = new ArrayList<String>();
 		
 		this.viewList = new ArrayList<View>();	
-		this.viewRefMap = new HashMap<String, String>();
-		this.attributeViewMap = new HashMap<String, List<View>>();
 		this.mapViewList = new ArrayList<CustomMapView>();
+		this.attributeViewMap = new HashMap<String, List<View>>();
 		this.dirtyButtonMap = new HashMap<String, Button>();
+		this.viewLayoutMap = new HashMap<String, LinearLayout>();
+		this.containerMap = new HashMap<String, LinearLayout>();
 		
 		linearLayout = new LinearLayout(activityRef.get());
         linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -112,161 +118,293 @@ public class Tab {
         
         viewFactory = new ViewFactory(activityRef, arch16n);
 	}
+	
+	public void addCustomContainer(String ref, String style, String parentRef) throws Exception {
+		LinearLayout parentContainer = containerMap.get(parentRef);
+		CustomLinearLayout containerLayout = new CustomLinearLayout(linearLayout.getContext(), beanShellLinker.getUIRenderer().getStyleMappings(style), true);
+		addCustomContainer(ref, containerLayout, parentContainer);
+	}
 
-	public void addChildContainer(LinearLayout parentLayout, LinearLayout containerLayout) {
+	public void addCustomContainer(String ref, LinearLayout containerLayout, LinearLayout parentLayout) throws Exception {
+		// check if container already exists
+		if (containerMap.get(ref) != null) {
+			throw new Exception("container already exists " + ref);
+		}
+		
 		if (parentLayout == null) {
 			linearLayout.addView(containerLayout);
 		} else {
 			parentLayout.addView(containerLayout);
 		}
+		containerMap.put(ref, containerLayout);
+		refreshTab();
+	}
+	
+	public void removeCustomContainer(String ref) {
+		LinearLayout layout = containerMap.get(ref);
+		if (layout != null) {
+			ViewParent parent = layout.getParent();
+			if (parent instanceof ViewGroup) {
+				((ViewGroup) parent).removeView(layout);
+				containerMap.remove(ref);
+			} else {
+				FLog.w("cannot remove container " + ref);
+			}
+		} else {
+			FLog.w("cannot find container " + ref);
+		}
+		
+		refreshTab();
+	}
+	
+	public View addCustomView(String ref, FormInputDef inputDef, boolean isArchEnt, boolean isRelationship, String containerRef) throws Exception {
+		return addCustomView(ref, inputDef, isArchEnt, isRelationship, containerMap.get(containerRef), true);
+	}
+	
+	public View addCustomView(String ref, FormInputDef inputDef, boolean isArchEnt, boolean isRelationship, LinearLayout container) throws Exception {
+		return addCustomView(ref, inputDef, isArchEnt, isRelationship, container, false);
 	}
 
-	public View addCustomView(String ref, String name, FormAttribute attribute, boolean isArchEnt, boolean isRelationship, 
-			List<Map<String, String>> styleMappings, LinearLayout linearLayout) {
+	public View addCustomView(String ref, FormInputDef inputDef, boolean isArchEnt, boolean isRelationship, LinearLayout container, boolean dynamic) throws Exception {
+		// check if ref already exists
+		if (beanShellLinker.getUIRenderer().getViewByRef(ref) != null) {
+			throw new Exception("view already exists " + ref);
+		}
+		
 		// check if root container
-		if (linearLayout == null) {
-			linearLayout = this.linearLayout;
+		if (container == null) {
+			container = this.linearLayout;
 		}
 		
 		View view = null;
 		
 		// check the control type to know the type of the question
-        switch (attribute.controlType) {
+        switch (inputDef.controlType) {
             case Constants.CONTROL_INPUT:
-            	switch (attribute.dataType) {
+            	switch (inputDef.dataType) {
 	                case Constants.DATATYPE_INTEGER:
-	                	view = viewFactory.createIntegerTextField(attribute, ref);
-	                	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createIntegerTextField(inputDef, ref, dynamic);
+	                	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                case Constants.DATATYPE_DECIMAL:
-	                	view = viewFactory.createDecimalTextField(attribute, ref);
-	                	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createDecimalTextField(inputDef, ref, dynamic);
+	                	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                case Constants.DATATYPE_LONG:
-	                	view = viewFactory.createLongTextField(attribute, ref);
-	                	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createLongTextField(inputDef, ref, dynamic);
+	                	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                case Constants.DATATYPE_DATE:
-	                	view = viewFactory.createDatePicker(attribute, ref);
-	                	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createDatePicker(inputDef, ref, dynamic);
+	                	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                case Constants.DATATYPE_TIME:
-	                	view = viewFactory.createTimePicker(attribute, ref);
-	    				setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createTimePicker(inputDef, ref, dynamic);
+	    				setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                case Constants.DATATYPE_TEXT:
-	                	view = viewFactory.createTextArea(attribute, ref);
-	                	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                	view = viewFactory.createTextArea(inputDef, ref, dynamic);
+	                	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                    break;
 	                default:
 	                	// check for additional types
-	                	if (attribute.map) {            		
-	                		MapLayout mapLayout = viewFactory.createMapView(linearLayout);
-	                		linearLayout.addView(mapLayout);
+	                	if (inputDef.map) {
+	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
+	                			TextView mapLabel = viewFactory.createLabel(inputDef);
+	                			container.addView(mapLabel);
+	                		}
+	                		MapLayout mapLayout = viewFactory.createMapView(ref, dynamic);
+	                		container.addView(mapLayout);
 	                		mapViewList.add(mapLayout.getMapView());
 	                		view = mapLayout.getMapView();
-	                	} else if (attribute.table) {
-	                		if (attribute.questionText != null && !attribute.questionText.isEmpty()) {
-	                			TextView tableLabel = viewFactory.createLabel(attribute);
-	                			linearLayout.addView(tableLabel);
+	                	} else if (inputDef.table) {
+	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
+	                			TextView tableLabel = viewFactory.createLabel(inputDef);
+	                			container.addView(tableLabel);
 	                		}
-	                		view = viewFactory.createTableView();
-	                		linearLayout.addView(view);
-	                	} else if (attribute.web) {
-	                		if (attribute.questionText != null && !attribute.questionText.isEmpty()) {
-	                			TextView webLabel = viewFactory.createLabel(attribute);
-	                			linearLayout.addView(webLabel);
+	                		view = viewFactory.createTableView(ref, dynamic);
+	                		container.addView(view);
+	                	} else if (inputDef.web) {
+	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
+	                			TextView webLabel = viewFactory.createLabel(inputDef);
+	                			container.addView(webLabel);
 	                		}
-	                		view = viewFactory.createWebView();
-	                		linearLayout.addView(view);
+	                		view = viewFactory.createWebView(ref, dynamic);
+	                		container.addView(view);
 	                	} else {
-	                		view = viewFactory.createTextField(-1, attribute, ref);
-	                		setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                		view = viewFactory.createTextField(-1, inputDef, ref, dynamic);
+	                		setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                	}
 	                    break;
             	}
                 break;
             // create control for select one showing it as drop down
             case Constants.CONTROL_SELECT_ONE:
-                switch (attribute.dataType) {
+                switch (inputDef.dataType) {
                     case Constants.DATATYPE_CHOICE:
                     	// Picture Gallery
-                        if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = viewFactory.createPictureGallery(attribute, ref, false);
-                            setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+                        if (FormInputDef.IMAGE_TYPE.equalsIgnoreCase(inputDef.questionType)) {
+                            view = viewFactory.createPictureGallery(inputDef, ref, dynamic, false);
+                            setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
                         }
                         // Radio Button
-                        else if ("full".equalsIgnoreCase(attribute.questionAppearance)) {
-                        	view = viewFactory.createRadioGroup(attribute, ref);
-                        	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+                        else if (FormInputDef.RADIO_TYPE.equalsIgnoreCase(inputDef.questionAppearance)) {
+                        	view = viewFactory.createRadioGroup(inputDef, ref, dynamic);
+                        	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
                         // List
-                        } else if ("compact".equalsIgnoreCase(attribute.questionAppearance) ) {
-                        	view = viewFactory.createList(attribute);
-                            linearLayout.addView(view);
+                        } else if (FormInputDef.LIST_TYPE.equalsIgnoreCase(inputDef.questionAppearance) ) {
+                        	if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
+	                			TextView listLabel = viewFactory.createLabel(inputDef);
+	                			container.addView(listLabel);
+	                		}
+                        	view = viewFactory.createList(inputDef, ref, dynamic);
+                        	container.addView(view);
                         // DropDown (default)
                         } else {
-                        	view = viewFactory.createDropDown(attribute, ref);
-                        	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+                        	view = viewFactory.createDropDown(inputDef, ref, dynamic);
+                        	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
                         }
                         break;
                 }
                 break;
             // create control for multi select, showing it as checkbox
             case Constants.CONTROL_SELECT_MULTI:
-                switch (attribute.dataType) {
+                switch (inputDef.dataType) {
                     case Constants.DATATYPE_CHOICE_LIST:
-                    	if ("image".equalsIgnoreCase(attribute.questionType)) {
-                            view = viewFactory.createPictureGallery(attribute, ref, true);
-                            setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
-                    	} else if ("camera".equalsIgnoreCase(attribute.questionType)) {
-                    		view = viewFactory.createCameraPictureGallery(attribute, ref);
-                            setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
-                    	} else if ("video".equalsIgnoreCase(attribute.questionType)) {
-                    		view = viewFactory.createVideoGallery(attribute, ref);
-                            setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
-                    	} else if ("file".equalsIgnoreCase(attribute.questionType)) {
-                    		view = viewFactory.createFileListGroup(attribute, ref);
-                    		setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+                    	if (FormInputDef.IMAGE_TYPE.equalsIgnoreCase(inputDef.questionType)) {
+                            view = viewFactory.createPictureGallery(inputDef, ref, dynamic, true);
+                            setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
+                    	} else if (FormInputDef.CAMERA_TYPE.equalsIgnoreCase(inputDef.questionType)) {
+                    		view = viewFactory.createCameraPictureGallery(inputDef, ref, dynamic);
+                            setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
+                    	} else if (FormInputDef.VIDEO_TYPE.equalsIgnoreCase(inputDef.questionType)) {
+                    		view = viewFactory.createVideoGallery(inputDef, ref, dynamic);
+                            setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
+                    	} else if (FormInputDef.FILE_TYPE.equalsIgnoreCase(inputDef.questionType)) {
+                    		view = viewFactory.createFileListGroup(inputDef, ref, dynamic);
+                    		setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
                         } else {
-	                    	view = viewFactory.createCheckListGroup(attribute, ref);
-	                    	setupView(linearLayout, view, attribute, ref, isArchEnt, isRelationship);
+	                    	view = viewFactory.createCheckListGroup(inputDef, ref, dynamic);
+	                    	setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
                         }
                 }
                 break;
             // create control for trigger showing as a button
             case Constants.CONTROL_TRIGGER:
-                view = viewFactory.createTrigger(attribute);
-                linearLayout.addView(view);
+                view = viewFactory.createTrigger(inputDef, ref, dynamic);
+                container.addView(view);
                 break;
         }
         
         viewList.add(view);
-        viewRefMap.put(name, ref);
         
-        if(attribute.name != null){
-        	addViewMappings(attribute.name, view);
+        if(inputDef.name != null){
+        	addViewMappings(inputDef.name, view);
         }
+        
+        // add view to ui renderer
+        beanShellLinker.getUIRenderer().addViewToTab(ref, view, this);
+        
+        refreshTab();
         
         return view;
 	}
+	
+	public void removeCustomView(String ref) {
+		// remove from view list
+		for (int i = 0; i < viewList.size(); i++) {
+			View view = viewList.get(i);
+			if (view instanceof IView) {
+				IView iview = (IView) view;
+				if (iview.getRef().equals(ref)) {
+					if (!iview.isDynamic()) {
+						FLog.w("can only remove dynamic views " + ref);
+						return ;
+					}
+					
+					ViewParent parent = view.getParent();
+					viewList.remove(i);
+					
+					if (parent instanceof ViewGroup) {
+						((ViewGroup) parent).removeView(view);
+					} else {
+						FLog.w("could not remove view " + iview.getRef());
+					}
+					
+					if (view instanceof ICustomView) {
+						ICustomView customView = (ICustomView) view;
+						
+						String name = customView.getAttributeName();
+						if (attributeViewMap.get(name) != null) {
+							attributeViewMap.get(name).remove(customView);
+							if (attributeViewMap.get(name).isEmpty()) {
+								attributeViewMap.remove(name);
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+		
+		// remove from map list and map layout
+		for (int i = 0; i < mapViewList.size(); i++) {
+			CustomMapView mapView = mapViewList.get(i);
+			if (mapView.getRef().equals(ref)) {
+				mapViewList.remove(i);
+				mapView.removeLayout();
+				break;
+			}
+		}
+		
+		// remove from dirty button map
+		Button dirtyButton = dirtyButtonMap.get(ref);
+		if (dirtyButton != null) {
+			ViewParent parent = dirtyButton.getParent();
+			if (parent instanceof ViewGroup) {
+				((ViewGroup) parent).removeView(dirtyButton);
+			} else {
+				FLog.w("cannot remove dirty button " + ref);
+			}
+			dirtyButtonMap.remove(ref);
+		}
+		
+		// remove from layout button map
+		LinearLayout layout = viewLayoutMap.get(ref);
+		if (layout != null) {
+			ViewParent parent = layout.getParent();
+			if (parent instanceof ViewGroup) {
+				((ViewGroup) parent).removeView(layout);
+			} else {
+				FLog.w("cannot remove view layout " + ref);
+			}
+			viewLayoutMap.remove(ref);
+		}
+		
+		// add view to ui renderer
+        beanShellLinker.getUIRenderer().removeViewFromTab(ref);
+        
+        refreshTab();
+	}
+	
+	private void refreshTab() {
+		view.postInvalidate();
+	}
 
-	private void setupView(LinearLayout linearLayout, View view, FormAttribute attribute, String ref, boolean isArchEnt, boolean isRelationship) {
+	private void setupView(LinearLayout linearLayout, View view, FormInputDef attribute, String ref, boolean isArchEnt, boolean isRelationship) {
 		Button certaintyButton = null;
     	Button annotationButton = null;
     	Button dirtyButton = null;
     	Button infoButton = null;
 		
     	// setup view buttons
-		if (attribute.controlType != Constants.CONTROL_TRIGGER &&
-				!(attribute.controlType == Constants.CONTROL_SELECT_MULTI && 
-				"image".equalsIgnoreCase(attribute.questionType))) {
+		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
 			if(attribute.questionText != null && !attribute.questionText.isEmpty()){
 				LinearLayout fieldLinearLayout = new LinearLayout(this.linearLayout.getContext());
 		    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		    	
 	            TextView textView = viewFactory.createLabel(attribute);
 	            fieldLinearLayout.addView(textView);
-	            linearLayout.addView(fieldLinearLayout);
 	                
 	    		if(attribute.certainty && (isArchEnt || isRelationship)){
 	    			certaintyButton = viewFactory.createCertaintyButton();
@@ -293,6 +431,9 @@ public class Tab {
 		    		fieldLinearLayout.addView(dirtyButton);
 		    		dirtyButtonMap.put(ref, dirtyButton);
 	    		}
+	    		
+	    		linearLayout.addView(fieldLinearLayout);
+	    		viewLayoutMap.put(ref, fieldLinearLayout);
 			}
         }
 		
@@ -614,7 +755,8 @@ public class Tab {
 	}
 
 	public void clearViews() {
-		List<View> views = getViews();
+		List<View> views = new ArrayList<View>();
+		views.addAll(viewList);
 		for (View v : views) {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
@@ -691,7 +833,7 @@ public class Tab {
 		HashMap<String, Object> viewValues = new HashMap<String, Object>(); 
 		HashMap<String, Object> viewCertainties = new HashMap<String, Object>(); 
 		HashMap<String, Object> viewAnnotations = new HashMap<String, Object>(); 
-		HashMap<String, Object> viewDirtyReasons = new HashMap<String, Object>(); 
+		HashMap<String, Object> viewDirtyReasons = new HashMap<String, Object>();
 		for (View view : viewList) {
 			if (view instanceof ICustomView) {
 				String ref = ((ICustomView) view).getRef();
@@ -771,5 +913,36 @@ public class Tab {
 			}
 		}
 		return false;
+	}
+
+	public void removeCustomViews() {
+		List<String> dynamicViews = new ArrayList<String>();
+		for (View view : viewList) {
+			if (view instanceof IView) {
+				IView iview = (IView) view;
+				if (iview.isDynamic()) {
+					dynamicViews.add(iview.getRef());
+				}
+			}
+		}
+		for (String ref : dynamicViews) {
+			removeCustomView(ref);
+		}
+	}
+	
+	public void removeCustomContainers() {
+		ArrayList<String> dynamicLayouts = new ArrayList<String>();
+		for (String ref : containerMap.keySet()) {
+			LinearLayout layout = containerMap.get(ref);
+			if (layout instanceof CustomLinearLayout) {
+				CustomLinearLayout customLayout = (CustomLinearLayout) layout;
+				if (customLayout.isDynamic()) {
+					dynamicLayouts.add(ref);
+				}
+			}
+		}
+		for (String ref : dynamicLayouts) {
+			removeCustomContainer(ref);
+		}
 	}
 }

@@ -12,7 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -42,11 +42,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 	}
 
 	private List<VocabularyTerm> terms;
-	
 	private Stack<VocabularyTerm> parentTerms;
-	
 	private List<VocabularyTerm> currentTerms;
-
 	private List<VocabularyTerm> currentItems;
 
 	private boolean lastSelected;
@@ -64,8 +61,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
-	public HierarchicalSpinner(Context context, FormAttribute attribute, String ref) {
-		super(context, attribute, ref);
+	public HierarchicalSpinner(Context context, FormInputDef attribute, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic);
 		FAIMSApplication.getInstance().injectMembers(this);
 		customListener = new HierarchicalOnItemSelectListener();
 		super.setOnItemSelectedListener(customListener);

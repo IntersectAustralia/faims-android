@@ -7,7 +7,7 @@ import java.util.Stack;
 
 import android.content.Context;
 import android.view.View;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -28,8 +28,8 @@ public class HierarchicalPictureGallery extends PictureGallery {
 		super(context);
 	}
 	
-	public HierarchicalPictureGallery(Context context, FormAttribute attribute, String ref) {
-		super(context, attribute, ref, false);
+	public HierarchicalPictureGallery(Context context, FormInputDef attribute, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic, false);
 	}
 	
 	private void mapVocabToParent() {

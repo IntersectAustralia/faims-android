@@ -23,7 +23,8 @@ import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.util.Arch16n;
@@ -254,12 +255,21 @@ public class UIRenderer {
 		}
 	}
 	
+	public void clearTempBundle() {
+		if (tempSavedInstanceState != null) {
+			tempSavedInstanceState = null;
+			for (TabGroup tabGroup : tabGroupList) {
+				tabGroup.clearTempBundle();
+			}
+		}
+	}
+	
 	private void clearBackStack() {
 		FragmentManager fm = activityRef.get().getSupportFragmentManager();
 		while(fm.popBackStackImmediate());
 	}
 	
-	public void createUI() {
+	public void createUI() throws Exception {
 		boolean showFirsTabGroup = tempSavedInstanceState == null;
 		clearBackStack();
 		createTabGroups();
@@ -278,7 +288,7 @@ public class UIRenderer {
 		}
 	}
 	
-	private void createTabGroups() {
+	private void createTabGroups() throws Exception {
 		for (TabGroupGenerator tabGroupGen : tabGroupGeneratorList) {
 			TabGroup tabGroup = tabGroupGen.generate();
 			tabGroupList.add(tabGroup);
@@ -288,7 +298,7 @@ public class UIRenderer {
 		}
 	}
 	
-	private void createTabs(TabGroupGenerator tabGroupGen, TabGroup tabGroup) {
+	private void createTabs(TabGroupGenerator tabGroupGen, TabGroup tabGroup) throws Exception {
 		for (TabGenerator tabGen : tabGroupGen.tabGeneratorList()) {
 			Tab tab = tabGen.generate();
 			tabList.add(tab);
@@ -299,36 +309,49 @@ public class UIRenderer {
 		}
 	}
 	
-	private void createViews(TabGenerator tabGen, Tab tab, TabGroup tabGroup) {
+	private void createViews(TabGenerator tabGen, Tab tab, TabGroup tabGroup) throws Exception {
 		for (ViewGenerator viewGen : tabGen.viewGeneratorList()) {
 			if (viewGen instanceof ContainerGenerator) {
 				ContainerGenerator containerGen = (ContainerGenerator) viewGen;
-				LinearLayout containerLayout = (LinearLayout) containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
-				createContainers(containerGen, null, containerLayout, tab, tabGroup);
+				createContainers(containerGen, null, tab, tabGroup);
 			} else {
 				createInput(viewGen, null, tab, tabGroup);
 			}
 		}
 	}
 	
-	private void createContainers(ContainerGenerator parentContainerGen, LinearLayout parentLayout, LinearLayout layout, Tab tab, TabGroup tabGroup) {
-		tab.addChildContainer(parentLayout, layout);
-		for (ViewGenerator viewGen : parentContainerGen.viewGeneratorList()) {
+	private void createContainers(ContainerGenerator containerGen, LinearLayout parentLayout, Tab tab, TabGroup tabGroup) throws Exception {
+		LinearLayout layout = (LinearLayout) containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
+		tab.addCustomContainer(containerGen.getRef(), layout, parentLayout);
+		for (ViewGenerator viewGen : containerGen.viewGeneratorList()) {
 			if (viewGen instanceof ContainerGenerator) {
-				ContainerGenerator containerGen = (ContainerGenerator) viewGen;
-				LinearLayout containerLayout = (LinearLayout) containerGen.generate(tab, layout.getContext(), getStyleMappings(containerGen.getStyle()));
-				createContainers((ContainerGenerator) viewGen, layout, containerLayout, tab, tabGroup);
+				ContainerGenerator childContainerGen = (ContainerGenerator) viewGen;
+				createContainers(childContainerGen, layout, tab, tabGroup);
 			} else {
 				createInput(viewGen, layout, tab, tabGroup);
 			}
 		}
 	}
 	
-	private void createInput(ViewGenerator viewGen, LinearLayout layout, Tab tab, TabGroup tabGroup) {
-		View view = tab.addCustomView(viewGen.getRef(), viewGen.getName(), viewGen.attribute(), tabGroup.isArchEnt(), tabGroup.isRelationship(), getStyleMappings(viewGen.getStyle()), layout);
+	private void createInput(ViewGenerator viewGen, LinearLayout layout, Tab tab, TabGroup tabGroup) throws Exception {
+		tab.addCustomView(viewGen.getRef(), viewGen.attribute(), tabGroup.isArchEnt(), tabGroup.isRelationship(), layout);
+	}
+	
+	public void addViewToTab(String ref, View view, Tab tab) {
+		viewMap.put(ref, view);	
 		viewList.add(view);
-		viewTabMap.put(viewGen.getRef(), tab);
-		viewMap.put(viewGen.getRef(), view);	
+		viewTabMap.put(ref, tab);
+	}
+	
+	public void removeViewFromTab(String ref) {
+		View view = viewMap.get(ref);
+		if (view != null) {
+			viewMap.remove(ref);
+			viewList.remove(viewList.indexOf(view));
+			viewTabMap.remove(ref);
+		} else {
+			FLog.w("cannot remove view " + ref);
+		}
 	}
 	
 	public void parseSchema(String path) {
@@ -421,7 +444,7 @@ public class UIRenderer {
 		String viewName = input.getIndex().getReference().getNameLast();
 		String viewRef = tabRef + "/" + viewName;
 		
-		ViewGenerator viewGen = new ViewGenerator(viewRef, viewName, FormAttribute.parseFromInput(input), style);
+		ViewGenerator viewGen = new ViewGenerator(viewRef, FormInputDef.parseFromInput(input), style);
 		if (parentContainerGen != null) {
 			parentContainerGen.addViewGenerator(viewGen);
 		} else {
@@ -431,10 +454,13 @@ public class UIRenderer {
 
 	private void parseContainer(IFormElement element, FormIndex childIndex, String tabRef, TabGenerator tabGen, ContainerGenerator parentContainerGen) {
 		GroupDef childContainerElement = (GroupDef) element;
-		FormIndex inputIndex = this.fem.getModel().incrementIndex(childIndex,true);
 		String style = childContainerElement.getAdditionalAttribute(null,"faims_style");
-		
-		ContainerGenerator containerGen = new ContainerGenerator(style);
+		FormEntryCaption viewCaption = this.fem.getModel().getCaptionPrompt(childIndex);
+		String viewName = viewCaption.getIndex().getReference().getNameLast();
+		String viewRef = tabRef + "/" + viewName;
+		FormIndex inputIndex = this.fem.getModel().incrementIndex(childIndex,true);
+				
+		ContainerGenerator containerGen = new ContainerGenerator(viewRef, style);
 		if (parentContainerGen != null) {
 			parentContainerGen.addViewContainer(containerGen);
 		} else {
@@ -479,7 +505,7 @@ public class UIRenderer {
 		}
 	}
 	
-	private List<Map<String, String>> getStyleMappings(String style) {
+	public List<Map<String, String>> getStyleMappings(String style) {
 		List<Map<String, String>> styleMappings = new ArrayList<Map<String, String>>();
 		if (style != null) {
 			String[] styles = style.split(" ");

@@ -11,20 +11,28 @@ import au.org.intersect.faims.android.ui.view.styling.StyleUtils;
 
 public class CustomLinearLayout extends LinearLayout implements FaimsStyling {
 	
+	private boolean dynamic;
+
 	public CustomLinearLayout(Context context) {
 		super(context);
 	}
 	
-	public CustomLinearLayout(Context context, List<Map<String, String>> styleMappings) {
+	public CustomLinearLayout(Context context, List<Map<String, String>> styleMappings, boolean dynamic) {
 		super(context);
-		this.setOrientation(LinearLayout.VERTICAL);
+		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+		setOrientation(LinearLayout.VERTICAL);
 		applyStyle(styleMappings);
+		this.dynamic = dynamic;
+	}
+	
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	@Override
 	public void applyStyle(List<Map<String, String>> styleMappings) {
 		if(!styleMappings.isEmpty()){
-			LayoutParams layoutParams = this.getLayoutParams() != null ? (LayoutParams) this.getLayoutParams() : new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+			LayoutParams layoutParams = getLayoutParams() != null ? (LayoutParams) getLayoutParams() : new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			for (Map<String, String> styles : styleMappings) {
 				if (!styles.isEmpty()) {
 					for (Entry<String, String> attribute : styles.entrySet()) {
@@ -42,9 +50,9 @@ public class CustomLinearLayout extends LinearLayout implements FaimsStyling {
 							layoutParams.weight = StyleUtils.getLayoutParamsValue(attribute.getValue());
 						}
 					}
-					this.setLayoutParams(layoutParams);
 				}
 			}
+			setLayoutParams(layoutParams);
 		}
 		
 	}

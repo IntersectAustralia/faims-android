@@ -1,0 +1,1252 @@
+createList(String ref, String containerRef) {
+	listDef = createViewDef().createList();
+	createView(ref, listDef, containerRef);
+}
+
+createList(String ref) {
+	createList(ref, null);
+}
+
+createButton(String ref, String label, String containerRef) {
+	buttonDef = createViewDef().createButton().setLabel(label);
+	createView(ref, buttonDef, containerRef);
+}
+
+createButton(String ref, String label) {
+	createButton(ref, label, null);
+}
+
+createTextField(String ref, String label, String name, String type, String containerRef, String data, boolean annotation, boolean certainty) {
+	textDef = createViewDef().createTextField(data).setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(annotation).setCertaintyEnabled(certainty);
+	createView(ref, textDef, containerRef);
+}
+
+createTextField(String ref, String label, String name, String type,  String containerRef, String data) {
+	createTextField(ref, label, name, type, containerRef, data, true, true);
+}
+
+createTextField(String ref, String label, String name, String type, String containerRef) {
+	createTextField(ref, label, name, type, containerRef, null);
+}
+
+createTextField(String ref, String label, String name, String type) {
+	createTextField(ref, label, name, type, null, null);
+}
+
+createIntegerField(String ref, String label, String name, String type, String containerRef) {
+	createTextField(ref, label, name, type, containerRef, "integer");
+}
+
+createIntegerField(String ref, String label, String name, String type) {
+	createTextField(ref, label, name, type, null, "integer");
+}
+
+createTextArea(String ref, String label, String name, String type, String containerRef) {
+	createTextField(ref, label, name, type, containerRef, "textarea");
+}
+
+createTextArea(String ref, String label, String name, String type) {
+	createTextField(ref, label, name, type, null, "textarea");
+}
+
+createReadOnlyField(String ref, String label, String name, String type, String containerRef) {
+	textDef = createViewDef().createTextField().setLabel(label).setAttributeName(name).setAttributeType(type).setReadOnly(true);
+	createView(ref, textDef, containerRef);
+}
+
+createReadOnlyField(String ref, String label, String name, String type) {
+	createReadOnlyField(ref, label, name, type, null);
+}
+
+createDatePicker(String ref, String label, String name, String type, String containerRef) {
+	dateDef = createViewDef().createDatePicker().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	createView(ref, dateDef, containerRef);
+}
+
+createDatePicker(String ref, String label, String name, String type) {
+	createDatePicker(ref, label, name, type, null);
+}
+
+createTimePicker(String ref, String label, String name, String type, String containerRef) {
+	timeDef = createViewDef().createTimePicker().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	createView(ref, timeDef, containerRef);
+}
+
+createTimePicker(String ref, String label, String name, String type) {
+	createTimePicker(ref, label, name, type, null);
+}
+
+createMap(String ref) {
+	mapDef = createViewDef().createMap();
+	createView(ref, mapDef, null);
+}
+
+createTable(String ref) {
+	tableDef = createViewDef().createTable();
+	createView(ref, tableDef, null);
+}
+
+createWebView(String ref) {
+	webDef = createViewDef().createWebView();
+	createView(ref, webDef, null);
+}
+
+createPictureGallery(String ref, String label, String name, String type, String containerRef) {
+	picDef = createViewDef().createPictureGallery().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	createView(ref, picDef, containerRef);
+}
+
+createPictureGallery(String ref, String label, String name, String type) {
+	createPictureGallery(ref, label, name, type, null);
+}
+
+createRadioGroup(String ref, String label, String name, String type, String containerRef) {
+	radioDef = createViewDef().createRadioGroup().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	createView(ref, radioDef, containerRef);
+}
+
+createRadioGroup(String ref, String label, String name, String type) {
+	createRadioGroup(ref, label, name, type, null);
+}
+
+createDropDown(String ref, String label, String name, String type, String containerRef, boolean annotation, boolean certainty) {
+	dropDef = createViewDef().createDropDown().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(annotation).setCertaintyEnabled(certainty);
+	createView(ref, dropDef, containerRef);
+}
+
+createDropDown(String ref, String label, String name, String type, String containerRef) {
+	createDropDown(ref, label, name, type, containerRef, true, true);
+}
+
+createDropDown(String ref, String label, String name, String type) {
+	createDropDown(ref, label, name, type, null);
+}
+
+createDropDown(String ref, String label) {
+	createDropDown(ref, label, null, null, null);
+}
+
+createCameraGallery(String ref, String label, String name, String type, boolean sync, String containerRef) {
+	cameraDef = createViewDef().createCameraGallery(sync).setLabel(label).setAttributeName(name).setAttributeType(type);
+	createView(ref, cameraDef, containerRef);
+}
+
+createCameraGallery(String ref, String label, String name, String type, boolean sync) {
+	createCameraGallery(ref, label, name, type, sync, null);
+}
+
+createVideoGallery(String ref, String label, String name, String type, boolean sync, String containerRef) {
+	videoDef = createViewDef().createVideoGallery(sync).setLabel(label).setAttributeName(name).setAttributeType(type);
+	createView(ref, videoDef, containerRef);
+}
+
+createVideoGallery(String ref, String label, String name, String type, boolean sync) {
+	createVideoGallery(ref, label, name, type, sync, null);
+}
+
+createFileGroup(String ref, String label, String name, String type, boolean sync, String containerRef) {
+	fileDef = createViewDef().createFileGroup(sync).setLabel(label).setAttributeName(name).setAttributeType(type);
+	createView(ref, fileDef, containerRef);
+}
+
+createFileGroup(String ref, String label, String name, String type, boolean sync) {
+	createFileGroup(ref, label, name, type, sync, null);
+}
+
+createCheckboxGroup(String ref, String label, String name, String type, String containerRef) {
+	checkDef = createViewDef().createCheckboxGroup().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	createView(ref, checkDef, containerRef);
+}
+
+createCheckboxGroup(String ref, String label, String name, String type) {
+	createCheckboxGroup(ref, label, name, type, null);
+}
+
+// USER
+User user; // dont touch
+
+populateListForUsers() {
+  fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+      onFetch(result) {
+          populateList("user/tab1/users", result);
+      }
+  });
+  return users;
+}
+
+login(){
+  fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+      onFetch(userResult) {
+          user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+          setUser(user);
+          showTabGroup("menu");
+      }
+  });
+}
+
+initUsers() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createList("user/tab1/users");
+			populateListForUsers();
+			onEvent("user/tab1/users", "click", "login()");
+		}
+	});
+}
+
+onEvent("user", "load", "initUsers()");
+
+// // CONTROLS
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("entity", "Save and Load Entity"));
+options.add(createOption("relationship", "Save and Load Relationship"));
+options.add(createOption("associations", "Associations"));
+options.add(createOption("map", "Map View"));
+options.add(createOption("table", "Table View"));
+options.add(createOption("web", "Web View"));
+options.add(createOption("demo1", "Demo 1"));
+options.add(createOption("demo2", "Demo 2"));
+options.add(createOption("demo3", "Demo 3"));
+options.add(createOption("demo4", "Demo 4"));
+options.add(createOption("demo5", "Demo 5"));
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity".equals(value)) {
+		showTabGroup("tabgroup1");
+	} else if ("relationship".equals(value)) {
+		showTabGroup("tabgroup2");
+	} else if ("associations".equals(value)) {
+		showTabGroup("tabgroup3");
+	} else if ("map".equals(value)) {
+		showTabGroup("tabgroup4");
+	} else if ("table".equals(value)) {
+		showTabGroup("tabgroup5");
+	} else if ("web".equals(value)) {
+		showTabGroup("tabgroup6");
+	} else if ("demo1".equals(value)) {
+		showTabGroup("tabgroup7");
+	} else if ("demo2".equals(value)) {
+		showTabGroup("tabgroup8");
+	} else if ("demo3".equals(value)) {
+		showTabGroup("tabgroup9");
+	} else if ("demo4".equals(value)) {
+		showTabGroup("tabgroup10");
+	} else if ("demo5".equals(value)) {
+		showTabGroup("tabgroup11");
+	}
+}
+
+initMenu() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createButton("menu/tab1/startsync", "Start Sync");
+			createButton("menu/tab1/stopsync", "Stop Sync");
+			onEvent("menu/tab1/startsync", "click", "startSync()");
+			onEvent("menu/tab1/stopsync", "click", "stopSync()");
+
+			createList("menu/tab1/options");
+			populateList("menu/tab1/options", options);
+			onEvent("menu/tab1/options", "click", "onClickOption()");
+		}
+	});
+}
+
+onEvent("menu", "load", "initMenu()");
+
+// ENTITY
+
+String entityId = null;
+String tableEntityId = null;
+boolean entityLoaded = false;
+
+// initEntity(tabgroup) {
+//  	newEntity(tabgroup);
+// }
+
+initAutoEntity(tabgroup) {
+	if (entityLoaded) {
+		clearEntity(tabgroup);
+	}
+}
+
+closeEntity(tabgroup) {
+	cancelTabGroup(tabgroup, true);
+}
+
+loadEntities(tabgroup) {
+	if (entityLoaded) {
+		fetchEntityList("small", new FetchCallback() {
+			onFetch(result) {
+				populateDropDown(tabgroup + "/tab2/entities", result);
+			}
+		});
+	}
+}
+
+// saveEntity(tabgroup) {
+// 	updateEntity(tabgroup);
+// }
+
+// loadEntity(tabgroup) {
+// 	localId = getFieldValue(tabgroup + "/tab2/entities");
+// 	if (isNull(localId)) return;
+
+// 	newEntity(tabgroup);
+// 	showTabGroup(tabgroup, localId);
+// 	entityId = localId;
+// }
+
+loadEntityAuto(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/entities");
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = localId;
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getEntityIdentifier(result), null, true);
+		}
+	});
+}
+
+reloadEntity(tabgroup) {
+	if (isNull(entityId)) return;
+	
+	showTabGroup(tabgroup, entityId);
+}
+
+fetchEntityIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(uuid)) from archentity;", callback);
+}
+
+getEntityIdentifier(Object result) {
+	attributes = null;
+	if (entityId == null) {
+		attributes = createAttributeList();
+		entityCount = Integer.valueOf(result.get(0)) + 1;
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	}
+	return attributes;
+}
+
+updateEntity(tabgroup) {
+	if (isNull(entityId)) entityId = null;
+
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+					reloadEntity(tabgroup);
+				}
+			});
+		}
+	});
+}
+
+clearEntity(tabgroup) {
+	newEntity(tabgroup);
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			}, true);
+		}
+	});
+}
+
+newEntity(tabgroup) {
+	newTabGroup(tabgroup);
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
+	
+	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
+
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
+	
+	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
+	
+	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	entityId = null;
+
+	keepTabGroupChanges(tabgroup);
+}
+
+deleteEntity(tabgroup){
+	if (isNull(entityId)) return;
+	
+	deleteArchEnt(entityId);
+	entityId = null;
+	
+  cancelTabGroup(tabgroup, false);
+}
+
+onEvent("tabgroup1/tab2", "show", "loadEntities(\"tabgroup1\")");
+onEvent("tabgroup1", "show", "initAutoEntity(\"tabgroup1\")");
+onEvent("tabgroup1", "load", "setupEntity()");
+
+setupEntity() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createTextField("tabgroup1/tab1/name", "Name", "name", "freetext");
+			createTextArea("tabgroup1/tab1/description", "Description", "description", "freetext");
+			createIntegerField("tabgroup1/tab1/value", "Value", "value", "measure");
+			createReadOnlyField("tabgroup1/tab1/timestamp", "Timestamp", "timestamp", "freetext");
+			createDatePicker("tabgroup1/tab1/date", "Date", "date", "freetext");
+			createTimePicker("tabgroup1/tab1/time", "Time", "time", "freetext");
+			createCheckboxGroup("tabgroup1/tab1/location", "Location", "location", "vocab");
+			createRadioGroup("tabgroup1/tab1/choice", "Choice", "choice", "vocab");
+			createDropDown("tabgroup1/tab1/item", "Item", "item", "vocab");
+			createDropDown("tabgroup1/tab1/type", "Type", "type", "vocab");
+			createPictureGallery("tabgroup1/tab1/gallery", "Gallery", "gallery", "vocab");
+			createPictureGallery("tabgroup1/tab1/rocks", "Rocks", "rocks", "vocab");
+			createFileGroup("tabgroup1/tab1/files", "Files", "file", "freetext", false);
+			createButton("tabgroup1/tab1/attachfile", "Attach File");
+			createCameraGallery("tabgroup1/tab1/pictures", "Camera", "picture", "freetext", true);
+			createButton("tabgroup1/tab1/attachpicture", "Take Picture");
+			createVideoGallery("tabgroup1/tab1/videos", "Video", "video", "freetext", true);
+			createButton("tabgroup1/tab1/attachvideo", "Take Video");
+			createFileGroup("tabgroup1/tab1/audios", "Audio", "audio", "freetext", false);
+			createButton("tabgroup1/tab1/attachaudio", "Record Audio");
+			createButton("tabgroup1/tab1/viewattached", "View Attached Files");
+			createButton("tabgroup1/tab1/clear", "Clear");
+			createButton("tabgroup1/tab1/delete", "Delete");
+			createButton("tabgroup1/tab1/close", "Close");
+			createDropDown("tabgroup1/tab2/entities", "Load Entity");
+			createButton("tabgroup1/tab2/load", "Load");
+
+			onEvent("tabgroup1/tab1/clear", "click", "clearEntity(\"tabgroup1\")");
+			onEvent("tabgroup1/tab2/load", "click", "loadEntityAuto(\"tabgroup1\")");
+			onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
+			onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");
+
+			onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
+			onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");
+			onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/videos\")");
+			onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
+			onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+			entityLoaded = true;
+		}
+	});
+}
+
+// // RELATIONSHIP
+
+String relationshipId = null;
+String tableRelationshipId = null;
+boolean relationshipLoaded = false;
+
+// initRelationship(tabgroup) {
+// 	newRelationship(tabgroup);
+// }
+
+initAutoRelationship(tabgroup) {
+	if (relationshipLoaded) {
+		clearRelationship(tabgroup);
+	}
+}
+
+closeRelationship(tabgroup) {
+	cancelTabGroup(tabgroup, true);
+}
+
+loadRelationships(tabgroup) {
+	if (relationshipLoaded) {
+		fetchRelationshipList("abovebelow", new FetchCallback() {
+			onFetch(result) {
+				populateDropDown(tabgroup + "/tab2/relationships", result);
+			}
+		});
+	}
+}
+
+// saveRelationship(tabgroup) {
+// 	updateRelationship(tabgroup);
+// }
+
+// loadRelationship(tabgroup) {
+// 	localId = getFieldValue(tabgroup + "/tab2/relationships");
+// 	if (isNull(localId)) return;
+
+// 	newRelationship(tabgroup);	
+// 	showTabGroup(tabgroup, localId);
+// 	relationshipId = localId;
+// }
+
+loadRelationshipAuto(tabgroup) {
+	localId = getFieldValue(tabgroup + "/tab2/relationships");
+	if (isNull(localId)) return;
+
+	newRelationship(tabgroup);	
+	showTabGroup(tabgroup, localId);
+	relationshipId = localId;
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(result), null, true);
+		}
+	});
+}
+
+reloadRelationship(tabgroup) {
+	if (isNull(relationshipId)) return;
+	
+	showTabGroup(tabgroup, relationshipId);
+}
+
+fetchRelationshipIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(relationshipid)) from relationship;", callback);
+}
+
+getRelationshipIdentifier(Object result) {
+	attributes = null;
+	if (relationshipId == null) {
+		attributes = createAttributeList();
+		relationshipCount = Integer.valueOf(result.get(0)) + 1;
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relationshipCount, null, null));
+	}
+	return attributes;
+}
+
+updateRelationship(tabgroup) {
+	if (isNull(relationshipId)) relationshipId = null;
+
+	if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
+	
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, relationshipId, null, getRelationshipIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					relationshipId = uuid;
+					reloadRelationship(tabgroup);
+				}
+			});
+		}
+	});
+	
+}
+
+clearRelationship(tabgroup) {
+	newRelationship(tabgroup);
+	fetchRelationshipIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getRelationshipIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					relationshipId = uuid;
+				}
+			}, true);
+		}
+	});
+}
+
+newRelationship(tabgroup) {
+	newTabGroup(tabgroup);
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
+	
+	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
+
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
+	
+	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
+	
+	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	relationshipId = null;
+
+	keepTabGroupChanges(tabgroup);
+}
+
+deleteRelationship(tabgroup){
+	if (isNull(relationshipId)) return;
+	
+	deleteRel(relationshipId);
+	relationshipId = null;
+	
+  cancelTabGroup(tabgroup, false);
+}
+
+onEvent("tabgroup2/tab2", "show", "loadRelationships(\"tabgroup2\")");
+onEvent("tabgroup2", "show", "initAutoRelationship(\"tabgroup2\")");
+onEvent("tabgroup2", "load", "setupRelationship()");
+
+setupRelationship() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createTextField("tabgroup2/tab1/name", "Name", "name", "freetext");
+			createTextArea("tabgroup2/tab1/description", "Description", "description", "freetext");
+			createIntegerField("tabgroup2/tab1/value", "Value", "value", "measure");
+			createReadOnlyField("tabgroup2/tab1/timestamp", "Timestamp", "timestamp", "freetext");
+			createDatePicker("tabgroup2/tab1/date", "Date", "date", "freetext");
+			createTimePicker("tabgroup2/tab1/time", "Time", "time", "freetext");
+			createCheckboxGroup("tabgroup2/tab1/location", "Location", "location", "vocab");
+			createRadioGroup("tabgroup2/tab1/choice", "Choice", "choice", "vocab");
+			createDropDown("tabgroup2/tab1/item", "Item", "item", "vocab");
+			createDropDown("tabgroup2/tab1/type", "Type", "type", "vocab");
+			createPictureGallery("tabgroup2/tab1/gallery", "Gallery", "gallery", "vocab");
+			createPictureGallery("tabgroup2/tab1/rocks", "Rocks", "rocks", "vocab");
+			createFileGroup("tabgroup2/tab1/files", "Files", "file", "freetext", false);
+			createButton("tabgroup2/tab1/attachfile", "Attach File");
+			createCameraGallery("tabgroup2/tab1/pictures", "Camera", "picture", "freetext", true);
+			createButton("tabgroup2/tab1/attachpicture", "Take Picture");
+			createVideoGallery("tabgroup2/tab1/videos", "Video", "video", "freetext", true);
+			createButton("tabgroup2/tab1/attachvideo", "Take Video");
+			createFileGroup("tabgroup2/tab1/audios", "Audio", "audio", "freetext", false);
+			createButton("tabgroup2/tab1/attachaudio", "Record Audio");
+			createButton("tabgroup2/tab1/viewattached", "View Attached Files");
+			createButton("tabgroup2/tab1/clear", "Clear");
+			createButton("tabgroup2/tab1/delete", "Delete");
+			createButton("tabgroup2/tab1/close", "Close");
+			createDropDown("tabgroup2/tab2/relationships", "Load Relationship");
+			createButton("tabgroup2/tab2/load", "Load");
+
+			onEvent("tabgroup2/tab1/clear", "click", "clearRelationship(\"tabgroup2\")");
+			onEvent("tabgroup2/tab2/load", "click", "loadRelationshipAuto(\"tabgroup2\")");
+			onEvent("tabgroup2/tab1/delete", "click", "deleteRel(\"tabgroup2\")");
+			onEvent("tabgroup2/tab1/close", "click", "closeRelationship(\"tabgroup2\")");
+
+			onEvent("tabgroup2/tab1/attachfile", "click", "attachFileTo(\"tabgroup2/tab1/files\")");
+			onEvent("tabgroup2/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup2/tab1/pictures\")");
+			onEvent("tabgroup2/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup2/tab1/videos\")");
+			onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/audios\")");
+			onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
+
+			relationshipLoaded = true;
+		}
+	});
+}
+
+// // ASSOCIATIONS
+
+boolean associationsLoaded = false;
+
+loadMembers() {
+	if (associationsLoaded) {
+		fetchEntityList("small", new FetchCallback() {
+			onFetch(result) {
+				populateDropDown("tabgroup3/tab1/entities", result);
+			}
+		});
+		fetchRelationshipList("abovebelow", new FetchCallback() {
+			onFetch(result) {
+				populateDropDown("tabgroup3/tab1/relationships", result);
+			}
+		});
+	}
+}
+
+onEvent("tabgroup3", "show", "loadMembers()");
+
+onAddMember() {
+	eid = getFieldValue("tabgroup3/tab1/entities");
+	rid = getFieldValue("tabgroup3/tab1/relationships");
+	if (isNull(eid) || isNull(rid)) return;
+	
+	verb = getFieldValue("tabgroup3/tab1/verb");
+	
+	addReln(eid, rid, verb, new SaveCallback() {
+		onSaveAssociation(entityId, relId) {
+			showToast("added association");
+		}
+	});
+}
+
+setupAssociations() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createDropDown("tabgroup3/tab1/entities", "Entities");
+			createDropDown("tabgroup3/tab1/relationships", "Relationships");
+			createTextField("tabgroup3/tab1/verb", "Verb", null, null);
+			createButton("tabgroup3/tab1/add", "Add Association");
+
+			onEvent("tabgroup3/tab1/add", "click", "onAddMember()");
+
+			associationsLoaded = true;
+		}
+	});
+}
+
+onEvent("tabgroup3", "load", "setupAssociations()");
+
+// Map View
+
+setupMap() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createMap("tabgroup4/tab1/map");
+		}
+	});
+}
+
+onEvent("tabgroup4", "load", "setupMap()");
+
+// //Table View
+
+tableQuery = new ArrayList();
+tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
+				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
+				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure, \n" + 
+				"	 									   vocabname, \n" + 
+				"	 									   freetext), ' | ') as response, uuid \n" +
+				" 			FROM latestNonDeletedArchentIdentifiers\n" +
+				" 			GROUP BY uuid;");
+tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname || ' (' || freetext || ')', \n" + 
+				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname, \n" + 
+				" 													 freetext), ' | ') as response, relationshipid \n" +
+				" 		FROM latestNonDeletedRelnIdentifiers \n" +
+				" 		GROUP BY relationshipid;");
+tableQuery.add("select uuid, attributename, response\n" + 
+				"from (select attributename, attributeid\n" + 
+				"from attributekey join idealaent using (attributeid) join aenttype using (aenttypeid)\n" + 
+				"where aenttypename = 'small'), (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"left outer join \n" + 
+				"(select uuid, valuetimestamp, attributename, attributeid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||') '||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' ' || vocabname   ||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure,\n" + 
+				"                                                                                              vocabname,\n" + 
+				"                                                                                              freetext), ' | ') as response\n" + 
+				"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp          \n" + 
+				"          FROM latestnondeletedaentvalue join latestnondeletedarchent using (uuid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY uuid, attributename ASC)\n" + 
+				"group by uuid, attributeid) using (uuid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select uuid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, geospatialcolumn\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'username', fname || ' ' || lname\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, fname, lname\n" + 
+				"from latestnondeletedarchentidentifiers join user using (userid)\n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'action', uuid \n" + 
+				"from latestnondeletedarchent join aenttype using (aenttypeid) \n" + 
+				"where aenttypename = 'small' \n" + 
+				"group by uuid \n" + 
+				"order by uuid, attributename;");
+tableQuery.add("select relationshipid, attributename, response\n" + 
+				"from (select attributename, attributeid \n" + 
+				"from attributekey join idealreln using (attributeid) join relntype using (relntypeid)\n" + 
+				"where relntypename = 'AboveBelow'),\n" + 
+				"(select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename\n" + 
+				") left outer join (\n" + 
+				"select relationshipid, relnvaluetimestamp, attributename, attributeid, group_concat(coalesce(vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                         vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname,\n" + 
+				"                                                                                         freetext), ' | ') as response\n" + 
+				"FROM (  SELECT relationshipid, attributeid, vocabid, attributename, vocabname,  freetext, certainty, attributetype, relnvaluetimestamp, relntimestamp\n" + 
+				"          FROM latestnondeletedrelnvalue join latestnondeletedrelationship using (relationshipid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY relationshipid, attributename ASC)\n" + 
+				"group by relationshipid, attributeid) using (relationshipid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, geospatialcolumn\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'username', fname || ' ' || lname\n" + 
+				"from (select relationshipid, relntypeid, relntypename, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, fname, lname\n" + 
+				"from latestNonDeletedRelnIdentifiers join user using (userid)\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"union\n" + 
+				"select relationshipid, 'action', relationshipid \n" + 
+				"from latestNonDeletedRelnIdentifiers join relntype using (relntypeid) \n" + 
+				"where relntype.relntypename = 'AboveBelow' \n" + 
+				"group by relationshipid \n" + 
+				"order by relationshipid, attributename;");
+
+createTableHeaders(headers) {
+	ArrayList listHeaders = new ArrayList();
+	for (String header : headers) {
+		listHeaders.add(header);
+	}
+	return listHeaders;
+}
+
+tableHeaders = new ArrayList();
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "choice", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "choice", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+
+tableList = new ArrayList();
+tableList.add(createOption("entity", "Fetch Entities"));
+tableList.add(createOption("relationship", "Fetch Relationships"));
+tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
+tableList.add(createOption("relationship-pivot", "Fetch Relationship Attributes"));
+
+boolean tableLoaded = false;
+
+refresh() {
+	if (tableLoaded) {
+		refreshTable("tabgroup5/tab1/table");
+	}
+}
+
+onEvent("tabgroup5", "show", "refresh()");
+
+setupTable() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createDropDown("tabgroup5/tab1/queries", "Queries");
+			createButton("tabgroup5/tab1/load", "Load Query");
+			createTable("tabgroup5/tab1/table");
+			createContainer("tabgroup5/tab1/buttons", "orientation");
+			createButton("tabgroup5/tab1/top", "Top", "tabgroup5/tab1/buttons");
+			createButton("tabgroup5/tab1/bottom", "Bottom", "tabgroup5/tab1/buttons");
+			createTextField("tabgroup5/tab1/scrollRow", "Scroll Row", null, null, "tabgroup5/tab1/buttons");
+			createButton("tabgroup5/tab1/row", "Row", "tabgroup5/tab1/buttons");
+			
+			populateDropDown("tabgroup5/tab1/queries", tableList);
+
+			onEvent("tabgroup5/tab1/load", "click", "onLoadQuery()");
+			onEvent("tabgroup5/tab1/top", "click", "onScrollTop()");
+			onEvent("tabgroup5/tab1/bottom", "click", "onScrollBottom()");
+			onEvent("tabgroup5/tab1/row", "click", "onScrollRow()");
+
+			tableLoaded = true;
+		}
+	});
+}
+
+onEvent("tabgroup5", "load", "setupTable()");
+
+onLoadQuery() {
+	selectedItem = getFieldValue("tabgroup5/tab1/queries");
+	
+	index = getTableIndex(selectedItem);
+	if (index < 0) return;
+
+	headers = tableHeaders.get(index);
+	query = tableQuery.get(index);
+	if (index == 0) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowEntityRow()");
+	} else if (index == 1) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRelationshipRow()");
+	} else if (index == 2) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
+	} else if (index == 3) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowRelationshipRow()");
+	}
+}
+
+onShowEntityRow() {
+	// row = getTableRow();
+	// value = getTableValue();
+
+	// tableEntityId = value;
+	// showTabGroup("tabgroup1", value);
+}
+
+onShowRelationshipRow() {
+	// row = getTableRow();
+	// value = getTableValue();
+
+	// tableRelationshipId = value;
+	// showTabGroup("tabgroup2", value);
+}
+
+getTableIndex(selectedItem) {
+	for (int i = 0; i < tableList.size(); i++) {
+		if (tableList.get(i).get(0).equals(selectedItem)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+onScrollTop() {
+	scrollTableToTop("tabgroup5/tab1/table");
+}
+
+onScrollBottom() {
+	scrollTableToBottom("tabgroup5/tab1/table");
+}
+
+onScrollRow() {
+	value = getFieldValue("tabgroup5/tab1/scrollRow");
+	row = 0;
+	if (value != null && !"".equals(value)) {
+		row = Integer.parseInt(value);
+	}
+	scrollTableToRow("tabgroup5/tab1/table", row);
+}
+
+// Web view
+
+setupWebView() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			createWebView("tabgroup6/tab1/web");
+
+			populateWebViewHtml("tabgroup6/tab1/web", "<html><body><h1>Hello World</h1></body></html>");
+		}
+	});
+}
+
+onEvent("tabgroup6", "load", "setupWebView()");
+
+// Demo 1
+
+createDemoPicture(name) {
+	ArrayList list = new ArrayList();
+	list.add(name);
+	list.add(name);
+	list.add(name);
+	return list;
+}
+
+demo1counter = 0;
+demo1Picture = null;
+
+setTextDemo1() {
+	demo1counter++;
+	setFieldValue("tabgroup7/tab1/a1", "Hello World " + demo1counter);
+}
+
+onClickDemo1Picture() {
+	picture = getFieldValue("tabgroup7/tab1/picture");
+	//showToast(picture);
+
+	executeViewTask(new ViewTask() {
+		doTask() {
+			if ("A".equals(demo1Picture)) {
+				removeView("tabgroup7/tab1/a1");
+				removeView("tabgroup7/tab1/a2");
+				removeView("tabgroup7/tab1/a3");
+			} else if ("B".equals(demo1Picture)) {
+
+			} else if ("C".equals(demo1Picture)) {
+				
+			}
+
+			if ("A".equals(picture)) {
+				createTextField("tabgroup7/tab1/a1", "A1", "name", "freetext");
+				createDropDown("tabgroup7/tab1/a2", "A2", "item", "vocab");
+				createButton("tabgroup7/tab1/a3", "A3");
+
+				fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+					onFetch(result) {
+						populateDropDown("tabgroup7/tab1/a2", result);
+					}
+				});
+
+				onEvent("tabgroup7/tab1/a3", "click", "setTextDemo1()");
+			} else if ("B".equals(picture)) {
+
+			} else if ("C".equals(picture)) {
+
+			}
+
+			demo1Picture = picture;
+		}
+	});
+}
+
+setupDemo1() {
+	demo1counter = 0;
+	executeViewTask(new ViewTask() {
+		doTask() {
+			removeAllViewsAndContainers("tabgroup7");
+
+			createPictureGallery("tabgroup7/tab1/picture", "gallery", "gallery", "freetext");
+
+			ArrayList pictures = new ArrayList();
+			pictures.add(createDemoPicture("A"));
+			pictures.add(createDemoPicture("B"));
+			pictures.add(createDemoPicture("C"));
+			populatePictureGallery("tabgroup7/tab1/picture", pictures);
+
+			onEvent("tabgroup7/tab1/picture", "click", "onClickDemo1Picture()");
+		}
+	});
+}
+
+onEvent("tabgroup7", "show", "setupDemo1()");
+
+// Demo 2
+
+demo2counter = 0;
+
+createRecord() {
+	demo2counter++;
+	container = "tabgroup8/tab1/container" + demo2counter;
+	createContainer(container, "orientation", "tabgroup8/tab1/super");
+	createContainer("tabgroup8/tab1/mc" + demo2Counter, "even", container);
+	createContainer("tabgroup8/tab1/tc" + demo2Counter, "even", container);
+	createTextField("tabgroup8/tab1/measure" + demo2counter, "Measure", "value", "measure", "tabgroup8/tab1/mc" + demo2Counter, "decimal", false, true);
+	createDropDown("tabgroup8/tab1/type" + demo2counter, "Type", "value", "freetext", "tabgroup8/tab1/tc" + demo2Counter, false, false);
+
+	ArrayList types = new ArrayList();
+	types.add("Length");
+	types.add("Height");
+	types.add("Weight");
+	populateDropDown("tabgroup8/tab1/type" + demo2counter, types);
+}
+
+saveRecord() {
+	fetchEntityIdentifier(new FetchCallback() {
+			onFetch(result) {
+				saveTabGroup("tabgroup8", null, null, getEntityIdentifier(result), new SaveCallback() {
+					onSave(uuid, callback) {
+						showToast("saved record ");
+					}
+				});
+			}
+		});
+}
+
+setupDemo2() {
+	demo2counter = 0;
+	executeViewTask(new ViewTask() {
+		doTask() {
+			removeAllViewsAndContainers("tabgroup8");
+
+			createButton("tabgroup8/tab1/new", "New Record");
+			createContainer("tabgroup8/tab1/super", null);
+			createButton("tabgroup8/tab1/save", "Save");
+
+			onEvent("tabgroup8/tab1/new", "click", "createRecord()");
+			onEvent("tabgroup8/tab1/save", "click", "saveRecord()");
+
+			createRecord();
+		}
+	});
+}
+
+onEvent("tabgroup8", "show", "setupDemo2()");
+
+// Demo 3
+
+choices = null;
+onClickDemo3Choice() {
+	choice = getFieldValue("tabgroup9/tab1/choice");
+	executeViewTask(new ViewTask() {
+		doTask() {
+			if (choices.get(choices.size()-1).get(0).equals(choice)) {
+				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext");
+			} else {
+				removeView("tabgroup9/tab1/other");
+			}
+		}
+	});
+}
+
+onClickDemo3Save() {
+	fetchEntityIdentifier(new FetchCallback() {
+			onFetch(result) {
+				saveTabGroup("tabgroup9", null, null, getEntityIdentifier(result), new SaveCallback() {
+					onSave(uuid, callback) {
+						showToast("saved record ");
+					}
+				});
+			}
+		});
+}
+
+setupDemo3() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			removeAllViewsAndContainers("tabgroup9");
+			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, false, true);
+			createButton("tabgroup9/tab1/save", "Save");
+
+			fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+					onFetch(result) {
+						choices = result;
+						populateDropDown("tabgroup9/tab1/choice", result);
+					}
+				});
+
+			onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
+			onEvent("tabgroup9/tab1/save", "click", "onClickDemo3Save()");
+		}
+	});
+}
+
+onEvent("tabgroup9", "show", "setupDemo3()");
+
+// Demo 4
+textCount = 0;
+hasTotal = false;
+
+showTotalNumbers() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			if (hasTotal) {
+				removeView("tabgroup10/tab1/total");
+			}
+			createTextField("tabgroup10/tab1/total", "Total", null, null, "tabgroup10/tab1/numbers", "integer", false, false);
+
+			total = 0;
+			for (i = 0; i < textCount; i++) {
+				value = getFieldValue("tabgroup10/tab1/text" + i);
+				if (value != null && !"".equals(value)) {
+					total += Integer.parseInt(value);
+				}
+			}
+			setFieldValue("tabgroup10/tab1/total", "" + total);
+
+			hasTotal = true;
+		}
+	});
+}
+
+createNumbers() {
+	num = getFieldValue("tabgroup10/tab1/num");
+	if ("None".equals(num)) return;
+
+	textCount = Integer.parseInt(num);
+
+	executeViewTask(new ViewTask() {
+		doTask() {
+			container = "tabgroup10/tab1/numbers";
+			createContainer(container, null);
+			for (i = 0; i < textCount; i++) {
+				createTextField("tabgroup10/tab1/text" + i, "Field " + i, null, null, container, "integer", false, false);
+			}
+			createButton("tabgroup10/tab1/sum", "Sum", container);
+
+			onEvent("tabgroup10/tab1/sum", "click", "showTotalNumbers()");
+		}
+	});
+}
+
+setupDemo4() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			removeAllViewsAndContainers("tabgroup10");
+
+			createContainer("tabgroup10/tab1/container", "orientation");
+			createDropDown("tabgroup10/tab1/num", "Num", null, null, "tabgroup10/tab1/container", false, false);
+			createButton("tabgroup10/tab1/count", "Count", "tabgroup10/tab1/container");
+
+			ArrayList numbers = new ArrayList();
+			numbers.add("None");
+			numbers.add("1");
+			numbers.add("2");
+			numbers.add("3");
+			numbers.add("4");
+			numbers.add("5");
+			populateDropDown("tabgroup10/tab1/num", numbers);
+
+			onEvent("tabgroup10/tab1/count", "click", "createNumbers()");
+		}
+	});
+}
+
+onEvent("tabgroup10", "show", "setupDemo4()");
+
+// Demo 5

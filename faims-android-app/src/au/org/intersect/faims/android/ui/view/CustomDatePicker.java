@@ -7,7 +7,7 @@ import android.content.Context;
 import android.widget.DatePicker;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -30,6 +30,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	AutoSaveManager autoSaveManager;
 
 	private String ref;
+	private boolean dynamic;
 	private String currentValue;
 	private float certainty;
 	private float currentCertainty;
@@ -39,7 +40,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	private FormInputDef attribute;
 
 	private CustomDatePickerOnDateChangedListener customChangeListener;
 	
@@ -48,63 +49,81 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public CustomDatePicker(Context context, FormAttribute attribute, String ref) {
+	public CustomDatePicker(Context context, FormInputDef attribute, String ref, boolean dynamic) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.attribute = attribute;
 		this.ref = ref;
+		this.dynamic = dynamic;
 		reset();
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		init(0, 0, 0, customChangeListener);
 		DateUtil.setDatePicker(this);
 	}
 
+	@Override
 	public String getAttributeName() {
 		return attribute.name;
 	}
 
+	@Override
 	public String getAttributeType() {
 		return attribute.type;
 	}
 	
+	@Override
 	public String getRef() {
 		return ref;
 	}
 
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
+
+	@Override
 	public float getCertainty() {
 		return certainty;
 	}
 
+	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
 		notifySave();
 	}
 
+	@Override
 	public boolean isDirty() {
 		return dirty;
 	}
 	
+	@Override
 	public void setDirty(boolean value) {
 		this.dirty = value;
 	}
 	
+	@Override
 	public void setDirtyReason(String value) {
 		this.dirtyReason = value;
 	}
 
+	@Override
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
 	
+	@Override
 	public String getValue() {
 		return DateUtil.getDate(this);
 	}
 	
+	@Override
 	public void setValue(String value) {
 		DateUtil.setDatePicker(this, value);
 		notifySave();
 	}
 
+	@Override
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
@@ -114,6 +133,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		save();
 	}
 
+	@Override
 	public boolean hasChanges() {
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getCertainty(), currentCertainty) ||

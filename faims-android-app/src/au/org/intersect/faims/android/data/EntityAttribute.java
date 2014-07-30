@@ -16,12 +16,8 @@ public class EntityAttribute extends RelationshipAttribute {
 	}
 	
 	public EntityAttribute(String name, String text, String measure, String vocab, String certainty, boolean isDeleted) {
-		this.name = name;
-		this.text = text;
+		super(name, text, vocab, certainty, isDeleted);
 		this.measure = measure;
-		this.vocab = vocab;
-		this.certainty = certainty;
-		this.isDeleted = isDeleted;
 	}
 
 	public String getMeasure() {

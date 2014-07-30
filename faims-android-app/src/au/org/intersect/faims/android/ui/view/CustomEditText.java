@@ -9,7 +9,7 @@ import android.text.TextWatcher;
 import android.widget.EditText;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
@@ -40,6 +40,7 @@ public class CustomEditText extends EditText implements ICustomView {
 	AutoSaveManager autoSaveManager;
 
 	private String ref;
+	private boolean dynamic;
 	private String currentValue;
 	private float certainty;
 	private float currentCertainty;
@@ -49,7 +50,7 @@ public class CustomEditText extends EditText implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	private FormInputDef inputDef;
 	
 	private CustomEditTextTextWatcher customTextWatcher;
 	
@@ -58,71 +59,91 @@ public class CustomEditText extends EditText implements ICustomView {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
-	public CustomEditText(Context context, FormAttribute attribute, String ref) {
+	public CustomEditText(Context context, FormInputDef inputDef, String ref, boolean dynamic) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
-		reset();
+		this.dynamic = dynamic;
 		customTextWatcher = new CustomEditTextTextWatcher();
 		addTextChangedListener(customTextWatcher);
+		reset();
 	}
 
+	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
+	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 
+	@Override
 	public String getRef() {
 		return ref;
 	}
 	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
+	
+	@Override
 	public String getValue() {
 		return getText().toString();
 	}
 	
+	@Override
 	public void setValue(String value) {
 		setText(value);
 		notifySave();
 	}
 
+	@Override
 	public float getCertainty() {
 		return certainty;
 	}
 
+	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
 		notifySave();
 	}
 
+	@Override
 	public String getAnnotation() {
 		return annotation;
 	}
 
+	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
 		notifySave();
 	}
 	
+	@Override
 	public boolean isDirty() {
 		return dirty;
 	}
 	
+	@Override
 	public void setDirty(boolean dirty) {
 		this.dirty = dirty;
 	}
 	
+	@Override
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
 	
+	@Override
 	public void setDirtyReason(String reason) {
 		this.dirtyReason = reason;
 	}
 
+	@Override
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
@@ -132,6 +153,7 @@ public class CustomEditText extends EditText implements ICustomView {
 		save();
 	}
 
+	@Override
 	public boolean hasChanges() {
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 

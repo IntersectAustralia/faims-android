@@ -7,10 +7,29 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import au.org.intersect.faims.android.data.NameValuePair;
 
-public class CustomListView extends ListView {
+public class CustomListView extends ListView implements IView {
 	
+	private String ref;
+	private boolean dynamic;
+
 	public CustomListView(Context context) {
 		super(context);
+	}
+	
+	public CustomListView(Context context, String ref, boolean dynamic) {
+		super(context);
+		this.ref = ref;
+		this.dynamic = dynamic;
+	}
+	
+	@Override
+	public String getRef() {
+		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	public void populate(List<NameValuePair> pairs) {

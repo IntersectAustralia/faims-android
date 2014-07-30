@@ -21,6 +21,8 @@ import android.graphics.Color;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.LinearLayout;
@@ -66,6 +68,7 @@ import au.org.intersect.faims.android.ui.map.tools.PointDistanceTool;
 import au.org.intersect.faims.android.ui.map.tools.PointSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.PolygonSelectionTool;
 import au.org.intersect.faims.android.ui.map.tools.TouchSelectionTool;
+import au.org.intersect.faims.android.ui.view.IView;
 import au.org.intersect.faims.android.ui.view.MapText;
 import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.GeometryUtil;
@@ -99,7 +102,7 @@ import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
-public class CustomMapView extends MapView {
+public class CustomMapView extends MapView implements IView {
 
 	private static final int MAP_OVERLAY_DELAY = 500;
 	
@@ -328,9 +331,14 @@ public class CustomMapView extends MapView {
 	private MapPos lastMapPoint;
 	
 	private boolean lastMapMoved;
+
+	private String ref;
+	private boolean dynamic;
 	
-	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout) {
+	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout, String ref, boolean dynamic) {
 		this(activity);
+		this.ref = ref;
+		this.dynamic = dynamic;
 		
 		FAIMSApplication.getInstance().injectMembers(this);
 		
@@ -453,6 +461,16 @@ public class CustomMapView extends MapView {
 		// this.getOptions().setPersistentCachePath(activity.getDatabasePath("mapcache").getPath());
 		// set persistent raster cache limit to 100MB
 		// this.getOptions().setPersistentCacheSize(100 * 1024 * 1024);
+	}
+	
+	@Override
+	public String getRef() {
+		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	public static int nextId() {
@@ -2551,6 +2569,13 @@ public class CustomMapView extends MapView {
 
 	public void setLegacyToolVisible(boolean value) {
 		this.mapLayout.getToolsBarView().setLegacyToolVisible(value);
+	}
+
+	public void removeLayout() {
+		ViewParent parent = mapLayout.getParent();
+		if (parent instanceof ViewGroup) {
+			((ViewGroup) parent).removeView(mapLayout);
+		}
 	}
 
 }
