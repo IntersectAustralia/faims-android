@@ -19,6 +19,7 @@ import android.os.HandlerThread;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
+import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
@@ -68,6 +69,9 @@ public class BluetoothManager implements IFAIMSRestorable {
 	
 	@Inject
 	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	GPSDataManager gpsDataManager;
 	
 	private WeakReference<ShowModuleActivity> activityRef;
 	
@@ -370,7 +374,9 @@ public class BluetoothManager implements IFAIMSRestorable {
 
 	@Override
 	public void pause() {
-		pauseConnection();
+		if (!(gpsDataManager.isTrackingStarted() && gpsDataManager.isExternalGPSStarted())) {
+			pauseConnection();
+		}
 	}
 
 	@Override

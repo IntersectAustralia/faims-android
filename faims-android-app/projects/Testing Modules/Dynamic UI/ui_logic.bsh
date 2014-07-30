@@ -739,10 +739,48 @@ onEvent("tabgroup3", "load", "setupAssociations()");
 
 // Map View
 
+loadProfile() {
+	profile = getFieldValue("tabgroup4/tab1/profiles");
+	showToast(profile);
+}
+
+saveProfile() {
+	profile = getFieldValue("tabgroup4/tab1/profiles");
+	showToast(profile);
+}
+
+startTracking() {
+	startInternalGPS();
+	startTrackingGPS("time", 5, "showToast(\"tracking...\")");
+}
+stopTracking() {
+	stopTrackingGPS();
+	stopGPS();
+}
+
 setupMap() {
 	executeViewTask(new ViewTask() {
 		doTask() {
+			createDropDown("tabgroup4/tab1/profiles", "Profiles");
+			createButton("tabgroup4/tab1/load", "Load");
+			createButton("tabgroup4/tab1/save", "Save");
 			createMap("tabgroup4/tab1/map");
+			createCanvasLayer("tabgroup4/tab1/map", "Canvas 1");
+			createCanvasLayer("tabgroup4/tab1/map", "Canvas 2");
+			setSelectedLayer("tabgroup4/tab1/map", "Canvas 1");
+			createButton("tabgroup4/tab1/start", "Start Track Log");
+			createButton("tabgroup4/tab1/stop", "Stop Track Log");
+
+			ArrayList list = new ArrayList();
+			list.add("Profile 1");
+			list.add("Profile 2");
+			list.add("Profile 3");
+			populateDropDown("tabgroup4/tab1/profiles", list);
+
+			onEvent("tabgroup4/tab1/load", "click", "loadProfile()");
+			onEvent("tabgroup4/tab1/save", "click", "saveProfile()");
+			onEvent("tabgroup4/tab1/start", "click", "startTracking()");
+			onEvent("tabgroup4/tab1/stop", "click", "stopTracking()");
 		}
 	});
 }
@@ -1279,3 +1317,25 @@ setupDemo4() {
 onEvent("tabgroup10", "show", "setupDemo4()");
 
 // Demo 5
+
+setText() {
+	setFieldValue("tabgroup11/tab1/text", "getLastTextAlertInput()");
+}
+
+showText() {
+	showTextAlert("Popup Text", "Please enter some text", "setText()", "");
+}
+
+setupDemo5() {
+	executeViewTask(new ViewTask() {
+		doTask() {
+			removeAllViewsAndContainers("tabgroup11");
+			createButton("tabgroup11/tab1/show", "Pop Text");
+			createTextField("tabgroup11/tab1/text", "Text", null, null, null, null, false, false);
+
+			onEvent("tabgroup11/tab1/show", "click", "showText()");
+		}
+	});
+}
+
+onEvent("tabgroup11", "show", "setupDemo5()");

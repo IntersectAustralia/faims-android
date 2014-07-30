@@ -3435,11 +3435,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Override
 	public void resume() {
-		if (gpsDataManager.isTrackingStarted()) {
-			startTrackingGPS(gpsDataManager.getTrackingType(),
-					gpsDataManager.getTrackingValue(),
-					gpsDataManager.getTrackingExec());
-		}
 	}
 	
 	@Override
