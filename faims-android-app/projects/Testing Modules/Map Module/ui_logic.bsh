@@ -48,6 +48,18 @@ onEvent("main/map/clear", "click", "onClearMap()");
 onEvent("main/map/create", "click", "onCreateMap()");
 onEvent("main/map/data", "click", "setSelectedLayer(\"main/map/map\", DATA_ENTRY_LAYER_ID)");
 onEvent("main/map/entity", "click", "setSelectedLayer(\"main/map/map\", \"Entity Layer\")");
+onEvent("main/map/saveMap", "click", "onSaveMap()");
+onEvent("main/map/loadMap", "click", "onLoadMap()");
+
+onSaveMap() {
+    file = getAttachedFilePath("files/data/saved_config.json");
+    saveMapViewConfiguration("main/map/map", file, "showToast(\"Saved map config\")");
+}
+
+onLoadMap() {
+    file = getAttachedFilePath("files/data/saved_config.json");
+    loadMapViewConfiguration("main/map/map", file, "showToast(\"Loaded map config\")");
+}
 
 onClearMap() {
 	clearGeometryList("main/map/map", getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID));

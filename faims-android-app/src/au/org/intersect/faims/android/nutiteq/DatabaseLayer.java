@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -292,6 +295,33 @@ public class DatabaseLayer extends GeometryLayer {
 		}
 		
 		//FLog.d("time: " + (System.currentTimeMillis() - time) / 1000);
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", getName());
+			json.put("type", "DatabaseLayer");
+			json.put("queryName", getQueryName());
+			json.put("querySql", getQuerySQL());
+			json.put("isEntity", getType() == Type.ENTITY);
+			JSONObject point = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("pointStyle", point);
+			JSONObject line = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("lineStyle", line);
+			JSONObject polygon = new JSONObject();
+			pointStyle.saveToJSON(point);
+			json.put("polygonStyle", polygon);
+			json.put("visible", isVisible());
+			if (getTextLayer() != null) {
+				JSONObject textLayer = new JSONObject();
+				getTextLayer().saveToJSON(textLayer);
+				json.put("textLayer", textLayer);
+			}
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize DatabaseLayer", e);
+		}
 	}
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.gdal.gdal.gdal;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Feature;
 import org.gdal.ogr.FeatureDefn;
@@ -35,7 +34,6 @@ import com.nutiteq.style.StyleSet;
 import com.nutiteq.tasks.Task;
 import com.nutiteq.ui.DefaultLabel;
 import com.nutiteq.ui.Label;
-import com.nutiteq.utils.GeoUtils;
 import com.nutiteq.utils.WkbRead;
 import com.nutiteq.vectorlayers.GeometryLayer;
 

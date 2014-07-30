@@ -934,7 +934,7 @@ public class LayerManagerDialog extends AlertDialog {
 					} else {
 						mapView.addSpatialLayer(layerName, spatialFile.getPath(), tableName, idColumn, labelColumn, 
 								pointStyle, lineStyle, polygonStyle, 
-								textStyle.toStyleSet());
+								textStyle);
 						redrawLayers();
 						d.dismiss();
 					}
@@ -1029,7 +1029,7 @@ public class LayerManagerDialog extends AlertDialog {
 					} else {
 						mapView.addDatabaseLayer(layerName, "Entity".equals(type), query, mapView.getDatabaseLayerQuery(query), 
 								pointStyle, lineStyle, polygonStyle, 
-								textStyle.toStyleSet());
+								textStyle);
 						redrawLayers();
 						d.dismiss();
 					}
@@ -1104,7 +1104,7 @@ public class LayerManagerDialog extends AlertDialog {
 
 	private void createUsersTrackLogLayer(String layerName) throws Exception {
 		mapView.setUserTrackLogLayer(mapView.addDataBaseLayerForTrackLog(layerName, mapView.getUserCheckedList(), mapView.getTrackLogQueryName(), mapView.getTrackLogQuerySql(),
-				pointStyle, lineStyle, polygonStyle, textStyle.toStyleSet()));
+				pointStyle, lineStyle, polygonStyle, textStyle));
 	}
 
 	private View createUserSelectionButton() throws Exception {

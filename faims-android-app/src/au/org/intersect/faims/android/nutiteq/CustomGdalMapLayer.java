@@ -9,8 +9,11 @@ import org.gdal.gdalconst.gdalconstConstants;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 import org.gdal.osr.osr;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import au.org.intersect.faims.android.exceptions.MapException;
+import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.MapView;
 import com.nutiteq.components.Envelope;
@@ -196,5 +199,16 @@ public class CustomGdalMapLayer extends GdalMapLayer {
 
 	public boolean isShowAlways(){
 		return this.showAlways;
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", getName());
+			json.put("source", getGdalSource());
+			json.put("type", "CustomGdalMapLayer");
+			json.put("visible", isVisible());
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize CustomGdalMapLayer", e);
+		}
 	}
 }

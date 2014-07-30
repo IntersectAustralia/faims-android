@@ -3,6 +3,9 @@ package au.org.intersect.faims.android.nutiteq;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -27,21 +30,21 @@ public class DatabaseTextLayer extends TextLayer {
 	DatabaseManager databaseManager;
 	
 	private DatabaseLayer databaseLayer;
-	private StyleSet<TextStyle> styleSet;
+	private GeometryTextStyle textStyle;
 	private int minZoom;
 	private Vector<Text> objects;
 	
 	private boolean renderOnce;
 
-	public DatabaseTextLayer(Projection projection, DatabaseLayer databaseLayer, StyleSet<TextStyle> styleSet) {
+	public DatabaseTextLayer(Projection projection, DatabaseLayer databaseLayer, GeometryTextStyle textStyle) {
 		super(projection);
 
 		FAIMSApplication.getInstance().injectMembers(this);
 		
 		this.databaseLayer = databaseLayer;
-		this.styleSet = styleSet;
-		if (styleSet != null) {
-			this.minZoom = styleSet.getFirstNonNullZoomStyleZoom();
+		this.textStyle = textStyle;
+		if (textStyle != null) {
+			this.minZoom = textStyle.toStyleSet().getFirstNonNullZoomStyleZoom();
 		}
 	}
 	
@@ -57,6 +60,8 @@ public class DatabaseTextLayer extends TextLayer {
 	        setVisibleElementsList(null);
 	      return;
 	    }
+		
+		StyleSet<TextStyle> styleSet = textStyle.toStyleSet();
 		
 		if (renderOnce) {
 			renderOnce = false;
@@ -99,6 +104,17 @@ public class DatabaseTextLayer extends TextLayer {
 		    
 		    setVisibleElementsList(objects);
 		    
+		}
+	}
+	
+	public void saveToJSON(JSONObject json) {
+		try {
+			JSONObject style = new JSONObject();
+			textStyle.saveToJSON(style);
+			json.put("textStyle", style);
+			json.put("visible", isVisible());
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize DatabaseTextLayer", e);
 		}
 	}
 

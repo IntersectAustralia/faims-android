@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import au.org.intersect.faims.android.log.FLog;
 
 import com.nutiteq.components.Envelope;
@@ -122,5 +125,15 @@ public class CanvasLayer extends GeometryLayer {
 
 	public List<Geometry> getGeometryList() {
 		return objects.getAll();
+	}
+
+	public void saveToJSON(JSONObject json) {
+		try {
+			json.put("name", getName());
+			json.put("type", "CanvasLayer");
+			json.put("visible", isVisible());
+		} catch (JSONException e) {
+			FLog.e("Couldn't serialize CanvasLayer", e);
+		}
 	}
 }

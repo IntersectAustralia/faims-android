@@ -22,6 +22,8 @@
               <create/>
               <data/>
               <entity/>
+              <saveMap/>
+              <loadMap/>
             </map>
             <gps>
               <connectexternal/>
@@ -78,6 +80,12 @@
         </trigger>
         <trigger ref="entity">
             <label>Change to entity layer</label>
+        </trigger>
+        <trigger ref="saveMap">
+            <label>Save map config</label>
+        </trigger>
+        <trigger ref="loadMap">
+            <label>Load map config</label>
         </trigger>
       </group>
 

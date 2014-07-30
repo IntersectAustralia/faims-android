@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.beanshell;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -614,6 +617,58 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			FLog.e("exception binding map event to view " + ref, e);
 			showWarning("Logic Error", "Error cannot bind map event to view "
 					+ ref);
+		}
+	}
+	
+	public void saveMapViewConfiguration(String ref, String file, String callback) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				JSONObject json = new JSONObject();
+				((CustomMapView) obj).saveToJSON(json);
+				File fileToSave = new File(file);
+				if (!fileToSave.exists()) {
+					fileToSave.getParentFile().mkdirs();
+				}
+				FileWriter writer = new FileWriter(file);
+				writer.write(json.toString());
+				writer.close();
+				
+				execute(callback);
+			} else {
+				FLog.w("cannot save configuration for map view " + obj);
+				showWarning("Logic Error", "Cannot save configuration for map view " + obj);
+			}
+		} catch (Exception e) {
+			FLog.e("error saving map view configuration", e);
+			showWarning("Logic Error", "Error saving map view configuration");
+		}
+	}
+	
+	public void loadMapViewConfiguration(String ref, String configFile, final String callback) {
+		try {
+			final Object obj = uiRenderer.getViewByRef(ref);
+			if (obj instanceof CustomMapView) {
+				String jsonContents = FileUtil.readFileIntoString(configFile);
+				final JSONObject json = new JSONObject(jsonContents);
+				
+				activityRef.get().runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						((CustomMapView) obj).loadFromJSON(json);
+						execute(callback);
+					}
+					
+				});
+				
+			} else {
+				FLog.w("cannot load configuration for map view " + obj);
+				showWarning("Logic Error", "Cannot load configuration for map view " + obj);
+			}
+		} catch (Exception e) {
+			FLog.e("error loading map view configuration", e);
+			showWarning("Logic Error", "Error loading map view configuration");
 		}
 	}
 	
@@ -1978,7 +2033,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						idColumn, labelColumn, pointStyle,
 						lineStyle,
 						polygonStyle,
-						textStyle.toStyleSet());
+						textStyle);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);
@@ -2006,7 +2061,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						querySql, pointStyle,
 						lineStyle,
 						polygonStyle,
-						textStyle.toStyleSet());
+						textStyle);
 			} else {
 				FLog.w("cannot find map view " + ref);
 				showWarning("Logic Error", "Error cannot find map view " + ref);

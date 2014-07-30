@@ -279,26 +279,20 @@ public class GdalMapLayer extends RasterLayer {
         }
         
         if (openData == null){
+        	Log.error("GDALOpen failed - " + gdal.GetLastErrorNo());
+        	Log.error(gdal.GetLastErrorMsg());
+        	
+        	// gdal.DumpOpenDatasets( stderr );
+        	
+        	// gdal.DestroyDriverManager();
+        	
+        	// gdal.DumpSharedList( null );
+        	
             return null;
         }
         
         this.boundsEnvelope = bounds(openData,layerProjection); 
 
-        /* -------------------------------------------------------------------- */
-        /*      Report general info for debugging.                              */
-        /* -------------------------------------------------------------------- */
-        if (openData == null) {
-            Log.error("GDALOpen failed - " + gdal.GetLastErrorNo());
-            Log.error(gdal.GetLastErrorMsg());
-
-            // gdal.DumpOpenDatasets( stderr );
-
-            // gdal.DestroyDriverManager();
-
-            // gdal.DumpSharedList( null );
-
-            return null;
-        }
         return openData;
     }
 
