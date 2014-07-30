@@ -1084,10 +1084,10 @@ createRecord() {
 	demo2counter++;
 	container = "tabgroup8/tab1/container" + demo2counter;
 	createContainer(container, "orientation", "tabgroup8/tab1/super");
-	createContainer("tabgroup8/tab1/mc" + demo2Counter, "even", container);
-	createContainer("tabgroup8/tab1/tc" + demo2Counter, "even", container);
-	createTextField("tabgroup8/tab1/measure" + demo2counter, "Measure", "value", "measure", "tabgroup8/tab1/mc" + demo2Counter, "decimal", false, true);
-	createDropDown("tabgroup8/tab1/type" + demo2counter, "Type", "value", "freetext", "tabgroup8/tab1/tc" + demo2Counter, false, false);
+	createContainer("tabgroup8/tab1/mc" + demo2counter, "even", container);
+	createContainer("tabgroup8/tab1/tc" + demo2counter, "even", container);
+	createTextField("tabgroup8/tab1/measure" + demo2counter, "Measure", "value", "measure", "tabgroup8/tab1/mc" + demo2counter, "decimal", false, true);
+	createDropDown("tabgroup8/tab1/type" + demo2counter, "Type", "value", "freetext", "tabgroup8/tab1/tc" + demo2counter, false, false);
 
 	ArrayList types = new ArrayList();
 	types.add("Length");
@@ -1096,16 +1096,26 @@ createRecord() {
 	populateDropDown("tabgroup8/tab1/type" + demo2counter, types);
 }
 
+lastDemo2Record = null;
 saveRecord() {
 	fetchEntityIdentifier(new FetchCallback() {
 			onFetch(result) {
 				saveTabGroup("tabgroup8", null, null, getEntityIdentifier(result), new SaveCallback() {
 					onSave(uuid, callback) {
+						lastDemo2Record = uuid;
 						showToast("saved record ");
 					}
 				});
 			}
 		});
+}
+
+clearRecord() {
+	newTabGroup("tabgroup8");
+}
+
+loadRecord() {
+	showTabGroup("tabgroup8", lastDemo2Record);
 }
 
 setupDemo2() {
@@ -1117,9 +1127,13 @@ setupDemo2() {
 			createButton("tabgroup8/tab1/new", "New Record");
 			createContainer("tabgroup8/tab1/super", null);
 			createButton("tabgroup8/tab1/save", "Save");
+			createButton("tabgroup8/tab1/clear", "Clear");
+			createButton("tabgroup8/tab1/load", "Load");
 
 			onEvent("tabgroup8/tab1/new", "click", "createRecord()");
 			onEvent("tabgroup8/tab1/save", "click", "saveRecord()");
+			onEvent("tabgroup8/tab1/clear", "click", "clearRecord()");
+			onEvent("tabgroup8/tab1/load", "click", "loadRecord()");
 
 			createRecord();
 		}
@@ -1136,7 +1150,7 @@ onClickDemo3Choice() {
 	executeViewTask(new ViewTask() {
 		doTask() {
 			if (choices.get(choices.size()-1).get(0).equals(choice)) {
-				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext");
+				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", null, null, false, false);
 			} else {
 				removeView("tabgroup9/tab1/other");
 			}
@@ -1144,11 +1158,14 @@ onClickDemo3Choice() {
 	});
 }
 
+lastDemo3Record = null;
+
 onClickDemo3Save() {
 	fetchEntityIdentifier(new FetchCallback() {
 			onFetch(result) {
 				saveTabGroup("tabgroup9", null, null, getEntityIdentifier(result), new SaveCallback() {
 					onSave(uuid, callback) {
+						lastDemo3Record = uuid;
 						showToast("saved record ");
 					}
 				});
@@ -1156,12 +1173,22 @@ onClickDemo3Save() {
 		});
 }
 
+clearDemo3Record() {
+	newTabGroup("tabgroup9");
+}
+
+loadDemo3Record() {
+	showTabGroup("tabgroup9", lastDemo3Record);
+}
+
 setupDemo3() {
 	executeViewTask(new ViewTask() {
 		doTask() {
 			removeAllViewsAndContainers("tabgroup9");
-			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, false, true);
+			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, true, true);
 			createButton("tabgroup9/tab1/save", "Save");
+			createButton("tabgroup9/tab1/clear", "Clear");
+			createButton("tabgroup9/tab1/load", "Load");
 
 			fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
 					onFetch(result) {
@@ -1172,6 +1199,8 @@ setupDemo3() {
 
 			onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
 			onEvent("tabgroup9/tab1/save", "click", "onClickDemo3Save()");
+			onEvent("tabgroup9/tab1/clear", "click", "clearDemo3Record()");
+			onEvent("tabgroup9/tab1/load", "click", "loadDemo3Record()");
 		}
 	});
 }

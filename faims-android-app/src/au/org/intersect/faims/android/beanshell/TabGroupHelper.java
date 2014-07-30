@@ -15,13 +15,10 @@ import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
-import au.org.intersect.faims.android.ui.view.CameraPictureGallery;
-import au.org.intersect.faims.android.ui.view.FileListGroup;
 import au.org.intersect.faims.android.ui.view.ICustomFileView;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
 import au.org.intersect.faims.android.ui.view.TabGroup;
-import au.org.intersect.faims.android.ui.view.VideoGallery;
 
 import com.nutiteq.geometry.Geometry;
 
@@ -551,56 +548,12 @@ public class TabGroupHelper {
 	
 	private static void showArchEntityTab(BeanShellLinker linker, ArchEntity archEntity, Tab tab) {
 		tab.clearViews();
-		for (EntityAttribute attribute : archEntity.getAttributes()) {
-			if (tab.hasView(attribute.getName())) {
-				List<View> views = tab.getAttributeViews(attribute.getName());
-				if (views != null) {
-					setAttribute(linker, attribute, views);
-				}
-			}
-		}
+		AttributeHelper.showArchEntityTab(linker, archEntity, tab);
 	}
 	
 	private static void showRelationshipTab(BeanShellLinker linker, Relationship relationship, Tab tab) {
 		tab.clearViews();
-		for (RelationshipAttribute attribute : relationship.getAttributes()) {
-			if (tab.hasView(attribute.getName())) {
-				List<View> views = tab.getAttributeViews(attribute.getName());
-				if (views != null) {
-					setAttribute(linker, attribute, views);
-				}
-			}
-		}
-	}
-
-	private static void setAttribute(BeanShellLinker linker, Attribute attribute, List<View> views) {
-		for (View v : views) {
-			if (v instanceof ICustomView) {
-				ICustomView customView = (ICustomView) v;
-				if (customView.getAttributeName().equals(attribute.getName())) {
-					if (v instanceof FileListGroup) {
-						// add full path
-						FileListGroup fileList = (FileListGroup) v;
-						fileList.addFile(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof CameraPictureGallery) {
-						CameraPictureGallery cameraGallery = (CameraPictureGallery) v;
-						// add full path
-						cameraGallery.addPicture(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else if (v instanceof VideoGallery) {
-						VideoGallery videoGallery = (VideoGallery) v;
-						// add full path
-						videoGallery.addVideo(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-					} else {
-						linker.setFieldValue(customView.getRef(), attribute.getValue(customView.getAttributeType()));
-						linker.setFieldCertainty(customView.getRef(), attribute.getCertainty());
-						linker.setFieldAnnotation(customView.getRef(), attribute.getAnnotation(customView.getAttributeType()));
-						linker.appendFieldDirty(customView.getRef(), attribute.isDirty(), attribute.getDirtyReason());
-					}
-					customView.save();
-					break;
-				}
-			}
-		}
+		AttributeHelper.showRelationshipTab(linker, relationship, tab);
 	}
 	
 	private static void onWarning(final BeanShellLinker linker, final IBeanShellCallback callback, final String title, final String errorMessage, final String callbackErrorMessage) {
