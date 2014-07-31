@@ -13,6 +13,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomSpinner extends Spinner implements ICustomView {
 	
@@ -42,6 +43,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		this.attribute = attribute;
 		this.ref = ref;
 		reset();
+		NativeCSS.addCSSClass(this, "dropdown");
 	}
 	
 	public String getAttributeName() {

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.javarosa.core.model.SelectChoice;
 
+import com.nativecss.NativeCSS;
+
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.text.InputType;
@@ -53,6 +55,7 @@ public class ViewFactory {
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
         textView.setText(inputText);
+        NativeCSS.addCSSClass(textView, "label");
         return textView;
 	}
 	
@@ -104,6 +107,7 @@ public class ViewFactory {
 	protected CustomEditText createTextArea(FormAttribute attribute, String ref) {
 		CustomEditText text = createTextField(-1, attribute, ref);
     	text.setLines(TEXT_AREA_SIZE);
+    	NativeCSS.addCSSClass(text, "text-area");
     	return text;
 	}
 	
@@ -240,6 +244,7 @@ public class ViewFactory {
 		button.setLayoutParams(layoutParams);
 		button.setText(label);
 		button.setTextSize(TEXT_SIZE);
+		NativeCSS.addCSSClass(button, "button-extra");
 		return button;
 	}
 	

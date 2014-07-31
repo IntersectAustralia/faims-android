@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.widget.Button;
 
@@ -10,6 +12,7 @@ public class CustomButton extends Button {
 
 	public CustomButton(Context context) {
 		super(context);
+		NativeCSS.addCSSClass(this, "button");
 	}
 	
 	public void clicked() {

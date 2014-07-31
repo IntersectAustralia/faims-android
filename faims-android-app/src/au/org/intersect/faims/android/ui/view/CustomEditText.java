@@ -14,6 +14,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomEditText extends EditText implements ICustomView {
 	
@@ -66,6 +67,7 @@ public class CustomEditText extends EditText implements ICustomView {
 		reset();
 		customTextWatcher = new CustomEditTextTextWatcher();
 		addTextChangedListener(customTextWatcher);
+		NativeCSS.addCSSClass(this, "input-field");
 	}
 
 	public String getAttributeName() {

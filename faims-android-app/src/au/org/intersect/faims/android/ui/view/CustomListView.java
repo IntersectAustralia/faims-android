@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.util.List;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -11,6 +13,7 @@ public class CustomListView extends ListView {
 	
 	public CustomListView(Context context) {
 		super(context);
+		NativeCSS.addCSSClass(this, "list");
 	}
 
 	public void populate(List<NameValuePair> pairs) {

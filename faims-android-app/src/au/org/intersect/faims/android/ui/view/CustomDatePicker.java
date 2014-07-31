@@ -13,6 +13,7 @@ import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomDatePicker extends DatePicker implements ICustomView {
 	
@@ -57,6 +58,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		init(0, 0, 0, customChangeListener);
 		DateUtil.setDatePicker(this);
+		NativeCSS.addCSSClass(this, "date-picker");
 	}
 
 	public String getAttributeName() {

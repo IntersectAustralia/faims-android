@@ -16,6 +16,7 @@ public class FormAttribute {
 	public String questionAppearance;
 	public String name;
 	public String type;
+	public String styleClass;
 	public boolean sync;
 	public boolean certainty;
 	public boolean annotation;
@@ -35,6 +36,7 @@ public class FormAttribute {
 		attribute.questionAppearance = input.getQuestion().getAppearanceAttr();
 		attribute.name = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		attribute.type = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
+		attribute.styleClass = input.getQuestion().getAdditionalAttribute(null, "faims_style_class");
 		if (attribute.type == null) attribute.type = Tab.FREETEXT;
 		attribute.certainty = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_certainty"));
 		attribute.annotation = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_annotation"));

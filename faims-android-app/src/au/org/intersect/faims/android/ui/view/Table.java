@@ -17,9 +17,11 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.StringUtil;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class Table extends WebView {
@@ -66,6 +68,7 @@ public class Table extends WebView {
 	private List<String> actionValues;
 	private List<String> headers;
 	private boolean pivot;
+	private String cssFile;
 		
 	int scrollX;
 	int scrollY;
@@ -86,6 +89,7 @@ public class Table extends WebView {
 		
 		// add java interface
 		addJavascriptInterface(new TableInterface(), "Android");
+		NativeCSS.addCSSClass(this, "table-view");
 	}
 
 	public void populate(String query, List<String> headers, String actionName, int actionIndex, String actionCallback, boolean pivot) throws Exception {
@@ -128,6 +132,11 @@ public class Table extends WebView {
 		};
 		task.execute();
 	}
+
+	public void style(String cssFile) throws Exception {
+		this.cssFile = cssFile;
+		refresh();
+	}
 	
 	public void scrollToTop() {
 		loadUrl("javascript:scrollToElement('page-top')");
@@ -144,6 +153,11 @@ public class Table extends WebView {
 	private String generateTable() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append(readFileFromAssets("table.header.html"));
+		if (cssFile != null) {
+			sb.append("<style>" + FileUtil.readFileIntoString(cssFile) + "</style>");
+		} else {
+			sb.append("<link href=\"table.css\" type=\"text/css\" rel=\"stylesheet\"/>");
+		}
 		sb.append("<table id=\"table\" class=\"table\">");
 		
 		Collection<List<String>> results = databaseManager.fetchRecord().fetchAll(query);
