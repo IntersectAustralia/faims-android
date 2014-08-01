@@ -131,14 +131,14 @@ public class ViewFactory {
 		CustomRadioGroup radioGroup = new CustomRadioGroup(context(), attribute, ref, dynamic);
 		
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-		if (attribute.selectChoices != null) {
+		if (attribute.selectChoices != null && !attribute.selectChoices.isEmpty()) {
 			for (final NameValuePair selectChoice : attribute.selectChoices) {
 	        	String innerText = selectChoice.getName();
 	        	innerText = arch16n.substituteValue(innerText);
 	        	pairs.add(new NameValuePair(innerText, selectChoice.getValue()));
 	        }
+			radioGroup.populate(pairs);
 		}
-		radioGroup.populate(pairs);
 		
 		return radioGroup;  
 	}
@@ -147,21 +147,21 @@ public class ViewFactory {
 		HierarchicalSpinner spinner = new HierarchicalSpinner(context(), attribute, ref, dynamic);
 		
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        if (attribute.selectChoices != null) {
+        if (attribute.selectChoices != null && !attribute.selectChoices.isEmpty()) {
 	        for (final NameValuePair selectChoice : attribute.selectChoices) {
 	        	String innerText = selectChoice.getName();
 	        	innerText = arch16n.substituteValue(innerText);
 	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
 	            choices.add(pair);
 	        }
+	        
+	        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+	                context(),
+	                R.layout.multiline_spinner_dropdown_item,
+	                choices);
+	        spinner.setAdapter(arrayAdapter, true);
+	        spinner.reset();
         }
-        
-        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                context(),
-                R.layout.multiline_spinner_dropdown_item,
-                choices);
-        spinner.setAdapter(arrayAdapter);
-        spinner.reset();
         
         return spinner;
 	}
@@ -171,7 +171,7 @@ public class ViewFactory {
                 context(), attribute, ref, dynamic);
         
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        if (attribute.selectChoices != null) {
+        if (attribute.selectChoices != null && !attribute.selectChoices.isEmpty()) {
 	        for (final NameValuePair selectChoice : attribute.selectChoices) {
 	        	String innerText = selectChoice.getName();
 	        	innerText = arch16n.substituteValue(innerText);
@@ -193,20 +193,20 @@ public class ViewFactory {
 		CustomListView list = new CustomListView(context(), ref, dynamic);
 		
         List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        if (attribute.selectChoices != null) {
+        if (attribute.selectChoices != null && !attribute.selectChoices.isEmpty()) {
 	        for (final NameValuePair selectChoice : attribute.selectChoices) {
 	        	String innerText = selectChoice.getName();
 	        	innerText = arch16n.substituteValue(innerText);
 	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
 	            choices.add(pair);
 	        }
+	        
+	        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+	                context(),
+	                android.R.layout.simple_list_item_1,
+	                choices);
+	        list.setAdapter(arrayAdapter);
         }
-        
-        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-                context(),
-                android.R.layout.simple_list_item_1,
-                choices);
-        list.setAdapter(arrayAdapter);
         
         return list;
 	}

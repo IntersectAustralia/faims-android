@@ -457,7 +457,7 @@ public class UIRenderer {
 		String style = childContainerElement.getAdditionalAttribute(null,"faims_style");
 		FormEntryCaption viewCaption = this.fem.getModel().getCaptionPrompt(childIndex);
 		String viewName = viewCaption.getIndex().getReference().getNameLast();
-		String viewRef = tabRef + "/" + viewName;
+		String viewRef = parentContainerGen != null ? parentContainerGen.getRef() + "/" + viewName : tabRef + "/" + viewName;
 		FormIndex inputIndex = this.fem.getModel().incrementIndex(childIndex,true);
 				
 		ContainerGenerator containerGen = new ContainerGenerator(viewRef, style);
