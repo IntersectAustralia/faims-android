@@ -77,6 +77,7 @@ import au.org.intersect.faims.android.util.ModuleUtil;
 import bsh.EvalError;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class ShowModuleActivity extends FragmentActivity implements
 		IFAIMSRestorable {
@@ -202,7 +203,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		FAIMSApplication.getInstance().setApplication(getApplication());
 		FAIMSApplication.getInstance().injectMembers(this);
-
+		
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setProgressBarIndeterminateVisibility(false);
 		setContentView(R.layout.activity_show_module);
@@ -226,7 +227,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 		setupSync();
 		setupWifiBroadcast();
 		setupManagers();
-		
+
+		String css = module.getCSS();
+		NativeCSS.styleWithCSS(css);
+
 		startLoadTask();
 	}
 
@@ -372,6 +376,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		NativeCSS.onActivityResumed(this);
 
 		resume();
 		bluetoothManager.resume();
@@ -408,6 +413,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onDestroy() {
+		NativeCSS.onActivityDestroyed(this);
 		bluetoothManager.destroy();
 		gpsDataManager.destroy();
 		beanShellLinker.destroy();

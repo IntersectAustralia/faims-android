@@ -33,6 +33,7 @@ public class FormInputDef implements Serializable {
 	public String questionAppearance;
 	public String name;
 	public String type;
+	public String styleClass;
 	public boolean sync;
 	public boolean certainty;
 	public boolean annotation;
@@ -199,6 +200,11 @@ public class FormInputDef implements Serializable {
 		return this;
 	}
 	
+	public FormInputDef setStyleCss(String style) {
+		this.styleClass = style;
+		return this;
+	}
+	
 	public FormInputDef addChoice(String name, String value) {
 		if (this.selectChoices == null) {
 			this.selectChoices = new ArrayList<NameValuePair>();
@@ -222,6 +228,7 @@ public class FormInputDef implements Serializable {
 		
 		inputDef.name = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		inputDef.type = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
+		inputDef.styleClass = input.getQuestion().getAdditionalAttribute(null, "faims_style_class");
 		if (inputDef.type == null) inputDef.type = Tab.FREETEXT;
 		
 		inputDef.certainty = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_certainty"));

@@ -15,6 +15,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
@@ -69,6 +70,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;		
 	    this.customListener = new CheckBoxGroupOnClickListener();
+	    NativeCSS.addCSSClass(this, "checkbox-group");
 	    reset();
 	}
 

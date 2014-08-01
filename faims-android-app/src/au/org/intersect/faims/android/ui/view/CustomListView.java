@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.util.List;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -20,6 +22,7 @@ public class CustomListView extends ListView implements IView {
 		super(context);
 		this.ref = ref;
 		this.dynamic = dynamic;
+		NativeCSS.addCSSClass(this, "list");
 	}
 	
 	@Override

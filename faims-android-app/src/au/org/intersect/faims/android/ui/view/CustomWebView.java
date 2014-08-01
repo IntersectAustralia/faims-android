@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.util.Stack;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -59,6 +61,7 @@ public class CustomWebView extends WebView implements IView {
 				}
 		    }
 		});
+		NativeCSS.addCSSClass(this, "web-view");
 	}
 	
 	public boolean isDynamic() {

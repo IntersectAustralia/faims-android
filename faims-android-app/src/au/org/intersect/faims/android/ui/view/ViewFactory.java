@@ -20,6 +20,8 @@ import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
+import com.nativecss.NativeCSS;
+
 public class ViewFactory {
 
 	public static final int MARGIN = 10;
@@ -50,6 +52,7 @@ public class ViewFactory {
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
         textView.setText(inputText);
+        NativeCSS.addCSSClass(textView, "label");
         return textView;
 	}
 	
@@ -101,6 +104,7 @@ public class ViewFactory {
 	protected CustomEditText createTextArea(FormInputDef attribute, String ref, boolean dynamic) {
 		CustomEditText text = createTextField(-1, attribute, ref, dynamic);
     	text.setLines(TEXT_AREA_SIZE);
+    	NativeCSS.addCSSClass(text, "text-area");
     	return text;
 	}
 	
@@ -245,6 +249,7 @@ public class ViewFactory {
 		button.setLayoutParams(layoutParams);
 		button.setText(label);
 		button.setTextSize(TEXT_SIZE);
+		NativeCSS.addCSSClass(button, "button-extra");
 		return button;
 	}
 	

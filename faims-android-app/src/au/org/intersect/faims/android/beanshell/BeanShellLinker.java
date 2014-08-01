@@ -1696,6 +1696,25 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
+	public void styleTable(String ref, String cssFile) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+
+			if (obj instanceof Table) {
+				Table table = (Table) obj;
+				table.style(cssFile);
+			} else {
+				FLog.w("Cannot style table "
+						+ ref);
+				showWarning("Logic Error", "Cannot style table "
+						+ ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to style table " + ref, e);
+			showWarning("Logic Error", "Error trying to style table " + ref);
+		}
+	}
+	
 	public void scrollTableToTop(String ref) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);

@@ -1,5 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.widget.Button;
 
@@ -20,6 +22,7 @@ public class CustomButton extends Button implements IView {
 		super(context);
 		this.ref = ref;
 		this.dynamic = dynamic;
+		NativeCSS.addCSSClass(this, "button");
 	}
 	
 	@Override

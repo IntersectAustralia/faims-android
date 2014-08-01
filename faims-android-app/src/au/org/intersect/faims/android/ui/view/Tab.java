@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class Tab {
 
@@ -297,6 +299,11 @@ public class Tab {
         }
         
         viewList.add(view);
+        
+        if (inputDef.styleClass != null) {
+			NativeCSS.addCSSClass(view, inputDef.styleClass);
+		}
+		NativeCSS.setCSSId(view, ref);
         
         if(inputDef.name != null){
         	addViewMappings(inputDef.name, view);
@@ -786,6 +793,7 @@ public class Tab {
 		}
 		
 		executeCommands(onShowCommands);
+		refreshCSS();
 	}
 
 	public void onHideTab() {
@@ -919,7 +927,26 @@ public class Tab {
 		}
 		return false;
 	}
+	
+	public void refreshCSS() {
+		Handler cssHandler = new Handler(beanShellLinker.getActivity().getMainLooper());
+		cssHandler.post(new Runnable() {
 
+			@Override
+			public void run() {
+				if (beanShellLinker.getActivity() != null) {
+					NativeCSS.refreshCSSStyling(view);
+					for (View v : getViews()) {
+						if (v instanceof PictureGallery) {
+							((PictureGallery) v).updateImages();
+						}
+					}
+				}
+			}
+			
+		});
+	}
+	
 	public void removeCustomViews() {
 		List<String> dynamicViews = new ArrayList<String>();
 		for (View view : viewList) {

@@ -13,6 +13,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomSpinner extends Spinner implements ICustomView {
 	
@@ -44,6 +45,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;
 		reset();
+		NativeCSS.addCSSClass(this, "dropdown");
 	}
 	
 	@Override

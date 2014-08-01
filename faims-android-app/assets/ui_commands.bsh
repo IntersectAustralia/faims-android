@@ -797,6 +797,18 @@ refreshTable(String ref){
 }
 
 /**
+  * Styles the table with the supplied css file.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param cssFile the css file to style the table with
+  */
+styleTable(String ref, String cssFile) {
+  linker.styleTable(ref, cssFile);
+}
+
+/**
   * Scroll table to top.
   *
   * If the field reference is not found a logic error dialog will appear.

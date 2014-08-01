@@ -21,6 +21,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
 
@@ -82,6 +83,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
+		NativeCSS.addCSSClass(this, "gallery");
 	}
 
 	public PictureGallery(Context context, FormInputDef inputDef, String ref, boolean dynamic, boolean isMulti) {
@@ -94,12 +96,12 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
-	    galleriesLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
+		NativeCSS.addCSSClass(this, "gallery");
 		reset();
 	}
 
@@ -202,7 +204,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
             if (selectedImages != null && selectedImages.contains(view)) {
                 view.setBackgroundColor(Color.BLUE);
             } else {
-                view.setBackgroundColor(Color.LTGRAY);
+                view.setBackgroundColor(Color.TRANSPARENT);
+                NativeCSS.refreshCSSStyling(view);
             }
         }
 		updateImageListeners();
@@ -369,7 +372,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		setGalleryImage(gallery, path);
 		
-		gallery.setBackgroundColor(Color.LTGRAY);
 		gallery.setPadding(10, 10, 10, 10);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
@@ -382,6 +384,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				return true;
 			}
 		});
+		
+		NativeCSS.addCSSClass(galleryLayout, "gallery");
+		NativeCSS.addCSSClass(gallery, "gallery-item");
 		
 		TextView textView = new TextView(
 				galleriesLayout.getContext());

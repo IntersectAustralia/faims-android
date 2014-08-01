@@ -13,6 +13,7 @@ import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomTimePicker extends TimePicker implements ICustomView {
 
@@ -57,6 +58,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		setOnTimeChangedListener(customChangeListener);
 		DateUtil.setTimePicker(this);
+		NativeCSS.addCSSClass(this, "time-picker");
 		reset();
 	}
 

@@ -18,6 +18,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
@@ -71,6 +72,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;
 		this.customListener = new RadioGroupOnChangeListener();
+		NativeCSS.addCSSClass(this, "radio-group");
 		reset();
 	}
 

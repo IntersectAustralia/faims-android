@@ -82,6 +82,7 @@ import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 import com.nutiteq.MapView;
 import com.nutiteq.components.Bounds;
 import com.nutiteq.components.Components;
@@ -429,6 +430,8 @@ public class CustomMapView extends MapView implements IView {
         getConstraints().setMapBounds(null);
 		getConstraints().setRotatable(true);
 //		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
+		
+		NativeCSS.addCSSClass(this, "map-view");
 	}
 
 	public CustomMapView(Context context) {
