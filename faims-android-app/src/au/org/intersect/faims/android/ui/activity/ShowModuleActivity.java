@@ -361,7 +361,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		uiRenderer.parseSchema(getModule().getDirectoryPath("ui_schema.xml").getPath());
 	}
 	
-	private void renderUI() {
+	private void renderUI() throws Exception {
 		uiRenderer.createUI();
 	}
 	
@@ -418,6 +418,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		gpsDataManager.destroy();
 		beanShellLinker.destroy();
 		autoSaveManager.destroy();
+		uiRenderer.clearTempBundle();
 		destroy();
 		super.onDestroy();
 	}

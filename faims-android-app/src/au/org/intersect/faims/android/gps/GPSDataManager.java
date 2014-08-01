@@ -433,7 +433,9 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 
 	@Override
 	public void pause() {
-		pauseListener();
+		if (!isTrackingStarted()) {
+			pauseListener();
+		}
 	}
 
 	@Override

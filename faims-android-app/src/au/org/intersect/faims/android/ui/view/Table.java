@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
 
 @SuppressLint("SetJavaScriptEnabled")
-public class Table extends WebView {
+public class Table extends WebView implements IView {
 	
 	class TableInterface {
 		
@@ -73,9 +73,20 @@ public class Table extends WebView {
 	int scrollX;
 	int scrollY;
 
+	private String ref;
+	private boolean dynamic;
+
 	public Table(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
+	}
+	
+	public Table(Context context, String ref, boolean dynamic) {
+		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
+		
+		this.ref = ref;
+		this.dynamic = dynamic;
 		
 		setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 		
@@ -90,6 +101,16 @@ public class Table extends WebView {
 		// add java interface
 		addJavascriptInterface(new TableInterface(), "Android");
 		NativeCSS.addCSSClass(this, "table-view");
+	}
+	
+	@Override
+	public String getRef() {
+		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 
 	public void populate(String query, List<String> headers, String actionName, int actionIndex, String actionCallback, boolean pivot) throws Exception {

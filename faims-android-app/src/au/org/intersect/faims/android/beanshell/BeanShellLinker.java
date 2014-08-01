@@ -51,9 +51,11 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.ViewTask;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.EntityAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
@@ -686,12 +688,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return tab;
 	}
 	
-	protected TabGroup getTabGroupFromTabLabel(String ref) throws Exception {
+	protected TabGroup getTabGroupFromRef(String ref) throws Exception {
 		if (ref == null) {
 			throw new Exception("Cannot find tab group " + ref);
 		}
 		String[] ids = ref.split("/");
-		if (ids.length < 2) {
+		if (ids.length < 1) {
 			throw new Exception("Cannot find tab group " + ref);
 		}
 		String groupId = ids[0];
@@ -700,6 +702,22 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			throw new Exception("Cannot find tab group " + ref);
 		}
 		return tabGroup;
+	}
+	
+	protected Tab getTabFromRef(String ref) throws Exception {
+		if (ref == null) {
+			throw new Exception("Cannot find tab " + ref);
+		}
+		String[] ids = ref.split("/");
+		if (ids.length < 2) {
+			throw new Exception("Cannot find tab " + ref);
+		}
+		String tabId = ids[0] + "/" + ids[1];
+		Tab tab = uiRenderer.getTabByLabel(tabId);
+		if (tab == null) {
+			throw new Exception("Cannot find tab " + ref);
+		}
+		return tab;
 	}
 
 	public void newTabGroup(String label) {
@@ -789,7 +807,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public Tab showTab(String label, String uuid, FetchCallback callback) {
 		try {
-			TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			TabGroup tabGroup = getTabGroupFromRef(label);
 			Tab tab = uiRenderer.showTab(label);
 			if (tab == null) {
 				throw new Exception("cannot show tab " + label);
@@ -887,7 +905,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void cancelTab(String label, boolean warn) {
 		try {
-			final TabGroup tabGroup = getTabGroupFromTabLabel(label);
+			final TabGroup tabGroup = getTabGroupFromRef(label);
 			final Tab tab = getTab(label);
 			if (warn) {
 				if (tab.hasChanges() 
@@ -3436,11 +3454,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Override
 	public void resume() {
-		if (gpsDataManager.isTrackingStarted()) {
-			startTrackingGPS(gpsDataManager.getTrackingType(),
-					gpsDataManager.getTrackingValue(),
-					gpsDataManager.getTrackingExec());
-		}
 	}
 	
 	@Override
@@ -3469,15 +3482,73 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void executeHardwareCaptureCallBack() {
-		try {
-			this.interpreter.eval(hardwareReadingCallBack);
-		} catch (EvalError e) {
-			FLog.e("error when executing the callback for hardware capture", e);
-		}
+		execute(hardwareReadingCallBack);
 	}
 	
 	public void clearHardwareDeviceBuffer() {
 		this.activityRef.get().clearDeviceBuffer();
+	}
+	
+	public void executeViewTask(final ViewTask task) {
+		getActivity().runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					task.doTask();
+				} catch (Exception e) {
+					reportError("Error found when executing execute view task dotask callback", e);
+				}
+			}
+			
+		});
+	}
+	
+	public void createView(String ref, FormInputDef inputDef, String containerRef) {
+		try {
+			TabGroup tabGroup = getTabGroupFromRef(ref);
+			Tab tab = getTabFromRef(ref);
+			tab.addCustomView(ref, inputDef, tabGroup.isArchEnt(), tabGroup.isRelationship(), containerRef);
+		} catch (Exception e) {
+			reportError("Error trying to create view " + ref, e);
+		}
+	}
+	
+	public void removeView(String ref) {
+		try {
+			Tab tab = getTabFromRef(ref);
+			tab.removeCustomView(ref);
+		} catch (Exception e) {
+			reportError("Error trying to remove view " + ref, e);
+		}
+	}
+	
+	public void createContainer(String ref, String style, String containerRef) {
+		try {
+			Tab tab = getTabFromRef(ref);
+			tab.addCustomContainer(ref, style, containerRef);
+		} catch (Exception e) {
+			reportError("Error trying to create container " + ref, e);
+		}
+	}
+	
+	public void removeContainer(String ref) {
+		try {
+			final Tab tab = getTabFromRef(ref);
+			tab.removeCustomContainer(ref);
+		} catch (Exception e) {
+			reportError("Error trying to remove container " + ref, e);
+		}
+	}
+	
+	public void removeAllViewsAndContainers(String tabGroupRef) {
+		try {
+			final TabGroup tabGroup = getTabGroup(tabGroupRef);
+			tabGroup.removeCustomViews();
+			tabGroup.removeCustomContainers();
+		} catch (Exception e) {
+			reportError("Error trying to remove all views and containers " + tabGroupRef, e);
+		}
 	}
 	
 }

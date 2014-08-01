@@ -4,7 +4,9 @@ import android.graphics.Typeface;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.ViewTask;
 import au.org.intersect.faims.android.data.EntityAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.data.User;
@@ -223,6 +225,93 @@ cancelTabGroup(String ref, boolean warn){
   */
 cancelTab(String ref, boolean warn){
 	linker.cancelTab(ref, warn);
+}
+
+/** 
+  * Execute a view task to process view changes.
+  *
+  * @param task a view task to execute
+  */
+executeViewTask(ViewTask task) {
+  linker.executeViewTask(task);
+}
+
+/**
+  * Create a new view.
+  *
+  * @param ref the reference to the view
+  * @param inputDef the definition of the view
+  */
+createView(String ref, FormInputDef inputDef) {
+  linker.createView(ref, inputDef, null);
+}
+
+/**
+  * create a new view.
+  *
+  * @param ref the reference to the view
+  * @param inputDef the definition of the view
+  * @param conatinerRef the reference ot the container. Can be null.
+  */
+createView(String ref, FormInputDef inputDef, String containerRef) {
+  linker.createView(ref, inputDef, containerRef);
+}
+
+/**
+  * Remove view.
+  *
+  * @param ref the reference to the view
+  */
+removeView(String ref) {
+  linker.removeView(ref);
+}
+
+/**
+  * Create a new container.
+  *
+  * @param ref the reference to the container
+  * @param style the styles to apply on the container
+  */
+createContainer(String ref, String style) {
+  linker.createContainer(ref, style, null);
+}
+
+/**
+  * Create a new container.
+  *
+  * @param ref the reference to the container
+  * @param style the styles to apply on the container
+  * @param conatinerRef the reference ot the container. Can be null.
+  */
+createContainer(String ref, String style, String containerRef) {
+  linker.createContainer(ref, style, containerRef);
+}
+
+/**
+  * Remove container.
+  *
+  * @param ref the reference to the container
+  */
+removeContainer(String ref) {
+  linker.removeContainer(ref);
+}
+
+/**
+  * Remove all non static views and containers in tabgroup.
+  *
+  * @param ref the reference to the tabgroup
+  */
+removeAllViewsAndContainers(String ref) {
+  linker.removeAllViewsAndContainers(ref);
+}
+
+/**
+  * Create View definition
+  *
+  * @return view definition object
+  */
+createViewDef() {
+  return new FormInputDef();
 }
 
 //========= Dialog Functionality ==========

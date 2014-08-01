@@ -19,7 +19,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.log.FLog;
@@ -42,8 +42,8 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public CameraPictureGallery(Context context, FormAttribute attribute, String ref) {
-		super(context, attribute, ref, true);
+	public CameraPictureGallery(Context context, FormInputDef attribute, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic, true);
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = attribute.sync;
 	}

@@ -11,7 +11,8 @@ public class ContainerGenerator extends ViewGenerator {
 
 	private ArrayList<ViewGenerator> viewGeneratorList;
 
-	public ContainerGenerator(String style) {
+	public ContainerGenerator(String ref, String style) {
+		this.ref = ref;
 		this.style = style;
 		this.viewGeneratorList = new ArrayList<ViewGenerator>();
 	}
@@ -29,7 +30,7 @@ public class ContainerGenerator extends ViewGenerator {
 	}
 
 	public LinearLayout generate(Tab tab, Context context, List<Map<String, String>> styleMappings) {
-		return new CustomLinearLayout(context, styleMappings);
+		return new CustomLinearLayout(context, styleMappings, false);
 	}
 
 }

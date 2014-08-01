@@ -7,7 +7,7 @@ import java.util.List;
 import android.content.Context;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -21,7 +21,6 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 	AutoSaveManager autoSaveManager;
 	
 	private boolean sync;
-
 	private List<NameValuePair> reloadPairs;
 
 	public FileListGroup(Context context) {
@@ -29,8 +28,8 @@ public class FileListGroup extends CustomCheckBoxGroup implements ICustomFileVie
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
-	public FileListGroup(Context context, FormAttribute attribute, boolean sync, String ref) {
-		super(context, attribute, ref);
+	public FileListGroup(Context context, FormInputDef attribute, boolean sync, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic);
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.sync = sync;
 	}

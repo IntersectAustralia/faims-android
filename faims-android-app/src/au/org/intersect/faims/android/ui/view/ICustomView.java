@@ -5,11 +5,10 @@ import java.util.List;
 
 import au.org.intersect.faims.android.data.Attribute;
 
-public interface ICustomView {
+public interface ICustomView extends IView {
 
 	public String getAttributeName();
 	public String getAttributeType();
-	public String getRef();
 	public String getValue();
 	public void setValue(String value);
 	public float getCertainty();

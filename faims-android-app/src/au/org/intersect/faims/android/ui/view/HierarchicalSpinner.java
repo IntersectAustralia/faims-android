@@ -9,10 +9,11 @@ import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -23,15 +24,18 @@ public class HierarchicalSpinner extends CustomSpinner {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 		{
-			if(hierarchicalSelectListener != null) {
-				hierarchicalSelectListener.onItemSelected(parent, view, position, id);
+			if (selectEnabled) {
+				if(hierarchicalSelectListener != null) {
+					hierarchicalSelectListener.onItemSelected(parent, view, position, id);
+				}
+				
+				if (listener != null) {
+					listener.onItemSelected(parent, view, position, id);
+				}
+				
+				notifySave();
 			}
-			
-			if (listener != null) {
-				listener.onItemSelected(parent, view, position, id);
-			}
-			
-			notifySave();
+			selectEnabled = true;
 		}
 
 		@Override
@@ -42,11 +46,8 @@ public class HierarchicalSpinner extends CustomSpinner {
 	}
 
 	private List<VocabularyTerm> terms;
-	
 	private Stack<VocabularyTerm> parentTerms;
-	
 	private List<VocabularyTerm> currentTerms;
-
 	private List<VocabularyTerm> currentItems;
 
 	private boolean lastSelected;
@@ -58,17 +59,30 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private OnItemSelectedListener listener;
 	private OnItemSelectedListener hierarchicalSelectListener;
 	private HierarchicalOnItemSelectListener customListener;
+	
+	private boolean selectEnabled;
 
 	public HierarchicalSpinner(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
-	public HierarchicalSpinner(Context context, FormAttribute attribute, String ref) {
-		super(context, attribute, ref);
+	public HierarchicalSpinner(Context context, FormInputDef attribute, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic);
 		FAIMSApplication.getInstance().injectMembers(this);
+		selectEnabled = false;
 		customListener = new HierarchicalOnItemSelectListener();
 		super.setOnItemSelectedListener(customListener);
+	}
+	
+	public void setSelectEnabled(boolean enabled) {
+		selectEnabled = enabled;
+	}
+	
+	@Override
+	public void setAdapter(SpinnerAdapter adapter) {
+		selectEnabled = false;
+		super.setAdapter(adapter);
 	}
 	
 	private void mapVocabToParent() {

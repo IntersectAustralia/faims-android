@@ -346,6 +346,10 @@ public class TabGroup extends Fragment {
 		tempSavedInstanceState = savedInstanceState;
 	}
 	
+	public void clearTempBundle() {
+		tempSavedInstanceState = null;
+	}
+	
 	public void restoreFromTempBundle() {
 		if (tempSavedInstanceState != null) {
 			try {
@@ -416,6 +420,18 @@ public class TabGroup extends Fragment {
 			}
 			
 		});
+	}
+
+	public void removeCustomViews() {
+		for (Tab tab : tabs) {
+			tab.removeCustomViews();
+		}
+	}
+	
+	public void removeCustomContainers() {
+		for (Tab tab : tabs) {
+			tab.removeCustomContainers();
+		}
 	}
 
 }

@@ -7,7 +7,7 @@ import android.content.Context;
 import android.widget.Spinner;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
@@ -21,6 +21,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	AutoSaveManager autoSaveManager;
 
 	private String ref;
+	private boolean dynamic;
 	protected String currentValue;
 	protected float certainty;
 	protected float currentCertainty;
@@ -30,40 +31,51 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	protected String dirtyReason;
 	protected boolean annotationEnabled;
 	protected boolean certaintyEnabled;
-	protected FormAttribute attribute;
+	protected FormInputDef inputDef;
 	
 	public CustomSpinner(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public CustomSpinner(Context context, FormAttribute attribute, String ref) {
+	public CustomSpinner(Context context, FormInputDef inputDef, String ref, boolean dynamic) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
+		this.dynamic = dynamic;
 		reset();
 		NativeCSS.addCSSClass(this, "dropdown");
 	}
 	
+	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
+	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 
+	@Override
 	public String getRef() {
 		return ref;
 	}
 	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
+	
+	@Override
 	public String getValue() {
 		NameValuePair pair = (NameValuePair) getSelectedItem();
 		if (pair == null) return null;
 		return pair.getValue();
 	}
 
+	@Override
 	public void setValue(String value) {
 		if (value != null) {
 			for (int i = 0; i < getAdapter().getCount(); ++i) {
@@ -79,40 +91,49 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		notifySave();
 	}
 
+	@Override
 	public float getCertainty() {
 		return certainty;
 	}
 
+	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
 		notifySave();
 	}
 
+	@Override
 	public String getAnnotation() {
 		return annotation;
 	}
 
+	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
 		notifySave();
 	}
 
+	@Override
 	public boolean isDirty() {
 		return dirty;
 	}
 	
+	@Override
 	public void setDirty(boolean value) {
 		this.dirty = value;
 	}
 	
+	@Override
 	public void setDirtyReason(String value) {
 		this.dirtyReason = value;
 	}
 
+	@Override
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
 	
+	@Override
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
@@ -123,6 +144,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		currentValue = null;
 	}
 
+	@Override
 	public boolean hasChanges() {
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getAnnotation(), currentAnnotation) || 

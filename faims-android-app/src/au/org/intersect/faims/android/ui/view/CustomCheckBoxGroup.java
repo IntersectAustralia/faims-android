@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
@@ -35,6 +35,8 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	AutoSaveManager autoSaveManager;
 	
 	private String ref;
+	private boolean dynamic;
+	
 	protected List<NameValuePair> currentValues;
 	protected float certainty;
 	protected float currentCertainty;
@@ -44,7 +46,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	protected String dirtyReason;
 	protected boolean annotationEnabled;
 	protected boolean certaintyEnabled;
-	protected FormAttribute attribute;
+	protected FormInputDef inputDef;
 
 	protected OnClickListener listener;
 	protected CheckBoxGroupOnClickListener customListener;
@@ -55,7 +57,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		this.customListener = new CheckBoxGroupOnClickListener();
 	}
 	
-	public CustomCheckBoxGroup(Context context, FormAttribute attribute, String ref) {
+	public CustomCheckBoxGroup(Context context, FormInputDef inputDef, String ref, boolean dynamic) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 		
@@ -64,26 +66,32 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	                LayoutParams.MATCH_PARENT));
 	    setOrientation(LinearLayout.VERTICAL);
 		
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
-		reset();
+		this.dynamic = dynamic;		
 	    this.customListener = new CheckBoxGroupOnClickListener();
 	    NativeCSS.addCSSClass(this, "checkbox-group");
+	    reset();
 	}
 
 	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 
 	@Override
 	public String getRef() {
 		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 	
 	@Override

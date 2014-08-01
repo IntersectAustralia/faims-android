@@ -7,7 +7,7 @@ import android.content.Context;
 import android.widget.TimePicker;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -30,6 +30,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	AutoSaveManager autoSaveManager;
 	
 	private String ref;
+	private boolean dynamic;
 	private String currentValue;
 	private float certainty;
 	private float currentCertainty;
@@ -39,7 +40,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 	private String dirtyReason;
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
-	private FormAttribute attribute;
+	private FormInputDef inputDef;
 	
 	private CustomDatePickerOnDateChangedListener customChangeListener;
 	
@@ -48,64 +49,82 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public CustomTimePicker(Context context, FormAttribute attribute, String ref) {
+	public CustomTimePicker(Context context, FormInputDef inputDef, String ref, boolean dynamic) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
-		reset();
+		this.dynamic = dynamic;
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		setOnTimeChangedListener(customChangeListener);
 		DateUtil.setTimePicker(this);
 		NativeCSS.addCSSClass(this, "time-picker");
+		reset();
 	}
 
+	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
+	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 	
+	@Override
 	public String getRef() {
 		return ref;
 	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
+	}
 
+	@Override
 	public float getCertainty() {
 		return certainty;
 	}
 
+	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
 		notifySave();
 	}
 
+	@Override
 	public boolean isDirty() {
 		return dirty;
 	}
 	
+	@Override
 	public void setDirty(boolean value) {
 		this.dirty = value;
 	}
 	
+	@Override
 	public void setDirtyReason(String value) {
 		this.dirtyReason = value;
 	}
 
+	@Override
 	public String getDirtyReason() {
 		return dirtyReason;
 	}
 	
+	@Override
 	public String getValue() {
 		return DateUtil.getTime(this);
 	}
 	
+	@Override
 	public void setValue(String value) {
 		DateUtil.setTimePicker(this, value);
 		notifySave();
 	}
 
+	@Override
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
@@ -115,6 +134,7 @@ public class CustomTimePicker extends TimePicker implements ICustomView {
 		save();
 	}
 
+	@Override
 	public boolean hasChanges() {
 		return !Compare.equal(getValue(), currentValue) || 
 				!Compare.equal(getCertainty(), currentCertainty) ||

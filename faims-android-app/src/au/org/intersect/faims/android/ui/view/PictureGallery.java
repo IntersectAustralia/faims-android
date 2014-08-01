@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
@@ -54,7 +54,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	protected static final int GALLERY_SIZE = 400;
 	
-	protected String ref;
+	private String ref;
+	private boolean dynamic;
 	protected List<NameValuePair> currentValues;
 	protected float certainty;
 	protected float currentCertainty;
@@ -75,7 +76,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 
-	private FormAttribute attribute;
+	private FormInputDef inputDef;
 
 	public PictureGallery(Context context) {
 		super(context);
@@ -85,11 +86,12 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		NativeCSS.addCSSClass(this, "gallery");
 	}
 
-	public PictureGallery(Context context, FormAttribute attribute, String ref, boolean isMulti) {
+	public PictureGallery(Context context, FormInputDef inputDef, String ref, boolean dynamic, boolean isMulti) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
+		this.dynamic = dynamic;
 		this.isMulti = isMulti;
 		
 		galleriesLayout = new LinearLayout(this.getContext());
@@ -97,25 +99,30 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		
-		reset();
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
 		NativeCSS.addCSSClass(this, "gallery");
+		reset();
 	}
 
 	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 
 	@Override
 	public String getRef() {
 		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 	
 	@Override
