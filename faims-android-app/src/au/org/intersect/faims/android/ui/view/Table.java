@@ -115,7 +115,6 @@ public class Table extends WebView implements IView {
 		this.actionName = actionName;
 		this.actionIndex = actionIndex;
 		this.actionCallback = actionCallback;
-		this.actionValues = new ArrayList<String>();
 		this.pivot = pivot;
 		
 		refresh();
@@ -123,6 +122,7 @@ public class Table extends WebView implements IView {
 
 	public void refresh() throws Exception {
 		if (this.query == null) return; // nothing to refresh
+		this.actionValues = new ArrayList<String>();
 		
 		AsyncTask<Void,Void,String> task = new AsyncTask<Void,Void,String>() {
 
