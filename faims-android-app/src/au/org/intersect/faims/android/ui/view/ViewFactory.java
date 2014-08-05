@@ -85,7 +85,10 @@ public class ViewFactory {
     	if (attribute.readOnly) {
     		text.setEnabled(false);
     	}
-    	if (type >= 0) text.setInputType(type);
+    	if (type >= 0) {
+    		text.setInputType(type);
+    		NativeCSS.addCSSClass(text, "input-field");
+    	}
     	return text;
 	}
 	
