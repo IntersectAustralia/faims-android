@@ -32,5 +32,6 @@
 	<classpathentry kind="lib" path="libs/roboguice-2.0.jar"/>
 	<classpathentry kind="lib" path="libs/slf4j-android-1.6.1-RC1.jar"/>
 	<classpathentry kind="lib" path="libs/robolectric-2.2-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="libs/nativecss.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
