@@ -29,6 +29,8 @@
           </menu>
           <tabgroup1>
               <tab1>
+              	  <startInternalGPS/>
+                  <startExternalGPS/>
                   <startTimeLog/>
                   <stopTrackLog/>
               </tab1>
@@ -87,7 +89,13 @@
     <group ref="tabgroup1">
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
-        <label>Tracklog </label>	
+        <label>Tracklog </label>
+         <trigger ref="startInternalGPS">
+        	<label> Start Internal GPS</label>
+        </trigger>
+         <trigger ref="startExternalGPS">
+        	<label> Start External GPS</label>
+        </trigger>	
          <trigger ref="startTimeLog">
         	<label> Start Time Track log</label>
         </trigger>
