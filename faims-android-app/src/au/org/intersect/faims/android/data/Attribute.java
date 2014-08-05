@@ -9,6 +9,7 @@ public abstract class Attribute implements Serializable {
 	public static final String FREETEXT = "freetext";
 	public static final String MEASURE = "measure";
 	public static final String VOCAB = "vocab";
+	public static final String CERTAINTY = "certainty";
 	
 	protected String name;
 	protected String text;

@@ -1,0 +1,167 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Dynamic UI</h:title>
+
+    <model>
+      <instance>
+        <faims id="dynamic_ui">
+          <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
+          <user>
+              <tab1></tab1>
+          </user>
+          <menu>
+              <tab1></tab1>
+          </menu>
+          <tabgroup1>
+              <tab1></tab1>
+              <tab2></tab2>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1></tab1>
+              <tab2></tab2>
+          </tabgroup2>
+          <tabgroup3>
+              <tab1></tab1>
+          </tabgroup3>
+          <tabgroup4>
+              <tab1></tab1>
+          </tabgroup4>
+          <tabgroup5>
+              <tab1></tab1>
+          </tabgroup5>
+          <tabgroup6>
+              <tab1></tab1>
+          </tabgroup6>
+          <tabgroup7>
+              <tab1></tab1>
+          </tabgroup7>
+          <tabgroup8>
+              <tab1></tab1>
+          </tabgroup8>
+          <tabgroup9>
+              <tab1></tab1>
+          </tabgroup9>
+          <tabgroup10>
+              <tab1></tab1>
+          </tabgroup10>
+          <tabgroup11>
+              <tab1></tab1>
+          </tabgroup11>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+  
+  <h:body>
+    <group ref="style">
+      <label></label>
+      <group ref="orientation">
+        <label></label>
+        <input ref="orientation">
+            <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label></label>
+        <input ref="layout_weight">
+            <label>1</label>
+        </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>Users List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+      </group>
+    </group>
+    <group ref="menu">
+      <label>Options</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Options</label>
+      </group>
+    </group>
+    <group ref="tabgroup1" faims_archent_type="small">
+      <label>Entity</label>
+      <group ref="tab1">
+        <label>Save Entity</label>
+      </group>
+      <group ref="tab2">
+        <label>Load Entity</label>
+      </group>
+    </group>
+    <group ref="tabgroup2" faims_rel_type="AboveBelow">
+      <label>Relationship</label>
+      <group ref="tab1">
+        <label>Save Relationship</label>
+      </group>
+      <group ref="tab2">
+        <label>Load Relationship</label>
+      </group>
+    </group>
+    <group ref="tabgroup3">
+        <label>Associations</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Associations</label>
+        </group>
+    </group>
+    <group ref="tabgroup4">
+        <label>Map</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Map</label>
+        </group>
+    </group>
+    <group ref="tabgroup5">
+        <label>Table</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>tabgroup5</label>
+        </group>
+    </group>
+    <group ref="tabgroup6">
+        <label>Web View</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Web View</label>
+        </group>
+    </group>
+    <group ref="tabgroup7">
+        <label>Demo 1</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Demo 1</label>
+        </group>
+    </group>
+    <group ref="tabgroup8" faims_archent_type="small">
+        <label>Demo 2</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Demo 2</label>
+        </group>
+    </group>
+    <group ref="tabgroup9" faims_archent_type="small">
+        <label>Demo 3</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Demo 3</label>
+        </group>
+    </group>
+    <group ref="tabgroup10" faims_archent_type="small">
+        <label>Demo 4</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Demo 4</label>
+        </group>
+    </group>
+    <group ref="tabgroup11">
+        <label>Demo 5</label>
+        <group ref="tab1" faims_scrollable="false">
+            <label>Demo 5</label>
+        </group>
+    </group>
+  </h:body>
+</h:html>

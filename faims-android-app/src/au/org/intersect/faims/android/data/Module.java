@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.util.FileUtil;
 
 public class Module implements Serializable {
 
@@ -58,6 +59,11 @@ public class Module implements Serializable {
 		String fullpath = uploadFile.getAbsolutePath();
 		String basepath = getDirectoryPath().getAbsolutePath() + '/';
 		return new File(fullpath.replace(basepath, ""));
+	}
+	
+	public String getCSS() {
+		String cssFilePath = getDirectoryPath("style.css").getPath();
+		return FileUtil.readFileIntoString(cssFilePath);
 	}
 	
 	public static Module fromJson(JSONObject object) throws JSONException {

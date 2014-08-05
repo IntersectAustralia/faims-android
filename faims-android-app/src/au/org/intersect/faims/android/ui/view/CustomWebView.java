@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.util.Stack;
 
+import com.nativecss.NativeCSS;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,7 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import au.org.intersect.faims.android.util.FileUtil;
 
-public class CustomWebView extends WebView {
+public class CustomWebView extends WebView implements IView {
 	
 	private static class WebPage {
 		String data;
@@ -30,8 +32,18 @@ public class CustomWebView extends WebView {
 	
 	private String baseUrl;
 
+	private String ref;
+	private boolean dynamic;
+
 	public CustomWebView(final Context context) {
 		super(context);
+	}
+	
+	public CustomWebView(final Context context, String ref, boolean dynamic) {
+		super(context);
+		
+		this.ref = ref;
+		this.dynamic = dynamic;
 		webPageStack = new Stack<WebPage>();
 		
 		this.setWebViewClient(new WebViewClient() {
@@ -49,6 +61,15 @@ public class CustomWebView extends WebView {
 				}
 		    }
 		});
+		NativeCSS.addCSSClass(this, "web-view");
+	}
+	
+	public boolean isDynamic() {
+		return dynamic;
+	}
+	
+	public String getRef() {
+		return ref;
 	}
 
 	public void loadDataWithBaseURL(String data, String mimeType, String encoding, String failUrl) {

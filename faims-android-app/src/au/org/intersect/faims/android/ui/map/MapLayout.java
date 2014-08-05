@@ -16,8 +16,12 @@ public class MapLayout extends LinearLayout {
 	
 	private LayerBarView layerBarView;
 	private ToolsBarView toolsBarView;
-
+	
 	public MapLayout(Context context) {
+		super(context);
+	}
+
+	public MapLayout(Context context, String ref, boolean dynamic) {
 		super(context);
 		
 		ShowModuleActivity activity = (ShowModuleActivity) context;
@@ -31,7 +35,7 @@ public class MapLayout extends LinearLayout {
 		toolsView = new ToolView(activity);
 		layersView = new RelativeLayout(activity);
 		
-		mapView = new CustomMapView(activity, this);
+		mapView = new CustomMapView(activity, this, ref, dynamic);
 		mapView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		mapView.startMapping();
 		

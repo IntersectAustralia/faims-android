@@ -36,8 +36,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class FAIMSClient {
 
-	private static final int CONNECTION_TIMEOUT = 3600 * 1000;	
-	private static final int DATA_TIMEOUT = 3600 * 1000;
+	private static final int CONNECTION_TIMEOUT = 300 * 1000; // 5 minutes
+	private static final int DATA_TIMEOUT = 3600 * 1000; // 10 hours
 	
 	// Note: this is temporary 	
 	private static final String USERNAME = "faimsandroidapp";	
@@ -139,11 +139,7 @@ public class FAIMSClient {
 			try {
 				initClient();
 				
-				HttpParams params = new BasicHttpParams();
-				HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
-				HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
-				
-				HttpResponse response = getRequest(getUri(requestUri), params);
+				HttpResponse response = getRequest(getUri(requestUri));
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == HttpStatus.SC_ACCEPTED) {
 					FLog.d("download file busy");
@@ -239,17 +235,14 @@ public class FAIMSClient {
 	}
 	
 	private HttpResponse getRequest(String uri) throws IOException {
-		return getRequest(uri, null);
-	}
-	
-	private HttpResponse getRequest(String uri, HttpParams params) throws IOException {
 		FLog.d("request: " + uri);
 		
 		HttpGet get = createGetRequest(uri);
 		
-		if (params != null) {
-			get.setParams(params);
-		}
+		HttpParams params = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, DATA_TIMEOUT);
+		get.setParams(params);
 
 		HttpResponse response = httpClient.execute(get);
 		return response;

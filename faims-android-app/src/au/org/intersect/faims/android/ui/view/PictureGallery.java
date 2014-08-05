@@ -15,12 +15,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Attribute;
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
 
@@ -53,7 +54,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	protected static final int GALLERY_SIZE = 400;
 	
-	protected String ref;
+	private String ref;
+	private boolean dynamic;
 	protected List<NameValuePair> currentValues;
 	protected float certainty;
 	protected float currentCertainty;
@@ -74,46 +76,53 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	private boolean annotationEnabled;
 	private boolean certaintyEnabled;
 
-	private FormAttribute attribute;
+	private FormInputDef inputDef;
 
 	public PictureGallery(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
+		NativeCSS.addCSSClass(this, "gallery");
 	}
 
-	public PictureGallery(Context context, FormAttribute attribute, String ref, boolean isMulti) {
+	public PictureGallery(Context context, FormInputDef inputDef, String ref, boolean dynamic, boolean isMulti) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.attribute = attribute;
+		this.inputDef = inputDef;
 		this.ref = ref;
+		this.dynamic = dynamic;
 		this.isMulti = isMulti;
 		
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
-	    galleriesLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		
-		reset();
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
+		NativeCSS.addCSSClass(this, "gallery");
+		reset();
 	}
 
 	@Override
 	public String getAttributeName() {
-		return attribute.name;
+		return inputDef.name;
 	}
 
 	@Override
 	public String getAttributeType() {
-		return attribute.type;
+		return inputDef.type;
 	}
 
 	@Override
 	public String getRef() {
 		return ref;
+	}
+	
+	@Override
+	public boolean isDynamic() {
+		return dynamic;
 	}
 	
 	@Override
@@ -195,7 +204,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
             if (selectedImages != null && selectedImages.contains(view)) {
                 view.setBackgroundColor(Color.BLUE);
             } else {
-                view.setBackgroundColor(Color.LTGRAY);
+                view.setBackgroundColor(Color.TRANSPARENT);
+                NativeCSS.refreshCSSStyling(view);
             }
         }
 		updateImageListeners();
@@ -362,7 +372,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		setGalleryImage(gallery, path);
 		
-		gallery.setBackgroundColor(Color.LTGRAY);
 		gallery.setPadding(10, 10, 10, 10);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
@@ -375,6 +384,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				return true;
 			}
 		});
+		
+		NativeCSS.addCSSClass(galleryLayout, "gallery");
+		NativeCSS.addCSSClass(gallery, "gallery-item");
 		
 		TextView textView = new TextView(
 				galleriesLayout.getContext());

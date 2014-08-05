@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Arch16n;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
@@ -86,7 +88,8 @@ public class TabGroup extends Fragment {
     		                  ViewGroup container,
                               Bundle savedInstanceState) {
 		if (ref != null) {
-		
+			refreshCSS();
+			
 			if (tabHost == null) {
 				tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
 				tabHost.setup();
@@ -155,7 +158,7 @@ public class TabGroup extends Fragment {
 			
 			// restore after tabgroup is shown
 			restoreFromTempBundle();
-							
+			
 			return tabHost;
 		}
 		return null;
@@ -343,6 +346,10 @@ public class TabGroup extends Fragment {
 		tempSavedInstanceState = savedInstanceState;
 	}
 	
+	public void clearTempBundle() {
+		tempSavedInstanceState = null;
+	}
+	
 	public void restoreFromTempBundle() {
 		if (tempSavedInstanceState != null) {
 			try {
@@ -399,6 +406,32 @@ public class TabGroup extends Fragment {
 				return true;
 		}
 		return false;
+	}
+	
+	public void refreshCSS() {
+		Handler cssHandler = new Handler(getActivity().getMainLooper());
+		cssHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				if (getActivity() != null) {
+					NativeCSS.refreshCSSStyling(getActivity().findViewById(R.id.fragment_content));
+				}
+			}
+			
+		});
+	}
+
+	public void removeCustomViews() {
+		for (Tab tab : tabs) {
+			tab.removeCustomViews();
+		}
+	}
+	
+	public void removeCustomContainers() {
+		for (Tab tab : tabs) {
+			tab.removeCustomContainers();
+		}
 	}
 
 }

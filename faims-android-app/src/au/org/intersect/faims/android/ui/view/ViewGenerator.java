@@ -1,21 +1,18 @@
 package au.org.intersect.faims.android.ui.view;
 
-import au.org.intersect.faims.android.data.FormAttribute;
+import au.org.intersect.faims.android.data.FormInputDef;
 
 public class ViewGenerator {
 
 	protected String ref;
-	protected String name;
-	private FormAttribute attribute;
+	private FormInputDef attribute;
 	protected String style;
 	
 	public ViewGenerator() {
-		
 	}
 
-	public ViewGenerator(String ref, String name, FormAttribute attribute, String style) {
+	public ViewGenerator(String ref, FormInputDef attribute, String style) {
 		this.ref = ref;
-		this.name = name;
 		this.attribute = attribute;
 		this.style = style;
 	}
@@ -24,11 +21,7 @@ public class ViewGenerator {
 		return this.ref;
 	}
 	
-	public String getName() {
-		return this.name;
-	}
-	
-	public FormAttribute attribute() {
+	public FormInputDef attribute() {
 		return this.attribute;
 	}
 
