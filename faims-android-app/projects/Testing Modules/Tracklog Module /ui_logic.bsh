@@ -56,14 +56,23 @@ onEvent("menu/tab1/options", "click", "onClickOption()");
 
 
 //Test for Tracklog work with pause
+
+setGPSUpdateInterval(4);
+onEvent("tabgroup1/tab1/startInternalGPS", "click", "startInternalGPS()");
+onEvent("tabgroup1/tab1/startExternalGPS", "click", "startExternalGPS()");
 onEvent("tabgroup1/tab1/startTimeLog", "click", "startTrackAlert()");
 onEvent("tabgroup1/tab1/stopTrackLog", "click", "stopTrackingGPS()");
 
 startTrackAlert(){
-	startInternalGPS();
+	
 	startTrackingGPS("time", 10, "saveTimeGPSTrack()");
 
 }
 saveTimeGPSTrack() {
     showToast("still tracking");
+    position = getGPSPosition();
+    showToast("Longitude:"+position.getLongitude());
 }
+
+
+

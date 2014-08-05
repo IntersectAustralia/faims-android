@@ -1036,8 +1036,12 @@ setupWebView() {
 
 onEvent("tabgroup6", "load", "setupWebView()");
 
-// Demo 1
+// This method is used for testing FAIMS-758
+eventOccurred () {
+    showToast("EVENT OCCURRED!");
+}
 
+// Demo 1    
 createDemoPicture(name) {
 	ArrayList list = new ArrayList();
 	list.add(name);
@@ -1108,6 +1112,7 @@ setupDemo1() {
 			populatePictureGallery("tabgroup7/tab1/picture", pictures);
 
 			onEvent("tabgroup7/tab1/picture", "click", "onClickDemo1Picture()");
+            onEvent("tabgroup7/tab1/picture", "select", "eventOccurred()");
 		}
 	});
 }
@@ -1126,7 +1131,6 @@ createRecord() {
 	createContainer("tabgroup8/tab1/tc" + demo2counter, "even", container);
 	createTextField("tabgroup8/tab1/measure" + demo2counter, "Measure", "value", "measure", "tabgroup8/tab1/mc" + demo2counter, "decimal", false, true);
 	createDropDown("tabgroup8/tab1/type" + demo2counter, "Type", "value", "freetext", "tabgroup8/tab1/tc" + demo2counter, false, false);
-
 	ArrayList types = new ArrayList();
 	types.add("Length");
 	types.add("Height");
@@ -1236,6 +1240,7 @@ setupDemo3() {
 				});
 
 			onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
+            onEvent("tabgroup9/tab1/choice", "select", "eventOccurred()");
 			onEvent("tabgroup9/tab1/save", "click", "onClickDemo3Save()");
 			onEvent("tabgroup9/tab1/clear", "click", "clearDemo3Record()");
 			onEvent("tabgroup9/tab1/load", "click", "loadDemo3Record()");
