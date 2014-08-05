@@ -22,7 +22,6 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -71,6 +70,7 @@ import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
@@ -1334,13 +1334,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 			if (obj instanceof HierarchicalSpinner) {
 				final HierarchicalSpinner spinner = (HierarchicalSpinner) obj;
-				AsyncTask<Void,Void,List<VocabularyTerm>> task = new AsyncTask<Void,Void,List<VocabularyTerm>>() {
+				CancelableTask task = new CancelableTask() {
+
+					private List<VocabularyTerm> terms;
 
 					@Override
-					protected List<VocabularyTerm> doInBackground(
+					protected Void doInBackground(
 							Void... params) {
 						try {
-							return databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+							terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+							return null;
 						} catch (Exception e) {
 							FLog.e("Error trying to load vocabulary terms", e);
 						}
@@ -1348,7 +1351,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 					
 					@Override
-					protected void onPostExecute(List<VocabularyTerm> terms) {
+					protected void onPostExecute(Void result) {
 						if (terms == null) {
 							FLog.w("Error trying to load vocabulary terms for attribute " + attributeName);
 							showWarning("Populate Error", "Error trying to load vocabulary terms");
@@ -1440,13 +1443,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			
 			if (obj instanceof PictureGallery) {
 				final HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) obj;
-				AsyncTask<Void,Void,List<VocabularyTerm>> task = new AsyncTask<Void,Void,List<VocabularyTerm>>() {
+				CancelableTask task = new CancelableTask() {
+
+					private List<VocabularyTerm> terms;
 
 					@Override
-					protected List<VocabularyTerm> doInBackground(
+					protected Void doInBackground(
 							Void... params) {
 						try {
-							return databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+							terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
+							return null;
 						} catch (Exception e) {
 							FLog.e("Error trying to load vocabulary terms", e);
 						}
@@ -1454,7 +1460,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 					
 					@Override
-					protected void onPostExecute(List<VocabularyTerm> terms) {
+					protected void onPostExecute(Void result) {
 						if (terms == null) {
 							FLog.w("Error trying to load vocabulary terms for attribute " + attributeName);
 							showWarning("Populate Error", "Error trying to load vocabulary terms");

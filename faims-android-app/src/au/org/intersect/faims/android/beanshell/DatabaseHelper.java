@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.beanshell;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.os.AsyncTask;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.IBeanShellCallback;
@@ -15,6 +14,7 @@ import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.WKTUtil;
+import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.view.Tab;
 import au.org.intersect.faims.android.util.GeometryUtil;
@@ -26,36 +26,7 @@ public class DatabaseHelper {
 	protected static void saveArchEnt(final BeanShellLinker linker, final String entityId, final String entityType,
 			final List<Geometry> geometry, final List<EntityAttribute> attributes, final SaveCallback callback, final boolean newEntity, boolean blocking) {
 		if (blocking) {
-			saveArchEnt(linker, entityId, entityType, geometry, attributes, callback, newEntity); 
-		} else {
-			AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
-
-				@Override
-				protected Void doInBackground(Void... params) {
-					saveArchEnt(linker, entityId, entityType, geometry, attributes, callback, newEntity);
-					return null;
-				}
-				
-			};
-			task.execute();
-		}
-	}
-	
-	private static void saveArchEnt(final BeanShellLinker linker, final String entityId, final String entityType,
-			final List<Geometry> geometry, final List<EntityAttribute> attributes, final SaveCallback callback, final boolean newEntity) {
-		try {
-			DatabaseManager databaseManager = linker.getDatabaseManager();
-			
-			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(
-					linker.getModule().getSrid(), GeometryUtil.EPSG4326, geometry);
-			
-			final String uuid = databaseManager.entityRecord().saveArchEnt(
-					entityId, entityType, WKTUtil.collectionToWKT(geomList), attributes, newEntity);
-			
-			if (uuid == null) {
-				throw new Exception();
-			}
-			
+			final String uuid = saveArchEnt(linker, entityId, entityType, geometry, attributes, callback, newEntity); 
 			if (callback != null) {
 				linker.getActivity().runOnUiThread(new Runnable() {
 					
@@ -70,22 +41,26 @@ public class DatabaseHelper {
 					}
 				});
 			}
-		} catch (Exception e) {
-			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
-		}
-	}
-	
-	protected static void saveRel(final BeanShellLinker linker, final String relationshipId, final String relationshipType,
-			final List<Geometry> geometry, final List<RelationshipAttribute> attributes, final SaveCallback callback, final boolean newRelationship, boolean blocking) {
-		if (blocking) {
-			saveRel(linker, relationshipId, relationshipType, geometry, attributes, callback, newRelationship);
 		} else {
-			AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+			CancelableTask task = new CancelableTask() {
+
+				private String uuid;
 
 				@Override
 				protected Void doInBackground(Void... params) {
-					saveRel(linker, relationshipId, relationshipType, geometry, attributes, callback, newRelationship);
+					uuid = saveArchEnt(linker, entityId, entityType, geometry, attributes, callback, newEntity);
 					return null;
+				}
+				
+				@Override
+				protected void onPostExecute(Void result) {
+					if (uuid == null) return;
+					if (callback == null) return;
+					try {
+						callback.onSave(uuid, newEntity);
+					} catch (Exception e) {
+						linker.reportError("Error found when executing save arch enitty " + entityId + " onsave callback", e);
+					}
 				}
 				
 			};
@@ -93,21 +68,32 @@ public class DatabaseHelper {
 		}
 	}
 	
-	private static void saveRel(final BeanShellLinker linker, final String relationshipId, final String relationshipType,
-			final List<Geometry> geometry, final List<RelationshipAttribute> attributes, final SaveCallback callback, final boolean newRelationship) {
+	private static String saveArchEnt(final BeanShellLinker linker, final String entityId, final String entityType,
+			final List<Geometry> geometry, final List<EntityAttribute> attributes, final SaveCallback callback, final boolean newEntity) {
 		try {
 			DatabaseManager databaseManager = linker.getDatabaseManager();
 			
 			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(
 					linker.getModule().getSrid(), GeometryUtil.EPSG4326, geometry);
 			
-			final String uuid = databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
-					WKTUtil.collectionToWKT(geomList), attributes, newRelationship);
+			final String uuid = databaseManager.entityRecord().saveArchEnt(
+					entityId, entityType, WKTUtil.collectionToWKT(geomList), attributes, newEntity);
 			
 			if (uuid == null) {
 				throw new Exception();
 			}
 			
+			return uuid;
+		} catch (Exception e) {
+			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
+		}
+		return null;
+	}
+	
+	protected static void saveRel(final BeanShellLinker linker, final String relationshipId, final String relationshipType,
+			final List<Geometry> geometry, final List<RelationshipAttribute> attributes, final SaveCallback callback, final boolean newRelationship, boolean blocking) {
+		if (blocking) {
+			final String uuid = saveRel(linker, relationshipId, relationshipType, geometry, attributes, callback, newRelationship);
 			if (callback != null) {
 				linker.getActivity().runOnUiThread(new Runnable() {
 					
@@ -122,13 +108,56 @@ public class DatabaseHelper {
 					
 				});	
 			}
-		} catch (Exception e) {
-			onError(linker, callback, e, "Error trying to save relationship", "Error found when executing save relationship " + relationshipId + " onerror callback");
+		} else {
+			CancelableTask task = new CancelableTask() {
+
+				private String uuid;
+
+				@Override
+				protected Void doInBackground(Void... params) {
+					uuid = saveRel(linker, relationshipId, relationshipType, geometry, attributes, callback, newRelationship);
+					return null;
+				}
+				
+				@Override
+				protected void onPostExecute(Void result) {
+					if (uuid == null) return;
+					if (callback == null) return;
+					try {
+						callback.onSave(uuid, newRelationship);
+					} catch (Exception e) {
+						linker.reportError("Error found when executing save relationship " + relationshipId + " onsave callback", e);
+					}
+				}
+			};
+			task.execute();
 		}
 	}
 	
+	private static String saveRel(final BeanShellLinker linker, final String relationshipId, final String relationshipType,
+			final List<Geometry> geometry, final List<RelationshipAttribute> attributes, final SaveCallback callback, final boolean newRelationship) {
+		try {
+			DatabaseManager databaseManager = linker.getDatabaseManager();
+			
+			List<Geometry> geomList = databaseManager.spatialRecord().convertGeometryFromProjToProj(
+					linker.getModule().getSrid(), GeometryUtil.EPSG4326, geometry);
+			
+			final String uuid = databaseManager.relationshipRecord().saveRel(relationshipId, relationshipType,
+					WKTUtil.collectionToWKT(geomList), attributes, newRelationship);
+			
+			if (uuid == null) {
+				throw new Exception();
+			}
+			
+			return uuid;
+		} catch (Exception e) {
+			onError(linker, callback, e, "Error trying to save relationship", "Error found when executing save relationship " + relationshipId + " onerror callback");
+		}
+		return null;
+	}
+	
 	protected static void deleteArchEnt(final BeanShellLinker linker, final String entityId, final DeleteCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
@@ -141,24 +170,20 @@ public class DatabaseHelper {
 							mapView.updateSelections();
 						}
 					}
-					
-					if (callback != null) {
-						linker.getActivity().runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								try {
-									callback.onDelete(entityId);
-								} catch (Exception e) {
-									linker.reportError("Error found when executing delete arch entity " + entityId + " ondelete callback", e);
-								}
-							}
-						});
-					}
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error deleting arch entity " + entityId, "Error found when executing delete arch entity " + entityId + " onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				if (callback == null) return;
+				try {
+					callback.onDelete(entityId);
+				} catch (Exception e) {
+					linker.reportError("Error found when executing delete arch entity " + entityId + " ondelete callback", e);
+				}
 			}
 			
 		};
@@ -166,7 +191,7 @@ public class DatabaseHelper {
 	}
 
 	protected static void deleteRel(final BeanShellLinker linker, final String relationshipId, final DeleteCallback callback){
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
 
 			@Override
 			protected Void doInBackground(Void... params) {
@@ -179,24 +204,20 @@ public class DatabaseHelper {
 							mapView.updateSelections();
 						}
 					}
-					
-					if (callback != null) {
-						linker.getActivity().runOnUiThread(new Runnable() {
-	
-							@Override
-							public void run() {
-								try {
-									callback.onDelete(relationshipId);
-								} catch (Exception e) {
-									linker.reportError("Error found when executing delete relationship " + relationshipId + " ondelete callback", e);
-								}
-							}
-						});
-					}
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error deleting relationship " + relationshipId, "Error found when executing delete relationship " + relationshipId + " onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				if (callback == null) return;
+				try {
+					callback.onDelete(relationshipId);
+				} catch (Exception e) {
+					linker.reportError("Error found when executing delete relationship " + relationshipId + " ondelete callback", e);
+				}
 			}
 			
 		};
@@ -205,28 +226,16 @@ public class DatabaseHelper {
 	
 	public static void addReln(final BeanShellLinker linker, final String entityId, final String relationshpId, final String verb, 
 			final SaveCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private boolean added;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					if (linker.getDatabaseManager().sharedRecord().addReln(entityId, relationshpId, verb) == false) {
+					added = linker.getDatabaseManager().sharedRecord().addReln(entityId, relationshpId, verb);
+					if (added == false) {
 						throw new Exception();
-					}
-					
-					if (callback != null) {
-						linker.getActivity().runOnUiThread(new Runnable() {
-
-							@Override
-							public void run() {
-								try {
-									callback.onSaveAssociation(entityId, relationshpId);
-								} catch (Exception e) {
-									linker.reportError("Error found when executing add reln onsaveassociation callback", e);
-								}
-							}
-							
-						});
 					}
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error saving arch entity to relationship", "Error found when executing add reln onerror callback");
@@ -234,19 +243,32 @@ public class DatabaseHelper {
 				return null;
 			}
 			
+			@Override
+			protected void onPostExecute(Void result) {
+				if (!added) return;
+				if (callback == null) return;
+				try {
+					callback.onSaveAssociation(entityId, relationshpId);
+				} catch (Exception e) {
+					linker.reportError("Error found when executing add reln onsaveassociation callback", e);
+				}
+			}
+			
 		};
 		task.execute();
 	}
 	
 	public static void fetchArchEnt(final BeanShellLinker linker, final String entityId, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private ArchEntity entity;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
 					DatabaseManager databaseManager = linker.getDatabaseManager();
 					
-					final ArchEntity entity = databaseManager.entityRecord().fetchArchEnt(entityId);
+					entity = databaseManager.entityRecord().fetchArchEnt(entityId);
 					if (entity == null) {
 						throw new Exception();
 					} else {
@@ -256,12 +278,16 @@ public class DatabaseHelper {
 									GeometryUtil.EPSG4326, linker.getModule().getSrid(), geomList));
 						}
 					}
-					
-					onFetch(linker, callback, entity, "Error found when executing fetch arch entity " + entityId + " onfetch callback");
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching arch entity " + entityId, "Error found when executing fetch arch entity " + entityId + " onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				if (entity == null) return;
+				onFetch(linker, callback, entity, "Error found when executing fetch arch entity " + entityId + " onfetch callback");
 			}
 			
 		};
@@ -269,14 +295,16 @@ public class DatabaseHelper {
 	}
 
 	public static void fetchRel(final BeanShellLinker linker, final String relationshipId, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private Relationship relationship;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
 					DatabaseManager databaseManager = linker.getDatabaseManager();
 					
-					final Relationship relationship = databaseManager.relationshipRecord().fetchRel(relationshipId);
+					relationship = databaseManager.relationshipRecord().fetchRel(relationshipId);
 					if (relationship == null) {
 						throw new Exception();
 					} else {
@@ -286,12 +314,16 @@ public class DatabaseHelper {
 									GeometryUtil.EPSG4326, linker.getModule().getSrid(), geomList));
 						}
 					}
-					
-					onFetch(linker, callback, relationship, "Error found when executing fetch relationship " + relationshipId + " onfetch callback");
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching relationship " + relationshipId, "Error found when executing fetch relationship " + relationshipId + " onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				if (relationship == null) return;
+				onFetch(linker, callback, relationship, "Error found when executing fetch relationship " + relationshipId + " onfetch callback");
 			}
 			
 		};
@@ -299,106 +331,121 @@ public class DatabaseHelper {
 	}
 
 	public static void fetchOne(final BeanShellLinker linker, final String query, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private ArrayList<String> results;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					final ArrayList<String> result = linker.getDatabaseManager().fetchRecord().fetchOne(query);
-					onFetch(linker, callback, result, "Error found when executing fetch " + query + " result onfetch callback");
+					results = linker.getDatabaseManager().fetchRecord().fetchOne(query);
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching query result", "Error found when executing fetch " + query + " result onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				onFetch(linker, callback, results, "Error found when executing fetch " + query + " result onfetch callback");
 			}
 		};
 		task.execute();		
 	}
 
 	public static void fetchAll(final BeanShellLinker linker, final String query, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private ArrayList<List<String>> results;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchAll(query);
-					onFetch(linker, callback, result, "Error found when executing fetch " + query + " results onfetch callback");
+					results = linker.getDatabaseManager().fetchRecord().fetchAll(query);
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching query results", "Error found when executing fetch " + query + " results onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				onFetch(linker, callback, results, "Error found when executing fetch " + query + " results onfetch callback");
 			}
 		};
 		task.execute();
 	}
 
 	public static void fetchEntityList(final BeanShellLinker linker, final String entityType, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private ArrayList<List<String>> results;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchEntityList(entityType);
-					onFetch(linker, callback, result, "Error found when executing fetch entity " + entityType + " list onfetch callback");
+					results = linker.getDatabaseManager().fetchRecord().fetchEntityList(entityType);
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching entity list", "Error found when executing fetch entity  " + entityType + " list onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				onFetch(linker, callback, results, "Error found when executing fetch entity " + entityType + " list onfetch callback");
 			}
 		};
 		task.execute();
 	}
 
 	public static void fetchRelationshipList(final BeanShellLinker linker, final String relationshipType, final FetchCallback callback) {
-		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+		CancelableTask task = new CancelableTask() {
+
+			private ArrayList<List<String>> results;
 
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					final ArrayList<List<String>> result = linker.getDatabaseManager().fetchRecord().fetchRelationshipList(relationshipType);
-					onFetch(linker, callback, result, "Error found when executing fetch relationship " + relationshipType + " list onfetch callback");
+					results = linker.getDatabaseManager().fetchRecord().fetchRelationshipList(relationshipType);
 				} catch (Exception e) {
 					onError(linker, callback, e, "Error fetching relationship list", "Error found when executing fetch relationship " + relationshipType + " list onerror callback");
 				}
 				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(Void result) {
+				onFetch(linker, callback, results, "Error found when executing fetch relationship " + relationshipType + " list onfetch callback");
 			}
 		};
 		task.execute();
 	}
 	
 	private static void onFetch(final BeanShellLinker linker, final FetchCallback callback, final Object result, final String callbackErrorMessage) {
-		if (callback != null) {
-			linker.getActivity().runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						callback.onFetch(result);
-					} catch (Exception e) {
-						linker.reportError(callbackErrorMessage, e);
-					}
-				}
-				
-			});
+		if (callback == null) return;
+		try {
+			callback.onFetch(result);
+		} catch (Exception e) {
+			linker.reportError(callbackErrorMessage, e);
 		}
 	}
 	
 	private static void onError(final BeanShellLinker linker, final IBeanShellCallback callback, final Exception e, final String errorMessage, final String callbackErrorMessage) {
 		FLog.e(errorMessage, e);
-		if (callback != null) {
-			linker.getActivity().runOnUiThread(new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						callback.onError(errorMessage);
-					} catch (Exception e) {
-						linker.reportError(callbackErrorMessage, e);
-					}
+		if (callback == null) return;
+		linker.getActivity().runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					callback.onError(errorMessage);
+				} catch (Exception e) {
+					linker.reportError(callbackErrorMessage, e);
 				}
-				
-			});
-		}
+			}
+			
+		});
 	}
 
 }

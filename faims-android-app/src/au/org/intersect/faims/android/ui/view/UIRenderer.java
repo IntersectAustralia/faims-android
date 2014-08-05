@@ -255,7 +255,7 @@ public class UIRenderer {
 		}
 	}
 	
-	public void clearTempBundle() {
+	public void destroy() {
 		if (tempSavedInstanceState != null) {
 			tempSavedInstanceState = null;
 			for (TabGroup tabGroup : tabGroupList) {

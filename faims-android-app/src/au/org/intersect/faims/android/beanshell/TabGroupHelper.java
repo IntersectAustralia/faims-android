@@ -3,7 +3,6 @@ package au.org.intersect.faims.android.beanshell;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.os.AsyncTask;
 import android.view.View;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.IBeanShellCallback;
@@ -15,6 +14,7 @@ import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.view.CameraPictureGallery;
 import au.org.intersect.faims.android.ui.view.FileListGroup;
 import au.org.intersect.faims.android.ui.view.ICustomFileView;
@@ -32,7 +32,7 @@ public class TabGroupHelper {
 		if (blocking) {
 			saveTabGroupInBackground(linker, ref, uuid, geometry, attributes, callback, newRecord);
 		} else {
-			AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+			CancelableTask task = new CancelableTask() {
 
 				@Override
 				protected Void doInBackground(Void... params) {
@@ -102,7 +102,7 @@ public class TabGroupHelper {
 		if (blocking) {
 			saveTabInBackground(linker, ref, uuid, geometry, attributes, callback, newRecord);
 		} else {
-			AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+			CancelableTask task = new CancelableTask() {
 
 				@Override
 				protected Void doInBackground(Void... params) {
