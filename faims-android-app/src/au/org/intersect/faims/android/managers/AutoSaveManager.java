@@ -201,7 +201,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	public void setStatus(Status status) {
 		this.status = status;
 		if (this.activityRef != null) {
-			this.activityRef.get().updateActionBar();
+			this.activityRef.get().updateStatusBar();
 		}
 	}
 	

@@ -34,6 +34,7 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.Window;
+import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
@@ -384,7 +385,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		beanShellLinker.resume();
 
 		// update action bar
-		updateActionBar();
+		updateStatusBar();
 	}
 
 	@Override
@@ -664,20 +665,21 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_show_module, menu);
+		//TODO: Create action bar
 		return true;
 	}
 
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (menuManager == null) {
-			menuManager = new ShowModuleMenuManager(this);
-		}
-		menuManager.prepare(menu);
+		//TODO: Update action bar
 		return true;
 	}
 
-	public void updateActionBar() {
-		invalidateOptionsMenu();
+	public void updateStatusBar() {
+		if (menuManager == null) {
+			menuManager = new ShowModuleMenuManager(this);
+		}
+		
+		menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
 	}
 
 	public void setPathVisible(boolean value) {
@@ -1196,7 +1198,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			@Override
 			public void run() {
 				syncStatus = status;
-				updateActionBar();
+				updateStatusBar();
 			}
 
 		});
