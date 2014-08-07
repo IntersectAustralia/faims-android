@@ -207,6 +207,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 	
 	public void pauseListener() {
+		FLog.d("paused gps");
 		pauseInternalGPSListener();
 		pauseExternalGPSListener();
 	}
