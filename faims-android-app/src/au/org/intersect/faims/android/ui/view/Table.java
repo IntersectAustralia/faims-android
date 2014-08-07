@@ -264,5 +264,39 @@ public class Table extends WebView implements IView {
 	private String readFileFromAssets(String fileName) throws IOException {
 		return StringUtil.streamToString(getContext().getAssets().open(fileName));
 	}
+	
+	@Override
+	public String getClickCallback() {
+		return null;
+	}
+
+	@Override
+	public void setClickCallback(String code) {
+		
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return null;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+		
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return null;
+	}
+
+	@Override
+	public String getBlurCallback() {
+		return null;
+	}
+
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+	}
 
 }

@@ -14,6 +14,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
@@ -52,6 +53,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	@Inject
 	AutoSaveManager autoSaveManager;
 	
+	@Inject
+	BeanShellLinker linker;
+	
 	protected static final int GALLERY_SIZE = 400;
 	
 	private String ref;
@@ -77,6 +81,10 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	private boolean certaintyEnabled;
 
 	private FormInputDef inputDef;
+
+	private String selectCallback;
+	private String focusCallback;
+	private String blurCallback;
 
 	public PictureGallery(Context context) {
 		super(context);
@@ -469,6 +477,64 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	public boolean hasAttributeChanges(
 			Collection<? extends Attribute> attributes) {
 		return Compare.compareAttributeValue(this, attributes);
+	}
+	
+	@Override
+	public String getClickCallback() {
+		return null;
+	}
+
+	@Override
+	public void setClickCallback(final String code) {
+		setSelectCallback(code);
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return selectCallback;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+		if (code == null) return;
+		selectCallback = code;
+		setImageListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v)
+			{
+				linker.execute(selectCallback);
+			}
+
+		});
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return focusCallback;
+	}
+	
+	@Override
+	public String getBlurCallback() {
+		return blurCallback;
+	}
+	
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+		if (focusCode == null && blurCode == null) return;
+		focusCallback = focusCode;
+		blurCallback = blurCode;
+		setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					linker.execute(focusCallback);
+				} else {
+					linker.execute(blurCallback);
+				}
+			}
+		});
 	}
 	
 }

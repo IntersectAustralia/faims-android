@@ -320,8 +320,8 @@ public class UIRenderer {
 		}
 	}
 	
-	private void createContainers(ContainerGenerator containerGen, LinearLayout parentLayout, Tab tab, TabGroup tabGroup) throws Exception {
-		LinearLayout layout = (LinearLayout) containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
+	private void createContainers(ContainerGenerator containerGen, CustomLinearLayout parentLayout, Tab tab, TabGroup tabGroup) throws Exception {
+		CustomLinearLayout layout = containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
 		tab.addCustomContainer(containerGen.getRef(), layout, parentLayout);
 		for (ViewGenerator viewGen : containerGen.viewGeneratorList()) {
 			if (viewGen instanceof ContainerGenerator) {

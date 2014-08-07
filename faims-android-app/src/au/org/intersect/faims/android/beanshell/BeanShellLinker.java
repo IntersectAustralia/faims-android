@@ -33,8 +33,6 @@ import android.os.HandlerThread;
 import android.provider.MediaStore;
 import android.view.InputDevice;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -43,7 +41,6 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
@@ -92,6 +89,7 @@ import au.org.intersect.faims.android.ui.view.FileListGroup;
 import au.org.intersect.faims.android.ui.view.HierarchicalPictureGallery;
 import au.org.intersect.faims.android.ui.view.HierarchicalSpinner;
 import au.org.intersect.faims.android.ui.view.ICustomView;
+import au.org.intersect.faims.android.ui.view.IView;
 import au.org.intersect.faims.android.ui.view.Picture;
 import au.org.intersect.faims.android.ui.view.PictureGallery;
 import au.org.intersect.faims.android.ui.view.Tab;
@@ -111,7 +109,6 @@ import com.google.inject.Singleton;
 import com.nutiteq.components.MapPos;
 import com.nutiteq.geometry.Geometry;
 import com.nutiteq.geometry.Point;
-import com.nutiteq.geometry.VectorElement;
 
 @Singleton
 public class BeanShellLinker implements IFAIMSRestorable {
@@ -273,6 +270,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void executeOnUiThread(final String code) {
+		if (code == null) return;
 		activityRef.get().runOnUiThread(new Runnable() {
 
 			@Override
@@ -378,98 +376,46 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 	public void bindViewToEvent(String ref, String type, final String code) {
 		try {
-
 			if ("click".equals(type.toLowerCase(Locale.ENGLISH))) {
 				View view = uiRenderer.getViewByRef(ref);
-				if (view == null) {
-					FLog.w("cannot find view " + ref);
-					showWarning("Logic Error", "Error cannot find view " + ref);
-					return;
+				if (view instanceof CustomListView) {
+					final CustomListView listView = (CustomListView) view;
+					listView.setClickCallback(code);
+				} else if (view instanceof IView) {
+					IView iview = (IView) view;
+					iview.setClickCallback(code);
 				} else {
-					if (view instanceof CustomListView) {
-						final CustomListView listView = (CustomListView) view;
-						listView.setOnItemClickListener(new ListView.OnItemClickListener() {
-
-							@Override
-							public void onItemClick(AdapterView<?> arg0,
-									View arg1, int index, long arg3) {
-								try {
-									NameValuePair pair = (NameValuePair) listView
-											.getItemAtPosition(index);
-									interpreter.set("_list_item_value",
-											pair.getValue());
-									execute(code);
-								} catch (Exception e) {
-									FLog.e("error setting list item value", e);
-								}
-							}
-
-						});
-					} else if (view instanceof CustomSpinner) {
-						final CustomSpinner spinner = (CustomSpinner) view;
-						addSpinnerEventClickListener(spinner, code);
-					} else if (view instanceof PictureGallery) {
-						PictureGallery pictureGalleryView = (PictureGallery) view;
-						addPictureGalleryEventClickListener(pictureGalleryView, code);
-					} else if (view instanceof CustomRadioGroup) {
-						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
-						addRadioGroupEventClickListener(radioGroup, code);
-					} else {
-						view.setOnClickListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								execute(code);
-							}
-						});
-					}
+					FLog.w("cannot bind " + type +" event to view " + ref);
+					showWarning("Logic Error", "Error bind " + type + " event to view " + ref);
+					return;
 				}
 			} else if ("select".equals(type.toLowerCase(Locale.ENGLISH))) {
 				View view = uiRenderer.getViewByRef(ref);
-				if (view == null) {
-					FLog.w("cannot find view " + ref);
-					showWarning("Logic Error", "Error cannot find view " + ref);
-					return;
+				if (view instanceof IView) {
+					IView iview = (IView) view;
+					iview.setSelectCallback(code);
 				} else {
-					if (view instanceof CustomSpinner) {
-						CustomSpinner spinner = (CustomSpinner) view;
-						addSpinnerEventClickListener(spinner, code);
-					} else if (view instanceof PictureGallery) {
-						PictureGallery pictureGalleryView = (PictureGallery) view;
-						addPictureGalleryEventClickListener(pictureGalleryView, code);
-					} else if (view instanceof CustomRadioGroup) {
-						final CustomRadioGroup radioGroup = (CustomRadioGroup) view;
-						addRadioGroupEventClickListener(radioGroup, code);
-					}
+					FLog.w("cannot bind " + type +" event to view " + ref);
+					showWarning("Logic Error", "Error bind " + type + " event to view " + ref);
+					return;
 				}
 			} else if ("delayclick".equals(type.toLowerCase(Locale.ENGLISH))) {
-					View view = uiRenderer.getViewByRef(ref);
-					if (view == null) {
-						FLog.w("cannot find view " + ref);
-						showWarning("Logic Error", "Error cannot find view " + ref);
-						return;
-					} else {
-						if (view instanceof CustomButton) {
-							view.setOnClickListener(new OnClickListener() {
-	
-								@Override
-								public void onClick(View v) {
-									CustomButton button = (CustomButton) v;
-									if (button.canClick()) {
-										execute(code);
-										button.clicked();
-									}
-								}
-							});
-						}
-					}
+				View view = uiRenderer.getViewByRef(ref);
+				if (view instanceof CustomButton) {
+					CustomButton button = (CustomButton) view;
+					button.setDelayClickCallback(code);
+				} else {
+					FLog.w("cannot bind " + type +" event to view " + ref);
+					showWarning("Logic Error", "Error bind " + type + " event to view " + ref);
+					return;
+				}
 			} else if ("load".equals(type.toLowerCase(Locale.ENGLISH))) {
 				TabGroup tg = uiRenderer.getTabGroupByLabel(ref);
 				if (tg == null) {
 					Tab tb = uiRenderer.getTabByLabel(ref);
 					if (tb == null) {
-						FLog.w("cannot find view " + ref);
-						showWarning("Logic Error", "Error cannot find view " + ref);
+						FLog.w("cannot bind " + type +" event to " + ref);
+						showWarning("Logic Error", "Error bind " + type + " event to " + ref);
 						return;
 					} else {
 						tb.addOnLoadCommand(code);
@@ -482,8 +428,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				if (tg == null) {
 					Tab tb = uiRenderer.getTabByLabel(ref);
 					if (tb == null) {
-						FLog.w("cannot find view " + ref);
-						showWarning("Logic Error", "Error cannot find view " + ref);
+						FLog.w("cannot bind " + type +" event to " + ref);
+						showWarning("Logic Error", "Error bind " + type + " event to " + ref);
 						return;
 					} else {
 						tb.addOnShowCommand(code);
@@ -500,73 +446,18 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error binding event to view " + ref);
 		}
 	}
-	
-	private void addSpinnerEventClickListener(final CustomSpinner spinner, final String code) {
-		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(
-					AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
-				execute(code);
-			}
-
-			@Override
-			public void onNothingSelected(
-					AdapterView<?> arg0) {
-				execute(code);
-			}
-
-		});
-	}
-	
-	private void addPictureGalleryEventClickListener(final PictureGallery pictureGallery, final String code) {
-		pictureGallery.setImageListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v)
-			{
-				execute(code);
-			}
-
-		});
-	}
-	
-	private void addRadioGroupEventClickListener(final CustomRadioGroup radioGroup, final String code) {
-		radioGroup.setOnCheckChangedListener(new RadioGroup.OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(RadioGroup group, int checkedId) {
-				execute(code);
-			}
-		});
-	}
 
 	public void bindFocusAndBlurEvent(String ref, final String focusCallback,
-			final String blurCallBack) {
+			final String blurCallback) {
 		try {
 			View view = uiRenderer.getViewByRef(ref);
-			if (view == null) {
-				FLog.w("cannot find view " + ref);
-				showWarning("Logic Error", "Error cannot find view " + ref);
-				return;
+			if (view instanceof IView) {
+				IView iview = (IView) view;
+				iview.setFocusBlurCallbacks(focusCallback, blurCallback);
 			} else {
-				view.setOnFocusChangeListener(new OnFocusChangeListener() {
-
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (hasFocus) {
-							if (focusCallback != null
-									&& !focusCallback.isEmpty()) {
-								execute(focusCallback);
-							}
-						} else {
-							if (blurCallBack != null && !blurCallBack.isEmpty()) {
-								execute(blurCallBack);
-							}
-						}
-					}
-				});
+				FLog.w("cannot bind focus and blur to view " + ref);
+				showWarning("Logic Error", "Error bind focus and blur to view " + ref);
+				return;
 			}
 		} catch (Exception e) {
 			FLog.e("exception binding focus and blur event to view " + ref, e);
@@ -581,33 +472,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			View view = uiRenderer.getViewByRef(ref);
 			if (view instanceof CustomMapView) {
 				final CustomMapView mapView = (CustomMapView) view;
-				mapView.setMapListener(new CustomMapView.CustomMapListener() {
-
-					@Override
-					public void onMapClicked(double x, double y, boolean arg2) {
-						try {
-							MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG3857, module.getSrid(), new MapPos(x, y));
-							interpreter.set("_map_point_clicked", p);
-							execute(clickCallback);
-						} catch (Exception e) {
-							FLog.e("error setting map point clicked", e);
-						}
-					}
-
-					@Override
-					public void onVectorElementClicked(VectorElement element,
-							double arg1, double arg2, boolean arg3) {
-						try {
-							int geomId = mapView
-									.getGeometryId((Geometry) element);
-							interpreter.set("_map_geometry_selected", geomId);
-							execute(selectCallback);
-						} catch (Exception e) {
-							FLog.e("error setting map geometry selected", e);
-						}
-					}
-
-				});
+				mapView.setMapCallbacks(clickCallback, selectCallback);
 			} else {
 				FLog.w("cannot bind map event to view " + ref);
 				showWarning("Logic Error",
@@ -1086,11 +951,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return textAlertInput;
 	}
 	
-	protected void reportError(Exception e) {
+	public void reportError(Exception e) {
 		reportError(e.getMessage(), e);
 	}
 	
-	protected void reportError(final String message, Exception e) {
+	public void reportError(final String message, Exception e) {
 		FLog.e(message, e);
 		ShowModuleActivity activity = activityRef.get();
 		if (activity != null) {
@@ -1367,11 +1232,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				CustomSpinner spinner = (CustomSpinner) obj;
 
 				List<NameValuePair> pairs = convertToNameValuePairs((Collection<?>) valuesObj);
-
-				ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-						this.activityRef.get(),
-						android.R.layout.simple_spinner_dropdown_item, pairs);
-				spinner.setAdapter(arrayAdapter);
+				spinner.populate(pairs);
 			} else {
 				FLog.w("cannot populate drop down "
 						+ ref);
@@ -3169,33 +3030,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (obj instanceof CustomMapView) {
 				CustomMapView mapView = (CustomMapView) obj;
 				if ("create".equals(type)) {
-					mapView.setCreateCallback(new CustomMapView.CreateCallback() {
-						
-						@Override
-						public void onCreate(int geomId) {
-							try {
-								interpreter.set("_map_geometry_created", geomId);
-								execute(callback);
-							} catch (Exception e) {
-								FLog.e("error setting geometry created", e);
-							}
-						}
-					});
+					mapView.setCreateCallback(callback);
 				} else if ("load".equals(type)) {
-					mapView.setLoadToolVisible(true);
-					mapView.setLoadCallback(new CustomMapView.LoadCallback() {
-						
-						@Override
-						public void onLoad(String id, boolean isEntity) {
-							try {
-								interpreter.set("_map_geometry_loaded", id);
-								interpreter.set("_map_geometry_loaded_type", isEntity ? "entity" : "relationship");
-								execute(callback);
-							} catch (Exception e) {
-								FLog.e("error setting geometry loaded", e);
-							}
-						}
-					});	
+					mapView.setLoadCallback(callback);	
 				} else {
 					FLog.w("Error cannot bind to tool event " + type);
 					showWarning("Logic Error", "Error cannot bind to tool event " + type);

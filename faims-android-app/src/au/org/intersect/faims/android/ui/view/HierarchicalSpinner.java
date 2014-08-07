@@ -122,7 +122,13 @@ public class HierarchicalSpinner extends CustomSpinner {
 		this.listener = listener;
 	}
 	
+	public List<VocabularyTerm> getTerms() {
+		return terms;
+	}
+	
 	public void setTerms(List<VocabularyTerm> terms) {
+		if (terms == null) return;
+		
 		this.terms = terms;
 		
 		mapVocabToParent();	

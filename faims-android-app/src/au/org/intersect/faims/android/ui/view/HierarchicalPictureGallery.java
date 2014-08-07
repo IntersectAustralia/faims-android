@@ -54,14 +54,17 @@ public class HierarchicalPictureGallery extends PictureGallery {
 			}
 		}
 	}
+	
+	public List<VocabularyTerm> getTerms() {
+		return terms;
+	}
 
 	public void setTerms(List<VocabularyTerm> terms) {
+		if (terms == null) return;
+		
 		this.terms = terms;
-		
 		mapVocabToParent();
-		
 		this.parentTerms = new Stack<VocabularyTerm>();
-		
 		loadTerms();
 	}
 	
