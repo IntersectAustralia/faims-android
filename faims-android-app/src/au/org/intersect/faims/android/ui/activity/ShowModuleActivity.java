@@ -682,11 +682,18 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	public void updateStatusBar() {
-		if (menuManager == null) {
-			menuManager = new ShowModuleMenuManager(this);
-		}
-		
-		menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (menuManager == null) {
+					menuManager = new ShowModuleMenuManager(ShowModuleActivity.this);
+				}
+				
+				menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+			}
+			
+		});
 	}
 
 	public void setPathVisible(boolean value) {
