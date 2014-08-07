@@ -315,6 +315,7 @@ public class Tab {
 	                		container.addView(view);
 	                	} else {
 	                		view = viewFactory.createTextField(-1, inputDef, ref, dynamic);
+	                		NativeCSS.addCSSClass(view, "input-field");
 	                		setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                	}
 	                    break;

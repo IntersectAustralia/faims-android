@@ -125,10 +125,10 @@
 	                  <audios></audios>
 	                  <attachaudio></attachaudio>
 	                  <viewattached></viewattached>
-	                  <container>
+	                  <container1>
 	                      <save></save>
 	                      <clear></clear>
-	                  </container>
+	                  </container1>
 	                  <delete></delete>
 	                  <close></close>
 	          	</container>
@@ -162,10 +162,10 @@
 	                  <audios></audios>
 	                  <attachaudio></attachaudio>
 	                  <viewattached></viewattached>
-	                  <container>
+	                  <container1>
 	                      <save></save>
 	                      <clear></clear>
-	                  </container>
+	                  </container1>
 	                  <delete></delete>
 	                  <close></close>
                  </container>
@@ -739,7 +739,7 @@
 	        <trigger ref="viewattached">
 	            <label>View Attached Files</label>
 	        </trigger>
-	        <group ref="container" faims_style="orientation even">
+	        <group ref="container1" faims_style="orientation even">
 	          <label></label>
 	            <trigger ref="save">
 	              <label>Save</label>
@@ -879,7 +879,7 @@
 	        <trigger ref="viewattached">
 	            <label>View Attached Files</label>
 	        </trigger>
-	        <group ref="container" faims_style="orientation even">
+	        <group ref="container1" faims_style="orientation even">
 	          <label></label>
 	            <trigger ref="save">
 	              <label>Save</label>
