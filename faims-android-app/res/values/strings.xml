@@ -122,5 +122,9 @@
     <string name="autosave_ready">Ready to save</string>
     <string name="autosave_saving">Autosave in progress</string>
     <string name="autosave_error">Autosave error</string>
+    
+    <string name="distance_text">Tracking distance</string>
+    <string name="direction_text">Tracking angle</string>
+    <string name="direction_indicator">Tracking direction</string>
 
 </resources>

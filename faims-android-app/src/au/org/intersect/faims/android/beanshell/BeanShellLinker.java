@@ -301,7 +301,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				return;
 			}
 			gpsDataManager.setTrackingStarted(true);
-			activityRef.get().updateActionBar();
+			activityRef.get().updateStatusBar();
 			trackingHandlerThread = new HandlerThread("tracking");
 			trackingHandlerThread.start();
 			trackingHandler = new Handler(trackingHandlerThread.getLooper());
@@ -371,7 +371,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 		
 		gpsDataManager.setTrackingStarted(false);
-		activityRef.get().updateActionBar();
+		activityRef.get().updateStatusBar();
 	}
 
 	public void bindViewToEvent(String ref, String type, final String code) {

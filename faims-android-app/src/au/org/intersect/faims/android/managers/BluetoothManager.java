@@ -410,7 +410,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	private void updateBluetoothStatus(BluetoothStatus status) {
 		if (isBluetoothConnected) {
 			setBluetoothStatus(status);
-			activityRef.get().updateActionBar();
+			activityRef.get().updateStatusBar();
 		}
 	}
 

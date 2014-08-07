@@ -1,0 +1,114 @@
+<HorizontalScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+   	android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+  <LinearLayout android:id="@+id/status_bar_icons"
+	android:layout_width="wrap_content"
+	android:layout_height="match_parent"
+	android:orientation="horizontal"
+	android:layout_marginRight="5dp"
+	android:layout_gravity="right">
+      
+	  <ImageView android:id="@+id/action_autosave_saving"
+	    android:contentDescription="@string/autosave_saving"
+	    android:src="@drawable/action_autosave_ready"
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_autosave_ready"
+	    android:contentDescription="@string/autosave_ready"
+	    android:src="@drawable/action_autosave_ready" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_autosave"
+	    android:contentDescription="@string/autosave_active"
+	    android:src="@drawable/action_autosave" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_autosave_error"
+	    android:contentDescription="@string/autosave_error"
+	    android:src="@drawable/action_autosave_error" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_autosave_inactive"
+	    android:contentDescription="@string/autosave_inactive"
+	    android:src="@drawable/action_autosave_inactive" 
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <ImageView android:id="@+id/action_bluetooth_active"
+	    android:contentDescription="@string/bluetooth_active"
+	    android:src="@drawable/action_bluetooth_a" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_bluetooth_connected"
+	    android:contentDescription="@string/bluetooth_connected"
+	    android:src="@drawable/action_bluetooth" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_bluetooth_disconnected"
+	    android:contentDescription="@string/bluetooth_disconnected"
+	    android:src="@drawable/action_bluetooth_d" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_bluetooth_error"
+	    android:contentDescription="@string/bluetooth_error"
+	    android:src="@drawable/action_bluetooth_e" 
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <ImageView android:id="@+id/action_gps_inactive"
+	    android:contentDescription="@string/gps_inactive"
+	    android:src="@drawable/action_gps_inactive" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_gps_active_no_signal"
+	    android:contentDescription="@string/action_gps_active_no_signal"
+	    android:src="@drawable/action_gps_active" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_gps_active_has_signal"
+	    android:contentDescription="@string/action_gps_active_has_signal"
+	    android:src="@drawable/action_gps_active_signal" 
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <ImageView android:id="@+id/action_tracker_active_no_gps"
+	    android:contentDescription="@string/tracker_active_no_gps"
+	    android:src="@drawable/action_track_active_no_gps" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_tracker_active_has_gps"
+	    android:contentDescription="@string/tracker_active_has_gps"
+	    android:src="@drawable/action_track_active_has_gps" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_tracker_inactive"
+	    android:contentDescription="@string/tracker_inactive"
+	    android:src="@drawable/action_track_inactive" 
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <ImageView android:id="@+id/action_sync_active"
+	    android:contentDescription="@string/sync_syncing"
+	    android:src="@drawable/action_sync_active"
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_sync_has_changes"
+	    android:contentDescription="@string/sync_has_changes"
+	    android:src="@drawable/action_sync_active" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_sync"
+	    android:contentDescription="@string/sync_no_changes"
+	    android:src="@drawable/action_sync" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_sync_error"
+	    android:contentDescription="@string/sync_error"
+	    android:src="@drawable/action_sync_error" 
+	    style="@style/statusBarIconLarge"/>
+	  <ImageView android:id="@+id/action_sync_inactive"
+	    android:contentDescription="@string/sync_inactive"
+	    android:src="@drawable/action_sync_inactive" 
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <ImageView android:id="@+id/direction_indicator"
+	    android:contentDescription="@string/direction_indicator"
+	    style="@style/statusBarIconLarge"/>
+	  
+	  <TextView android:id="@+id/distance_text"
+	    android:contentDescription="@string/distance_text"
+	    android:textColor="#FFFFFF"
+	    style="@style/statusBarIconLarge"/>
+	  <TextView android:id="@+id/direction_text"
+	    android:contentDescription="@string/direction_text"
+	    android:textColor="#FFFFFF"
+	    style="@style/statusBarIconLarge"/>
+	  
+	  
+  </LinearLayout>
+  
+</HorizontalScrollView>

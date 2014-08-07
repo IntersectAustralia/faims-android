@@ -1713,7 +1713,7 @@ public class CustomMapView extends MapView implements IView {
 	
 				@Override
 				public void run() {
-					activityRef.get().updateActionBar();
+					activityRef.get().updateStatusBar();
 				}
 				
 			});
