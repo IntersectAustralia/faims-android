@@ -71,7 +71,11 @@ startTrackAlert(){
 saveTimeGPSTrack() {
     showToast("still tracking");
     position = getGPSPosition();
-    showToast("Longitude:"+position.getLongitude());
+    if (position == null) {
+        showToast("not gps signal found");
+    } else {
+        showToast("Longitude:"+position.getLongitude());
+    }
 }
 
 

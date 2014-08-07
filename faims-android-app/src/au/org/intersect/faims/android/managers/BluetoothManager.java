@@ -159,14 +159,10 @@ public class BluetoothManager implements IFAIMSRestorable {
 				showConnectionDialog();
 				return;
 			}	
-			createBluetoothHandlerThread();
+			resumeConnection();
 			isBluetoothConnected = true;
 			updateBluetoothStatus(BluetoothStatus.CONNECTED);
 			beanShellLinker.showToast("bluetooth connection established");
-			
-			if (repeatable) {
-				readMessage();
-			}
 		}
 	}
 	
@@ -176,6 +172,13 @@ public class BluetoothManager implements IFAIMSRestorable {
 			updateBluetoothStatus(BluetoothStatus.DISCONNECTED);
 			isBluetoothConnected = false;
 			beanShellLinker.showToast("bluetooth connection destroyed");
+		}
+	}
+	
+	public void resumeConnection() {
+		createBluetoothHandlerThread();
+		if (repeatable) {
+			readMessage();
 		}
 	}
 	
@@ -368,7 +371,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 	@Override
 	public void resume() {
 		if (isBluetoothConnected) {
-			createConnection();
+			 resumeConnection();
 		}
 	}
 
@@ -384,7 +387,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		destroyConnection();
 	}
 	
-	public boolean isEndOfLine(char c) {
+	private boolean isEndOfLine(char c) {
 		return c == Character.LINE_SEPARATOR || c == '\n';
 	}
 	
