@@ -32,6 +32,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
@@ -47,6 +48,71 @@ import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
 
 public class Tab {
+	
+	private static class Creator implements Serializable {
+		private static final long serialVersionUID = -7695642524796470211L;
+		
+		protected String ref;
+		
+		public Creator() {
+			
+		}
+	}
+	
+	private static class ContainerCreator extends Creator implements Serializable {
+		private static final long serialVersionUID = -6316380182212646811L;
+		
+		private String style;
+		private String parent;
+		
+		public ContainerCreator(String ref, String style, String parent) {
+			this.ref = ref;
+			this.style = style;
+			this.parent = parent;
+		}
+	}
+	
+	private static class ViewCreator extends Creator implements Serializable {
+		private static final long serialVersionUID = 127908031663861660L;
+		
+		private FormInputDef inputDef;
+		private boolean isArchEnt;
+		private boolean isRelationship;
+		private String containerRef;
+		
+		public ViewCreator(String ref, FormInputDef inputDef, boolean isArchEnt, boolean isRelationship, String containerRef) {
+			this.ref = ref;
+			this.inputDef = inputDef;
+			this.isArchEnt = isArchEnt;
+			this.isRelationship = isRelationship;
+			this.containerRef = containerRef;
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private static class ViewData implements Serializable {
+		private static final long serialVersionUID = -3601918620845812810L;
+		
+		private List<NameValuePair> pairs;
+		private List<VocabularyTerm> terms;
+		private String clickCallback;
+		private String delayClickCallback;
+		private String selectCallback;
+		private String focusCallback;
+		private String blurCallback;
+		private String mapClickCallback;
+		private String mapSelectCallback;
+		private String toolCreateCallback;
+		private String toolLoadCallback;
+		private Object value;
+		private Object annotation;
+		private Object certainty;
+		private String dirtyReason;
+		
+		public ViewData() {
+			
+		}
+	}
 
 	@Inject
 	DatabaseManager databaseManager;
@@ -57,8 +123,6 @@ public class Tab {
 	@Inject
 	Arch16n arch16n;
 
-	public static final String FREETEXT = "freetext";
-
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
@@ -68,8 +132,9 @@ public class Tab {
 	private List<CustomMapView> mapViewList;
 	private Map<String, Button> dirtyButtonMap;
 	private Map<String, LinearLayout> viewLayoutMap;
+	private Map<String, CustomLinearLayout> containerMap;
 	
-	private Map<String, LinearLayout> containerMap;
+	private List<Creator> viewCreators;
 
 	private String ref;
 	private String name;
@@ -103,7 +168,9 @@ public class Tab {
 		this.attributeViewMap = new HashMap<String, List<View>>();
 		this.dirtyButtonMap = new HashMap<String, Button>();
 		this.viewLayoutMap = new HashMap<String, LinearLayout>();
-		this.containerMap = new HashMap<String, LinearLayout>();
+		this.containerMap = new HashMap<String, CustomLinearLayout>();
+		
+		this.viewCreators = new ArrayList<Creator>();
 		
 		linearLayout = new LinearLayout(activityRef.get());
         linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -122,12 +189,13 @@ public class Tab {
 	}
 	
 	public void addCustomContainer(String ref, String style, String parentRef) throws Exception {
-		LinearLayout parentContainer = containerMap.get(parentRef);
+		viewCreators.add(new ContainerCreator(ref, style, parentRef));
+		CustomLinearLayout parentContainer = containerMap.get(parentRef);
 		CustomLinearLayout containerLayout = new CustomLinearLayout(linearLayout.getContext(), beanShellLinker.getUIRenderer().getStyleMappings(style), true);
 		addCustomContainer(ref, containerLayout, parentContainer);
 	}
 
-	public void addCustomContainer(String ref, LinearLayout containerLayout, LinearLayout parentLayout) throws Exception {
+	public void addCustomContainer(String ref, CustomLinearLayout containerLayout, CustomLinearLayout parentLayout) throws Exception {
 		// check if container already exists
 		if (containerMap.get(ref) != null) {
 			throw new Exception("container already exists " + ref);
@@ -143,14 +211,25 @@ public class Tab {
 	}
 	
 	public void removeCustomContainer(String ref) {
-		LinearLayout layout = containerMap.get(ref);
+		int index = 0;
+		for (Creator c : viewCreators) {
+			if (c.ref.equals(ref)) {
+				break;
+			}
+			index++;
+		}
+		viewCreators.remove(index);
+		
+		CustomLinearLayout layout = containerMap.get(ref);
 		if (layout != null) {
-			ViewParent parent = layout.getParent();
-			if (parent instanceof ViewGroup) {
-				((ViewGroup) parent).removeView(layout);
-				containerMap.remove(ref);
-			} else {
-				FLog.w("cannot remove container " + ref);
+			if (layout.isDynamic()) {
+				ViewParent parent = layout.getParent();
+				if (parent instanceof ViewGroup) {
+					((ViewGroup) parent).removeView(layout);
+					containerMap.remove(ref);
+				} else {
+					FLog.w("cannot remove container " + ref);
+				}
 			}
 		} else {
 			FLog.w("cannot find container " + ref);
@@ -160,6 +239,7 @@ public class Tab {
 	}
 	
 	public View addCustomView(String ref, FormInputDef inputDef, boolean isArchEnt, boolean isRelationship, String containerRef) throws Exception {
+		viewCreators.add(new ViewCreator(ref, inputDef, isArchEnt, isRelationship, containerRef));
 		return addCustomView(ref, inputDef, isArchEnt, isRelationship, containerMap.get(containerRef), true);
 	}
 	
@@ -319,7 +399,16 @@ public class Tab {
 	}
 	
 	public void removeCustomView(String ref) {
-		// remove from view list
+		int index = 0;
+		for (Creator c : viewCreators) {
+			if (c.ref.equals(ref)) {
+				break;
+			}
+			index++;
+		}
+		viewCreators.remove(index);
+		
+		// remove from view list and attribute map
 		for (int i = 0; i < viewList.size(); i++) {
 			View view = viewList.get(i);
 			if (view instanceof IView) {
@@ -389,7 +478,7 @@ public class Tab {
 			viewLayoutMap.remove(ref);
 		}
 		
-		// add view to ui renderer
+		// remove view to ui renderer
         beanShellLinker.getUIRenderer().removeViewFromTab(ref);
         
         refreshTab();
@@ -420,7 +509,7 @@ public class Tab {
 	    			fieldLinearLayout.addView(certaintyButton);
 	    		}
 	    		
-	    		if(attribute.annotation && (isArchEnt || isRelationship) && !FREETEXT.equals(attribute.type)){
+	    		if(attribute.annotation && (isArchEnt || isRelationship) && !Attribute.FREETEXT.equals(attribute.type)){
 	    			annotationButton = viewFactory.createAnnotationButton();
 	    			setupAnnotationButtonClick(annotationButton, view);
 	    			fieldLinearLayout.addView(annotationButton);
@@ -838,68 +927,150 @@ public class Tab {
 	}
 	
 	public void saveTo(Bundle savedInstanceState) {
-		HashMap<String, Object> viewPairs = new HashMap<String, Object>();
-		HashMap<String, Object> viewValues = new HashMap<String, Object>(); 
-		HashMap<String, Object> viewCertainties = new HashMap<String, Object>(); 
-		HashMap<String, Object> viewAnnotations = new HashMap<String, Object>(); 
-		HashMap<String, Object> viewDirtyReasons = new HashMap<String, Object>();
+		HashMap<String, ViewData> viewData = new HashMap<String, ViewData>();
 		for (View view : viewList) {
-			if (view instanceof ICustomView) {
-				String ref = ((ICustomView) view).getRef();
-				if (view instanceof FileListGroup) {
-					FileListGroup fileList = (FileListGroup) view;
-					viewPairs.put(ref, fileList.getPairs());
-				} else if (view instanceof CameraPictureGallery) {
-					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
-					viewPairs.put(ref, cameraGallery.getPairs());
-				} else if (view instanceof VideoGallery) {
-					VideoGallery videoGallery = (VideoGallery) view;
-					viewPairs.put(ref, videoGallery.getPairs());
+			if (view instanceof IView) {
+				IView iview = (IView) view;
+				String ref = iview.getRef();
+				
+				ViewData data = new ViewData();
+				viewData.put(ref, data);
+				
+				// store callbacks
+				data.clickCallback = iview.getClickCallback();
+				data.selectCallback = iview.getSelectCallback();
+				data.focusCallback = iview.getFocusCallback();
+				data.blurCallback = iview.getBlurCallback();
+				
+				if (iview instanceof CustomButton) {
+					CustomButton button = (CustomButton) iview;
+					data.delayClickCallback = button.getDelayClickCallback();
 				}
-				viewValues.put(ref, beanShellLinker.getFieldValue(ref));
-				viewCertainties.put(ref, beanShellLinker.getFieldCertainty(ref));
-				viewAnnotations.put(ref, beanShellLinker.getFieldAnnotation(ref));
-				viewDirtyReasons.put(ref, beanShellLinker.getFieldDirty(ref));
-			} else if (view instanceof CustomMapView) {
-				CustomMapView map = (CustomMapView) view;
-				map.saveTo(savedInstanceState);
+				
+				// store pairs
+				if (iview instanceof HierarchicalSpinner) {
+					HierarchicalSpinner spinner = (HierarchicalSpinner) iview;
+					if (spinner.getTerms() == null) {
+						data.pairs = spinner.getPairs();
+					} else {
+						data.terms = spinner.getTerms();
+					}
+				} else if (iview instanceof HierarchicalPictureGallery) {
+					HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) iview;
+					if (gallery.getTerms() == null) {
+						data.pairs = gallery.getPairs();
+					} else {
+						data.terms = gallery.getTerms();
+					}
+				} else if (iview instanceof CustomRadioGroup) {
+					CustomRadioGroup radio = (CustomRadioGroup) iview;
+					data.pairs = radio.getPairs();
+				} else if (iview instanceof CustomCheckBoxGroup) {
+					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
+					data.pairs = check.getPairs();
+				} else if (iview instanceof CustomListView) {
+					CustomListView list = (CustomListView) iview;
+					data.pairs = list.getPairs();
+				}
+				
+				// store values
+				if (iview instanceof ICustomView) {
+					data.value = beanShellLinker.getFieldValue(ref);
+					data.annotation = beanShellLinker.getFieldAnnotation(ref);
+					data.certainty = beanShellLinker.getFieldCertainty(ref);
+					data.dirtyReason = beanShellLinker.getFieldDirty(ref);
+				} 
+				
+				// store map and callbacks
+				if (iview instanceof CustomMapView) {
+					CustomMapView map = (CustomMapView) iview;
+					map.saveTo(savedInstanceState);
+					data.mapClickCallback = map.getMapClickCallback();
+					data.mapSelectCallback = map.getMapSelectCallback();
+					data.toolCreateCallback = map.getCreateCallback();
+					data.toolLoadCallback = map.getLoadCallback();
+				}
 			}
 		}
-		savedInstanceState.putSerializable(getRef() + ":viewPairs", (Serializable) viewPairs);
-		savedInstanceState.putSerializable(getRef() + ":viewValues", (Serializable) viewValues);
-		savedInstanceState.putSerializable(getRef() + ":viewCertainties", (Serializable) viewCertainties);
-		savedInstanceState.putSerializable(getRef() + ":viewAnnotations", (Serializable) viewAnnotations);
-		savedInstanceState.putSerializable(getRef() + ":viewDirtyReasons", (Serializable) viewDirtyReasons);
+		savedInstanceState.putSerializable(getRef() + ":viewData", (Serializable) viewData);
+		savedInstanceState.putSerializable(getRef() + ":viewCreators", (Serializable) viewCreators);
 		savedInstanceState.putBoolean(getRef() + ":tabShown", tabShown);
 		savedInstanceState.putBoolean(getRef() + ":hidden", hidden);
 	}
 
 	@SuppressWarnings("unchecked")
 	public void restoreFrom(Bundle savedInstanceState) {
-		HashMap<String, Object> viewPairs = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewPairs");
-		HashMap<String, Object> viewValues = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewValues");
-		HashMap<String, Object> viewCertainties = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewCertainties");
-		HashMap<String, Object> viewAnnotations = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewAnnotations");
-		HashMap<String, Object> viewDirtyReasons = (HashMap<String, Object>) savedInstanceState.getSerializable(getRef() + ":viewDirtyReasons");
-		for(View view : viewList){
-			if (view instanceof ICustomView) {
-				String ref = ((ICustomView) view).getRef();
-				if (view instanceof FileListGroup) {
-					FileListGroup fileList = (FileListGroup) view;
-					fileList.setPairs((List<NameValuePair>) viewPairs.get(ref));
-				} else if (view instanceof CameraPictureGallery) {
-					CameraPictureGallery cameraGallery = (CameraPictureGallery) view;
-					cameraGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
-				} else if (view instanceof VideoGallery) {
-					VideoGallery videoGallery = (VideoGallery) view;
-					videoGallery.setPairs((List<NameValuePair>) viewPairs.get(ref));
+		HashMap<String, ViewData> viewData = (HashMap<String, ViewData>) savedInstanceState.getSerializable(getRef() + ":viewData");
+		try {
+			ArrayList<Creator> viewCreators = (ArrayList<Creator>) savedInstanceState.getSerializable(getRef() + ":viewCreators");
+			if (viewCreators != null) {
+				for (Creator c : viewCreators) {
+					if (c instanceof ContainerCreator) {
+						ContainerCreator cc = (ContainerCreator) c;
+						addCustomContainer(cc.ref, cc.style, cc.parent);
+					} else if (c instanceof ViewCreator) {
+						ViewCreator vc = (ViewCreator) c;
+						addCustomView(vc.ref, vc.inputDef, vc.isArchEnt, vc.isRelationship, vc.containerRef);
+					}
 				}
-				beanShellLinker.setFieldValue(ref, viewValues.get(ref));
-				beanShellLinker.setFieldCertainty(ref, viewCertainties.get(ref));
-				beanShellLinker.setFieldAnnotation(ref, viewAnnotations.get(ref));
-				beanShellLinker.setFieldDirty(ref, viewDirtyReasons.get(ref) != null, (String) viewDirtyReasons.get(ref));
-			} else if (view instanceof CustomMapView) {
-				((CustomMapView) view).restoreFrom(savedInstanceState);
+			}
+		} catch (Exception e) {
+			beanShellLinker.reportError("Error trying to recover dynamic views", e);
+		}
+		for(View view : viewList){
+			if (view instanceof IView) {
+				IView iview = (IView) view;
+				String ref = ((IView) view).getRef();
+				
+				ViewData data = viewData.get(ref);
+				
+				// load callbacks
+				iview.setClickCallback(data.clickCallback);
+				iview.setSelectCallback(data.selectCallback);
+				iview.setFocusBlurCallbacks(data.focusCallback, data.blurCallback);
+				
+				// load pairs
+				if (iview instanceof HierarchicalSpinner) {
+					HierarchicalSpinner spinner = (HierarchicalSpinner) iview;
+					if (data.terms == null) {
+						spinner.setPairs(data.pairs);
+					} else {
+						spinner.setTerms(data.terms);
+					}
+				} else if (iview instanceof HierarchicalPictureGallery) {
+					HierarchicalPictureGallery gallery = (HierarchicalPictureGallery) iview;
+					if (data.terms == null) {
+						gallery.setPairs(data.pairs);
+					} else {
+						gallery.setTerms(data.terms);
+					}
+				} else if (iview instanceof CustomRadioGroup) {
+					CustomRadioGroup radio = (CustomRadioGroup) iview;
+					radio.setPairs(data.pairs);
+				} else if (iview instanceof CustomCheckBoxGroup) {
+					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
+					check.setPairs(data.pairs);
+				} else if (iview instanceof CustomListView) {
+					CustomListView list = (CustomListView) iview;
+					list.setPairs(data.pairs);
+				}
+				
+				// load values
+				if (iview instanceof ICustomView) {
+					beanShellLinker.setFieldValue(ref, data.value);
+					beanShellLinker.setFieldCertainty(ref, data.certainty);
+					beanShellLinker.setFieldAnnotation(ref, data.annotation);
+					beanShellLinker.setFieldDirty(ref, data.dirtyReason != null, data.dirtyReason);
+				}
+				
+				// load map
+				if (iview instanceof CustomMapView) {
+					CustomMapView map = (CustomMapView) iview;
+					map.restoreFrom(savedInstanceState);
+					map.setMapCallbacks(data.mapClickCallback, data.mapSelectCallback);
+					map.setCreateCallback(data.toolCreateCallback);
+					map.setLoadCallback(data.toolLoadCallback);
+				}
 			}
 		}
 		tabShown = savedInstanceState.getBoolean(getRef() + ":tabShown");

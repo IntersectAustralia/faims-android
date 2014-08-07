@@ -1,11 +1,16 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
@@ -19,6 +24,9 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	BeanShellLinker linker;
 
 	private String ref;
 	private boolean dynamic;
@@ -32,6 +40,10 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	protected boolean annotationEnabled;
 	protected boolean certaintyEnabled;
 	protected FormInputDef inputDef;
+
+	private String selectCallback;
+	private String focusCallback;
+	private String blurCallback;
 	
 	public CustomSpinner(Context context) {
 		super(context);
@@ -170,6 +182,28 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		
 	}
 	
+	public List<NameValuePair> getPairs() {
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		if (getAdapter() != null) {
+			for (int i = 0; i < getAdapter().getCount(); ++i) {
+				NameValuePair pair = (NameValuePair) getItemAtPosition(i);
+				pairs.add(pair);
+			}
+		}
+		return pairs;
+	}
+	
+	public void setPairs(List<NameValuePair> pairs) {
+		populate(pairs);
+	}
+	
+	public void populate(List<NameValuePair> pairs) {
+		ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+				getContext(),
+				android.R.layout.simple_spinner_dropdown_item, pairs);
+		setAdapter(arrayAdapter);
+	}
+	
 	@Override
 	public boolean getAnnotationEnabled() {
 		return annotationEnabled;
@@ -200,5 +234,69 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	public boolean hasAttributeChanges(
 			Collection<? extends Attribute> attributes) {
 		return Compare.compareAttributeValue(this, attributes);
+	}
+	
+	@Override
+	public String getClickCallback() {
+		return null;
+	}
+
+	public void setClickCallback(String code) {
+		setSelectCallback(code);
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return selectCallback;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+		if (code == null) return;
+		selectCallback = code;
+		setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(
+					AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				linker.execute(selectCallback);
+			}
+
+			@Override
+			public void onNothingSelected(
+					AdapterView<?> arg0) {
+				linker.execute(selectCallback);
+			}
+
+		});
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return focusCallback;
+	}
+	
+	@Override
+	public String getBlurCallback() {
+		return blurCallback;
+	}
+	
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+		if (focusCode == null && blurCode == null) return;
+		focusCallback = focusCode;
+		blurCallback = blurCode;
+		setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					linker.execute(focusCallback);
+				} else {
+					linker.execute(blurCallback);
+				}
+			}
+		});
 	}
 }

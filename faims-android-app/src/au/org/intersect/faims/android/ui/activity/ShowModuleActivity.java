@@ -45,6 +45,7 @@ import au.org.intersect.faims.android.database.DatabaseChangeListener;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.AsyncTaskManager;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
@@ -134,6 +135,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	AsyncTaskManager asyncTaskManager;
 	
 	private WifiBroadcastReceiver broadcastReceiver;
 
@@ -350,6 +354,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 		beanShellLinker.init(this, module);
 		uiRenderer.init(this);
 		autoSaveManager.init(this);
+		asyncTaskManager.init();
+		
 	}
 
 	private void setupBeanshell() {
@@ -419,7 +425,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 		gpsDataManager.destroy();
 		beanShellLinker.destroy();
 		autoSaveManager.destroy();
-		uiRenderer.clearTempBundle();
+		uiRenderer.destroy();
+		asyncTaskManager.destroy();
 		destroy();
 		super.onDestroy();
 	}

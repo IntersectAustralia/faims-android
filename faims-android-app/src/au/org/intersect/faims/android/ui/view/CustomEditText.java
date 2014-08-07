@@ -6,8 +6,10 @@ import java.util.List;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -38,6 +40,9 @@ public class CustomEditText extends EditText implements ICustomView {
 	
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	BeanShellLinker linker;
 
 	private String ref;
 	private boolean dynamic;
@@ -53,6 +58,10 @@ public class CustomEditText extends EditText implements ICustomView {
 	private FormInputDef inputDef;
 	
 	private CustomEditTextTextWatcher customTextWatcher;
+
+	private String clickCallback;
+	private String focusCallback;
+	private String blurCallback;
 	
 	public CustomEditText(Context context) {
 		super(context);
@@ -209,6 +218,61 @@ public class CustomEditText extends EditText implements ICustomView {
 	public boolean hasAttributeChanges(
 			Collection<? extends Attribute> attributes) {
 		return Compare.compareAttributeValue(this, attributes);
+	}
+	
+	@Override
+	public String getClickCallback() {
+		return clickCallback;
+	}
+
+	@Override
+	public void setClickCallback(String code) {
+		if (code == null) return;
+		clickCallback = code;
+		setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				linker.execute(clickCallback);
+			}
+		});
+	}
+	
+	@Override
+	public String getSelectCallback() {
+		return null;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return focusCallback;
+	}
+	
+	@Override
+	public String getBlurCallback() {
+		return blurCallback;
+	}
+	
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+		if (focusCode == null && blurCode == null) return;
+		focusCallback = focusCode;
+		blurCallback = blurCode;
+		setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					linker.execute(focusCallback);
+				} else {
+					linker.execute(blurCallback);
+				}
+			}
+		});
 	}
 	
 }

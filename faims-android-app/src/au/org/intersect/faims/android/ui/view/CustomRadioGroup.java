@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
@@ -36,6 +37,9 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	BeanShellLinker linker;
 
 	private String ref;
 	private boolean dynamic;
@@ -52,6 +56,10 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
 	private OnCheckedChangeListener listener;
 	private RadioGroupOnChangeListener customListener;
+
+	private String clickCallback;
+	private String focusCallback;
+	private String blurCallback;
 
 	public CustomRadioGroup(Context context) {
 		super(context);
@@ -219,6 +227,24 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public List<NameValuePair> getPairs() {
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		HorizontalScrollView horizontalScrollView = (HorizontalScrollView) getChildAt(0);
+		RadioGroup rg = (RadioGroup) horizontalScrollView.getChildAt(0);
+		for (int i = 0; i < rg.getChildCount(); ++i) {
+			View view = rg.getChildAt(i);
+			if (view instanceof CustomRadioButton) {
+				CustomRadioButton rb = (CustomRadioButton) view;
+				pairs.add(new NameValuePair(rb.getText().toString(), rb.getValue()));
+			}
+		}
+		return pairs;
+	}
+	
+	public void setPairs(List<NameValuePair> pairs) {
+		populate(pairs);
+	}
 
 	public void populate(List<NameValuePair> pairs) {
 		removeAllViews();
@@ -271,5 +297,60 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	public boolean hasAttributeChanges(
 			Collection<? extends Attribute> attributes) {
 		return Compare.compareAttributeValue(this, attributes);
+	}
+
+	@Override
+	public String getClickCallback() {
+		return clickCallback;
+	}
+
+	@Override
+	public void setClickCallback(String code) {
+		if (code == null) return;
+		clickCallback = code;
+		setOnCheckChangedListener(new RadioGroup.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				linker.execute(clickCallback);
+			}
+		});
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return null;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return focusCallback;
+	}
+	
+	@Override
+	public String getBlurCallback() {
+		return blurCallback;
+	}
+	
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+		if (focusCode == null && blurCode == null) return;
+		focusCallback = focusCode;
+		blurCallback = blurCode;
+		setOnFocusChangeListener(new OnFocusChangeListener() {
+
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					linker.execute(focusCallback);
+				} else {
+					linker.execute(blurCallback);
+				}
+			}
+		});
 	}
 }

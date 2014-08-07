@@ -36,6 +36,7 @@ import android.widget.RelativeLayout;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -109,8 +110,6 @@ import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
 public class CustomMapView extends MapView implements IView {
-
-	private static final String TAG = "CustomMapView:";
 	
 	private static final int MAP_OVERLAY_DELAY = 500;
 	
@@ -214,6 +213,9 @@ public class CustomMapView extends MapView implements IView {
 	
 	@Inject
 	DatabaseManager databaseManager;
+	
+	@Inject
+	BeanShellLinker linker;
 
 	// TODO what is this?
 	private static int cacheId = 9991;
@@ -322,9 +324,9 @@ public class CustomMapView extends MapView implements IView {
 
 	private Geometry geomToFollowBuffer;
 
-	private CreateCallback createCallback;
+	private CreateCallback createCallbackListener;
 
-	private LoadCallback loadCallback;
+	private LoadCallback loadCallbackListener;
 
 	private int vertexLayerId;
 
@@ -342,6 +344,14 @@ public class CustomMapView extends MapView implements IView {
 
 	private String ref;
 	private boolean dynamic;
+
+	private String clickCallback;
+
+	private String selectCallback;
+
+	private String createCallback;
+
+	private String loadCallback;
 	
 	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout, String ref, boolean dynamic) {
 		this(activity);
@@ -2314,33 +2324,62 @@ public class CustomMapView extends MapView implements IView {
 		return heading;
 	}
 	
-	public CreateCallback getCreateCallback() {
+	public String getCreateCallback() {
 		return createCallback;
 	}
 
-	public void setCreateCallback(CreateCallback createCallback) {
-		this.createCallback = createCallback;
+	public void setCreateCallback(String callback) {
+		if (callback == null) return;
+		this.createCallback = callback;
+		this.createCallbackListener = new CustomMapView.CreateCallback() {
+			
+			@Override
+			public void onCreate(int geomId) {
+				try {
+					linker.getInterpreter().set("_map_geometry_created", geomId);
+					linker.execute(CustomMapView.this.createCallback);
+				} catch (Exception e) {
+					FLog.e("error setting geometry created", e);
+				}
+			}
+		};
 	}
 	
-	public LoadCallback getLoadCallback() {
+	public String getLoadCallback() {
 		return loadCallback;
 	}
 
-	public void setLoadCallback(LoadCallback loadCallback) {
-		this.loadCallback = loadCallback;
+	public void setLoadCallback(final String callback) {
+		this.setLoadToolVisible(false);
+		if (callback == null) return;
+		this.setLoadToolVisible(true);
+		this.loadCallback = callback;
+		this.loadCallbackListener = new CustomMapView.LoadCallback() {
+			
+			@Override
+			public void onLoad(String id, boolean isEntity) {
+				try {
+					linker.getInterpreter().set("_map_geometry_loaded", id);
+					linker.getInterpreter().set("_map_geometry_loaded_type", isEntity ? "entity" : "relationship");
+					linker.execute(CustomMapView.this.loadCallback);
+				} catch (Exception e) {
+					FLog.e("error setting geometry loaded", e);
+				}
+			}
+		};
 	}
 
 	public void notifyGeometryCreated(Geometry geom) {
 		GeometryData data = (GeometryData) geom.userData;
-		if (createCallback != null) {
-			createCallback.onCreate(data.geomId);
+		if (createCallbackListener != null) {
+			createCallbackListener.onCreate(data.geomId);
 		}
 	}
 
 	public void notifyGeometryLoaded(Geometry geom) {
 		GeometryData data = (GeometryData) geom.userData;
-		if (loadCallback != null) {
-			loadCallback.onLoad(data.id, data.type == GeometryData.Type.ENTITY);
+		if (loadCallbackListener != null) {
+			loadCallbackListener.onLoad(data.id, data.type == GeometryData.Type.ENTITY);
 		}
 	}
 	
@@ -2801,12 +2840,12 @@ public class CustomMapView extends MapView implements IView {
 	public void saveTo(Bundle savedInstanceState) {
 		JSONObject json = new JSONObject();
 		saveToJSON(json);
-		savedInstanceState.putString(TAG + "settings", json.toString());
+		savedInstanceState.putString(getRef() + ":settings", json.toString());
 	}
 	
 	public void restoreFrom(Bundle savedInstanceState) {
 		try {
-			JSONObject json = new JSONObject(savedInstanceState.getString(TAG + "settings"));
+			JSONObject json = new JSONObject(savedInstanceState.getString(getRef() + ":settings"));
 			loadFromJSON(json);
 		} catch (JSONException e) {
 			FLog.e("Couldn't parse JSON map config", e);
@@ -2818,6 +2857,82 @@ public class CustomMapView extends MapView implements IView {
 		if (parent instanceof ViewGroup) {
 			((ViewGroup) parent).removeView(mapLayout);
 		}
+	}
+	
+	@Override
+	public String getClickCallback() {
+		return null;
+	}
+
+	@Override
+	public void setClickCallback(String code) {
+		
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return null;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+		
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return null;
+	}
+
+	@Override
+	public String getBlurCallback() {
+		return null;
+	}
+
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
+	}
+	
+	public String getMapClickCallback() {
+		return clickCallback;
+	}
+	
+	public String getMapSelectCallback() {
+		return selectCallback;
+	}
+
+	public void setMapCallbacks(String clickCallback, String selectCallback) {
+		if (clickCallback == null && selectCallback == null) return;
+		this.clickCallback = clickCallback;
+		this.selectCallback = selectCallback;
+		setMapListener(new CustomMapView.CustomMapListener() {
+
+			@Override
+			public void onMapClicked(double x, double y, boolean arg2) {
+				try {
+					MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG3857, linker.getModule().getSrid(), new MapPos(x, y));
+					if (CustomMapView.this.clickCallback == null) return;
+					linker.getInterpreter().set("_map_point_clicked", p);
+					linker.execute(CustomMapView.this.clickCallback);
+				} catch (Exception e) {
+					FLog.e("error setting map point clicked", e);
+				}
+			}
+
+			@Override
+			public void onVectorElementClicked(VectorElement element,
+					double arg1, double arg2, boolean arg3) {
+				try {
+					int geomId = getGeometryId((Geometry) element);
+					if (CustomMapView.this.selectCallback == null) return;
+					linker.getInterpreter().set("_map_geometry_selected", geomId);
+					linker.execute(CustomMapView.this.selectCallback);
+				} catch (Exception e) {
+					FLog.e("error setting map geometry selected", e);
+				}
+			}
+
+		});
 	}
 
 }

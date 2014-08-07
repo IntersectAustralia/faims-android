@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
-import android.widget.LinearLayout;
 
 public class ContainerGenerator extends ViewGenerator {
 
@@ -29,7 +28,7 @@ public class ContainerGenerator extends ViewGenerator {
 		return viewGeneratorList;
 	}
 
-	public LinearLayout generate(Tab tab, Context context, List<Map<String, String>> styleMappings) {
+	public CustomLinearLayout generate(Tab tab, Context context, List<Map<String, String>> styleMappings) {
 		return new CustomLinearLayout(context, styleMappings, false);
 	}
 

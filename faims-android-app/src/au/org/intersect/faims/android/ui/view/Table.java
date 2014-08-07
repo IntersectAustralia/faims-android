@@ -8,7 +8,6 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -17,6 +16,7 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.StringUtil;
 
@@ -119,7 +119,6 @@ public class Table extends WebView implements IView {
 		this.actionName = actionName;
 		this.actionIndex = actionIndex;
 		this.actionCallback = actionCallback;
-		this.actionValues = new ArrayList<String>();
 		this.pivot = pivot;
 		
 		refresh();
@@ -127,13 +126,17 @@ public class Table extends WebView implements IView {
 
 	public void refresh() throws Exception {
 		if (this.query == null) return; // nothing to refresh
+		this.actionValues = new ArrayList<String>();
 		
-		AsyncTask<Void,Void,String> task = new AsyncTask<Void,Void,String>() {
+		CancelableTask task = new CancelableTask() {
+
+			private String table;
 
 			@Override
-			protected String doInBackground(Void... params) {
+			protected Void doInBackground(Void... params) {
 				try {
-					return generateTable();
+					table = generateTable();
+					return null;
 				} catch (Exception e) {
 					FLog.e("Error trying to load table", e);
 				}
@@ -141,12 +144,12 @@ public class Table extends WebView implements IView {
 			}
 			
 			@Override
-			protected void onPostExecute(String result) {
-				if (result == null) {
+			protected void onPostExecute(Void result) {
+				if (table == null) {
 					Table.this.loadDataWithBaseURL("file:///android_asset/", "<h1>Error trying to load table</h1>", "text/html", "utf-8", null);
 				} else {
 					loadUrl("javascript:saveScrollPosition()");
-					Table.this.loadDataWithBaseURL("file:///android_asset/", result, "text/html", "utf-8", null);
+					Table.this.loadDataWithBaseURL("file:///android_asset/", table, "text/html", "utf-8", null);
 				}
 			}
 			
@@ -263,6 +266,40 @@ public class Table extends WebView implements IView {
 	
 	private String readFileFromAssets(String fileName) throws IOException {
 		return StringUtil.streamToString(getContext().getAssets().open(fileName));
+	}
+	
+	@Override
+	public String getClickCallback() {
+		return null;
+	}
+
+	@Override
+	public void setClickCallback(String code) {
+		
+	}
+
+	@Override
+	public String getSelectCallback() {
+		return null;
+	}
+
+	@Override
+	public void setSelectCallback(String code) {
+		
+	}
+
+	@Override
+	public String getFocusCallback() {
+		return null;
+	}
+
+	@Override
+	public String getBlurCallback() {
+		return null;
+	}
+
+	@Override
+	public void setFocusBlurCallbacks(String focusCode, String blurCode) {
 	}
 
 }

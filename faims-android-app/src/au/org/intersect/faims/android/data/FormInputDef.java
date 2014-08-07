@@ -8,8 +8,6 @@ import org.javarosa.core.model.Constants;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import au.org.intersect.faims.android.ui.view.Tab;
-
 public class FormInputDef implements Serializable {
 	
 	private static final long serialVersionUID = 100808462162745802L;
@@ -45,7 +43,7 @@ public class FormInputDef implements Serializable {
 	public ArrayList<NameValuePair> selectChoices;
 	
 	public FormInputDef() {
-		type = Tab.FREETEXT;
+		type = Attribute.FREETEXT;
 	}
 	
 	public FormInputDef createTextField() {
@@ -229,7 +227,7 @@ public class FormInputDef implements Serializable {
 		inputDef.name = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_name");
 		inputDef.type = input.getQuestion().getAdditionalAttribute(null, "faims_attribute_type");
 		inputDef.styleClass = input.getQuestion().getAdditionalAttribute(null, "faims_style_class");
-		if (inputDef.type == null) inputDef.type = Tab.FREETEXT;
+		if (inputDef.type == null) inputDef.type = Attribute.FREETEXT;
 		
 		inputDef.certainty = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_certainty"));
 		inputDef.annotation = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_annotation"));

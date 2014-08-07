@@ -24,18 +24,21 @@ public class HierarchicalSpinner extends CustomSpinner {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 		{
-			if (selectEnabled) {
-				if(hierarchicalSelectListener != null) {
-					hierarchicalSelectListener.onItemSelected(parent, view, position, id);
+			if (!ignoreSelectOnce) {
+				if (selectEnabled) {
+					if(hierarchicalSelectListener != null) {
+						hierarchicalSelectListener.onItemSelected(parent, view, position, id);
+					}
+					
+					if (listener != null) {
+						listener.onItemSelected(parent, view, position, id);
+					}
+					
+					notifySave();
 				}
-				
-				if (listener != null) {
-					listener.onItemSelected(parent, view, position, id);
-				}
-				
-				notifySave();
+				selectEnabled = true;
 			}
-			selectEnabled = true;
+			ignoreSelectOnce = false;
 		}
 
 		@Override
@@ -61,6 +64,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private HierarchicalOnItemSelectListener customListener;
 	
 	private boolean selectEnabled;
+	private boolean ignoreSelectOnce;
 
 	public HierarchicalSpinner(Context context) {
 		super(context);
@@ -83,6 +87,11 @@ public class HierarchicalSpinner extends CustomSpinner {
 	public void setAdapter(SpinnerAdapter adapter) {
 		selectEnabled = false;
 		super.setAdapter(adapter);
+	}
+	
+	public void setAdapter(SpinnerAdapter adapter, boolean b) {
+		ignoreSelectOnce = b;
+		setAdapter(adapter);
 	}
 	
 	private void mapVocabToParent() {
@@ -113,7 +122,13 @@ public class HierarchicalSpinner extends CustomSpinner {
 		this.listener = listener;
 	}
 	
+	public List<VocabularyTerm> getTerms() {
+		return terms;
+	}
+	
 	public void setTerms(List<VocabularyTerm> terms) {
+		if (terms == null) return;
+		
 		this.terms = terms;
 		
 		mapVocabToParent();	

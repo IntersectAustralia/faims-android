@@ -353,6 +353,13 @@ getEntityIdentifier(Object result) {
 	return attributes;
 }
 
+getEntityIdentifierAlways(Object result) {
+	attributes = createAttributeList();
+	entityCount = Integer.valueOf(result.get(0)) + 1;
+	attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	return attributes;
+}
+
 updateEntity(tabgroup) {
 	if (isNull(entityId)) entityId = null;
 
@@ -741,12 +748,30 @@ onEvent("tabgroup3", "load", "setupAssociations()");
 
 loadProfile() {
 	profile = getFieldValue("tabgroup4/tab1/profiles");
-	showToast(profile);
+	if ("Profile 1".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config1.json");
+		loadMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	} else if ("Profile 2".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config2.json");
+		loadMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	} else if ("Profile 3".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config3.json");
+		loadMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	}
 }
 
 saveProfile() {
 	profile = getFieldValue("tabgroup4/tab1/profiles");
-	showToast(profile);
+	if ("Profile 1".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config1.json");
+		saveMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	} else if ("Profile 2".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config2.json");
+		saveMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	} else if ("Profile 3".equals(profile)) {
+		String path = getAttachedFilePath("files/data/saved_config3.json");
+		saveMapViewConfiguration("tabgroup4/tab1/map", path, "");
+	}
 }
 
 startTracking() {
@@ -1024,12 +1049,22 @@ onScrollRow() {
 
 // Web view
 
+onTakePicture() {
+	picture = getLastPictureFilePath();
+	file = getAttachedFilePath("files/data/css-page-background-9.jpg");
+	populateWebViewHtml("tabgroup6/tab1/web", "<html><body style=\"background-image:url('"+file+"')\"><div align=\"center\"><h1>This is the picture you took</h1><img src=\""+picture+"\" style=\"width:50%;\"/></div></body></html>");
+}
+
 setupWebView() {
 	executeViewTask(new ViewTask() {
 		doTask() {
 			createWebView("tabgroup6/tab1/web");
+			createButton("tabgroup6/tab1/picture", "Take Picture");
 
-			populateWebViewHtml("tabgroup6/tab1/web", "<html><body><h1>Hello World</h1></body></html>");
+			onEvent("tabgroup6/tab1/picture", "click", "openCamera(\"onTakePicture()\")");
+
+			file = getAttachedFilePath("files/data/css-page-background-9.jpg");
+			populateWebViewHtml("tabgroup6/tab1/web", "<html><body style=\"background-image:url('"+file+"')\"><div align=\"center\"><h1>Take a picture!</h1></div></body></html>");
 		}
 	});
 }
@@ -1069,9 +1104,10 @@ onClickDemo1Picture() {
 				removeView("tabgroup7/tab1/a2");
 				removeView("tabgroup7/tab1/a3");
 			} else if ("B".equals(demo1Picture)) {
-
+				removeView("tabgroup7/tab1/b1");
+				removeView("tabgroup7/tab1/b2");
 			} else if ("C".equals(demo1Picture)) {
-				
+				removeView("tabgroup7/tab1/c1");
 			}
 
 			if ("A".equals(picture)) {
@@ -1087,9 +1123,12 @@ onClickDemo1Picture() {
 
 				onEvent("tabgroup7/tab1/a3", "click", "setTextDemo1()");
 			} else if ("B".equals(picture)) {
+				createCameraGallery("tabgroup7/tab1/b1", "Pictures", null, null, false);
+				createButton("tabgroup7/tab1/b2", "Take Picture");
 
+				onEvent("tabgroup7/tab1/b2", "click", "attachPictureTo(\"tabgroup7/tab1/b1\")");
 			} else if ("C".equals(picture)) {
-
+				createTextField("tabgroup7/tab1/c1", "Text", null, null);
 			}
 
 			demo1Picture = picture;
@@ -1142,7 +1181,7 @@ lastDemo2Record = null;
 saveRecord() {
 	fetchEntityIdentifier(new FetchCallback() {
 			onFetch(result) {
-				saveTabGroup("tabgroup8", null, null, getEntityIdentifier(result), new SaveCallback() {
+				saveTabGroup("tabgroup8", null, null, getEntityIdentifierAlways(result), new SaveCallback() {
 					onSave(uuid, callback) {
 						lastDemo2Record = uuid;
 						showToast("saved record ");
@@ -1187,12 +1226,17 @@ onEvent("tabgroup8", "show", "setupDemo2()");
 // Demo 3
 
 choices = null;
+loadedValue = null;
 onClickDemo3Choice() {
 	choice = getFieldValue("tabgroup9/tab1/choice");
 	executeViewTask(new ViewTask() {
 		doTask() {
 			if (choices.get(choices.size()-1).get(0).equals(choice)) {
-				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", null, null, false, false);
+				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", "tabgroup9/tab1/container", null, false, false);
+				if (loadedValue != null) {
+					setFieldValue("tabgroup9/tab1/other", loadedValue);
+					setFieldAnnotation("tabgroup9/tab1/choice", "");
+				}
 			} else {
 				removeView("tabgroup9/tab1/other");
 			}
@@ -1205,7 +1249,7 @@ lastDemo3Record = null;
 onClickDemo3Save() {
 	fetchEntityIdentifier(new FetchCallback() {
 			onFetch(result) {
-				saveTabGroup("tabgroup9", null, null, getEntityIdentifier(result), new SaveCallback() {
+				saveTabGroup("tabgroup9", null, null, getEntityIdentifierAlways(result), new SaveCallback() {
 					onSave(uuid, callback) {
 						lastDemo3Record = uuid;
 						showToast("saved record ");
@@ -1220,7 +1264,19 @@ clearDemo3Record() {
 }
 
 loadDemo3Record() {
-	showTabGroup("tabgroup9", lastDemo3Record);
+	loadedValue = null;
+	showTabGroup("tabgroup9", lastDemo3Record, new FetchCallback() {
+		onFetch(entity) {
+			attributes = entity.getAttributes();
+			for (attr : attributes) {
+				if ("choice".equals(attr.getName())) {
+					if (choices.get(choices.size()-1).get(0).equals(attr.getValue("vocab"))) {
+						loadedValue = attr.getValue("freetext");
+					}
+				}
+			}
+		}
+	});
 }
 
 setupDemo3() {
@@ -1228,6 +1284,7 @@ setupDemo3() {
 		doTask() {
 			removeAllViewsAndContainers("tabgroup9");
 			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, true, true);
+			createContainer("tabgroup9/tab1/container", null);
 			createButton("tabgroup9/tab1/save", "Save");
 			createButton("tabgroup9/tab1/clear", "Clear");
 			createButton("tabgroup9/tab1/load", "Load");
@@ -1324,7 +1381,7 @@ onEvent("tabgroup10", "show", "setupDemo4()");
 // Demo 5
 
 setText() {
-	setFieldValue("tabgroup11/tab1/text", "getLastTextAlertInput()");
+	setFieldValue("tabgroup11/tab1/text", getLastTextAlertInput());
 }
 
 showText() {

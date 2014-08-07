@@ -329,21 +329,27 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void saveTo(Bundle savedInstanceState){
-		autoSaveManager.flush(false);
-		
-		for (Tab tab : tabs) {
-			tab.saveTo(savedInstanceState);
-		}
-		
-		Tab tab = getCurrentTab();
-		if (tab != null) {
-			String tabLabel = tab.getName();
-			savedInstanceState.putString(getRef() + ":currentTabLabel", tabLabel);
+		if (tabHost != null) {
+			autoSaveManager.flush(false);
+			
+			savedInstanceState.putBoolean(getRef() + ":loaded", true);
+			
+			for (Tab tab : tabs) {
+				tab.saveTo(savedInstanceState);
+			}
+			
+			Tab tab = getCurrentTab();
+			if (tab != null) {
+				String tabLabel = tab.getName();
+				savedInstanceState.putString(getRef() + ":currentTabLabel", tabLabel);
+			}
 		}
 	}
 
 	public void restoreFrom(Bundle savedInstanceState){
-		tempSavedInstanceState = savedInstanceState;
+		if (savedInstanceState.getBoolean(getRef() + ":loaded")) {
+			tempSavedInstanceState = savedInstanceState;
+		}
 	}
 	
 	public void clearTempBundle() {

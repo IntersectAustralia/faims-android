@@ -255,7 +255,7 @@ public class UIRenderer {
 		}
 	}
 	
-	public void clearTempBundle() {
+	public void destroy() {
 		if (tempSavedInstanceState != null) {
 			tempSavedInstanceState = null;
 			for (TabGroup tabGroup : tabGroupList) {
@@ -320,8 +320,8 @@ public class UIRenderer {
 		}
 	}
 	
-	private void createContainers(ContainerGenerator containerGen, LinearLayout parentLayout, Tab tab, TabGroup tabGroup) throws Exception {
-		LinearLayout layout = (LinearLayout) containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
+	private void createContainers(ContainerGenerator containerGen, CustomLinearLayout parentLayout, Tab tab, TabGroup tabGroup) throws Exception {
+		CustomLinearLayout layout = containerGen.generate(tab, activityRef.get(), getStyleMappings(containerGen.getStyle()));
 		tab.addCustomContainer(containerGen.getRef(), layout, parentLayout);
 		for (ViewGenerator viewGen : containerGen.viewGeneratorList()) {
 			if (viewGen instanceof ContainerGenerator) {
@@ -457,7 +457,7 @@ public class UIRenderer {
 		String style = childContainerElement.getAdditionalAttribute(null,"faims_style");
 		FormEntryCaption viewCaption = this.fem.getModel().getCaptionPrompt(childIndex);
 		String viewName = viewCaption.getIndex().getReference().getNameLast();
-		String viewRef = tabRef + "/" + viewName;
+		String viewRef = parentContainerGen != null ? parentContainerGen.getRef() + "/" + viewName : tabRef + "/" + viewName;
 		FormIndex inputIndex = this.fem.getModel().incrementIndex(childIndex,true);
 				
 		ContainerGenerator containerGen = new ContainerGenerator(viewRef, style);
