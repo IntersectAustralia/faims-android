@@ -44,6 +44,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
@@ -355,6 +356,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		} else {
 			showToast("GPS tracking has been started, please stop it before starting");
 		}
+	}
+	
+	public boolean isTrackingGPS() {
+		return gpsDataManager.isTrackingStarted();
 	}
 
 	public void stopTrackingGPS() {
@@ -829,6 +834,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			FLog.e("Error trying to reset tab group changes for " + ref, e);
 			showWarning("Logic Error", "Error tring to reset tab group changes for " + ref);
 		}
+	}
+	
+	public boolean isAutosaveEnabled() {
+		return autoSaveManager.isEnabled();
 	}
 
 	public void goBack() {
@@ -1714,8 +1723,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		gpsDataManager.startInternalGPSListener();
 	}
 	
+	public boolean isInternalGPSOn() {
+		return gpsDataManager.isInternalGPSStarted();
+	}
+	
 	public void stopGPS() {
 		gpsDataManager.destroyListener();
+	}
+	
+	public boolean isExternalGPSOn() {
+		return gpsDataManager.isExternalGPSStarted();
 	}
 
 	public Object getGPSPosition() {
@@ -2380,6 +2397,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			this.activityRef.get().disableSync();
 		}
 	}
+	
+	public boolean isSyncEnabled() {
+		return this.activityRef.get().isSyncEnabled();
+	}
 
 	public void addSyncListener(final String startCallback,
 			final String successCallback, final String failureCallback) {
@@ -2721,6 +2742,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		} else {
 			activityRef.get().disableFileSync();
 		}
+	}
+	
+	public boolean isFileSyncEnabled() {
+		return activityRef.get().isFileSyncEnabled();
 	}
 
 	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
@@ -3189,6 +3214,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		bluetoothManager.destroyConnection();
 	}
 	
+	public boolean isBluetoothConnected() {
+		return bluetoothManager.isBluetoothConnected();
+	}
+	
 	public void readBluetoothMessage() {
 		bluetoothManager.readMessage();
 	}
@@ -3392,6 +3421,14 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		} catch (Exception e) {
 			reportError("Error trying to remove all views and containers " + tabGroupRef, e);
 		}
+	}
+	
+	public void addActionBarItem(String name, ActionButtonCallback callback) {
+		activityRef.get().addActionBarItem(name, callback);
+	}
+	
+	public void removeActionBarItem(String name) {
+		activityRef.get().removeActionBarItem(name);
 	}
 	
 }

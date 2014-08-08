@@ -1,9 +1,14 @@
 package au.org.intersect.faims.android.ui.activity;
 
 import java.lang.ref.WeakReference;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.animation.Animation;
@@ -13,7 +18,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.ToggleActionButtonCallback;
 import au.org.intersect.faims.android.gps.GPSDataManager;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.util.BitmapUtil;
@@ -46,14 +54,86 @@ public class ShowModuleMenuManager {
 	private Bitmap tempBitmap;
 	private Animation rotation;
 	
+	private LinkedHashMap<String, ActionButtonCallback> menuItems;
+	
 	private WeakReference<ShowModuleActivity> activityRef;
 	
 	public ShowModuleMenuManager(ShowModuleActivity activity) {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 		
+		menuItems = new LinkedHashMap<String, ActionButtonCallback>();
+		
 		rotation = AnimationUtils.loadAnimation(activity, R.anim.clockwise);
 		rotation.setRepeatCount(Animation.INFINITE);
+	}
+
+	public void addMenuItem(String name, ActionButtonCallback callback) {
+		menuItems.put(name, callback);
+	}
+	
+	public void removeMenuItem(String name) {
+		menuItems.remove(name);
+	}
+	
+	public void updateActionBar(Menu menu) {
+		menu.clear();
+		for(Map.Entry<String, ActionButtonCallback> entry : menuItems.entrySet()) {
+			ActionButtonCallback actionItem = entry.getValue();
+			if (actionItem instanceof ToggleActionButtonCallback) {
+				if (((ToggleActionButtonCallback) actionItem).isActionOff()) {
+					addOnActionToMenu(actionItem, menu);
+				} else {
+					addOffActionToMenu((ToggleActionButtonCallback) actionItem, menu);
+				}
+			} else {
+				addOnActionToMenu(actionItem, menu);
+			}
+		}
+	}
+	
+	public void addOnActionToMenu(final ActionButtonCallback actionItem, final Menu menu) {
+		menu.add(actionItem.actionOnLabel());
+		menu.getItem(menu.size()-1).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				try {
+					actionItem.actionOn();
+					updateActionBar(menu);
+				} catch (Exception e) {
+					showActionError(actionItem, e);
+				}
+				return false;
+			}
+		});
+	}
+	
+	public void addOffActionToMenu(final ToggleActionButtonCallback actionItem, final Menu menu) {
+		menu.add(actionItem.actionOffLabel());
+		menu.getItem(menu.size()-1).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				try {
+					actionItem.actionOff();
+					updateActionBar(menu);
+				} catch (Exception e) {
+					showActionError(actionItem, e);
+				}
+				return false;
+			}
+		});
+	}
+	
+	private void showActionError(ActionButtonCallback callback, Exception e) {
+		try {
+			FLog.e("error trying to call action bar menu action", e);
+			callback.onError(e.getMessage());
+		} catch (Exception ce) {
+			FLog.e("error trying to call action bar menu onerror callback", ce);
+			activityRef.get().beanShellLinker.reportError("error trying to call action bar menu onerror callback", ce);
+		}
 	}
 	
 	public void updateStatusBar(LinearLayout statusBar) {
@@ -237,7 +317,7 @@ public class ShowModuleMenuManager {
 			});
 		}
 	}
-
+	
 	public void setPathVisible(boolean value) {
 		this.pathIndicatorVisible = value;
 	}

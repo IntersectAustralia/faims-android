@@ -38,6 +38,7 @@ import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ShowModuleActivityData;
@@ -672,21 +673,31 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//TODO: Create action bar
-		return true;
-	}
-
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		//TODO: Update action bar
+		try {
+			if (menuManager == null) {
+				menuManager = new ShowModuleMenuManager(this);
+			}
+			menuManager.updateActionBar(menu);			
+			menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+		} catch (Exception e) {
+			beanShellLinker.reportError("Error trying to update action and status bars", e);
+		}
+		
 		return true;
 	}
 
 	public void updateStatusBar() {
-		if (menuManager == null) {
-			menuManager = new ShowModuleMenuManager(this);
-		}
-		
-		menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+		invalidateOptionsMenu();
+	}
+	
+	public void addActionBarItem(String name, ActionButtonCallback callback) {
+		menuManager.addMenuItem(name, callback);
+		invalidateOptionsMenu();
+	}
+	
+	public void removeActionBarItem(String name) {
+		menuManager.removeMenuItem(name);
+		invalidateOptionsMenu();
 	}
 
 	public void setPathVisible(boolean value) {
@@ -950,6 +961,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 				});
 		confirmDialog.show();
+	}
+	
+	public boolean isSyncEnabled() {
+		return activityData.isSyncEnabled();
 	}
 
 	public void enableSync() {
@@ -1293,6 +1308,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	public void disableFileSync() {
 		activityData.setFileSyncEnabled(false);
+	}
+	
+	public boolean isFileSyncEnabled() {
+		return activityData.isFileSyncEnabled();
 	}
 
 	public void startSyncingFiles() {

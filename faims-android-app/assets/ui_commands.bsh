@@ -4,6 +4,8 @@ import android.graphics.Typeface;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.FetchCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
+import au.org.intersect.faims.android.beanshell.callbacks.ToggleActionButtonCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.ViewTask;
 import au.org.intersect.faims.android.data.EntityAttribute;
 import au.org.intersect.faims.android.data.FormInputDef;
@@ -203,6 +205,13 @@ saveTab(String ref, String id, List geometry, List attributes, SaveCallback call
   */
 keepTabGroupChanges(String ref) {
   linker.keepTabGroupChanges(ref);
+}
+
+/**
+ * @return whether autosave is enabled
+ */
+boolean isAutosaveEnabled() {
+  linker.isAutosaveEnabled();
 }
 
 /**
@@ -1063,12 +1072,26 @@ startInternalGPS(){
 }
 
 /**
+  * @return whether internal GPS is on
+  */
+boolean isInternalGPSOn() {
+  return linker.isInternalGPSOn();
+}
+
+/**
   * Start using the external GPS to update the location.
   *
   * A dialog will be presented to the user to choose which bluetooth device to be used as external GPS.
   */
 startExternalGPS(){
 	linker.startExternalGPS();
+}
+
+/**
+  * @return whether external GPS is on
+  */
+boolean isExternalGPSOn() {
+  return linker.isExternalGPSOn();
 }
 
 /**
@@ -1156,6 +1179,13 @@ startTrackingGPS(String type, int value, String callback){
 }
 
 /**
+  * @return whether GPS tracking is on
+  */
+boolean isTrackingGPS() {
+  return linker.isTrackingGPS();
+}
+
+/**
   * Stop the GPS track log.
   */
 stopTrackingGPS(){
@@ -1178,6 +1208,13 @@ createBluetoothConnection(String callback, int interval){
   */
 destroyBluetoothConnection(){
   linker.destroyBluetoothConnection();
+}
+
+/**
+  * @return whether bluetooth is connected
+  */
+boolean isBluetoothConnected() {
+  return linker.isBluetoothConnected();
 }
 
 /**
@@ -1877,6 +1914,13 @@ setSyncEnabled(boolean value) {
 }
 
 /**
+  * @return whether sync is enabled
+  */
+boolean isSyncEnabled() {
+  linker.isSyncEnabled();
+}
+
+/**
   * Bind to the sync start, success and failure events.
   *
   * @param startCallback the callback that will be executed when sync is started
@@ -1921,6 +1965,13 @@ setSyncDelay(float value) {
   */
 setFileSyncEnabled(boolean enabled) {
 	linker.setFileSyncEnabled(enabled);
+}
+
+/**
+  * @return whether file sync is enabled
+  */
+boolean isFileSyncEnabled() {
+  linker.isFileSyncEnabled();
 }
 
 //========= Static Data Functionality ==========
@@ -2328,6 +2379,25 @@ addVideo(String ref, String file) {
   */
 execute(String code){
 	return linker.execute(code);
+}
+
+/**
+  * Adds an item to the action bar with a reference name
+  *
+  * @param name the reference name for the action bar menu item
+  * @param callback the callback with item action/s, label/s and show requirement
+  */
+addActionBarItem(String name, ActionButtonCallback callback) {
+  linker.addActionBarItem(name, callback);
+}
+
+/**
+  * Remove an action item with the given reference name
+  *
+  * @param name the reference name of the action bar menu item
+  */
+removeActionBarItem(String name) {
+  linker.removeActionBarItem(name);
 }
 
 /**
