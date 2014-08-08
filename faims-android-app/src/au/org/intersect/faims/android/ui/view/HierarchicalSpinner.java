@@ -16,6 +16,7 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.Compare;
 
 public class HierarchicalSpinner extends CustomSpinner {
 	
@@ -99,20 +100,24 @@ public class HierarchicalSpinner extends CustomSpinner {
 		this.vocabIdToParentTerms = new HashMap<String, List<VocabularyTerm>>();
 		
 		for (VocabularyTerm term : terms) {
-			vocabIdToParentTerm.put(term.id, null);
-			vocabIdToParentTerms.put(term.id, null);
-			if (term.terms != null) {
-				mapVocabToParent(term);
+			if (term.id != null) {
+				vocabIdToParentTerm.put(term.id, null);
+				vocabIdToParentTerms.put(term.id, null);
+				if (term.terms != null) {
+					mapVocabToParent(term);
+				}
 			}
 		}
 	}
 	
 	private void mapVocabToParent(VocabularyTerm parentTerm) {
 		for (VocabularyTerm term : parentTerm.terms) {
-			vocabIdToParentTerm.put(term.id, parentTerm);
-			vocabIdToParentTerms.put(term.id, parentTerm.terms);
-			if (term.terms != null) {
-				mapVocabToParent(term);
+			if (term.id != null) {
+				vocabIdToParentTerm.put(term.id, parentTerm);
+				vocabIdToParentTerms.put(term.id, parentTerm.terms);
+				if (term.terms != null) {
+					mapVocabToParent(term);
+				}
 			}
 		}
 	}
@@ -129,7 +134,9 @@ public class HierarchicalSpinner extends CustomSpinner {
 	public void setTerms(List<VocabularyTerm> terms) {
 		if (terms == null) return;
 		
-		this.terms = terms;
+		this.terms = new ArrayList<VocabularyTerm>();
+		this.terms.add(new VocabularyTerm(null, "", null, null));
+		this.terms.addAll(terms);
 		
 		mapVocabToParent();	
 		this.parentTerms = new Stack<VocabularyTerm>();
@@ -250,14 +257,18 @@ public class HierarchicalSpinner extends CustomSpinner {
 			return;
 		}
 		
-		if (value == null || "".equals(value)) {
+		if (value == null) {
+			setSelectionItem(0, false);
+			lastSelectedItem = null;
+			parentTerms.clear();
+			loadTerms();
 			return;
 		}
 		
 		// add terms to parent stack
 		parentTerms.clear();
 		VocabularyTerm parentTerm = vocabIdToParentTerm.get(value);
-		while(parentTerm != null) {
+		while (parentTerm != null) {
 			parentTerms.insertElementAt(parentTerm, 0);
 			parentTerm = vocabIdToParentTerm.get(parentTerm.id);
 		}
@@ -273,7 +284,7 @@ public class HierarchicalSpinner extends CustomSpinner {
 		
 		int index = 0;
 		for (VocabularyTerm t : terms) {
-			if (t.id.equals(value)) {
+			if (Compare.equal(t.id, value)) {
 				setSelectionItem(parentTerms.size() + index, false);
 				break;
 			}
@@ -299,17 +310,12 @@ public class HierarchicalSpinner extends CustomSpinner {
 			super.reset();
 			return;
 		}
-		dirty = false;
-		dirtyReason = null;
-		setSelectionItem(0, false);
+		setValue(null);
 		setCertainty(1);
 		setAnnotation("");
-		
-		lastSelectedItem = null;
-		parentTerms.clear();
-		loadTerms();
+		dirty = false;
+		dirtyReason = null;
 		
 		save();
-		currentValue = null;
 	}
 }

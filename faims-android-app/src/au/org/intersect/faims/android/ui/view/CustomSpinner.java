@@ -149,11 +149,10 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
-		setSelection(0);
+		setValue(null);
 		setCertainty(1);
 		setAnnotation("");
 		save();
-		currentValue = null;
 	}
 
 	@Override
@@ -198,9 +197,12 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	}
 	
 	public void populate(List<NameValuePair> pairs) {
+		List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
+		newPairs.add(new NameValuePair("", null));
+		newPairs.addAll(pairs);
 		ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
 				getContext(),
-				android.R.layout.simple_spinner_dropdown_item, pairs);
+				android.R.layout.simple_spinner_dropdown_item, newPairs);
 		setAdapter(arrayAdapter);
 	}
 	
