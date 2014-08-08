@@ -359,7 +359,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public boolean isTrackingGPS() {
-		return gpsDataManager.isTrackingStarted();
+		try {
+			return gpsDataManager.isTrackingStarted();
+		} catch (Exception e) {
+			FLog.e("error checking GPS tracking state", e);
+			showWarning("Logic Error", "Error checking GPS tracking state");
+		}
+		return false;
 	}
 
 	public void stopTrackingGPS() {
@@ -837,7 +843,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public boolean isAutosaveEnabled() {
-		return autoSaveManager.isEnabled();
+		try {
+			return autoSaveManager.isEnabled();
+		} catch (Exception e) {
+			FLog.e("error checking autosave state", e);
+			showWarning("Logic Error", "Error checking autosave state");
+		}
+		return false;
 	}
 
 	public void goBack() {
@@ -1706,66 +1718,146 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public int getGpsUpdateInterval() {
-		return gpsDataManager.getGpsUpdateInterval();
+		try {
+			return gpsDataManager.getGpsUpdateInterval();
+		} catch (Exception e) {
+			FLog.e("error trying to get gps interval", e);
+			showWarning("Logic Error", "Error trying to get gps interval");
+		}
+		return -1;
 	}
 
 	public void setGpsUpdateInterval(int gpsUpdateInterval) {
-		gpsDataManager.setGpsUpdateInterval(
-				gpsUpdateInterval);
+		try {
+			gpsDataManager.setGpsUpdateInterval(
+					gpsUpdateInterval);
+		} catch (Exception e) {
+			FLog.e("error trying to set gps interval", e);
+			showWarning("Logic Error", "Error trying to set gps interval");
+		}
 	}
 	
 	public void startExternalGPS() {
-		bluetoothManager.resetConnection(); // make sure we get users to reconnect to the correct device
-		gpsDataManager.startExternalGPSListener();	
+		try {
+			bluetoothManager.resetConnection(); // make sure we get users to reconnect to the correct device
+			gpsDataManager.startExternalGPSListener();	
+		} catch (Exception e) {
+			FLog.e("error trying to start external gps", e);
+			showWarning("Logic Error", "Error trying to start external gps");
+		}
 	}
 
 	public void startInternalGPS() {
-		gpsDataManager.startInternalGPSListener();
+		try {
+			gpsDataManager.startInternalGPSListener();
+		} catch (Exception e) {
+			FLog.e("error trying to start internal gps", e);
+			showWarning("Logic Error", "Error trying to start internal gps");
+		}
 	}
 	
 	public boolean isInternalGPSOn() {
-		return gpsDataManager.isInternalGPSStarted();
+		try {
+			return gpsDataManager.isInternalGPSStarted();
+		} catch (Exception e) {
+			FLog.e("error checking internal GPS state", e);
+			showWarning("Logic Error", "Error checking internal GPS state");
+		}
+		return false;
 	}
 	
 	public void stopGPS() {
-		gpsDataManager.destroyListener();
+		try {
+			gpsDataManager.destroyListener();
+		} catch (Exception e) {
+			FLog.e("error trying to stop gps", e);
+			showWarning("Logic Error", "Error trying to stop gps");
+		}
 	}
 	
 	public boolean isExternalGPSOn() {
-		return gpsDataManager.isExternalGPSStarted();
+		try {
+			return gpsDataManager.isExternalGPSStarted();
+		} catch (Exception e) {
+			FLog.e("error checking external GPS state", e);
+			showWarning("Logic Error", "Error checking external GPS state");
+		}
+		return false;
 	}
 
 	public Object getGPSPosition() {
-		return gpsDataManager.getGPSPosition();
+		try {
+			return gpsDataManager.getGPSPosition();
+		} catch (Exception e) {
+			FLog.e("error trying to get gps position", e);
+			showWarning("Logic Error", "Error trying to get gps position");
+		}
+		return null;
 	}
 	
 	public Object getGPSPositionProjected() {
-		GPSLocation l = (GPSLocation) gpsDataManager.getGPSPosition();
-		if (l == null) return l;
-		MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
-		l.setLongitude(p.x);
-		l.setLatitude(p.y);
-		return l;
+		try {
+			GPSLocation l = (GPSLocation) gpsDataManager.getGPSPosition();
+			if (l == null) return l;
+			MapPos p = databaseManager.spatialRecord().convertFromProjToProj(GeometryUtil.EPSG4326, module.getSrid(), new MapPos(l.getLongitude(), l.getLatitude()));
+			l.setLongitude(p.x);
+			l.setLatitude(p.y);
+			return l;
+		} catch (Exception e) {
+			FLog.e("error trying to get gps projected position", e);
+			showWarning("Logic Error", "Error trying to get gps projected position");
+		}
+		return null;
 	}
 
 	public Object getGPSEstimatedAccuracy() {
-		return gpsDataManager.getGPSEstimatedAccuracy();
+		try {
+			return gpsDataManager.getGPSEstimatedAccuracy();
+		} catch (Exception e) {
+			FLog.e("error trying to get gps accuracy", e);
+			showWarning("Logic Error", "Error trying to get gps accuracy");
+		}
+		return null;
 	}
 
 	public Object getGPSHeading() {
-		return gpsDataManager.getGPSHeading();
+		try {
+			return gpsDataManager.getGPSHeading();
+		} catch (Exception e) {
+			FLog.e("error trying to get gps heading", e);
+			showWarning("Logic Error", "Error trying to get gps heading");
+		}
+		return null;
 	}
 
 	public Object getGPSPosition(String gps) {
-		return gpsDataManager.getGPSPosition(gps);
+		try {
+			return gpsDataManager.getGPSPosition(gps);
+		} catch (Exception e) {
+			FLog.e("error trying to get gps position", e);
+			showWarning("Logic Error", "Error trying to get gps position");
+		}
+		return null;
 	}
 
 	public Object getGPSEstimatedAccuracy(String gps) {
-		return gpsDataManager.getGPSEstimatedAccuracy(gps);
+		try {
+			return gpsDataManager.getGPSEstimatedAccuracy(gps);
+		} catch (Exception e) {
+			FLog.e("error trying to get gps accuracy", e);
+			showWarning("Logic Error", "Error trying to get gps accuracy");
+		}
+		return null;
 	}
 
 	public Object getGPSHeading(String gps) {
-		return gpsDataManager.getGPSHeading(gps);
+		try {
+			return gpsDataManager.getGPSHeading(gps);
+		} catch (Exception e) {
+			FLog.e("error trying to get gps position", e);
+			showWarning("Logic Error", "Error trying to get gps heading");
+		}
+		return null;
 	}
 
 	public void showBaseMap(final String ref, String layerName,
@@ -2399,7 +2491,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public boolean isSyncEnabled() {
-		return this.activityRef.get().isSyncEnabled();
+		try {
+			return this.activityRef.get().isSyncEnabled();
+		} catch (Exception e) {
+			FLog.e("error checking sync state", e);
+			showWarning("Logic Error", "Error checking sync state");
+		}
+		return false;
 	}
 
 	public void addSyncListener(final String startCallback,
@@ -2745,7 +2843,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public boolean isFileSyncEnabled() {
-		return activityRef.get().isFileSyncEnabled();
+		try {
+			return activityRef.get().isFileSyncEnabled();
+		} catch (Exception e) {
+			FLog.e("error checking file sync state", e);
+			showWarning("Logic Error", "Error checking file sync state");
+		}
+		return false;
 	}
 
 	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
@@ -3215,7 +3319,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public boolean isBluetoothConnected() {
-		return bluetoothManager.isBluetoothConnected();
+		try {
+			return bluetoothManager.isBluetoothConnected();
+		} catch (Exception e) {
+			FLog.e("error checking bluetooth state", e);
+			showWarning("Logic Error", "Error checking bluetooth state");
+		}
+		return false;
 	}
 	
 	public void readBluetoothMessage() {

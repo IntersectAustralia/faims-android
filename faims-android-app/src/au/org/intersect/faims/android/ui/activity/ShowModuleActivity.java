@@ -672,17 +672,22 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(final Menu menu) {
 		try {
-			if (menuManager == null) {
-				menuManager = new ShowModuleMenuManager(this);
-			}
-			menuManager.updateActionBar(menu);			
-			menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+			runOnUiThread(new Runnable() {
+	
+				@Override
+				public void run() {
+					if (menuManager == null) {
+						menuManager = new ShowModuleMenuManager(ShowModuleActivity.this);
+					}
+					menuManager.updateActionBar(menu);			
+					menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
+				}
+			});
 		} catch (Exception e) {
 			beanShellLinker.reportError("Error trying to update action and status bars", e);
 		}
-		
 		return true;
 	}
 

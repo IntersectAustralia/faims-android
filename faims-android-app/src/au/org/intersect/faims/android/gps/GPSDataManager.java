@@ -164,9 +164,15 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 	}
-
+	
 	public void startInternalGPSListener(){
-		destroyInternalGPSListener();
+		startInternalGPSListener(true);
+	}
+
+	public void startInternalGPSListener(boolean destroyListener){
+		if (destroyListener) {
+			destroyInternalGPSListener();
+		}
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, this);
 		setInternalGPSStarted(true);
 	}
@@ -178,7 +184,13 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 	
 	public void startExternalGPSListener(){
-		destroyExternalGPSListener();
+		startExternalGPSListener(true);
+	}
+	
+	public void startExternalGPSListener(boolean destroyListener){
+		if (destroyListener) {
+			destroyExternalGPSListener();
+		}
 		bluetoothManager.createConnection(this, getGpsUpdateInterval() * 1000);
 		setExternalGPSStarted(true);
 	}
@@ -195,6 +207,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 	
 	public void pauseListener() {
+		FLog.d("paused gps");
 		pauseInternalGPSListener();
 		pauseExternalGPSListener();
 	}
@@ -423,11 +436,11 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	@Override
 	public void resume() {
 		if (isExternalGPSStarted()) {
-			startExternalGPSListener();
+			startExternalGPSListener(false);
 		}
 		
 		if (isInternalGPSStarted()) {
-			startInternalGPSListener();
+			startInternalGPSListener(false);
 		}
 	}
 
