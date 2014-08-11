@@ -1229,6 +1229,8 @@ onClickDemo3Choice() {
 		doTask() {
 			if (choices.get(choices.size()-1).get(0).equals(choice)) {
 				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", "tabgroup9/tab1/container", null, false, false);
+				
+
 				if (loadedValue != null) {
 					setFieldValue("tabgroup9/tab1/other", loadedValue);
 					setFieldAnnotation("tabgroup9/tab1/choice", "");
@@ -1280,6 +1282,10 @@ setupDemo3() {
 		doTask() {
 			removeAllViewsAndContainers("tabgroup9");
 			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, true, true);
+			createTextField("tabgroup9/tab1/certaintyText", "Certainty", "choice", "certainty", null, null, false, false);
+			createTextField("tabgroup9/tab1/measureText", "Measure", "choice", "measure", null, null, false, false);
+
+
 			createContainer("tabgroup9/tab1/container", null);
 			createButton("tabgroup9/tab1/save", "Save");
 			createButton("tabgroup9/tab1/clear", "Clear");
