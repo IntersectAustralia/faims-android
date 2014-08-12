@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.ui.activity;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,11 +29,10 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
-import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
-import au.org.intersect.faims.android.net.FetchResult;
+import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadModuleService;
 import au.org.intersect.faims.android.services.UpdateModuleDataService;
@@ -46,6 +46,7 @@ import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 
+import com.google.gson.JsonArray;
 import com.google.inject.Inject;
 
 public class FetchModulesActivity extends RoboActivity {
@@ -67,7 +68,7 @@ public class FetchModulesActivity extends RoboActivity {
 			
 			activity.busyDialog.dismiss();
 			
-			DownloadResult result = (DownloadResult) message.obj;
+			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show module activity
 				activity.showModuleActivity();
@@ -103,7 +104,7 @@ public class FetchModulesActivity extends RoboActivity {
 			
 			activity.busyDialog.dismiss();
 			
-			DownloadResult result = (DownloadResult) message.obj;
+			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show module activity
 				activity.showModuleActivity();
@@ -139,7 +140,7 @@ public class FetchModulesActivity extends RoboActivity {
 			
 			activity.busyDialog.dismiss();
 			
-			DownloadResult result = (DownloadResult) message.obj;
+			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show module activity
 				activity.showModuleActivity();
@@ -368,16 +369,15 @@ public class FetchModulesActivity extends RoboActivity {
     		
     		fetchTask = new FetchModulesListTask(faimsClient, new ITaskListener() {
 
-				@SuppressWarnings("unchecked")
 				@Override
 				public void handleTaskCompleted(Object result) {
 					FetchModulesActivity.this.busyDialog.dismiss();
 					
-					FetchResult fetchResult = (FetchResult) result;
+					Result fetchResult = (Result) result;
 					
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
 						if (moduleListAdapter != null) moduleListAdapter.clear();
-		    			FetchModulesActivity.this.modules = (List<Module>) fetchResult.data;
+		    			FetchModulesActivity.this.modules = parseModules((JsonArray) fetchResult.data);
 		    			Collections.reverse(FetchModulesActivity.this.modules);
 		    			for (Module p : modules) {
 		    				FetchModulesActivity.this.moduleListAdapter.add(p.name);
@@ -762,4 +762,16 @@ public class FetchModulesActivity extends RoboActivity {
 		startActivityForResult(showModulesIntent, 1);
 		finish();
     }
+    
+    protected List<Module> parseModules(JsonArray objects) {
+		ArrayList<Module> modules = new ArrayList<Module>();
+		try {
+			for (int i = 0; i < objects.size(); i++) {
+				modules.add(Module.fromJson(objects.get(i).getAsJsonObject()));
+			}
+		} catch (Exception e) {
+			FLog.e("error trying to parse module list");
+		}
+		return modules;
+	}
 }

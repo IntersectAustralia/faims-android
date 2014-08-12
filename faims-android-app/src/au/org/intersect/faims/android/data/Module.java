@@ -1,6 +1,10 @@
 package au.org.intersect.faims.android.data;
 
+import java.io.File;
 import java.io.Serializable;
+
+import android.os.Environment;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 
 import com.google.gson.JsonObject;
 
@@ -34,6 +38,18 @@ public class Module implements Serializable {
 	public Module(String name, String key) {
 		this.name = name;
 		this.key = key;
+	}
+	
+	public File getDirectoryPath() {
+		return getDirectoryPath(null);
+	}
+	
+	public File getDirectoryPath(String path) {
+		String directoryPath = Environment.getExternalStorageDirectory() + FaimsSettings.modulesDir + this.key;
+		if (path != null) {
+			directoryPath += '/' + path;
+		}
+		return new File(directoryPath);
 	}
 	
 	public static Module fromJson(JsonObject object) {

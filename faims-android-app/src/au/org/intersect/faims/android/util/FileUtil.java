@@ -364,6 +364,24 @@ public class FileUtil {
 			}
 		}
 	}
+	
+	public static List<File> listDirectory(File directory) {
+		ArrayList<File> fileList = new ArrayList<File>();
+		getDirectoryList(directory, fileList);
+		return fileList;
+	}
+	
+	private static void getDirectoryList(File dir, List<File> fileList) {
+		if (dir == null || dir.listFiles() == null) return;
+		
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory()) {
+				getDirectoryList(f, fileList);
+			} else {
+				fileList.add(f);
+			}
+		}
+	}
 
 	public static void moveDir(String fromDir, String toDir) throws Exception {
 		toDir = new File(toDir).getAbsolutePath() + "/";

@@ -58,7 +58,6 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.managers.LockManager;
-import au.org.intersect.faims.android.net.DownloadResult;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
@@ -141,7 +140,7 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 				Message message) {
 			activity.busyDialog.dismiss();
 			
-			DownloadResult result = (DownloadResult) message.obj;
+			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				activity.linker.execute(callback);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
