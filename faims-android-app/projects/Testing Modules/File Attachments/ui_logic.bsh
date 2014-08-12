@@ -63,6 +63,45 @@ stopSync() {
     setFileSyncEnabled(false);
 }
 
+
+addActionBarItem("sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Sync off";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+    }
+    isActionOff() {
+        isSyncEnabled();
+    }
+    actionOffLabel() {
+        "Turn Sync on";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+    }
+});
+
+addActionBarItem("file sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn File Sync off";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+        setFileSyncEnabled(false);
+    }
+    isActionOff() {
+        isFileSyncEnabled();
+    }
+    actionOffLabel() {
+        "Turn File Sync on";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+        setFileSyncEnabled(true);
+    }
+});
+
 /*** Uneditable - you can edit the code below with extreme precaution ***/
 /*** USER ***/
 User user; // dont touch

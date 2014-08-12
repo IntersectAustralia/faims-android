@@ -191,6 +191,7 @@ updateEntity(tabgroup) {
 	});
 }
 
+
 clearEntity(tabgroup) {
 	newEntity(tabgroup);
 	fetchEntityIdentifier(new FetchCallback() {
@@ -306,6 +307,56 @@ onEvent("tabgroup5/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup5/tab1/a
 onEvent("tabgroup5/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
 onEvent("tabgroup5/tab2", "show", "loadEntities(\"tabgroup5\")");
+
+addActionBarItem("sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Sync off";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+    }
+    isActionOff() {
+        isSyncEnabled();
+    }
+    actionOffLabel() {
+        "Turn Sync on";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+    }
+});
+
+addActionBarItem("auto save", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn auto save off";
+    }
+    actionOn() {
+        showTabGroup("tabgroup1");
+    }
+    isActionOff() {
+        isAutosaveEnabled();
+    }
+    actionOffLabel() {
+        "Turn auto save on";
+    }
+    actionOff() {
+        showTabGroup("tabgroup5");;
+    }
+});
+
+addActionBarItem("save Entity", new ActionButtonCallback() {
+    actionOnLabel() {
+        "Save Entity";
+    }
+     
+    actionOn() {
+    	if(isAutosaveEnabled()){
+        	showToast("Already Auto saved");
+        } else {
+        	saveEntity("tabgroup1");
+        }	
+    }
+});
 
 // RELATIONSHIP
 

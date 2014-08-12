@@ -27,8 +27,49 @@ loadOK() {
 onEvent("App/LogicTriggered/ShowWarning","click", "displayAlert()");
 onEvent("App/LogicTriggered/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
 onEvent("App/LogicTriggered/ShowToast", "click", "onClickButton()");
-onEvent("App/LogicTriggered/ShowHidden", "click", "showTab(\"App/Hidden\")");
-onEvent("App/Hidden/HideTab", "click", "cancelTab(\"App/Hidden\", false);showTab(\"App/Inputs\")");
+onEvent("App/LogicTriggered/ShowHidden", "click", "showHiddenTab()");
+onEvent("App/Hidden/HideTab", "click", "hideTab()");
+
+boolean flag = false;
+
+hideTab(){
+	flag = false;
+    cancelTab("App/Hidden", false);
+    showTab("App/Inputs");
+    refreshActionBarMenu();
+}
+
+showHiddenTab(){
+	flag = true;
+	showTab("App/Hidden");
+	refreshActionBarMenu();
+}
+	
+addActionBarItem("hidden tab", new ToggleActionButtonCallback() {
+	
+    actionOnLabel() {
+        "Hide tab";
+    }
+    actionOn() {
+    	hideTab();
+    }
+    isActionOff() {
+    	isTabHidden();
+    }
+    actionOffLabel() {
+        "Show Tab";
+    }
+    actionOff() {
+    	showHiddenTab();
+    }
+
+});
+
+boolean isTabHidden(){
+	return flag;
+}
+
+
 
 String printOut1 = "This is ONE";
 String printOut2 = "This is TWO";
