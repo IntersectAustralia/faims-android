@@ -221,6 +221,16 @@
             <term>Choice D</term>
         </lookup>
     </property>
+   <property type="string" name="choice2">
+        <description>Dummy 2</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A 2</term>
+            <term>Choice B 2</term>
+            <term>Choice C 2</term>
+            <term>Choice D 2</term>
+        </lookup>
+    </property>
     <property type="file" name="file">
       <bundle>DOI</bundle>
     </property>
@@ -450,6 +460,16 @@
             <term>Choice B</term>
             <term>Choice C</term>
             <term>Choice D</term>
+        </lookup>
+    </property>
+    <property type="string" name="choice2">
+        <description>Dummy 2</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A 2</term>
+            <term>Choice B 2</term>
+            <term>Choice C 2</term>
+            <term>Choice D 2</term>
         </lookup>
     </property>
     <property type="file" name="file">

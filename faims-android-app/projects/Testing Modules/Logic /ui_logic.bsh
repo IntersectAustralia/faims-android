@@ -1221,26 +1221,26 @@ onEvent("tabgroup8", "show", "setupDemo2()");
 
 // Demo 3
 
-choices = null;
-loadedValue = null;
-onClickDemo3Choice() {
-	choice = getFieldValue("tabgroup9/tab1/choice");
-	executeViewTask(new ViewTask() {
-		doTask() {
-			if (choices.get(choices.size()-1).get(0).equals(choice)) {
-				createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", "tabgroup9/tab1/container", null, false, false);
+// choices = null;
+// loadedValue = null;
+// onClickDemo3Choice() {
+// 	choice = getFieldValue("tabgroup9/tab1/choice");
+// 	executeViewTask(new ViewTask() {
+// 		doTask() {
+// 			if (choices.get(choices.size()-1).get(0).equals(choice)) {
+				// createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", "tabgroup9/tab1/container", null, false, false);
 				
 
-				if (loadedValue != null) {
-					setFieldValue("tabgroup9/tab1/other", loadedValue);
-					setFieldAnnotation("tabgroup9/tab1/choice", "");
-				}
-			} else {
-				removeView("tabgroup9/tab1/other");
-			}
-		}
-	});
-}
+// 				if (loadedValue != null) {
+					// setFieldValue("tabgroup9/tab1/other", loadedValue);
+					// setFieldAnnotation("tabgroup9/tab1/choice", "");
+// 				}
+// 			} else {
+// 				removeView("tabgroup9/tab1/other");
+// 			}
+// 		}
+// 	});
+// }
 
 lastDemo3Record = null;
 
@@ -1271,6 +1271,10 @@ loadDemo3Record() {
 					if (choices.get(choices.size()-1).get(0).equals(attr.getValue("vocab"))) {
 						loadedValue = attr.getValue("freetext");
 					}
+				} else if ("choice2".equals(attr.getName())) {
+					if (choices.get(choices.size()-1).get(0).equals(attr.getValue("vocab"))) {
+						loadedValue = attr.getValue("freetext");
+					}
 				}
 			}
 		}
@@ -1284,6 +1288,14 @@ setupDemo3() {
 			createDropDown("tabgroup9/tab1/choice", "Choice", "choice", "vocab", null, true, true);
 			createTextField("tabgroup9/tab1/certaintyText", "Certainty", "choice", "certainty", null, null, false, false);
 			createTextField("tabgroup9/tab1/measureText", "Measure", "choice", "measure", null, null, false, false);
+			createTextField("tabgroup9/tab1/other", "Other", "choice", "freetext", null, null, false, false);
+
+
+			createDropDown("tabgroup9/tab1/choice2", "Choice", "choice2", "vocab", null, true, true);
+			createTextField("tabgroup9/tab1/certaintyText2", "Certainty", "choice2", "certainty", null, null, false, false);
+			createTextField("tabgroup9/tab1/measureText2", "Measure", "choice2", "measure", null, null, false, false);
+			createTextField("tabgroup9/tab1/other2", "Other", "choice2", "freetext", null, null, false, false);
+
 
 
 			createContainer("tabgroup9/tab1/container", null);
@@ -1298,7 +1310,15 @@ setupDemo3() {
 					}
 				});
 
-			onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
+			fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice2';", new FetchCallback() {
+					onFetch(result) {
+						choices = result;
+						populateDropDown("tabgroup9/tab1/choice2", result);
+					}
+				});
+
+			// onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
+			// onEvent("tabgroup9/tab1/choice2", "click", "onClickDemo3Choice()");
 			onEvent("tabgroup9/tab1/save", "click", "onClickDemo3Save()");
 			onEvent("tabgroup9/tab1/clear", "click", "clearDemo3Record()");
 			onEvent("tabgroup9/tab1/load", "click", "loadDemo3Record()");
