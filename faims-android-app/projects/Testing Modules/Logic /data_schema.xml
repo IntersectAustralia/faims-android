@@ -1,0 +1,489 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="SyncExample" preparer="Nobody">
+    
+   <RelationshipElement name="AboveBelow" type="hierarchy">
+    <description>
+      Indicates that one element is above or below another element.
+    </description>
+    <parent>
+      Above
+    </parent>
+    <child>
+      Below
+    </child>
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <description>This is a name.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="value">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="date">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="time">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="description">
+        <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="gallery">
+      <description>This is a picture gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/pictures/cugl69808.jpg">cugl69808.jpg<description>This is the first picture</description></term>
+        <term pictureURL="files/data/pictures/cugl69807a.jpg">cugl69807a.jpg<description>This is the second picture</description></term>
+        <term pictureURL="files/data/pictures/cugl67286.jpg">cugl67286.jpg</term>
+        <term pictureURL="files/data/pictures/cugl66291-7579a.jpg">cugl66291-7579a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39501_1.jpg">cugl39501_1.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39500_01.jpg">cugl39500_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39499_01.jpg">cugl39499_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39498_01.jpg">cugl39498_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39497_01.jpg">cugl39497_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39443a.jpg">cugl39443a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26216.jpg">cugl26216.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26210a.jpg">cugl26210a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26209b.jpg">cugl26209b.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26208a.jpg">cugl26208a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26207.jpg">cugl26207.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26206a.jpg">cugl26206a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26197a.jpg">cugl26197a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26193.jpg">cugl26193.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26185a.jpg">cugl26185a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26140.jpg">cugl26140.jpg</term>
+      </lookup>
+    </property>
+    <property type="string" name="rocks">
+      <description>This is a rock gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/rocks/Angular.png">Angular.png<description>Angular</description>
+            <term pictureURL="files/data/rocks/AngularSub.png">AngularSub.png<description>Angular Sub</description></term>
+            <term pictureURL="files/data/rocks/AngularVery.png">AngularVery.png<description>Angular Very</description></term>
+            <term pictureURL="files/data/rocks/AngularAngular.png">AngularAngular.png<description>Angular Angular</description></term>
+        </term>
+        <term pictureURL="files/data/rocks/Rounded.png">Rounded.png<description>Rounded</description>
+            <term pictureURL="files/data/rocks/RoundedSub.png">RoundedSub<description>Rounded Sub</description></term>
+            <term pictureURL="files/data/rocks/RoundedWell.png">RoundedWell.png<description>Rounded Well</description></term>
+            <term pictureURL="files/data/rocks/RoundedRounded.png">RoundedRounded.png<description>Rounded Rounded</description></term>
+        </term>
+      </lookup>
+    </property>
+    <property type="string" name="item">
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>
+                Item A
+                <description>This is Item A</description>
+            </term>
+            <term>
+                Item B
+                <description>This is Item B</description>
+            </term>
+            <term>
+                Item C
+                <description>This is Item C</description>
+            </term>
+            <term>
+                Item D
+                <description>This is Item D</description>
+            </term>
+        </lookup>
+    </property>
+    <property type="string" name="type">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>
+            Type A
+            <description>This is Type A</description>
+            <term>
+                Color A1
+                <term>
+                    Shape A1S1
+                    <term>Size A1S1R1
+                        <description>This is Size A1S1R1</description></term>
+                    <term>Size A1S1R2</term>
+                    <term>Size A1S1R3</term>
+                    <term>Size A1S1R4</term>
+                </term>
+                <term>
+                    Shape A1S2
+                    <term>Size A1S2R1</term>
+                    <term>Size A1S2R2</term>
+                    <term>Size A1S2R3</term>
+                    <term>Size A1S2R4</term>
+                </term>
+                <term>
+                    Shape A1S3
+                    <term>Size A1S3R1</term>
+                    <term>Size A1S3R2</term>
+                    <term>Size A1S3R3</term>
+                    <term>Size A1S3R4</term>
+                </term>
+                <term>
+                    Shape A1S4
+                    <term>Size A1S4R1</term>
+                    <term>Size A1S4R2</term>
+                    <term>Size A1S4R3</term>
+                    <term>Size A1S4R4</term>
+                </term>
+            </term>
+            <term>
+                Color A2
+                <term>Shape A2S1</term>
+                <term>Shape A2S2</term>
+                <term>Shape A2S3</term>
+                <term>Shape A2S4</term>
+	        </term>
+            <term>
+                Color A3
+                <term>Shape A3S1</term>
+                <term>Shape A3S2</term>
+                <term>Shape A3S3</term>
+                <term>Shape A3S4</term>
+	        </term>
+            <term>
+                Color A4
+                <term>Shape A4S1</term>
+                <term>Shape A4S2</term>
+                <term>Shape A4S3</term>
+                <term>Shape A4S4</term>
+	    	</term>
+        </term>
+        <term>
+            Type B
+            <description>This is Type B</description>
+            <term>
+                Color B1
+                <term>Shape B1S1
+                    <description>This is Shape B1S1</description></term>
+                <term>Shape B1S2</term>
+                <term>Shape B1S3</term>
+                <term>Shape B1S4</term>
+            </term>
+            <term>
+                Color B2
+                <term>Shape B2S1</term>
+                <term>Shape B2S2</term>
+                <term>Shape B2S3</term>
+                <term>Shape B2S4</term>
+	        </term>
+            <term>
+                Color B3
+                <term>Shape B3S1</term>
+                <term>Shape B3S2</term>
+                <term>Shape B3S3</term>
+                <term>Shape B3S4</term>
+	        </term>
+            <term>
+                Color B4
+                <term>Shape B4S1</term>
+                <term>Shape B4S2</term>
+                <term>Shape B4S3</term>
+                <term>Shape B4S4</term>
+	    	</term>
+        </term>
+        <term>
+        	Type C
+        	<description>This is Type C</description>
+            <term>Color C1</term>
+            <term>Color C2</term>
+            <term>Color C3</term>
+            <term>Color C4</term>  
+        </term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="string" name="location">
+        <description>This is a location</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+    <property type="string" name="choice">
+        <description>This is a choice</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A</term>
+            <term>Choice B</term>
+            <term>Choice C</term>
+            <term>Choice D</term>
+        </lookup>
+    </property>
+   <property type="string" name="choice2">
+        <description>Dummy 2</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A 2</term>
+            <term>Choice B 2</term>
+            <term>Choice C 2</term>
+            <term>Choice D 2</term>
+        </lookup>
+    </property>
+    <property type="file" name="file">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="picture">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="video">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="audio">
+      <bundle>DOI</bundle>
+    </property>
+  </RelationshipElement>
+  
+  <ArchaeologicalElement name="small">
+    <description>
+      An small entity
+    </description>
+    <property type="string" name="entity" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <description>This is a name.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="value">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="date">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="time">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="description">
+        <bundle>DOI</bundle>
+    </property>
+     <property type="string" name="scvalue">
+      <description>This is a scan code value.</description>
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="gallery">
+      <description>This is a picture gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/pictures/cugl69808.jpg">cugl69808.jpg<description>This is the first picture</description></term>
+        <term pictureURL="files/data/pictures/cugl69807a.jpg">cugl69807a.jpg<description>This is the second picture</description></term>
+        <term pictureURL="files/data/pictures/cugl67286.jpg">cugl67286.jpg</term>
+        <term pictureURL="files/data/pictures/cugl66291-7579a.jpg">cugl66291-7579a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39501_1.jpg">cugl39501_1.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39500_01.jpg">cugl39500_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39499_01.jpg">cugl39499_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39498_01.jpg">cugl39498_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39497_01.jpg">cugl39497_01.jpg</term>
+        <term pictureURL="files/data/pictures/cugl39443a.jpg">cugl39443a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26216.jpg">cugl26216.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26210a.jpg">cugl26210a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26209b.jpg">cugl26209b.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26208a.jpg">cugl26208a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26207.jpg">cugl26207.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26206a.jpg">cugl26206a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26197a.jpg">cugl26197a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26193.jpg">cugl26193.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26185a.jpg">cugl26185a.jpg</term>
+        <term pictureURL="files/data/pictures/cugl26140.jpg">cugl26140.jpg</term>
+      </lookup>
+    </property>
+    <property type="string" name="rocks">
+      <description>This is a rock gallery</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term pictureURL="files/data/rocks/Angular.png">Angular.png<description>Angular</description>
+            <term pictureURL="files/data/rocks/AngularSub.png">AngularSub.png<description>Angular Sub</description></term>
+            <term pictureURL="files/data/rocks/AngularVery.png">AngularVery.png<description>Angular Very</description></term>
+            <term pictureURL="files/data/rocks/AngularAngular.png">AngularAngular.png<description>Angular Angular</description></term>
+        </term>
+        <term pictureURL="files/data/rocks/Rounded.png">Rounded.png<description>Rounded</description>
+            <term pictureURL="files/data/rocks/RoundedSub.png">RoundedSub<description>Rounded Sub</description></term>
+            <term pictureURL="files/data/rocks/RoundedWell.png">RoundedWell.png<description>Rounded Well</description></term>
+            <term pictureURL="files/data/rocks/RoundedRounded.png">RoundedRounded.png<description>Rounded Rounded</description></term>
+        </term>
+      </lookup>
+    </property>
+    <property type="string" name="item">
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>
+                Item A
+                <description>This is Item A</description>
+            </term>
+            <term>
+                Item B
+                <description>This is Item B</description>
+            </term>
+            <term>
+                Item C
+                <description>This is Item C</description>
+            </term>
+            <term>
+                Item D
+                <description>This is Item D</description>
+            </term>
+        </lookup>
+    </property>
+    <property type="string" name="type">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>
+            Type A
+            <description>This is Type A</description>
+            <term>
+                Color A1
+                <term>
+                    Shape A1S1
+                    <term>Size A1S1R1
+                        <description>This is Size A1S1R1</description></term>
+                    <term>Size A1S1R2</term>
+                    <term>Size A1S1R3</term>
+                    <term>Size A1S1R4</term>
+                </term>
+                <term>
+                    Shape A1S2
+                    <term>Size A1S2R1</term>
+                    <term>Size A1S2R2</term>
+                    <term>Size A1S2R3</term>
+                    <term>Size A1S2R4</term>
+                </term>
+                <term>
+                    Shape A1S3
+                    <term>Size A1S3R1</term>
+                    <term>Size A1S3R2</term>
+                    <term>Size A1S3R3</term>
+                    <term>Size A1S3R4</term>
+                </term>
+                <term>
+                    Shape A1S4
+                    <term>Size A1S4R1</term>
+                    <term>Size A1S4R2</term>
+                    <term>Size A1S4R3</term>
+                    <term>Size A1S4R4</term>
+                </term>
+            </term>
+            <term>
+                Color A2
+                <term>Shape A2S1</term>
+                <term>Shape A2S2</term>
+                <term>Shape A2S3</term>
+                <term>Shape A2S4</term>
+	        </term>
+            <term>
+                Color A3
+                <term>Shape A3S1</term>
+                <term>Shape A3S2</term>
+                <term>Shape A3S3</term>
+                <term>Shape A3S4</term>
+	        </term>
+            <term>
+                Color A4
+                <term>Shape A4S1</term>
+                <term>Shape A4S2</term>
+                <term>Shape A4S3</term>
+                <term>Shape A4S4</term>
+	    	</term>
+        </term>
+        <term>
+            Type B
+            <description>This is Type B</description>
+            <term>
+                Color B1
+                <term>Shape B1S1
+                    <description>This is Shape B1S1</description></term>
+                <term>Shape B1S2</term>
+                <term>Shape B1S3</term>
+                <term>Shape B1S4</term>
+            </term>
+            <term>
+                Color B2
+                <term>Shape B2S1</term>
+                <term>Shape B2S2</term>
+                <term>Shape B2S3</term>
+                <term>Shape B2S4</term>
+	        </term>
+            <term>
+                Color B3
+                <term>Shape B3S1</term>
+                <term>Shape B3S2</term>
+                <term>Shape B3S3</term>
+                <term>Shape B3S4</term>
+	        </term>
+            <term>
+                Color B4
+                <term>Shape B4S1</term>
+                <term>Shape B4S2</term>
+                <term>Shape B4S3</term>
+                <term>Shape B4S4</term>
+	    	</term>
+        </term>
+        <term>
+        	Type C
+        	<description>This is Type C</description>
+            <term>Color C1</term>
+            <term>Color C2</term>
+            <term>Color C3</term>
+            <term>Color C4</term>  
+        </term>
+        <term>Type D</term>
+      </lookup>
+    </property>
+    <property type="string" name="location">
+        <description>This is a location</description>
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+    <property type="string" name="choice">
+        <description>This is a choice</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A</term>
+            <term>Choice B</term>
+            <term>Choice C</term>
+            <term>Choice D</term>
+        </lookup>
+    </property>
+    <property type="string" name="choice2">
+        <description>Dummy 2</description>
+        <bundle>DOI</bundle>
+        <lookup>
+            <term>Choice A 2</term>
+            <term>Choice B 2</term>
+            <term>Choice C 2</term>
+            <term>Choice D 2</term>
+        </lookup>
+    </property>
+    <property type="file" name="file">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="picture">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="video">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="audio">
+      <bundle>DOI</bundle>
+    </property>
+  </ArchaeologicalElement>
+  
+</dataSchema>

@@ -1071,10 +1071,7 @@ setupWebView() {
 
 onEvent("tabgroup6", "load", "setupWebView()");
 
-// This method is used for testing FAIMS-758
-eventOccurred () {
-    showToast("EVENT OCCURRED!");
-}
+
 
 // Demo 1    
 createDemoPicture(name) {
@@ -1151,7 +1148,6 @@ setupDemo1() {
 			populatePictureGallery("tabgroup7/tab1/picture", pictures);
 
 			onEvent("tabgroup7/tab1/picture", "click", "onClickDemo1Picture()");
-            onEvent("tabgroup7/tab1/picture", "select", "eventOccurred()");
 		}
 	});
 }
@@ -1297,7 +1293,6 @@ setupDemo3() {
 				});
 
 			onEvent("tabgroup9/tab1/choice", "click", "onClickDemo3Choice()");
-            onEvent("tabgroup9/tab1/choice", "select", "eventOccurred()");
 			onEvent("tabgroup9/tab1/save", "click", "onClickDemo3Save()");
 			onEvent("tabgroup9/tab1/clear", "click", "clearDemo3Record()");
 			onEvent("tabgroup9/tab1/load", "click", "loadDemo3Record()");
