@@ -33,6 +33,7 @@
                   <startExternalGPS/>
                   <startTimeLog/>
                   <stopTrackLog/>
+                  <stopGPS/>
               </tab1>
           </tabgroup1>
 
@@ -101,6 +102,9 @@
         </trigger>
          <trigger ref="stopTrackLog">
         	<label> Stop Track log</label>
+        </trigger>
+        <trigger ref="stopGPS">
+        	<label> Stop GPS</label>
         </trigger>
       </group>
     </group>
