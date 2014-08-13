@@ -38,6 +38,8 @@ public class EntityAttribute extends RelationshipAttribute {
 			return measure;
 		} else if (VOCAB.equals(type)) {
 			return vocab;
+		} else if (CERTAINTY.equals(type)) {
+			return certainty;
 		} else {
 			return text;
 		}
@@ -45,12 +47,6 @@ public class EntityAttribute extends RelationshipAttribute {
 	
 	@Override
 	public String getAnnotation(String type) {
-		if (MEASURE.equals(type)) {
-			return text;
-		} else if (VOCAB.equals(type)) {
-			return text;
-		} else {
-			return null;
-		}
+		return text;
 	}
 }
