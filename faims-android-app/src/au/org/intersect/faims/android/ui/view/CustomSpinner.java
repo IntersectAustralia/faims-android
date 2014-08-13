@@ -186,7 +186,9 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		if (getAdapter() != null) {
 			for (int i = 0; i < getAdapter().getCount(); ++i) {
 				NameValuePair pair = (NameValuePair) getItemAtPosition(i);
-				pairs.add(pair);
+				if (pair.getValue() != null) {
+					pairs.add(pair);
+				}
 			}
 		}
 		return pairs;
