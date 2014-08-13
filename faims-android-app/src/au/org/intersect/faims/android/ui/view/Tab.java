@@ -179,6 +179,8 @@ public class Tab {
 		
         if (scrollable) {
         	scrollView = new ScrollView(this.linearLayout.getContext());
+        	scrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        	scrollView.setBackgroundColor(Color.WHITE);
         	scrollView.addView(linearLayout);
         	view = scrollView;
         } else {
@@ -292,7 +294,7 @@ public class Tab {
 	                	// check for additional types
 	                	if (inputDef.map) {
 	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
-	                			TextView mapLabel = viewFactory.createLabel(inputDef);
+	                			TextView mapLabel = viewFactory.createLabel(ref, inputDef);
 	                			container.addView(mapLabel);
 	                		}
 	                		MapLayout mapLayout = viewFactory.createMapView(ref, dynamic);
@@ -301,14 +303,14 @@ public class Tab {
 	                		view = mapLayout.getMapView();
 	                	} else if (inputDef.table) {
 	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
-	                			TextView tableLabel = viewFactory.createLabel(inputDef);
+	                			TextView tableLabel = viewFactory.createLabel(ref, inputDef);
 	                			container.addView(tableLabel);
 	                		}
 	                		view = viewFactory.createTableView(ref, dynamic);
 	                		container.addView(view);
 	                	} else if (inputDef.web) {
 	                		if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
-	                			TextView webLabel = viewFactory.createLabel(inputDef);
+	                			TextView webLabel = viewFactory.createLabel(ref, inputDef);
 	                			container.addView(webLabel);
 	                		}
 	                		view = viewFactory.createWebView(ref, dynamic);
@@ -337,7 +339,7 @@ public class Tab {
                         // List
                         } else if (FormInputDef.LIST_TYPE.equalsIgnoreCase(inputDef.questionAppearance) ) {
                         	if (inputDef.questionText != null && !inputDef.questionText.isEmpty()) {
-	                			TextView listLabel = viewFactory.createLabel(inputDef);
+	                			TextView listLabel = viewFactory.createLabel(ref, inputDef);
 	                			container.addView(listLabel);
 	                		}
                         	view = viewFactory.createList(inputDef, ref, dynamic);
@@ -500,7 +502,7 @@ public class Tab {
 				LinearLayout fieldLinearLayout = new LinearLayout(this.linearLayout.getContext());
 		    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
 		    	
-	            TextView textView = viewFactory.createLabel(attribute);
+	            TextView textView = viewFactory.createLabel(ref, attribute);
 	            fieldLinearLayout.addView(textView);
 	                
 	    		if(attribute.certainty && (isArchEnt || isRelationship)){
@@ -1102,7 +1104,7 @@ public class Tab {
 	
 	public void refreshCSS() {
 		Handler cssHandler = new Handler(beanShellLinker.getActivity().getMainLooper());
-		cssHandler.post(new Runnable() {
+		cssHandler.postDelayed(new Runnable() {
 
 			@Override
 			public void run() {
@@ -1116,7 +1118,7 @@ public class Tab {
 				}
 			}
 			
-		});
+		}, 1);
 	}
 	
 	public void removeCustomViews() {

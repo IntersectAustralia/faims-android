@@ -47,12 +47,16 @@ public class ViewFactory {
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	protected TextView createLabel(FormInputDef attribute) {
+	protected TextView createLabel(String ref, FormInputDef attribute) {
 		TextView textView = new TextView(context());
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
         textView.setText(inputText);
         NativeCSS.addCSSClass(textView, "label");
+        NativeCSS.setCSSId(textView, ref + "-label");
+        if (attribute.styleClass != null) {
+        	NativeCSS.addCSSClass(textView, attribute.styleClass + "-label");
+        }
         return textView;
 	}
 	

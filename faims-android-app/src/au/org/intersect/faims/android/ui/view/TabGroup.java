@@ -88,7 +88,6 @@ public class TabGroup extends Fragment {
     		                  ViewGroup container,
                               Bundle savedInstanceState) {
 		if (ref != null) {
-			refreshCSS();
 			
 			if (tabHost == null) {
 				tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
