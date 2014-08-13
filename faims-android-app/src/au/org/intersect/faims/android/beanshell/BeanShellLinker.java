@@ -3541,4 +3541,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		activityRef.get().removeActionBarItem(name);
 	}
 	
+	public void refreshActionBarMenu() {
+		activityRef.get().updateStatusBar();
+	}
+	
 }
