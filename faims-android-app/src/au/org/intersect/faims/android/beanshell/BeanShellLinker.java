@@ -2920,7 +2920,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					for (EntityAttribute attribute : entity.getAttributes()) {
 						if ("file".equalsIgnoreCase(attribute.getType())) {
 							if (!attribute.isDeleted()) {
-								attachedFiles.add(attribute.getText());
+								attachedFiles.add(attribute.getMeasure());
 							}
 						}
 					}
