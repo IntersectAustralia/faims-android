@@ -79,4 +79,121 @@ saveTimeGPSTrack() {
 }
 
 
+//Action Bar Testing
 
+addActionBarItem("about", new ActionButtonCallback() {
+    actionOnLabel() {
+        "About";
+    }
+     
+    actionOn() {
+        showWarning("Test Module", "This module was created merely for test purposes. Use it as you will");
+    }
+});
+ 
+ 
+// Toggle item
+addActionBarItem("Tacklog", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Time Track Log off";
+    }
+    actionOn() {
+        stopTrackingGPS();  
+    }
+    isActionOff() {
+        isTrackingGPS();
+    }
+    actionOffLabel() {
+        "Turn Time Tracklog on";
+    }
+    actionOff() {
+        startTrackAlert();
+    }
+});
+
+addActionBarItem("External GPS", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn External GPS off";
+    }
+    actionOn() {
+        stopGPS();
+    }
+    isActionOff() {
+        isExternalGPSOn();
+    }
+    actionOffLabel() {
+        "Turn External GPS on";
+    }
+    actionOff() {
+    	startExternalGPS();
+    }
+});
+
+addActionBarItem("Internal GPS", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Internal GPS off";
+    }
+    actionOn() {
+    	stopGPS();
+    }
+    isActionOff() {
+        isInternalGPSOn();
+    }
+    actionOffLabel() {
+        "Turn Internal GPS on";
+    }
+    actionOff() {
+         startInternalGPS();
+    }
+});
+
+addActionBarItem("bluetooth", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn bluetooth off";
+    }
+    actionOn() {
+    	onBluetoothStop();
+    }
+    isActionOff() {
+        isBluetoothConnected();
+    }
+    actionOffLabel() {
+        "Turn bluetooth on";
+    }
+    actionOff() {
+         onBluetoothStart();
+    }
+});
+
+messageBuffer = new ArrayList();
+messageBufferSize = 5;
+addMessage(message) {
+	messageBuffer.add(message);
+	if (messageBuffer.size() > messageBufferSize) {
+		messageBuffer.remove(0);
+	}
+	value = "";
+	for (i = 0; i < messageBuffer.size(); i++) {
+		if (!value.isEmpty()) {
+			value += "\n";
+		}
+		value += messageBuffer.get(i);
+	}
+	showWarning("Bluetooth Input",value);
+}
+
+
+onBluetoothStart() {
+	createBluetoothConnection("onBluetoothInput()", 1);
+}
+
+
+onBluetoothStop() {
+	destroyBluetoothConnection();
+}
+
+
+onBluetoothInput() {
+	message = getBluetoothMessage();
+	addMessage(message);
+}
