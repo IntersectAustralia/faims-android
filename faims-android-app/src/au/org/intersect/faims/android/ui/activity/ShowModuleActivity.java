@@ -1505,10 +1505,12 @@ public class ShowModuleActivity extends FragmentActivity implements IFAIMSRestor
 
 	public void enableFileSync() {
 		activityData.setFileSyncEnabled(true);
+		updateSyncStatus();
 	}
 	
 	public void disableFileSync() {
 		activityData.setFileSyncEnabled(false);
+		updateSyncStatus();
 	}
 	
 	private void startSyncingFiles() {
