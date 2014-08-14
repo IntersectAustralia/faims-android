@@ -20,11 +20,13 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
+
 
 	class PictureGalleryOnClickListener implements OnClickListener {
 
@@ -57,6 +59,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	BeanShellLinker linker;
 	
 	protected static final int GALLERY_SIZE = 400;
+	private static final int GALLERY_ITEM_PADDING = 10;
+	private static final int GALLERY_PADDING  = 30;
 	
 	private String ref;
 	private boolean dynamic;
@@ -104,6 +108,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
+	    int padding = (int) ScaleUtil.getDip(context, GALLERY_PADDING);
+	    this.setPadding(padding, 0, padding, 0);
 	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		
@@ -380,7 +386,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		setGalleryImage(gallery, path);
 		
-		gallery.setPadding(10, 10, 10, 10);
+		int padding = (int) ScaleUtil.getDip(galleriesLayout.getContext(), GALLERY_ITEM_PADDING);
+		gallery.setPadding(padding, padding, padding, padding);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
 		gallery.setOnClickListener(this.customListener);
@@ -404,7 +411,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		textView.setTextSize(15);
 		textView.setWidth(GALLERY_SIZE);
-		textView.setPadding(10, 10, 10, 10);
+		textView.setPadding(padding, padding, padding, padding);
 		galleryLayout.addView(textView);
 		galleryLayout.addView(gallery);
 		

@@ -235,7 +235,16 @@ public class ShowModuleActivity extends FragmentActivity implements
 		setupManagers();
 
 		String css = module.getCSS();
-		NativeCSS.styleWithCSS(css);
+		if (!css.isEmpty()) {
+			NativeCSS.styleWithCSS(css);
+		} else {
+			try {
+				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(getAssets().open("default.css")));
+			} catch (Exception e) {
+				FLog.e("Couldn't style module with default styling", e);
+				NativeCSS.styleWithCSS("");
+			}
+		}
 
 		startLoadTask();
 	}
