@@ -75,7 +75,9 @@ import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
+import au.org.intersect.faims.android.ui.dialog.DateDialog;
 import au.org.intersect.faims.android.ui.dialog.TextDialog;
+import au.org.intersect.faims.android.ui.dialog.TimeDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -156,6 +158,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private Double prevLat;
 	
 	private String textAlertInput;
+	private String dateAlertInput;
+	private String timeAlertInput;
 
 	private String lastFileBrowserCallback;
 
@@ -970,6 +974,64 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public String getLastTextAlertInput() {
 		return textAlertInput;
+	}
+	
+	public Dialog showDateAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final DateDialog dateDialog = new DateDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			dateDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dateAlertInput = dateDialog.getDateText(); 
+					execute(okCallback);
+				}
+			});
+			dateDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			dateDialog.show();
+			return dateDialog;
+		} catch (Exception e) {
+			FLog.e("error showing date alert", e);
+			showWarning("Logic Error", "Error show date alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastDateAlertInput() {
+		return dateAlertInput;
+	}
+	
+	public Dialog showTimeAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final TimeDialog timeDialog = new TimeDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			timeDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					timeAlertInput = timeDialog.getTimeText(); 
+					execute(okCallback);
+				}
+			});
+			timeDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			timeDialog.show();
+			return timeDialog;
+		} catch (Exception e) {
+			FLog.e("error showing time alert", e);
+			showWarning("Logic Error", "Error show time alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastTimeAlertInput() {
+		return timeAlertInput;
 	}
 	
 	public void reportError(Exception e) {
@@ -3376,6 +3438,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
 		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
 		savedInstanceState.putString(TAG + "textAlertInput", textAlertInput);
+		savedInstanceState.putString(TAG + "datetAlertInput", dateAlertInput);
+		savedInstanceState.putString(TAG + "timeAlertInput", timeAlertInput);
 		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
 		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
 		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);

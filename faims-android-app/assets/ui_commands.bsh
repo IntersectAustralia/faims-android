@@ -386,6 +386,48 @@ String getLastTextAlertInput() {
   return linker.getLastTextAlertInput();
 }
 
+/**
+  * Show an alert dialog to the user with the given message and a date picker for input.
+  *
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
+  */
+showDateAlert(String title, String message, String okCallback, String cancelCallback) {
+  linker.showDateAlert(title, message, okCallback, cancelCallback);
+}
+
+/**
+  * This is used in conjunction with showDateAlert. This returns the input from the last date alert shown.
+  *
+  * @return input received from last date alert
+  */
+String getLastDateAlertInput() {
+  return linker.getLastDateAlertInput();
+}
+
+/**
+  * Show an alert dialog to the user with the given message and a time picker for input.
+  *
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
+  */
+showTimeAlert(String title, String message, String okCallback, String cancelCallback) {
+  linker.showTimeAlert(title, message, okCallback, cancelCallback);
+}
+
+/**
+  * This is used in conjunction with showTimeAlert. This returns the input from the last time alert shown.
+  *
+  * @return input received from last time alert
+  */
+String getLastTimeAlertInput() {
+  return linker.getLastTimeAlertInput();
+}
+
 //========= Setter / Getter Functionality ==========
 /**
   * Set the field with the following reference to the given value.
