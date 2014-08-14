@@ -1309,10 +1309,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	public void enableFileSync() {
 		activityData.setFileSyncEnabled(true);
+		updateSyncStatus();
 	}
 
 	public void disableFileSync() {
 		activityData.setFileSyncEnabled(false);
+		updateSyncStatus();
 	}
 	
 	public boolean isFileSyncEnabled() {
