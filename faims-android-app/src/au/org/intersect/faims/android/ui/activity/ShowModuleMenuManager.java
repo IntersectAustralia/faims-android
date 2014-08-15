@@ -49,8 +49,8 @@ public class ShowModuleMenuManager {
 	private int pathIndex;
 	private int pathLength;
 
-	private BitmapDrawable whiteArrow;
-	private BitmapDrawable greyArrow;
+	private BitmapDrawable validArrow;
+	private BitmapDrawable invalidArrow;
 	private Bitmap tempBitmap;
 	private Animation rotation;
 	
@@ -82,18 +82,21 @@ public class ShowModuleMenuManager {
 			ActionButtonCallback actionItem = entry.getValue();
 			if (actionItem instanceof ToggleActionButtonCallback) {
 				if (((ToggleActionButtonCallback) actionItem).isActionOff()) {
-					addOnActionToMenu(actionItem, menu);
+					addOnActionToMenu(actionItem, menu, true);
 				} else {
 					addOffActionToMenu((ToggleActionButtonCallback) actionItem, menu);
 				}
 			} else {
-				addOnActionToMenu(actionItem, menu);
+				addOnActionToMenu(actionItem, menu, false);
 			}
 		}
 	}
 	
-	public void addOnActionToMenu(final ActionButtonCallback actionItem, final Menu menu) {
+	public void addOnActionToMenu(final ActionButtonCallback actionItem, final Menu menu, boolean showIcon) {
 		menu.add(actionItem.actionOnLabel());
+		if (showIcon) {
+			menu.getItem(menu.size()-1).setIcon(R.drawable.toggle_on);
+		}
 		menu.getItem(menu.size()-1).setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			
 			@Override
@@ -111,6 +114,7 @@ public class ShowModuleMenuManager {
 	
 	public void addOffActionToMenu(final ToggleActionButtonCallback actionItem, final Menu menu) {
 		menu.add(actionItem.actionOffLabel());
+		menu.getItem(menu.size()-1).setIcon(R.drawable.toggle_off);
 		menu.getItem(menu.size()-1).setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			
 			@Override
@@ -249,25 +253,25 @@ public class ShowModuleMenuManager {
 			if (tempBitmap != null) {
 				tempBitmap.recycle();
 			}
-			if (whiteArrow == null) {
-				whiteArrow = new BitmapDrawable(
+			if (validArrow == null) {
+				validArrow = new BitmapDrawable(
 						activityRef.get().getResources(),
 						UnscaledBitmapLoader
 								.decodeResource(
 										activityRef.get().getResources(),
-										au.org.intersect.faims.android.R.drawable.white_arrow));
+										au.org.intersect.faims.android.R.drawable.arrow_valid));
 			}
-			if (greyArrow == null) {
-				greyArrow = new BitmapDrawable(
+			if (invalidArrow == null) {
+				invalidArrow = new BitmapDrawable(
 						activityRef.get().getResources(),
 						UnscaledBitmapLoader
 								.decodeResource(
 										activityRef.get().getResources(),
-										au.org.intersect.faims.android.R.drawable.grey_arrow));
+										au.org.intersect.faims.android.R.drawable.arrow_invalid));
 			}
 
 			this.tempBitmap = BitmapUtil.rotateBitmap(
-					pathValid ? whiteArrow.getBitmap() : greyArrow.getBitmap(),
+					pathValid ? validArrow.getBitmap() : invalidArrow.getBitmap(),
 					pathBearing - pathHeading);
 			direction_indicator.setImageDrawable(new BitmapDrawable(activityRef.get().getResources(),
 					tempBitmap));

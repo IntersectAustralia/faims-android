@@ -101,11 +101,11 @@
 	  
 	  <TextView android:id="@+id/distance_text"
 	    android:contentDescription="@string/distance_text"
-	    android:textColor="#FFFFFF"
+	    android:textColor="#222222"
 	    style="@style/statusBarIconLarge"/>
 	  <TextView android:id="@+id/direction_text"
 	    android:contentDescription="@string/direction_text"
-	    android:textColor="#FFFFFF"
+	    android:textColor="#222222"
 	    style="@style/statusBarIconLarge"/>
 	  
 	  
