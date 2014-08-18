@@ -1307,7 +1307,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void populateDropDown(String ref, Collection valuesObj) {
+	public void populateDropDown(String ref, Collection valuesObj, boolean hasNull) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
@@ -1315,7 +1315,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				CustomSpinner spinner = (CustomSpinner) obj;
 
 				List<NameValuePair> pairs = convertToNameValuePairs((Collection<?>) valuesObj);
-				spinner.populate(pairs);
+				if (hasNull) {
+					spinner.populateWithNull(pairs);
+				} else {
+					spinner.populate(pairs);
+				}
 			} else {
 				FLog.w("cannot populate drop down "
 						+ ref);
@@ -1327,7 +1331,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void populateHierarchicalDropDown(String ref, final String attributeName) {
+	public void populateHierarchicalDropDown(String ref, final String attributeName, final boolean hasNull) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
@@ -1356,7 +1360,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							showWarning("Populate Error", "Error trying to load vocabulary terms");
 						} else {
 							VocabularyTerm.applyArch16n(terms, arch16n);
-							spinner.setTerms(terms);
+							if (hasNull) {
+								spinner.setTermsWithNull(terms);
+							} else {
+								spinner.setTerms(terms);
+							}
 						}
 					}
 					

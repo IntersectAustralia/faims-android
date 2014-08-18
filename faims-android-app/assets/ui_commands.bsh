@@ -757,7 +757,20 @@ createRelationshipAttribute(String name, String text, String vocab, String certa
   * @param values the collection of values to populate the dropdown with
   */
 populateDropDown(String ref, Collection values){
-    linker.populateDropDown(ref, values);
+    linker.populateDropDown(ref, values, false);
+}
+
+/**
+  * Populate dropdown field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param values the collection of values to populate the dropdown with
+  * @param hasNull set to true to populate the drop down with null value
+  */
+populateDropDown(String ref, Collection values, boolean hasNull){
+    linker.populateDropDown(ref, values, hasNull);
 }
 
 /**
@@ -769,7 +782,20 @@ populateDropDown(String ref, Collection values){
   * @param attributeName the name of the attribute
   */
 populateHierarchicalDropDown(String ref, String attributeName){
-    linker.populateHierarchicalDropDown(ref, attributeName);
+    linker.populateHierarchicalDropDown(ref, attributeName, false);
+}
+
+/**
+  * Populate dropdown field hierarchical vocab terms of the given attribute.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param attributeName the name of the attribute
+  * @param hasNull set to true to populate the drop down with null value
+  */
+populateHierarchicalDropDown(String ref, String attributeName, boolean hasNull){
+    linker.populateHierarchicalDropDown(ref, attributeName, hasNull);
 }
 
 /**
