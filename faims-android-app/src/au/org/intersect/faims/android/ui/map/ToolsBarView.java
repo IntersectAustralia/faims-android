@@ -269,13 +269,25 @@ public class ToolsBarView extends RelativeLayout {
 		
 		buttonsLayout.addView(configButton);
 	}
+	
+	public boolean getLoadToolVisible() {
+		return loadButton.getVisibility() == View.VISIBLE;
+	}
 
 	public void setLoadToolVisible(boolean value) {
 		loadButton.setVisibility(value ? View.VISIBLE : View.GONE);
 	}
 
+	public boolean getDatabaseToolVisible() {
+		return databaseSelectionButton.getVisibility() == View.VISIBLE;
+	}
+	
 	public void setDatabaseToolVisible(boolean value) {
 		databaseSelectionButton.setVisibility(value ? View.VISIBLE : View.GONE);
+	}
+	
+	public boolean getLegacyToolVisible() {
+		return legacySelectionButton.getVisibility() == View.VISIBLE;
 	}
 
 	public void setLegacyToolVisible(boolean value) {
