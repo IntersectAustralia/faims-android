@@ -62,6 +62,7 @@ onEvent("tabgroup1/tab1/startInternalGPS", "click", "startInternalGPS()");
 onEvent("tabgroup1/tab1/startExternalGPS", "click", "startExternalGPS()");
 onEvent("tabgroup1/tab1/startTimeLog", "click", "startTrackAlert()");
 onEvent("tabgroup1/tab1/stopTrackLog", "click", "stopTrackingGPS()");
+onEvent("tabgroup1/tab1/stopGPS", "click", "stopGPS()");
 
 startTrackAlert(){
 	

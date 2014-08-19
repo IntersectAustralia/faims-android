@@ -25,6 +25,8 @@ public class RelationshipAttribute extends Attribute {
 	public String getValue(String type) {
 		if (VOCAB.equals(type)) {
 			return vocab;
+		} else if (CERTAINTY.equals(type)) {
+			return certainty;
 		} else {
 			return text;
 		}
@@ -32,11 +34,7 @@ public class RelationshipAttribute extends Attribute {
 	
 	@Override
 	public String getAnnotation(String type) {
-		if (VOCAB.equals(type)) {
-			return text;
-		} else {
-			return null;
-		}
+		return text;
 	}
 
 }

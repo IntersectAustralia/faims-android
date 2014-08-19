@@ -806,7 +806,15 @@ setupMap() {
 			onEvent("tabgroup4/tab1/save", "click", "saveProfile()");
 			onEvent("tabgroup4/tab1/start", "click", "startTracking()");
 			onEvent("tabgroup4/tab1/stop", "click", "stopTracking()");
-		}
+
+			addDatabaseLayerQuery("tabgroup4/tab1/map", "track log entities", 
+			"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+			" FROM archentity join aenttype using (aenttypeid)\n" +
+			" where archentity.deleted is null\n" + 
+			"   and lower(aenttypename) = lower('gps_track')\n" + 
+			" group by uuid\n" + 
+			" having max(aenttimestamp)");
+			}
 	});
 }
 
@@ -1379,8 +1387,24 @@ setText() {
 	setFieldValue("tabgroup11/tab1/text", getLastTextAlertInput());
 }
 
+setDate() {
+	setFieldValue("tabgroup11/tab1/text", getLastDateAlertInput());
+}
+
+setTime() {
+	setFieldValue("tabgroup11/tab1/text", getLastTimeAlertInput());
+}
+
 showText() {
 	showTextAlert("Popup Text", "Please enter some text", "setText()", "");
+}
+
+showDate() {
+	showDateAlert("Popup Date", "Please pick a date", "setDate()", "");
+}
+
+showTime() {
+	showTimeAlert("Popup Time", "Please pick a time", "setTime()", "");
 }
 
 setupDemo5() {
@@ -1388,9 +1412,13 @@ setupDemo5() {
 		doTask() {
 			removeAllViewsAndContainers("tabgroup11");
 			createButton("tabgroup11/tab1/show", "Pop Text");
+			createButton("tabgroup11/tab1/showDate", "Pop Date");
+			createButton("tabgroup11/tab1/showTime", "Pop Time");
 			createTextField("tabgroup11/tab1/text", "Text", null, null, null, null, false, false);
 
 			onEvent("tabgroup11/tab1/show", "click", "showText()");
+			onEvent("tabgroup11/tab1/showDate", "click", "showDate()");
+			onEvent("tabgroup11/tab1/showTime", "click", "showTime()");
 		}
 	});
 }

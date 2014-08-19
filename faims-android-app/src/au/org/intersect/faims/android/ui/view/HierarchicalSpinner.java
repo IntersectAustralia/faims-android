@@ -131,12 +131,18 @@ public class HierarchicalSpinner extends CustomSpinner {
 		return terms;
 	}
 	
+	public void setTermsWithNull(List<VocabularyTerm> terms) {
+		if (terms == null) return;
+		ArrayList<VocabularyTerm> newTerms = new ArrayList<VocabularyTerm>();
+		newTerms.add(new VocabularyTerm(null, "", null, null));
+		newTerms.addAll(terms);
+		setTerms(newTerms);
+	}
+	
 	public void setTerms(List<VocabularyTerm> terms) {
 		if (terms == null) return;
 		
-		this.terms = new ArrayList<VocabularyTerm>();
-		this.terms.add(new VocabularyTerm(null, "", null, null));
-		this.terms.addAll(terms);
+		this.terms = terms;
 		
 		mapVocabToParent();	
 		this.parentTerms = new Stack<VocabularyTerm>();

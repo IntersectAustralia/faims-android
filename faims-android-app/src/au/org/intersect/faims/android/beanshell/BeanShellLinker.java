@@ -75,7 +75,9 @@ import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
 import au.org.intersect.faims.android.ui.dialog.BusyDialog;
+import au.org.intersect.faims.android.ui.dialog.DateDialog;
 import au.org.intersect.faims.android.ui.dialog.TextDialog;
+import au.org.intersect.faims.android.ui.dialog.TimeDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -156,6 +158,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	private Double prevLat;
 	
 	private String textAlertInput;
+	private String dateAlertInput;
+	private String timeAlertInput;
 
 	private String lastFileBrowserCallback;
 
@@ -972,6 +976,64 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return textAlertInput;
 	}
 	
+	public Dialog showDateAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final DateDialog dateDialog = new DateDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			dateDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dateAlertInput = dateDialog.getDateText(); 
+					execute(okCallback);
+				}
+			});
+			dateDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			dateDialog.show();
+			return dateDialog;
+		} catch (Exception e) {
+			FLog.e("error showing date alert", e);
+			showWarning("Logic Error", "Error show date alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastDateAlertInput() {
+		return dateAlertInput;
+	}
+	
+	public Dialog showTimeAlert(final String title, final String message,
+			final String okCallback, final String cancelCallback) {
+		try {
+			final TimeDialog timeDialog = new TimeDialog(this.activityRef.get(), arch16n.substituteValue(title),
+					arch16n.substituteValue(message), null, null);
+			timeDialog.setOkListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					timeAlertInput = timeDialog.getTimeText(); 
+					execute(okCallback);
+				}
+			});
+			timeDialog.setCancelListener(new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					execute(cancelCallback);
+				}
+			});
+			timeDialog.show();
+			return timeDialog;
+		} catch (Exception e) {
+			FLog.e("error showing time alert", e);
+			showWarning("Logic Error", "Error show time alert dialog");
+		}
+		return null;
+	}
+	
+	public String getLastTimeAlertInput() {
+		return timeAlertInput;
+	}
+	
 	public void reportError(Exception e) {
 		reportError(e.getMessage(), e);
 	}
@@ -1245,7 +1307,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public void populateDropDown(String ref, Collection valuesObj) {
+	public void populateDropDown(String ref, Collection valuesObj, boolean hasNull) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
@@ -1253,7 +1315,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				CustomSpinner spinner = (CustomSpinner) obj;
 
 				List<NameValuePair> pairs = convertToNameValuePairs((Collection<?>) valuesObj);
-				spinner.populate(pairs);
+				if (hasNull) {
+					spinner.populateWithNull(pairs);
+				} else {
+					spinner.populate(pairs);
+				}
 			} else {
 				FLog.w("cannot populate drop down "
 						+ ref);
@@ -1265,7 +1331,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void populateHierarchicalDropDown(String ref, final String attributeName) {
+	public void populateHierarchicalDropDown(String ref, final String attributeName, final boolean hasNull) {
 		try {
 			Object obj = uiRenderer.getViewByRef(ref);
 
@@ -1294,7 +1360,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							showWarning("Populate Error", "Error trying to load vocabulary terms");
 						} else {
 							VocabularyTerm.applyArch16n(terms, arch16n);
-							spinner.setTerms(terms);
+							if (hasNull) {
+								spinner.setTermsWithNull(terms);
+							} else {
+								spinner.setTerms(terms);
+							}
 						}
 					}
 					
@@ -3376,6 +3446,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
 		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
 		savedInstanceState.putString(TAG + "textAlertInput", textAlertInput);
+		savedInstanceState.putString(TAG + "datetAlertInput", dateAlertInput);
+		savedInstanceState.putString(TAG + "timeAlertInput", timeAlertInput);
 		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
 		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
 		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);

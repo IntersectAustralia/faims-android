@@ -386,6 +386,48 @@ String getLastTextAlertInput() {
   return linker.getLastTextAlertInput();
 }
 
+/**
+  * Show an alert dialog to the user with the given message and a date picker for input.
+  *
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
+  */
+showDateAlert(String title, String message, String okCallback, String cancelCallback) {
+  linker.showDateAlert(title, message, okCallback, cancelCallback);
+}
+
+/**
+  * This is used in conjunction with showDateAlert. This returns the input from the last date alert shown.
+  *
+  * @return input received from last date alert
+  */
+String getLastDateAlertInput() {
+  return linker.getLastDateAlertInput();
+}
+
+/**
+  * Show an alert dialog to the user with the given message and a time picker for input.
+  *
+  * @param title the title of the dialog
+  * @param message the message to be shown to the user
+  * @param okCallback the callback that is executed when Ok button is pressed
+  * @param cancelCallback the callback that is executed when Cancel button is pressed
+  */
+showTimeAlert(String title, String message, String okCallback, String cancelCallback) {
+  linker.showTimeAlert(title, message, okCallback, cancelCallback);
+}
+
+/**
+  * This is used in conjunction with showTimeAlert. This returns the input from the last time alert shown.
+  *
+  * @return input received from last time alert
+  */
+String getLastTimeAlertInput() {
+  return linker.getLastTimeAlertInput();
+}
+
 //========= Setter / Getter Functionality ==========
 /**
   * Set the field with the following reference to the given value.
@@ -715,7 +757,20 @@ createRelationshipAttribute(String name, String text, String vocab, String certa
   * @param values the collection of values to populate the dropdown with
   */
 populateDropDown(String ref, Collection values){
-    linker.populateDropDown(ref, values);
+    linker.populateDropDown(ref, values, false);
+}
+
+/**
+  * Populate dropdown field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param values the collection of values to populate the dropdown with
+  * @param hasNull set to true to populate the drop down with null value
+  */
+populateDropDown(String ref, Collection values, boolean hasNull){
+    linker.populateDropDown(ref, values, hasNull);
 }
 
 /**
@@ -727,7 +782,20 @@ populateDropDown(String ref, Collection values){
   * @param attributeName the name of the attribute
   */
 populateHierarchicalDropDown(String ref, String attributeName){
-    linker.populateHierarchicalDropDown(ref, attributeName);
+    linker.populateHierarchicalDropDown(ref, attributeName, false);
+}
+
+/**
+  * Populate dropdown field hierarchical vocab terms of the given attribute.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param attributeName the name of the attribute
+  * @param hasNull set to true to populate the drop down with null value
+  */
+populateHierarchicalDropDown(String ref, String attributeName, boolean hasNull){
+    linker.populateHierarchicalDropDown(ref, attributeName, hasNull);
 }
 
 /**

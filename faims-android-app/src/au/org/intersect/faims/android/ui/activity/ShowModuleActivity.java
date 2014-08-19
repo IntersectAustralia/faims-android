@@ -461,8 +461,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 			bluetoothManager.saveTo(savedInstanceState);
 			gpsDataManager.saveTo(savedInstanceState);
 			beanShellLinker.saveTo(savedInstanceState);
-			activityData.saveTo(savedInstanceState);
 			activityData.setUserId(databaseManager.getUserId());
+			activityData.saveTo(savedInstanceState);
 			uiRenderer.saveTo(savedInstanceState);
 			autoSaveManager.saveTo(savedInstanceState);
 		} catch (Exception e) {
@@ -1339,10 +1339,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	public void enableFileSync() {
 		activityData.setFileSyncEnabled(true);
+		updateSyncStatus();
 	}
 
 	public void disableFileSync() {
 		activityData.setFileSyncEnabled(false);
+		updateSyncStatus();
 	}
 	
 	public boolean isFileSyncEnabled() {

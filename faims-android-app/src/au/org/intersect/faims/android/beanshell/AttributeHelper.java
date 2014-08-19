@@ -249,9 +249,19 @@ public class AttributeHelper {
 		}
 		
 		private void setViewAt(BeanShellLinker linker, List<ICustomView> views, EntityAttribute attribute, int i, boolean ignoreAnnotation, boolean ignoreCertainty){
-			if (views != null && views.size() > i) {
-				ICustomView view = views.get(i);
-				setAttribute(linker, attribute, view, ignoreAnnotation, ignoreCertainty);
+			if (views != null) {
+				if (views.size() > 0) {
+					ICustomView firstView = views.get(0);
+					// if the first view is a checkbox view or file view then set attribute value to the first view
+					// else set attribute value to the view by index
+					if (firstView instanceof CustomCheckBoxGroup || 
+						firstView instanceof ICustomFileView) {
+						setAttribute(linker, attribute, firstView, ignoreAnnotation, ignoreCertainty);
+					} else if (views.size() > i) {
+						ICustomView view = views.get(i);
+						setAttribute(linker, attribute, view, ignoreAnnotation, ignoreCertainty);
+					}
+				}
 			}	
 		}
 		

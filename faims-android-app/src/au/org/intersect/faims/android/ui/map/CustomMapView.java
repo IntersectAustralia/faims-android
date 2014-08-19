@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -236,17 +237,12 @@ public class CustomMapView extends MapView implements IView {
 
 	private EditView editView;
 	
-	private float vertexSize = 0.2f;
-	
-	private int bufferColor = Color.GREEN;
-	
-	private int targetColor = Color.RED;
-	
 	private RelativeLayout toolsView;
 
 	private RelativeLayout layersView;
 	
 	private ArrayList<Runnable> runnableList;
+	
 	private ArrayList<Thread> threadList;
 
 	private boolean canRunThreads;
@@ -256,57 +252,38 @@ public class CustomMapView extends MapView implements IView {
 	private MapTool currentTool;
 
 	private InternalMapListener internalMapListener;
+	
 	private CustomMapListener mapListener;
-
-	private Layer selectedLayer;
 	
 	private ArrayList<Geometry> highlightGeometryList;
 
 	private ArrayList<Geometry> transformGeometryList;
-
-	private boolean showDecimal;
+	
 	private LayerManagerDialog layerManagerDialog;
-
-	private boolean showKm;
 
 	private boolean toolsEnabled = true;
 
 	private MapLayout mapLayout;
 	
 	private MarkerLayer currentPositionLayer;
+	
 	private GPSLocation previousLocation;
+	
 	private Float previousHeading;
 
 	private WeakReference<ShowModuleActivity> activityRef;
-	
-	private HashMap<String, String> databaseLayerQueryMap;
-	private String trackLogQueryName;
-	private String trackLogQuerySql;
-	private Map<User, Boolean> userCheckedList;
-	private Integer userTrackLogLayer;
-	
-	private ArrayList<String> databaseLayerQueryList;
 
 	private SelectionDialog selectionDialog;
 	
 	private HashMap<String, GeometrySelection> selectionMap;
 
 	private GeometrySelection selectedSelection;
+	
 	private ArrayList<GeometrySelection> restrictedSelections;
-
-	private HashMap<String, QueryBuilder> selectQueryMap;
-
-	private HashMap<String, LegacyQueryBuilder> legacySelectQueryMap;
-	
-	private ArrayList<QueryBuilder> selectQueryList;
-	
-	private ArrayList<LegacyQueryBuilder> legacySelectQueryList;
 
 	private String lastSelectionQuery;
 
 	private Geometry geomToFollow;
-
-	private float buffer = 50;
 
 	protected boolean locationValid;
 
@@ -343,8 +320,19 @@ public class CustomMapView extends MapView implements IView {
 	private boolean lastMapMoved;
 
 	private String ref;
+	
 	private boolean dynamic;
+	
+	private Integer userTrackLogLayer;
+	
+	private Map<User, Boolean> userCheckedList;
+	
+	private String trackLogQueryName;
+	
+	private String trackLogQuerySql;
 
+	// restored via event listeners
+	
 	private String clickCallback;
 
 	private String selectCallback;
@@ -352,6 +340,34 @@ public class CustomMapView extends MapView implements IView {
 	private String createCallback;
 
 	private String loadCallback;
+	
+	// restored
+	
+	private float vertexSize = 0.2f;
+	
+	private int bufferColor = Color.GREEN;
+	
+	private int targetColor = Color.RED;
+	
+	private Layer selectedLayer;
+	
+	private boolean showDecimal;
+	
+	private boolean showKm;
+
+	private float buffer = 50;
+	
+	private ArrayList<String> databaseLayerQueryList;
+	
+	private HashMap<String, String> databaseLayerQueryMap;
+	
+	private HashMap<String, QueryBuilder> selectQueryMap;
+
+	private ArrayList<QueryBuilder> selectQueryList;
+
+	private HashMap<String, LegacyQueryBuilder> legacySelectQueryMap;
+	
+	private ArrayList<LegacyQueryBuilder> legacySelectQueryList;
 	
 	public CustomMapView(ShowModuleActivity activity, MapLayout mapLayout, String ref, boolean dynamic) {
 		this(activity);
@@ -370,14 +386,14 @@ public class CustomMapView extends MapView implements IView {
         threadList = new ArrayList<Thread>();
         tools = new ArrayList<MapTool>();
         highlightGeometryList = new ArrayList<Geometry>();
-        databaseLayerQueryMap = new HashMap<String, String>();
+        databaseLayerQueryMap = new LinkedHashMap<String, String>();
         databaseLayerQueryList = new ArrayList<String>();
-        selectionMap = new HashMap<String, GeometrySelection>();
-        selectQueryMap = new HashMap<String, QueryBuilder>();
+        selectionMap = new LinkedHashMap<String, GeometrySelection>();
+        selectQueryMap = new LinkedHashMap<String, QueryBuilder>();
         legacySelectQueryMap = new HashMap<String, LegacyQueryBuilder>();
         selectQueryList = new ArrayList<QueryBuilder>();
         legacySelectQueryList = new ArrayList<LegacyQueryBuilder>();
-        userCheckedList = new HashMap<User, Boolean>();
+        userCheckedList = new LinkedHashMap<User, Boolean>();
         
 		this.mapLayout = mapLayout;
 		this.drawView = mapLayout.getDrawView();
@@ -2687,6 +2703,9 @@ public class CustomMapView extends MapView implements IView {
 				}
 			}
 			json.put("tools", tools);
+			json.put("loadToolVisible", this.mapLayout.getToolsBarView().getLoadToolVisible());
+			json.put("databaseToolVisible", this.mapLayout.getToolsBarView().getDatabaseToolVisible());
+			json.put("legacyToolVisible", this.mapLayout.getToolsBarView().getLegacyToolVisible());
 			
 			// selections
 			JSONArray selections = new JSONArray();
@@ -2711,14 +2730,42 @@ public class CustomMapView extends MapView implements IView {
 			configDialogSettings.put("drawViewColor", getDrawViewColor());
 			configDialogSettings.put("editViewColor", getEditViewColor());
 			configDialogSettings.put("drawViewStrokeStyle", getDrawViewStrokeStyle());
-			configDialogSettings.put("vertexSize", getVertexSize());
 			configDialogSettings.put("drawViewTextSize", getDrawViewTextSize());
+			configDialogSettings.put("vertexSize", getVertexSize());
+			configDialogSettings.put("bufferColor", getBufferColor());
+			configDialogSettings.put("targetColor", getTargetColor());
 			configDialogSettings.put("showDecimal", showDecimal());
 			configDialogSettings.put("showKm", showKm());
 			configDialogSettings.put("pathBuffer", getPathBuffer());
-			configDialogSettings.put("bufferColor", getBufferColor());
-			configDialogSettings.put("targetColor", getTargetColor());
 			json.put("configDialogSettings", configDialogSettings);
+			
+			// database layer queries
+			JSONArray databaseQueriesJSON = new JSONArray();
+			for (String name : databaseLayerQueryMap.keySet()) {
+				JSONObject queryJSON = new JSONObject();
+				queryJSON.put("name", name);
+				queryJSON.put("sql", databaseLayerQueryMap.get(name));
+				databaseQueriesJSON.put(queryJSON);
+			}
+			json.put("databaseQueries", databaseQueriesJSON);
+			
+			// selection queries
+			JSONArray selectionQueriesJSON = new JSONArray();
+			for (QueryBuilder builder : selectQueryList) {
+				JSONObject builderJSON = new JSONObject();
+				builder.saveToJSON(builderJSON);
+				selectionQueriesJSON.put(builderJSON);
+			}
+			json.put("selectionQueries", selectionQueriesJSON);
+			
+			// legacy selection queries
+			JSONArray legacySelectionQueriesJSON = new JSONArray();
+			for (LegacyQueryBuilder builder : legacySelectQueryList) {
+				JSONObject builderJSON = new JSONObject();
+				builder.saveToJSON(builderJSON);
+				legacySelectionQueriesJSON.put(builderJSON);
+			}
+			json.put("legacySelectionQueries", legacySelectionQueriesJSON);
 			
 		} catch (JSONException e) {
 			FLog.e("Couldn't serialise map config to JSON", e);
@@ -2750,6 +2797,9 @@ public class CustomMapView extends MapView implements IView {
 					((CreatePolygonTool) getTool(CreatePolygonTool.NAME)).setStyle(GeometryStyle.loadGeometryStyleFromJSON(tool.getJSONObject("style")));
 				}
 			}
+			this.mapLayout.getToolsBarView().setLoadToolVisible(json.getBoolean("loadToolVisible"));
+			this.mapLayout.getToolsBarView().setDatabaseToolVisible(json.getBoolean("databaseToolVisible"));
+			this.mapLayout.getToolsBarView().setLegacyToolVisible(json.getBoolean("legacyToolVisible"));
 			
 			// selections
 			removeAllSelections();
@@ -2779,6 +2829,31 @@ public class CustomMapView extends MapView implements IView {
 			setPathBuffer((float) configDialogSettings.getDouble("pathBuffer"));
 			setBufferColor(configDialogSettings.getInt("bufferColor"));
 			setTargetColor(configDialogSettings.getInt("targetColor"));
+			
+			// database layer queries
+			JSONArray databaseQueriesJSON = json.getJSONArray("databaseQueries");
+			for (int i = 0; i < databaseQueriesJSON.length(); i++) {
+				JSONObject queryJSON = databaseQueriesJSON.getJSONObject(i);
+				addDatabaseLayerQuery(queryJSON.getString("name"), queryJSON.optString("sql"));
+			}
+			
+			// selection queries
+			JSONArray selectionQueriesJSON = json.getJSONArray("selectionQueries");
+			for (int i = 0; i < selectionQueriesJSON.length(); i++) {
+				JSONObject builderJSON = selectionQueriesJSON.getJSONObject(i);
+				QueryBuilder builder = new QueryBuilder();
+				builder.loadFromJSON(builderJSON);
+				addSelectQueryBuilder(builder.getName(), builder);
+			}
+			
+			// legacy selection queries
+			JSONArray legacySelectionQueriesJSON = json.getJSONArray("legacySelectionQueries");
+			for (int i = 0; i < selectionQueriesJSON.length(); i++) {
+				JSONObject builderJSON = legacySelectionQueriesJSON.getJSONObject(i);
+				LegacyQueryBuilder builder = new LegacyQueryBuilder();
+				builder.loadFromJSON(builderJSON);
+				addLegacySelectQueryBuilder(builder.getName(), builder.getDbPath(), builder.getTableName(), builder);
+			}
 			
 		} catch (Exception e) {
 			FLog.e("Couldn't restore from JSON map config", e);
@@ -2811,7 +2886,7 @@ public class CustomMapView extends MapView implements IView {
 				if (layer.getJSONObject("textLayer") != null) {
 					textStyle = GeometryTextStyle.loadGeometryStyleFromJSON(layer.getJSONObject("textLayer").getJSONObject("textStyle"));
 				}
-				newLayer = addDatabaseLayer(layer.getString("name"), layer.getBoolean("isEntity"), layer.getString("queryName"), layer.getString("querySql"),
+				newLayer = addDatabaseLayer(layer.getString("name"), layer.getBoolean("isEntity"), layer.getString("queryName"), layer.optString("querySql"),
 						pointStyle, lineStyle, polygonStyle, textStyle);
 			} else if (layer.getString("type").equals("TrackLogDatabaseLayer")) {
 				GeometryStyle pointStyle = GeometryStyle.loadGeometryStyleFromJSON(layer.getJSONObject("pointStyle"));
@@ -2825,7 +2900,7 @@ public class CustomMapView extends MapView implements IView {
 					putUserCheckList(User.loadUserFromJSON(layer.getJSONArray("users").getJSONObject(j)),
 							layer.getJSONArray("users").getJSONObject(j).getBoolean("checked"));
 				}
-				newLayer = addDataBaseLayerForTrackLog(layer.getString("name"), getUserCheckedList(), layer.getString("queryName"), layer.getString("querySql"),
+				newLayer = addDataBaseLayerForTrackLog(layer.getString("name"), getUserCheckedList(), layer.getString("queryName"), layer.optString("querySql"),
 						pointStyle, lineStyle, polygonStyle, textStyle);
 			} else {
 				continue;

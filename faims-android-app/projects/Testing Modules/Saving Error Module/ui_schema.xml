@@ -188,7 +188,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -198,7 +198,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -208,7 +208,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -218,7 +218,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>

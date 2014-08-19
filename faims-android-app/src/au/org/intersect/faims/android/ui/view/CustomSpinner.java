@@ -186,7 +186,9 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		if (getAdapter() != null) {
 			for (int i = 0; i < getAdapter().getCount(); ++i) {
 				NameValuePair pair = (NameValuePair) getItemAtPosition(i);
-				pairs.add(pair);
+				if (pair.getValue() != null) {
+					pairs.add(pair);
+				}
 			}
 		}
 		return pairs;
@@ -196,13 +198,19 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		populate(pairs);
 	}
 	
-	public void populate(List<NameValuePair> pairs) {
+	public void populateWithNull(List<NameValuePair> pairs) {
+		if (pairs == null) return;
 		List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
 		newPairs.add(new NameValuePair("", null));
 		newPairs.addAll(pairs);
+		populate(newPairs);
+	}
+	
+	public void populate(List<NameValuePair> pairs) {
+		if (pairs == null) return;
 		ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
 				getContext(),
-				android.R.layout.simple_spinner_dropdown_item, newPairs);
+				android.R.layout.simple_spinner_dropdown_item, pairs);
 		setAdapter(arrayAdapter);
 	}
 	
