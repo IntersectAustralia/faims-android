@@ -24,6 +24,7 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.MeasurementUtil;
 
@@ -40,6 +41,9 @@ public class ShowModuleMenuManager {
 	
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	Arch16n arch16n;
 	
 	private boolean pathIndicatorVisible;
 	private float pathDistance;
@@ -93,7 +97,7 @@ public class ShowModuleMenuManager {
 	}
 	
 	public void addOnActionToMenu(final ActionButtonCallback actionItem, final Menu menu, boolean showIcon) {
-		menu.add(actionItem.actionOnLabel());
+		menu.add(arch16n.substituteValue(actionItem.actionOnLabel()));
 		if (showIcon) {
 			menu.getItem(menu.size()-1).setIcon(R.drawable.toggle_on);
 		}
@@ -113,7 +117,7 @@ public class ShowModuleMenuManager {
 	}
 	
 	public void addOffActionToMenu(final ToggleActionButtonCallback actionItem, final Menu menu) {
-		menu.add(actionItem.actionOffLabel());
+		menu.add(arch16n.substituteValue(actionItem.actionOffLabel()));
 		menu.getItem(menu.size()-1).setIcon(R.drawable.toggle_off);
 		menu.getItem(menu.size()-1).setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			
