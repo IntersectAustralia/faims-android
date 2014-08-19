@@ -10,6 +10,8 @@ import android.text.InputType;
 import android.text.format.Time;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
@@ -18,7 +20,6 @@ import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
-import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nativecss.NativeCSS;
 
@@ -28,6 +29,7 @@ public class ViewFactory {
 	public static final int TEXT_SIZE = 10;
 	public static final int BUTTON_SIZE = 34;
 	public static final int TEXT_AREA_SIZE = 5;
+	public static final float LABEL_ICON_SCALE = 0.6F;
 	
 	class DefaultLayoutParams extends LayoutParams {
 		
@@ -60,20 +62,29 @@ public class ViewFactory {
         return textView;
 	}
 	
-	protected Button createCertaintyButton() {
-		return createButton("C");
+	protected ImageView createCertaintyIcon() {
+		return createLabelIcon(R.drawable.certainty);
 	}
 	
-	protected Button createAnnotationButton() {
-		return createButton("A");
+	protected ImageView createAnnotationIcon() {
+		return createLabelIcon(R.drawable.annotation);
 	}
 	
-	protected Button createDirtyButton() {
-		return createButton("\u26A0");
+	protected ImageView createDirtyIcon() {
+		return createLabelIcon(R.drawable.dirty);
 	}
 
-	protected Button createInfoButton() {
-		return createButton("?");
+	protected ImageView createInfoIcon() {
+		return createLabelIcon(R.drawable.info);
+	}
+	
+	private ImageView createLabelIcon(int drawableResource) {
+		ImageView image = new ImageView(context());
+		image.setScaleType(ScaleType.FIT_CENTER);
+		image.setScaleX(LABEL_ICON_SCALE);
+		image.setScaleY(LABEL_ICON_SCALE);
+		image.setImageResource(drawableResource);
+		return image;
 	}
 	
 	protected Table createTableView(String ref, boolean dynamic) {
@@ -246,22 +257,6 @@ public class ViewFactory {
 	 
 	protected MapLayout createMapView(String ref, boolean dynamic) {
 		return new MapLayout(context(), ref, dynamic);
-	}
-	
-	private Button createButton(String label) {
-		Button button = new Button(context());
-		button.setBackgroundResource(R.drawable.square_button);
-		int size = getDefaultSize();
-		LayoutParams layoutParams = new DefaultLayoutParams(size, size);
-		button.setLayoutParams(layoutParams);
-		button.setText(label);
-		button.setTextSize(TEXT_SIZE);
-		NativeCSS.addCSSClass(button, "button-extra");
-		return button;
-	}
-	
-	private int getDefaultSize() {
-		return (int) ScaleUtil.getDip(context(), BUTTON_SIZE);
 	}
 	
 	private Context context() {

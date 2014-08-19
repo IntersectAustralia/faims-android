@@ -35,9 +35,9 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -1144,7 +1144,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (obj instanceof ICustomView) {
 				ICustomView customView = (ICustomView) obj;
 				
-				Button dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
+				ImageView dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
 					dirtyButton.setVisibility(isDirty ? View.VISIBLE : View.GONE);
 				}
@@ -1170,7 +1170,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				boolean isViewDirty = isDirty || customView.isDirty();
 				
-				Button dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
+				ImageView dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
 					dirtyButton.setVisibility(isViewDirty ? View.VISIBLE : View.GONE);
 				}
