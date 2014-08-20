@@ -70,6 +70,6 @@
 	    	android:orientation="vertical"
 	    	android:divider="@drawable/vertical_divider"
 	        android:showDividers="middle"
-	        ></LinearLayout> -->
+	        ></LinearLayout>
 	</LinearLayout>
 </ScrollView>
