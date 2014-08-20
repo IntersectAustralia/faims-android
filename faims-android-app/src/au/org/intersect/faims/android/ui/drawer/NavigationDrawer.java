@@ -19,6 +19,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.view.TabGroup;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
+import au.org.intersect.faims.android.util.Arch16n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,6 +36,9 @@ public class NavigationDrawer {
 	
 	@Inject
 	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	Arch16n arch16n;
 
 	private WeakReference<ShowModuleActivity> activityRef;
 	private TextView moduleNameText;
@@ -99,7 +103,7 @@ public class NavigationDrawer {
 				}
 				
 			});
-			groupButton.setText(tabGroup.getLabel());
+			groupButton.setText(arch16n.substituteValue(tabGroup.getLabel()));
 			if (i == tabGroupStack.size() - 1) {
 				groupButton.setEnabled(false);
 			}
@@ -133,7 +137,7 @@ public class NavigationDrawer {
 	
 	public void addNavigationAction(final String name, final ActionButtonCallback callback, String type) {
 		Button button = (Button) LayoutInflater.from(navigationButtonsLayout.getContext()).inflate(getButtonLayout(type), null);
-		button.setText(callback.actionOnLabel());
+		button.setText(arch16n.substituteValue(callback.actionOnLabel()));
 		button.setOnClickListener(new OnClickListener() {
 			
 			@Override
