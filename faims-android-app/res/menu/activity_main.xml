@@ -10,8 +10,4 @@
     android:icon="@android:drawable/ic_menu_preferences"
     android:showAsAction="never"/>
   
-   <item android:id="@+id/faims_about"
-    android:title="@string/faims_about_title"
-    android:icon="@android:drawable/ic_menu_preferences"
-    android:showAsAction="never"/>
 </menu>
