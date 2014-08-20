@@ -301,7 +301,7 @@ public class FetchModulesActivity extends RoboActivity {
 			}
 		});
 		
-		builder.setNeutralButton("Update Data", new OnClickListener() {
+		builder.setNeutralButton("Update Maps", new OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
