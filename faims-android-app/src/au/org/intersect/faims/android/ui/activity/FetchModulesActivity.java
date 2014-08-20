@@ -71,7 +71,7 @@ public class FetchModulesActivity extends RoboActivity {
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show module activity
-				activity.showModuleActivity();
+				activity.confirmAndShowModuleActivity();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
@@ -304,7 +304,7 @@ public class FetchModulesActivity extends RoboActivity {
 			}
 		});
 		
-		builder.setNeutralButton("Update Data", new OnClickListener() {
+		builder.setNeutralButton("Update Maps", new OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -756,8 +756,23 @@ public class FetchModulesActivity extends RoboActivity {
     	confirmDialog.show();
     }
     
+    private void confirmAndShowModuleActivity() {
+    	confirmDialog = new ConfirmDialog(FetchModulesActivity.this,
+				getString(R.string.module_downloaded_title),
+				getString(R.string.module_downloaded_message),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						showModuleActivity();
+					}
+    		
+    	});
+    	confirmDialog.show();
+    }
+    
     private void showModuleActivity() {
-    	Intent showModulesIntent = new Intent(this, ShowModuleActivity.class);
+    	Intent showModulesIntent = new Intent(FetchModulesActivity.this, ShowModuleActivity.class);
 		showModulesIntent.putExtra("key", selectedModule.key);
 		startActivityForResult(showModulesIntent, 1);
 		finish();

@@ -51,13 +51,13 @@ public class DownloadModuleService extends DownloadUploadService {
 		}
 		
 		// 4. download app files
-		if (!downloadFiles("app", Request.APP_FILES_INFO_REQUEST(serviceModule), 
-				Request.APP_FILE_DOWNLOAD_REQUEST(serviceModule), 
-				serviceModule.getDirectoryPath(this.getResources().getString(R.string.app_dir)))) {
-			FLog.d("Failed to download app files");
-			FileUtil.delete(serviceModule.getDirectoryPath());
-			return;
-		}
+//		if (!downloadFiles("app", Request.APP_FILES_INFO_REQUEST(serviceModule), 
+//				Request.APP_FILE_DOWNLOAD_REQUEST(serviceModule), 
+//				serviceModule.getDirectoryPath(this.getResources().getString(R.string.app_dir)))) {
+//			FLog.d("Failed to download app files");
+//			FileUtil.delete(serviceModule.getDirectoryPath());
+//			return;
+//		}
 		
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
 		module.version = jsonInfo.get("version").getAsString();

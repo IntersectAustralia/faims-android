@@ -88,6 +88,9 @@
     <string name="render_ui_failure_title">Error</string>
     <string name="render_ui_failure_message">Failed to load module</string>
     
+    <string name="module_downloaded_title">Module Downloaded</string>
+    <string name="module_downloaded_message">Core module successfully downloaded. To fetch pictures, videos and attachments please turn on module sync.</string>
+    
     <string name="faims_fetch_module_list_title">Fetch Module List</string>
     <string name="faims_server_setting_title">Settings</string>
     <string name="faims_about_title">About</string>
@@ -99,7 +102,6 @@
     <string name="gps_inactive">GPS disabled</string>
     <string name="action_gps_active_has_signal">GPS active has signal</string>
     <string name="action_gps_active_no_signal">GPS active no signal</string>
-    
     
     <string name="tracker_active_has_gps">Track log active, GPS connected</string>
     <string name="tracker_active_no_gps">Track log active, GPS not connected</string>
