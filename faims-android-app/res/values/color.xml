@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <drawable name="color_blue">#66B7ED</drawable>
-    <drawable name="color_black">#88000000</drawable>
-    <drawable name="color_grey">#E5E5E5</drawable> 
-    <drawable name="color_transparent">#00000000</drawable>
+    <color name="color_blue">#66B7ED</color>
+    <color name="color_black">#88000000</color>
+    <color name="color_grey">#E5E5E5</color> 
+    <color name="color_transparent">#00000000</color>
 </resources>

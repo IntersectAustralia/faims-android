@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:state_focused="true" android:state_pressed="false">
 		<shape xmlns:android="http://schemas.android.com/apk/res/android"> 
-			<solid android:color="@drawable/color_blue"/>
+			<solid android:color="@color/color_blue"/>
 			<padding android:left="10dp" android:top="10dp" 
 				android:right="10dp" android:bottom="10dp" /> 
 			<corners android:radius="15dp" /> 
@@ -10,7 +10,7 @@
 	</item>
 	<item android:state_focused="true" android:state_pressed="true">
 		<shape xmlns:android="http://schemas.android.com/apk/res/android"> 
-			<solid android:color="@drawable/color_blue"/>
+			<solid android:color="@color/color_blue"/>
 			<padding android:left="10dp" android:top="10dp" 
 				android:right="10dp" android:bottom="10dp" /> 
 			<corners android:radius="15dp" /> 
@@ -18,7 +18,7 @@
 	</item>
 	<item android:state_focused="false" android:state_pressed="true">
 		<shape xmlns:android="http://schemas.android.com/apk/res/android"> 
-			<solid android:color="@drawable/color_blue"/>
+			<solid android:color="@color/color_blue"/>
 			<padding android:left="10dp" android:top="10dp" 
 				android:right="10dp" android:bottom="10dp" /> 
 			<corners android:radius="15dp" /> 
@@ -26,7 +26,7 @@
 	</item>
 	<item>
 		<shape xmlns:android="http://schemas.android.com/apk/res/android"> 
-			<solid android:color="@drawable/color_black"/>
+			<solid android:color="@color/color_black"/>
 			<padding android:left="10dp" android:top="10dp" 
 				android:right="10dp" android:bottom="10dp" /> 
 			<corners android:radius="15dp" /> 
