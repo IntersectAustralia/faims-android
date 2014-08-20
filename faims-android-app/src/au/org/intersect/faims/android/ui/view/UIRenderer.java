@@ -27,6 +27,7 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.FileUtil;
 
@@ -47,6 +48,9 @@ public class UIRenderer {
 	@Inject
 	AutoSaveManager autoSaveManager;
 	
+	@Inject
+	NavigationDrawer navigationDrawer;
+	
     private FormEntryController fem;
     
     private WeakReference<ShowModuleActivity> activityRef;
@@ -59,14 +63,11 @@ public class UIRenderer {
     private ArrayList<Tab> tabList;
     private HashMap<String, Tab> tabMap;
     
-
     private LinkedList<View> viewList;
     private HashMap<String, View> viewMap;
     private HashMap<String, Tab> viewTabMap; 
     
     protected List<Integer> indexes;
-    
-    private TabGroup currentTabGroup;
 
 	private Map<String,Map<String,String>> styles;
 
@@ -85,30 +86,52 @@ public class UIRenderer {
         this.viewMap = new HashMap<String, View>();
         this.viewTabMap = new HashMap<String, Tab>();
         this.indexes = null;
-        this.currentTabGroup = null;
         this.styles = new HashMap<String, Map<String,String>>();
     }
+	
+	public void navigateToTabGroup(int index) {
+		try {
+			FragmentManager fm = activityRef.get().getSupportFragmentManager();
+			
+	    	int size = navigationDrawer.getTabGroupCount();
+	    	int count = size - 1;
+	    	while (count > index) {
+	    		if (count > index && count < size - 1) {
+	    			TabGroup tabGroup = (TabGroup) fm.findFragmentByTag(navigationDrawer.peekTabGroup().getRef());
+	    			tabGroup.addPopCounter();
+	    		}
+	    		navigationDrawer.popTabGroupNoUpdate();
+	    		fm.popBackStack();
+	    		count--;
+	    	}
+	    	
+	    	navigationDrawer.update();
+		} catch (Exception e) {
+			FLog.e("Error tyring to navigate to tab group", e);
+		}
+	}
 
     public TabGroup showTabGroup(int index) {
     	FragmentManager fm = activityRef.get().getSupportFragmentManager();
     	
     	TabGroup tabGroup = this.tabGroupList.get(index);
     	if (tabGroup == null) return null;
-    	invalidateListViews(tabGroup);
-    	if (tabGroup == this.currentTabGroup) {
+    	
+    	if (tabGroup == navigationDrawer.peekTabGroup()) {
     		tabGroup.onShowTabGroup();
-    		return currentTabGroup;
+    		return tabGroup;
     	}
 	    
 	    FragmentTransaction ft = fm.beginTransaction();
-        if(this.currentTabGroup == null){
+        if(navigationDrawer.peekTabGroup() == null){
         	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getRef());
         }else{
         	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getRef());   	
-        	ft.addToBackStack(currentTabGroup.getRef());
+        	ft.addToBackStack(navigationDrawer.peekTabGroup().getRef());
         }
-        this.currentTabGroup = tabGroup;
         ft.commit();
+        
+        navigationDrawer.pushTabGroup(tabGroup);
         
         return tabGroup;
     }
@@ -118,35 +141,24 @@ public class UIRenderer {
     	
     	TabGroup tabGroup = this.tabGroupMap.get(name);
     	if (tabGroup == null) return null;
-    	invalidateListViews(tabGroup);
-    	if (tabGroup == this.currentTabGroup){
+
+    	if (tabGroup == navigationDrawer.peekTabGroup()){
     		tabGroup.onShowTabGroup();
-    		return currentTabGroup;
+    		return tabGroup;
     	}
     	
     	FragmentTransaction ft = fm.beginTransaction();
-	    if(this.currentTabGroup == null){
-        	ft.add(R.id.fragment_content, tabGroup, tabGroup.getRef());
+	    if(navigationDrawer.peekTabGroup() == null){
+        	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getRef());
         }else{
         	ft.replace(R.id.fragment_content, tabGroup, tabGroup.getRef());
-        	ft.addToBackStack(currentTabGroup.getRef());
+        	ft.addToBackStack(navigationDrawer.peekTabGroup().getRef());
         }
-	    this.currentTabGroup = tabGroup;
         ft.commit();
+        
+        navigationDrawer.pushTabGroup(tabGroup);
+        
         return tabGroup;
-    }
-
-    public void invalidateListViews(TabGroup tabGroup){
-    	if (tabGroup.getTabs() != null) {
-	    	for(Tab tab : tabGroup.getTabs()){
-				for(View view : tab.getViews()){
-					if(view instanceof CustomListView){
-						CustomListView listView = (CustomListView) view;
-						listView.invalidateViews();
-					}
-				}
-			}
-    	}
     }
     
     public Tab showTab(String label) {
@@ -187,14 +199,6 @@ public class UIRenderer {
     	return viewMap.get(ref);
     }
 	
-	public TabGroup getCurrentTabGroup() {
-		return currentTabGroup;
-	}
-
-	public void setCurrentTabGroup(TabGroup currentTabGroup) {
-		this.currentTabGroup = currentTabGroup;
-	}
-	
 	@SuppressWarnings("rawtypes")
 	public List<View> getViewByType(Class type){
 		List<View> result = new ArrayList<View>();
@@ -213,7 +217,7 @@ public class UIRenderer {
 			TabGroup tabGroup = (TabGroup) fragmentManager.findFragmentByTag(fragmentManager.getBackStackEntryAt(i).getName());
 			indexes.add(tabGroupList.indexOf(tabGroup));
 		}
-		indexes.add(tabGroupList.indexOf(currentTabGroup));
+		indexes.add(tabGroupList.indexOf(navigationDrawer.peekTabGroup()));
 		savedInstanceState.putIntegerArrayList(TAG + "indexes", (ArrayList<Integer>) indexes);
 	}
 

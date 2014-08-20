@@ -78,6 +78,7 @@ import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.DateDialog;
 import au.org.intersect.faims.android.ui.dialog.TextDialog;
 import au.org.intersect.faims.android.ui.dialog.TimeDialog;
+import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.LegacyQueryBuilder;
 import au.org.intersect.faims.android.ui.map.QueryBuilder;
@@ -136,6 +137,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Inject
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	NavigationDrawer navigationDrawer;
 
 	private Interpreter interpreter;
 
@@ -3615,6 +3619,22 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public void refreshActionBarMenu() {
 		activityRef.get().updateStatusBar();
+	}
+	
+	public void addNavigationButton(String name, ActionButtonCallback callback, String type) {
+		try {
+			navigationDrawer.addNavigationAction(name, callback, type);
+		} catch (Exception e) {
+			reportError("Error tring to add navigation button action", e);
+		}
+	}
+	
+	public void removeNavigationButton(String name) {
+		try {
+			navigationDrawer.removeNavigationAction(name);
+		} catch (Exception e) {
+			reportError("Error tring to remove navigation button action", e);
+		}
 	}
 	
 }

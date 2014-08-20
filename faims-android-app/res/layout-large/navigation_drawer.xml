@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="500dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#FFFFFF"
+    >
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+    	android:orientation="vertical"
+    	android:background="#FFFFFF"
+    	android:divider="@drawable/vertical_divider"
+        android:showDividers="middle"
+	    >
+	    <FrameLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        >
+	        <View
+	            android:layout_width="5dp"
+	            android:layout_height="match_parent"
+			    android:layout_gravity="left"
+			    android:background="@drawable/color_blue"/>
+		    <LinearLayout
+		        android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+		    	android:orientation="vertical"
+		    	android:layout_gravity="right"
+		    	android:paddingLeft="5dp"
+		        >
+		        <TextView 
+				    android:id="@+id/module_name"
+				    android:layout_width="match_parent"
+				    android:layout_height="wrap_content"
+				    android:drawablePadding="10dp"
+				    android:paddingLeft="22dp"
+				    android:paddingTop="22dp"
+				    android:paddingRight="22dp"
+				    android:paddingBottom="12dp"
+				    android:textSize="36sp" >
+				</TextView>
+			    <TextView 
+				    android:id="@+id/module_description"
+				    android:layout_width="match_parent"
+				    android:layout_height="wrap_content"
+				    android:drawablePadding="10dp"
+				    android:paddingLeft="22dp"
+				    android:paddingRight="22dp"
+				    android:paddingBottom="22dp"
+				    android:textColor="#777777" >
+				</TextView>
+	        </LinearLayout>
+	    </FrameLayout>
+        <include layout="@layout/home_button"/>
+	    <LinearLayout
+		    android:id="@+id/navigation_stack"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+	    	android:orientation="vertical"
+	    	android:divider="@drawable/vertical_divider"
+	        android:showDividers="middle"
+	        ></LinearLayout>
+	    <include layout="@layout/exit_button"/>
+	    <LinearLayout
+	        android:id="@+id/navigation_buttons"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+	    	android:orientation="vertical"
+	    	android:divider="@drawable/vertical_divider"
+	        android:showDividers="middle"
+	        ></LinearLayout>
+	</LinearLayout>
+</ScrollView>

@@ -29,7 +29,6 @@ import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -68,8 +67,8 @@ import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
+import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
-import au.org.intersect.faims.android.ui.view.TabGroup;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -139,6 +138,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	@Inject
 	AsyncTaskManager asyncTaskManager;
+	
+	@Inject
+	NavigationDrawer navigationDrawer;
 	
 	private WifiBroadcastReceiver broadcastReceiver;
 
@@ -233,10 +235,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 		setupSync();
 		setupWifiBroadcast();
 		setupManagers();
+		
+		navigationDrawer.init(this);
 
 		String css = module.getCSS();
 		NativeCSS.styleWithCSS(css);
-
+		
 		startLoadTask();
 	}
 
@@ -536,59 +540,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	public void onBackPressed() {
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		if (fragmentManager.getBackStackEntryCount() > 0) {
-			TabGroup currentTabGroup = (TabGroup) fragmentManager
-					.findFragmentByTag(fragmentManager.getBackStackEntryAt(
-							fragmentManager.getBackStackEntryCount() - 1)
-							.getName());
-			if (currentTabGroup != null) {
-				uiRenderer.invalidateListViews(currentTabGroup);
-				uiRenderer.setCurrentTabGroup(currentTabGroup);
-				getActionBar().setTitle(currentTabGroup.getLabel());
-			}
+		if (navigationDrawer.getTabGroupCount() > 1) {
+			navigationDrawer.popTabGroup();
+			getActionBar().setTitle(navigationDrawer.peekTabGroup().getLabel());
 			super.onBackPressed();
 		} else {
-			if (syncStarted) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("Stop Syncing");
-				builder.setMessage("Syncing is still in progress. Do you want to exit the activity and stop the sync?");
-				builder.setPositiveButton("Yes", new OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						stopSync();
-						ShowModuleActivity.super.onBackPressed();
-					}
-				});
-				builder.setNegativeButton("No", new OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// Do nothing
-					}
-				});
-				builder.show();
-			} else {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("Exit Module");
-				builder.setMessage("Do you want to exit module?");
-				builder.setPositiveButton("Yes", new OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						ShowModuleActivity.super.onBackPressed();
-					}
-				});
-				builder.setNegativeButton("No", new OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// Do nothing
-					}
-				});
-				builder.show();
-			}
+			closeActivity();
 		}
 	}
 
@@ -1415,5 +1372,48 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	public void clearDeviceBuffer() {
 		this.deviceBuffer = null;
+	}
+
+	public void closeActivity() {
+		if (syncStarted) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Stop Syncing");
+			builder.setMessage("Syncing is still in progress. Do you want to exit the activity and stop the sync?");
+			builder.setPositiveButton("Yes", new OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					stopSync();
+					finish();
+				}
+			});
+			builder.setNegativeButton("No", new OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Do nothing
+				}
+			});
+			builder.show();
+		} else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Exit Module");
+			builder.setMessage("Do you want to exit module?");
+			builder.setPositiveButton("Yes", new OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+			builder.setNegativeButton("No", new OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Do nothing
+				}
+			});
+			builder.show();
+		}
 	}
 }

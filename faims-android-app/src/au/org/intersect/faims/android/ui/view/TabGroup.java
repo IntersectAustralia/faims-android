@@ -61,6 +61,8 @@ public class TabGroup extends Fragment {
 
 	private Bundle tempSavedInstanceState;
 	private boolean isVisible;
+
+	private int popCounter;
 	
 	public TabGroup() {
 	}
@@ -117,30 +119,36 @@ public class TabGroup extends Fragment {
 				if(this.tempSavedInstanceState == null && this.onLoadCommands.size() > 0){
 					executeCommands(this.onLoadCommands);
 				}
-			}
-			
-			// TODO does this listener need to be removed?
-			tabHost.setOnTabChangedListener(new OnTabChangeListener() {
-	
-				@Override
-				public void onTabChanged(String arg0) {
-					if (lastTab != null) {
-						lastTab.onHideTab();
-						lastTab = null;
+				
+				tabHost.setOnTabChangedListener(new OnTabChangeListener() {
+		
+					@Override
+					public void onTabChanged(String arg0) {
+						if (lastTab != null) {
+							lastTab.onHideTab();
+							lastTab = null;
+						}
+						
+						Tab tab = getCurrentTab();
+						if (tab != null) {
+							tab.onShowTab();
+							lastTab = tab;
+						}
 					}
 					
-					Tab tab = getCurrentTab();
-					if (tab != null) {
-						tab.onShowTab();
-						lastTab = tab;
-					}
-				}
+				});
 				
-			});
+				popCounter = 0;
+			}
 			
 			// Solves a prob the back button gives us with the TabHost already having a parent
-			if (tabHost.getParent() != null){
+			if (tabHost != null && tabHost.getParent() != null){
 				((ViewGroup) tabHost.getParent()).removeView(tabHost);
+			}
+			
+			if (popCounter > 0) {
+				popCounter--;
+				return tabHost;
 			}
 			
 			if(this.tempSavedInstanceState == null && this.onShowCommands.size() > 0){
@@ -292,6 +300,7 @@ public class TabGroup extends Fragment {
 			tab.onShowTab();
 			lastTab = getCurrentTab();
 		}
+		invalidateListViews();
 		resetTabGroupOnShow();
 		isVisible = true;
 	}
@@ -305,6 +314,19 @@ public class TabGroup extends Fragment {
 		}
 		isVisible = false;
 	}
+	
+	public void invalidateListViews(){
+    	if (getTabs() != null) {
+	    	for(Tab tab : getTabs()){
+				for(View view : tab.getViews()){
+					if(view instanceof CustomListView){
+						CustomListView listView = (CustomListView) view;
+						listView.invalidateViews();
+					}
+				}
+			}
+    	}
+    }
 	
 	private void resetTabGroupOnShow() {
 		if (tabHost != null) {
@@ -437,6 +459,10 @@ public class TabGroup extends Fragment {
 		for (Tab tab : tabs) {
 			tab.removeCustomContainers();
 		}
+	}
+
+	public void addPopCounter() {
+		popCounter++;
 	}
 
 }

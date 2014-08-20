@@ -2476,6 +2476,36 @@ refreshActionBarMenu() {
 }
 
 /**
+  * Adds an action button to the navigation drawer
+  *
+  * @param name the reference name of the action button
+  * @param callback the callback with item action and label
+  */
+addNavigationButton(String name, ActionButtonCallback callback) {
+  linker.addNavigationButton(name, callback, "default");
+}
+
+/**
+  * Adds an action button to the navigation drawer
+  *
+  * @param name the reference name of the action button
+  * @param callback the callback with item action and label
+  * @param type the type of button to add (default, primary, success and danger)
+  */
+addNavigationButton(String name, ActionButtonCallback callback, String type) {
+  linker.addNavigationButton(name, callback, type);
+}
+
+/**
+  * Remove an action button to the navigation drawer
+  *
+  * @param name the reference name of the action button
+  */
+removeNavigationButton(String name) {
+  linker.removeNavigationButton(name);
+}
+
+/**
   * Helper method to be used with a button click event to attach files to a view
   *
   * @param ref the view reference to attach the files to (must be of type file)

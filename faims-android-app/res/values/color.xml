@@ -2,4 +2,6 @@
 <resources>
     <drawable name="color_blue">#66B7ED</drawable>
     <drawable name="color_black">#88000000</drawable>
+    <drawable name="color_grey">#F0F0F0</drawable>
+    <drawable name="color_transparent">#00000000</drawable>
 </resources>
