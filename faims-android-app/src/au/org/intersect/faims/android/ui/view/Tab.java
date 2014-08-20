@@ -10,26 +10,24 @@ import java.util.Map;
 import org.javarosa.core.model.Constants;
 
 import android.app.ActionBar.LayoutParams;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
@@ -122,6 +120,9 @@ public class Tab {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	private static final int PADDING = 25;
+	private static final int TOP_PADDING = 10;
 
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;
@@ -130,8 +131,8 @@ public class Tab {
 	private List<View> viewList;
 	private Map<String, List<View>> attributeViewMap;
 	private List<CustomMapView> mapViewList;
-	private Map<String, Button> dirtyButtonMap;
-	private Map<String, LinearLayout> viewLayoutMap;
+	private Map<String, ImageView> dirtyButtonMap;
+	private Map<String, FrameLayout> viewLayoutMap;
 	private Map<String, CustomLinearLayout> containerMap;
 	
 	private List<Creator> viewCreators;
@@ -166,16 +167,17 @@ public class Tab {
 		this.viewList = new ArrayList<View>();	
 		this.mapViewList = new ArrayList<CustomMapView>();
 		this.attributeViewMap = new HashMap<String, List<View>>();
-		this.dirtyButtonMap = new HashMap<String, Button>();
-		this.viewLayoutMap = new HashMap<String, LinearLayout>();
+		this.dirtyButtonMap = new HashMap<String, ImageView>();
+		this.viewLayoutMap = new HashMap<String, FrameLayout>();
 		this.containerMap = new HashMap<String, CustomLinearLayout>();
 		
 		this.viewCreators = new ArrayList<Creator>();
 		
 		linearLayout = new LinearLayout(activityRef.get());
         linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        linearLayout.setOrientation(LinearLayout.VERTICAL);    
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setBackgroundColor(Color.WHITE);
+        linearLayout.setPadding(0, (int) ScaleUtil.getDip(activityRef.get(), TOP_PADDING), 0, 0); 
 		
         if (scrollable) {
         	scrollView = new ScrollView(this.linearLayout.getContext());
@@ -457,7 +459,7 @@ public class Tab {
 		}
 		
 		// remove from dirty button map
-		Button dirtyButton = dirtyButtonMap.get(ref);
+		ImageView dirtyButton = dirtyButtonMap.get(ref);
 		if (dirtyButton != null) {
 			ViewParent parent = dirtyButton.getParent();
 			if (parent instanceof ViewGroup) {
@@ -469,7 +471,7 @@ public class Tab {
 		}
 		
 		// remove from layout button map
-		LinearLayout layout = viewLayoutMap.get(ref);
+		FrameLayout layout = viewLayoutMap.get(ref);
 		if (layout != null) {
 			ViewParent parent = layout.getParent();
 			if (parent instanceof ViewGroup) {
@@ -491,216 +493,89 @@ public class Tab {
 	}
 
 	private void setupView(LinearLayout linearLayout, View view, FormInputDef attribute, String ref, boolean isArchEnt, boolean isRelationship) {
-		Button certaintyButton = null;
-    	Button annotationButton = null;
-    	Button dirtyButton = null;
-    	Button infoButton = null;
+		ImageView certaintyImage = null;
+		ImageView annotationImage = null;
+		ImageView infoImage = null;
+		ImageView dirtyImage = null;
 		
     	// setup view buttons
-		if (attribute.controlType != Constants.CONTROL_TRIGGER) {
-			if(attribute.questionText != null && !attribute.questionText.isEmpty()){
-				LinearLayout fieldLinearLayout = new LinearLayout(this.linearLayout.getContext());
-		    	fieldLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
-		    	
-	            TextView textView = viewFactory.createLabel(ref, attribute);
-	            fieldLinearLayout.addView(textView);
-	                
-	    		if(attribute.certainty && (isArchEnt || isRelationship)){
-	    			certaintyButton = viewFactory.createCertaintyButton();
-	    			setupCertaintyButtonClick(certaintyButton, view);
-	    			fieldLinearLayout.addView(certaintyButton);
-	    		}
-	    		
-	    		if(attribute.annotation && (isArchEnt || isRelationship) && !Attribute.FREETEXT.equals(attribute.type)){
-	    			annotationButton = viewFactory.createAnnotationButton();
-	    			setupAnnotationButtonClick(annotationButton, view);
-	    			fieldLinearLayout.addView(annotationButton);
-	    		}
-	    		
-	    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
-	    			infoButton = viewFactory.createInfoButton();
-	    			setupInfoButtonClick(infoButton, attribute.name);
-	    			fieldLinearLayout.addView(infoButton);
-	    		}
-	    		
-	    		if (isArchEnt || isRelationship) {
-		    		dirtyButton = viewFactory.createDirtyButton();
-		    		dirtyButton.setVisibility(View.GONE);
-		    		setupDirtyButtonClick(dirtyButton, view);
-		    		fieldLinearLayout.addView(dirtyButton);
-		    		dirtyButtonMap.put(ref, dirtyButton);
-	    		}
-	    		
-	    		linearLayout.addView(fieldLinearLayout);
-	    		viewLayoutMap.put(ref, fieldLinearLayout);
-			}
-        }
+		if (view instanceof ICustomView) {
+			ICustomView customView = (ICustomView) view;
+			if (attribute.controlType != Constants.CONTROL_TRIGGER) {
+				if(attribute.questionText != null && !attribute.questionText.isEmpty()){
+					FrameLayout fieldFrameLayout = new FrameLayout(this.linearLayout.getContext());
+					int padding = (int) ScaleUtil.getDip(fieldFrameLayout.getContext(), PADDING);
+					fieldFrameLayout.setPadding(0, 0, padding, 0);
+					
+					Button buttonOverlay = new Button(fieldFrameLayout.getContext());
+					buttonOverlay.setBackgroundColor(Color.TRANSPARENT);
+					buttonOverlay.setBackgroundResource(R.drawable.label_selector);
+					fieldFrameLayout.addView(buttonOverlay);
+			    	
+		            TextView textView = viewFactory.createLabel(ref, attribute);
+		            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		    		params.gravity = Gravity.CENTER_VERTICAL;
+		            fieldFrameLayout.addView(textView, params);
+		            
+		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
+		            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+		            iconParams.topMargin = PADDING;
+		            iconParams.bottomMargin = PADDING;
+		            
+		            final LabelDialog labelDialog = new LabelDialog(linearLayout.getContext(), customView);
+		            labelDialog.setTitle(attribute.questionText);
+		    		
+		    		if(attribute.annotation && (isArchEnt || isRelationship) && !Attribute.FREETEXT.equals(attribute.type)){
+		    			annotationImage = viewFactory.createAnnotationIcon();
+		    			labelDialog.addAnnotationTab();
+		    			icons.addView(annotationImage);
+		    		}
+		    		
+		    		if(attribute.certainty && (isArchEnt || isRelationship)){
+		    			certaintyImage = viewFactory.createCertaintyIcon();
+		    			labelDialog.addCertaintyTab();
+		    			icons.addView(certaintyImage);
+		    		}
+		    		
+		    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
+		    			infoImage = viewFactory.createInfoIcon();
+		    			labelDialog.addInfoTab(getAttributeDescription(attribute.name), moduleDir);
+		    			icons.addView(infoImage);
+		    		}
+		    		
+		    		if (isArchEnt || isRelationship) {
+			    		dirtyImage = viewFactory.createDirtyIcon();
+			    		dirtyImage.setVisibility(View.GONE);
+			    		labelDialog.addDirtyTab();
+			    		icons.addView(dirtyImage);
+			    		dirtyButtonMap.put(ref, dirtyImage);
+		    		}
+		    		
+		    		params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		    		params.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+		    		fieldFrameLayout.addView(icons, params);
+		    		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
+		    			
+		    			@Override
+		    			public boolean onLongClick(View v) {
+	    					labelDialog.show();
+		    				return false;
+		    			}
+		    		});
+		    		
+		    		linearLayout.addView(fieldFrameLayout);
+		    		viewLayoutMap.put(ref, fieldFrameLayout);
+				}
+	        }
+		}
 		
         linearLayout.addView(view);
         
         if (view instanceof ICustomView) {
         	ICustomView customView = (ICustomView) view;
-        	customView.setCertaintyEnabled(certaintyButton != null);
-        	customView.setAnnotationEnabled(annotationButton != null);
+        	customView.setCertaintyEnabled(certaintyImage != null);
+        	customView.setAnnotationEnabled(annotationImage != null);
         }
-	}
-	
-	private void setDirtyTextArea(EditText text, String value) {
-		if (value == null || "".equals(value)) return;
-		
-		String[] lines = value.split(";");
-		StringBuffer sb = new StringBuffer();
-		int count = 0;
-		for (String l : lines) {
-			if (l.trim().equals("")) continue;
-			sb.append(l);
-			sb.append("\n");
-			count++;
-		}
-		text.setLines(count);
-		text.setText(sb.toString());
-	}
-	
-	private void setupDirtyButtonClick(Button dirtyButton, final View view) {
-		dirtyButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				ScrollView scrollView = new ScrollView(linearLayout.getContext());
-				EditText textView = new EditText(linearLayout.getContext());
-				scrollView.addView(textView);
-				textView.setEnabled(false);
-				
-				if (view instanceof ICustomView) {
-					ICustomView customView = (ICustomView) view;
-					setDirtyTextArea(textView, customView.getDirtyReason());
-				}
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(linearLayout.getContext());
-				
-				builder.setTitle("Annotation");
-				builder.setMessage("Dirty Reason:");
-				builder.setView(scrollView);
-				builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int id) {
-				            // User cancelled the dialog
-				        }
-				    });
-				
-				builder.create().show();
-			}
-		});
-	}
-
-	private void setupAnnotationButtonClick(Button annotationButton, final View view) {
-		annotationButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				final EditText editText = new EditText(linearLayout.getContext());
-				
-				if (view instanceof ICustomView) {
-					ICustomView customView = (ICustomView) view;
-					editText.setText(customView.getAnnotation());
-				}
-				
-				AlertDialog.Builder builder = new AlertDialog.Builder(linearLayout.getContext());
-				
-				builder.setTitle("Annotation");
-				builder.setMessage("Set the annotation text for the field");
-				builder.setView(editText);
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int id) {
-				        	
-				        	if (view instanceof ICustomView) {
-								ICustomView customView = (ICustomView) view;
-								customView.setAnnotation(editText.getText().toString());
-							}
-				        }
-				    });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int id) {
-				            // User cancelled the dialog
-				        }
-				    });
-				
-				builder.create().show();
-			}
-		});
-	}
-
-	private void setupCertaintyButtonClick(Button certaintyButton,final View view) {
-		certaintyButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				LinearLayout layout = new LinearLayout(linearLayout.getContext());
-				layout.setOrientation(LinearLayout.VERTICAL);
-				final SeekBar seekBar = new SeekBar(linearLayout.getContext());
-				float certainty = 0;
-				seekBar.setMax(100);
-				seekBar.setMinimumWidth((int) ScaleUtil.getDip(linearLayout.getContext(), 400));
-				
-				if (view instanceof ICustomView) {
-					ICustomView customView = (ICustomView) view;
-					certainty = customView.getCertainty();
-	        		seekBar.setProgress((int) (certainty * 100));
-				}
-				
-				final TextView text = new TextView(linearLayout.getContext());
-				text.setText("    Certainty: " + certainty);
-				seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-					
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-					}
-					
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-					
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress,
-							boolean fromUser) {
-						text.setText("    Certainty: " + ((float) progress)/100);
-					}
-				});
-				layout.addView(text);
-				layout.addView(seekBar);
-				AlertDialog.Builder builder = new AlertDialog.Builder(linearLayout.getContext());
-				
-				builder.setTitle("Certainty");
-				builder.setMessage("Set the certainty value for the question");
-				builder.setView(layout);
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int id) {
-				        	
-				        	if (view instanceof ICustomView) {
-								ICustomView customView = (ICustomView) view;
-								customView.setCertainty(((float)seekBar.getProgress())/100);
-							}
-				        }
-				    });
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				        public void onClick(DialogInterface dialog, int id) {
-				            // User cancelled the dialog
-				        }
-				    });
-				
-				builder.create().show();
-				
-			}
-		});
-	}
-
-	private void setupInfoButtonClick(Button infoButton, final String attributeName) {
-		infoButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				showDescriptionDialog(getAttributeDescription(attributeName));
-			}
-
-		});
 	}
 	
 	private boolean hasAttributeDescription(String attributeName) {
@@ -781,28 +656,6 @@ public class Tab {
 		sb.append("</ul>");
 	}
 	
-	private void showDescriptionDialog(String description) {
-		AlertDialog.Builder dialog = new AlertDialog.Builder(linearLayout.getContext());
-		dialog.setTitle("Info");
-		ScrollView scrollView = new ScrollView(linearLayout.getContext());
-		LinearLayout layout = new LinearLayout(linearLayout.getContext());
-		WebView webView = new WebView(linearLayout.getContext());
-		webView.loadDataWithBaseURL("file:///" + moduleDir + "/", description, "text/html", null, null);
-		layout.addView(webView);
-		scrollView.addView(layout);
-		dialog.setView(scrollView);
-		dialog.setPositiveButton("Done", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				// dismiss the dialog
-			}
-		});
-		AlertDialog d = dialog.create();
-		d.setCanceledOnTouchOutside(true);
-		d.show();
-	}
-	
 	public String getRef() {
 		return ref;
 	}
@@ -860,7 +713,7 @@ public class Tab {
 			if (v instanceof ICustomView) {
 				ICustomView customView = (ICustomView) v;
 				customView.reset();
-				Button dirtyButton = dirtyButtonMap.get(customView.getRef());
+				ImageView dirtyButton = dirtyButtonMap.get(customView.getRef());
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
 			}
 		}
@@ -870,7 +723,7 @@ public class Tab {
 		return mapViewList;
 	}
 	
-	public Button getDirtyButton(String ref) {
+	public ImageView getDirtyButton(String ref) {
 		return dirtyButtonMap.get(ref);
 	}
 

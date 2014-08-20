@@ -23,6 +23,7 @@ import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Arch16n;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
@@ -42,6 +43,8 @@ public class TabGroup extends Fragment {
 	
 	@Inject 
 	AutoSaveManager autoSaveManager;
+	
+	private static final int PADDING = 5;
 	
 	private TabHost tabHost;
 	private HashMap<String, Tab> tabMap;
@@ -94,6 +97,8 @@ public class TabGroup extends Fragment {
 			if (tabHost == null) {
 				tabHost = (TabHost) inflater.inflate(R.layout.tab_group, container, false);
 				tabHost.setup();
+				int padding = (int) ScaleUtil.getDip(tabHost.getContext(), PADDING);
+				tabHost.setPadding(padding, 0, padding, 0);
 				
 				for (Tab tab : tabs) {
 					tabHost.addTab(tab.createTabSpec(tabHost));

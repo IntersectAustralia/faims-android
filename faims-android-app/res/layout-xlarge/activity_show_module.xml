@@ -13,13 +13,19 @@
 	    
 	    <LinearLayout
 	        android:id="@+id/status_bar"
-	        android:layout_width="match_parent"
-	        android:layout_height="?android:attr/actionBarSize"
 	        android:orientation="horizontal"
-	        android:background="#000000"
-	        >
+	        android:background="#F0F0F0"
+	        android:layout_width="fill_parent"
+	        android:layout_height="?android:attr/actionBarSize">
+	        
 	        <include layout="@layout/status_bar"/>
+	        
 	    </LinearLayout>
+	    
+	    <View
+	        android:background="#DDDDDD"
+	        android:layout_width="fill_parent"
+	        android:layout_height="1dp"/>
 	    
 	    <FrameLayout
 	        android:id="@+id/fragment_content"

@@ -14,6 +14,7 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.util.Compare;
+import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
@@ -37,6 +38,8 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	private static final int PADDING  = 30;
 	
 	private String ref;
 	private boolean dynamic;
@@ -73,7 +76,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	                LayoutParams.MATCH_PARENT,
 	                LayoutParams.MATCH_PARENT));
 	    setOrientation(LinearLayout.VERTICAL);
-		
+	    int padding = (int) ScaleUtil.getDip(context, PADDING);
+	    setPadding(padding, 0, padding, 0);
+	    
 		this.inputDef = inputDef;
 		this.ref = ref;
 		this.dynamic = dynamic;		

@@ -5,6 +5,7 @@ import group.pals.android.lib.ui.filechooser.io.localfile.LocalFile;
 import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -239,7 +240,16 @@ public class ShowModuleActivity extends FragmentActivity implements
 		navigationDrawer.init(this);
 
 		String css = module.getCSS();
-		NativeCSS.styleWithCSS(css);
+		if (!css.isEmpty()) {
+			NativeCSS.styleWithCSS(css);
+		} else {
+			try {
+				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(getAssets().open("default.css")));
+			} catch (Exception e) {
+				FLog.e("Couldn't style module with default styling", e);
+				NativeCSS.styleWithCSS("");
+			}
+		}
 		
 		startLoadTask();
 	}
@@ -646,6 +656,26 @@ public class ShowModuleActivity extends FragmentActivity implements
 			beanShellLinker.reportError("Error trying to update action and status bars", e);
 		}
 		return true;
+	}
+	
+	@Override
+	// Overrides action bar overflow menu to show icons
+	public boolean onMenuOpened(int featureId, Menu menu)
+	{
+	    if(featureId == Window.FEATURE_ACTION_BAR && menu != null){
+	        if(menu.getClass().getSimpleName().equals("MenuBuilder")){
+	            try{
+	                Method m = menu.getClass().getDeclaredMethod(
+	                    "setOptionalIconsVisible", Boolean.TYPE);
+	                m.setAccessible(true);
+	                m.invoke(menu, true);
+	            }
+	            catch(Exception e){
+	                FLog.w("Error trying to show icons in action bar overflow menu", e);
+	            }
+	        }
+	    }
+	    return super.onMenuOpened(featureId, menu);
 	}
 
 	public void updateStatusBar() {
