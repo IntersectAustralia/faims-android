@@ -68,6 +68,7 @@ public class LabelDialog extends AlertDialog {
 		
 		tabHost = (TabHost) labelDialogView.findViewById(R.id.label_tabhost);
 		tabHost.setup();
+		// Hide soft keyboard on tab change
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 			
 			@Override

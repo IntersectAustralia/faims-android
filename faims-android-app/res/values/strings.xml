@@ -92,7 +92,6 @@
     <string name="faims_fetch_module_list_title">Fetch Module List</string>
     <string name="faims_server_setting_title">Settings</string>
     <string name="faims_about_title">About</string>
-    <string name="intersect_logo">Intersect Logo</string>
     
     <string name="server_ip_settings_title">FAIMS Server Host</string>
     <string name="server_port_settings_title">FAIMS Server Port</string>
@@ -126,5 +125,8 @@
     <string name="distance_text">Tracking distance</string>
     <string name="direction_text">Tracking angle</string>
     <string name="direction_indicator">Tracking direction</string>
+    
+    <string name="splash_load">Load Module</string>
+    <string name="splash_continue">Continue Last Session</string>
 
 </resources>
