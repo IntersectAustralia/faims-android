@@ -14,12 +14,12 @@
 	<property name="filechooser.dir" value="../android-filechooser/code/src/"/>	
 
 	<filelist id="android_jars" dir="${libs.dir}">
-		<file name="android-support-v4.jar"/>
 		<file name="android.jar"/>
 		<file name="maps.jar"/>
 	</filelist>
 
 	<filelist id="libs_jars" dir="${libs.dir}">
+		<file name="android-support-v4.jar"/>
 		<file name="junit.jar"/>
 		<file name="commons-codec-1.7.jar"/>
 		<file name="commons-compress-1.4.1.jar"/>
