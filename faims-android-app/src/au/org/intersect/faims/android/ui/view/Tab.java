@@ -518,9 +518,6 @@ public class Tab {
 		            fieldFrameLayout.addView(textView, params);
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
-		            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-		            iconParams.topMargin = PADDING;
-		            iconParams.bottomMargin = PADDING;
 		            
 		            final LabelDialog labelDialog = new LabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(attribute.questionText);
@@ -552,7 +549,7 @@ public class Tab {
 		    		}
 		    		
 		    		params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		    		params.gravity = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+		    		params.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
 		    		fieldFrameLayout.addView(icons, params);
 		    		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
 		    			
