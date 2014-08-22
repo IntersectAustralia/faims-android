@@ -320,6 +320,14 @@ public class TabGroup extends Fragment {
 		isVisible = false;
 	}
 	
+	private void invalidateTabs() {
+		if (getTabs() != null) {
+	    	for(Tab tab : getTabs()){
+	    		tab.invalidate();
+			}
+    	}
+	}
+	
 	public void invalidateListViews(){
     	if (getTabs() != null) {
 	    	for(Tab tab : getTabs()){
@@ -442,7 +450,7 @@ public class TabGroup extends Fragment {
 	
 	public void refreshCSS() {
 		Handler cssHandler = new Handler(getActivity().getMainLooper());
-		cssHandler.post(new Runnable() {
+		cssHandler.postDelayed(new Runnable() {
 
 			@Override
 			public void run() {
@@ -451,7 +459,8 @@ public class TabGroup extends Fragment {
 				}
 			}
 			
-		});
+		}, 1);
+		invalidateTabs();
 	}
 
 	public void removeCustomViews() {

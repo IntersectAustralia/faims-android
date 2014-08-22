@@ -1001,4 +1001,8 @@ public class Tab {
 			removeCustomContainer(ref);
 		}
 	}
+
+	public void invalidate() {
+		view.invalidate();
+	}
 }

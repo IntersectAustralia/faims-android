@@ -840,6 +840,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
+	public void refreshTabgroupCSS(String ref) {
+		try {
+			TabGroup tabGroup = getTabGroup(ref);
+			tabGroup.refreshCSS();
+		} catch (Exception e) {
+			FLog.e("Error trying to refresh tab group CSS for " + ref, e);
+			showWarning("Logic Error", "Error tring to refresh tab group CSS for " + ref);
+		}
+	}
+	
 	public void keepTabGroupChanges(String ref) {
 		try {
 			TabGroup tabGroup = getTabGroup(ref);

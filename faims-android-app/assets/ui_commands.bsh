@@ -236,6 +236,15 @@ cancelTab(String ref, boolean warn){
 	linker.cancelTab(ref, warn);
 }
 
+/**
+  * Refreshes the CSS styling for a tabgroup
+  *
+  * @param ref the reference to the tabgroup
+  */
+refreshTabgroupCSS(String ref) {
+  linker.refreshTabgroupCSS(ref);
+}
+
 /** 
   * Execute a view task to process view changes.
   *
