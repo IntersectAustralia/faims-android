@@ -121,8 +121,7 @@ public class Tab {
 	@Inject
 	Arch16n arch16n;
 	
-	private static final int PADDING = 25;
-	private static final int TOP_PADDING = 10;
+	private static final int PADDING = 15;
 
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;
@@ -177,7 +176,8 @@ public class Tab {
         linearLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         linearLayout.setBackgroundColor(Color.WHITE);
-        linearLayout.setPadding(0, (int) ScaleUtil.getDip(activityRef.get(), TOP_PADDING), 0, 0); 
+        int padding = (int) ScaleUtil.getDip(activityRef.get(), PADDING);
+        linearLayout.setPadding(padding, padding, padding, padding);
 		
         if (scrollable) {
         	scrollView = new ScrollView(this.linearLayout.getContext());
@@ -498,14 +498,15 @@ public class Tab {
 		ImageView infoImage = null;
 		ImageView dirtyImage = null;
 		
+		LinearLayout viewLayout = new LinearLayout(linearLayout.getContext());
+		viewLayout.setOrientation(LinearLayout.VERTICAL);
+		
     	// setup view buttons
 		if (view instanceof ICustomView) {
 			ICustomView customView = (ICustomView) view;
 			if (attribute.controlType != Constants.CONTROL_TRIGGER) {
 				if(attribute.questionText != null && !attribute.questionText.isEmpty()){
 					FrameLayout fieldFrameLayout = new FrameLayout(this.linearLayout.getContext());
-					int padding = (int) ScaleUtil.getDip(fieldFrameLayout.getContext(), PADDING);
-					fieldFrameLayout.setPadding(0, 0, padding, 0);
 					
 					Button buttonOverlay = new Button(fieldFrameLayout.getContext());
 					buttonOverlay.setBackgroundColor(Color.TRANSPARENT);
@@ -560,13 +561,14 @@ public class Tab {
 		    			}
 		    		});
 		    		
-		    		linearLayout.addView(fieldFrameLayout);
+		    		viewLayout.addView(fieldFrameLayout);
 		    		viewLayoutMap.put(ref, fieldFrameLayout);
 				}
 	        }
 		}
 		
-        linearLayout.addView(view);
+        viewLayout.addView(view);
+        linearLayout.addView(viewLayout);
         
         if (view instanceof ICustomView) {
         	ICustomView customView = (ICustomView) view;

@@ -60,7 +60,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	protected static final int GALLERY_SIZE = 400;
 	private static final int GALLERY_ITEM_PADDING = 10;
-	private static final int GALLERY_PADDING  = 30;
 	
 	private String ref;
 	private boolean dynamic;
@@ -108,8 +107,6 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		galleriesLayout = new LinearLayout(this.getContext());
 	    galleriesLayout.setOrientation(LinearLayout.HORIZONTAL);
-	    int padding = (int) ScaleUtil.getDip(context, GALLERY_PADDING);
-	    this.setPadding(padding, 0, padding, 0);
 	    galleriesLayout.setGravity(Gravity.BOTTOM);
 	    galleryImages = new ArrayList<CustomImageView>();
 		addView(galleriesLayout);		

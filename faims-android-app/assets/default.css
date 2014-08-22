@@ -1,56 +1,10 @@
-.input-field {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
 .label {
-  margin-left:5%;
   padding-bottom:5px;
   text-color:grey;
 }
 
-.button {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
-.date-picker {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
-.dropdown {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
-.text-area {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
 .list {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
   border-top:1px solid grey;
-}
-
-.web-view {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
-}
-
-.table-view {
-  width:90%;
-  margin-left:5%;
-  margin-right:5%;
 }
 
 .gallery-item {
