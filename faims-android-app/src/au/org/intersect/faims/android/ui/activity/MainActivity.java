@@ -48,7 +48,7 @@ public class MainActivity extends RoboActivity {
         		
         		Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
 				showModulesIntent.putExtra("key", selectedItem);
-				saveModuleKey(selectedItem);
+				FAIMSApplication.getInstance().saveModuleKey(selectedItem);
 				MainActivity.this.startActivityForResult(showModulesIntent, 1);
         	}
         });
@@ -167,10 +167,5 @@ public class MainActivity extends RoboActivity {
 			}
 		}
 	}
-
-    private void saveModuleKey(String key) {
-    	SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-    	editor.putString("module-key", key);
-    	editor.apply();
-	}
+	
 }
