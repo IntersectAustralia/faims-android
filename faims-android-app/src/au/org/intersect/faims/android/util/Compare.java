@@ -26,13 +26,68 @@ public class Compare {
 	public static boolean compareAttributeValue(ICustomView view, Collection<? extends Attribute> attributes) {
 		for (Attribute a : attributes) {
 			if (equal(a.getName(), view.getAttributeName())) {
-				String annotation = view.getAnnotationEnabled() ? view.getAnnotation() : null;
-				String certainty = view.getCertaintyEnabled() ? String.valueOf(view.getCertainty()) : null;
-				return !cleanAndEqual(a.getValue(view.getAttributeType()), view.getValue()) ||
-						!cleanAndEqual(a.getAnnotation(view.getAttributeType()), annotation) ||
-						!cleanAndEqual(a.getCertainty(), certainty);
+				boolean valueEqual = cleanAndEqual(a.getValue(view.getAttributeType()), view.getValue());
+				if (!valueEqual) return true;
+				
+				boolean annotationEqual;
+				if (view.getAnnotationEnabled()) {
+					annotationEqual = cleanAndEqual(a.getAnnotation(view.getAttributeType()), view.getAnnotation());
+				} else {
+					annotationEqual = true;
+				}
+				if (!annotationEqual) return true;
+				
+				boolean certaintyEqual;
+				if (view.getCertaintyEnabled()) {
+					certaintyEqual = cleanAndEqual(a.getCertainty(), String.valueOf(view.getCertainty()));
+				} else {
+					certaintyEqual = true;
+				}
+				if (!certaintyEqual) return true;
+				
+				break;
 			}
 		}
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean compareAttributeValues(
+			ICustomView view,
+			Collection<? extends Attribute> attributes) {
+		ArrayList<NameValuePair> attributeValues = new ArrayList<NameValuePair>();
+		String attributeAnnotation = null;
+		String attributeCertainty = null;
+			
+		for (Attribute a : attributes) {
+			if (equal(a.getName(), view.getAttributeName())) {
+				attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
+				
+				// Note: this assumes that the annotation and certainty are the same for each multi-value
+				attributeAnnotation = a.getAnnotation(view.getAttributeType());
+				attributeCertainty = a.getCertainty();
+			}
+		}
+			
+		boolean valuesEqual = compareValues(clean(attributeValues), clean((List<NameValuePair>) view.getValues()));
+		if (!valuesEqual) return true;
+		
+		boolean annotationEqual;
+		if (view.getAnnotationEnabled() && attributeAnnotation != null) {
+			annotationEqual = cleanAndEqual(attributeAnnotation, view.getAnnotation());
+		} else {
+			annotationEqual = true;
+		}
+		if (!annotationEqual) return true;
+		
+		boolean certaintyEqual;
+		if (view.getCertaintyEnabled() && attributeCertainty != null) {
+			certaintyEqual = cleanAndEqual(attributeCertainty, String.valueOf(view.getCertainty()));
+		} else {
+			certaintyEqual = true;
+		}
+		if (!certaintyEqual) return true;
+		
 		return false;
 	}
 	
@@ -40,12 +95,9 @@ public class Compare {
 	public static boolean compareFileAttributeValues(
 			ICustomView view,
 			Collection<? extends Attribute> attributes, Module module) {
-		String annotation = view.getAnnotationEnabled() ? view.getAnnotation() : null;
-		String certainty = view.getCertaintyEnabled() ? String.valueOf(view.getCertainty()) : null;
-		
 		ArrayList<NameValuePair> attributeValues = new ArrayList<NameValuePair>();
-		String attributeAnnotation = annotation;
-		String attributeCertainty = certainty;
+		String attributeAnnotation = null;
+		String attributeCertainty = null;
 		
 		for (Attribute a : attributes) {
 			if (equal(a.getName(), view.getAttributeName())) {
@@ -57,35 +109,26 @@ public class Compare {
 			}
 		}
 		
-		return !compareValues(clean(attributeValues), stripModulePath(module, clean((List<NameValuePair>) view.getValues()))) ||
-				!cleanAndEqual(attributeAnnotation, annotation) ||
-				!cleanAndEqual(attributeCertainty, certainty);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static boolean compareAttributeValues(
-			ICustomView view,
-			Collection<? extends Attribute> attributes) {
-		String annotation = view.getAnnotationEnabled() ? view.getAnnotation() : null;
-		String certainty = view.getCertaintyEnabled() ? String.valueOf(view.getCertainty()) : null;
+		boolean valuesEqual = compareValues(clean(attributeValues), stripModulePath(module, clean((List<NameValuePair>) view.getValues())));
+		if (!valuesEqual) return true;
 		
-		ArrayList<NameValuePair> attributeValues = new ArrayList<NameValuePair>();
-		String attributeAnnotation = annotation;
-		String attributeCertainty = certainty;
-		
-		for (Attribute a : attributes) {
-			if (equal(a.getName(), view.getAttributeName())) {
-				attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
-				
-				// Note: this assumes that the annotation and certainty are the same for each multi-value
-				attributeAnnotation = a.getAnnotation(view.getAttributeType());
-				attributeCertainty = a.getCertainty();
-			}
+		boolean annotationEqual;
+		if (view.getAnnotationEnabled() && attributeAnnotation != null) {
+			annotationEqual = cleanAndEqual(attributeAnnotation, view.getAnnotation());
+		} else {
+			annotationEqual = true;
 		}
+		if (!annotationEqual) return true;
 		
-		return !compareValues(clean(attributeValues), clean((List<NameValuePair>) view.getValues())) ||
-				!cleanAndEqual(attributeAnnotation, annotation) ||
-				!cleanAndEqual(attributeCertainty, certainty);
+		boolean certaintyEqual;
+		if (view.getCertaintyEnabled() && attributeCertainty != null) {
+			certaintyEqual = cleanAndEqual(attributeCertainty, String.valueOf(view.getCertainty()));
+		} else {
+			certaintyEqual = true;
+		}
+		if (!certaintyEqual) return true;
+		
+		return false;
 	}
 	
 	public static boolean compareValues(List<NameValuePair> values1, List<NameValuePair> values2) {
