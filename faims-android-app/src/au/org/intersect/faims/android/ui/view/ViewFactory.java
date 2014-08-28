@@ -30,6 +30,7 @@ public class ViewFactory {
 	public static final int BUTTON_SIZE = 34;
 	public static final int TEXT_AREA_SIZE = 5;
 	public static final float LABEL_ICON_SCALE = 0.6F;
+	public static final float INFO_ICON_SCALE = 0.8F;
 	
 	class DefaultLayoutParams extends LayoutParams {
 		
@@ -63,26 +64,26 @@ public class ViewFactory {
 	}
 	
 	protected ImageView createCertaintyIcon() {
-		return createLabelIcon(R.drawable.certainty);
+		return createLabelIcon(R.drawable.certainty, LABEL_ICON_SCALE);
 	}
 	
 	protected ImageView createAnnotationIcon() {
-		return createLabelIcon(R.drawable.annotation);
+		return createLabelIcon(R.drawable.annotation, LABEL_ICON_SCALE);
 	}
 	
 	protected ImageView createDirtyIcon() {
-		return createLabelIcon(R.drawable.dirty);
+		return createLabelIcon(R.drawable.dirty, LABEL_ICON_SCALE);
 	}
 
 	protected ImageView createInfoIcon() {
-		return createLabelIcon(R.drawable.info);
+		return createLabelIcon(R.drawable.info, INFO_ICON_SCALE);
 	}
 	
-	private ImageView createLabelIcon(int drawableResource) {
+	private ImageView createLabelIcon(int drawableResource, float scale) {
 		ImageView image = new ImageView(context());
 		image.setScaleType(ScaleType.FIT_CENTER);
-		image.setScaleX(LABEL_ICON_SCALE);
-		image.setScaleY(LABEL_ICON_SCALE);
+		image.setScaleX(scale);
+		image.setScaleY(scale);
 		image.setImageResource(drawableResource);
 		return image;
 	}
