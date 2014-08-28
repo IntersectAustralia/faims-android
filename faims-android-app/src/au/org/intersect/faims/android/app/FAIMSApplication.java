@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.app;
 
 import roboguice.RoboGuice;
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import au.org.intersect.faims.android.log.FLog;
 
 public class FAIMSApplication {
@@ -30,6 +32,17 @@ public class FAIMSApplication {
 			return;
 		}
 		RoboGuice.getBaseApplicationInjector(application).injectMembers(obj);
+	}
+	
+	public void saveModuleKey(String key) {
+    	SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext()).edit();
+    	editor.putString("module-key", key);
+    	editor.apply();
+	}
+	
+	public String getSessionModuleKey() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
+		return prefs.getString("module-key", null);
 	}
 
 }

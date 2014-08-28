@@ -755,6 +755,7 @@ public class FetchModulesActivity extends RoboActivity {
     private void showModuleActivity() {
     	Intent showModulesIntent = new Intent(this, ShowModuleActivity.class);
 		showModulesIntent.putExtra("key", selectedModule.key);
+		FAIMSApplication.getInstance().saveModuleKey(selectedModule.key);
 		startActivityForResult(showModulesIntent, 1);
 		finish();
     }

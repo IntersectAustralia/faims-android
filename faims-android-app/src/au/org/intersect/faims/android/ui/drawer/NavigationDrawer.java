@@ -125,7 +125,7 @@ public class NavigationDrawer {
 	
 	private void setupHomeAction() {
 		Button button = (Button) activityRef.get().findViewById(R.id.home_button);
-		button.setText("Home");
+		button.setText("Module Home");
 		button.setOnClickListener(new OnClickListener() {
 			
 			@Override

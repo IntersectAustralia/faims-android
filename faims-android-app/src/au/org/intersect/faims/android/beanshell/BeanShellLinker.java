@@ -608,6 +608,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			TabGroup tabGroup = showTabGroup(label);
 			tabGroup.clearTabs();
+			tabGroup.setArchEntity(null);
+			tabGroup.setRelationship(null);
 		} catch (Exception e) {
 			FLog.e("error showing new tabgroup " + label, e);
 			showWarning("Logic Error", "Error showing new tab group " + label);
