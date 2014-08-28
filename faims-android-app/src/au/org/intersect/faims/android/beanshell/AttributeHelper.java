@@ -13,13 +13,12 @@ import au.org.intersect.faims.android.data.EntityAttribute;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
-import au.org.intersect.faims.android.ui.view.CameraPictureGallery;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
-import au.org.intersect.faims.android.ui.view.FileListGroup;
+import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.ICustomFileView;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
-import au.org.intersect.faims.android.ui.view.VideoGallery;
 
 public class AttributeHelper {
 	
@@ -96,19 +95,76 @@ public class AttributeHelper {
 			for (int i = 0; i < views.size(); i++) {
 				ICustomView customView = views.get(i);
 				
-				if (customView.getAnnotationEnabled()) {
-					viewAnnotations.add(customView.getAnnotation());
+				if (customView instanceof CustomFileList) {
+					// get values
+					CustomFileList fileList = (CustomFileList) customView;
+					
+					// attach files and reload file list
+					List<String> newValues = new ArrayList<String>();
+					List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
+					@SuppressWarnings("unchecked")
+					List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
+					if (pairs != null) {
+						for (NameValuePair pair : pairs) {
+							// strip out full path
+							String relativePath = null;
+							
+							// attach new files
+							boolean sync = fileList.getSync();
+							String attachment = pair.getName();
+							if (hasAttachment(linker, attachment, sync)) {
+								relativePath = linker.stripAttachedFilePath(attachment);
+							} else {
+								relativePath = linker.attachFile(attachment, sync, null, null);
+							}
+							
+							newValues.add(relativePath);
+							
+							String fullPath = linker.getModule().getDirectoryPath(relativePath).getPath();
+							newPairs.add(new NameValuePair(fullPath, fullPath));
+						}
+						// reload new paths into file views
+						fileList.setReloadPairs(newPairs);
+					}
+					
+					String type = fileList.getAttributeType();
+					if (Attribute.MEASURE.equals(type) || Attribute.VOCAB.equals(type)) {
+						if (newValues.size() > 0) {
+							if (valuesByType.get(type) == null) {
+								valuesByType.put(type, new ArrayList<String>());
+							}
+							valuesByType.get(type).addAll(newValues);
+						}
+					} else {
+						FLog.w("Cannot save file list to type " + type);
+					}
+					
+					// get annotations
+					if (valuesByType.get(Attribute.FREETEXT) == null) {
+						valuesByType.put(Attribute.FREETEXT, new ArrayList<String>());
+					}
+					valuesByType.get(Attribute.FREETEXT).addAll(fileList.getAnnotations());
+					
+					// get certainties
+					if (valuesByType.get(Attribute.CERTAINTY) == null) {
+						valuesByType.put(Attribute.CERTAINTY, new ArrayList<String>());
+					}
+					valuesByType.get(Attribute.CERTAINTY).addAll(fileList.getCertainties());
+				} else {
+					if (customView.getAnnotationEnabled()) {
+						viewAnnotations.add(customView.getAnnotation());
+					}
+					
+					if (customView.getCertaintyEnabled()) {
+						viewCertainties.add(String.valueOf(customView.getCertainty()));
+					}
+					
+					String type = customView.getAttributeType();
+					if (valuesByType.get(type) == null) {
+						valuesByType.put(type, new ArrayList<String>());
+					}
+					valuesByType.get(type).addAll(getViewValues(linker, customView));
 				}
-				
-				if (customView.getCertaintyEnabled()) {
-					viewCertainties.add(String.valueOf(customView.getCertainty()));
-				}
-				
-				String type = customView.getAttributeType();
-				if (valuesByType.get(type) == null) {
-					valuesByType.put(type, new ArrayList<String>());
-				}
-				valuesByType.get(type).addAll(getViewValues(linker, customView));
 			}
 			return valuesByType;
 		}
@@ -116,31 +172,7 @@ public class AttributeHelper {
 		@SuppressWarnings("unchecked")
 		private ArrayList<String> getViewValues(BeanShellLinker linker, ICustomView customView) {
 			ArrayList<String> values = new ArrayList<String>();
-			if (customView instanceof ICustomFileView) {
-				ICustomFileView fileView = (ICustomFileView) customView;
-				List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
-				List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-				if (pairs != null) {
-					for (NameValuePair pair : pairs) {
-						// strip out full path
-						String value = null;
-						
-						// attach new files
-						boolean sync = fileView.getSync();
-						String attachment = pair.getName();
-						if (hasAttachment(linker, attachment, sync)) {
-							value = linker.stripAttachedFilePath(attachment);
-						} else {
-							value = linker.attachFile(attachment, sync, null, null);
-						}
-						
-						values.add(value);
-						newPairs.add(new NameValuePair(attachment, linker.getModule().getDirectoryPath(value).getPath()));
-					}
-					// reload new paths into file views
-					fileView.setReloadPairs(newPairs);
-				}
-			} else if (customView instanceof CustomCheckBoxGroup) {
+			if (customView instanceof CustomCheckBoxGroup || customView instanceof CustomFileList) {
 				List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
 				if (pairs != null) {
 					for (NameValuePair pair : pairs) {
@@ -150,7 +182,6 @@ public class AttributeHelper {
 			} else {
 				values.add(customView.getValue());
 			}
-			
 			return  values;
 		}
 		
@@ -179,7 +210,7 @@ public class AttributeHelper {
 		}
 
 		public boolean hasChanges(BeanShellLinker linker,
-				Collection<? extends Attribute> cachedAttributes) {
+				HashMap<String, ArrayList<Attribute>> cachedAttributes) {
 			for (ICustomView customView : views) {
 				if (customView instanceof ICustomFileView) {
 					if (((ICustomFileView) customView).hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
@@ -225,9 +256,9 @@ public class AttributeHelper {
 				RelationshipAttribute attribute = attributes.get(i);
 				boolean hasTextView = hasViewAt(freetexts, i);
 				boolean hasCertaintyView = hasViewAt(certainties, i);
-				setValueAt(linker, freetexts, attribute, i, false, hasCertaintyView);
-				setValueAt(linker, vocabs, attribute, i, hasTextView, hasCertaintyView);
-				setValueAt(linker, certainties, attribute, i, hasTextView, false);
+				setViewAt(linker, freetexts, attribute, i, false, hasCertaintyView);
+				setViewAt(linker, vocabs, attribute, i, hasTextView, hasCertaintyView);
+				setViewAt(linker, certainties, attribute, i, hasTextView, false);
 			}
 		}
 		
@@ -248,14 +279,14 @@ public class AttributeHelper {
 			return views != null && views.size() > i;
 		}
 		
-		private void setViewAt(BeanShellLinker linker, List<ICustomView> views, EntityAttribute attribute, int i, boolean ignoreAnnotation, boolean ignoreCertainty){
+		private void setViewAt(BeanShellLinker linker, List<ICustomView> views, Attribute attribute, int i, boolean ignoreAnnotation, boolean ignoreCertainty){
 			if (views != null) {
 				if (views.size() > 0) {
 					ICustomView firstView = views.get(0);
 					// if the first view is a checkbox view or file view then set attribute value to the first view
 					// else set attribute value to the view by index
 					if (firstView instanceof CustomCheckBoxGroup || 
-						firstView instanceof ICustomFileView) {
+						firstView instanceof CustomFileList) {
 						setAttribute(linker, attribute, firstView, ignoreAnnotation, ignoreCertainty);
 					} else if (views.size() > i) {
 						ICustomView view = views.get(i);
@@ -265,26 +296,11 @@ public class AttributeHelper {
 			}	
 		}
 		
-		private void setValueAt(BeanShellLinker linker, List<ICustomView> views, RelationshipAttribute attribute, int i, boolean ignoreAnnotation, boolean ignoreCertainty){
-			if (views != null && views.size() > i) {
-				ICustomView view = views.get(i);
-				setAttribute(linker, attribute, view, ignoreAnnotation, ignoreCertainty);
-			}
-		}
-		
 		private static void setAttribute(BeanShellLinker linker, Attribute attribute, ICustomView customView, boolean ignoreAnnotation, boolean ignoreCertainty) {
-			if (customView instanceof FileListGroup) {
+			if (customView instanceof CustomFileList) {
 				// add full path
-				FileListGroup fileList = (FileListGroup) customView;
-				fileList.addFile(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-			} else if (customView instanceof CameraPictureGallery) {
-				CameraPictureGallery cameraGallery = (CameraPictureGallery) customView;
-				// add full path
-				cameraGallery.addPicture(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
-			} else if (customView instanceof VideoGallery) {
-				VideoGallery videoGallery = (VideoGallery) customView;
-				// add full path
-				videoGallery.addVideo(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())));
+				CustomFileList fileList = (CustomFileList) customView;
+				fileList.addFile(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())), attribute.getAnnotation(customView.getAttributeType()), attribute.getCertainty());
 			} else {
 				linker.setFieldValue(customView.getRef(), attribute.getValue(customView.getAttributeType()));
 				if (!ignoreCertainty && customView.getCertaintyEnabled()) {
@@ -345,8 +361,18 @@ public class AttributeHelper {
 	
 	private static Collection<AttributeViewGroup> getChangedAttributeGroups(BeanShellLinker linker, List<View> views, Collection<? extends Attribute> cachedAttributes) {
 		ArrayList<AttributeViewGroup> viewGroups = new ArrayList<AttributeViewGroup>();
+		HashMap<String, ArrayList<Attribute>> cachedMap = new HashMap<String, ArrayList<Attribute>>();
+		if (cachedAttributes != null) {
+			for (Attribute attribute : cachedAttributes) {
+				if (cachedMap.get(attribute.getName()) == null) {
+					cachedMap.put(attribute.getName(), new ArrayList<Attribute>());
+				}
+				cachedMap.get(attribute.getName()).add(attribute);
+			}
+		}
+		
 		for (AttributeViewGroup group : getAttributeGroups(linker, views)) {
-			if (cachedAttributes == null || group.hasChanges(linker, cachedAttributes)) {
+			if (cachedMap.size() == 0 || group.hasChanges(linker, cachedMap)) {
 				viewGroups.add(group);
 			}
 		}

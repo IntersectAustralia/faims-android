@@ -30,13 +30,13 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
-import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.dialog.AttributeLabelDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
@@ -104,7 +104,9 @@ public class Tab {
 		private String toolLoadCallback;
 		private Object value;
 		private Object annotation;
+		private List<String> annotations;
 		private Object certainty;
+		private List<String> certainties;
 		private String dirtyReason;
 		
 		public ViewData() {
@@ -520,19 +522,23 @@ public class Tab {
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
 		            
-		            final LabelDialog labelDialog = new LabelDialog(linearLayout.getContext(), customView);
+		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(attribute.questionText);
 		    		
-		    		if(attribute.annotation && (isArchEnt || isRelationship) && !Attribute.FREETEXT.equals(attribute.type)){
+		    		if(attribute.annotation && (isArchEnt || isRelationship)){
 		    			annotationImage = viewFactory.createAnnotationIcon();
-		    			labelDialog.addAnnotationTab();
-		    			icons.addView(annotationImage);
+		    			if (!(view instanceof CustomFileList)) {
+		    				labelDialog.addAnnotationTab();
+		    				icons.addView(annotationImage);
+		    			}
 		    		}
 		    		
 		    		if(attribute.certainty && (isArchEnt || isRelationship)){
 		    			certaintyImage = viewFactory.createCertaintyIcon();
-		    			labelDialog.addCertaintyTab();
-		    			icons.addView(certaintyImage);
+		    			if (!(view instanceof CustomFileList)) {
+		    				labelDialog.addCertaintyTab();
+		    				icons.addView(certaintyImage);
+		    			}
 		    		}
 		    		
 		    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
@@ -714,6 +720,9 @@ public class Tab {
 				customView.reset();
 				ImageView dirtyButton = dirtyButtonMap.get(customView.getRef());
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
+			} else if (v instanceof CustomFileList) {
+				CustomFileList customFileList = (CustomFileList) v;
+				customFileList.reset();
 			}
 		}
 	}
@@ -825,6 +834,11 @@ public class Tab {
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					data.pairs = list.getPairs();
+				} else if (iview instanceof CustomFileList) {
+					CustomFileList fileList = (CustomFileList) iview;
+					data.pairs = fileList.getPairs();
+					data.annotations = fileList.getAnnotations();
+					data.certainties = fileList.getCertainties();
 				}
 				
 				// store values
@@ -907,6 +921,11 @@ public class Tab {
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					list.setPairs(data.pairs);
+				} else if (iview instanceof CustomFileList) {
+					CustomFileList fileList = (CustomFileList) iview;
+					fileList.setPairs(data.pairs);
+					fileList.setAnnotations(data.annotations);
+					fileList.setCertainties(data.certainties);
 				}
 				
 				// load values

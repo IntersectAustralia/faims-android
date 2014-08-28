@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import au.org.intersect.faims.android.data.Attribute;
@@ -16,7 +17,7 @@ public interface ICustomView extends IView {
 	public String getAnnotation();
 	public void setAnnotation(String annotation);
 	public boolean hasChanges();
-	public boolean hasAttributeChanges(Collection<? extends Attribute> attributes);
+	public boolean hasAttributeChanges(HashMap<String, ArrayList<Attribute>>  attributes);
 	public void reset();
 	public boolean isDirty();
 	public void setDirty(boolean dirty);

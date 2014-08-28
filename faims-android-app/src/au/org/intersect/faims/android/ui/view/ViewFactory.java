@@ -248,11 +248,11 @@ public class ViewFactory {
 	}
 	    
 	protected CameraPictureGallery createCameraPictureGallery(FormInputDef attribute, String ref, boolean dynamic) {
-		return new CameraPictureGallery(context(), attribute, ref, dynamic);
+		return new CameraPictureGallery(context(), attribute, attribute.sync, ref, dynamic);
 	}
 	    
 	protected VideoGallery createVideoGallery(FormInputDef attribute, String ref, boolean dynamic) {
-		return new VideoGallery(context(), attribute, ref, dynamic);
+		return new VideoGallery(context(), attribute, attribute.sync, ref, dynamic);
 	}
 	 
 	protected MapLayout createMapView(String ref, boolean dynamic) {

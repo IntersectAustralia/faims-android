@@ -85,6 +85,7 @@ import au.org.intersect.faims.android.ui.map.QueryBuilder;
 import au.org.intersect.faims.android.ui.view.CameraPictureGallery;
 import au.org.intersect.faims.android.ui.view.CustomButton;
 import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
+import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.CustomListView;
 import au.org.intersect.faims.android.ui.view.CustomRadioGroup;
 import au.org.intersect.faims.android.ui.view.CustomSpinner;
@@ -1223,6 +1224,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				if (customView instanceof CustomCheckBoxGroup) {
 					return customView.getValues();
+				} else if (customView instanceof CustomFileList) {
+					return customView.getValues();
 				} else if (customView instanceof PictureGallery) {
 					if (((PictureGallery) customView).isMulti()) {
 						return customView.getValues();
@@ -1524,7 +1527,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				}
 				
 				final CameraPictureGallery gallery = (CameraPictureGallery) obj;
-				gallery.populate(pictures);
+				gallery.populateImages(pictures);
 			} else {
 				FLog.w("Cannot populate camera picture gallery "
 						+ ref);
@@ -1553,7 +1556,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				}
 				
 				final VideoGallery gallery = (VideoGallery) obj;
-				gallery.populate(pictures);
+				gallery.populateImages(pictures);
 			} else {
 				FLog.w("Cannot populate video gallery "
 						+ ref);
@@ -3337,7 +3340,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof CameraPictureGallery) {
 				CameraPictureGallery gallery = (CameraPictureGallery) obj;
-				gallery.addPicture(file);
+				gallery.addFile(file);
 			}else {
 				FLog.w("cannot add picture to view " + obj);
 				showWarning("Logic Error", "Cannot add picture to view " + obj);
@@ -3354,7 +3357,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			Object obj = uiRenderer.getViewByRef(ref);
 			if (obj instanceof VideoGallery) {
 				VideoGallery gallery = (VideoGallery) obj;
-				gallery.addVideo(file);
+				gallery.addFile(file);
 			} else {
 				FLog.w("cannot add video to view " + obj);
 				showWarning("Logic Error", "Cannot add video to view " + obj);

@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -209,7 +210,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 
 	@Override
 	public boolean hasAttributeChanges(
-			Collection<? extends Attribute> attributes) {
+			HashMap<String, ArrayList<Attribute>> attributes) {
 		return Compare.compareAttributeValue(this, attributes);
 	}
 

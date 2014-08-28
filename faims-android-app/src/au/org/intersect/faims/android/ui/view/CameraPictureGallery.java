@@ -2,10 +2,7 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,38 +15,29 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
-import au.org.intersect.faims.android.data.Attribute;
+import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormInputDef;
-import au.org.intersect.faims.android.data.Module;
-import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
-import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
 
-public class CameraPictureGallery extends PictureGallery implements ICustomFileView {
+public class CameraPictureGallery extends FilePictureGallery {
 
 	@Inject
 	AutoSaveManager autoSaveManager;
+
+	@Inject
+	BeanShellLinker linker;
 	
-	private boolean sync;
-
-	private List<NameValuePair> reloadPairs;
-
 	public CameraPictureGallery(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
-	public CameraPictureGallery(Context context, FormInputDef attribute, String ref, boolean dynamic) {
-		super(context, attribute, ref, dynamic, true);
+	public CameraPictureGallery(Context context, FormInputDef attribute, boolean sync, String ref, boolean dynamic) {
+		super(context, attribute, ref, dynamic, sync);
 		FAIMSApplication.getInstance().injectMembers(this);
-		this.sync = attribute.sync;
-	}
-	
-	public boolean getSync() {
-		return sync;
 	}
 	
 	@Override
@@ -139,69 +127,12 @@ public class CameraPictureGallery extends PictureGallery implements ICustomFileV
 		}
 		return null;
 	}
-	
-	@Override
-	public void reset() {
-		dirty = false;
-		dirtyReason = null;
-		
-		removeSelectedImages();
-		galleriesLayout.removeAllViews();
-		galleryImages = new ArrayList<CustomImageView>();
-		
-		setCertainty(1);
-		setAnnotation("");
-		save();
-	}
 
-	public void addPicture(String value) {
+	@Override
+	public void addFile(String value, String annotation, String certainty) {
 		Picture picture = new Picture(value, null, value);
-		addSelectedImage(addGallery(picture));
-		autoSaveManager.save();
-	}
-	
-	@Override
-	public boolean hasAttributeChanges(
-			Collection<? extends Attribute> attributes) {
-		return Compare.compareAttributeValues(this, attributes);
-	}
-	
-	@Override
-	public boolean hasFileAttributeChanges(Module module,
-			Collection<? extends Attribute> attributes) {
-		return Compare.compareFileAttributeValues(this, attributes, module);
-	}
-	
-	@Override
-	public void setReloadPairs(List<NameValuePair> pairs) {
-		this.reloadPairs = pairs;
-	}
-	
-	@Override
-	public void reload() {
-		if (reloadPairs == null) return;
-		List<NameValuePair> pairs = getPairs();
-		List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
-		List<String> values = new ArrayList<String>();
-		for (NameValuePair p : pairs) {
-			boolean addedPair = false;
-			for (NameValuePair r : reloadPairs) {
-				if (Compare.equal(p.getName(), r.getName())) {
-					newPairs.add(new NameValuePair(r.getValue(), r.getValue()));
-					values.add(r.getValue());
-					addedPair = true;
-					break;
-				}
-			}
-			if (!addedPair) {
-				newPairs.add(p);
-			}
-		}
-		setPairs(newPairs);
-		for (String value : values) {
-			setValue(value);
-		}
-		reloadPairs = null;
+		addGallery(picture);
+		super.addFile(value, annotation, certainty);
 	}
 
 }

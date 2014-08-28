@@ -1,7 +1,7 @@
 package au.org.intersect.faims.android.ui.view;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -315,7 +315,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 
 	@Override
 	public boolean hasAttributeChanges(
-			Collection<? extends Attribute> attributes) {
+			HashMap<String, ArrayList<Attribute>>  attributes) {
 		return Compare.compareAttributeValues(this, attributes);
 	}
 
