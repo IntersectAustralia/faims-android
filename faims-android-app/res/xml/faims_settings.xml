@@ -3,6 +3,8 @@
     <PreferenceCategory 
         android:title="@string/faims_server_setting_title"
         android:key="pref_faims_server_setting">
+        <Preference android:key="demoButton"
+            android:title="Connect to Demo Server"/>
         <EditTextPreference
             android:key="pref_server_ip"
             android:title="@string/server_ip_settings_title" />
@@ -11,7 +13,5 @@
             android:title="@string/server_port_settings_title" />
         <Preference android:key="button"
             android:title="Test connection"/>
-        <Preference android:key="demoButton"
-            android:title="Connect to Demo Server"/>
     </PreferenceCategory>
 </PreferenceScreen>
