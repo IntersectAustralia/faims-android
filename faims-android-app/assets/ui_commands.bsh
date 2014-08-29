@@ -979,6 +979,18 @@ populateHierarchicalPictureGallery(String ref, String attributeName){
 }
 
 /**
+  * Populate file list field with the given collection of values.
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param values the collection of values to populate the file list with
+  */
+populateFileList(String ref, Collection values) {
+  linker.populateFileList(ref, values);
+}
+
+/**
   * Populate camera picture gallery field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.

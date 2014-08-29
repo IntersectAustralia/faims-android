@@ -1510,6 +1510,32 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error populate hierarchical picture gallery " + ref);
 		}
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void populateFileList(String ref, Collection valuesObj) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+
+			if (obj instanceof FileListGroup) {
+				List<NameValuePair> files = new ArrayList<NameValuePair>();
+				if (valuesObj instanceof List<?>) {
+					ArrayList<String> values = (ArrayList<String>) valuesObj;
+					for (String value : values) {
+						files.add(new NameValuePair(value, value));
+					}
+				}
+				
+				final FileListGroup fileList = (FileListGroup) obj;
+				fileList.populate(files);
+			} else {
+				FLog.w("Cannot populate file list " + ref);
+				showWarning("Logic Error", "Cannot populate file list " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate file list " + ref, e);
+			showWarning("Logic Error", "Error populate file list " + ref);
+		}
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populateCameraPictureGallery(String ref, Collection valuesObj) {

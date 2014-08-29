@@ -113,12 +113,11 @@ public class FileListGroup extends CustomFileList {
 	}
 
 	@Override
-	protected void populate(List<NameValuePair> pairs) {
+	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
 		removeAllViews();
 		for (NameValuePair pair : pairs) {
-			FrameLayout layout = createFileListItem(pair.getValue(), annotationEnabled, certaintyEnabled, pairs.indexOf(pair));
-			addView(layout);
+			super.addFile(pair.getName());
 		}
 	}
 	
