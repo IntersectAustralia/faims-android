@@ -49,8 +49,7 @@ public class SyncFilesService extends DownloadUploadService {
 		if (!downloadFiles("app", 
 				Request.APP_FILES_INFO_REQUEST(serviceModule), 
 				Request.APP_FILE_DOWNLOAD_REQUEST(serviceModule), 
-				appDirectory, 
-				false)) {
+				appDirectory)) {
 			FLog.d("Failed to download app files");
 			return;
 		}

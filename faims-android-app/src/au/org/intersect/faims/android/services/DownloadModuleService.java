@@ -18,15 +18,16 @@ public class DownloadModuleService extends DownloadUploadService {
 	
 	@Override
 	protected void performService() throws Exception {
-		// 0. delete module if it exists
-		FileUtil.delete(serviceModule.getDirectoryPath());
+		// 0. delete module if it exists and we want to override everything
+		if (overwrite) {
+			FileUtil.delete(serviceModule.getDirectoryPath());
+		}
 		
 		// 1. download settings (ui schema, ui logic, module settings, properties file(s))
 		if (!downloadFiles("settings", Request.SETTINGS_INFO_REQUEST(serviceModule), 
 				Request.SETTINGS_DOWNLOAD_REQUEST(serviceModule), 
 				serviceModule.getDirectoryPath())) {
 			FLog.d("Failed to download settings");
-			FileUtil.delete(serviceModule.getDirectoryPath());
 			return;
 		}
 			
@@ -37,7 +38,6 @@ public class DownloadModuleService extends DownloadUploadService {
 				Request.DATABASE_DOWNLOAD_REQUEST(serviceModule), 
 				serviceModule.getDirectoryPath())) {
 			FLog.d("Failed to download database");
-			FileUtil.delete(serviceModule.getDirectoryPath());
 			return;
 		}
 		
@@ -46,7 +46,6 @@ public class DownloadModuleService extends DownloadUploadService {
 				Request.DATA_FILE_DOWNLOAD_REQUEST(serviceModule), 
 				serviceModule.getDirectoryPath(this.getResources().getString(R.string.data_dir)))) {
 			FLog.d("Failed to download data files");
-			FileUtil.delete(serviceModule.getDirectoryPath());
 			return;
 		}
 		
@@ -55,7 +54,6 @@ public class DownloadModuleService extends DownloadUploadService {
 				Request.APP_FILE_DOWNLOAD_REQUEST(serviceModule), 
 				serviceModule.getDirectoryPath(this.getResources().getString(R.string.app_dir)))) {
 			FLog.d("Failed to download app files");
-			FileUtil.delete(serviceModule.getDirectoryPath());
 			return;
 		}
 		

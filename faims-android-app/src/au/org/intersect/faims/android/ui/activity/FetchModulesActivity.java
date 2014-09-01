@@ -75,7 +75,8 @@ public class FetchModulesActivity extends RoboActivity {
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
 				// start show module activity
 				activity.showModuleActivity();
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
+					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
 					activity.showBusyErrorDialog();
 				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
@@ -219,7 +220,7 @@ public class FetchModulesActivity extends RoboActivity {
 						public void handleDialogResponse(
 								DialogResultCode resultCode) {
 							if (resultCode == DialogResultCode.SELECT_YES) {
-								downloadModuleArchive();
+								downloadModule(true);
 							}
 						}
 				
@@ -265,7 +266,7 @@ public class FetchModulesActivity extends RoboActivity {
 												public void handleDialogResponse(
 														DialogResultCode resultCode) {
 													if (resultCode == DialogResultCode.SELECT_YES) {
-														downloadModuleArchive();
+														downloadModule(true);
 													}
 												}	
 									});
@@ -305,7 +306,7 @@ public class FetchModulesActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				updateModuleDataArchive();
+				updateModuleData(true);
 			}
 		});
 		
@@ -407,8 +408,7 @@ public class FetchModulesActivity extends RoboActivity {
     	
     }
 
-	protected void downloadModuleArchive() {
-    	
+	protected void downloadModule(final boolean overwrite) {
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyDownloadingModulesDialog();
     		
@@ -418,6 +418,7 @@ public class FetchModulesActivity extends RoboActivity {
 		    Messenger messenger = new Messenger(downloadHandler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("module", selectedModule);
+		    intent.putExtra("overwrite", overwrite);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -429,9 +430,9 @@ public class FetchModulesActivity extends RoboActivity {
     				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					downloadModuleArchive();
+    					downloadModule(overwrite);
     				} else {
-    					showLocateServerDownloadArchiveFailureDialog();
+    					showLocateServerDownloadArchiveFailureDialog(overwrite);
     				}
     			}
         		
@@ -451,6 +452,7 @@ public class FetchModulesActivity extends RoboActivity {
 		    Messenger messenger = new Messenger(updateModuleSettingHandler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("module", selectedModule);
+		    intent.putExtra("overwrite", true);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -464,7 +466,7 @@ public class FetchModulesActivity extends RoboActivity {
     				if ((Boolean) result) {
     					updateModuleSettingArchive();
     				} else {
-    					showLocateServerDownloadArchiveFailureDialog();
+    					showLocateServerDownloadArchiveFailureDialog(true);
     				}
     			}
         		
@@ -473,7 +475,7 @@ public class FetchModulesActivity extends RoboActivity {
     	
     }
 
-	protected void updateModuleDataArchive() {
+	protected void updateModuleData(final boolean overwrite) {
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyUpdatingModuleDataDialog();
@@ -484,6 +486,7 @@ public class FetchModulesActivity extends RoboActivity {
 		    Messenger messenger = new Messenger(updateModuleDataHandler);
 		    intent.putExtra("MESSENGER", messenger);
 		    intent.putExtra("module", selectedModule);
+		    intent.putExtra("overwrite", overwrite);
 		    startService(intent);
     	} else {
     		showBusyLocatingServerDialog();
@@ -495,9 +498,9 @@ public class FetchModulesActivity extends RoboActivity {
     				FetchModulesActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					updateModuleDataArchive();
+    					updateModuleData(overwrite);
     				} else {
-    					showLocateServerDownloadArchiveFailureDialog();
+    					showLocateServerDownloadArchiveFailureDialog(false);
     				}
     			}
         		
@@ -523,7 +526,7 @@ public class FetchModulesActivity extends RoboActivity {
     	choiceDialog.show();
     }
     
-    private void showLocateServerDownloadArchiveFailureDialog() {
+    private void showLocateServerDownloadArchiveFailureDialog(final boolean overwrite) {
     	choiceDialog = new ChoiceDialog(FetchModulesActivity.this,
 				getString(R.string.locate_server_failure_title),
 				getString(R.string.locate_server_failure_message),
@@ -532,7 +535,7 @@ public class FetchModulesActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadModuleArchive();
+							downloadModule(overwrite);
 						}
 					}
     		
@@ -566,7 +569,7 @@ public class FetchModulesActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadModuleArchive();
+							downloadModule(false);
 						}
 					}
     		
@@ -729,7 +732,7 @@ public class FetchModulesActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateModuleDataArchive();
+							updateModuleData(false);
 						}
 					}
     		

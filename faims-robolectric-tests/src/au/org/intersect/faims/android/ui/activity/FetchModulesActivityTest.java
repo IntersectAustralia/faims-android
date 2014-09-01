@@ -327,7 +327,7 @@ public class FetchModulesActivityTest {
 		assertEquals("Dialog message", activity.getString(R.string.confirm_download_module_message) + " Module 0?", choiceDialog.getMessage());
 		
 		// download module
-		activity.downloadModuleArchive();
+		activity.downloadModule(true);
 		
 		// download service
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
@@ -365,7 +365,7 @@ public class FetchModulesActivityTest {
 		
 		activity.selectedModule = activity.modules.get(0);
 		
-		activity.downloadModuleArchive();
+		activity.downloadModule(true);
 		
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedService();
@@ -404,7 +404,7 @@ public class FetchModulesActivityTest {
 		// TODO pick module form dialog
 		activity.selectedModule = activity.modules.get(0);
 		
-		activity.downloadModuleArchive();
+		activity.downloadModule(true);
 		
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedService();
@@ -442,7 +442,7 @@ public class FetchModulesActivityTest {
 		// TODO pick module form dialog
 		activity.selectedModule = activity.modules.get(0);
 		
-		activity.downloadModuleArchive();
+		activity.downloadModule(true);
 		
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedService();

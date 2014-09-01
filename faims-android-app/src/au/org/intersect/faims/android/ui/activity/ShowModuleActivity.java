@@ -1139,6 +1139,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("module", module);
+				intent.putExtra("overwrite", true);
 				ShowModuleActivity.this.startService(intent);
 
 				callSyncStart();
@@ -1328,6 +1329,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 				Messenger messenger = new Messenger(handler);
 				intent.putExtra("MESSENGER", messenger);
 				intent.putExtra("module", module);
+				intent.putExtra("overwrite", false);
 				ShowModuleActivity.this.startService(intent);
 
 				callSyncStart();

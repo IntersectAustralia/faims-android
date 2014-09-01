@@ -33,6 +33,7 @@ public abstract class DownloadUploadService extends IntentService {
 
 	protected boolean serviceInterrupted;
 	protected Module serviceModule;
+	protected boolean overwrite;
 	protected Result serviceResult;
 
 	public DownloadUploadService(String name) {
@@ -81,19 +82,14 @@ public abstract class DownloadUploadService extends IntentService {
 
 	protected void initService(Intent intent) {
 		serviceModule = (Module) intent.getExtras().get("module");
+		overwrite = intent.getExtras().getBoolean("overwrite");
 	}
 
 	protected abstract void performService() throws Exception;
 
 	// Download Helpers
-
 	protected boolean downloadFiles(String name, String infoUri,
-			String downloadUri, File downloadDirectory) throws Exception {
-		return downloadFiles(name, infoUri, downloadUri, downloadDirectory, true);
-	}
-
-	protected boolean downloadFiles(String name, String infoUri,
-			String downloadUri, File downloadDirectory, boolean overwrite)
+			String downloadUri, File downloadDirectory)
 			throws Exception {
 		FLog.d("downloading files for " + serviceModule.name);
 
@@ -136,6 +132,7 @@ public abstract class DownloadUploadService extends IntentService {
 							+ URLEncoder.encode(fileInfo.getString("file"),
 									"UTF-8"), downloadFile);
 			if (downloadResult.resultCode != FAIMSClientResultCode.SUCCESS) {
+				FileUtil.delete(downloadFile);
 				serviceResult = downloadResult;
 				return false;
 			}
@@ -146,6 +143,7 @@ public abstract class DownloadUploadService extends IntentService {
 				FLog.d("downloaded file failed because file is corrupted");
 				serviceResult = new Result(FAIMSClientResultCode.FAILURE,
 						FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
+				FileUtil.delete(downloadFile);
 				return false;
 			}
 

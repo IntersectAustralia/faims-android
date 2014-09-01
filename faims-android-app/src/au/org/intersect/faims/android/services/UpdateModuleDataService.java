@@ -16,12 +16,13 @@ public class UpdateModuleDataService extends DownloadUploadService {
 	@Override
 	protected void performService() throws Exception {
 		File dataDir = serviceModule.getDirectoryPath(this.getResources().getString(R.string.data_dir));
-		FileUtil.delete(dataDir);
+		if (overwrite) {
+			FileUtil.delete(dataDir);
+		}
 		
 		if (!downloadFiles("data", Request.DATA_FILES_INFO_REQUEST(serviceModule), 
 				Request.DATA_FILE_DOWNLOAD_REQUEST(serviceModule), dataDir)) {
 			FLog.d("Failed to download data files");
-			FileUtil.delete(dataDir);
 			return;
 		}
 	}
