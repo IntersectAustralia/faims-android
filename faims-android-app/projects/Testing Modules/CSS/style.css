@@ -1,0 +1,77 @@
+.button {
+  background-image:url('http://ebmedia.eventbrite.com/s3-build/images/1067670/43784128390/1/logo.gif');
+  width:50%;
+  height:60px;
+  margin-left:25%;
+  border:2px solid black;
+}
+
+.button-extra {
+  background-color:purple;
+  border:1px solid black;
+}
+
+.styler {
+  border:5px solid red;
+}
+
+.gallery {
+  background-color:red;
+}
+
+.gallery-item {
+  background-color:green;
+}
+
+.label {
+  color:blue;
+}
+
+.checkbox-group {
+  background-color:yellow;
+}
+
+.checkbox {
+  color:red;
+}
+
+.radio-group {
+  background-color:orange;
+}
+
+.radio-button {
+  color:black;
+}
+
+.dropdown {
+  background-color:yellow;
+}
+
+.input-field {
+  width:75%;
+}
+
+.list {
+  background-color:green;
+}
+
+.date-picker {
+  background-color:green;
+}
+
+.time-picker {
+  background-color:blue;
+}
+
+.web-view {
+  width:50%;
+}
+
+
+#tabgroup1/tab1/save {
+  border:2px solid purple;
+}
+
+#tabgroup1/tab1/clear {
+  border:2px solid maroon;
+}
