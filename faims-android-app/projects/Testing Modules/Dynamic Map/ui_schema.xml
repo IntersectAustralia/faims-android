@@ -1,0 +1,461 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Map Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="map_example">
+          <style>
+            <orientation>
+                <orientation></orientation>
+            </orientation>
+            <even>
+                <layout_weight></layout_weight>
+            </even>
+          </style>
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
+          <controls>
+              <tab1>
+                  <connectexternal></connectexternal>
+                  <connectinternal></connectinternal>
+                  <starttrackingtime></starttrackingtime>
+                  <starttrackingdistance></starttrackingdistance>
+                  <stoptracking></stoptracking>
+              </tab1>
+              <tab2>
+                  <screens></screens>
+              </tab2>
+          </controls>
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <position></position>
+                  <map></map>
+                  <show></show>
+                  <plot></plot>
+                  <save></save>
+                  <clear></clear>
+              </tab1>
+              <tab2>
+                  <entity></entity>
+                  <load></load>
+              </tab2>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>  
+                  <drawActions></drawActions> 
+                  <create></create>           
+                  <generate></generate>           
+                  <map></map>
+                  <layers></layers>
+                  <layerActions></layerActions>
+                  <layerActionBtn></layerActionBtn>
+              </tab1>
+              <tab2>
+                  <entity></entity>
+                  <name></name>
+                  <value></value>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab2>
+              <tab3>
+                  <relationship></relationship>
+                  <name></name>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab3>
+          </tabgroup2>
+          <tabgroup3>
+              <tab1>
+                  <longitude></longitude>
+                  <latitude></latitude>
+                  <map></map>
+				  <create></create>
+				  <clear></clear>
+              </tab1>
+          </tabgroup3>
+          <tabgroup4>
+              <tab1>
+                  <map></map>
+              </tab1>
+          </tabgroup4>
+          <tabgroup5>
+              <tab1>
+                  <map></map>
+                  <container>
+                      <child1>
+                          <clear></clear>
+                      </child1>
+                      <child2>
+                          <createChoices></createChoices>
+                      </child2>
+                  </container>
+              </tab1>
+              <tab2>
+                  <entity></entity>
+                  <name></name>
+                  <value></value>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab2>
+              <tab3>
+                  <relationship></relationship>
+                  <name></name>
+                  <clear></clear>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+              </tab3>
+          </tabgroup5>
+        </faims>
+      </instance>
+    </model>
+  </h:head>
+
+  <h:body>
+    <group ref="style">
+      <label></label>
+      <group ref="orientation">
+        <label></label>
+        <input ref="orientation">
+            <label>horizontal</label>
+        </input>
+      </group>
+      <group ref="even">
+        <label></label>
+        <input ref="layout_weight">
+            <label>1</label>
+        </input>
+      </group>
+    </group>
+    <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="controls">
+        <label>Controls</label>
+        <group ref="tab1">
+            <label>Controls</label>
+            <trigger ref="connectexternal">
+	            <label>Connect external gps</label>
+	        </trigger>
+	        <trigger ref="connectinternal">
+	            <label>Connect internal gps</label>
+	        </trigger>
+            <trigger ref="starttrackingtime">
+	            <label>Start tracking gps based on time interval</label>
+	        </trigger>
+	        <trigger ref="starttrackingdistance">
+	            <label>Start tracking gps based on distance interval</label>
+	        </trigger>
+	        <trigger ref="stoptracking">
+	            <label>Stop tracking gps</label>
+	        </trigger>
+	        </group>
+        <group ref="tab2" faims_scrollable="false">
+            <label>Screens</label>
+            <select1 ref="screens" appearance="compact">
+	          <label>Screens:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+	        </select1>
+        </group>
+    </group>
+    <group ref="tabgroup1" faims_archent_type="gpsentity">
+      <label>GPS Test</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+            <label>Name:</label>
+        </input>
+        <input ref="position" faims_read_only="true"  faims_certainty="false" faims_annotation="false">
+            <label>Position:</label>
+        </input>
+        <input ref="map" faims_map="true" faims_certainty="false" faims_annotation="false">
+            <label>Map:</label>
+        </input>
+        <trigger ref="show">
+            <label>Snap to GPS position</label>
+        </trigger>
+        <trigger ref="plot">
+            <label>Plot GPS position</label>
+        </trigger>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+          <label>Entity</label>
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
+	          <label>Entity:</label>
+	          <item>
+	            <label>dummy</label>
+	            <value>dummy</value>
+	          </item>
+		  </select1>
+		  <trigger ref="load">
+			  <label>Load</label>
+		  </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup2" faims_archent_type="simpleentity">
+      <label>Drawing Test</label>
+      <group ref="tab1"  faims_scrollable="false">
+        <label>Map</label>
+        <select1 ref="drawActions"  faims_certainty="false" faims_annotation="false">
+            <label>Draw Actions:</label>
+            <item>
+                <label>Draw Point</label>
+                <value>draw_point</value>
+            </item>
+            <item>
+                <label>Draw Line</label>
+                <value>draw_line</value>
+            </item>
+            <item>
+                <label>Draw Polygon</label>
+                <value>draw_polygon</value>
+            </item>
+            <item>
+                <label>Draw Grid</label>
+                <value>draw_grid</value>
+            </item>
+            <item>
+                <label>Select Shape</label>
+                <value>select_shape</value>
+            </item>
+        </select1>
+        <trigger ref="create">
+            <label>Create</label>
+        </trigger>
+        <trigger ref="generate">
+            <label>Generate grid</label>
+        </trigger>
+        <input ref="map" faims_map="true"  faims_certainty="false" faims_annotation="false">
+            <label>Map:</label>
+        </input>
+        <select1 ref="layers"  faims_certainty="false" faims_annotation="false">
+            <label>Layers:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="layerActions"  faims_certainty="false" faims_annotation="false">
+            <label>Layers Actions:</label>
+            <item>
+                <label>Create Layer</label>
+                <value>create_layer</value>
+            </item>
+            <item>
+                <label>Remove Layer</label>
+                <value>remove_layer</value>
+            </item>
+            <item>
+                <label>Hide Layer</label>
+                <value>hide_layer</value>
+            </item>
+            <item>
+                <label>Show Layer</label>
+                <value>show_layer</value>
+            </item>
+        </select1> 
+        <trigger ref="layerActionBtn">
+            <label>Ok</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+          <label>Entity</label>
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
+              <label>Entity</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+              <label>Name:</label>
+          </input>
+          <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+              <label>Value:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+      <group ref="tab3">
+          <label>Relationship</label>
+          <select1 ref="relationship"  faims_certainty="false" faims_annotation="false">
+              <label>Relationship</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name">
+              <label>Name:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup3">
+      <label>Point Test</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="longitude">
+            <label>X:</label>
+        </input>
+        <input ref="latitude">
+            <label>Y:</label>
+        </input>
+        <input ref="map" faims_map="true">
+            <label>Map:</label>
+        </input>
+        <trigger ref="create">
+            <label>Create Point</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear Points</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup4">
+      <label>Kaz Test</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+            <label>Map:</label>
+        </input>
+      </group>
+    </group>
+    <group ref="tabgroup5" faims_archent_type="simpleentity">
+      <label>UI Test</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Map</label>
+        <input ref="map" faims_map="true" faims_certainty="false">
+            <label></label>
+        </input>
+        <group ref="container" faims_style="orientation">
+            <label></label>
+            <group ref="child1" faims_style="even">
+                <label></label>
+                <trigger ref="clear">
+		            <label>Clear</label>
+		        </trigger>
+            </group>
+            <group ref="child2" faims_style="even">
+                <label></label>
+                <select1 ref="createChoices" appearance="full"  faims_certainty="false" faims_annotation="false">
+	              <label>Create:</label>
+	              <item>
+	                  <label>dummy</label>
+	                  <value>dummy</value>
+	              </item>
+	          </select1>
+            </group>
+        </group>
+      </group>
+      <group ref="tab2">
+          <label>Entity</label>
+          <select1 ref="entity"  faims_certainty="false" faims_annotation="false">
+              <label>Entity</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+              <label>Name:</label>
+          </input>
+          <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+              <label>Value:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+      <group ref="tab3">
+          <label>Relationship</label>
+          <select1 ref="relationship"  faims_certainty="false" faims_annotation="false">
+              <label>Relationship</label>
+              <item>
+                  <label>dummy</label>
+                  <value>dummy</value>
+              </item>
+          </select1>
+          <input ref="name">
+              <label>Name:</label>
+          </input>
+          <trigger ref="clear">
+              <label>Clear</label>
+          </trigger>
+          <trigger ref="save">
+              <label>Save</label>
+          </trigger>
+          <trigger ref="update">
+              <label>Update</label>
+          </trigger>
+          <trigger ref="load">
+              <label>Load</label>
+          </trigger>
+      </group>
+    </group>
+  </h:body>
+</h:html>
