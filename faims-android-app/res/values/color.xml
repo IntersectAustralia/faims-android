@@ -4,4 +4,7 @@
     <color name="color_black">#88000000</color>
     <color name="color_grey">#E5E5E5</color> 
     <color name="color_transparent">#00000000</color>
+    
+    <color name="breadcrumb_module_name">#777777</color>
+    <color name="breadcrumb_contents">#222222</color>
 </resources>

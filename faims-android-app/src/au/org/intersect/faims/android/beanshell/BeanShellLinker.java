@@ -635,7 +635,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (tabGroup == null) {
 				throw new Exception("cannot find tabgroup " + label);
 			}
-			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -669,7 +668,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 				}
 			});
-			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);

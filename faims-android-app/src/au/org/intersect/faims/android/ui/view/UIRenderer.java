@@ -101,6 +101,7 @@ public class UIRenderer {
 	    			tabGroup.addPopCounter();
 	    		}
 	    		navigationDrawer.popTabGroupNoUpdate();
+	    		activityRef.get().updateActionBarTitle();
 	    		fm.popBackStack();
 	    		count--;
 	    	}

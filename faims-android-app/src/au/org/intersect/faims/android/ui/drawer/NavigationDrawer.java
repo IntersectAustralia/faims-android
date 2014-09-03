@@ -109,6 +109,7 @@ public class NavigationDrawer {
 			}
 			navigationStackLayout.addView(groupButton);
 		}
+		activityRef.get().updateActionBarTitle();
 	}
 	
 	private void setupExitAction() {
@@ -192,6 +193,10 @@ public class NavigationDrawer {
 
 	public int getTabGroupCount() {
 		return tabGroupStack.size();
+	}
+	
+	public Stack<TabGroup> getTabGroupStack() {
+		return tabGroupStack;
 	}
 	
 }

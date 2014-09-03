@@ -7,7 +7,9 @@ import group.pals.android.lib.ui.filechooser.prefs.DisplayPrefs;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
@@ -18,6 +20,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -30,11 +33,16 @@ import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
@@ -70,6 +78,7 @@ import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
+import au.org.intersect.faims.android.ui.view.TabGroup;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.DateUtil;
@@ -227,7 +236,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Intent data = getIntent();
 		moduleKey = data.getStringExtra("key");
 		module = ModuleUtil.getModule(moduleKey);
-		setTitle(module.name);
 
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowModuleActivity.this, module
@@ -552,7 +560,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	public void onBackPressed() {
 		if (navigationDrawer.getTabGroupCount() > 1) {
 			navigationDrawer.popTabGroup();
-			getActionBar().setTitle(navigationDrawer.peekTabGroup().getLabel());
+			updateActionBarTitle();
 			super.onBackPressed();
 		} else {
 			closeActivity();
@@ -1447,5 +1455,30 @@ public class ShowModuleActivity extends FragmentActivity implements
 			});
 			builder.show();
 		}
+	}
+
+	public void updateActionBarTitle() {
+		StringBuilder breadcrumbs = new StringBuilder();
+		breadcrumbs.append(module.name);
+		
+		Stack<TabGroup> tabgroups = navigationDrawer.getTabGroupStack();
+		Iterator<TabGroup> iter = tabgroups.iterator();
+		while (iter.hasNext()) {
+			breadcrumbs.append(" > " + iter.next().getLabel());
+		}
+		Spannable text = new SpannableString(breadcrumbs.toString());
+		text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
+				0, module.name.length()+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_contents),
+				module.name.length()+2, breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		
+		int actionBarTitle = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
+	    TextView title = (TextView) getWindow().findViewById(actionBarTitle);
+	    if (title != null) {
+	    	title.setText(text);
+	    	title.setEllipsize(TextUtils.TruncateAt.START);
+	    } else {
+	    	getActionBar().setTitle(breadcrumbs.toString());
+	    }
 	}
 }
