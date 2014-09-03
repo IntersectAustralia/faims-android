@@ -1469,8 +1469,8 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Spannable text = new SpannableString(breadcrumbs.toString());
 		text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
 				0, module.name.length()+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_contents),
-				module.name.length()+2, breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		text.setSpan(R.color.breadcrumb_contents, module.name.length()+2,
+				breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		
 		int actionBarTitle = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
 	    TextView title = (TextView) getWindow().findViewById(actionBarTitle);
