@@ -1,0 +1,1198 @@
+populateListForUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
+}
+populateListForUsers();
+
+login(){
+	fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(userResult) {
+			user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+			setUser(user);
+			showTabGroup("controls");
+		}
+	});
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+onEvent("controls/tab1/connectexternal", "click", "startExternalGPS()");
+onEvent("controls/tab1/connectinternal", "click", "startInternalGPS()");
+onEvent("controls/tab1/starttrackingtime", "click", "startTrackingGPS(\"time\", 10, \"saveTimeGPSTrack()\")");
+onEvent("controls/tab1/starttrackingdistance", "click", "startTrackingGPS(\"distance\", 10, \"saveDistanceGPSTrack()\")");
+onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
+
+saveTimeGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveDistanceGPSTrack() {
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	saveGPSTrack(attributes);
+}
+
+saveGPSTrack(List attributes) {
+	position = getGPSPosition();
+	if (position == null) return;
+
+	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
+	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
+	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
+	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
+	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	
+	positionProj = getGPSPositionProjected();
+	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
+	ArrayList l = new ArrayList();
+	l.add(p);
+	
+	saveArchEnt(null, "gps_track", l, attributes);
+}
+
+getScreen(id, name) {
+	ArrayList screen = new ArrayList();
+	screen.add(id);
+	screen.add(name);
+	return screen;
+}
+
+populateScreens() {
+
+	ArrayList screens = new ArrayList();
+	screens.add(getScreen("tabgroup1", "GPS test"));
+	screens.add(getScreen("tabgroup2", "Drawing test"));
+	screens.add(getScreen("tabgroup3", "Point test"));
+	screens.add(getScreen("tabgroup4", "Kaz test"));
+	screens.add(getScreen("tabgroup5", "UI test"));
+	
+	populateList("controls/tab2/screens", screens);
+}
+
+populateScreens();
+
+onEvent("controls/tab2/screens", "click", "gotoScreen()");
+
+gotoScreen() {
+	screen = getListItemValue();
+	showTabGroup(screen);
+}
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+	setSyncEnabled(true);
+	setFileSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+syncStarted() {
+	//showToast("starting sync");
+}
+
+syncCompleted() {
+	//showToast("completed sync");
+	//updateAll();
+}
+
+syncFailed() {
+	//showToast("failed sync");
+}
+
+onEvent("controls", "show", "cleanup()");
+onEvent("tabgroup1", "load", "showScreen(\"tabgroup1\")");
+onEvent("tabgroup2", "load", "showScreen(\"tabgroup2\")");
+onEvent("tabgroup3", "load", "showScreen(\"tabgroup3\")");
+onEvent("tabgroup4", "load", "showScreen(\"tabgroup4\")");
+onEvent("tabgroup5", "load", "showScreen(\"tabgroup5\")");
+
+boolean initTabGroup1 = false;
+boolean initTabGroup2 = false;
+boolean initTabGroup3 = false;
+boolean initTabGroup4 = false;
+boolean initTabGroup5 = false;
+
+int entityCount = 0;
+int relCount = 0;
+showScreen(name) {
+	setGPSUpdateInterval(4);
+
+	sydneymap = "files/data/maps/sydney_map.tif";
+	kazmap = "files/data/maps/kaz_map.tif";
+	
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			entityCount = result.size() + 1;
+		}
+	});
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			relCount = result.size() + 1;
+		}
+	});
+	
+	if ("tabgroup1".equals(name) && !initTabGroup1) {
+		initTabGroup1 = true;
+		setupMap(name + "/tab1/map", sydneymap, convertFromProjToProj("4326", getModuleSrid(), createPoint(151.26854f, -33.88190f))); // sydney
+		initEntityMap();
+	} else if ("tabgroup2".equals(name) && !initTabGroup2) {
+		initTabGroup2 = true;
+		setupMap(name + "/tab1/map", sydneymap, convertFromProjToProj("4326", getModuleSrid(), createPoint(151.26854f, -33.88190f))); // sydney
+		initDrawMap();
+	} else if ("tabgroup3".equals(name) && !initTabGroup3) {
+		initTabGroup3 = true;
+		setupMap(name + "/tab1/map", sydneymap, convertFromProjToProj("4326", getModuleSrid(), createPoint(151.26854f, -33.88190f))); // sydney
+		initPointMap();
+	} else if ("tabgroup4".equals(name) && !initTabGroup4) {
+		initTabGroup4 = true;
+		setupMap(name + "/tab1/map", kazmap, convertFromProjToProj("4326", getModuleSrid(), createPoint(25.33825f, 42.58401f))); // kaz
+		initSpatialMap();
+	} else if ("tabgroup5".equals(name) && !initTabGroup5) {
+		initTabGroup5 = true;
+		startSync();
+		initUIMap();
+	}
+	
+}
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("user", "show", "cleanup()");
+
+setupMap(id, filename, point) {
+	setToolsEnabled(id, false);
+	showRasterMap(id, "raster map", filename);
+	setMapFocusPoint(id, point.x, point.y);
+	setMapRotation(id, 0.0f);
+	setMapZoom(id, 15.0f);
+}
+
+
+onEvent("tabgroup1/tab1/show", "click", "snapToGPSPosition()");
+onEvent("tabgroup1/tab1/plot", "click", "plotGPSPoint()");
+onEvent("tabgroup1/tab1/save", "click", "saveGPSEntity()");
+onEvent("tabgroup1/tab1/clear", "click", "clearGPSEntity()");
+onEvent("tabgroup1/tab2/load", "click", "loadGPSEntity(null)");
+onMapEvent("tabgroup1/tab1/map", "onTabMapClick()", "onTabMapSelect()");
+
+int entityLayerId = -1;
+int pointLayerId = -1;
+int bluePointId = -1;
+int lastPointId = -1;
+ArrayList loadedEntities;
+ArrayList entityPoints;
+int gpsEntityCount = 0;
+
+initEntityMap() {
+	entityLayerId = createCanvasLayer("tabgroup1/tab1/map", "Entity Layer");
+	pointLayerId = createCanvasLayer("tabgroup1/tab1/map", "Point Layer");
+	
+	bluePointId = 0;
+	lastPointId = 0;
+	
+	loadedEntities = new ArrayList();
+	entityPoints = new ArrayList();
+	
+	refreshGPSEntities();
+	clearGPSEntity();
+	
+	fetchEntityList("gpsentity", new FetchCallback() {
+		onFetch(result) {
+			gpsEntityCount = result.size() + 1;
+		}
+	});
+}
+
+snapToGPSPosition(){
+	location = getGPSPositionProjected();
+	if (location == null) {
+		showWarning("Logic Error", "No GPS Signal");
+	} else {
+		centerOnCurrentPosition("tabgroup1/tab1/map");
+	}
+}
+
+refreshGPSEntities() {
+	fetchEntityList("gpsentity", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup1/tab2/entity", result);
+		}
+	});
+}
+
+saveGPSEntity() {
+	collection = null;
+	if (lastPointId != 0) {
+		collection = new ArrayList();
+		collection.add(getGeometry("tabgroup1/tab1/map", lastPointId));
+		
+		// clear geometry
+		clearGeometry("tabgroup1/tab1/map", lastPointId);
+		
+		lastPointId = 0;
+	} else {
+		showWarning("Warning", "Please plot a point before saving entity");
+		return;
+	}
+
+	List attributes = createAttributeList();
+	attributes.add(createEntityAttribute("entity", "GPS " + gpsEntityCount++, null, null, null));
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
+	
+	saveArchEnt(null, "gpsentity", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			refreshGPSEntities();
+			loadGPSEntity(uuid);
+		}
+	});
+}
+
+setGPSEntity(entity) {
+	point = entity.getGeometryList().get(0);
+	
+	for (EntityAttribute attribute : entity.getAttributes()) {
+		if ("name".equals(attribute.getName())) {
+			setFieldValue("tabgroup1/tab1/name", attribute.getText());
+		}
+	}
+	
+	setFieldValue("tabgroup1/tab1/position", "Longitude = " + point.getMapPos().x + ", Latitude = " + point.getMapPos().y);
+}
+
+loadGPSEntity(id) {
+	if (id == null) {
+		entityId = getFieldValue("tabgroup1/tab2/entity");
+	} else {
+		entityId = id;
+	}
+	
+	if (entityId == null || "".equals(entityId)) return;
+	
+	showTabGroup("tabgroup1", entityId, new FetchCallback() {
+		onFetch(entity) {
+			setGPSEntity(entity);
+	
+			for (Object e : loadedEntities) {
+				if (e.getId().equals(entityId)) {
+					System.out.println("Entity already loaded");
+					return;
+				}
+			}
+			
+			loadedEntities.add(entity);
+			
+			redrawGPSEntities();
+		}
+	});
+}
+
+clearEntityPoints() {
+	for (Integer id : entityPoints) {
+		clearGeometry("tabgroup1/tab1/map", id);
+	}
+	entityPoints = new ArrayList();
+}
+
+redrawGPSEntities() {
+	clearEntityPoints();
+	
+	for (Object entity : loadedEntities) {
+		point = entity.getGeometryList().get(0);
+		entityPoints.add(drawGeometry("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.GREEN)));
+	}
+}
+
+clearGPSEntity() {
+	newTabGroup("tabgroup1");
+}
+
+clearBluePoint() {
+	if (bluePointId != 0) {
+		clearGeometry("tabgroup1/tab1/map", bluePointId);
+		bluePointId = 0;
+	}
+}
+
+onTabMapClick() {
+	clearBluePoint();
+}
+
+onTabMapSelect() {
+	clearBluePoint();
+	
+	selectedId = getMapGeometrySelected();
+	
+	for (int i = 0; i < entityPoints.size(); i++) {
+		id = entityPoints.get(i);
+		
+		if (id == selectedId) {
+			// load entity name
+			Object entity = loadedEntities.get(i);
+		
+			setGPSEntity(entity);
+			
+			point = getGeometry("tabgroup1/tab1/map", id);
+			bluePointId = drawGeometry("tabgroup1/tab1/map", pointLayerId, point, gpsPointStyle(Color.BLUE));
+			break;
+		}
+	}
+}
+
+plotGPSPoint() {
+	if (lastPointId != 0) {
+		clearGeometry("tabgroup1/tab1/map", lastPointId);
+	}
+
+	location = getGPSPositionProjected();
+	if (location == null) {
+		showWarning("Logic Error", "No GPS Signal");
+	} else {
+		longitude = location.getLongitude();
+		latitude = location.getLatitude();
+		point = createPoint(longitude, latitude);
+		lastPointId = drawPoint("tabgroup1/tab1/map", entityLayerId, point, gpsPointStyle(Color.RED));
+	}
+}
+
+// DRAW TEST
+
+onEvent("tabgroup2/tab1/drawActions", "click", "onChangeAction()");
+onEvent("tabgroup2/tab1/layers", "click", "onChangeLayers()");
+onEvent("tabgroup2/tab1/create", "click", "onDrawAction()");
+onEvent("tabgroup2/tab1/generate", "click", "onGenerateGrid()");
+onEvent("tabgroup2/tab1/layerActionBtn", "click", "onLayerAction()");
+onMapEvent("tabgroup2/tab1/map", "onMapClick()", "onMapSelect()");
+
+POINT = 1;
+LINE = 2;
+POLYGON = 3;
+GRID = 4;
+SELECT_SHAPE = 5;
+
+gpsPointStyle(int color) {
+	return createPointStyle(10, color, 0.2f, 0.5f);
+}
+
+pointStyle(int color) {
+	return createPointStyle(10, color, 0.2f, 0.5f);
+}
+
+lineStyle(int color) {
+	return createLineStyle(10, color, 0.05f, 0.3f, null);
+}
+
+polygonStyle(int color, int lineColor) {
+	return createPolygonStyle(10, color, createLineStyle(10, lineColor, 0.05f, 0.3f, null));
+}
+
+List canvasLayers = new ArrayList();
+List canvasLayerIds = new ArrayList();
+List points = new ArrayList();
+List pointIds = new ArrayList();
+int gridId = 0;
+int tool = POINT;
+int currentGeometryId = 0;
+int layerCount = 1;
+
+initDrawMap() {
+	
+	addLayer();
+	refreshLayers();
+	refreshEntities();
+	refreshRelationships();
+	
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			entityCount = result.size() + 1;
+		}
+	});
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			relCount = result.size() + 1;
+		}
+	});
+	
+}
+
+getLayerName() {
+	return "Layer " + layerCount++;
+}
+
+onMapSelect() {
+	if (tool != SELECT_SHAPE) return;
+	
+	geomId = getMapGeometrySelected();
+	
+	if (currentGeometryId == geomId) return;
+	currentGeometryId = geomId;
+	
+	addGeometryHighlight("tabgroup2/tab1/map", currentGeometryId);
+	prepareHighlightTransform("tabgroup2/tab1/map");
+}
+
+onMapClick() {
+
+	if (currentGeometryId != 0){
+		doHighlightTransform("tabgroup2/tab1/map");
+		clearGeometryHighlights("tabgroup2/tab1/map");
+		currentGeometryId = 0;
+	}
+
+	if (getCurrentLayerId() == 0) {
+		showWarning("Logic Error", "No layer selected");
+		return;
+	}
+	
+	switch(tool) {
+		case POINT:
+			point = getMapPointClicked();
+			drawPoint("tabgroup2/tab1/map", getCurrentLayerId(), point, pointStyle(Color.RED));
+		break;
+		case LINE:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", getCurrentLayerId(), point, pointStyle(Color.GREEN))));
+		break;
+		case POLYGON:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", getCurrentLayerId(), point, pointStyle(Color.BLUE))));
+		break;
+		case GRID:
+			point = getMapPointClicked();
+			points.add(point);
+			pointIds.add(new Integer(drawPoint("tabgroup2/tab1/map", getCurrentLayerId(), point, pointStyle(Color.YELLOW))));
+		break;
+	}
+}
+
+onGenerateGrid() {
+	drawGrid("tabgroup2/tab1/map", getCurrentLayerId(), Color.YELLOW, 3, 5);
+}
+
+refreshLayers() {
+	populateDropDown("tabgroup2/tab1/layers", canvasLayers);
+	
+	// check if current layer exists and set to that layer
+	index = canvasLayerIds.indexOf(getCurrentLayerId());
+	if (index >= 0) {
+		setFieldValue("tabgroup2/tab1/layers", canvasLayers.get(index));
+	} else {
+		onChangeLayers();
+	}
+}
+
+drawBox(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(createPoint(p1.x, p1.y));
+	pts.add(createPoint(p2.x, p1.y));
+	pts.add(createPoint(p2.x, p2.y));
+	pts.add(createPoint(p1.x, p2.y));
+	pts.add(createPoint(p1.x, p1.y));
+	return drawLine(map, layer, pts, lineStyle(color));
+}
+
+drawLine(map, layer, p1, p2, color) {
+	List pts = new ArrayList();
+	pts.add(p1);
+	pts.add(p2);
+	return drawLine(map, layer, pts, lineStyle(color));
+}
+
+drawGrid(map, layer, color, cols, rows) {
+	if (gridId == 0) {
+		showWarning("Logic Error", "Cannot create grid.");
+		return;
+	}
+	
+	polygon = getGeometry(map, gridId);
+	pts = polygon.getVertexList();
+	
+	p1 = pts.get(0);
+	p2 = pts.get(2);
+	
+	// draw a box
+	drawBox(map, layer, p1, p2, color);
+	
+	// draw grid
+	for (i = 1; i < cols; i++) {
+		t = p1.x + (p2.x - p1.x) * ((float) i / cols);
+		drawLine(map, layer, createPoint(t, p1.y), createPoint(t, p2.y), color);
+	}
+	
+	for (i = 1; i < rows; i++) {
+		t = p1.y + (p2.y - p1.y) * ((float) i / rows);
+		drawLine(map, layer, createPoint(p1.x, t), createPoint(p2.x, t), color);
+	}
+
+	clearGeometry(map, gridId);
+	gridId = 0;
+}
+
+createShape() {
+	
+	switch(tool) {
+		case LINE:
+			if (getCurrentLayerId() == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			drawLine("tabgroup2/tab1/map", getCurrentLayerId(), points, lineStyle(Color.GREEN));
+			clearPoints();
+		break;
+		case POLYGON:
+			if (getCurrentLayerId() == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			drawPolygon("tabgroup2/tab1/map", getCurrentLayerId(), points, polygonStyle(Color.BLUE, Color.BLACK));
+			clearPoints();
+		break;
+		case GRID:
+			if (getCurrentLayerId() == 0) {
+				showWarning("Logic Error", "No layer selected");
+				return;
+			}
+			
+			if (points.size() != 2) {
+				showWarning("Logic Error", "Cannot create grid.");
+				return;
+			}
+			
+			p1 = points.get(0);
+			p2 = points.get(1);
+			
+			List pts = new ArrayList();
+			pts.add(createPoint(p1.x, p1.y));
+			pts.add(createPoint(p2.x, p1.y));
+			pts.add(createPoint(p2.x, p2.y));
+			pts.add(createPoint(p1.x, p2.y));
+			
+			gridId = drawPolygon("tabgroup2/tab1/map", getCurrentLayerId(), pts, polygonStyle(Color.YELLOW, Color.BLACK));
+			clearPoints();
+		break;
+	}
+	
+}
+
+clearPoints() {
+	if (getCurrentLayerId() != 0) clearGeometryList("tabgroup2/tab1/map", pointIds);
+	
+	points = new ArrayList();
+	pointIds = new ArrayList();
+}
+
+onChangeLayers() {
+	layer = getFieldValue("tabgroup2/tab1/layers");
+	if (layer == null || "".equals(layer)) {
+		layerId = 0;
+	} else {
+		layerId = canvasLayerIds.get(canvasLayers.indexOf(getFieldValue("tabgroup2/tab1/layers")));
+	}
+	if (layerId == 0 || layerId != getCurrentLayerId()) {
+		clearPoints();
+	}
+}
+
+getCurrentLayerId() {
+	layer = getFieldValue("tabgroup2/tab1/layers");
+	if (layer == null || "".equals(layer)) {
+		layerId = 0;
+	} else {
+		layerId = canvasLayerIds.get(canvasLayers.indexOf(getFieldValue("tabgroup2/tab1/layers")));
+	}
+	return layerId;
+}
+
+onChangeAction() {
+	action = getFieldValue("tabgroup2/tab1/drawActions");
+	if ("draw_point".equals(action)) {
+		if (tool != POINT) clearPoints();
+		tool = POINT;
+	} else if ("draw_line".equals(action)) {
+		if (tool != LINE) clearPoints();
+		tool = LINE;
+	} else if ("draw_polygon".equals(action)) {
+		if (tool != POLYGON) clearPoints();
+		tool = POLYGON;
+	} else if ("select_shape".equals(action)) {
+		if (tool != SELECT_SHAPE) clearPoints();
+		tool = SELECT_SHAPE;
+	} else if ("draw_grid".equals(action)) {
+		if (tool != GRID) clearPoints();
+		tool = GRID;
+	}
+}
+
+onDrawAction() {
+	createShape();
+}
+
+addLayer() {
+	layerName = getLayerName();
+	layerId = createCanvasLayer("tabgroup2/tab1/map", layerName);
+	canvasLayers.add(layerName);
+	canvasLayerIds.add(layerId);
+	refreshLayers();
+	return layerId;
+}
+
+removeLayer(layerId) {
+	removeLayer("tabgroup2/tab1/map", layerId);
+	canvasLayers.remove(canvasLayers.get(canvasLayerIds.indexOf(layerId)));
+	canvasLayerIds.remove(canvasLayerIds.indexOf(layerId));
+	refreshLayers();
+}
+
+onLayerAction() {
+	action = getFieldValue("tabgroup2/tab1/layerActions");
+	
+	if ("create_layer".equals(action)) {
+		addLayer();
+	} else if ("remove_layer".equals(action)) {
+		if (getCurrentLayerId() == 0) return;
+		removeLayer(getCurrentLayerId());
+	} else if ("hide_layer".equals(action)) {
+		if (getCurrentLayerId() == 0) return;
+		setLayerVisible("tabgroup2/tab1/map", getCurrentLayerId(), false);
+	} else if ("show_layer".equals(action)) {
+		if (getCurrentLayerId() == 0) return;
+		setLayerVisible("tabgroup2/tab1/map", getCurrentLayerId(), true);
+	}
+	
+}
+
+onEvent("tabgroup2/tab2/clear", "click", "clearEntity()");
+onEvent("tabgroup2/tab2/save", "click", "saveEntity()");
+onEvent("tabgroup2/tab2/update", "click", "updateEntity(getFieldValue(\"tabgroup2/tab2/entity\"))");
+onEvent("tabgroup2/tab2/load", "click", "loadEntity()");
+
+onEvent("tabgroup2/tab3/clear", "click", "clearRelationship()");
+onEvent("tabgroup2/tab3/save", "click", "saveRelationship()");
+onEvent("tabgroup2/tab3/update", "click", "updateRelationship(getFieldValue(\"tabgroup2/tab3/relationship\"))");
+onEvent("tabgroup2/tab3/load", "click", "loadRelationship()");
+
+refreshEntities() {
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup2/tab2/entity", result);
+		}
+	});
+}
+
+clearEntity() {
+	newTabGroup("tabgroup2");
+}
+
+saveEntity() {
+	updateEntity(null);
+}
+
+updateEntity(String entityId) {	
+	if (entityId == null || "".equals(entityId)) entityId = null;
+
+	List attributes = createAttributeList();
+	if (entityId == null) {
+		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+	}
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, getFieldCertainty("tabgroup2/tab2/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup2/tab2/value"), null, getFieldValue("tabgroup2/tab2/value"), getFieldCertainty("tabgroup2/tab2/value")));
+	
+	List collection = null;
+	if (getCurrentLayerId() != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", getCurrentLayerId()); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	saveArchEnt(entityId, "simpleentity", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			entityId = uuid;
+			refreshEntities();
+		}
+	});
+}
+
+loadEntity() {
+	entityId = getFieldValue("tabgroup2/tab2/entity");
+	
+	if (entityId == null || "".equals(entityId)) return;
+	
+	fetchArchEnt(entityId, new FetchCallback() {
+		onFetch(result) {
+			showTabGroup("tabgroup2", entityId);
+	
+			drawGeometryList(result.getGeometryList());
+		}
+	});
+}
+
+drawGeometryList(geometryList) {
+	for (Geometry geom : geometryList) {
+		if (geom instanceof Polygon) {
+			drawGeometry("tabgroup2/tab1/map", getCurrentLayerId(), geom, polygonStyle(Color.BLUE, Color.BLACK));
+		} else if (geom instanceof Line) {
+			drawGeometry("tabgroup2/tab1/map", getCurrentLayerId(), geom, lineStyle(Color.GREEN));
+		} else if (geom instanceof Point) {
+			drawGeometry("tabgroup2/tab1/map", getCurrentLayerId(), geom, pointStyle(Color.RED));
+		}
+	}
+}
+
+refreshRelationships() {
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup2/tab3/relationship", result);
+		}
+	});
+}
+
+clearRelationship() {
+	setFieldValue("tabgroup2/tab3/name", "");
+	setFieldCertainty("tabgroup2/tab3/name","1");
+}
+
+saveRelationship() {
+	updateRelationship(null);
+}
+
+updateRelationship(String relId) {
+	if (relId == null || "".equals(relId)) relId = null;	
+
+	List attributes = createAttributeList();
+	if (relId == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab3/name"), null, getFieldCertainty("tabgroup2/tab3/name")));
+	
+	List collection = null;
+	if (getCurrentLayerId() != 0) {
+		collection = getGeometryList("tabgroup2/tab1/map", getCurrentLayerId()); 
+		if (collection != null) {
+			System.out.println(collection);
+		}
+	}
+	
+	saveRel(relId, "abovebelow", collection, attributes, new SaveCallback() {
+		onSave(uuid, newRecord) {
+			relId = uuid;
+			refreshRelationships();
+		}
+	});
+}
+
+loadRelationship() {
+	relId = getFieldValue("tabgroup2/tab3/relationship");
+	
+	if (relId == null || "".equals(relId)) return;
+	
+	fetchRel(relId, new FetchRecord() {
+		onFetch(result) {
+			for (Object attribute : result.getAttributes()) {
+				if ("name".equals(attribute.getName())) {
+					setFieldValue("tabgroup2/tab3/name", attribute.getText());
+					setFieldCertainty("tabgroup2/tab3/name", attribute.getCertainty());
+				}
+			}
+	
+			drawGeometryList(result.getGeometryList());
+		}
+	});
+}
+
+// POINT TEST
+
+onEvent("tabgroup3/tab1/create", "click", "drawPointOnPointLayer()");
+onEvent("tabgroup3/tab1/clear", "click", "clearPointLayer()");
+onMapEvent("tabgroup3/tab1/map", "onClickPointLayer()", "onSelectPointLayer()");
+
+int mapPointLayerId = -1;
+
+initPointMap() {
+	clearPointLayer();
+}
+
+drawPointOnPointLayer() {
+	lon = getFieldValue("tabgroup3/tab1/longitude");
+	lat = getFieldValue("tabgroup3/tab1/latitude");
+	
+	if ("".equals(lon) || "".equals(lat)) {
+		return;
+	}
+	
+	lon = Float.parseFloat(lon);
+	lat = Float.parseFloat(lat);
+	
+	point = createPoint(lon, lat);
+	
+	drawPoint("tabgroup3/tab1/map", mapPointLayerId, point, pointStyle(Color.RED));
+	
+	setMapFocusPoint("tabgroup3/tab1/map", lon, lat);
+}
+
+clearPointLayer() {
+	if (mapPointLayerId > 0)
+		removeLayer("tabgroup3/tab1/map", mapPointLayerId);
+	
+	mapPointLayerId = createCanvasLayer("tabgroup3/tab1/map", "Point Layer");
+}
+
+onSelectPointLayer() {
+	selectedId = getMapGeometrySelected();
+	point = getGeometry("tabgroup3/tab1/map", selectedId).getMapPos();
+	
+	addGeometryHighlight("tabgroup3/tab1/map", selectedId);
+	
+	showToast("selected point at (" + point.x + ", " + point.y + ")");
+}
+
+onClickPointLayer() {
+	clearGeometryHighlights("tabgroup3/tab1/map");
+
+	p = getMapPointClicked();
+	setFieldValue("tabgroup3/tab1/longitude", p.x);
+	setFieldValue("tabgroup3/tab1/latitude", p.y);
+}
+
+// Kaz Test
+
+initSpatialMap() {
+	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);
+	ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+	pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+	ts = createTextStyle(10, Color.WHITE, 40, Typeface.SANS_SERIF);
+	showSpatialLayer("tabgroup4/tab1/map", "Kaz All Teams", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", "PK_UID", "PK_UID", ps, ls, pos, ts);
+	showSpatialLayer("tabgroup4/tab1/map", "Kaz Site Points", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", "PK_UID", "PK_UID", ps, ls, pos, ts); 
+}
+
+// Map UI Test
+
+initUIMap() {
+	setMapZoom("tabgroup5/tab1/map", 15.0f);
+	createCanvasLayer("tabgroup5/tab1/map", "Data entry layer");
+	setSelectedLayer("tabgroup5/tab1/map", "Data entry layer");
+
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "no query", null);
+	addTrackLogLayerQuery("tabgroup5/tab1/map", "track log entities", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('gps_track')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities",
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" +
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		" group by uuid\n" + 
+		" having max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value pond", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" + 
+		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		"   and aentvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'pond'||'%'\n" + 
+		"        OR measure LIKE '%'||null||'%'\n" + 
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by uuid, attributeid\n" + 
+		" having max(valuetimestamp)\n" + 
+		"    and max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all simple type entities with value forest", 
+		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
+		" FROM archentity join aenttype using (aenttypeid)\n" + 
+		" JOIN aentvalue using (uuid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where archentity.deleted is null\n" + 
+		"   and lower(aenttypename) = lower('simpleentity')\n" + 
+		"   and aentvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'forest'||'%'\n" + 
+		"        OR measure LIKE '%'||null||'%'\n" + 
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by uuid, attributeid\n" + 
+		" having max(valuetimestamp)\n" + 
+		"    and max(aenttimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships", 
+		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+		" FROM relationship join relntype using (relntypeid)\n" +
+		" where relationship.deleted is null\n" + 
+		"   and lower(relntypename) = lower('abovebelow')\n" + 
+		" group by relationshipid\n" + 
+		" having max(relntimestamp)");
+	addDatabaseLayerQuery("tabgroup5/tab1/map", "all abovebelow relationships with value area", 
+		"SELECT relationshipid, max(relntimestamp) as relntimestamp\n" + 
+		" FROM relationship join relntype using (relntypeid)\n" + 
+		" JOIN relnvalue using (relationshipid) LEFT OUTER JOIN vocabulary using (vocabid, attributeid)\n" + 
+		" where relationship.deleted is null\n" + 
+		"   and lower(relntypename) = lower('abovebelow')\n" + 
+		"   and relnvalue.deleted is null\n" + 
+		"   and (freetext LIKE '%'||'area'||'%'\n" +
+		"        OR vocabname LIKE '%'||null||'%')\n" + 
+		" group by relationshipid, attributeid\n" + 
+		" having max(relnvaluetimestamp)\n" + 
+		"    and max(relntimestamp)");
+					
+	addSelectQueryBuilder("tabgroup5/tab1/map", "select entity based on type", createQueryBuilder(
+		"select uuid\n" + 
+		"  from latestNonDeletedArchent\n" + 
+		"  JOIN latestNonDeletedAentValue using (uuid)\n" + 
+		"  join aenttype using (aenttypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(aenttypename) = lower('simpleentity') \n" + 
+		"   and (freetext LIKE '%'||?||'%' \n" + 
+		"                OR measure LIKE '%'||?||'%' \n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"   group by uuid").
+					addParameter("freetext", "Simple 1").
+					addParameter("measure", null).
+					addParameter("vocabname", null));
+	addSelectQueryBuilder("tabgroup5/tab1/map", "select relationship based on type", createQueryBuilder(
+		"select relationshipid\n" + 
+		"  FROM latestNonDeletedRelationship\n" + 
+		"  JOIN latestNonDeletedRelnValue using (relationshipid)\n" + 
+		"  JOIN relntype using (relntypeid)\n" + 
+		"  LEFT OUTER JOIN vocabulary using (vocabid, attributeid) \n" + 
+		"  where lower(relntypename) = lower('abovebelow') \n" + 
+		"  and (freetext LIKE '%'||?||'%'\n" + 
+		"                OR vocabname LIKE '%'||?||'%') \n" + 
+		"  group by relationshipid").
+					addParameter("freetext", "AboveBelow 1").
+					addParameter("vocabname", null));
+					
+	addLegacySelectQueryBuilder("tabgroup5/tab1/map", "select from kaz all teams by id", "files/data/maps/KAZ.sqlite", "KAZ_AllTeams", 
+		createLegacyQueryBuilder("Select PK_UID from KAZ_ALLTeams where PK_UID = ?").addParameter("ID", null));
+	addLegacySelectQueryBuilder("tabgroup5/tab1/map", "select from kaz site points by id", "files/data/maps/KAZ.sqlite", "KAZ_SitePoints", 
+		createLegacyQueryBuilder("Select PK_UID from KAZ_SitePoints where PK_UID = ?").addParameter("ID", null));
+					
+	refreshUIEntities();
+	refreshUIRelationships();
+	
+	choices = new ArrayList();
+	choices.add("None");
+	choices.add("Simple Entity");
+	choices.add("Above Below Relationship");
+	populateRadioGroup("tabgroup5/tab1/createChoices", choices);
+	
+}
+onEvent("tabgroup5", "load", "loadUI()");
+
+loadUI(){
+	onEvent("tabgroup5/tab2/clear", "click", "clearUIEntity()");
+	onEvent("tabgroup5/tab2/save", "click", "saveUIEntity()");
+	onEvent("tabgroup5/tab2/update", "click", "updateUIEntity(getFieldValue(\"tabgroup5/tab2/entity\"))");
+	onEvent("tabgroup5/tab2/load", "click", "loadUIEntity(null)");
+
+	onEvent("tabgroup5/tab3/clear", "click", "clearUIRelationship()");
+	onEvent("tabgroup5/tab3/save", "click", "saveUIRelationship()");
+	onEvent("tabgroup5/tab3/update", "click", "updateUIRelationship(getFieldValue(\"tabgroup5/tab3/relationship\"))");
+	onEvent("tabgroup5/tab3/load", "click", "loadUIRelationship(null)");
+
+	onEvent("tabgroup5/tab1/clear", "click", "clearCreateGeometry()");
+	onToolEvent("tabgroup5/tab1/map", "create", "onCreateGeometry()");
+	onToolEvent("tabgroup5/tab1/map", "load", "onLoadGeometry()");
+
+}
+
+int createGeomId = 0;
+
+clearCreateGeometry() {
+	createGeomId = 0;
+}
+
+onCreateGeometry() {
+	createGeomId = getMapGeometryCreated();
+	
+	System.out.println("create id:" + createGeomId);
+	
+	choice = getFieldValue("tabgroup5/tab1/createChoices");
+	if ("None".equals(choice)) {
+		createGeomId = 0;
+	} else if ("Simple Entity".equals(choice)) {
+		showTab("tabgroup5/tab2");
+	} else if ("Above Below Relationship".equals(choice)) {
+		showTab("tabgroup5/tab3");
+	}
+	
+}
+
+onLoadGeometry() {
+	uuid = getMapGeometryLoaded();
+	isEntity = "entity".equals(getMapGeometryLoadedType());
+	
+	if (isEntity) {
+		loadUIEntity(uuid);
+	} else {
+		loadUIRelationship(uuid);
+	}
+}
+
+refreshUIEntities() {
+	fetchEntityList("simpleentity", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup5/tab2/entity", result);
+		}
+	});
+}
+
+clearUIEntity() {
+	newTabGroup("tabgroup5");
+}
+
+saveUIEntity() {
+	updateUIEntity(null);
+}
+
+updateUIEntity(String entityId) {
+	if (entityId == null || "".equals(entityId)) entityId = null;
+
+	List attributes = createAttributeList();
+	if (entityId == null) {
+		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+	}
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
+	
+	
+	if (entityId == null) {
+		ArrayList list = null;
+		if (createGeomId > 0) {
+			Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+			list = new ArrayList();
+			list.add(g);
+			clearGeometry("tabgroup5/tab1/map", createGeomId);
+			createGeomId = 0;
+		}
+
+		saveTab("tabgroup5/tab2", entityId, list, attributes, new SaveCallback() {
+			onSave(uuid, newRecord) {
+				refreshUIEntities();
+				refreshMap("tabgroup5/tab1/map");
+			}
+		});	
+	} else {
+		fetchArchEnt(entityId, new FetchCallback() {
+			onFetch(entity) {
+				saveTab("tabgroup5/tab2", entityId, entity.getGeometryList(), attributes, new SaveCallback() {
+					onSave(uuid, newRecord) {
+						refreshUIEntities();
+						refreshMap("tabgroup5/tab1/map");
+					}
+				});
+			}
+		});
+	}
+	
+}
+
+loadUIEntity(entityId) {
+	
+	if (entityId == null) {
+		entityId = getFieldValue("tabgroup5/tab2/entity");
+	} else {
+		setFieldValue("tabgroup5/tab2/entity", entityId);
+	}
+	
+	if (entityId == null || "".equals(entityId)) return;
+	
+	showTab("tabgroup5/tab2", entityId);
+	
+}
+
+refreshUIRelationships() {
+	fetchRelationshipList("abovebelow", new FetchCallback() {
+		onFetch(relationships) {
+			populateDropDown("tabgroup5/tab3/relationship", relationships);
+		}
+	});
+}
+
+clearUIRelationship() {
+	setFieldValue("tabgroup5/tab3/name", "");
+	setFieldCertainty("tabgroup5/tab3/name","1");
+}
+
+saveUIRelationship() {
+	updateUIRelationship(null);
+}
+
+updateUIRelationship(String relId) {
+	
+	if (relId == null || "".equals(relId)) relId = null;
+
+	List attributes = createAttributeList();
+	if (relId == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup5/tab3/name"), null, getFieldCertainty("tabgroup5/tab3/name")));
+	
+	if (relId == null) {
+		ArrayList list = null;
+		if (createGeomId > 0) {
+			Geometry g = getGeometry("tabgroup5/tab1/map", createGeomId);
+			list = new ArrayList();
+			list.add(g);
+			
+			clearGeometry("tabgroup5/tab1/map", createGeomId);
+			createGeomId = 0;
+		}
+		saveRel(relId, "abovebelow", list, attributes, new SaveCallback() {
+			onSave(uuid, newRecord) {
+				refreshUIRelationships();
+				refreshMap("tabgroup5/tab1/map");
+			}
+		});
+	} else {
+		fetchRel(relId, new FetchCallback() {
+			onFetch(rel) {
+				saveRel(relId, "abovebelow", rel.getGeometryList(), attributes, new SaveCallback() {
+					onSave(uuid, newRecord) {
+						refreshUIRelationships();
+						refreshMap("tabgroup5/tab1/map");
+					}
+				});
+			}
+		});
+	}
+
+}
+
+loadUIRelationship(relId) {
+	if (relId == null) {
+		relId = getFieldValue("tabgroup5/tab3/relationship");
+	} else {
+		setFieldValue("tabgroup5/tab3/relationship", relId);
+	}
+	
+	if (relId == null || "".equals(relId)) return;
+	
+	fetchRel(relId, new FetchCallback() {
+		onFetch(relationship) {
+			for (Object attribute : relationship.getAttributes()) {
+				System.out.println(attribute.toString());
+				if ("name".equals(attribute.getName())) {
+					setFieldValue("tabgroup5/tab3/name", attribute.getText());
+					setFieldCertainty("tabgroup5/tab3/name", attribute.getCertainty());
+				}
+			}
+			
+			showTab("tabgroup5/tab3");
+		}
+	});
+}

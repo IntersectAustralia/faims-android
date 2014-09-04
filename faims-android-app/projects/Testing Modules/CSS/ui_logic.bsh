@@ -1,33 +1,33 @@
 
-// addActionBarItem("about", new ActionButtonCallback() {
-//     actionOnLabel() {
-//         "About";
-//     }
+addActionBarItem("about", new ActionButtonCallback() {
+    actionOnLabel() {
+        "About";
+    }
      
-//     actionOn() {
-//         showWarning("Test Module", "This module was created merely for test purposes. Use it as you will");
-//     }
-// });
+    actionOn() {
+        showWarning("Test Module", "This module was created merely for test purposes. Use it as you will");
+    }
+});
  
  
-// Toggle item
-// addActionBarItem("sync", new ToggleActionButtonCallback() {
-//     actionOnLabel() {
-//         "Turn Sync off";
-//     }
-//     actionOn() {
-//         setSyncEnabled(false);
-//     }
-//     isActionOff() {
-//         isSyncEnabled();
-//     }
-//     actionOffLabel() {
-//         "Turn Sync on";
-//     }
-//     actionOff() {
-//         setSyncEnabled(true);
-//     }
-// });
+Toggle item
+addActionBarItem("sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Sync off";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+    }
+    isActionOff() {
+        isSyncEnabled();
+    }
+    actionOffLabel() {
+        "Turn Sync on";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+    }
+});
 
 // Primary Buttons (blue color)
 addNavigationButton("test1", new ActionButtonCallback() {

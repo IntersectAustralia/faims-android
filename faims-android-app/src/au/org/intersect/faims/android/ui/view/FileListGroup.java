@@ -20,6 +20,7 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.ui.dialog.FileAttachmentLabelDialog;
 
 import com.google.inject.Inject;
+import com.nativecss.NativeCSS;
 
 public class FileListGroup extends CustomFileList {
 	
@@ -52,6 +53,7 @@ public class FileListGroup extends CustomFileList {
 	public FileListGroup(Context context, FormInputDef attribute, boolean sync, String ref, boolean dynamic) {
 		super(context, attribute, ref, dynamic, sync);
 		FAIMSApplication.getInstance().injectMembers(this);
+		NativeCSS.addCSSClass(this, "file-list");
 	}
 	
 	@Override
@@ -98,6 +100,7 @@ public class FileListGroup extends CustomFileList {
 				return false;
 			}
 		});
+		NativeCSS.addCSSClass(layout, "file-list-item");
 		return layout;
 	}
 	
