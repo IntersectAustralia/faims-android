@@ -1458,7 +1458,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	    	title.setText(text);
 	    	title.setEllipsize(TextUtils.TruncateAt.START);
 	    } else {
-	    	getActionBar().setTitle(breadcrumbs.toString());
+	    	setTitle(breadcrumbs.toString());
 	    }
 	}
 }
