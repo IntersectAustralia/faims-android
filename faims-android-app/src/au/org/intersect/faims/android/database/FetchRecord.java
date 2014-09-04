@@ -118,7 +118,7 @@ public class FetchRecord extends Database {
 		try {
 			db = openDB();
 
-			if (userQuery == null) {
+			if (userQuery == null || userQuery.isEmpty()) {
 				userQuery = "";
 			} else {
 				userQuery =	"JOIN (" + userQuery + ") USING (uuid, aenttimestamp)\n";
