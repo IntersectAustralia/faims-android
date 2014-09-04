@@ -153,7 +153,6 @@ public class CustomListView extends ListView implements IView {
 			protected Void doInBackground(Void... params) {
 				try {
 					values = databaseManager.fetchRecord().fetchAll(query);
-					Thread.sleep(2000);
 				} catch (Exception e) {
 					FLog.e("error updating cursor list " + ref, e);
 					linker.showWarning("Logic Error", "Error updating cursor list " + ref);

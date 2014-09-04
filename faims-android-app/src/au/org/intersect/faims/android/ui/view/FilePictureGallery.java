@@ -97,10 +97,7 @@ public class FilePictureGallery extends CustomFileList {
 	}
 	
 	public void populateImages(List<Picture> pictures) {
-		galleryImages = null;
-		
-		galleriesLayout.removeAllViews();
-		galleryImages = new ArrayList<CustomImageView>();
+		reset();
 		
 		for (Picture picture : pictures) {
 			addFile(picture.getUrl());

@@ -118,7 +118,7 @@ public class FileListGroup extends CustomFileList {
 	@Override
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
-		removeAllViews();
+		reset();
 		for (NameValuePair pair : pairs) {
 			addFile(pair.getName());
 		}
