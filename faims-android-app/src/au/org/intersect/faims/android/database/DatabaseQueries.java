@@ -208,50 +208,53 @@ public final class DatabaseQueries {
 
 	public static final String DUMP_DATABASE_TO(String path, String fromTimestamp){
 		return "attach database '" + path + "' as export;" +
-				"create table export.archentity as select * from archentity where aenttimestamp >= '" + fromTimestamp + "';" +
-				"create table export.aentvalue as select * from aentvalue where valuetimestamp >= '" + fromTimestamp + "';" +
-				"create table export.aentreln as select * from aentreln where aentrelntimestamp >= '" + fromTimestamp + "';" +
-				"create table export.relationship as select * from relationship where relntimestamp >= '" + fromTimestamp + "';" +
-				"create table export.relnvalue as select * from relnvalue where relnvaluetimestamp >= '" + fromTimestamp + "';" +
+				"create table export.archentity as select * from archentity where versionnum is null and aenttimestamp >= '" + fromTimestamp + "';" +
+				"create table export.aentvalue as select * from aentvalue where versionnum is null and valuetimestamp >= '" + fromTimestamp + "';" +
+				"create table export.aentreln as select * from aentreln where versionnum is null and aentrelntimestamp >= '" + fromTimestamp + "';" +
+				"create table export.relationship as select * from relationship where versionnum is null and relntimestamp >= '" + fromTimestamp + "';" +
+				"create table export.relnvalue as select * from relnvalue where versionnum is null and relnvaluetimestamp >= '" + fromTimestamp + "';" +
 				"detach database export;";
 	}
 
 	public static final String MERGE_DATABASE_FROM(String path){
 		return "attach database '" + path + "' as import;" +
 				"insert or replace into archentity (\n" + 
-				"         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
-				"  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn \n" + 
+				"         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
+				"  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn \n" + 
 				"  from import.archentity;\n" +
 				"delete from aentvalue\n" + 
 				"    where uuid || valuetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(measure, '')|| coalesce(certainty, '')|| userid IN\n" + 
 				"    (select uuid || valuetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(measure, '')|| coalesce(certainty, '')|| userid from import.aentvalue);" +
 				"insert into aentvalue (\n" + 
-				"         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-				"  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
+				"         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+				"  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
 				"  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);\n" + 
 				"insert or replace into relationship (\n" + 
-				"         relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
-				"  select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn\n" + 
+				"         relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) \n" + 
+				"  select relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn\n" + 
 				"  from import.relationship;\n" + 
 				"delete from relnvalue\n" + 
 				"    where relationshipid || relnvaluetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')||  coalesce(certainty, '')|| userid IN\n" + 
 				"    (select relationshipid || relnvaluetimestamp || attributeid || coalesce(vocabid, '')|| coalesce(freetext, '')|| coalesce(certainty, '')|| userid from import.relnvalue);" +
 				"insert into relnvalue (\n" + 
-				"         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-				"  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
+				"         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+				"  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp \n" + 
 				"  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);\n" + 
 				"insert into aentreln (\n" + 
-				"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
-				"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
+				"         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) \n" + 
+				"  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp\n" + 
 				"  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);\n" + 
 				"insert or replace into vocabulary (\n" + 
-				"         vocabid, attributeid, vocabname, vocabdescription, parentvocabid, SemanticMapURL, PictureURL) \n" + 
-				"  select vocabid, attributeid, vocabname, vocabdescription, parentvocabid, SemanticMapURL, PictureURL\n" + 
+				"         vocabid, attributeid, vocabname, vocabdescription, VocabCountOrder, VocabDeleted, parentvocabid, SemanticMapURL, PictureURL) \n" + 
+				"  select vocabid, attributeid, vocabname, vocabdescription, VocabCountOrder, VocabDeleted, parentvocabid, SemanticMapURL, PictureURL\n" + 
 				"  from import.vocabulary;\n" + 
 				"insert or replace into user (\n" + 
-				"         userid, fname, lname, email) \n" + 
-				"  select userid, fname, lname, email\n" + 
+				"         userid, fname, lname, email, UserDeleted) \n" + 
+				"  select userid, fname, lname, email, UserDeleted\n" + 
 				"  from import.user;\n" + 
+				"insert or replace into File (Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize)\n" +
+				"  select Filename, MD5Checksum, Size, Type, import.file.State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize\n" +
+				"  from import.file left outer join (select filename, state from file) local using (filename) where local.State != 'downloaded' or local.state is null;" + 
 				"detach database import;";
 	}
 
@@ -311,17 +314,35 @@ public final class DatabaseQueries {
 			"select attributedescription from attributekey where attributename = ?;";
 	
 	public static final String GET_VOCABULARIES_TERM_DESCRIPTION =
-			"select vocabid, vocabname, vocabdescription, pictureurl, parentvocabid from attributekey join vocabulary using (attributeid) where attributename = ?;";
+			"select vocabid, vocabname, vocabdescription, pictureurl, parentvocabid from attributekey join vocabulary using (attributeid) where attributename = ? order by VocabCountOrder;";
 
 	public static String COUNT_AENT_RECORDS(String timestamp) {
-		return "select count(*) from archentity where aenttimestamp >= '" + timestamp + "';";
+		return "select count(*) from archentity where versionnum is null and aenttimestamp >= '" + timestamp + "';";
+	}
+	
+	public static String COUNT_AENT_VALUE_RECORDS(String timestamp) {
+		return "select count(*) from aentvalue where versionnum is null and valuetimestamp >= '" + timestamp + "';";
 	}
 
 	public static String COUNT_RELN_RECORDS(String timestamp) {
-		return "select count(*) from relationship where relntimestamp >= '" + timestamp + "';";
+		return "select count(*) from relationship where versionnum is null and relntimestamp >= '" + timestamp + "';";
+	}
+	
+	public static String COUNT_RELN_VALUE_RECORDS(String timestamp) {
+		return "select count(*) from relnvalue where versionnum is null and relnvaluetimestamp >= '" + timestamp + "';";
 	}
 	
 	public static String COUNT_AENT_RELN_RECORDS(String timestamp) {
-		return "select count(*) from aentreln where aentrelntimestamp >= '" + timestamp + "';";
+		return "select count(*) from aentreln where versionnum is null and aentrelntimestamp >= '" + timestamp + "';";
 	}
+	
+	public static String INSERT_FILE = "insert or replace into File (Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	
+	public static String UPDATE_FILE = "update File set State = ? where Filename = ?";
+	
+	public static String GET_UPLOAD_FILES = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where Type = ? and State = 'attached';";
+	
+	public static String GET_DOWNLOAD_FILES = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where Type = ? and State is null;";
+	
+	public static String HAS_FILE_CHANGES = "select count(*) from file where state = 'attached';";
 }

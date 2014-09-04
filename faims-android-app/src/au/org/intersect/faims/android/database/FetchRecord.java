@@ -225,7 +225,31 @@ public class FetchRecord extends Database {
 				return true;
 			}
 			
+			query = DatabaseQueries.COUNT_AENT_VALUE_RECORDS(timestamp);
+			stmt = db.prepare(query);
+			if(stmt.step()){
+				count = stmt.column_int(0);
+			}
+			stmt.close();
+			stmt = null;
+			
+			if(count > 0){
+				return true;
+			}
+			
 			query = DatabaseQueries.COUNT_RELN_RECORDS(timestamp);
+			stmt = db.prepare(query);
+			if(stmt.step()){
+				count = stmt.column_int(0);
+			}
+			stmt.close();
+			stmt = null;
+			
+			if(count > 0){
+				return true;
+			}
+			
+			query = DatabaseQueries.COUNT_RELN_VALUE_RECORDS(timestamp);
 			stmt = db.prepare(query);
 			if(stmt.step()){
 				count = stmt.column_int(0);

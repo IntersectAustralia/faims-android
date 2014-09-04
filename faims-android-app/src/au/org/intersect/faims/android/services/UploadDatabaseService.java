@@ -1,24 +1,17 @@
 package au.org.intersect.faims.android.services;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 
 import android.content.Intent;
-import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.Request;
 import au.org.intersect.faims.android.util.FileUtil;
 
-import com.google.inject.Inject;
-
 public class UploadDatabaseService extends DownloadUploadService {
-
-	@Inject
-	DatabaseManager databaseManager;
 	
 	protected File tempDB;
 	
@@ -58,14 +51,11 @@ public class UploadDatabaseService extends DownloadUploadService {
     		return;
     	}
     	
-    	ArrayList<File> files = new ArrayList<File>();
-    	files.add(tempDB);
-    	
 		HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
 		extraParts.put("user", new StringBody(databaseManager.getUserId()));
 		
-    	if (!uploadFiles("db", 
-    			Request.DATABASE_UPLOAD_REQUEST(serviceModule), files, serviceModule.getDirectoryPath(), extraParts)) {
+    	if (!uploadFile("db", 
+    			Request.DATABASE_UPLOAD_REQUEST(serviceModule), tempDB, serviceModule.getDirectoryPath(), extraParts)) {
     		FLog.d("Failed to upload database");
 			return;
     	}

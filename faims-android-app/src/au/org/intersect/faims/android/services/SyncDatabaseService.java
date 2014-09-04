@@ -1,7 +1,6 @@
 package au.org.intersect.faims.android.services;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -59,14 +58,11 @@ public class SyncDatabaseService extends UploadDatabaseService {
     		return;
     	}
     	
-    	ArrayList<File> files = new ArrayList<File>();
-    	files.add(tempDB);
-    	
 		HashMap<String, ContentBody> extraParts = new HashMap<String, ContentBody>();
 		extraParts.put("user", new StringBody(databaseManager.getUserId()));
 		
-    	if (!uploadFiles("db", 
-    			Request.DATABASE_UPLOAD_REQUEST(serviceModule), files, serviceModule.getDirectoryPath(), extraParts)){
+    	if (!uploadFile("db", 
+    			Request.DATABASE_UPLOAD_REQUEST(serviceModule), tempDB, serviceModule.getDirectoryPath(), extraParts)){
     		FLog.d("Failed to upload database");
 			return;
     	}    	

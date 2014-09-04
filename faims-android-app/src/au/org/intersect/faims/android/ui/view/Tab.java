@@ -720,9 +720,6 @@ public class Tab {
 				customView.reset();
 				ImageView dirtyButton = dirtyButtonMap.get(customView.getRef());
 				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
-			} else if (v instanceof CustomFileList) {
-				CustomFileList customFileList = (CustomFileList) v;
-				customFileList.reset();
 			}
 		}
 	}

@@ -2,12 +2,11 @@ package au.org.intersect.faims.android.services;
 
 import java.io.File;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.http.entity.mime.content.ContentBody;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.IntentService;
@@ -16,7 +15,10 @@ import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.database.FileRecord;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
@@ -30,6 +32,9 @@ public abstract class DownloadUploadService extends IntentService {
 
 	@Inject
 	FAIMSClient faimsClient;
+	
+	@Inject
+	DatabaseManager databaseManager;
 
 	protected boolean serviceInterrupted;
 	protected Module serviceModule;
@@ -104,41 +109,50 @@ public abstract class DownloadUploadService extends IntentService {
 		for (int i = 0; i < jsonFiles.length(); i++) {
 			JSONObject fileInfo = jsonFiles.getJSONObject(i);
 
-			File downloadFile = new File(downloadDirectory.getPath() + '/'
+			File file = new File(downloadDirectory.getPath() + '/'
 					+ fileInfo.getString("file"));
 
-			// check if file exists and is overwritable
-			if (!overwrite && downloadFile.exists()) {
-				continue;
+			if (!downloadFile(name, downloadUri, file, FileInfo.fromJson(fileInfo), overwrite)) {
+				return false;
 			}
+		}
 
+		serviceResult = Result.SUCCESS;
+		serviceResult.data = infoResult.data;
+		return true;
+	}
+	
+	protected boolean downloadFile(String name, String downloadUri, File downloadFile, FileInfo fileInfo, boolean overwrite) throws Exception {
+		// check if file exists and is overwritable
+		if (overwrite || !downloadFile.exists()) {
 			// check if there is enough space to download file
-			long size = fileInfo.getLong("size");
+			long size = fileInfo.size;
 			if (FileUtil.getExternalStorageSpace() < size) {
 				FLog.d("download file failed because there is not enough space");
 				serviceResult = new Result(FAIMSClientResultCode.FAILURE,
 						FAIMSClientErrorCode.STORAGE_LIMIT_ERROR);
 				return false;
 			}
-
+	
 			// download file
 			File parentDirectory = downloadFile.getParentFile();
 			if (parentDirectory != null) {
 				FileUtil.makeDirs(parentDirectory);
 			}
+			
 			Result downloadResult = faimsClient.downloadFile(
 					downloadUri
 							+ "&request_file="
-							+ URLEncoder.encode(fileInfo.getString("file"),
+							+ URLEncoder.encode(fileInfo.filename,
 									"UTF-8"), downloadFile);
 			if (downloadResult.resultCode != FAIMSClientResultCode.SUCCESS) {
 				FileUtil.delete(downloadFile);
 				serviceResult = downloadResult;
 				return false;
 			}
-
+	
 			// check if md5 hash matches
-			String md5checksum = fileInfo.getString("md5");
+			String md5checksum = fileInfo.md5;
 			if (!FileUtil.generateMD5Hash(downloadFile).equals(md5checksum)) {
 				FLog.d("downloaded file failed because file is corrupted");
 				serviceResult = new Result(FAIMSClientResultCode.FAILURE,
@@ -146,81 +160,60 @@ public abstract class DownloadUploadService extends IntentService {
 				FileUtil.delete(downloadFile);
 				return false;
 			}
-
-			FLog.d("downloaded file: " + downloadFile);
 		}
 
+		FLog.d("downloaded file: " + downloadFile);
+		
 		serviceResult = Result.SUCCESS;
-		serviceResult.data = infoResult.data;
 		return true;
 	}
 
-	protected boolean uploadFiles(String name, String uploadUri,
-			List<File> uploadFiles, File baseDirectory) throws Exception {
-		return uploadFiles(name, uploadUri, uploadFiles, baseDirectory, null, null);
-	}
-
-	protected boolean uploadFiles(String name, String uploadUri,
-			List<File> uploadFiles, File baseDirectory, HashMap<String, ContentBody> extraParts)
+	protected boolean uploadFile(String name, String uploadUri,
+			File uploadFile, File baseDirectory, HashMap<String, ContentBody> extraParts)
 			throws Exception {
-		return uploadFiles(name, uploadUri, uploadFiles, baseDirectory, extraParts, null);
-	}
+		FLog.d("uploading file for " + serviceModule.name);
 
-	protected boolean uploadFiles(String name, String uploadUri,
-			List<File> uploadFiles, File baseDirectory, HashMap<String, ContentBody> extraParts,
-			String excludeFileFromRequestUri) throws Exception {
-		FLog.d("uploading files for " + serviceModule.name);
-
-		// get files to exclude
-		JSONArray jsonFiles = null;
-		if (excludeFileFromRequestUri != null) {
-			Result infoResult = faimsClient
-					.fetchRequestObject(excludeFileFromRequestUri);
-			if (infoResult.resultCode != FAIMSClientResultCode.SUCCESS) {
-				serviceResult = infoResult;
-				return false;
-			}
-
-			JSONObject jsonInfo = (JSONObject) infoResult.data;
-			jsonFiles = jsonInfo.getJSONArray("files");
+		// get path relative to home directory
+		Result uploadResult = faimsClient.uploadFile(uploadUri, uploadFile,
+				pathFromBaseDirectory(baseDirectory, uploadFile), extraParts);
+		if (uploadResult.resultCode != FAIMSClientResultCode.SUCCESS) {
+			serviceResult = uploadResult;
+			return false;
 		}
 
-		for (int i = 0; i < uploadFiles.size(); i++) {
-			File uploadFile = uploadFiles.get(i);
-
-			// check if file is excluded
-			if (excludeFile(baseDirectory, uploadFile, jsonFiles)) {
-				continue;
-			}
-
-			// get path relative to home directory
-			Result uploadResult = faimsClient.uploadFile(uploadUri, uploadFile,
-					pathFromBaseDirectory(baseDirectory, uploadFile), extraParts);
-			if (uploadResult.resultCode != FAIMSClientResultCode.SUCCESS) {
-				serviceResult = uploadResult;
-				return false;
-			}
-
-			FLog.d("uploaded file: " + uploadFile);
-		}
+		FLog.d("uploaded file: " + uploadFile);
 
 		serviceResult = Result.SUCCESS;
 		return true;
 	}
-
-	private boolean excludeFile(File baseDirectory, File uploadFile, JSONArray jsonFiles)
-			throws JSONException {
-		if (jsonFiles != null) {
-			for (int i = 0; i < jsonFiles.length(); i++) {
-				String uploadPath = pathFromBaseDirectory(baseDirectory, uploadFile).getPath();
-				String downloadPath = jsonFiles.getJSONObject(
-						i).getString("file");
-				if (uploadPath.equals(downloadPath)) {
-					return true;
-				}
+	
+	protected boolean uploadSyncFiles(String name, String uploadUri, File baseDirectory) throws Exception {
+		ArrayList<FileInfo> files = databaseManager.fileRecord().getFilesToUpload(name);
+		for (FileInfo info : files) {
+			if (uploadFile(name, uploadUri, serviceModule.getDirectoryPath(info.filename), baseDirectory, null)) {
+				databaseManager.fileRecord().updateFile(info.filename, FileRecord.UPLOADED);
+			} else {
+				return false;
 			}
 		}
-		return false;
+		serviceResult = Result.SUCCESS;
+		return true;
+	}
+	
+	protected boolean downloadSyncFiles(String name, String downloadUri, File baseDirectory) throws Exception {
+		ArrayList<FileInfo> files = databaseManager.fileRecord().getFilesToDownload(name);
+		for (FileInfo info : files) {
+			File file = serviceModule.getDirectoryPath(info.filename);
+			String originalFilename = info.filename;
+			info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
+			if (downloadFile(name, downloadUri, file, info, false)) {
+				databaseManager.fileRecord().updateFile(originalFilename, FileRecord.DOWNLOADED);
+			} else {
+				return false;
+			}
+		}
+		serviceResult = Result.SUCCESS;
+		return true;
 	}
 	
 	private File pathFromBaseDirectory(File baseDirectory, File file) {

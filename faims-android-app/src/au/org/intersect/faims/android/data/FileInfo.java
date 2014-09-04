@@ -6,13 +6,20 @@ import org.json.JSONObject;
 public class FileInfo {
 
 	public String filename;
-	public long size;
 	public String md5;
+	public long size;
+	public String type;
+	public String state;
+	public String timestamp;
+	public boolean deleted;
+	public String thumbnailFilename;
+	public String thumbnailMD5;
+	public long thumbnailSize;
 	
 	public void parseJson(JSONObject object) throws JSONException {
 		filename = object.getString("file");
-		size = object.getLong("size");
 		md5 = object.getString("md5");
+		size = object.getLong("size");
 	}
 	
 	public static FileInfo fromJson(JSONObject object) throws JSONException {

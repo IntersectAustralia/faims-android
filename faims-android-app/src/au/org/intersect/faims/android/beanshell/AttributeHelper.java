@@ -16,7 +16,6 @@ import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 import au.org.intersect.faims.android.ui.view.CustomFileList;
-import au.org.intersect.faims.android.ui.view.ICustomFileView;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
 
@@ -118,25 +117,23 @@ public class AttributeHelper {
 								relativePath = linker.attachFile(attachment, sync, null, null);
 							}
 							
-							newValues.add(relativePath);
-							
-							String fullPath = linker.getModule().getDirectoryPath(relativePath).getPath();
-							newPairs.add(new NameValuePair(fullPath, fullPath));
+							if (relativePath != null) {
+								newValues.add(relativePath);
+								
+								String fullPath = linker.getModule().getDirectoryPath(relativePath).getPath();
+								newPairs.add(new NameValuePair(fullPath, fullPath));
+							}
 						}
 						// reload new paths into file views
 						fileList.setReloadPairs(newPairs);
 					}
 					
 					String type = fileList.getAttributeType();
-					if (Attribute.MEASURE.equals(type) || Attribute.VOCAB.equals(type)) {
-						if (newValues.size() > 0) {
-							if (valuesByType.get(type) == null) {
-								valuesByType.put(type, new ArrayList<String>());
-							}
-							valuesByType.get(type).addAll(newValues);
+					if (newValues.size() > 0) {
+						if (valuesByType.get(type) == null) {
+							valuesByType.put(type, new ArrayList<String>());
 						}
-					} else {
-						FLog.w("Cannot save file list to type " + type);
+						valuesByType.get(type).addAll(newValues);
 					}
 					
 					// get annotations
@@ -212,8 +209,8 @@ public class AttributeHelper {
 		public boolean hasChanges(BeanShellLinker linker,
 				HashMap<String, ArrayList<Attribute>> cachedAttributes) {
 			for (ICustomView customView : views) {
-				if (customView instanceof ICustomFileView) {
-					if (((ICustomFileView) customView).hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
+				if (customView instanceof CustomFileList) {
+					if (((CustomFileList) customView).hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
 						return true;
 					}
 				} else if (customView.hasAttributeChanges(cachedAttributes)) {
@@ -300,7 +297,12 @@ public class AttributeHelper {
 			if (customView instanceof CustomFileList) {
 				// add full path
 				CustomFileList fileList = (CustomFileList) customView;
-				fileList.addFile(linker.getAttachedFilePath(attribute.getValue(customView.getAttributeType())), attribute.getAnnotation(customView.getAttributeType()), attribute.getCertainty());
+				String value = attribute.getValue(customView.getAttributeType());
+				if (value != null) {
+					fileList.addFile(linker.getAttachedFilePath(value), attribute.getAnnotation(customView.getAttributeType()), attribute.getCertainty());
+				} else {
+					FLog.w("Null filename found for attribute " + attribute.getName());
+				}
 			} else {
 				linker.setFieldValue(customView.getRef(), attribute.getValue(customView.getAttributeType()));
 				if (!ignoreCertainty && customView.getCertaintyEnabled()) {

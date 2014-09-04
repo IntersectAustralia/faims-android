@@ -3006,12 +3006,17 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						}
 				
 			});
+			
 			if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
 				activityRef.get().setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
+			
+			// add file to database
+			databaseManager.fileRecord().insertFile(attachFile, sync, file);
+			
 			return attachFile;
 		} catch (Exception e) {
-			FLog.e("error attaching file " + filePath, e);
+			reportError("Error trying to attach file " + filePath, e);
 			return null;
 		}
 	}

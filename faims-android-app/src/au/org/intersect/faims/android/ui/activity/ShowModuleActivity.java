@@ -72,7 +72,6 @@ import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
 import au.org.intersect.faims.android.util.Arch16n;
-import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.InputBuffer;
 import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
@@ -1234,31 +1233,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 	}
 
 	private boolean hasFileChanges() {
-		Module module = ModuleUtil.getModule(moduleKey);
-		if (module.fileSyncTimeStamp != null) {
-			File attachedFiles = module.getDirectoryPath("files");
-			return hasFileChanges(attachedFiles, module.fileSyncTimeStamp);
-		} else {
-			return true;
+		try {
+			return databaseManager.fileRecord().hasFileChanges();
+		} catch (Exception e) {
+			FLog.e("error getting files changed", e);
+			return false;
 		}
-	}
-
-	private boolean hasFileChanges(File attachedFiles, String fileSyncTimeStamp) {
-		if (attachedFiles.isDirectory()) {
-			for (File file : attachedFiles.listFiles()) {
-				if (file.isDirectory()) {
-					if (hasFileChanges(file, fileSyncTimeStamp)) {
-						return true;
-					}
-				} else {
-					if (file.lastModified() > DateUtil.convertToDateGMT(
-							fileSyncTimeStamp).getTime()) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	public void setSyncMinInterval(float value) {

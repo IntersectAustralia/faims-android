@@ -117,7 +117,7 @@ public class FileListGroup extends CustomFileList {
 		if (pairs == null) return;
 		removeAllViews();
 		for (NameValuePair pair : pairs) {
-			super.addFile(pair.getName());
+			addFile(pair.getName());
 		}
 	}
 	

@@ -21,6 +21,7 @@ public class DatabaseManager {
 	private AttributeRecord attributeRecord;
 	private SpatialRecord spatialRecord;
 	private SharedRecord sharedRecord;
+	private FileRecord fileRecord;
 	
 	public void init(File dbFile) {
 
@@ -34,6 +35,7 @@ public class DatabaseManager {
 		this.queryRecord = new QueryRecord(dbFile);
 		this.attributeRecord = new AttributeRecord(dbFile);
 		this.spatialRecord = new SpatialRecord(dbFile);
+		this.fileRecord = new FileRecord(dbFile);
 	}
 
 	public void setUserId(String userId) {
@@ -87,6 +89,10 @@ public class DatabaseManager {
 
 	public SpatialRecord spatialRecord() {
 		return this.spatialRecord;
+	}
+	
+	public FileRecord fileRecord() {
+		return this.fileRecord;
 	}
 
 }

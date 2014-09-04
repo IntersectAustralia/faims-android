@@ -15,7 +15,7 @@ import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
-import au.org.intersect.faims.android.ui.view.ICustomFileView;
+import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
 import au.org.intersect.faims.android.ui.view.TabGroup;
@@ -363,8 +363,8 @@ public class TabGroupHelper {
 			@Override
 			public void run() {
 				for (View view : views) {
-					if (view instanceof ICustomFileView) {
-						ICustomFileView fileView = (ICustomFileView) view;
+					if (view instanceof CustomFileList) {
+						CustomFileList fileView = (CustomFileList) view;
 						fileView.reload();
 					}
 				}
