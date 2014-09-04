@@ -844,6 +844,20 @@ populateList(String ref, Collection values){
 }
 
 /**
+  * Populate a scrolling list with a query, that dynamically adds items on scroll
+  *
+  * If the field reference is not found a logic error dialog will appear.
+  * 
+  * @param ref the reference to the field
+  * @param query the query to extract data to populate the list
+  * @param limit the limit for the original population and the number of items added
+  * each time the scroll reaches the bottom
+  */
+populateCursorList(String ref, String query, int limit) {
+  linker.populateCursorList(ref, query, limit);
+}
+
+/**
   * Populate table from a query.
   *
   * If the field reference is not found a logic error dialog will appear.

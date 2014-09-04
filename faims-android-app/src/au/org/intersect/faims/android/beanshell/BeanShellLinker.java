@@ -635,7 +635,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if (tabGroup == null) {
 				throw new Exception("cannot find tabgroup " + label);
 			}
-			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -669,7 +668,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					}
 				}
 			});
-			activityRef.get().getActionBar().setTitle(tabGroup.getLabel());
 			return tabGroup;
 		} catch (Exception e) {
 			FLog.e("error showing tabgroup " + label, e);
@@ -1424,6 +1422,23 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			showWarning("Logic Error", "Error populate list " + ref);
 		}
 	}
+	
+	public void populateCursorList(String ref, String query, int limit) {
+		try {
+			Object obj = uiRenderer.getViewByRef(ref);
+			
+			if (obj instanceof CustomListView) {
+				CustomListView list = (CustomListView) obj;
+				list.populateWithCursor(query, limit);
+			} else {
+				FLog.w("cannot populate cursor list " + ref);
+				showWarning("Logic Error", "Cannot populate cursor list " + ref);
+			}
+		} catch (Exception e) {
+			FLog.e("error populate cursor list " + ref, e);
+			showWarning("Logic Error", "Error populate cursor list " + ref);
+		}
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populatePictureGallery(String ref, Collection valuesObj) {
@@ -1775,7 +1790,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	private ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
+	public ArrayList<NameValuePair> convertToNameValuePairs(Collection<?> valuesObj) throws Exception {
 		ArrayList<NameValuePair> pairs = null;
 		try {
 			@SuppressWarnings("unchecked")
