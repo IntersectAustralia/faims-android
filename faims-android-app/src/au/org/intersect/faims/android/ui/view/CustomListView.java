@@ -44,6 +44,7 @@ public class CustomListView extends ListView implements IView {
 	private String query;
 	private ArrayList<NameValuePair> items;
 	private ArrayAdapter<NameValuePair> arrayAdapter;
+	private boolean disableLoad;
 	
 	private LinearLayout loadingView;
 	private Animation rotation;
@@ -122,6 +123,7 @@ public class CustomListView extends ListView implements IView {
 			
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				disableLoad = false;
 			}
 			
 			@Override
@@ -129,7 +131,9 @@ public class CustomListView extends ListView implements IView {
 					int visibleItemCount, int totalItemCount) {
 				if (firstVisibleItem + visibleItemCount >= totalItemCount) {
 					try {
-						loadMoreItems(limit);
+						if (!disableLoad) {
+							loadMoreItems(limit, totalItemCount);
+						}
 					} catch (Exception e) {
 						FLog.e("error updating cursor list " + ref, e);
 						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
@@ -139,7 +143,7 @@ public class CustomListView extends ListView implements IView {
 		});
 	}
  
-	private void loadMoreItems(final int extra) throws Exception {
+	private void loadMoreItems(final int extra, final int shownItems) throws Exception {
 		if (getFooterViewsCount() > 0) {
 			return;
 		}
@@ -153,6 +157,9 @@ public class CustomListView extends ListView implements IView {
 			protected Void doInBackground(Void... params) {
 				try {
 					values = databaseManager.fetchRecord().fetchAll(query);
+					if (values.size() == shownItems) {
+						disableLoad = true;
+					}
 				} catch (Exception e) {
 					FLog.e("error updating cursor list " + ref, e);
 					linker.showWarning("Logic Error", "Error updating cursor list " + ref);
