@@ -109,11 +109,13 @@ public class ViewFactory {
 	}
 	
 	protected CustomEditText createIntegerTextField(FormInputDef attribute, String ref, boolean dynamic) {
-    	return createTextField(InputType.TYPE_CLASS_NUMBER, attribute, ref, dynamic);
+    	return createTextField(InputType.TYPE_CLASS_NUMBER |
+    			InputType.TYPE_NUMBER_FLAG_SIGNED, attribute, ref, dynamic);
 	}
 	
 	protected CustomEditText createDecimalTextField(FormInputDef attribute, String ref, boolean dynamic) {
-        return createTextField(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, attribute, ref, dynamic);
+        return createTextField(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED |
+        		InputType.TYPE_NUMBER_FLAG_DECIMAL, attribute, ref, dynamic);
 	}
 	
 	protected CustomEditText createLongTextField(FormInputDef attribute, String ref, boolean dynamic) {
