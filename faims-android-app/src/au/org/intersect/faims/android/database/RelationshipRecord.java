@@ -238,7 +238,7 @@ public class RelationshipRecord extends SharedRecord {
 				}
 			}
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 		
 		return true;
