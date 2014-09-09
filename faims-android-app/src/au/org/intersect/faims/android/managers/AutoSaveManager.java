@@ -151,10 +151,39 @@ public class AutoSaveManager implements IFAIMSRestorable {
 			clearSaveCallbacks();
 			
 			if (pauseCounter == 0) {
-				linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
-				geometry = null;
-				attributes = null;
-				newRecord = false;
+				linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, new SaveCallback() {
+
+					@Override
+					public void onError(String message) {
+						try {
+							callback.onError(message);
+						} catch (Exception e) {
+							linker.showWarning("Logic Error", "Error in save callback on error");
+							FLog.e("Error in save callback on error", e);
+						}
+					}
+
+					@Override
+					public void onSave(String uuid, boolean newRecord) {
+						try {
+							callback.onSave(uuid, newRecord);
+						} catch (Exception e) {
+							linker.showWarning("Logic Error", "Error in save callback on save");
+							FLog.e("Error in save callback on save", e);
+						}
+						geometry = null;
+						attributes = null;
+						newRecord = false;
+					}
+
+					@Override
+					public void onSaveAssociation(String entityId,
+							String relationshpId) {
+						callback.onSaveAssociation(entityId, relationshpId);
+					}
+					
+				}, newRecord, blocking);
+				
 			} else {
 				FLog.d("ignore autosave");
 			}

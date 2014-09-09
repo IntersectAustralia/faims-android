@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -188,6 +189,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setAnnotation(String annotation, int index) {
 		annotations.set(index, annotation);
+		notifySave();
 	}
 	
 	public List<String> getCertainties() {
@@ -199,6 +201,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setCertainty(String certainty, int index) {
 		certainties.set(index, certainty);
+		notifySave();
 	}
 	
 	public void setCertainties(List<String> certainties) {
@@ -244,8 +247,8 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	@Override
 	public void save() {
 		currentValues = (List<NameValuePair>) getValues();
-		currentAnnotations = getAnnotations();
-		currentCertainties = getCertainties();
+		currentAnnotations = new ArrayList<String>(getAnnotations());
+		currentCertainties = new ArrayList<String>(getCertainties());
 	}
 
 	@Override
@@ -292,11 +295,16 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 			certainties = new ArrayList<String>();
 		}
 		certainties.add(certainty);
-		autoSaveManager.save();
+		notifySave();
 	}
 	
 	public void addFile(String value) {
-		addFile(value, "", "1.0");
+		File file = new File(value);
+		if (file.exists()) {
+			addFile(value, "", "1.0");
+		} else {
+			linker.showWarning("Logic Error", "Cannot find file " + value + " to attach to " + ref);
+		}
 	}
 	
 	public void setReloadPairs(List<NameValuePair> pairs) {

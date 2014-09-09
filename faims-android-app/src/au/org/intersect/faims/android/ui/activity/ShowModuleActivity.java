@@ -20,6 +20,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.location.LocationManager;
@@ -29,6 +30,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -414,6 +416,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		// update action bar
 		updateStatusBar();
+		updateActionBarTitle();
 	}
 
 	@Override
@@ -426,6 +429,20 @@ public class ShowModuleActivity extends FragmentActivity implements
 		beanShellLinker.pause();
 	}
 
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	    super.onConfigurationChanged(newConfig);
+	    Handler handler = new Handler(getMainLooper());
+	    handler.postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				updateActionBarTitle();
+				NativeCSS.refreshCSSStyling(findViewById(R.id.fragment_content));
+			}
+		}, 500);
+	}
+	
 	private void showBusyDialog() {
 		busyDialog = new BusyDialog(this,
 				getString(R.string.load_module_title),
@@ -1447,13 +1464,19 @@ public class ShowModuleActivity extends FragmentActivity implements
 			breadcrumbs.append(" > " + iter.next().getLabel());
 		}
 		Spannable text = new SpannableString(breadcrumbs.toString());
-		text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
-				0, module.name.length()+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		text.setSpan(R.color.breadcrumb_contents, module.name.length()+2,
-				breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (tabgroups.size() > 0)
+		{
+			text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
+					0, module.name.length()+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			text.setSpan(R.color.breadcrumb_contents, module.name.length()+2,
+					breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		} else {
+			text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
+					0, module.name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		
 		int actionBarTitle = Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
-	    TextView title = (TextView) getWindow().findViewById(actionBarTitle);
+	    TextView title = (TextView) findViewById(actionBarTitle);
 	    if (title != null) {
 	    	title.setText(text);
 	    	title.setEllipsize(TextUtils.TruncateAt.START);
