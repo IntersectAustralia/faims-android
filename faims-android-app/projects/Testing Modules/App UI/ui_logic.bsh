@@ -16,6 +16,14 @@ displayAlert(){
 	showTextAlert("Alert", "Entity to Load:", "loadOK()", "loadCancel()");
 }
 
+displayDateAlert(){
+	showDateAlert("Alert", "Set Date:", "showToast(getLastDateAlertInput())", "showToast(\"Dialog cancelled\")");
+}
+
+displayTimeAlert(){
+	showTimeAlert("Alert", "Set Time:", "showToast(getLastTimeAlertInput())", "showToast(\"Dialog cancelled\")");
+}
+
 loadCancel() {
   showToast("Dialog Canceled");
 }
@@ -24,7 +32,9 @@ loadOK() {
   showToast("Entered text: "+entityId);
 }
 
-onEvent("App/LogicTriggered/ShowWarning","click", "displayAlert()");
+onEvent("App/LogicTriggered/ShowTextWarning","click", "displayAlert()");
+onEvent("App/LogicTriggered/ShowDateWarning","click", "displayDateAlert()");
+onEvent("App/LogicTriggered/ShowTimeWarning","click", "displayTimeAlert()");
 onEvent("App/LogicTriggered/ShowWarning", "click", "showWarning(\"Warning\", \"You have been warned.\")");
 onEvent("App/LogicTriggered/ShowToast", "click", "onClickButton()");
 onEvent("App/LogicTriggered/ShowHidden", "click", "showHiddenTab()");
