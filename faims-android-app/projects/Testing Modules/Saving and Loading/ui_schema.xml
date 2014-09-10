@@ -354,22 +354,22 @@
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -414,7 +414,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -457,7 +457,7 @@
 	        <trigger ref="viewattached">
 	            <label>View Attached Files</label>
 	        </trigger>
-	         <input ref="scvalue" faims_attribute_name="scvalue" faims_attribute_type="freetext">
+	         <input ref="scvalue" faims_attribute_name="scvalue" faims_attribute_type="measure">
 	          	<label>Scan Code Text:</label>
 	        </input>
 	        <trigger ref="scancode">
@@ -497,22 +497,22 @@
       <label>Relationship</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -636,22 +636,22 @@
         <label>Save Entity</label>
         	<group ref="container">
         	    <label></label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -776,22 +776,22 @@
         <label>Save Relationship</label>
         	<group ref="container">
         	    <label></label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -914,22 +914,22 @@
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -1045,22 +1045,22 @@
       <label>Relationship</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">

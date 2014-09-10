@@ -11,6 +11,8 @@ onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
 
 String entity_id = null;
 
+
+
 onShowEntity() {
     fetchEntityList("Entity", new FetchCallback() {
         onFetch(result) {
@@ -22,6 +24,12 @@ onShowEntity() {
 newEntity(){
     entity_id = null;
     newTabGroup("Entity");
+    //ArrayList files = new ArrayList();
+	//files.add(getAttachedFilePath("files/data/data_schema.xml"));
+	//populateFileList("Entity/Entity/Audio", files);
+	videos = new ArrayList();
+	videos.add("files/data/video-1409708461081.mp4");
+	//populateVideoGallery("Entity/Entity/Video", videos);
 }
 loadEntity() {
     entity_id = getListItemValue();

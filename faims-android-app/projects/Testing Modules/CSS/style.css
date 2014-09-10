@@ -23,6 +23,14 @@
   background-color:green;
 }
 
+.file-gallery {
+  background-color:blue;
+}
+
+.file-gallery-item {
+  background-color:red;
+}
+
 .label {
   color:blue;
 }
