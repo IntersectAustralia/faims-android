@@ -65,7 +65,7 @@ public class MergeRecord extends Database {
 			}
 			return false;
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 	}
 	

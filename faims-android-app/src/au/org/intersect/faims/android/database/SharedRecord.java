@@ -85,7 +85,7 @@ public class SharedRecord extends Database {
 				return false;
 			}
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 		return true;
 	}
@@ -101,7 +101,7 @@ public class SharedRecord extends Database {
 				return false;
 			}
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 		return true;
 	}
@@ -117,7 +117,7 @@ public class SharedRecord extends Database {
 				return false;
 			}
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 		return true;
 	}
@@ -133,7 +133,7 @@ public class SharedRecord extends Database {
 				return false;
 			}
 		} finally {
-			if (st != null) st.close();
+			closeStmt(st);
 		}
 		return true;
 	}
