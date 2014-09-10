@@ -354,22 +354,22 @@
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -414,7 +414,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -424,7 +424,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -434,7 +434,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -444,7 +444,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -457,7 +457,7 @@
 	        <trigger ref="viewattached">
 	            <label>View Attached Files</label>
 	        </trigger>
-	         <input ref="scvalue" faims_attribute_name="scvalue" faims_attribute_type="freetext">
+	         <input ref="scvalue" faims_attribute_name="scvalue" faims_attribute_type="measure">
 	          	<label>Scan Code Text:</label>
 	        </input>
 	        <trigger ref="scancode">
@@ -479,40 +479,37 @@
 	          <label>Close</label>
 	        </trigger>
       </group>
-      <group ref="tab2" faims_hidden="false">
+      <group ref="tab2" faims_scrollable="false">
         <label>Load Entity</label>
-       	<select1 ref="entities" faims_certainty="false">
+       	<select1 ref="entities" appearance="compact">
             <label>Entity:</label>
             <item>
             	<label>dummy</label>
             	<value>dummy</value>
           	</item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup2" faims_rel_type="AboveBelow">
       <label>Relationship</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -557,7 +554,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -567,7 +564,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -577,7 +574,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -587,7 +584,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -616,18 +613,15 @@
 	          <label>Close</label>
 	        </trigger>
       </group>
-      <group ref="tab2">
-        <label>Load Relationship</label>
-        <select1 ref="relationships" faims_certainty="false">
+      <group ref="tab2" faims_scrollable="false">
+        <label>Load Relationships</label>
+        <select1 ref="relationships" appearance="compact">
             <label>Relationship:</label>
             <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup3" faims_archent_type="small">
@@ -636,22 +630,22 @@
         <label>Save Entity</label>
         	<group ref="container">
         	    <label></label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -696,7 +690,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -706,7 +700,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -716,7 +710,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -726,7 +720,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -756,18 +750,15 @@
 	        </trigger>
 	        </group>
       </group>
-      <group ref="tab2" faims_hidden="false">
+      <group ref="tab2" faims_scrollable="false">
         <label>Load Entity</label>
-       	<select1 ref="entities" faims_certainty="false">
+        <select1 ref="entities" appearance="compact">
             <label>Entity:</label>
             <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup4" faims_rel_type="AboveBelow">
@@ -776,22 +767,22 @@
         <label>Save Relationship</label>
         	<group ref="container">
         	    <label></label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -836,7 +827,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -846,7 +837,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -856,7 +847,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -866,7 +857,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -896,40 +887,37 @@
 	        </trigger>
 	        </group>
       </group>
-      <group ref="tab2">
-        <label>Load Relationship</label>
-        <select1 ref="relationships" faims_certainty="false">
+      <group ref="tab2" faims_scrollable="false">
+        <label>Load Relationships</label>
+        <select1 ref="relationships" appearance="compact">
             <label>Relationship:</label>
             <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup5" faims_archent_type="small">
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -974,7 +962,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -984,7 +972,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -994,7 +982,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1004,7 +992,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1027,40 +1015,37 @@
 	          <label>Close</label>
 	        </trigger>
       </group>
-      <group ref="tab2" faims_hidden="false">
+      <group ref="tab2" faims_scrollable="false">
         <label>Load Entity</label>
-       	<select1 ref="entities" faims_certainty="false">
+        <select1 ref="entities" appearance="compact">
             <label>Entity:</label>
             <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup6" faims_rel_type="AboveBelow">
       <label>Relationship</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
@@ -1105,7 +1090,7 @@
 	                <value>dummy</value>
 	            </item>
 	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Files:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1115,7 +1100,7 @@
 	        <trigger ref="attachfile">
 	            <label>Attached File:</label>
 	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Pictures:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1125,7 +1110,7 @@
 	        <trigger ref="attachpicture">
 	            <label>Take picture</label>
 	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Videos:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1135,7 +1120,7 @@
 	        <trigger ref="attachvideo">
 	            <label>Take video</label>
 	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
+	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
 	            <label>Audios:</label>
 	            <item>
 	                <label>dummy</label>
@@ -1158,18 +1143,15 @@
 	          <label>Close</label>
 	        </trigger>
       </group>
-      <group ref="tab2">
-        <label>Load Relationship</label>
-        <select1 ref="relationships" faims_certainty="false">
+      <group ref="tab2" faims_scrollable="false">
+        <label>Load Relationships</label>
+        <select1 ref="relationships" appearance="compact">
             <label>Relationship:</label>
             <item>
-            	<label>dummy</label>
-            	<value>dummy</value>
-          	</item>
+              <label>dummy</label>
+              <value>dummy</value>
+            </item>
         </select1>
-        <trigger ref="load">
-            <label>Load</label>
-        </trigger>
       </group>
     </group>
     <group ref="tabgroup7">
