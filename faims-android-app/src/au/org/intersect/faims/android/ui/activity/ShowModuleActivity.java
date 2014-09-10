@@ -1461,7 +1461,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Stack<TabGroup> tabgroups = navigationDrawer.getTabGroupStack();
 		Iterator<TabGroup> iter = tabgroups.iterator();
 		while (iter.hasNext()) {
-			breadcrumbs.append(" > " + iter.next().getLabel());
+			TabGroup curr = iter.next();
+			breadcrumbs.append(" > ");
+			if (curr.getLabel() != null) breadcrumbs.append(curr.getLabel());
 		}
 		Spannable text = new SpannableString(breadcrumbs.toString());
 		if (tabgroups.size() > 0)
