@@ -314,6 +314,7 @@ addActionBarItem("sync", new ToggleActionButtonCallback() {
     }
     actionOn() {
         setSyncEnabled(false);
+        setFileSyncEnabled(false);
     }
     isActionOff() {
         isSyncEnabled();
@@ -323,6 +324,7 @@ addActionBarItem("sync", new ToggleActionButtonCallback() {
     }
     actionOff() {
         setSyncEnabled(true);
+        setFileSyncEnabled(true);
     }
 });
 
