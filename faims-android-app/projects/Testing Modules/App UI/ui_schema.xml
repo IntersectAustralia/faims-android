@@ -68,6 +68,8 @@
             </Maps>
 			<LogicTriggered>
 			<ShowTextWarning/>
+			<ShowDateWarning/>
+			<ShowTimeWarning/>
 			 <ShowWarning/>
               <ShowToast/>
               <ShowHidden/>
@@ -254,6 +256,12 @@
       <label>Logic Triggered</label>
       <trigger ref="ShowTextWarning">
           <label>Show Text Warning</label>
+        </trigger>
+        <trigger ref="ShowDateWarning">
+          <label>Show Date Warning</label>
+        </trigger>
+        <trigger ref="ShowTimeWarning">
+          <label>Show Time Warning</label>
         </trigger>
       <trigger ref="ShowWarning">
           <label>Show Warning</label>
