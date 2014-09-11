@@ -86,10 +86,10 @@
             <value>Item B</value>
           </item>
         </select1>
-        <input ref="counter" faims_certainty="false" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="counter" faims_certainty="false" faims_attribute_type="measure" faims_read_only="true">
             <label>Numtimes clicked dropdown:</label>
         </input>
-        <input ref="counter2" faims_certainty="false" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="counter2" faims_certainty="false" faims_attribute_type="measure" faims_read_only="true">
             <label>Numtimes clicked picture gallery:</label>
         </input>
       </group>
@@ -123,10 +123,10 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <input ref="counter" faims_certainty="false" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="counter" faims_certainty="false" faims_attribute_type="measure" faims_read_only="true">
             <label>Numtimes clicked dropdown:</label>
         </input>
-        <input ref="counter2" faims_certainty="false" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="counter2" faims_certainty="false" faims_attribute_type="measure" faims_read_only="true">
             <label>Numtimes clicked picture gallery:</label>
         </input>
       </group>

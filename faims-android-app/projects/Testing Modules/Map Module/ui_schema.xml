@@ -118,13 +118,13 @@
       <label/>
       <group ref="Test">
         <label>Test</label>
-        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="freetext" faims_certainty="false">
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="measure" faims_certainty="false">
           <label>ID</label>
         </input> 
-        <input ref="Lat" faims_attribute_name="Lat" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+        <input ref="Lat" faims_attribute_name="Lat" faims_attribute_type="measure" faims_certainty="false" faims_read_only="true">
           <label>Latitude</label>
         </input>
-        <input ref="Long" faims_attribute_name="Long" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+        <input ref="Long" faims_attribute_name="Long" faims_attribute_type="measure" faims_certainty="false" faims_read_only="true">
           <label>Longitude</label>
         </input>  
         <trigger ref="Update">
