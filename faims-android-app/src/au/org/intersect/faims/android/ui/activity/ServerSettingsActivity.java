@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.google.inject.Inject;
 
 import roboguice.activity.RoboActivity;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -75,6 +76,7 @@ public class ServerSettingsActivity extends RoboActivity {
 		});
 	}
 	
+	@SuppressLint("NewApi")
 	protected void testConnection(String ipAddress, String port) {
 		showBusyTestingConnectionDialog();
 		if (((NameValuePair)pastSessions.getSelectedItem()).getValue().equals(AUTODISCOVER_SERVER)) {
@@ -85,11 +87,13 @@ public class ServerSettingsActivity extends RoboActivity {
     			@Override
     			public void handleTaskCompleted(Object result) {
     				busyDialog.dismiss();
-    				if ((Boolean) result) {
-    					showWarning("Settings", "Connection test succeeded");
-    				} else {
-						showWarning("Settings", "No server found on the current network");
-					}
+    				if (!ServerSettingsActivity.this.isDestroyed()) {
+    					if ((Boolean) result) {
+    						showWarning("Settings", "Connection test succeeded");
+    					} else {
+    						showWarning("Settings", "No server found on the current network");
+    					}
+    				}
     			}
         		
         	}).execute();
@@ -100,10 +104,12 @@ public class ServerSettingsActivity extends RoboActivity {
 				public void handleTaskCompleted(Object result) {
 					busyDialog.dismiss();
 					if (result instanceof Boolean) {
-						if ((Boolean) result) {
-							showWarning("Settings", "Connection test succeeded");
-						} else {
-							showWarning("Settings", "There is no server available with the provided host and port");
+						if (!ServerSettingsActivity.this.isDestroyed()) {
+							if ((Boolean) result) {
+								showWarning("Settings", "Connection test succeeded");
+							} else {
+								showWarning("Settings", "There is no server available with the provided host and port");
+							}
 						}
 					}
 					
@@ -113,6 +119,7 @@ public class ServerSettingsActivity extends RoboActivity {
 		}
 	}
 	
+	@SuppressLint("NewApi")
 	protected void connectToServer(String ipAddress, String port) {
 		showBusyTestingConnectionDialog();
 		if (((NameValuePair)pastSessions.getSelectedItem()).getValue().equals(AUTODISCOVER_SERVER)) {
@@ -129,7 +136,11 @@ public class ServerSettingsActivity extends RoboActivity {
     					Intent mainIntent = new Intent(ServerSettingsActivity.this, MainActivity.class);
 						startActivity(mainIntent);
 						finish();
-    				}
+    				} else {
+    					if (!ServerSettingsActivity.this.isDestroyed()) {
+    						showWarning("Settings", "There is no server available with the provided host and port");
+    					}
+					}
     			}
         		
         	}).execute();
@@ -147,7 +158,9 @@ public class ServerSettingsActivity extends RoboActivity {
 							startActivity(mainIntent);
 							finish();
 						} else {
-							showWarning("Settings", "There is no server available with the provided host and port");
+							if (!ServerSettingsActivity.this.isDestroyed()) {
+	    						showWarning("Settings", "There is no server available with the provided host and port");
+	    					}
 						}
 					}
 					
@@ -203,7 +216,9 @@ public class ServerSettingsActivity extends RoboActivity {
 					public void handleDialogResponse(
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
-							ServerSettingsActivity.this.connectionTestingTask.cancel(true);
+							if (ServerSettingsActivity.this.connectionTestingTask != null) {
+								ServerSettingsActivity.this.connectionTestingTask.cancel(true);
+							}
 						}
 					}
 			

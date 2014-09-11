@@ -51,6 +51,15 @@ public class SplashActivity extends Activity {
     }
 
 
+	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+	}
+
+
 	private void updateButtons() {
 		Button connectDemo = (Button) findViewById(R.id.splash_connect_demo);
 		Button connectServer = (Button) findViewById(R.id.splash_connect_server);
