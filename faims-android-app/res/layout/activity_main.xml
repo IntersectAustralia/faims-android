@@ -1,15 +1,49 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="25dp"
     tools:context=".MainActivity"
     android:background="@android:color/white">
 
-    <ListView  
-		android:layout_width="fill_parent" 
-		android:layout_height="wrap_content" 
-		android:id="@+id/module_list"
-		android:background="@android:color/white"
-  	/>
+    <TextView 
+        android:id="@+id/connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="24sp"
+        android:paddingBottom="20dp" />
+    
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/available_modules"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:textColor="@color/heading_grey"
+        />
+    
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#DDDDDD"
+        />
+    
+    <android.support.v4.widget.SwipeRefreshLayout  
+	    android:id="@+id/swipe_container"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent">
+    
+	    <ListView  
+			android:id="@+id/module_list"
+			android:layout_width="fill_parent" 
+			android:layout_height="wrap_content" 
+			android:background="@android:color/white"
+	  	/>
+	    
+	</android.support.v4.widget.SwipeRefreshLayout>
 
-</RelativeLayout>
+</LinearLayout>

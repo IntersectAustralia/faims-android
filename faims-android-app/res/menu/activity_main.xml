@@ -1,10 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-
-  <item android:id="@+id/fetch_module_list"
-    android:title="Fetch Module List"
-    android:icon="@drawable/ic_menu_add" 
-    android:showAsAction="ifRoom" tools:ignore="HardcodedText"/>
-  
+    
   <item android:id="@+id/faims_server_setting"
     android:title="@string/faims_server_setting_title"
     android:icon="@android:drawable/ic_menu_preferences"

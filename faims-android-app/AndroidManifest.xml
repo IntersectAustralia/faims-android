@@ -57,8 +57,7 @@
 			/>
         
         <activity
-            android:name="au.org.intersect.faims.android.ui.activity.FetchModulesActivity"
-            android:label="@string/fetch_modules_name"
+            android:name="au.org.intersect.faims.android.ui.activity.ServerSettingsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
              />
 
@@ -70,11 +69,6 @@
             android:name="android.support.PARENT_ACTIVITY"
             android:value="au.org.intersect.faims.android.ui.activity.MainActivity" />       
         </activity>
-        
-        <activity
-            android:name="au.org.intersect.faims.android.ui.activity.FaimsServerSettingsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-             />
         
         <service
             android:name="au.org.intersect.faims.android.services.DownloadModuleService"

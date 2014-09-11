@@ -39,6 +39,8 @@ public class TestFAIMSClient extends FAIMSClient {
 				for (int i = 0; i < modulesCount; i++) {
 					JSONObject jsonObject = new JSONObject();
 					jsonObject.put("name", "Module " + i);
+					jsonObject.put("key", "key_" + i);
+					jsonObject.put("version", "0");
 					jsonArray.put(jsonObject);
 				}
 				result.data = jsonArray;

@@ -25,6 +25,22 @@
 			android:layout_height="wrap_content"
 			android:layout_marginTop="50dp"
 			android:gravity="center">
+			
+		    <Button android:id="@+id/splash_connect_demo"
+		        android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:background="@drawable/button_default"
+				android:textColor="#222222"
+				android:text="@string/splash_connect_demo"
+				style="?android:attr/button"/>
+		    
+		    <Button android:id="@+id/splash_connect_server"
+		        android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:background="@drawable/button_success"
+				android:textColor="@android:color/white"
+				android:text="@string/splash_connect_server"
+				style="?android:attr/button"/>
 		    
 		    <Button android:id="@+id/splash_load"
 		        android:layout_width="wrap_content"

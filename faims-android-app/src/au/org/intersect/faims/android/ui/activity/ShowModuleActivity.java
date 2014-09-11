@@ -1468,12 +1468,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Spannable text = new SpannableString(breadcrumbs.toString());
 		if (tabgroups.size() > 0)
 		{
-			text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
+			text.setSpan(new ForegroundColorSpan(R.color.heading_grey),
 					0, module.name.length()+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			text.setSpan(R.color.breadcrumb_contents, module.name.length()+2,
 					breadcrumbs.toString().length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		} else {
-			text.setSpan(new ForegroundColorSpan(R.color.breadcrumb_module_name),
+			text.setSpan(new ForegroundColorSpan(R.color.heading_grey),
 					0, module.name.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		
