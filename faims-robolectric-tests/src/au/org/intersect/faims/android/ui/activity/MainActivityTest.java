@@ -98,6 +98,7 @@ public class MainActivityTest {
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		// update test client
@@ -123,6 +124,7 @@ public class MainActivityTest {
 		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().get();
 		
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
@@ -159,6 +161,7 @@ public class MainActivityTest {
 		
 		// set invalid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
@@ -191,6 +194,7 @@ public class MainActivityTest {
 		
 		// set invalid host
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		TestFAIMSClient client = (TestFAIMSClient) activity.faimsClient;
@@ -249,6 +253,7 @@ public class MainActivityTest {
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		// update test client
@@ -281,6 +286,7 @@ public class MainActivityTest {
 		
 		// reset the server discovery
 		TestServerDiscovery discovery = (TestServerDiscovery) activity.serverDiscovery;
+		discovery.mockSharedPreferences(activity);
 		discovery.setHostValid(true);
 		
 		// update test client

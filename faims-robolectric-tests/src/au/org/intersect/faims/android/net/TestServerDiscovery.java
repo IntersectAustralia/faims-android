@@ -1,5 +1,9 @@
 package au.org.intersect.faims.android.net;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import com.google.inject.Provider;
 
 public class TestServerDiscovery extends ServerDiscovery {
@@ -46,6 +50,13 @@ public class TestServerDiscovery extends ServerDiscovery {
 			}
 			
 		};
+	}
+	
+	public void mockSharedPreferences(Activity activity) {
+		SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).edit();
+		// not used, as long as it's not empty 
+		prefs.putString("pref_server_ip", "test_server");
+		prefs.apply();
 	}
 
 }
