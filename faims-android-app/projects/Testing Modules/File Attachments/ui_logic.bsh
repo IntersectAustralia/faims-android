@@ -7,6 +7,7 @@ onEvent("Entity/Entity/AttachPhoto", "click", "attachPictureTo(\"Entity/Entity/P
 onEvent("Entity/Entity/AttachAudio", "click", "attachAudioTo(\"Entity/Entity/Audio\")");
 onEvent("Entity/Entity/AttachVideo", "click", "attachVideoTo(\"Entity/Entity/Video\")");
 onEvent("Entity/Entity/ViewAllFiles", "click", "viewArchEntAttachedFiles(entity_id)");
+onEvent("Entity/Entity/AutoAttachFiles", "click", "attachedFilesAuto()");
 onEvent("Entity/Entity/Update", "delayclick", "saveEntity()");
 
 String entity_id = null;
@@ -24,12 +25,7 @@ onShowEntity() {
 newEntity(){
     entity_id = null;
     newTabGroup("Entity");
-    //ArrayList files = new ArrayList();
-	//files.add(getAttachedFilePath("files/data/data_schema.xml"));
-	//populateFileList("Entity/Entity/Audio", files);
-	videos = new ArrayList();
-	videos.add("files/data/video-1409708461081.mp4");
-	//populateVideoGallery("Entity/Entity/Video", videos);
+    
 }
 loadEntity() {
     entity_id = getListItemValue();
@@ -54,6 +50,23 @@ saveEntity() {
     });
 }
 
+attachedFilesAuto() {
+	ArrayList files = new ArrayList();
+	files.add(getAttachedFilePath("files/data/data_schema.xml"));
+	files.add(getAttachedFilePath("files/data/ui_logic.bsh"));
+	files.add(getAttachedFilePath("files/data/ui_schema.xml"));
+	populateFileList("Entity/Entity/Files", files);
+	audios = new ArrayList();
+	audios.add(getAttachedFilePath("files/data/audio-1410324241737.mp4"));
+	populateFileList("Entity/Entity/Audio", audios);
+	videos = new ArrayList();
+	videos.add(getAttachedFilePath("files/data/video-1409708461081.mp4"));
+	populateVideoGallery("Entity/Entity/Video", videos);
+	photos = new ArrayList();
+	photos.add(getAttachedFilePath("files/data/test.png"));
+	populateCameraPictureGallery("Entity/Entity/Photo",photos);
+}
+
 onEvent("control/sync/startsync", "click", "startSync()");
 onEvent("control/sync/stopsync", "click", "stopSync()");
 
@@ -72,27 +85,10 @@ stopSync() {
 }
 
 
-addActionBarItem("sync", new ToggleActionButtonCallback() {
-    actionOnLabel() {
-        "Turn Sync off";
-    }
-    actionOn() {
-        setSyncEnabled(false);
-    }
-    isActionOff() {
-        isSyncEnabled();
-    }
-    actionOffLabel() {
-        "Turn Sync on";
-    }
-    actionOff() {
-        setSyncEnabled(true);
-    }
-});
 
 addActionBarItem("file sync", new ToggleActionButtonCallback() {
     actionOnLabel() {
-        "Turn File Sync off";
+        "Turn Sync off";
     }
     actionOn() {
         setSyncEnabled(false);
@@ -102,7 +98,7 @@ addActionBarItem("file sync", new ToggleActionButtonCallback() {
         isFileSyncEnabled();
     }
     actionOffLabel() {
-        "Turn File Sync on";
+        "Turn Sync on";
     }
     actionOff() {
         setSyncEnabled(true);

@@ -45,6 +45,7 @@ public class CustomListView extends ListView implements IView {
 	private ArrayList<NameValuePair> items;
 	private ArrayAdapter<NameValuePair> arrayAdapter;
 	private boolean disableLoad;
+	private int limit;
 	
 	private LinearLayout loadingView;
 	private Animation rotation;
@@ -61,6 +62,7 @@ public class CustomListView extends ListView implements IView {
 		this.dynamic = dynamic;
 		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		NativeCSS.addCSSClass(this, "list");
+		setupLoadingSpinner();
 	}
 	
 	private void setupLoadingSpinner() {
@@ -108,86 +110,88 @@ public class CustomListView extends ListView implements IView {
 		setAdapter(arrayAdapter);
 	}
 	
-	public void populateWithCursor(String query, final int limit) throws Exception {
+	public void populateWithCursor(String query, int limit) throws Exception {
 		this.query = query;
-		setupLoadingSpinner();
+		this.limit = limit;
+		this.disableLoad = false;
+		this.arrayAdapter = null;
 		
-		List<List<String>> values = databaseManager.fetchRecord().fetchAll(query);
-		int end = limit >= values.size() ? values.size() : limit;
-		items = linker.convertToNameValuePairs(values.subList(0, end));
-		arrayAdapter = new ArrayAdapter<NameValuePair>(this.getContext(),
-				android.R.layout.simple_list_item_1, items);
-		setAdapter(arrayAdapter);
+		List<List<String>> values = databaseManager.fetchRecord().fetchCursorAll(query, limit, 0);
+		items = linker.convertToNameValuePairs(values);
+		updateAdapter();
 		
 		setOnScrollListener(new OnScrollListener() {
 			
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
 				disableLoad = false;
+				loadMoreItems();
 			}
 			
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
-				if (firstVisibleItem + visibleItemCount >= totalItemCount) {
-					try {
-						if (!disableLoad) {
-							loadMoreItems(limit, totalItemCount);
-						}
-					} catch (Exception e) {
-						FLog.e("error updating cursor list " + ref, e);
-						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
-					}
-				}
+				loadMoreItems();
 			}
 		});
 	}
  
-	private void loadMoreItems(final int extra, final int shownItems) throws Exception {
-		if (getFooterViewsCount() > 0) {
-			return;
-		}
-		addFooterView(loadingView);
-		loadingView.getChildAt(0).startAnimation(rotation);
-		CancelableTask task = new CancelableTask() {
-			
-			private List<List<String>> values;
-			
-			@Override
-			protected Void doInBackground(Void... params) {
-				try {
-					values = databaseManager.fetchRecord().fetchAll(query);
-					if (values.size() == shownItems) {
+	private void loadMoreItems() {
+		try {
+			if (disableLoad || getFooterViewsCount() > 0 || getLastVisiblePosition() < items.size() - 1) return;
+			addFooterView(loadingView);
+			loadingView.getChildAt(0).startAnimation(rotation);
+			CancelableTask task = new CancelableTask() {
+				
+				private List<List<String>> values;
+				
+				@Override
+				protected Void doInBackground(Void... params) {
+					try {
+						values = databaseManager.fetchRecord().fetchCursorAll(query, limit, items.size());
+						if (values.size() < limit) {
+							disableLoad = true;
+						}
+						FLog.d("loaded " + values.size() +" records");
+					} catch (Exception e) {
+						FLog.e("error updating cursor list " + ref, e);
+						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
 						disableLoad = true;
 					}
-				} catch (Exception e) {
-					FLog.e("error updating cursor list " + ref, e);
-					linker.showWarning("Logic Error", "Error updating cursor list " + ref);
+					return null;
 				}
-				return null;
-			}
-			
-			@Override
-			protected void onPostExecute(Void result) {
-				if (items.size() == values.size()) {
-					removeFooterView(loadingView);
-					loadingView.getChildAt(0).clearAnimation();
-					return;
+				
+				@Override
+				protected void onPostExecute(Void result) {
+					try {
+						items.addAll(linker.convertToNameValuePairs(values));
+						updateAdapter();
+						removeFooterView(loadingView);
+						loadingView.getChildAt(0).clearAnimation();
+					} catch (Exception e) {
+						FLog.e("error updating cursor list " + ref, e);
+						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
+						disableLoad = true;
+					}	
+					super.onPostExecute(result);
 				}
-				int end = items.size() + extra >= values.size() ? values.size() : items.size() + extra;
-				try {
-					items.addAll(linker.convertToNameValuePairs(values.subList(items.size(), end)));
-				} catch (Exception e) {
-					FLog.e("error updating cursor list " + ref, e);
-					linker.showWarning("Logic Error", "Error updating cursor list " + ref);
-				}
-				arrayAdapter.notifyDataSetChanged();
-				removeFooterView(loadingView);
-				loadingView.getChildAt(0).clearAnimation();
-				super.onPostExecute(result);
-			}
-		};
-		task.execute();
+			};
+			task.execute();
+		} catch (Exception e) {
+			FLog.e("error updating cursor list " + ref, e);
+			linker.showWarning("Logic Error", "Error updating cursor list " + ref);
+		}
+	}
+	
+	private void updateAdapter() {
+		if (arrayAdapter == null) {
+			arrayAdapter = new ArrayAdapter<NameValuePair>(this.getContext(),
+					android.R.layout.simple_list_item_1, items);
+			setAdapter(arrayAdapter);
+		} else {
+			arrayAdapter.notifyDataSetChanged();
+		}
 	}
 
 	@Override

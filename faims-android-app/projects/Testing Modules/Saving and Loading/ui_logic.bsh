@@ -119,12 +119,24 @@ closeEntity(tabgroup) {
 	cancelTabGroup(tabgroup, true);
 }
 
+String ENTITY_LIST = "SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+        "                      measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+        "                      vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+        "                      measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+        "                        vocabname || ' (' || freetext  || ')', \n" + 
+        "                        measure   || ' (' || freetext  || ')', \n" + 
+        "                      measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      measure, \n" + 
+        "                      vocabname, \n" + 
+        "                      freetext), ' | ') as response \n" + 
+        "       FROM latestNonDeletedArchentIdentifiers\n" + 
+        "     WHERE aenttypename = 'small'\n" + 
+        "       GROUP BY uuid limit ? offset ?;";
+
 loadEntities(tabgroup) {
-	fetchEntityList("small", new FetchCallback() {
-		onFetch(result) {
-			populateDropDown(tabgroup + "/tab2/entities", result);
-		}
-	});
+  populateCursorList(tabgroup + "/tab2/entities", ENTITY_LIST, 5);
 }
 
 saveEntity(tabgroup) {
@@ -132,7 +144,7 @@ saveEntity(tabgroup) {
 }
 
 loadEntity(tabgroup) {
-	localId = getFieldValue(tabgroup + "/tab2/entities");
+	localId = getListItemValue();
 	if (isNull(localId)) return;
 
 	newEntity(tabgroup);
@@ -141,7 +153,7 @@ loadEntity(tabgroup) {
 }
 
 loadEntityAuto(tabgroup) {
-	localId = getFieldValue(tabgroup + "/tab2/entities");
+	localId = getListItemValue();
 	if (isNull(localId)) return;
 
 	newEntity(tabgroup);
@@ -208,19 +220,19 @@ clearEntity(tabgroup) {
 newEntity(tabgroup) {
 	newTabGroup(tabgroup);
 	
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
 		}
 	});
 
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateRadioGroup(tabgroup + "/tab1/choice", result);
 		}
 	});
 
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateDropDown(tabgroup + "/tab1/item", result);
 		}
@@ -228,7 +240,7 @@ newEntity(tabgroup) {
 	
 	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
 
-	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populatePictureGallery(tabgroup + "/tab1/gallery", result);
 		}
@@ -262,12 +274,13 @@ onCodeScan() {
 	setFieldValue("tabgroup1/tab1/scvalue", code);
 }
 
-onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");	
+onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");  
+onEvent("tabgroup1", "show", "loadEntities(\"tabgroup1\")");	
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
-onEvent("tabgroup1/tab2/load", "click", "loadEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab2/entities", "click", "loadEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
 
 onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
@@ -276,14 +289,13 @@ onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/v
 onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
 onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
-onEvent("tabgroup1/tab2", "show", "loadEntities(\"tabgroup1\")");
-
 onEvent("tabgroup3", "show", "initEntity(\"tabgroup3\")");	
+onEvent("tabgroup3", "show", "loadEntities(\"tabgroup3\")");  
 onEvent("tabgroup3/tab1/save", "delayclick", "saveEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/clear", "click", "newEntity(\"tabgroup3\")");
-onEvent("tabgroup3/tab2/load", "click", "loadEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/delete", "click", "deleteEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/close", "click", "closeEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab2/entities", "click", "loadEntity(\"tabgroup3\")");
 
 onEvent("tabgroup3/tab1/attachfile", "click", "attachFileTo(\"tabgroup3/tab1/files\")");
 onEvent("tabgroup3/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup3/tab1/pictures\")");
@@ -291,14 +303,13 @@ onEvent("tabgroup3/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup3/tab1/v
 onEvent("tabgroup3/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup3/tab1/audios\")");
 onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
-onEvent("tabgroup3/tab2", "show", "loadEntities(\"tabgroup3\")");
-
 onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
+onEvent("tabgroup5", "show", "loadEntities(\"tabgroup5\")");  
 // onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
-onEvent("tabgroup5/tab2/load", "click", "loadEntityAuto(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab2/entities", "click", "loadEntityAuto(\"tabgroup5\")");
 
 onEvent("tabgroup5/tab1/attachfile", "click", "attachFileTo(\"tabgroup5/tab1/files\")");
 onEvent("tabgroup5/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup5/tab1/pictures\")");
@@ -306,14 +317,13 @@ onEvent("tabgroup5/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup5/tab1/v
 onEvent("tabgroup5/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup5/tab1/audios\")");
 onEvent("tabgroup5/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
-onEvent("tabgroup5/tab2", "show", "loadEntities(\"tabgroup5\")");
-
 addActionBarItem("sync", new ToggleActionButtonCallback() {
     actionOnLabel() {
         "Turn Sync off";
     }
     actionOn() {
         setSyncEnabled(false);
+        setFileSyncEnabled(false);
     }
     isActionOff() {
         isSyncEnabled();
@@ -323,6 +333,7 @@ addActionBarItem("sync", new ToggleActionButtonCallback() {
     }
     actionOff() {
         setSyncEnabled(true);
+        setFileSyncEnabled(true);
     }
 });
 
@@ -375,12 +386,18 @@ closeRelationship(tabgroup) {
 	cancelTabGroup(tabgroup, true);
 }
 
+RELATIONSHIP_LIST = "SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+        "                            vocabname || ' (' || freetext || ')', \n" + 
+        "                            vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+        "                            freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+        "                            vocabname, \n" + 
+        "                            freetext), ' | ') as response \n" + 
+        "     FROM latestNonDeletedRelnIdentifiers \n" + 
+        "   WHERE relntypename = 'AboveBelow'\n" + 
+        "     GROUP BY relationshipid limit ? offset ?;";
+
 loadRelationships(tabgroup) {
-	fetchRelationshipList("abovebelow", new FetchCallback() {
-		onFetch(result) {
-			populateDropDown(tabgroup + "/tab2/relationships", result);
-		}
-	});
+	populateCursorList(tabgroup + "/tab2/relationships", RELATIONSHIP_LIST, 5);
 }
 
 saveRelationship(tabgroup) {
@@ -388,7 +405,7 @@ saveRelationship(tabgroup) {
 }
 
 loadRelationship(tabgroup) {
-	localId = getFieldValue(tabgroup + "/tab2/relationships");
+	localId = getListItemValue();
 	if (isNull(localId)) return;
 
 	newRelationship(tabgroup);	
@@ -397,7 +414,7 @@ loadRelationship(tabgroup) {
 }
 
 loadRelationshipAuto(tabgroup) {
-	localId = getFieldValue(tabgroup + "/tab2/relationships");
+	localId = getListItemValue();
 	if (isNull(localId)) return;
 
 	newRelationship(tabgroup);	
@@ -464,19 +481,19 @@ clearRelationship(tabgroup) {
 newRelationship(tabgroup) {
 	newTabGroup(tabgroup);
 
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
 		}
 	});
 
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateRadioGroup(tabgroup + "/tab1/choice", result);
 		}
 	});
 
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populateDropDown(tabgroup + "/tab1/item", result);
 		}
@@ -484,7 +501,7 @@ newRelationship(tabgroup) {
 	
 	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
 
-	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery';", new FetchCallback() {
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery' order by vocabcountorder;", new FetchCallback() {
 		onFetch(result) {
 			populatePictureGallery(tabgroup + "/tab1/gallery", result);
 		}
@@ -508,12 +525,13 @@ deleteRelationship(tabgroup){
   cancelTabGroup(tabgroup, false);
 }
 
-onEvent("tabgroup2", "show", "initRelationship(\"tabgroup2\")");	
+onEvent("tabgroup2", "show", "initRelationship(\"tabgroup2\")");  
+onEvent("tabgroup2", "show", "loadRelationships(\"tabgroup2\")");	
 onEvent("tabgroup2/tab1/save", "delayclick", "saveRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/clear", "click", "newRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab2/load", "click", "loadRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/delete", "click", "deleteRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/close", "click", "closeRelationship(\"tabgroup2\")");
+onEvent("tabgroup2/tab2/relationships", "click", "loadRelationship(\"tabgroup2\")");
 
 onEvent("tabgroup2/tab1/attachfile", "click", "attachFileTo(\"tabgroup2/tab1/files\")");
 onEvent("tabgroup2/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup2/tab1/pictures\")");
@@ -521,14 +539,13 @@ onEvent("tabgroup2/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup2/tab1/v
 onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/audios\")");
 onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
-onEvent("tabgroup2/tab2", "show", "loadRelationships(\"tabgroup2\")");
-
 onEvent("tabgroup4", "show", "initRelationship(\"tabgroup4\")");	
+onEvent("tabgroup4", "show", "loadRelationships(\"tabgroup4\")"); 
 onEvent("tabgroup4/tab1/save", "delayclick", "saveRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/clear", "click", "newRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab2/load", "click", "loadRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/delete", "click", "deleteRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/close", "click", "closeRelationship(\"tabgroup4\")");
+onEvent("tabgroup4/tab2/relationships", "click", "loadRelationship(\"tabgroup4\")");
 
 onEvent("tabgroup4/tab1/attachfile", "click", "attachFileTo(\"tabgroup4/tab1/files\")");
 onEvent("tabgroup4/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup4/tab1/pictures\")");
@@ -536,22 +553,19 @@ onEvent("tabgroup4/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup4/tab1/v
 onEvent("tabgroup4/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup4/tab1/audios\")");
 onEvent("tabgroup4/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
-onEvent("tabgroup4/tab2", "show", "loadRelationships(\"tabgroup4\")");
-
 onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
+onEvent("tabgroup6", "show", "loadRelationships(\"tabgroup6\")"); 
 // onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab2/load", "click", "loadRelationshipAuto(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/close", "click", "closeRelationship(\"tabgroup6\")");
+onEvent("tabgroup6/tab2/relationships", "click", "loadRelationshipAuto(\"tabgroup6\")");
 
 onEvent("tabgroup6/tab1/attachfile", "click", "attachFileTo(\"tabgroup6/tab1/files\")");
 onEvent("tabgroup6/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup6/tab1/pictures\")");
 onEvent("tabgroup6/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup6/tab1/videos\")");
 onEvent("tabgroup6/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup6/tab1/audios\")");
 onEvent("tabgroup6/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
-
-onEvent("tabgroup6/tab2", "show", "loadRelationships(\"tabgroup6\")");
 
 // ASSOCIATIONS
 
@@ -703,6 +717,7 @@ tableQuery.add("select relationshipid, attributename, response\n" +
 				"where relntype.relntypename = 'AboveBelow' \n" + 
 				"group by relationshipid \n" + 
 				"order by relationshipid, attributename;");
+tableQuery.add("select attributename, aentcountorder from attributekey join idealaent using (attributeid);");
 
 createTableHeaders(headers) {
 	ArrayList listHeaders = new ArrayList();
@@ -717,12 +732,14 @@ tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action"
 tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "attributename", "aentcountorder" }));
 
 tableList = new ArrayList();
 tableList.add(createOption("entity", "Fetch Entities"));
 tableList.add(createOption("relationship", "Fetch Relationships"));
 tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
 tableList.add(createOption("relationship-pivot", "Fetch Relationship Attributes"));
+tableList.add(createOption("attribute-order", "Attribute Ordering"));
 
 onEvent("tabgroup8", "load", "onLoadTable()");
 
@@ -753,7 +770,9 @@ onLoadQuery() {
 		populateTablePivot("tabgroup8/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
 	} else if (index == 3) {
 		populateTablePivot("tabgroup8/tab1/table", query, headers, "Show", 15, "onShowRelationshipRow()");
-	}
+	} else {
+    populateTableRaw("tabgroup8/tab1/table", query, headers, null, -1, null);
+  }
 }
 
 onShowEntityRow() {

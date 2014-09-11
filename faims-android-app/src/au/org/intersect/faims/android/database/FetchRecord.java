@@ -280,4 +280,33 @@ public class FetchRecord extends Database {
 		}
 	}
 
+	public List<List<String>> fetchCursorAll(String query, int limit, int offset) throws Exception {
+		jsqlite.Database db = null;
+		Stmt stmt = null;
+		try {
+			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			beginTransaction(db);
+			
+			stmt = db.prepare(query);
+			stmt.bind(1, limit);
+			stmt.bind(2, offset);
+			ArrayList<List<String>> results = new ArrayList<List<String>>();
+			while(stmt.step()){
+				List<String> result = new ArrayList<String>();
+				for(int i = 0; i < stmt.column_count(); i++){
+					result.add(stmt.column_string(i));
+				}
+				results.add(result);
+			}
+			stmt.close();
+			stmt = null;
+
+			commitTransaction(db);
+			return results;
+		} finally {
+			closeStmt(stmt);
+			closeDB(db);
+		}
+	}
+
 }

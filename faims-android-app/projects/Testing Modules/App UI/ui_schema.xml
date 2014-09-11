@@ -68,6 +68,8 @@
             </Maps>
 			<LogicTriggered>
 			<ShowTextWarning/>
+			<ShowDateWarning/>
+			<ShowTimeWarning/>
 			 <ShowWarning/>
               <ShowToast/>
               <ShowHidden/>
@@ -112,10 +114,10 @@
         <input ref="Annotation" faims_certainty="false" faims_annotation="true" faims_attribute_type="measure">
           <label>Annotation Only</label>
         </input>
-        <input ref="Certainty" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Certainty" faims_annotation="false" faims_attribute_type="measure">
           <label>Certainty Only</label>
         </input>
-        <input ref="Description" faims_attribute_name="Description" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Description" faims_attribute_name="Description" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>Description Only</label>
         </input>
         <input ref="AnnotationCertainty" faims_certainty="true" faims_annotation="true" faims_attribute_type="measure">
@@ -124,22 +126,22 @@
         <input ref="All" faims_attribute_name="All" faims_certainty="true" faims_annotation="true" faims_attribute_type="measure">
           <label>All Three</label>
         </input>
-        <input ref="ReadOnly" faims_attribute_name="Read Only" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext" faims_read_only="true">
+        <input ref="ReadOnly" faims_attribute_name="Read Only" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure" faims_read_only="true">
           <label>Read Only</label>
         </input>
-        <input ref="Input" faims_attribute_name="Input" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Input" faims_attribute_name="Input" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>Input</label>
         </input>
         <input ref="Measure" faims_attribute_name="Measure" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>Measure</label>
         </input>
-        <input ref="String" faims_attribute_name="String" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="String" faims_attribute_name="String" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>String</label>
         </input>
-        <input ref="Date" faims_attribute_name="Date" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Date" faims_attribute_name="Date" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>Date</label>
         </input>
-        <input ref="Time" faims_attribute_name="Time" faims_certainty="false" faims_annotation="false" faims_attribute_type="freetext">
+        <input ref="Time" faims_attribute_name="Time" faims_certainty="false" faims_annotation="false" faims_attribute_type="measure">
           <label>Time</label>
         </input>
       </group>
@@ -246,7 +248,7 @@
         <trigger ref="gpsgo">
           <label>internal gps</label>
         </trigger>
-        <input ref="text" faims_attribute_type="freetext">
+        <input ref="text" faims_attribute_type="measure">
           <label>stuff</label>
         </input>
       </group>
@@ -254,6 +256,12 @@
       <label>Logic Triggered</label>
       <trigger ref="ShowTextWarning">
           <label>Show Text Warning</label>
+        </trigger>
+        <trigger ref="ShowDateWarning">
+          <label>Show Date Warning</label>
+        </trigger>
+        <trigger ref="ShowTimeWarning">
+          <label>Show Time Warning</label>
         </trigger>
       <trigger ref="ShowWarning">
           <label>Show Warning</label>

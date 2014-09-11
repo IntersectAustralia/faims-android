@@ -108,7 +108,7 @@
       <label>Entity</label>
       <group ref="Entity">
         <label>Entity Attached Files</label>
-        <input ref="Name" faims_attribute_name="Name" faims_attribute_type="freetext" faims_annotation="false" faims_certainty="false">
+        <input ref="Name" faims_attribute_name="Name" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label> Name </label>
         </input>
         <trigger ref="Update">

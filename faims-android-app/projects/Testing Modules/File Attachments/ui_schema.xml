@@ -41,6 +41,7 @@
               <AttachAudio/>
               <Video/>
               <AttachVideo/>
+              <AutoAttachFiles/>
               <ViewAllFiles/>
               <Update/>
             </Entity>
@@ -155,6 +156,9 @@
         </select>
         <trigger ref="AttachVideo">
           <label>Record Video</label>
+        </trigger>
+        <trigger ref="AutoAttachFiles">
+          <label>Auto Attach Files</label>
         </trigger>
         <trigger ref="ViewAllFiles">
           <label>View All Files</label>
