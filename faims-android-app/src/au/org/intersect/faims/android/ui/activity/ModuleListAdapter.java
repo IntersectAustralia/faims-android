@@ -52,7 +52,11 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 		if (module != null) {
 			TextView moduleName = (TextView) v.findViewById(R.id.module_name);
 			TextView moduleVersion = (TextView) v.findViewById(R.id.module_version);
-			ImageView typeIcon = (ImageView) v.findViewById(R.id.module_type_icon);
+			ImageView localIcon = (ImageView) v.findViewById(R.id.module_local_icon);
+			ImageView serverIcon = (ImageView) v.findViewById(R.id.module_server_icon);
+			
+			localIcon.setVisibility(View.INVISIBLE);
+			serverIcon.setVisibility(View.INVISIBLE);
 			
 			Button itemOverlay = (Button) v.findViewById(R.id.list_item_overlay);
 			itemOverlay.setBackgroundResource(R.drawable.label_selector);
@@ -73,6 +77,8 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 			});
 			
 			if (module.isLocal() && module.isServer()) {
+				localIcon.setVisibility(View.VISIBLE);
+				serverIcon.setVisibility(View.VISIBLE);
 				itemOverlay.setOnLongClickListener(new OnLongClickListener() {
 					
 					@Override
@@ -82,15 +88,17 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 						return false;
 					}
 				});
+			} else {
+				itemOverlay.setOnLongClickListener(null);
 			}
 			
 			moduleName.setText(items.get(position).getName());
 			String version = items.get(position).getVersion() == null ? "?" : items.get(position).getVersion();
 			moduleVersion.setText("Version: " + version);
 			if (items.get(position).isLocal()) {
-				typeIcon.setBackgroundResource(R.drawable.module_local);
+				localIcon.setVisibility(View.VISIBLE);
 			} else {
-				typeIcon.setBackgroundResource(R.drawable.module_server);
+				serverIcon.setVisibility(View.VISIBLE);
 			}
 		}
 		
@@ -102,6 +110,7 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 	public void add(ModuleItem object) {
 		for (ModuleItem m : items) {
 			if (m.getKey().equals(object.getKey())) {
+				// local module exists on server too
 				m.setServer(true);
 				return;
 			}
