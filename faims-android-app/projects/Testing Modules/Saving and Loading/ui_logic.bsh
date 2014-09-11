@@ -275,7 +275,7 @@ onCodeScan() {
 }
 
 onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");  
-onEvent("tabgroup1", "load", "loadEntities(\"tabgroup1\")");	
+onEvent("tabgroup1", "show", "loadEntities(\"tabgroup1\")");	
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
@@ -290,7 +290,7 @@ onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/a
 onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
 onEvent("tabgroup3", "show", "initEntity(\"tabgroup3\")");	
-onEvent("tabgroup3", "load", "loadEntities(\"tabgroup3\")");  
+onEvent("tabgroup3", "show", "loadEntities(\"tabgroup3\")");  
 onEvent("tabgroup3/tab1/save", "delayclick", "saveEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/clear", "click", "newEntity(\"tabgroup3\")");
 onEvent("tabgroup3/tab1/delete", "click", "deleteEntity(\"tabgroup3\")");
@@ -304,7 +304,7 @@ onEvent("tabgroup3/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup3/tab1/a
 onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
 onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
-onEvent("tabgroup5", "load", "loadEntities(\"tabgroup5\")");  
+onEvent("tabgroup5", "show", "loadEntities(\"tabgroup5\")");  
 // onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
@@ -526,7 +526,7 @@ deleteRelationship(tabgroup){
 }
 
 onEvent("tabgroup2", "show", "initRelationship(\"tabgroup2\")");  
-onEvent("tabgroup2", "load", "loadRelationships(\"tabgroup2\")");	
+onEvent("tabgroup2", "show", "loadRelationships(\"tabgroup2\")");	
 onEvent("tabgroup2/tab1/save", "delayclick", "saveRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/clear", "click", "newRelationship(\"tabgroup2\")");
 onEvent("tabgroup2/tab1/delete", "click", "deleteRelationship(\"tabgroup2\")");
@@ -540,7 +540,7 @@ onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/a
 onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
 onEvent("tabgroup4", "show", "initRelationship(\"tabgroup4\")");	
-onEvent("tabgroup4", "load", "loadRelationships(\"tabgroup4\")"); 
+onEvent("tabgroup4", "show", "loadRelationships(\"tabgroup4\")"); 
 onEvent("tabgroup4/tab1/save", "delayclick", "saveRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/clear", "click", "newRelationship(\"tabgroup4\")");
 onEvent("tabgroup4/tab1/delete", "click", "deleteRelationship(\"tabgroup4\")");
@@ -554,7 +554,7 @@ onEvent("tabgroup4/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup4/tab1/a
 onEvent("tabgroup4/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
 onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
-onEvent("tabgroup6", "load", "loadRelationships(\"tabgroup6\")"); 
+onEvent("tabgroup6", "show", "loadRelationships(\"tabgroup6\")"); 
 // onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
 onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");
