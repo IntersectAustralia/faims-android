@@ -730,20 +730,12 @@ public class MainActivity extends RoboActivity {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         serverDiscovery.initiateServerIPAndPort(preferences);
         
-        
 		moduleListAdapter.clear();
 		readStoredModules();
 		
 		// if preferences has no selection the don't fetch
 		if (!preferences.getString("pref_server_ip", "").isEmpty()) {
 			fetchServerModules();
-		}
-		
-		TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
-		if (serverDiscovery.isServerHostValid()) {
-			connectionStatus.setText("Connected to " + serverDiscovery.getServerIP()+ ":" + serverDiscovery.getServerPort());
-		} else {
-			connectionStatus.setText("Not connected to a server");
 		}
 	}
 	
@@ -764,15 +756,17 @@ public class MainActivity extends RoboActivity {
 
 				@Override
 				public void handleTaskCompleted(Object result) {
-					Result fetchResult = (Result) result;		
+					Result fetchResult = (Result) result;
+					TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
+						connectionStatus.setText("Connected to " + serverDiscovery.getServerIP()+ ":" + serverDiscovery.getServerPort());
 		    			ArrayList<Module> modules = parseModules((JSONArray) fetchResult.data);
 		    			for (Module p : modules) {
 	    					moduleListAdapter.add(new ModuleItem(p.name, p.key, p.version, false, true));
 		    			}
 		    			moduleListAdapter.notifyDataSetChanged();
 					} else {
-						// ignore
+						connectionStatus.setText("Not connected to a server");
 					}
 				}
     			

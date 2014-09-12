@@ -17,7 +17,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="5dp"        
+        android:padding="10dp"        
         >
         
 	    <LinearLayout
@@ -34,7 +34,7 @@
 	            android:id="@+id/module_name"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:textSize="18sp"
+				android:textSize="20sp"
 				android:textColor="#222222"
 				android:textIsSelectable="false"
 				/>
@@ -43,7 +43,7 @@
 	            android:id="@+id/module_version"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:textSize="12sp"
+				android:textSize="14sp"
 				android:textColor="#777777"
 				android:textIsSelectable="false"
 				/>
@@ -66,8 +66,6 @@
 				android:gravity="center_vertical"
 				android:background="@drawable/module_local"
 				android:visibility="invisible"
-				android:scaleX="0.8"
-				android:scaleY="0.8"
 				tools:ignore="ContentDescription,RtlHardcoded" />
 		   	
 		   	<ImageView
@@ -76,9 +74,8 @@
 		   	    android:layout_height="wrap_content"
 		   	    android:background="@drawable/module_server"
 		   	    android:gravity="center_vertical"
+		   	    android:layout_marginLeft="10dp"
 		   	    android:visibility="invisible"
-		   	    android:scaleX="0.8"
-				android:scaleY="0.8"
 		   	    tools:ignore="ContentDescription,RtlHardcoded,RtlSymmetry" />
 		   	
 	   	</LinearLayout>
