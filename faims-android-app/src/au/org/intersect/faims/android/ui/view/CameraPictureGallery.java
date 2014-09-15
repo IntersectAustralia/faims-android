@@ -1,14 +1,11 @@
 package au.org.intersect.faims.android.ui.view;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.Date;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,7 +14,6 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormInputDef;
-import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 
 import com.google.inject.Inject;
@@ -41,13 +37,6 @@ public class CameraPictureGallery extends FilePictureGallery {
 	}
 	
 	@Override
-	protected void setGalleryImage(CustomImageView gallery, String path) {
-		if(path != null && new File(path).exists()) {
-			gallery.setImageBitmap(decodeFile(new File(path), GALLERY_SIZE, GALLERY_SIZE));
-		}
-	}
-	
-	@Override
 	protected void longSelectImage(View v) {
 		previewCameraPicture(v);
 	}
@@ -55,7 +44,11 @@ public class CameraPictureGallery extends FilePictureGallery {
 	private void previewCameraPicture(View v) {
 		CustomImageView selectedImageView = (CustomImageView) v;
 		String path = selectedImageView.getPicture().getUrl();
-		if (!new File(path).exists()) return;
+		File file = new File(path);
+		if (!file.exists()) {
+			linker.showPreviewWarning("Image Preview", file);
+			return;
+		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
@@ -100,32 +93,6 @@ public class CameraPictureGallery extends FilePictureGallery {
 		Date lastModifiedDate = new Date(videoFile.lastModified());
 		stringBuilder.append("Picture date: " + lastModifiedDate.toString());
 		return stringBuilder.toString();
-	}
-	
-	public static Bitmap decodeFile(File f, int WIDTH, int HIGHT) {
-		try {
-			// Decode image size
-			BitmapFactory.Options o = new BitmapFactory.Options();
-			o.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-			// The new size we want to scale to
-			final int REQUIRED_WIDTH = WIDTH;
-			final int REQUIRED_HIGHT = HIGHT;
-			// Find the correct scale value. It should be the power of 2.
-			int scale = 1;
-			while (o.outWidth / scale / 2 >= REQUIRED_WIDTH
-					&& o.outHeight / scale / 2 >= REQUIRED_HIGHT)
-				scale *= 2;
-
-			// Decode with inSampleSize
-			BitmapFactory.Options o2 = new BitmapFactory.Options();
-			o2.inSampleSize = scale;
-			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-		} catch (Exception e) {
-			FLog.e("error when decode the bitmap", e);
-		}
-		return null;
 	}
 
 	@Override

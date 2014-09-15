@@ -281,6 +281,35 @@ public class FileUtil {
 		}
 	}
 	
+	public static String addOriginalExtToFile(File file) {
+		String filename = file.getName();
+		int index = filename.lastIndexOf('.');
+		if (index > 0) {
+			String fileNoExt = filename.substring(0, index);
+			String fileExt = filename.substring(index);
+			return fileNoExt + ".original" + fileExt;
+		} else if (index == 0) {
+			return ".original" + filename; 
+		} else {
+			return filename + ".original";
+		}
+	}
+	
+	public static File getThumbnailFileFor(File file) {
+		String filename = file.getPath().replace(".original", ".thumbnail");
+		int index = filename.lastIndexOf('.');
+		if (index > 0) {
+			String fileNoExt = filename.substring(0, index);
+			index = fileNoExt.lastIndexOf('.');
+			if (index > 0) {
+				return new File(fileNoExt + ".jpg");
+			} else {
+				return new File(filename);
+			}
+		} 
+		return null;
+	}
+	
 	// Tar Helpers
 	
 //	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {

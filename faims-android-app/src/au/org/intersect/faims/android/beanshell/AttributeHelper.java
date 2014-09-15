@@ -114,7 +114,7 @@ public class AttributeHelper {
 							if (hasAttachment(linker, attachment, sync)) {
 								relativePath = linker.stripAttachedFilePath(attachment);
 							} else {
-								relativePath = linker.attachFile(attachment, sync, null, null);
+								relativePath = linker.attachFile(attachment, sync, null, null, customView.getAttributeName());
 							}
 							
 							if (relativePath != null) {

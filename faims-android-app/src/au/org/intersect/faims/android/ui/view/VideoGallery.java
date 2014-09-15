@@ -40,9 +40,13 @@ public class VideoGallery extends FilePictureGallery {
 	@Override
 	protected void setGalleryImage(CustomImageView gallery, String path) {
 		if(path != null && new File(path).exists()) {
-			Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
-					path, MediaStore.Images.Thumbnails.MINI_KIND);
-			gallery.setImageBitmap(thumbnail);
+			if (path.contains(".thumbnail")) {
+				super.setGalleryImage(gallery, path);
+			} else {
+				Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
+						path, MediaStore.Images.Thumbnails.MINI_KIND);
+				gallery.setImageBitmap(thumbnail);
+			}
 		}
 	}
 	
@@ -54,7 +58,11 @@ public class VideoGallery extends FilePictureGallery {
 	private void previewVideo(View v) {
 		final CustomImageView selectedImageView = (CustomImageView) v;
 		String path = selectedImageView.getPicture().getUrl();
-		if (!new File(path).exists()) return;
+		File file = new File(path);
+		if (!file.exists()) {
+			linker.showPreviewWarning("Video Preview", file);
+			return;
+		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 

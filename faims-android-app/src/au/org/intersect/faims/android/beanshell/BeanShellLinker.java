@@ -2983,6 +2983,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
+		return attachFile(filePath, sync, dir, callback, null);
+	}
+	
+	public String attachFile(String filePath, boolean sync, String dir, final String callback, String attributeName) {
 		try {
 			File file = new File(filePath);
 			if (!file.exists()) {
@@ -3006,8 +3010,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 			// create directories
 			FileUtil.makeDirs(module.getDirectoryPath(attachFile));
-			String name= file.getName();
-			
+			String name = (attributeName != null && 
+					databaseManager.fetchRecord().hasThumbnail(attributeName)) ? FileUtil.addOriginalExtToFile(file) : file.getName();
+			 
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
@@ -3162,15 +3167,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							activityRef.get().startActivity(intent);
 						}
 					} else {
-						if (file.getPath().contains("files/server")) {
-							showWarning(
-								"Attached File",
-								"Cannot open the selected file. The selected file only syncs to the server.");
-						} else {
-							showWarning(
-								"Attached File",
-								"Cannot open the selected file. Please wait for the file to finish syncing to the app.");
-						}
+						showPreviewWarning("Attached File", file);
 					}
 				}
 
@@ -3187,6 +3184,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						}
 					});
 			builder.create().show();
+		}
+	}
+	
+	public void showPreviewWarning(String title, File file) {
+		if (file.getPath().contains("files/server")) {
+			showWarning(
+					title,
+				"Cannot open the selected file. The selected file only syncs to the server.");
+		} else {
+			if (file.getPath().contains(".original")) {
+				showWarning(
+						title,
+					"Cannot open the selected file. The seleted file only syncs a thumbnail to the app.");
+			} else {
+				showWarning(
+						title,
+					"Cannot open the selected file. Please wait for the file to finish syncing to the app.");
+			}
 		}
 	}
 
