@@ -1,0 +1,33 @@
+// USER
+
+login() {
+	fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+		onFetch(result) {
+			user = new User(result.get(0), result.get(1), result.get(2), result.get(3));
+			setUser(user);
+			showTabGroup("menu");
+		}
+	});
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+loadUsers() {
+	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+		onFetch(result) {
+			populateList("user/tab1/users", result);
+		}
+	});
+}
+
+onEvent("user", "show", "loadUsers()");
+
+
+onEvent("menu", "load", "loadScrollList()");
+
+loadScrollList(){
+	populateCursorList("menu/tab1/scroll", "select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location' order by vocabcountorder limit ? offset ?;", 50);
+
+}
+
+onEvent("menu/tab1/scroll","click","showToast(\"getListItemValue()\")");
