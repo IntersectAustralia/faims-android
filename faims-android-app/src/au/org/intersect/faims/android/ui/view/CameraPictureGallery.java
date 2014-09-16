@@ -96,12 +96,4 @@ public class CameraPictureGallery extends FilePictureGallery {
 		stringBuilder.append("Picture date: " + lastModifiedDate.toString());
 		return stringBuilder.toString();
 	}
-
-	@Override
-	public void addFile(String value, String annotation, String certainty) {
-		Picture picture = new Picture(value, null, value);
-		addGallery(picture);
-		super.addFile(value, annotation, certainty);
-	}
-
 }

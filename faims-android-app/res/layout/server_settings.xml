@@ -1,0 +1,115 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="25dp"
+    tools:context=".MainActivity"
+    android:background="@android:color/white">
+    
+    <TextView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="20dp"
+        android:text="@string/select_server"
+        android:textSize="26sp" />
+    
+    <Spinner
+        android:id="@+id/previous_sessions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="40dp" />
+
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="@string/connect_to_server"
+        android:textStyle="bold"
+        android:textAllCaps="true"
+        android:textColor="@color/heading_grey" />
+    
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#DDDDDD" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
+        
+        <TextView
+            android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="1"
+        	android:text="@string/server_host"
+        	android:textAllCaps="true" />
+        
+        <TextView
+            android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="1"
+        	android:text="@string/server_port"
+        	android:textAllCaps="true" />
+        
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
+        
+        <EditText
+            android:id="@+id/host_field"
+            android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="1"
+        	android:inputType="text" />
+        
+        <EditText
+            android:id="@+id/port_field"
+            android:layout_width="0dp"
+        	android:layout_height="wrap_content"
+        	android:layout_weight="1"
+        	android:inputType="text" />
+        
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="end"
+        android:paddingTop="30dp">
+        
+        <View
+            android:layout_width="0dp"
+			android:layout_height="wrap_content"
+            android:layout_weight="1" />
+        
+        <Button android:id="@+id/test_connection"
+	        android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="3"
+			android:background="@drawable/button_default"
+			android:text="@string/test_connection"
+			style="?android:attr/button" />
+        
+        <Button android:id="@+id/connect_to_server"
+	        android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="2"
+			android:background="@drawable/button_success"
+			android:textColor="@android:color/white"
+			android:text="@string/connect"
+			style="?android:attr/button" />
+        
+    </LinearLayout>
+    
+</LinearLayout>

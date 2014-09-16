@@ -128,22 +128,22 @@
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
         <label>Save Entity</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
 	          	<label>Name:</label>
 	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="freetext">
+	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
 	          	<label>Description:</label>
 	        </input>
 	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
 	            <label>Value:</label>
 	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
               <label>Timestamp:</label>
             </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="freetext">
+            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
             	<label>Date:</label>
          	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="freetext">
+         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
             	<label>Time:</label>
          	</input>
             <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">

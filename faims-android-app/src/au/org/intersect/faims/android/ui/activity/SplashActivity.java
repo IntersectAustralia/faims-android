@@ -40,28 +40,65 @@ public class SplashActivity extends Activity {
 			}
 		});
 	
-	    Button loadModule = (Button) findViewById(R.id.splash_load);
-	    loadModule.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-	            SplashActivity.this.startActivity(mainIntent);
-			}
-		});
-	    
-	    updateContinueSessionButton();
+	    updateButtons();
 	}
 	
 
     @Override
     protected void onResume() {
     	super.onResume();
-    	updateContinueSessionButton();
+    	updateButtons();
     }
 
 
-	private void updateContinueSessionButton() {
+	@Override
+	public void onBackPressed() {
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		intent.addCategory(Intent.CATEGORY_HOME);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+	}
+
+
+	private void updateButtons() {
+		Button connectDemo = (Button) findViewById(R.id.splash_connect_demo);
+		Button connectServer = (Button) findViewById(R.id.splash_connect_server);
+		Button loadModule = (Button) findViewById(R.id.splash_load);
+		connectDemo.setVisibility(View.GONE);
+		connectServer.setVisibility(View.GONE);
+		loadModule.setVisibility(View.GONE);
+		
+		if (ModuleUtil.getModules().isEmpty()) {
+			connectDemo.setVisibility(View.VISIBLE);
+			connectDemo.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					connectToDemoServer();
+				}
+			});
+			
+			connectServer.setVisibility(View.VISIBLE);
+			connectServer.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					Intent serverSettings = new Intent(SplashActivity.this, ServerSettingsActivity.class);
+					startActivity(serverSettings);
+				}
+			});
+		} else {
+			loadModule.setVisibility(View.VISIBLE);
+			loadModule.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+		            SplashActivity.this.startActivity(mainIntent);
+				}
+			});
+		}
+		
 		Button continueSession = (Button) findViewById(R.id.splash_continue);
 		final String key = FAIMSApplication.getInstance().getSessionModuleKey();
 	    if (key != null && ModuleUtil.getModule(key) != null) {
@@ -77,6 +114,14 @@ public class SplashActivity extends Activity {
 	    } else {
 	    	continueSession.setVisibility(View.GONE);
 	    }
+	}
+	
+	private void connectToDemoServer() {
+		FAIMSApplication.getInstance().updateServerSettings(getResources().getString(R.string.demo_server_host),
+				getResources().getString(R.string.demo_server_port), false);
+		
+		Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+        startActivity(mainIntent);
 	}
 	 
 }

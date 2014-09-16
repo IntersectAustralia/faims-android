@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:background="@android:color/white"
+    >
+    
+    <Button
+        android:id="@+id/list_item_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:focusable="false"
+        />
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"        
+        >
+        
+	    <LinearLayout
+	        android:id="@+id/module_container"
+	        android:layout_width="wrap_content"
+	        android:layout_height="match_parent"
+	        android:layout_alignParentLeft="true"
+	        android:layout_toLeftOf="@+id/module_icon_container"
+	        android:gravity="center_vertical"
+	        android:orientation="vertical"
+	        tools:ignore="RtlHardcoded" >
+		 	
+	        <TextView
+	            android:id="@+id/module_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="20sp"
+				android:textColor="#222222"
+				android:textIsSelectable="false"
+				/>
+	        
+	        <TextView
+	            android:id="@+id/module_version"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textSize="14sp"
+				android:textColor="#777777"
+				android:textIsSelectable="false"
+				/>
+	        
+	    </LinearLayout>
+	   
+	    <LinearLayout
+	        android:id="@+id/module_icon_container"
+	        android:layout_width="wrap_content"
+	        android:layout_height="match_parent"
+	        android:layout_alignParentRight="true"
+	        android:gravity="center_vertical"
+	        android:orientation="horizontal"
+	        tools:ignore="RtlHardcoded" >
+		    
+		   	<ImageView
+				android:id="@+id/module_local_icon"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:background="@drawable/module_local"
+				android:visibility="invisible"
+				tools:ignore="ContentDescription,RtlHardcoded" />
+		   	
+		   	<ImageView
+		   	    android:id="@+id/module_server_icon"
+		   	    android:layout_width="wrap_content"
+		   	    android:layout_height="wrap_content"
+		   	    android:background="@drawable/module_server"
+		   	    android:gravity="center_vertical"
+		   	    android:layout_marginLeft="10dp"
+		   	    android:visibility="invisible"
+		   	    tools:ignore="ContentDescription,RtlHardcoded,RtlSymmetry" />
+		   	
+	   	</LinearLayout>
+        
+    </RelativeLayout>
+    
+</FrameLayout>

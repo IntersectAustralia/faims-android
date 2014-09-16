@@ -148,19 +148,22 @@ public class AttributeHelper {
 					}
 					valuesByType.get(Attribute.CERTAINTY).addAll(fileList.getCertainties());
 				} else {
-					if (customView.getAnnotationEnabled()) {
-						viewAnnotations.add(customView.getAnnotation());
+					List<String> values = getViewValues(linker, customView);
+					for (String value : values) {
+						if (customView.getAnnotationEnabled()) {
+							viewAnnotations.add(customView.getAnnotation());
+						}
+						
+						if (customView.getCertaintyEnabled()) {
+							viewCertainties.add(String.valueOf(customView.getCertainty()));
+						}
+						
+						String type = customView.getAttributeType();
+						if (valuesByType.get(type) == null) {
+							valuesByType.put(type, new ArrayList<String>());
+						}
+						valuesByType.get(type).add(value);
 					}
-					
-					if (customView.getCertaintyEnabled()) {
-						viewCertainties.add(String.valueOf(customView.getCertainty()));
-					}
-					
-					String type = customView.getAttributeType();
-					if (valuesByType.get(type) == null) {
-						valuesByType.put(type, new ArrayList<String>());
-					}
-					valuesByType.get(type).addAll(getViewValues(linker, customView));
 				}
 			}
 			return valuesByType;

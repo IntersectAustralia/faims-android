@@ -190,7 +190,7 @@
       <label>GPS Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
-        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
             <label>Name:</label>
         </input>
         <input ref="position" faims_read_only="true"  faims_certainty="false" faims_annotation="false">
@@ -301,7 +301,7 @@
                   <value>dummy</value>
               </item>
           </select1>
-          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
               <label>Name:</label>
           </input>
           <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
@@ -412,7 +412,7 @@
                   <value>dummy</value>
               </item>
           </select1>
-          <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
               <label>Name:</label>
           </input>
           <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">

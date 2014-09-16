@@ -4,12 +4,21 @@
     <string name="app_name">FAIMS</string>
     <string name="welcome">This is the FAIMS Android App!</string>
     <string name="menu_settings">Settings</string>
-    <string name="fetch_modules_name">Module List on Server</string> 
+    <string name="available_modules">Available Modules</string>
     
     <string name="choice_positive_button">YES</string>
     <string name="choice_negative_button">NO</string>
     <string name="confirm_dialog_button">OK</string>
     <string name="cancel_dialog_button">Cancel</string>
+    
+    <string name="connect_to_server">Connect to server</string>
+    <string name="select_server">Select previous server</string>
+    <string name="refresh_module_list">Refresh Module List</string>
+    <string name="server_name">Server Name</string>
+    <string name="server_host">Server Host</string>
+    <string name="server_port">Server Port</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="connect">Connect</string>
     
     <string name="locate_server_title">Locating Server</string>
     <string name="locate_server_message">looking for server on network..</string>
@@ -19,9 +28,6 @@
     
     <string name="fetch_modules_title">Fetching Module List</string>
     <string name="fetch_modules_message">please wait..</string>
-    
-    <string name="fetch_modules_failure_title">Could not fetch modules</string>
-    <string name="fetch_modules_failure_message">Would you like to try again?</string>
     
     <string name="confirm_download_module_title">Download Module</string>
     <string name="confirm_download_module_message">Would you like to download module</string>
@@ -128,5 +134,7 @@
     
     <string name="splash_load">Load Module</string>
     <string name="splash_continue">Continue Last Session</string>
+    <string name="splash_connect_demo">Connect to Demo Server</string>
+    <string name="splash_connect_server">Enter Server Details</string>
 
 </resources>
