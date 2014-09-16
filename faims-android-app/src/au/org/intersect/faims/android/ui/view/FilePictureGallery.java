@@ -97,10 +97,13 @@ public class FilePictureGallery extends CustomFileList {
 	}
 	
 	public void populateImages(List<Picture> pictures) {
-		reset();
+		if (galleriesLayout != null) {
+			galleriesLayout.removeAllViews();
+		}
+		galleryImages = new ArrayList<CustomImageView>();	
 		
 		for (Picture picture : pictures) {
-			addFile(picture.getUrl());
+			addFileView(picture.getUrl());
 		}
 	}
 	
@@ -186,4 +189,14 @@ public class FilePictureGallery extends CustomFileList {
 	protected void setGalleryImage(CustomImageView gallery, String path) {
 	}
 	
+	public void addFile(String value, String annotation, String certainty) {
+		addFileView(value);
+		super.addFile(value, annotation, certainty);
+	}
+	
+	public void addFileView(String filePath) {
+		Picture picture = new Picture(filePath, null, filePath);
+		addGallery(picture);
+	}
+
 }

@@ -56,11 +56,16 @@ public class FileListGroup extends CustomFileList {
 		NativeCSS.addCSSClass(this, "file-list");
 	}
 	
-	@Override
-	public void addFile(String filePath, String annotation, String certainty) {
+	private void addFileView(String filePath) {
 		FrameLayout layout = createFileListItem(filePath, annotationEnabled, certaintyEnabled, this.getChildCount());
 		addView(layout);
 		this.invalidate();
+	}
+	
+	
+	@Override
+	public void addFile(String filePath, String annotation, String certainty) {
+		addFileView(filePath);
 		super.addFile(filePath, annotation, certainty);
 	}
 	
@@ -118,9 +123,9 @@ public class FileListGroup extends CustomFileList {
 	@Override
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
-		reset();
+		removeAllViews();
 		for (NameValuePair pair : pairs) {
-			addFile(pair.getName());
+			addFileView(pair.getName());
 		}
 	}
 	

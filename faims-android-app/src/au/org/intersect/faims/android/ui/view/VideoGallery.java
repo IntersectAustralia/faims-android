@@ -147,11 +147,4 @@ public class VideoGallery extends FilePictureGallery {
 		}
 		return stringBuilder.toString();
 	}
-
-	@Override
-	public void addFile(String value, String annotation, String certainty) {
-		Picture picture = new Picture(value, null, value);
-		addGallery(picture);
-		super.addFile(value, annotation, certainty);
-	}
 }

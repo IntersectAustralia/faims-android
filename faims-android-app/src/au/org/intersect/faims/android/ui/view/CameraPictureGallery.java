@@ -127,12 +127,4 @@ public class CameraPictureGallery extends FilePictureGallery {
 		}
 		return null;
 	}
-
-	@Override
-	public void addFile(String value, String annotation, String certainty) {
-		Picture picture = new Picture(value, null, value);
-		addGallery(picture);
-		super.addFile(value, annotation, certainty);
-	}
-
 }
