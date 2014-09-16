@@ -523,7 +523,7 @@ public class Tab {
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
 		            
 		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
-		            labelDialog.setTitle(attribute.questionText);
+		            labelDialog.setTitle(arch16n.substituteValue(attribute.questionText));
 		    		
 		    		if(attribute.annotation && (isArchEnt || isRelationship)){
 		    			annotationImage = viewFactory.createAnnotationIcon();

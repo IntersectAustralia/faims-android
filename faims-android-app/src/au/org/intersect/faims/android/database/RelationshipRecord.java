@@ -269,6 +269,8 @@ public class RelationshipRecord extends SharedRecord {
 				//relAttribute.setDeleted(stmt.column_string(6) != null ? true : false);
 				relAttribute.setDirty(stmt.column_string(7) != null ? true : false);
 				relAttribute.setDirtyReason(stmt.column_string(8));
+				relAttribute.setIsFile(stmt.column_string(9) != null ? true : false);
+				relAttribute.setUseThumbnail(stmt.column_string(10) != null ? true : false);
 				attributes.add(relAttribute);
 			}
 			stmt.close();

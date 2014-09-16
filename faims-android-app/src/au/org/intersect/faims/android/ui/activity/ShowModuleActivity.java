@@ -246,6 +246,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		setupWifiBroadcast();
 		setupManagers();
 		
+		menuManager = new ShowModuleMenuManager(ShowModuleActivity.this);
 		navigationDrawer.init(this);
 
 		String css = module.getCSS();
@@ -669,9 +670,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 				@Override
 				public void run() {
-					if (menuManager == null) {
-						menuManager = new ShowModuleMenuManager(ShowModuleActivity.this);
-					}
 					menuManager.updateActionBar(menu);			
 					menuManager.updateStatusBar((LinearLayout) findViewById(R.id.status_bar));
 				}

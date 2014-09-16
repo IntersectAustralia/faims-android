@@ -31,6 +31,9 @@ import au.org.intersect.faims.android.log.FLog;
 
 public class FileUtil {
 
+	public static final String ORIGINAL_EXT = ".original";
+	public static final String THUMBNAIL_EXT = ".thumbnail";
+
 	// File Helpers
 	public static void touch(File file) throws Exception {
         if (!file.exists())
@@ -279,6 +282,35 @@ public class FileUtil {
 				fileList.add(f);
 			}
 		}
+	}
+	
+	public static String addOriginalExtToFile(File file) {
+		String filename = file.getName();
+		int index = filename.lastIndexOf('.');
+		if (index > 0) {
+			String fileNoExt = filename.substring(0, index);
+			String fileExt = filename.substring(index);
+			return fileNoExt + ORIGINAL_EXT + fileExt;
+		} else if (index == 0) {
+			return ORIGINAL_EXT + filename; 
+		} else {
+			return filename + ORIGINAL_EXT;
+		}
+	}
+	
+	public static File getThumbnailFileFor(File file) {
+		String filename = file.getPath().replace(ORIGINAL_EXT, THUMBNAIL_EXT);
+		int index = filename.lastIndexOf('.');
+		if (index > 0) {
+			String fileNoExt = filename.substring(0, index);
+			index = fileNoExt.lastIndexOf('.');
+			if (index > 0) {
+				return new File(fileNoExt + ".jpg");
+			} else {
+				return new File(filename);
+			}
+		} 
+		return null;
 	}
 	
 	// Tar Helpers

@@ -2260,6 +2260,7 @@ getLastSelectedFilepath() {
   *
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  * @return the full path of the file
   */
 attachFile(String filePath, boolean sync) {
 	return linker.attachFile(filePath, sync, null, null);
@@ -2275,6 +2276,7 @@ attachFile(String filePath, boolean sync) {
   * @param filepath the path of the file to be synced
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
   * @param dir the directory to be added to the app/server folder, can be null
+  * @return the full path of the file
   */
 attachFile(String filePath, boolean sync, String dir) {
 	return linker.attachFile(filePath, sync, dir, null);
@@ -2291,9 +2293,28 @@ attachFile(String filePath, boolean sync, String dir) {
   * @param sync the boolean value to tell whether the file should be copied to the app/server folder
   * @param dir the directory to be added to the app/server folder, can be null
   * @param callback code to execute when file is finished copying into the directory
+  * @return the full path of the file
   */
 attachFile(String filePath, boolean sync, String dir, String callback) {
 	return linker.attachFile(filePath, sync, dir, callback);
+}
+
+/**
+  * Copy a file into the modules server or app folders. If the sync is set to true then the file
+  * is copied to the app folder. If the sync is set to false then the file is copied to the server folder.
+  *
+  * Files in the app folder are sync to the server and other apps. Files in the server folder are only
+  * synced to the server.
+  *
+  * @param filepath the path of the file to be synced
+  * @param sync the boolean value to tell whether the file should be copied to the app/server folder
+  * @param dir the directory to be added to the app/server folder, can be null
+  * @param callback code to execute when file is finished copying into the directory
+  * @param attributeName the name of the attribute you are attaching the file to
+  * @return the full path of the file
+  */
+attachFile(String filePath, boolean sync, String dir, String callback, String attributeName) {
+  return linker.attachFile(filePath, sync, dir, callback, attributeName);
 }
 
 /**

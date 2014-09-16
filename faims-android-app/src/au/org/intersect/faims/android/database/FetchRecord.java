@@ -309,4 +309,25 @@ public class FetchRecord extends Database {
 		}
 	}
 
+	public boolean hasThumbnail(String attributeName) throws Exception {
+		jsqlite.Database db = null;
+		Stmt stmt = null;
+		try {
+			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			
+			stmt = db.prepare(DatabaseQueries.HAS_THUMBNAIL);
+			stmt.bind(1, attributeName);
+			if (stmt.step()) {
+				return stmt.column_int(0) > 0;
+			}
+			stmt.close();
+			stmt = null;
+
+			return false;
+		} finally {
+			closeStmt(stmt);
+			closeDB(db);
+		}
+	}
+
 }

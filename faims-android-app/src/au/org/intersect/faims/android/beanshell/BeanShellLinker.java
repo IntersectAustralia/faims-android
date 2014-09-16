@@ -2999,6 +2999,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	public String attachFile(String filePath, boolean sync, String dir, final String callback) {
+		return attachFile(filePath, sync, dir, callback, null);
+	}
+	
+	public String attachFile(String filePath, boolean sync, String dir, final String callback, String attributeName) {
 		try {
 			File file = new File(filePath);
 			if (!file.exists()) {
@@ -3022,8 +3026,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 			// create directories
 			FileUtil.makeDirs(module.getDirectoryPath(attachFile));
-			String name= file.getName();
-			
+			String name = (attributeName != null && 
+					databaseManager.fetchRecord().hasThumbnail(attributeName)) ? FileUtil.addOriginalExtToFile(file) : file.getName();
+			 
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
 
@@ -3178,15 +3183,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							activityRef.get().startActivity(intent);
 						}
 					} else {
-						if (file.getPath().contains("files/server")) {
-							showWarning(
-								"Attached File",
-								"Cannot open the selected file. The selected file only syncs to the server.");
-						} else {
-							showWarning(
-								"Attached File",
-								"Cannot open the selected file. Please wait for the file to finish syncing to the app.");
-						}
+						showPreviewWarning("Attached File", file);
 					}
 				}
 
@@ -3203,6 +3200,54 @@ public class BeanShellLinker implements IFAIMSRestorable {
 						}
 					});
 			builder.create().show();
+		}
+	}
+	
+	public void showPreviewWarning(String title, File file) {
+		if (file.getPath().contains("files/server")) {
+			if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
+				showWarning(
+						title,
+					"This image can only be viewed on the server.");
+			} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+				showWarning(
+						title,
+					"This video can only be viewed on the server.");
+			} else {
+				showWarning(
+						title,
+					"This file can only be viewed on the server.");
+			}
+		} else {
+			if (file.getPath().contains(FileUtil.ORIGINAL_EXT)) {
+				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"Large image can only viewed on the server.");
+				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"Entire video can only viewed on the server.");
+				} else {
+					showWarning(
+							title,
+						"Full file can only viewed on the server.");
+				}
+			} else {
+				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"The image has not completed syncing to your device.");
+				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"The video has not completed syncing to your device.");
+				} else {
+					showWarning(
+							title,
+						"The file has not completed syncing to your device.");
+				}
+			}
 		}
 	}
 
