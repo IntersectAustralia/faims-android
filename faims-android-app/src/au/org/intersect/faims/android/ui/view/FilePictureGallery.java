@@ -1,10 +1,13 @@
 package au.org.intersect.faims.android.ui.view;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,7 +18,9 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.dialog.FileAttachmentLabelDialog;
+import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.nativecss.NativeCSS;
@@ -97,10 +102,13 @@ public class FilePictureGallery extends CustomFileList {
 	}
 	
 	public void populateImages(List<Picture> pictures) {
-		reset();
+		if (galleriesLayout != null) {
+			galleriesLayout.removeAllViews();
+		}
+		galleryImages = new ArrayList<CustomImageView>();	
 		
 		for (Picture picture : pictures) {
-			addFile(picture.getUrl());
+			addFileView(picture.getUrl());
 		}
 	}
 	
@@ -116,13 +124,20 @@ public class FilePictureGallery extends CustomFileList {
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
 				GALLERY_SIZE, GALLERY_SIZE);
 		
-		setGalleryImage(gallery, path);
+		// check if thumbnail exists for file
+		File thumbnail = FileUtil.getThumbnailFileFor(new File(path));
+		if (thumbnail != null && thumbnail.exists()) {
+			setGalleryImage(gallery, thumbnail.getPath());
+		} else {
+			setGalleryImage(gallery, path);
+		}
 		
 		int padding = (int) ScaleUtil.getDip(galleriesLayout.getContext(), GALLERY_ITEM_PADDING);
 		int topPadding = padding * 3; // room for annotation/certainty icons
 		gallery.setPadding(padding, topPadding, padding, padding);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
+		gallery.setBackgroundResource(R.drawable.label_selector);
 		gallery.setOnLongClickListener(new OnLongClickListener() {
 	
 			@Override
@@ -184,6 +199,45 @@ public class FilePictureGallery extends CustomFileList {
 	}
 	
 	protected void setGalleryImage(CustomImageView gallery, String path) {
+		if(path != null && new File(path).exists()) {
+			gallery.setImageBitmap(decodeFile(new File(path), GALLERY_SIZE, GALLERY_SIZE));
+		}
 	}
 	
+	public Bitmap decodeFile(File f, int WIDTH, int HIGHT) {
+		try {
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+
+			// The new size we want to scale to
+			final int REQUIRED_WIDTH = WIDTH;
+			final int REQUIRED_HIGHT = HIGHT;
+			// Find the correct scale value. It should be the power of 2.
+			int scale = 1;
+			while (o.outWidth / scale / 2 >= REQUIRED_WIDTH
+					&& o.outHeight / scale / 2 >= REQUIRED_HIGHT)
+				scale *= 2;
+
+			// Decode with inSampleSize
+			BitmapFactory.Options o2 = new BitmapFactory.Options();
+			o2.inSampleSize = scale;
+			return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+		} catch (Exception e) {
+			FLog.e("error when decode the bitmap", e);
+		}
+		return null;
+	}
+	
+	public void addFile(String value, String annotation, String certainty) {
+		addFileView(value);
+		super.addFile(value, annotation, certainty);
+	}
+	
+	public void addFileView(String filePath) {
+		Picture picture = new Picture(filePath, null, filePath);
+		addGallery(picture);
+	}
+
 }

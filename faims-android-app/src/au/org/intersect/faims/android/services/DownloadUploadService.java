@@ -160,9 +160,9 @@ public abstract class DownloadUploadService extends IntentService {
 				FileUtil.delete(downloadFile);
 				return false;
 			}
-		}
 
-		FLog.d("downloaded file: " + downloadFile);
+			FLog.d("downloaded file: " + downloadFile);
+		}
 		
 		serviceResult = Result.SUCCESS;
 		return true;
@@ -203,9 +203,19 @@ public abstract class DownloadUploadService extends IntentService {
 	protected boolean downloadSyncFiles(String name, String downloadUri, File baseDirectory) throws Exception {
 		ArrayList<FileInfo> files = databaseManager.fileRecord().getFilesToDownload(name);
 		for (FileInfo info : files) {
-			File file = serviceModule.getDirectoryPath(info.filename);
-			String originalFilename = info.filename;
-			info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
+			File file;
+			String originalFilename;
+			if (info.thumbnailFilename == null) {
+				file = serviceModule.getDirectoryPath(info.filename);
+				originalFilename = info.filename;
+				info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
+			} else {
+				file = serviceModule.getDirectoryPath(info.thumbnailFilename);
+				originalFilename = info.thumbnailFilename;
+				info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
+				info.size = info.thumbnailSize;
+				info.md5 = info.thumbnailMD5;
+			}
 			if (downloadFile(name, downloadUri, file, info, false)) {
 				databaseManager.fileRecord().updateFile(originalFilename, FileRecord.DOWNLOADED);
 			} else {

@@ -270,6 +270,8 @@ public class EntityRecord extends SharedRecord {
 				//archAttribute.setDeleted(stmt.column_string(7) != null ? true : false);
 				archAttribute.setDirty(stmt.column_string(8) != null ? true : false);
 				archAttribute.setDirtyReason(stmt.column_string(9));
+				archAttribute.setIsFile(stmt.column_string(10) != null ? true : false);
+				archAttribute.setUseThumbnail(stmt.column_string(11) != null ? true : false);
 				attributes.add(archAttribute);
 			}
 			stmt.close();

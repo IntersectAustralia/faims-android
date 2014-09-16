@@ -66,7 +66,7 @@ public final class DatabaseQueries {
 			"VALUES (?, ?, ?, ?, ?, ?);";
 
 	public static final String FETCH_AENT_VALUE =
-		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, av.deleted, av.isdirty, av.isdirtyreason \n" + 
+		"SELECT uuid, attributename, vocabid, measure, freetext, certainty, attributetype, av.deleted, av.isdirty, av.isdirtyreason, attributeisfile, attributeusethumbnail \n" + 
 		"FROM latestNonDeletedArchent JOIN latestNonDeletedAentvalue AS av using (uuid) JOIN attributekey using (attributeid) \n" + 
 		"WHERE uuid = ?;";
 		
@@ -74,7 +74,7 @@ public final class DatabaseQueries {
 		"SELECT uuid, HEX(asBinary(geospatialColumn)) FROM latestNonDeletedArchent WHERE uuid = ?;";
 	
 	public static final String FETCH_RELN_VALUE = 
-		"SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, rv.deleted, rv.isdirty, rv.isdirtyreason \n" + 
+		"SELECT relationshipid, attributename, vocabid, freetext, certainty, attributetype, rv.deleted, rv.isdirty, rv.isdirtyreason, attributeisfile, attributeusethumbnail \n" + 
 		"FROM latestNonDeletedRelationship JOIN latestNonDeletedRelnvalue AS rv using (relationshipid) JOIN attributekey using (attributeid) \n" + 
 		"WHERE relationshipid = ?;";
 
@@ -345,4 +345,6 @@ public final class DatabaseQueries {
 	public static String GET_DOWNLOAD_FILES = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where Type = ? and State is null;";
 	
 	public static String HAS_FILE_CHANGES = "select count(*) from file where state = 'attached';";
+	
+	public static String HAS_THUMBNAIL = "select count(*) from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 and attributename = ?";
 }

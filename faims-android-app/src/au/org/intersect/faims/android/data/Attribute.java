@@ -19,6 +19,10 @@ public abstract class Attribute implements Serializable {
 	protected boolean isDeleted;
 	protected boolean dirty;
 	protected String dirtyReason;
+
+	private boolean file;
+
+	private boolean thumbnail;
 	
 	public String getName() {
 		return name;
@@ -86,6 +90,22 @@ public abstract class Attribute implements Serializable {
 	
 	public String getDirtyReason() {
 		return dirtyReason;
+	}
+	
+	public void setIsFile(boolean b) {
+		this.file = b;
+	}
+	
+	public boolean isFile() {
+		return file;
+	}
+	
+	public void setUseThumbnail(boolean b) {
+		this.thumbnail = b;
+	}
+	
+	public boolean useThumbnail() {
+		return thumbnail;
 	}
 	
 	public abstract String getValue(String type);
