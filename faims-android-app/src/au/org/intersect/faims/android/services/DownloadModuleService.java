@@ -30,6 +30,7 @@ public class DownloadModuleService extends DownloadUploadService {
 			FLog.d("Failed to download settings");
 			return;
 		}
+		addHostToModuleSettings();
 			
 		JSONObject jsonInfo = (JSONObject) serviceResult.data;
 		
@@ -58,7 +59,7 @@ public class DownloadModuleService extends DownloadUploadService {
 		}
 		
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
-		module.version = jsonInfo.getString("version");
+		module.dbVersion = jsonInfo.getString("version");
 		module.timestamp = DateUtil.getCurrentTimestampGMT();
 		module.fileSyncTimeStamp = DateUtil.getCurrentTimestampGMT();
 		ModuleUtil.saveModule(module);

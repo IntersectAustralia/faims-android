@@ -25,6 +25,7 @@ public class UpdateModuleSettingService extends DownloadUploadService {
 			FLog.d("Failed to download settings");
 			return;
 		}
+		addHostToModuleSettings();
 	}
 
 	private void deleteSettingsFiles() {

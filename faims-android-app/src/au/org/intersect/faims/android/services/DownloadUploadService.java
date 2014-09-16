@@ -1,6 +1,10 @@
 package au.org.intersect.faims.android.services;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +29,7 @@ import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
 import au.org.intersect.faims.android.net.FAIMSClientResultCode;
 import au.org.intersect.faims.android.net.Result;
 import au.org.intersect.faims.android.util.FileUtil;
+import au.org.intersect.faims.android.util.JsonUtil;
 
 import com.google.inject.Inject;
 
@@ -214,6 +219,36 @@ public abstract class DownloadUploadService extends IntentService {
 		}
 		serviceResult = Result.SUCCESS;
 		return true;
+	}
+	
+	protected void addHostToModuleSettings() {
+		File file = serviceModule.getDirectoryPath("module.settings");
+		if (file.exists()) {
+			InputStream is = null;
+			FileWriter writer = null;
+			try {
+				is = new FileInputStream(file);
+				String config = FileUtil.convertStreamToString(is);
+				JSONObject moduleSettings = JsonUtil.deserializeJsonString(config);
+				moduleSettings.put("host", faimsClient.getPlainHost());
+				writer = new FileWriter(file);
+				writer.write(moduleSettings.toString());
+				writer.close();
+			} catch (Exception e) {
+				FLog.w("cannot add host to modules settings ", e);
+				
+				try {
+					if (is != null)
+						is.close();
+					if (writer != null)
+						writer.close();
+				} catch (IOException ioe) {
+					FLog.e("error closing file streams", ioe);
+				}
+			}
+		} else {
+			FLog.w("Settings file doesn't exist to add host to");
+		}
 	}
 	
 	private File pathFromBaseDirectory(File baseDirectory, File file) {

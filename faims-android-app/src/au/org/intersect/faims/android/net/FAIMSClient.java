@@ -230,6 +230,10 @@ public class FAIMSClient {
 		return get;
 	}
 	
+	public String getPlainHost() {
+		return serverDiscovery.getPlainServerHost();
+	}
+	
 	private String getUri(String path) throws Exception {
 		return serverDiscovery.getServerHost() + path;
 	}

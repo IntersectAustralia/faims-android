@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import roboguice.activity.RoboActivity;
 import android.app.AlertDialog;
@@ -31,6 +32,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.data.ModuleItem;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
@@ -159,47 +161,6 @@ public class MainActivity extends RoboActivity {
 		
 	};
 
-	public class ModuleItem {
-		
-		private String name;
-		private String key;
-		private String version;
-		private boolean local;
-		private boolean server;
-		
-		public ModuleItem(String name, String key, String version, boolean local, boolean server) {
-			this.name = name;
-			this.key = key;
-			this.version = version;
-			this.local = local;
-			this.server = server;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public String getKey() {
-			return key;
-		}
-		
-		public String getVersion() {
-			return version;
-		}
-		
-		public boolean isLocal() {
-			return local;
-		}
-		
-		public boolean isServer() {
-			return server;
-		}
-
-		public void setServer(boolean server) {
-			this.server = server;  
-		}
-	}
-	
 	@Inject
 	FAIMSClient faimsClient;
 	
@@ -743,13 +704,15 @@ public class MainActivity extends RoboActivity {
 		List<Module> modules = ModuleUtil.getModules();
 		if (modules != null) {
 			for (Module p : modules) {
-				moduleListAdapter.add(new ModuleItem(p.name, p.key, p.version, true, false));
+				moduleListAdapter.add(new ModuleItem(p.name, p.key, p.host, p.version, true, false));
 			}
 			moduleListAdapter.notifyDataSetChanged();
 		}
 	}
 	
 	private void fetchServerModules() {
+		final TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
+		connectionStatus.setText("Not connected to a server");
 		if (serverDiscovery.isServerHostValid()) {
     		
 			new FetchModulesListTask(faimsClient, new ITaskListener() {
@@ -757,16 +720,13 @@ public class MainActivity extends RoboActivity {
 				@Override
 				public void handleTaskCompleted(Object result) {
 					Result fetchResult = (Result) result;
-					TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
 						connectionStatus.setText("Connected to " + serverDiscovery.getServerIP()+ ":" + serverDiscovery.getServerPort());
 		    			ArrayList<Module> modules = parseModules((JSONArray) fetchResult.data);
 		    			for (Module p : modules) {
-	    					moduleListAdapter.add(new ModuleItem(p.name, p.key, p.version, false, true));
+	    					moduleListAdapter.add(new ModuleItem(p.name, p.key, p.host, p.version, false, true));
 		    			}
 		    			moduleListAdapter.notifyDataSetChanged();
-					} else {
-						connectionStatus.setText("Not connected to a server");
 					}
 				}
     			
@@ -790,7 +750,9 @@ public class MainActivity extends RoboActivity {
 		ArrayList<Module> modules = new ArrayList<Module>();
 		try {
 			for (int i = 0; i < objects.length(); i++) {
-				modules.add(Module.fromJson(objects.getJSONObject(i)));
+				JSONObject moduleJson = objects.getJSONObject(i);
+				moduleJson.put("host", faimsClient.getPlainHost());
+				modules.add(Module.fromJson(moduleJson));
 			}
 		} catch (JSONException e) {
 			FLog.e("error trying to parse module list");

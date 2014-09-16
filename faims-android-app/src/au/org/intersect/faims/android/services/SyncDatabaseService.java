@@ -81,7 +81,7 @@ public class SyncDatabaseService extends UploadDatabaseService {
 		} 
 
 		JSONObject jsonInfo = (JSONObject) infoResult.data;	
-		int moduleVersion = Integer.parseInt(serviceModule.version == null ? "0" : serviceModule.version);
+		int moduleVersion = Integer.parseInt(serviceModule.dbVersion == null ? "0" : serviceModule.dbVersion);
 		int serverVersion = Integer.parseInt(jsonInfo.optString("version") == null ? "0" : jsonInfo.optString("version"));
 		if (serverVersion == moduleVersion) {
 			FLog.d("database is up to date");
@@ -108,7 +108,7 @@ public class SyncDatabaseService extends UploadDatabaseService {
 		// update settings
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
 		jsonInfo = (JSONObject) serviceResult.data;
-		module.version = jsonInfo.getString("version");
+		module.dbVersion = jsonInfo.getString("version");
 		ModuleUtil.saveModule(module);
 	}
 

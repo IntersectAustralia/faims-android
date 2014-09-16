@@ -76,6 +76,10 @@ public class ServerDiscovery {
 		return "http://" + serverIP + ":" + serverPort;
 	}
 	
+	public String getPlainServerHost() {
+		return serverIP + ":" + serverPort;
+	}
+	
 	public void invalidateServerHost() {
 		if (serverFixed) return;
 		serverIP = null;

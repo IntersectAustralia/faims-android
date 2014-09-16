@@ -25,7 +25,7 @@ public class DownloadDatabaseService extends DownloadUploadService {
 		
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
 		JSONObject jsonInfo = (JSONObject) serviceResult.data;
-		module.version = jsonInfo.getString("version");
+		module.dbVersion = jsonInfo.getString("version");
 		module.timestamp = DateUtil.getCurrentTimestampGMT(); // note: updating timestamp as database is overwritten
 		ModuleUtil.saveModule(module);
 	}

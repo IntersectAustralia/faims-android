@@ -2088,6 +2088,15 @@ String getModuleName(){
 }
 
 /**
+  * Get the static data for current module version.
+  *
+  * @return module version
+  */
+String getModuleVersion(){
+  return linker.getModuleVersion();
+}
+
+/**
   * Get the static data for current module projection.
   *
   * @return module projection
@@ -2538,6 +2547,15 @@ addNavigationButton(String name, ActionButtonCallback callback, String type) {
   */
 removeNavigationButton(String name) {
   linker.removeNavigationButton(name);
+}
+
+/**
+  * Returns the currently connected server
+  *
+  * @return IP and port of the connected server, null if no connected server
+  */
+String getConnectedServer() {
+  return linker.getConnectedServer();
 }
 
 /**

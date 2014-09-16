@@ -68,6 +68,7 @@ import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
+import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
@@ -126,6 +127,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Inject
 	BluetoothManager bluetoothManager;
+	
+	@Inject
+	ServerDiscovery serverDiscovery;
 	
 	@Inject
 	FileManager fileManager;
@@ -2805,12 +2809,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		this.hardwareBufferContents = contents;
 	}
 	
+	public String getConnectedServer() {
+		if (serverDiscovery.isServerHostValid()) {
+			return serverDiscovery.getPlainServerHost();
+		} else {
+			return null;
+		}
+	}
+	
 	public Module getModule() {
 		return this.module;
 	}
 
 	public String getModuleName() {
 		return this.module.getName();
+	}
+	
+	public String getModuleVersion() {
+		return this.module.getVersion();
 	}
 	
 	public String getModuleSrid() {

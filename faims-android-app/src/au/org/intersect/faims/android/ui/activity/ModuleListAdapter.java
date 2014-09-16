@@ -3,7 +3,10 @@ package au.org.intersect.faims.android.ui.activity;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +20,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
-import au.org.intersect.faims.android.ui.activity.MainActivity.ModuleItem;
+import au.org.intersect.faims.android.data.ModuleItem;
 
 public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 	
@@ -51,7 +54,7 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 		
 		if (module != null) {
 			TextView moduleName = (TextView) v.findViewById(R.id.module_name);
-			TextView moduleVersion = (TextView) v.findViewById(R.id.module_version);
+			TextView moduleDescription = (TextView) v.findViewById(R.id.module_version);
 			ImageView localIcon = (ImageView) v.findViewById(R.id.module_local_icon);
 			ImageView serverIcon = (ImageView) v.findViewById(R.id.module_server_icon);
 			
@@ -89,12 +92,32 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 					}
 				});
 			} else {
-				itemOverlay.setOnLongClickListener(null);
+				if (module.isLocal()) {
+					itemOverlay.setOnLongClickListener(new OnLongClickListener() {
+						
+						@Override
+						public boolean onLongClick(View v) {
+							AlertDialog.Builder builder = new AlertDialog.Builder(activityRef.get());
+							
+							builder.setTitle("Server not connected");
+							builder.setMessage("The server this module was downloaded from is not connected");
+							builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int id) {
+									// User clicked OK button
+								}
+							});
+							Dialog dialog = builder.create();
+							dialog.show();
+							return false;
+						}
+					});
+				} else {
+					itemOverlay.setOnLongClickListener(null);
+				}
 			}
 			
 			moduleName.setText(items.get(position).getName());
-			String version = items.get(position).getVersion() == null ? "?" : items.get(position).getVersion();
-			moduleVersion.setText("Version: " + version);
+			moduleDescription.setText(items.get(position).getDescription());
 			if (items.get(position).isLocal()) {
 				localIcon.setVisibility(View.VISIBLE);
 			} else {
