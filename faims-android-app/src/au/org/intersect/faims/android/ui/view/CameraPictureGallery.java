@@ -19,6 +19,8 @@ import au.org.intersect.faims.android.managers.AutoSaveManager;
 import com.google.inject.Inject;
 
 public class CameraPictureGallery extends FilePictureGallery {
+	
+	public static final String IMAGE_PREVIEW = "Image Preview";
 
 	@Inject
 	AutoSaveManager autoSaveManager;
@@ -46,13 +48,13 @@ public class CameraPictureGallery extends FilePictureGallery {
 		String path = selectedImageView.getPicture().getUrl();
 		File file = new File(path);
 		if (!file.exists()) {
-			linker.showPreviewWarning("Image Preview", file);
+			linker.showPreviewWarning(IMAGE_PREVIEW, file);
 			return;
 		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
-		builder.setTitle("Image Preview");
+		builder.setTitle(IMAGE_PREVIEW);
 
 		ScrollView scrollView = new ScrollView(this.getContext());
 		LinearLayout layout = new LinearLayout(this.getContext());

@@ -19,10 +19,13 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
 
 public class VideoGallery extends FilePictureGallery {
+	
+	public static final String VIDEO_PREVIEW = "Video Preview";
 
 	@Inject
 	AutoSaveManager autoSaveManager;
@@ -40,7 +43,7 @@ public class VideoGallery extends FilePictureGallery {
 	@Override
 	protected void setGalleryImage(CustomImageView gallery, String path) {
 		if(path != null && new File(path).exists()) {
-			if (path.contains(".thumbnail")) {
+			if (path.contains(FileUtil.THUMBNAIL_EXT)) {
 				super.setGalleryImage(gallery, path);
 			} else {
 				Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(
@@ -60,13 +63,13 @@ public class VideoGallery extends FilePictureGallery {
 		String path = selectedImageView.getPicture().getUrl();
 		File file = new File(path);
 		if (!file.exists()) {
-			linker.showPreviewWarning("Video Preview", file);
+			linker.showPreviewWarning(VIDEO_PREVIEW, file);
 			return;
 		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
 
-		builder.setTitle("Video Preview");
+		builder.setTitle(VIDEO_PREVIEW);
 
 		LinearLayout layout = new LinearLayout(this.getContext());
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,

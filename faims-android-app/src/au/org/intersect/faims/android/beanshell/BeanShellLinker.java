@@ -3189,18 +3189,48 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public void showPreviewWarning(String title, File file) {
 		if (file.getPath().contains("files/server")) {
-			showWarning(
-					title,
-				"Cannot open the selected file. The selected file only syncs to the server.");
-		} else {
-			if (file.getPath().contains(".original")) {
+			if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
 				showWarning(
 						title,
-					"Cannot open the selected file. The seleted file only syncs a thumbnail to the app.");
+					"This image can only be viewed on the server.");
+			} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+				showWarning(
+						title,
+					"This video can only be viewed on the server.");
 			} else {
 				showWarning(
 						title,
-					"Cannot open the selected file. Please wait for the file to finish syncing to the app.");
+					"This file can only be viewed on the server.");
+			}
+		} else {
+			if (file.getPath().contains(FileUtil.ORIGINAL_EXT)) {
+				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"Large image can only viewed on the server.");
+				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"Entire video can only viewed on the server.");
+				} else {
+					showWarning(
+							title,
+						"Full file can only viewed on the server.");
+				}
+			} else {
+				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"The image has not completed syncing to your device.");
+				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
+					showWarning(
+							title,
+						"The video has not completed syncing to your device.");
+				} else {
+					showWarning(
+							title,
+						"The file has not completed syncing to your device.");
+				}
 			}
 		}
 	}
