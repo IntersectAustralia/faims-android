@@ -18,6 +18,7 @@ import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
+import au.org.intersect.faims.android.util.FileUtil;
 
 public class AttributeHelper {
 	
@@ -321,8 +322,6 @@ public class AttributeHelper {
 		
 		private boolean hasAttachment(BeanShellLinker linker, String filename, boolean sync) {
 			if (filename == null) return false;
-			// strip the module path from filename if it exists
-			String strippedFilename = linker.stripAttachedFilePath(filename);
 			// get directory to attach to
 			String directory;
 			if (sync) {
@@ -330,8 +329,8 @@ public class AttributeHelper {
 			} else {
 				directory = linker.getActivity().getResources().getString(R.string.server_dir);
 			}
-			// check if file exists and is in correct directory
-			return linker.getModule().getDirectoryPath(strippedFilename).exists() && strippedFilename.contains(directory);
+			// check if filename is in correct directory
+			return filename.contains(linker.getActivity().getModule().getDirectoryPath(directory).getPath());
 		}
 
 	}
