@@ -112,7 +112,7 @@
       <group ref="Inputs">
         <label>Inputs</label>
         <input ref="Annotation" faims_certainty="false" faims_annotation="true" faims_attribute_type="measure">
-          <label>Annotation Only</label>
+          <label>{Annotation}</label>
         </input>
         <input ref="Certainty" faims_annotation="false" faims_attribute_type="measure">
           <label>Certainty Only</label>
