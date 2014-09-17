@@ -39,14 +39,30 @@
 				android:textIsSelectable="false"
 				/>
 	        
-	        <TextView
-	            android:id="@+id/module_version"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:textSize="12sp"
-				android:textColor="#777777"
-				android:textIsSelectable="false"
-				/>
+	        <LinearLayout
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:orientation="horizontal">
+	        
+		        <TextView
+		            android:id="@+id/module_server"
+					android:layout_width="150dp"
+					android:layout_height="wrap_content"
+					android:textSize="12sp"
+					android:textColor="#777777"
+					android:textIsSelectable="false"
+					/>
+		        
+		        <TextView
+		            android:id="@+id/module_version"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:textSize="12sp"
+					android:textColor="#777777"
+					android:textIsSelectable="false"
+					/>
+	        
+	        </LinearLayout>
 	        
 	    </LinearLayout>
 	   

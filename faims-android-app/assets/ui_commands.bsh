@@ -2573,7 +2573,7 @@ removeNavigationButton(String name) {
 /**
   * Returns the currently connected server
   *
-  * @return IP and port of the connected server, null if no connected server
+  * @return IP and port of the connected server, null if no connected server. Note: doesn't check if connection is active
   */
 String getConnectedServer() {
   return linker.getConnectedServer();

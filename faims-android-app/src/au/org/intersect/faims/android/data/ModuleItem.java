@@ -45,15 +45,4 @@ public class ModuleItem {
 	public void setServer(boolean server) {
 		this.server = server;  
 	}
-
-	public String getDescription() {
-		String description = "";
-		if (version != null && !version.isEmpty()) {
-			description += "Version: " + version + "   ";
-		}
-		if (host != null && !host.isEmpty()) {
-			description += "Server: " + host;
-		}
-		return description;
-	}
 }

@@ -54,7 +54,8 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 		
 		if (module != null) {
 			TextView moduleName = (TextView) v.findViewById(R.id.module_name);
-			TextView moduleDescription = (TextView) v.findViewById(R.id.module_version);
+			TextView moduleServer = (TextView) v.findViewById(R.id.module_server);
+			TextView moduleVersion = (TextView) v.findViewById(R.id.module_version);
 			ImageView localIcon = (ImageView) v.findViewById(R.id.module_local_icon);
 			ImageView serverIcon = (ImageView) v.findViewById(R.id.module_server_icon);
 			
@@ -97,17 +98,7 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 						
 						@Override
 						public boolean onLongClick(View v) {
-							AlertDialog.Builder builder = new AlertDialog.Builder(activityRef.get());
-							
-							builder.setTitle("Server not connected");
-							builder.setMessage("The server this module was downloaded from is not connected");
-							builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
-									// User clicked OK button
-								}
-							});
-							Dialog dialog = builder.create();
-							dialog.show();
+							showNoServerOptionsDialog();
 							return false;
 						}
 					});
@@ -117,7 +108,10 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 			}
 			
 			moduleName.setText(items.get(position).getName());
-			moduleDescription.setText(items.get(position).getDescription());
+			moduleServer.setText("Server: " + items.get(position).getHost());
+			if (items.get(position).getVersion() != null && !items.get(position).getVersion().isEmpty()) {
+				moduleVersion.setText("Version: " + items.get(position).getVersion());
+			}
 			if (items.get(position).isLocal()) {
 				localIcon.setVisibility(View.VISIBLE);
 			} else {
@@ -127,6 +121,20 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 		
 		
 		return v;
+	}
+
+	private void showNoServerOptionsDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(activityRef.get());
+		
+		builder.setTitle("Server not connected");
+		builder.setMessage("The server this module was downloaded from is not connected or the module has been deleted from the server");
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				// User clicked OK button
+			}
+		});
+		Dialog dialog = builder.create();
+		dialog.show();
 	}
 
 	@Override
