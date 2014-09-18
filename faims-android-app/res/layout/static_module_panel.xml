@@ -71,6 +71,7 @@
 	            android:id="@+id/static_module_version"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
+	            android:maxWidth="100dp"
 	            android:paddingLeft="5dp"
 	            android:textAllCaps="true"
 	            android:textColor="@color/color_blue"
