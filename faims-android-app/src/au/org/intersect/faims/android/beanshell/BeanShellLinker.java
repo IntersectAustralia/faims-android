@@ -851,7 +851,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			tabGroup.refreshCSS();
 		} catch (Exception e) {
 			FLog.e("Error trying to refresh tab group CSS for " + ref, e);
-			showWarning("Logic Error", "Error tring to refresh tab group CSS for " + ref);
+			showWarning("Logic Error", "Error trying to refresh tab group CSS for " + ref);
 		}
 	}
 	
@@ -861,7 +861,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			tabGroup.keepChanges();
 		} catch (Exception e) {
 			FLog.e("Error trying to reset tab group changes for " + ref, e);
-			showWarning("Logic Error", "Error tring to reset tab group changes for " + ref);
+			showWarning("Logic Error", "Error trying to reset tab group changes for " + ref);
 		}
 	}
 	

@@ -771,6 +771,13 @@ public class MainActivity extends RoboActivity {
 		}
 		return modules;
 	}
+	
+	public void loadModule(String key) {
+		Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
+		showModulesIntent.putExtra("key", key);
+		FAIMSApplication.getInstance().saveModuleKey(key);
+		startActivityForResult(showModulesIntent, 1);
+	}
 
 	public void openStaticModulePanel(final String key) {
 		Module module = ModuleUtil.getModule(key);
@@ -782,10 +789,7 @@ public class MainActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(View v) {
-				Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
-				showModulesIntent.putExtra("key", key);
-				FAIMSApplication.getInstance().saveModuleKey(key);
-				startActivityForResult(showModulesIntent, 1);
+				loadModule(key);
 			}
 		});
 		

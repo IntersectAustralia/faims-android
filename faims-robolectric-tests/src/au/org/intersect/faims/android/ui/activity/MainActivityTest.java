@@ -81,6 +81,7 @@ public class MainActivityTest {
 		
 		FrameLayout listItem = (FrameLayout) ((ModuleListAdapter)moduleListView.getAdapter()).getView(0, null, moduleListView);
 		listItem.getChildAt(0).performClick(); // click list item
+		activity.loadModule(moduleKey);
 		
 		ShadowActivity shadowActivity = Robolectric.shadowOf(activity);
 		Intent startedIntent = shadowActivity.getNextStartedActivity();
