@@ -22,9 +22,6 @@ public class SplashActivity extends Activity {
 	    
 	    FAIMSApplication.getInstance().setApplication(getApplication());
 	    
-	    WebView webview = (WebView) findViewById(R.id.splashscreen_webview);
-	    webview.loadUrl("file:///android_asset/splash.html");
-	    
 	    WebView attribution = (WebView) findViewById(R.id.splashscreen_attribution);
 	    attribution.loadUrl("file:///android_asset/attribution.html");
 	    attribution.setLongClickable(false);

@@ -43,10 +43,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/welcome_to_faims"
-            android:textSize="28sp" />
+            android:textSize="36sp" />
         
         <TextView 
             android:layout_width="wrap_content"
@@ -56,13 +56,13 @@
             android:paddingRight="25dp"
             android:text="@string/faims_description"
             android:textColor="#777777"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
         <LinearLayout
             android:id="@+id/splash_buttons"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="50dp"
             android:gravity="center"
             android:orientation="horizontal" >
 
