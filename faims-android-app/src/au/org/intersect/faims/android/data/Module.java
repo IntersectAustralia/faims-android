@@ -2,6 +2,7 @@ package au.org.intersect.faims.android.data;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -229,5 +230,21 @@ public class Module implements Serializable {
 	public String hasSensitiveData() {
 		return hasSensitiveData;
 	}
-	
+
+	public ArrayList<NameValuePair> getStaticData() {
+		ArrayList<NameValuePair> data = new ArrayList<NameValuePair>();
+		data.add(new NameValuePair("Module SRID", srid));
+		data.add(new NameValuePair("Module Year", season));
+		data.add(new NameValuePair("Permit No.", permitNo));
+		data.add(new NameValuePair("Permit Holder", permitHolder));
+		data.add(new NameValuePair("Permit Issued By", permitIssuedBy));
+		data.add(new NameValuePair("Permit Type", permitType));
+		data.add(new NameValuePair("Contact and Address", contactAndAddress));
+		data.add(new NameValuePair("Participants", participants));
+		data.add(new NameValuePair("Copyright Holder", copyrightHolder));
+		data.add(new NameValuePair("Client/Sponsor", clientSponsor));
+		data.add(new NameValuePair("Land Owner", landOwner));	
+		data.add(new NameValuePair("Has Sensitive Data", hasSensitiveData));
+		return data;
+	}
 }

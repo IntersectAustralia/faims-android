@@ -7,7 +7,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,7 +17,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ModuleItem;
 
@@ -69,10 +67,7 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 				@Override
 				public void onClick(View v) {
 					if (module.isLocal()) {
-						Intent showModulesIntent = new Intent(activityRef.get(), ShowModuleActivity.class);
-						showModulesIntent.putExtra("key", module.getKey());
-						FAIMSApplication.getInstance().saveModuleKey(module.getKey());
-						activityRef.get().startActivityForResult(showModulesIntent, 1);
+						activityRef.get().openStaticModulePanel(module.getKey());
 					} else {
 						activityRef.get().selectedDownloadModule = new Module(module.getName(), module.getKey());
 						activityRef.get().showDownloadModuleDialog(module.getName());

@@ -20,6 +20,9 @@
     <string name="test_connection">Test Connection</string>
     <string name="connect">Connect</string>
     
+    <string name="version">Version</string>
+    <string name="server">Server</string>
+    
     <string name="locate_server_title">Locating Server</string>
     <string name="locate_server_message">looking for server on network..</string>
     

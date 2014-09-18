@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import roboguice.activity.RoboActivity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -22,17 +23,26 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ModuleItem;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.FAIMSClient;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
@@ -75,8 +85,9 @@ public class MainActivity extends RoboActivity {
 			
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show module activity
-				activity.showModuleActivity();
+				// Show module static panel
+				activity.openStaticModulePanel(activity.selectedDownloadModule.key);
+				activity.readModules();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
 					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
@@ -110,8 +121,8 @@ public class MainActivity extends RoboActivity {
 			
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show module activity
-				activity.showModuleActivity();
+				// Show module static panel
+				activity.openStaticModulePanel(activity.selectedDownloadModule.key);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
 					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
@@ -145,8 +156,8 @@ public class MainActivity extends RoboActivity {
 			
 			Result result = (Result) message.obj;
 			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// start show module activity
-				activity.showModuleActivity();
+				// Show module static panel
+				activity.openStaticModulePanel(activity.selectedDownloadModule.key);
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
 					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
 				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
@@ -175,6 +186,8 @@ public class MainActivity extends RoboActivity {
 	protected ChoiceDialog choiceDialog;
 	protected ConfirmDialog confirmDialog;
 	
+	private DrawerLayout staticPanel;
+	
 	private AsyncTask<Void, Void, Void> locateTask;
 	
 	protected final DownloadModuleHandler downloadHandler = new DownloadModuleHandler(MainActivity.this);
@@ -190,7 +203,10 @@ public class MainActivity extends RoboActivity {
         setContentView(R.layout.activity_main);
         
         ListView moduleList = (ListView) findViewById(R.id.module_list);
-
+        
+        staticPanel = (DrawerLayout) findViewById(R.id.static_module_drawer_layout);
+        staticPanel.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        
         final SwipeRefreshLayout swipe = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         int blueColour = R.color.color_blue;
         swipe.setColorScheme(blueColour, blueColour, blueColour, blueColour);
@@ -615,13 +631,6 @@ public class MainActivity extends RoboActivity {
     	confirmDialog.show();
     }
     
-    private void showModuleActivity() {
-    	Intent showModulesIntent = new Intent(this, ShowModuleActivity.class);
-		showModulesIntent.putExtra("key", selectedDownloadModule.key);
-		FAIMSApplication.getInstance().saveModuleKey(selectedDownloadModule.key);
-		startActivityForResult(showModulesIntent, 1);
-    }
-    
     @Override
     protected void onPause() {
     	super.onPause();
@@ -630,6 +639,9 @@ public class MainActivity extends RoboActivity {
     @Override
     protected void onResume() {
     	super.onResume();
+    	if (staticPanel.isDrawerOpen(Gravity.END)) {
+        	staticPanel.closeDrawer(Gravity.END);
+        }
     	readModules();
     }
     
@@ -758,6 +770,73 @@ public class MainActivity extends RoboActivity {
 			FLog.e("error trying to parse module list");
 		}
 		return modules;
+	}
+
+	public void openStaticModulePanel(final String key) {
+		Module module = ModuleUtil.getModule(key);
+		
+		updateStaticPanelData(module);
+		
+		Button loadModule = (Button) findViewById(R.id.static_load_module);
+		loadModule.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
+				showModulesIntent.putExtra("key", key);
+				FAIMSApplication.getInstance().saveModuleKey(key);
+				startActivityForResult(showModulesIntent, 1);
+			}
+		});
+		
+		((ScrollView)findViewById(R.id.static_module_panel_scroll)).fullScroll(ScrollView.FOCUS_UP);
+		staticPanel.openDrawer(Gravity.END);
+		staticPanel.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+	}
+	
+	private void updateStaticPanelData(Module module) {
+		TextView moduleName = (TextView) findViewById(R.id.static_module_name);
+		moduleName.setText(module.getName());
+		
+		TextView moduleDescription = (TextView) findViewById(R.id.static_module_description);
+		if (module.getDescription() == null || module.getDescription().isEmpty()) {
+			moduleDescription.setVisibility(View.GONE);
+		} else {
+			moduleDescription.setVisibility(View.VISIBLE);
+			moduleDescription.setText(module.getDescription());
+		}
+		
+		TableLayout dataTable = (TableLayout) findViewById(R.id.module_static_data);
+		dataTable.removeAllViews();
+		LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		for (NameValuePair dataItem : module.getStaticData()) {
+			TableRow rowView = (TableRow) inflater.inflate(R.layout.static_module_data_row, null);
+			TextView label = (TextView) rowView.findViewById(R.id.static_data_label);
+			label.setText(dataItem.getName());
+			TextView value = (TextView) rowView.findViewById(R.id.static_data_value);
+			value.setText(dataItem.getValue());
+			dataTable.addView(rowView);
+		}
+		
+		TextView moduleVersion = (TextView) findViewById(R.id.static_module_version);
+		if (module.getVersion() == null || module.getVersion().isEmpty()) {
+			((TextView)findViewById(R.id.static_module_version_label)).setVisibility(View.GONE);
+			moduleVersion.setVisibility(View.GONE);
+		} else {
+			((TextView)findViewById(R.id.static_module_version_label)).setVisibility(View.VISIBLE);
+			moduleVersion.setVisibility(View.VISIBLE);
+			moduleVersion.setText(module.getVersion());
+		}
+		
+		TextView moduleServer = (TextView) findViewById(R.id.static_module_server);
+		if (module.getHost() == null || module.getHost().isEmpty()) {
+			((TextView)findViewById(R.id.static_module_server_label)).setVisibility(View.GONE);
+			moduleServer.setVisibility(View.GONE);
+		} else {
+			((TextView)findViewById(R.id.static_module_server_label)).setVisibility(View.VISIBLE);
+			moduleServer.setVisibility(View.VISIBLE);
+			moduleServer.setText(module.getHost());
+		}
 	}
 	
 }

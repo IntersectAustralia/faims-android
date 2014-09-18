@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/static_module_panel_scroll"
+    android:layout_width="300dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="end"
+    android:background="#FFFFFF">
+    
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+    	android:orientation="vertical">
+	    
+	    <TextView
+	        android:id="@+id/static_module_name"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_gravity="center_horizontal"
+	        android:paddingLeft="30dp"
+	        android:paddingRight="30dp"
+	        android:layout_marginTop="30dp"
+	        android:textSize="30sp" />
+	    
+	    <TextView
+	        android:id="@+id/static_module_description"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="30dp"
+	        android:paddingRight="30dp"
+	        android:layout_gravity="center_horizontal"
+	        android:layout_marginTop="10dp"
+	        android:textColor="#777777"
+	        android:textSize="16sp" />
+	    
+	    <Button
+	        android:id="@+id/static_load_module"
+	        android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:background="@drawable/button_primary"
+			android:textColor="@android:color/white"
+			android:text="@string/splash_load"
+			style="?android:attr/button"/>
+	        
+	    <TableLayout
+	        android:id="@+id/module_static_data"
+	        android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="20dp" />
+	        
+	    
+	    <LinearLayout
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="30dp"
+		    android:layout_marginBottom="30dp"
+		    android:layout_gravity="center_horizontal"
+	    	android:orientation="horizontal">
+		    
+	        <TextView
+	            android:id="@+id/static_module_version_label"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/version"
+	            android:textAllCaps="true"
+	            android:textColor="#777777" />
+	        
+	        <TextView
+	            android:id="@+id/static_module_version"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:paddingLeft="5dp"
+	            android:textAllCaps="true"
+	            android:textColor="@color/color_blue"
+	            tools:ignore="RtlSymmetry,RtlHardcoded" />
+	        
+	        <TextView
+	            android:id="@+id/static_module_server_label"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:paddingLeft="15dp"
+	            android:text="@string/server"
+	            android:textAllCaps="true"
+	            android:textColor="#777777"
+	            tools:ignore="RtlSymmetry,RtlHardcoded" />
+	        
+	        <TextView
+	            android:id="@+id/static_module_server"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:paddingLeft="5dp"
+	            android:textAllCaps="true"
+	            android:textColor="@color/color_blue"
+	            tools:ignore="RtlSymmetry,RtlHardcoded" />
+		
+        </LinearLayout>
+	    
+	</LinearLayout>
+	
+</ScrollView>
