@@ -13,7 +13,7 @@ getAttributeName(String vocab) {
 
 
 displayAlert(){
-	showTextAlert("Alert", "Entity to Load:", "loadOK()", "loadCancel()");
+	showTextAlert("{Header}", "Entity to Load:", "loadOK()", "loadCancel()");
 }
 
 displayDateAlert(){
