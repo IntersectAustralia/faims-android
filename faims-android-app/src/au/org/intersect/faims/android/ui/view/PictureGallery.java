@@ -6,13 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.Attribute;
@@ -213,10 +214,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		
 		for (CustomImageView view : galleryImages) {
             if (selectedImages != null && selectedImages.contains(view)) {
-                view.setBackgroundColor(Color.BLUE);
+            	((FrameLayout)view.getParent()).getChildAt(1).setVisibility(View.VISIBLE);
             } else {
-                view.setBackgroundColor(Color.TRANSPARENT);
-                NativeCSS.refreshCSSStyling(view);
+            	((FrameLayout)view.getParent()).getChildAt(1).setVisibility(View.GONE);
             }
         }
 		updateImageListeners();
@@ -410,7 +410,17 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		textView.setWidth(GALLERY_SIZE);
 		textView.setPadding(padding, padding, padding, padding);
 		galleryLayout.addView(textView);
-		galleryLayout.addView(gallery);
+		
+		FrameLayout imageContainer = new FrameLayout(galleriesLayout.getContext());
+		NativeCSS.addCSSClass(imageContainer, "gallery-item");
+		
+		imageContainer.addView(gallery);
+		View border = new View(galleriesLayout.getContext());
+		border.setBackgroundResource(R.drawable.gallery_selection_border);
+		border.setVisibility(View.GONE);
+		imageContainer.addView(border);
+		
+		galleryLayout.addView(imageContainer);
 		
 		galleryImages.add(gallery);
 		galleriesLayout.addView(galleryLayout);
