@@ -221,16 +221,16 @@
             <term>Choice D</term>
         </lookup>
     </property>
-    <property type="file" name="file">
+    <property type="file" name="file" file="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="picture">
+    <property type="file" name="picture" file="true" thumbnail="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="video">
+    <property type="file" name="video" file="true" thumbnail="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="audio">
+    <property type="file" name="audio" file="true">
       <bundle>DOI</bundle>
     </property>
   </RelationshipElement>
@@ -452,16 +452,16 @@
             <term>Choice D</term>
         </lookup>
     </property>
-    <property type="file" name="file">
+    <property type="file" name="file" file="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="picture">
+    <property type="file" name="picture" file="true" thumbnail="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="video">
+    <property type="file" name="video" file="true" thumbnail="true">
       <bundle>DOI</bundle>
     </property>
-    <property type="file" name="audio">
+    <property type="file" name="audio" file="true">
       <bundle>DOI</bundle>
     </property>
   </ArchaeologicalElement>
