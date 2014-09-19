@@ -66,41 +66,6 @@
                   <load></load>
               </tab2>
           </tabgroup1>
-          <tabgroup2>
-              <tab1>
-                  <name></name>
-                  <description></description>
-                  <value></value>
-                  <timestamp></timestamp>
-                  <date></date>
-                  <time></time>
-                  <location></location>
-                  <choice></choice>
-                  <item></item>
-                  <type></type>
-                  <gallery></gallery>
-                  <rocks></rocks>
-                  <files></files>
-                  <attachfile></attachfile>
-                  <pictures></pictures>
-                  <attachpicture></attachpicture>
-                  <videos></videos>
-                  <attachvideo></attachvideo>
-                  <audios></audios>
-                  <attachaudio></attachaudio>
-                  <viewattached></viewattached>
-                  <container>
-                      <save></save>
-                      <clear></clear>
-                  </container>
-                  <delete></delete>
-                  <close></close>
-              </tab1>
-              <tab2>
-                  <relationships></relationships>
-                  <load></load>
-              </tab2>
-          </tabgroup2>
           <tabgroup3>
               <tab1>
                   <container>
@@ -138,43 +103,6 @@
                   <load></load>
               </tab2>
           </tabgroup3>
-          <tabgroup4>
-              <tab1>
-                  <container>
-	                  <name></name>
-	                  <description></description>
-	                  <value></value>
-	                  <timestamp></timestamp>
-	                  <date></date>
-                  	  <time></time>
-	                  <location></location>
-	                  <choice></choice>
-	                  <item></item>
-	                  <type></type>
-	                  <gallery></gallery>
-	                  <rocks></rocks>
-	                  <files></files>
-	                  <attachfile></attachfile>
-	                  <pictures></pictures>
-	                  <attachpicture></attachpicture>
-	                  <videos></videos>
-	                  <attachvideo></attachvideo>
-	                  <audios></audios>
-	                  <attachaudio></attachaudio>
-	                  <viewattached></viewattached>
-	                  <container1>
-	                      <save></save>
-	                      <clear></clear>
-	                  </container1>
-	                  <delete></delete>
-	                  <close></close>
-                 </container>
-              </tab1>
-              <tab2>
-                  <relationships></relationships>
-                  <load></load>
-              </tab2>
-          </tabgroup4>
           <tabgroup5>
               <tab1>
                   <name></name>
@@ -207,42 +135,10 @@
                   <load></load>
               </tab2>
           </tabgroup5>
-          <tabgroup6>
-              <tab1>
-                  <name></name>
-                  <description></description>
-                  <value></value>
-                  <timestamp></timestamp>
-                  <date></date>
-                  <time></time>
-                  <location></location>
-                  <choice></choice>
-                  <item></item>
-                  <type></type>
-                  <gallery></gallery>
-                  <rocks></rocks>
-                  <files></files>
-                  <attachfile></attachfile>
-                  <pictures></pictures>
-                  <attachpicture></attachpicture>
-                  <videos></videos>
-                  <attachvideo></attachvideo>
-                  <audios></audios>
-                  <attachaudio></attachaudio>
-                  <viewattached></viewattached>
-                  <clear></clear>
-                  <delete></delete>
-                  <close></close>
-              </tab1>
-              <tab2>
-                  <relationships></relationships>
-                  <load></load>
-              </tab2>
-          </tabgroup6>
           <tabgroup7>
               <tab1>
-                  <entities></entities>
-                  <relationships></relationships>
+                  <entity1/>
+                  <entity2/>
                   <verb></verb>
                   <add></add>
               </tab1>
@@ -275,26 +171,14 @@
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup1/tab1/date" type="date"/>
       <bind nodeset="/faims/tabgroup1/tab1/time" type="time"/>
-      <bind nodeset="/faims/tabgroup2/tab1/description" type="string"/>
-      <bind nodeset="/faims/tabgroup2/tab1/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup2/tab1/date" type="date"/>
-      <bind nodeset="/faims/tabgroup2/tab1/time" type="time"/>
       <bind nodeset="/faims/tabgroup3/tab1/container/description" type="string"/>
       <bind nodeset="/faims/tabgroup3/tab1/container/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup3/tab1/container/date" type="date"/>
       <bind nodeset="/faims/tabgroup3/tab1/container/time" type="time"/>
-      <bind nodeset="/faims/tabgroup4/tab1/container/description" type="string"/>
-      <bind nodeset="/faims/tabgroup4/tab1/container/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup4/tab1/container/date" type="date"/>
-      <bind nodeset="/faims/tabgroup4/tab1/container/time" type="time"/>
       <bind nodeset="/faims/tabgroup5/tab1/description" type="string"/>
       <bind nodeset="/faims/tabgroup5/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup5/tab1/date" type="date"/>
       <bind nodeset="/faims/tabgroup5/tab1/time" type="time"/>
-      <bind nodeset="/faims/tabgroup6/tab1/description" type="string"/>
-      <bind nodeset="/faims/tabgroup6/tab1/value" type="decimal"/>
-      <bind nodeset="/faims/tabgroup6/tab1/date" type="date"/>
-      <bind nodeset="/faims/tabgroup6/tab1/time" type="time"/>
       <bind nodeset="/faims/tabgroup8/tab1/container/child3/scrollRow" type="decimal"/>
       
     </model>
@@ -490,140 +374,6 @@
         </select1>
       </group>
     </group>
-    <group ref="tabgroup2" faims_rel_type="AboveBelow">
-      <label>Relationship</label>
-      <group ref="tab1" faims_hidden="false">
-        <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
-	          	<label>Name:</label>
-	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
-	          	<label>Description:</label>
-	        </input>
-	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
-	            <label>Value:</label>
-	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
-              <label>Timestamp:</label>
-            </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
-            	<label>Date:</label>
-         	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
-            	<label>Time:</label>
-         	</input>
-            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-                <label>Location:</label>
-                <item>
-                	<label>dummy</label>
-                	<value>dummy</value>
-              	</item>
-            </select>
-             <select1 ref="choice" appearance="full" faims_attribute_name="choice" faims_attribute_type="vocab">
-	            <label>Choice:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="item" faims_attribute_name="item" faims_attribute_type="vocab">
-	            <label>Item:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
-	            <label>Type:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
-	            <label>Gallery:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select1 ref="rocks" type="image" faims_attribute_name="rocks" faims_attribute_type="vocab">
-	            <label>Rocks:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Files:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachfile">
-	            <label>Attached File:</label>
-	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Pictures:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachpicture">
-	            <label>Take picture</label>
-	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Videos:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachvideo">
-	            <label>Take video</label>
-	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Audios:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachaudio">
-	            <label>Record Audio</label>
-	        </trigger>
-	        <trigger ref="viewattached">
-	            <label>View Attached Files</label>
-	        </trigger>
-	        <group ref="container" faims_style="orientation even">
-	          <label></label>
-	            <trigger ref="save">
-	              <label>Save</label>
-	            </trigger>
-	            <trigger ref="clear">
-	              <label>Clear</label>
-	            </trigger>
-	        </group>
-	        <trigger ref="delete">
-	          <label>Delete</label>
-	        </trigger>
-	        <trigger ref="close">
-	          <label>Close</label>
-	        </trigger>
-      </group>
-      <group ref="tab2" faims_scrollable="false">
-        <label>Load Relationships</label>
-        <select1 ref="relationships" appearance="compact">
-            <label>Relationship:</label>
-            <item>
-              <label>dummy</label>
-              <value>dummy</value>
-            </item>
-        </select1>
-      </group>
-    </group>
     <group ref="tabgroup3" faims_archent_type="small">
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
@@ -761,143 +511,6 @@
         </select1>
       </group>
     </group>
-    <group ref="tabgroup4" faims_rel_type="AboveBelow">
-      <label>Relationship</label>
-      <group ref="tab1" faims_hidden="false">
-        <label>Save Relationship</label>
-        	<group ref="container">
-        	    <label></label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
-	          	<label>Name:</label>
-	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
-	          	<label>Description:</label>
-	        </input>
-	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
-	            <label>Value:</label>
-	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
-              <label>Timestamp:</label>
-            </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
-            	<label>Date:</label>
-         	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
-            	<label>Time:</label>
-         	</input>
-            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-                <label>Location:</label>
-                <item>
-                	<label>dummy</label>
-                	<value>dummy</value>
-              	</item>
-            </select>
-             <select1 ref="choice" appearance="full" faims_attribute_name="choice" faims_attribute_type="vocab">
-	            <label>Choice:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="item" faims_attribute_name="item" faims_attribute_type="vocab">
-	            <label>Item:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
-	            <label>Type:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
-	            <label>Gallery:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select1 ref="rocks" type="image" faims_attribute_name="rocks" faims_attribute_type="vocab">
-	            <label>Rocks:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Files:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachfile">
-	            <label>Attached File:</label>
-	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Pictures:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachpicture">
-	            <label>Take picture</label>
-	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Videos:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachvideo">
-	            <label>Take video</label>
-	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Audios:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachaudio">
-	            <label>Record Audio</label>
-	        </trigger>
-	        <trigger ref="viewattached">
-	            <label>View Attached Files</label>
-	        </trigger>
-	        <group ref="container1" faims_style="orientation even">
-	          <label></label>
-	            <trigger ref="save">
-	              <label>Save</label>
-	            </trigger>
-	            <trigger ref="clear">
-	              <label>Clear</label>
-	            </trigger>
-	        </group>
-	        <trigger ref="delete">
-	          <label>Delete</label>
-	        </trigger>
-	        <trigger ref="close">
-	          <label>Close</label>
-	        </trigger>
-	        </group>
-      </group>
-      <group ref="tab2" faims_scrollable="false">
-        <label>Load Relationships</label>
-        <select1 ref="relationships" appearance="compact">
-            <label>Relationship:</label>
-            <item>
-              <label>dummy</label>
-              <value>dummy</value>
-            </item>
-        </select1>
-      </group>
-    </group>
     <group ref="tabgroup5" faims_archent_type="small">
       <label>Entity</label>
       <group ref="tab1" faims_hidden="false">
@@ -1026,147 +639,19 @@
         </select1>
       </group>
     </group>
-    <group ref="tabgroup6" faims_rel_type="AboveBelow">
-      <label>Relationship</label>
-      <group ref="tab1" faims_hidden="false">
-        <label>Save Relationship</label>
-	        <input ref="name" faims_attribute_name="name" faims_attribute_type="measure">
-	          	<label>Name:</label>
-	        </input>
-	        <input ref="description" faims_attribute_name="description" faims_attribute_type="measure">
-	          	<label>Description:</label>
-	        </input>
-	        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
-	            <label>Value:</label>
-	        </input>
-	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="measure" faims_read_only="true" faims_certainty="false">
-              <label>Timestamp:</label>
-            </input>
-            <input ref="date" faims_attribute_name="date" faims_attribute_type="measure">
-            	<label>Date:</label>
-         	</input>
-         	<input ref="time" faims_attribute_name="time" faims_attribute_type="measure">
-            	<label>Time:</label>
-         	</input>
-            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-                <label>Location:</label>
-                <item>
-                	<label>dummy</label>
-                	<value>dummy</value>
-              	</item>
-            </select>
-             <select1 ref="choice" appearance="full" faims_attribute_name="choice" faims_attribute_type="vocab">
-	            <label>Choice:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="item" faims_attribute_name="item" faims_attribute_type="vocab">
-	            <label>Item:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
-	            <label>Type:</label>
-	            <item>
-	            	<label>dummy</label>
-	            	<value>dummy</value>
-	          	</item>
-	        </select1>
-	        <select1 ref="gallery" type="image" faims_attribute_name="gallery" faims_attribute_type="vocab">
-	            <label>Gallery:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select1 ref="rocks" type="image" faims_attribute_name="rocks" faims_attribute_type="vocab">
-	            <label>Rocks:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select1>
-	        <select ref="files" type="file" faims_attribute_name="file" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Files:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachfile">
-	            <label>Attached File:</label>
-	        </trigger>
-	        <select ref="pictures" type="camera" faims_sync="true" faims_attribute_name="picture" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Pictures:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachpicture">
-	            <label>Take picture</label>
-	        </trigger>
-	        <select ref="videos" type="video" faims_attribute_name="video" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Videos:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachvideo">
-	            <label>Take video</label>
-	        </trigger>
-	        <select ref="audios" type="file" faims_attribute_name="audio" faims_attribute_type="measure" faims_annotation="true" faims_certainty="true">
-	            <label>Audios:</label>
-	            <item>
-	                <label>dummy</label>
-	                <value>dummy</value>
-	            </item>
-	        </select>
-	        <trigger ref="attachaudio">
-	            <label>Record Audio</label>
-	        </trigger>
-	        <trigger ref="viewattached">
-	            <label>View Attached Files</label>
-	        </trigger>
-	        <trigger ref="clear">
-	            <label>Clear</label>
-	        </trigger>
-	        <trigger ref="delete">
-	          <label>Delete</label>
-	        </trigger>
-	        <trigger ref="close">
-	          <label>Close</label>
-	        </trigger>
-      </group>
-      <group ref="tab2" faims_scrollable="false">
-        <label>Load Relationships</label>
-        <select1 ref="relationships" appearance="compact">
-            <label>Relationship:</label>
-            <item>
-              <label>dummy</label>
-              <value>dummy</value>
-            </item>
-        </select1>
-      </group>
-    </group>
     <group ref="tabgroup7">
         <label>Associations</label>
         <group ref="tab1">
             <label>Add Entity Member</label>
-            <select1 ref="entities">
-                <label>Entities</label>
+            <select1 ref="entity1">
+                <label>Entity 1</label>
                 <item>
 	            	<label>dummy</label>
 	            	<value>dummy</value>
 	          	</item>
             </select1>
-            <select1 ref="relationships">
-                <label>Relationships</label>
+            <select1 ref="entity2">
+                <label>Entity 2</label>
                 <item>
 	            	<label>dummy</label>
 	            	<value>dummy</value>

@@ -52,11 +52,8 @@ createOption(name, value) {
 
 options = new ArrayList();
 options.add(createOption("entity", "Save and Load Entity"));
-options.add(createOption("relationship", "Save and Load Relationship"));
 options.add(createOption("entity_childview", "Save and Load Entity - Child Views"));
-options.add(createOption("relationship_childview", "Save and Load Relationship - Child Views"));
 options.add(createOption("entity_autosave", "Save and Load Entity - AutoSave"));
-options.add(createOption("relationship_autosave", "Save and Load Relationship - AutoSave"));
 options.add(createOption("associations", "Associations"));
 options.add(createOption("table", "Table View"));
 loadOptions() {
@@ -69,16 +66,10 @@ onClickOption() {
 	String value = getListItemValue();
 	if ("entity".equals(value)) {
 		showTabGroup("tabgroup1");
-	} else if ("relationship".equals(value)) {
-		showTabGroup("tabgroup2");
 	} else if ("entity_childview".equals(value)) {
 		showTabGroup("tabgroup3");
-	} else if ("relationship_childview".equals(value)) {
-		showTabGroup("tabgroup4");
 	} else if ("entity_autosave".equals(value)) {
 		showTabGroup("tabgroup5");
-	} else if ("relationship_autosave".equals(value)) {
-		showTabGroup("tabgroup6");
 	} else if ("associations".equals(value)) {
 		showTabGroup("tabgroup7");
 	}else if ("table".equals(value)) {
@@ -369,217 +360,18 @@ addActionBarItem("save Entity", new ActionButtonCallback() {
     }
 });
 
-// RELATIONSHIP
 
-String relationshipId = null;
-String tableRelationshipId = null;
-
-initRelationship(tabgroup) {
-	newRelationship(tabgroup);
-}
-
-initAutoRelationship(tabgroup) {
-	clearRelationship(tabgroup);
-}
-
-closeRelationship(tabgroup) {
-	cancelTabGroup(tabgroup, true);
-}
-
-RELATIONSHIP_LIST = "SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
-        "                            vocabname || ' (' || freetext || ')', \n" + 
-        "                            vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
-        "                            freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
-        "                            vocabname, \n" + 
-        "                            freetext), ' | ') as response \n" + 
-        "     FROM latestNonDeletedRelnIdentifiers \n" + 
-        "   WHERE relntypename = 'AboveBelow'\n" + 
-        "     GROUP BY relationshipid limit ? offset ?;";
-
-loadRelationships(tabgroup) {
-	populateCursorList(tabgroup + "/tab2/relationships", RELATIONSHIP_LIST, 5);
-}
-
-saveRelationship(tabgroup) {
-	updateRelationship(tabgroup);
-}
-
-loadRelationship(tabgroup) {
-	localId = getListItemValue();
-	if (isNull(localId)) return;
-
-	newRelationship(tabgroup);	
-	showTabGroup(tabgroup, localId);
-	relationshipId = localId;
-}
-
-loadRelationshipAuto(tabgroup) {
-	localId = getListItemValue();
-	if (isNull(localId)) return;
-
-	newRelationship(tabgroup);	
-	showTabGroup(tabgroup, localId);
-	relationshipId = localId;
-	fetchRelationshipIdentifier(new FetchCallback() {
-		onFetch(result) {
-			saveTabGroup(tabgroup, localId, null, getRelationshipIdentifier(result), null, true);
-		}
-	});
-}
-
-reloadRelationship(tabgroup) {
-	if (isNull(relationshipId)) return;
-	
-	showTabGroup(tabgroup, relationshipId);
-}
-
-fetchRelationshipIdentifier(FetchCallback callback) {
-	fetchOne("select count(distinct(relationshipid)) from relationship;", callback);
-}
-
-getRelationshipIdentifier(Object result) {
-	attributes = null;
-	if (relationshipId == null) {
-		attributes = createAttributeList();
-		relationshipCount = Integer.valueOf(result.get(0)) + 1;
-		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relationshipCount, null, null));
-	}
-	return attributes;
-}
-
-updateRelationship(tabgroup) {
-	if (isNull(relationshipId)) relationshipId = null;
-
-	if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
-	
-	fetchRelationshipIdentifier(new FetchCallback() {
-		onFetch(result) {
-			saveTabGroup(tabgroup, relationshipId, null, getRelationshipIdentifier(result), new SaveCallback() {
-				onSave(uuid, newRecord) {
-					relationshipId = uuid;
-					reloadRelationship(tabgroup);
-				}
-			});
-		}
-	});
-	
-}
-
-clearRelationship(tabgroup) {
-	newRelationship(tabgroup);
-	fetchRelationshipIdentifier(new FetchCallback() {
-		onFetch(result) {
-			saveTabGroup(tabgroup, null, null, getRelationshipIdentifier(result), new SaveCallback() {
-				onSave(uuid, newRecord) {
-					relationshipId = uuid;
-				}
-			}, true);
-		}
-	});
-}
-
-newRelationship(tabgroup) {
-	newTabGroup(tabgroup);
-
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location' order by vocabcountorder;", new FetchCallback() {
-		onFetch(result) {
-			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
-		}
-	});
-
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice' order by vocabcountorder;", new FetchCallback() {
-		onFetch(result) {
-			populateRadioGroup(tabgroup + "/tab1/choice", result);
-		}
-	});
-
-	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item' order by vocabcountorder;", new FetchCallback() {
-		onFetch(result) {
-			populateDropDown(tabgroup + "/tab1/item", result);
-		}
-	});
-	
-	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
-
-	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery' order by vocabcountorder;", new FetchCallback() {
-		onFetch(result) {
-			populatePictureGallery(tabgroup + "/tab1/gallery", result);
-		}
-	});
-	
-	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
-	
-	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
-
-	relationshipId = null;
-
-	keepTabGroupChanges(tabgroup);
-}
-
-deleteRelationship(tabgroup){
-	if (isNull(relationshipId)) return;
-	
-	deleteRel(relationshipId);
-	relationshipId = null;
-	
-  cancelTabGroup(tabgroup, false);
-}
-
-onEvent("tabgroup2", "show", "initRelationship(\"tabgroup2\")");  
-onEvent("tabgroup2", "show", "loadRelationships(\"tabgroup2\")");	
-onEvent("tabgroup2/tab1/save", "delayclick", "saveRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab1/clear", "click", "newRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab1/delete", "click", "deleteRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab1/close", "click", "closeRelationship(\"tabgroup2\")");
-onEvent("tabgroup2/tab2/relationships", "click", "loadRelationship(\"tabgroup2\")");
-
-onEvent("tabgroup2/tab1/attachfile", "click", "attachFileTo(\"tabgroup2/tab1/files\")");
-onEvent("tabgroup2/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup2/tab1/pictures\")");
-onEvent("tabgroup2/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup2/tab1/videos\")");
-onEvent("tabgroup2/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup2/tab1/audios\")");
-onEvent("tabgroup2/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
-
-onEvent("tabgroup4", "show", "initRelationship(\"tabgroup4\")");	
-onEvent("tabgroup4", "show", "loadRelationships(\"tabgroup4\")"); 
-onEvent("tabgroup4/tab1/save", "delayclick", "saveRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab1/clear", "click", "newRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab1/delete", "click", "deleteRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab1/close", "click", "closeRelationship(\"tabgroup4\")");
-onEvent("tabgroup4/tab2/relationships", "click", "loadRelationship(\"tabgroup4\")");
-
-onEvent("tabgroup4/tab1/attachfile", "click", "attachFileTo(\"tabgroup4/tab1/files\")");
-onEvent("tabgroup4/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup4/tab1/pictures\")");
-onEvent("tabgroup4/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup4/tab1/videos\")");
-onEvent("tabgroup4/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup4/tab1/audios\")");
-onEvent("tabgroup4/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
-
-onEvent("tabgroup6", "show", "initAutoRelationship(\"tabgroup6\")");	
-onEvent("tabgroup6", "show", "loadRelationships(\"tabgroup6\")"); 
-// onEvent("tabgroup6/tab1/save", "delayclick", "saveRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab1/clear", "click", "clearRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab1/delete", "click", "deleteRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab1/close", "click", "closeRelationship(\"tabgroup6\")");
-onEvent("tabgroup6/tab2/relationships", "click", "loadRelationshipAuto(\"tabgroup6\")");
-
-onEvent("tabgroup6/tab1/attachfile", "click", "attachFileTo(\"tabgroup6/tab1/files\")");
-onEvent("tabgroup6/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup6/tab1/pictures\")");
-onEvent("tabgroup6/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup6/tab1/videos\")");
-onEvent("tabgroup6/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup6/tab1/audios\")");
-onEvent("tabgroup6/tab1/viewattached", "click", "viewRelAttachedFiles(relationshipId)");
 
 // ASSOCIATIONS
 
 loadMembers() {
 	fetchEntityList("small", new FetchCallback() {
 		onFetch(result) {
-			populateDropDown("tabgroup7/tab1/entities", result);
+			populateDropDown("tabgroup7/tab1/entity1", result);
+			populateDropDown("tabgroup7/tab1/entity2", result);
 		}
 	});
-	fetchRelationshipList("abovebelow", new FetchCallback() {
-		onFetch(result) {
-			populateDropDown("tabgroup7/tab1/relationships", result);
-		}
-	});
+
 }
 
 onEvent("tabgroup7", "show", "loadMembers()");
@@ -587,17 +379,28 @@ onEvent("tabgroup7", "show", "loadMembers()");
 onEvent("tabgroup7/tab1/add", "click", "onAddMember()");
 
 onAddMember() {
-	eid = getFieldValue("tabgroup7/tab1/entities");
-	rid = getFieldValue("tabgroup7/tab1/relationships");
-	if (isNull(eid) || isNull(rid)) return;
+	eid1 = getFieldValue("tabgroup7/tab1/entity1");
+	eid2 = getFieldValue("tabgroup7/tab1/entity2");
+	if (isNull(eid1) || isNull(eid2)) return;
 	
 	verb = getFieldValue("tabgroup7/tab1/verb");
 	
-	addReln(eid, rid, verb, new SaveCallback() {
-		onSaveAssociation(entityId, relId) {
-			showToast("added association");
-		}
-	});
+	saveRel(null, "AboveBelow", null, null, new SaveCallback() {
+  	onSave(uuid, newRecord) {
+    	addReln(eid1, uuid, verb, new SaveCallback() {
+			onSaveAssociation(entityId, relId) {
+				showToast("added association entity1 ");
+			}
+		});
+		addReln(eid2, uuid, verb, new SaveCallback() {
+			onSaveAssociation(entityId, relId) {
+				showToast("added association entity2 ");
+			}
+		});
+  	}	
+	
+});
+
 }
 
 //Table View
@@ -617,14 +420,6 @@ tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabnam
 				"	 									   freetext), ' | ') as response, uuid \n" +
 				" 			FROM latestNonDeletedArchentIdentifiers\n" +
 				" 			GROUP BY uuid;");
-tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
-				" 													 vocabname || ' (' || freetext || ')', \n" + 
-				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
-				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
-				" 													 vocabname, \n" + 
-				" 													 freetext), ' | ') as response, relationshipid \n" +
-				" 		FROM latestNonDeletedRelnIdentifiers \n" +
-				" 		GROUP BY relationshipid;");
 tableQuery.add("select uuid, attributename, response\n" + 
 				"from (select attributename, attributeid\n" + 
 				"from attributekey join idealaent using (attributeid) join aenttype using (aenttypeid)\n" + 
@@ -675,48 +470,6 @@ tableQuery.add("select uuid, attributename, response\n" +
 				"where aenttypename = 'small' \n" + 
 				"group by uuid \n" + 
 				"order by uuid, attributename;");
-tableQuery.add("select relationshipid, attributename, response\n" + 
-				"from (select attributename, attributeid \n" + 
-				"from attributekey join idealreln using (attributeid) join relntype using (relntypeid)\n" + 
-				"where relntypename = 'AboveBelow'),\n" + 
-				"(select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
-				"from latestNonDeletedRelnIdentifiers\n" + 
-				"where relntypename = 'AboveBelow'\n" + 
-				"group by relationshipid\n" + 
-				"order by attributename\n" + 
-				") left outer join (\n" + 
-				"select relationshipid, relnvaluetimestamp, attributename, attributeid, group_concat(coalesce(vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
-				"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
-				"                                                                                         vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
-				"                                                                                         freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
-				"                                                                                         vocabname,\n" + 
-				"                                                                                         freetext), ' | ') as response\n" + 
-				"FROM (  SELECT relationshipid, attributeid, vocabid, attributename, vocabname,  freetext, certainty, attributetype, relnvaluetimestamp, relntimestamp\n" + 
-				"          FROM latestnondeletedrelnvalue join latestnondeletedrelationship using (relationshipid)\n" + 
-				"          JOIN attributekey using (attributeid)          \n" + 
-				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
-				"       ORDER BY relationshipid, attributename ASC)\n" + 
-				"group by relationshipid, attributeid) using (relationshipid, attributeid, attributename)\n" + 
-				"union \n" + 
-				"select relationshipid, 'geometry', astext(geospatialcolumn)\n" + 
-				"from (select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, geospatialcolumn\n" + 
-				"from latestNonDeletedRelnIdentifiers\n" + 
-				"where relntypename = 'AboveBelow'\n" + 
-				"group by relationshipid\n" + 
-				"order by attributename)\n" + 
-				"union \n" + 
-				"select relationshipid, 'username', fname || ' ' || lname\n" + 
-				"from (select relationshipid, relntypeid, relntypename, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, fname, lname\n" + 
-				"from latestNonDeletedRelnIdentifiers join user using (userid)\n" + 
-				"where relntypename = 'AboveBelow'\n" + 
-				"group by relationshipid\n" + 
-				"order by attributename)\n" + 
-				"union\n" + 
-				"select relationshipid, 'action', relationshipid \n" + 
-				"from latestNonDeletedRelnIdentifiers join relntype using (relntypeid) \n" + 
-				"where relntype.relntypename = 'AboveBelow' \n" + 
-				"group by relationshipid \n" + 
-				"order by relationshipid, attributename;");
 tableQuery.add("select attributename, aentcountorder from attributekey join idealaent using (attributeid);");
 
 createTableHeaders(headers) {
@@ -729,16 +482,12 @@ createTableHeaders(headers) {
 
 tableHeaders = new ArrayList();
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
-tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
-tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
 tableHeaders.add(createTableHeaders(new String[]{ "attributename", "aentcountorder" }));
 
 tableList = new ArrayList();
 tableList.add(createOption("entity", "Fetch Entities"));
-tableList.add(createOption("relationship", "Fetch Relationships"));
 tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
-tableList.add(createOption("relationship-pivot", "Fetch Relationship Attributes"));
 tableList.add(createOption("attribute-order", "Attribute Ordering"));
 
 onEvent("tabgroup8", "load", "onLoadTable()");
@@ -765,11 +514,7 @@ onLoadQuery() {
 	if (index == 0) {
 		populateTableRaw("tabgroup8/tab1/table", query, headers, "Show", 2, "onShowEntityRow()");
 	} else if (index == 1) {
-		populateTableRaw("tabgroup8/tab1/table", query, headers, "Show", 2, "onShowRelationshipRow()");
-	} else if (index == 2) {
 		populateTablePivot("tabgroup8/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
-	} else if (index == 3) {
-		populateTablePivot("tabgroup8/tab1/table", query, headers, "Show", 15, "onShowRelationshipRow()");
 	} else {
     populateTableRaw("tabgroup8/tab1/table", query, headers, null, -1, null);
   }
@@ -783,13 +528,6 @@ onShowEntityRow() {
 	showTabGroup("tabgroup1", value);
 }
 
-onShowRelationshipRow() {
-	row = getTableRow();
-	value = getTableValue();
-
-	tableRelationshipId = value;
-	showTabGroup("tabgroup2", value);
-}
 
 getTableIndex(selectedItem) {
 	for (int i = 0; i < tableList.size(); i++) {
