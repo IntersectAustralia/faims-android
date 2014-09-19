@@ -31,7 +31,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -188,6 +191,9 @@ public class MainActivity extends RoboActivity {
 	
 	private DrawerLayout staticPanel;
 	
+	TextView connectionStatusText;
+	ImageView connectionStatusIcon;
+	
 	private AsyncTask<Void, Void, Void> locateTask;
 	
 	protected final DownloadModuleHandler downloadHandler = new DownloadModuleHandler(MainActivity.this);
@@ -206,6 +212,9 @@ public class MainActivity extends RoboActivity {
         
         staticPanel = (DrawerLayout) findViewById(R.id.static_module_drawer_layout);
         staticPanel.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        
+        connectionStatusText = (TextView) findViewById(R.id.connection_status_text);
+		connectionStatusIcon = (ImageView) findViewById(R.id.connection_status_icon);
         
         final SwipeRefreshLayout swipe = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
         int blueColour = R.color.color_blue;
@@ -723,8 +732,11 @@ public class MainActivity extends RoboActivity {
 	}
 	
 	private void fetchServerModules() {
-		final TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
-		connectionStatus.setText("Not connected to a server");
+		connectionStatusText.setVisibility(View.GONE);
+		Animation rotation = AnimationUtils.loadAnimation(this, R.anim.clockwise);
+		rotation.setRepeatCount(Animation.INFINITE);
+		connectionStatusIcon.startAnimation(rotation);
+		connectionStatusIcon.setVisibility(View.VISIBLE);
 		if (serverDiscovery.isServerHostValid()) {
     		
 			new FetchModulesListTask(faimsClient, new ITaskListener() {
@@ -733,12 +745,14 @@ public class MainActivity extends RoboActivity {
 				public void handleTaskCompleted(Object result) {
 					Result fetchResult = (Result) result;
 					if (fetchResult.resultCode == FAIMSClientResultCode.SUCCESS) {
-						connectionStatus.setText("Connected to " + serverDiscovery.getServerIP()+ ":" + serverDiscovery.getServerPort());
+						updateConnectionStatusView("Connected to " + serverDiscovery.getServerIP()+ ":" + serverDiscovery.getServerPort());
 		    			ArrayList<Module> modules = parseModules((JSONArray) fetchResult.data);
 		    			for (Module p : modules) {
 	    					moduleListAdapter.add(new ModuleItem(p.name, p.key, p.host, p.version, false, true));
 		    			}
 		    			moduleListAdapter.notifyDataSetChanged();
+					} else {
+						updateConnectionStatusView("Not connected to a server");
 					}
 				}
     			
@@ -751,11 +765,20 @@ public class MainActivity extends RoboActivity {
     			public void handleTaskCompleted(Object result) {
     				if ((Boolean) result) {
     					fetchServerModules();
+    				} else {
+    					updateConnectionStatusView("Not connected to a server");
     				}
     			}
         		
         	}).execute();
     	}
+	}
+	
+	private void updateConnectionStatusView(String message) {
+		connectionStatusText.setText(message);
+		connectionStatusText.setVisibility(View.VISIBLE);
+		connectionStatusIcon.setVisibility(View.GONE);
+		connectionStatusIcon.clearAnimation();
 	}
 	
 	private ArrayList<Module> parseModules(JSONArray objects) {
