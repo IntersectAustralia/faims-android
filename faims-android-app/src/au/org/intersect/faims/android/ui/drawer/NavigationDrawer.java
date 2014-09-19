@@ -4,6 +4,8 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Stack;
 
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,6 +43,7 @@ public class NavigationDrawer {
 	Arch16n arch16n;
 
 	private WeakReference<ShowModuleActivity> activityRef;
+	private DrawerLayout naviationDrawerLayout;
 	private TextView moduleNameText;
 	private TextView moduleDescriptionText;
 	private LinearLayout navigationStackLayout;
@@ -54,6 +57,8 @@ public class NavigationDrawer {
 		FAIMSApplication.getInstance().injectMembers(this);
 		
 		activityRef = new WeakReference<ShowModuleActivity>(activity);
+		
+		naviationDrawerLayout = (DrawerLayout) activity.findViewById(R.id.navigation_drawer_layout);
 		
 		moduleNameText = (TextView) activity.findViewById(R.id.module_name);
 		moduleDescriptionText = (TextView) activity.findViewById(R.id.module_description);
@@ -100,6 +105,7 @@ public class NavigationDrawer {
 				@Override
 				public void onClick(View v) {
 					uiRenderer.navigateToTabGroup(tabGroupIndex);
+					naviationDrawerLayout.closeDrawer(Gravity.START);
 				}
 				
 			});
@@ -132,6 +138,7 @@ public class NavigationDrawer {
 			@Override
 			public void onClick(View v) {
 				uiRenderer.navigateToTabGroup(0);
+				naviationDrawerLayout.closeDrawer(Gravity.START);
 			}
 		});
 	}
