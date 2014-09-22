@@ -60,7 +60,6 @@ public class CustomListView extends ListView implements IView {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.ref = ref;
 		this.dynamic = dynamic;
-		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		NativeCSS.addCSSClass(this, "list");
 		setupLoadingSpinner();
 	}
@@ -108,6 +107,7 @@ public class CustomListView extends ListView implements IView {
 		arrayAdapter = new ArrayAdapter<NameValuePair>(this.getContext(),
 				android.R.layout.simple_list_item_1, pairs);
 		setAdapter(arrayAdapter);
+		NativeCSS.refreshCSSStyling(this);
 	}
 	
 	public void populateWithCursor(String query, int limit) throws Exception {
@@ -192,6 +192,7 @@ public class CustomListView extends ListView implements IView {
 		} else {
 			arrayAdapter.notifyDataSetChanged();
 		}
+		NativeCSS.refreshCSSStyling(this);
 	}
 
 	@Override

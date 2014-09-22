@@ -449,18 +449,20 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void refreshCSS() {
-		Handler cssHandler = new Handler(getActivity().getMainLooper());
-		cssHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				if (getActivity() != null) {
-					NativeCSS.refreshCSSStyling(getActivity().findViewById(R.id.fragment_content));
+		if (getActivity() != null) {
+			Handler cssHandler = new Handler(getActivity().getMainLooper());
+			cssHandler.postDelayed(new Runnable() {
+	
+				@Override
+				public void run() {
+					if (getActivity() != null) {
+						NativeCSS.refreshCSSStyling(getActivity().findViewById(R.id.fragment_content));
+					}
 				}
-			}
-			
-		}, 1);
-		invalidateTabs();
+				
+			}, 1);
+			invalidateTabs();
+		}
 	}
 
 	public void removeCustomViews() {
