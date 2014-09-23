@@ -65,7 +65,7 @@ public class SplashActivity extends Activity {
 		connectServer.setVisibility(View.GONE);
 		loadModule.setVisibility(View.GONE);
 		
-		if (ModuleUtil.getModules().isEmpty()) {
+		if (ModuleUtil.getModules() == null || ModuleUtil.getModules().isEmpty()) {
 			connectDemo.setVisibility(View.VISIBLE);
 			connectDemo.setOnClickListener(new OnClickListener() {
 				
