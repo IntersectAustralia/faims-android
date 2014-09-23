@@ -8,9 +8,12 @@ import java.util.List;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.Module;
@@ -50,6 +53,9 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	private String focusCallback;
 	private String blurCallback;
+	
+	protected List<ImageView> annotationIcons;
+	protected List<ImageView> certaintyIcons;
 	
 	protected ViewFactory viewFactory;
 	
@@ -189,7 +195,23 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setAnnotation(String annotation, int index) {
 		annotations.set(index, annotation);
+		updateAnnotationIcon(index);
 		notifySave();
+	}
+	
+	private void updateAnnotationIcon(int index) {
+		if (index < annotations.size() && index < annotationIcons.size()
+				&& annotationIcons.get(index) != null) {
+			if (!FaimsSettings.DEFAULT_ANNOTATION.equals(annotations.get(index)) && annotations.get(index) != null) {
+				annotationIcons.get(index).setImageResource(R.drawable.annotation_entered);
+			} else {
+				annotationIcons.get(index).setImageResource(R.drawable.annotation);
+			}
+		}
+	}
+	
+	@Override
+	public void setAnnotationIcon(ImageView annotationIcon) {
 	}
 	
 	public List<String> getCertainties() {
@@ -201,7 +223,24 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setCertainty(String certainty, int index) {
 		certainties.set(index, certainty);
+		updateCertaintyIcon(index);
 		notifySave();
+	}
+	
+	private void updateCertaintyIcon(int index) {
+		if (index < certainties.size() && index < certaintyIcons.size()
+				&& certaintyIcons.get(index) != null) {
+			if (!String.valueOf(FaimsSettings.DEFAULT_CERTAINTY).equals(certainties.get(index))
+					&& certainties.get(index) != null) {
+				certaintyIcons.get(index).setImageResource(R.drawable.certainty_entered);
+			} else {
+				certaintyIcons.get(index).setImageResource(R.drawable.certainty);
+			}
+		}
+	}
+	
+	@Override
+	public void setCertaintyIcon(ImageView certaintyIcon) {
 	}
 	
 	public void setCertainties(List<String> certainties) {
@@ -291,17 +330,19 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 			annotations = new ArrayList<String>();
 		}
 		annotations.add(annotation);
+		updateAnnotationIcon(annotations.indexOf(annotation));
 		if (certainties == null) {
 			certainties = new ArrayList<String>();
 		}
 		certainties.add(certainty);
+		updateCertaintyIcon(certainties.indexOf(certainty));
 		notifySave();
 	}
 	
 	public void addFile(String value) {
 		File file = new File(value);
 		if (file.exists()) {
-			addFile(value, "", "1.0");
+			addFile(value, FaimsSettings.DEFAULT_ANNOTATION, String.valueOf(FaimsSettings.DEFAULT_CERTAINTY));
 		} else {
 			linker.showWarning("Logic Error", "Cannot find file " + value + " to attach to " + ref);
 		}

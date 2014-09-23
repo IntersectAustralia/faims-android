@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import android.widget.ImageView;
 import au.org.intersect.faims.android.data.Attribute;
 
 public interface ICustomView extends IView {
@@ -30,5 +31,6 @@ public interface ICustomView extends IView {
 	public void setAnnotationEnabled(boolean enabled);
 	public boolean getCertaintyEnabled();
 	public void setCertaintyEnabled(boolean enabled);
-	
+	public void setAnnotationIcon(ImageView annotationIcon);
+	public void setCertaintyIcon(ImageView certaintyIcon);
 }

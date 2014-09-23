@@ -88,12 +88,14 @@ public class FileListGroup extends CustomFileList {
 		if (annotation) {
 			ImageView annotationImage = viewFactory.createAnnotationIcon();
 			LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			innerLayout.addView(annotationImage, imageParams);			
+			innerLayout.addView(annotationImage, imageParams);
+			annotationIcons.add(annotationImage);
 		}
 		if (certainty) {
 			ImageView certaintyImage = viewFactory.createCertaintyIcon();
 			LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			innerLayout.addView(certaintyImage, imageParams);			
+			innerLayout.addView(certaintyImage, imageParams);
+			certaintyIcons.add(certaintyImage);
 		}
 		layout.addView(innerLayout);
 		final FileAttachmentLabelDialog labelDialog = createLabelDialog(index);
@@ -175,7 +177,9 @@ public class FileListGroup extends CustomFileList {
 		removeAllViews();
 		
 		annotations = null;
+		annotationIcons = new ArrayList<ImageView>();
 		certainties = null;
+		certaintyIcons = new ArrayList<ImageView>();
 		save();
 	}
 
