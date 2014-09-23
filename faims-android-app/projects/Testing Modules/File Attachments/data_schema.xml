@@ -7,13 +7,13 @@
     <property name="Files" type="file">
       <description>Files</description>
     </property>
-    <property name="Photo" type="file">
+    <property name="Photo" type="file" thumbnail="true">
       <description>Photo</description>
     </property>
-    <property name="Audio" type="file">
+    <property name="Audio" type="file" thumbnail="true">
       <description>Audio</description>
     </property>
-    <property name="Video" type="file">
+    <property name="Video" type="file" thumbnail="true">
       <description>Video</description>
     </property>
   </ArchaeologicalElement>
