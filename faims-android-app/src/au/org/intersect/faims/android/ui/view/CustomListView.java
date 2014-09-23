@@ -60,6 +60,7 @@ public class CustomListView extends ListView implements IView {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.ref = ref;
 		this.dynamic = dynamic;
+		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		NativeCSS.addCSSClass(this, "list");
 		setupLoadingSpinner();
 	}
