@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,12 +37,15 @@ public class ServerSettingsActivity extends RoboActivity {
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
-	private FaimsServerConnectionTestingTask connectionTestingTask;
+	private AsyncTask<Void, Void, Void> connectionTestingTask;
+	private AsyncTask<Void, Void, Void> locateServerTask;
+	
 	private BusyDialog busyDialog;
 	
 	private Spinner pastSessions; 
 	private EditText hostField;
 	private EditText portField;
+
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,96 +82,81 @@ public class ServerSettingsActivity extends RoboActivity {
 	
 	@SuppressLint("NewApi")
 	protected void testConnection(String ipAddress, String port) {
-		showBusyTestingConnectionDialog();
+		
 		if (((NameValuePair)pastSessions.getSelectedItem()).getValue().equals(AUTODISCOVER_SERVER)) {
 			serverDiscovery.setServerHostFixed(false);
 			serverDiscovery.invalidateServerHost();
-			new LocateServerTask(serverDiscovery, new ITaskListener() {
-
-    			@Override
-    			public void handleTaskCompleted(Object result) {
-    				busyDialog.dismiss();
-    				if (!ServerSettingsActivity.this.isDestroyed()) {
-    					if ((Boolean) result) {
-    						showWarning("Settings", "Connection test succeeded");
-    					} else {
-    						showWarning("Settings", "No server found on the current network");
-    					}
-    				}
-    			}
-        		
-        	}).execute();
+			locateServerTask = createLocateServerTask(false).execute();
+			showBusyTestingConnectionDialog(locateServerTask);
 		} else {
-			connectionTestingTask = new FaimsServerConnectionTestingTask(ipAddress.trim(), port.trim(), new ITaskListener() {
-				
-				@Override
-				public void handleTaskCompleted(Object result) {
-					busyDialog.dismiss();
-					if (result instanceof Boolean) {
-						if (!ServerSettingsActivity.this.isDestroyed()) {
-							if ((Boolean) result) {
-								showWarning("Settings", "Connection test succeeded");
-							} else {
-								showWarning("Settings", "There is no server available with the provided host and port");
-							}
-						}
-					}
-					
-				}
-			});
-			connectionTestingTask.execute();
+			connectionTestingTask = createConnectionTask(ipAddress, port, false).execute();
+			showBusyTestingConnectionDialog(connectionTestingTask);
 		}
 	}
 	
 	@SuppressLint("NewApi")
 	protected void connectToServer(String ipAddress, String port) {
-		showBusyTestingConnectionDialog();
 		if (((NameValuePair)pastSessions.getSelectedItem()).getValue().equals(AUTODISCOVER_SERVER)) {
 			serverDiscovery.setServerHostFixed(false);
 			serverDiscovery.invalidateServerHost();
-			new LocateServerTask(serverDiscovery, new ITaskListener() {
-
-    			@Override
-    			public void handleTaskCompleted(Object result) {
-    				busyDialog.dismiss();
-    				if ((Boolean) result) {
-    					FAIMSApplication.getInstance().updateServerSettings(serverDiscovery.getServerIP(),
-    							serverDiscovery.getServerPort(), true);
-    					Intent mainIntent = new Intent(ServerSettingsActivity.this, MainActivity.class);
-						startActivity(mainIntent);
-						finish();
-    				} else {
-    					if (!ServerSettingsActivity.this.isDestroyed()) {
-    						showWarning("Settings", "There is no server available with the provided host and port");
-    					}
-					}
-    			}
-        		
-        	}).execute();
+			locateServerTask = createLocateServerTask(true).execute();
+			showBusyTestingConnectionDialog(locateServerTask);
 		} else {
-			connectionTestingTask = new FaimsServerConnectionTestingTask(ipAddress, port, new ITaskListener() {
-				
-				@Override
-				public void handleTaskCompleted(Object result) {
-					busyDialog.dismiss();
-					if (result instanceof Boolean) {
-						if ((Boolean) result) {
+			connectionTestingTask = createConnectionTask(ipAddress, port, true).execute();
+			showBusyTestingConnectionDialog(connectionTestingTask);
+		}
+	}
+	
+	private AsyncTask<Void,Void,Void> createLocateServerTask(final boolean connectToServer) {
+		return new LocateServerTask(serverDiscovery, new ITaskListener() {
+
+			@Override
+			public void handleTaskCompleted(Object result) {
+				busyDialog.dismiss();
+				if (!locateServerTask.isCancelled()) {
+					if ((Boolean) result) {
+						if (connectToServer) {
+							FAIMSApplication.getInstance().updateServerSettings(serverDiscovery.getServerIP(),
+	    							serverDiscovery.getServerPort(), true);
+	    					Intent mainIntent = new Intent(ServerSettingsActivity.this, MainActivity.class);
+							startActivity(mainIntent);
+							finish();
+						} else {
+							showWarning("Settings", "Connection test succeeded");
+						}
+					} else {
+						showWarning("Settings", connectToServer ? "There is no server available with the provided host and port" : 
+							"No server found on the current network");
+					}
+				}
+			}
+    		
+    	});
+	}
+	
+	private FaimsServerConnectionTestingTask createConnectionTask(String ipAddress, String port, final boolean connectToServer) {
+		return new FaimsServerConnectionTestingTask(ipAddress.trim(), port.trim(), new ITaskListener() {
+			
+			@Override
+			public void handleTaskCompleted(Object result) {
+				busyDialog.dismiss();
+				if (!connectionTestingTask.isCancelled()) {
+					if ((Boolean) result) {
+						if (connectToServer) {
 							FAIMSApplication.getInstance().updateServerSettings(hostField.getText().toString().trim(),
 									portField.getText().toString().trim(), false);
 							Intent mainIntent = new Intent(ServerSettingsActivity.this, MainActivity.class);
 							startActivity(mainIntent);
 							finish();
 						} else {
-							if (!ServerSettingsActivity.this.isDestroyed()) {
-	    						showWarning("Settings", "There is no server available with the provided host and port");
-	    					}
+							showWarning("Settings", "Connection test succeeded");
 						}
+					} else {
+						showWarning("Settings", "There is no server available with the provided host and port");
 					}
-					
 				}
-			});
-			connectionTestingTask.execute();
-		}
+			}
+		});
 	}
 	
 	private void setupPreviousSessions() {
@@ -206,7 +195,7 @@ public class ServerSettingsActivity extends RoboActivity {
 		});
 	}
 
-	private void showBusyTestingConnectionDialog() {
+	private void showBusyTestingConnectionDialog(final AsyncTask<Void,Void,Void> task) {
 		busyDialog = new BusyDialog(ServerSettingsActivity.this, 
 				"Settings",
 				"Connecting to server",
@@ -216,8 +205,8 @@ public class ServerSettingsActivity extends RoboActivity {
 					public void handleDialogResponse(
 							DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.CANCEL) {
-							if (ServerSettingsActivity.this.connectionTestingTask != null) {
-								ServerSettingsActivity.this.connectionTestingTask.cancel(true);
+							if (task != null) {
+								task.cancel(true);
 							}
 						}
 					}
