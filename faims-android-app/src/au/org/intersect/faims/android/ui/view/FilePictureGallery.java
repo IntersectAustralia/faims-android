@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
@@ -63,7 +64,9 @@ public class FilePictureGallery extends CustomFileList {
 		galleryImages = new ArrayList<CustomImageView>();
 		
 		annotations = null;
+		annotationIcons = new ArrayList<ImageView>();
 		certainties = null;
+		certaintyIcons = new ArrayList<ImageView>();
 		save();
 	}
 
@@ -169,12 +172,16 @@ public class FilePictureGallery extends CustomFileList {
 		iconContainer.setOrientation(LinearLayout.HORIZONTAL);
 		final FileAttachmentLabelDialog dialog = new FileAttachmentLabelDialog(getContext(), this, galleryImages.size());
 		if (annotationEnabled) {
-			iconContainer.addView(viewFactory.createAnnotationIcon());
+			ImageView annotationImage = viewFactory.createAnnotationIcon();
+			iconContainer.addView(annotationImage);
 			dialog.addAnnotationTab();
+			annotationIcons.add(annotationImage);
 		}
 		if (certaintyEnabled) {
-			iconContainer.addView(viewFactory.createCertaintyIcon());
+			ImageView certaintyImage = viewFactory.createCertaintyIcon();
+			iconContainer.addView(certaintyImage);
 			dialog.addCertaintyTab();
+			certaintyIcons.add(certaintyImage);
 		}
 		textView.setOnLongClickListener(new OnLongClickListener() {
 			

@@ -8,9 +8,12 @@ import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
@@ -44,6 +47,9 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	private String selectCallback;
 	private String focusCallback;
 	private String blurCallback;
+	
+	private ImageView annotationIcon;
+	private ImageView certaintyIcon;
 	
 	public CustomSpinner(Context context) {
 		super(context);
@@ -111,7 +117,23 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	@Override
 	public void setCertainty(float certainty) {
 		this.certainty = certainty;
+		updateCertaintyIcon(certainty);
 		notifySave();
+	}
+	
+	private void updateCertaintyIcon(float certainty) {
+		if (certaintyIcon != null) {
+			if (certainty != FaimsSettings.DEFAULT_CERTAINTY) {
+				certaintyIcon.setImageResource(R.drawable.certainty_entered);
+			} else {
+				certaintyIcon.setImageResource(R.drawable.certainty);
+			}
+		}
+	}
+	
+	@Override
+	public void setCertaintyIcon(ImageView certaintyIcon) {
+		this.certaintyIcon = certaintyIcon;
 	}
 
 	@Override
@@ -122,7 +144,23 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	@Override
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
+		updateAnnotationIcon(annotation);
 		notifySave();
+	}
+	
+	private void updateAnnotationIcon(String annotation) {
+		if (annotationIcon != null && annotation != null) {
+			if (!FaimsSettings.DEFAULT_ANNOTATION.equals(annotation)) {
+				annotationIcon.setImageResource(R.drawable.annotation_entered);
+			} else {
+				annotationIcon.setImageResource(R.drawable.annotation);
+			}
+		}
+	}
+	
+	@Override
+	public void setAnnotationIcon(ImageView annotationIcon) {
+		this.annotationIcon = annotationIcon;
 	}
 
 	@Override

@@ -530,6 +530,7 @@ public class Tab {
 		    			if (!(view instanceof CustomFileList)) {
 		    				labelDialog.addAnnotationTab();
 		    				icons.addView(annotationImage);
+		    				customView.setAnnotationIcon(annotationImage);
 		    			}
 		    		}
 		    		
@@ -538,6 +539,7 @@ public class Tab {
 		    			if (!(view instanceof CustomFileList)) {
 		    				labelDialog.addCertaintyTab();
 		    				icons.addView(certaintyImage);
+		    				customView.setCertaintyIcon(certaintyImage);
 		    			}
 		    		}
 		    		
