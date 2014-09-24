@@ -42,7 +42,7 @@
 			android:layout_marginTop="30dp"
 			android:background="@drawable/button_primary"
 			android:textColor="@android:color/white"
-			android:text="@string/splash_load"
+			android:text="@string/load_module"
 			style="?android:attr/button"/>
 	        
 	    <TableLayout

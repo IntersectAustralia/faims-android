@@ -17,7 +17,7 @@
     <string name="cancel_dialog_button">Cancel</string>
     
     <string name="connect_to_server">Connect to server</string>
-    <string name="select_server">Select previous server</string>
+    <string name="select_server">Select server</string>
     <string name="refresh_module_list">Refresh Module List</string>
     <string name="server_name">Server Name</string>
     <string name="server_host">Server Host</string>
@@ -25,6 +25,7 @@
     <string name="test_connection">Test Connection</string>
     <string name="connect">Connect</string>
     
+    <string name="load_module">Load Module</string>
     <string name="version">Version</string>
     <string name="server">Server</string>
     
@@ -140,7 +141,7 @@
     <string name="direction_text">Tracking angle</string>
     <string name="direction_indicator">Tracking direction</string>
     
-    <string name="splash_load">Load Module</string>
+    <string name="splash_show">Show Modules</string>
     <string name="splash_continue">Continue Last Session</string>
     <string name="splash_connect_demo">Connect to Demo Server</string>
     <string name="splash_connect_server">Enter Server Details</string>
