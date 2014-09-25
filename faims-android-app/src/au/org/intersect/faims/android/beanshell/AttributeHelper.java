@@ -18,7 +18,6 @@ import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 import au.org.intersect.faims.android.ui.view.Tab;
-import au.org.intersect.faims.android.util.FileUtil;
 
 public class AttributeHelper {
 	

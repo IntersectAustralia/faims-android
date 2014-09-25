@@ -34,6 +34,8 @@ public class ServerSettingsActivity extends RoboActivity {
 	
 	private static final String AUTODISCOVER_SERVER = "autodiscover";
 	
+	private static final String DEFAULT_PORT = "80";
+	
 	@Inject
 	ServerDiscovery serverDiscovery;
 	
@@ -182,7 +184,7 @@ public class ServerSettingsActivity extends RoboActivity {
 						portField.setText(server.split(":")[1]);
 					} else {
 						hostField.setText("");
-						portField.setText("");
+						portField.setText(DEFAULT_PORT);
 					}
 					hostField.setEnabled(true);
 					portField.setEnabled(true);

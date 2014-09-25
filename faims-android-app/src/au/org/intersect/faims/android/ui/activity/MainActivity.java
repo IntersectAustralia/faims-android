@@ -274,8 +274,8 @@ public class MainActivity extends RoboActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				choiceDialog = new ChoiceDialog(MainActivity.this, 
-						getString(R.string.confirm_download_module_title),
-						getString(R.string.confirm_download_module_message) + " " + selectedItem + "?",
+						getString(R.string.confirm_restore_module_title),
+						getString(R.string.confirm_restore_module_message) + " " + selectedItem + "?",
 						new IDialogListener() {
 
 							@Override
@@ -339,7 +339,7 @@ public class MainActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				updateModuleSettingArchive(true);
+				updateModuleSettings(true);
 			}
 		});
 		builder.create().show();
@@ -378,7 +378,7 @@ public class MainActivity extends RoboActivity {
     	
     }
 
-	protected void updateModuleSettingArchive(final boolean overwrite) {
+	protected void updateModuleSettings(final boolean overwrite) {
     	
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyUpdatingModuleSettingDialog();
@@ -401,7 +401,7 @@ public class MainActivity extends RoboActivity {
     				MainActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					updateModuleSettingArchive(overwrite);
+    					updateModuleSettings(overwrite);
     				} else {
     					showLocateServerDownloadArchiveFailureDialog(overwrite);
     				}
@@ -600,7 +600,7 @@ public class MainActivity extends RoboActivity {
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateModuleSettingArchive(false);
+							updateModuleSettings(false);
 						}
 					}
     		

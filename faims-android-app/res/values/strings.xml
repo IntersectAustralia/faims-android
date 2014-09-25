@@ -41,11 +41,16 @@
     <string name="confirm_download_module_title">Download Module</string>
     <string name="confirm_download_module_message">Would you like to download module</string>
     
+    <string name="confirm_restore_module_title">Restore Module</string>
+    <string name="confirm_restore_module_message">Would you like to restore module</string>
+    
     <string name="confirm_download_or_update_module_title">Update or Restore Module</string>
     <string name="confirm_download_or_update_module_message">Would you like to update or restore module</string>
     
     <string name="confirm_download_warning_module_title">Restore Module</string>
-    <string name="confirm_download_warning_module_message">Restoring a module from the server will DELETE ALL UNSYNCHRONIZED DATA and custom module settings. It should only be used for emergency restoration of your module. We recommend synchronising or manually backing up data on your device before you Restore.</string>
+    <string name="confirm_download_warning_module_message">Restoring a module from the server will DELETE ALL UNSYNCHRONIZED DATA and custom module settings. 
+        It should only be used for emergency restoration of your module.\n\n
+        We recommend synchronising or manually backing up data on your device before you Restore.</string>
     
     <string name="download_module_title">Downloading Module</string>
     <string name="download_module_message">please wait..</string>
