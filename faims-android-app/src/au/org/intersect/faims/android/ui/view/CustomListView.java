@@ -60,6 +60,7 @@ public class CustomListView extends ListView implements IView {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.ref = ref;
 		this.dynamic = dynamic;
+		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		NativeCSS.addCSSClass(this, "list");
 		setupLoadingSpinner();
 	}
@@ -115,8 +116,6 @@ public class CustomListView extends ListView implements IView {
 		this.limit = limit;
 		this.disableLoad = false;
 		this.arrayAdapter = null;
-		
-		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
 		
 		List<List<String>> values = databaseManager.fetchRecord().fetchCursorAll(query, limit, 0);
 		items = linker.convertToNameValuePairs(values);
