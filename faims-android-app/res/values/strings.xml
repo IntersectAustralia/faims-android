@@ -35,58 +35,55 @@
     <string name="locate_server_failure_title">Could not find Server</string>
     <string name="locate_server_failure_message">Would you like to try again?</string>
     
-    <string name="fetch_modules_title">Fetching Module List</string>
-    <string name="fetch_modules_message">please wait..</string>
-    
     <string name="confirm_download_module_title">Download Module</string>
     <string name="confirm_download_module_message">Would you like to download module</string>
     
-    <string name="confirm_restore_module_title">Restore Module</string>
-    <string name="confirm_restore_module_message">Would you like to restore module</string>
-    
     <string name="confirm_download_or_update_module_title">Update or Restore Module</string>
     <string name="confirm_download_or_update_module_message">Would you like to update or restore module</string>
+    
+    <string name="confirm_restore_module_title">Restore Module</string>
+    <string name="confirm_restore_module_message">Would you like to restore module</string>
     
     <string name="confirm_download_warning_module_title">Restore Module</string>
     <string name="confirm_download_warning_module_message">Restoring a module from the server will DELETE ALL UNSYNCHRONIZED DATA and custom module settings. 
         It should only be used for emergency restoration of your module.\n\n
         We recommend synchronising or manually backing up data on your device before you Restore.</string>
-    
-    <string name="download_module_title">Downloading Module</string>
-    <string name="download_module_message">please wait..</string>
-    
-    <string name="select_update_module_title">Update Module</string>
-    <string name="select_update_module_message">Do you want to update module settings or module data?</string>
-    
-    <string name="download_module_failure_title">Could not download module</string>
-    <string name="download_module_failure_message">Would you like to try again?</string>
-    
-    <string name="download_module_error_title">Module is too big</string>
-    <string name="download_module_error_message">Error storage limit reached</string>
-    
-    <string name="download_busy_module_error_title">Module archive in progress</string>
-    <string name="download_busy_module_error_message">Please wait until module has finished archiving on the server and try again</string>
-    
-    <string name="confirm_update_module_setting_title">Update Module Setting</string>
-    <string name="confirm_update_module_setting_message">Would you like to update module setting for</string>
-    
-    <string name="confirm_update_module_data_title">Update Module Data</string>
-    <string name="confirm_update_module_data_message">Would you like to update module data for</string>
-    
-    <string name="update_module_title">Updating Module</string>
-    <string name="update_module_message">please wait..</string>
-    
-    <string name="update_module_failure_title">Could not update module</string>
-    <string name="update_module_failure_message">Would you like to try again?</string>
-    
-    <string name="update_module_error_title">Module is too big</string>
-    <string name="update_module_error_message">Error storage limit reached</string>
-    
-    <string name="update_busy_module_error_title">Module archive in progress</string>
-    <string name="update_busy_module_error_message">Please wait until module has finished archiving on the server and try again</string>
+        
+    <string name="confirm_restore_no">No</string>
+    <string name="confirm_restore_yes">Yes, restore the module</string>
+        
+    <string name="confirm_update_module_title">Update Module</string>
+    <string name="confirm_update_module_message">Do you want to update module settings or module data?</string>
 
-    <string name="render_module_title">Show Module</string>
-    <string name="render_module_message">Do you want to open module?</string>
+    <string name="busy_error_title">Server Busy Error</string>
+    <string name="download_busy_error_message">Could not download module as server is busy. Please wait and try again.</string>
+    <string name="update_settings_busy_error_message">Could not update module settings as server is busy. Please wait and try again.</string>
+    <string name="update_data_busy_error_message">Could not update module maps as server is busy. Please wait and try again.</string>
+    
+    <string name="storage_error_title">Storage Error</string>
+    <string name="download_storage_error_message">Could not download module because your device does not have enough disk space. Please clear some disk space and try again.</string>
+    <string name="update_settings_storage_error_message">Could not update module settings because your device does not have enough disk space. Please clear some disk space and try again.</string>
+    <string name="update_data_storage_error_message">Could not update module maps because your device does not have enough disk space. Please clear some disk space and try again.</string>
+    
+    <string name="corrupted_error_title">Download Corrupted Error</string>
+    <string name="download_corrupted_error_message">Could not download module because a file was corrupted on transfer from server to your device. Please try again.</string>
+    <string name="update_settings_corrupted_error_message">Could not update module settings because a file was corrupted on transfer from server to your device. Please try again.</string>
+    <string name="update_data_corrupted_error_message">Could not update module maps because a file was corrupted on transfer from server to your device. Please try again.</string>
+    
+    <string name="server_error_title">Server Error</string>
+    <string name="download_server_error_message">Could not download module because there was a network error. Please check you can connect to the server and try again.</string>
+    <string name="update_settings_server_error_message">Could not update module settings because there was a network error. Please check you can connect to the server and try again.</string>
+    <string name="update_data_server_error_message">Could not update module maps because there was a network error. Please check you can connect to the server and try again.</string>
+    
+    <string name="interrupted_title">Cancelled</string>
+    <string name="download_interrupted_message">Download module cancelled. Would you like to try again?</string>
+    <string name="update_settings_interrupted_message">Update module settings cancelled. Would you like to try again?</string>
+    <string name="update_data_interrupted_message">Update module maps cancelled. Would you like to try again?</string>
+    
+    <string name="busy_title">Downloading</string>
+    <string name="download_busy_message">Downloading module please wait..</string>
+    <string name="update_settings_busy_message">Updating module settings please wait..</string>
+    <string name="update_data_busy_message">Updating module maps please wait..</string>
     
     <string name="upload_database_title">Uploading Database</string>
     <string name="upload_database_message">please wait..</string>
@@ -97,16 +94,19 @@
     <string name="download_database_title">Downloading Database</string>
     <string name="download_database_message">please wait..</string>
     
-    <string name="load_module_title">Loading module</string>
-    <string name="load_module_message">please wait..</string>
-
     <string name="download_database_failure_title">Could not download database</string>
     <string name="download_database_failure_message">Would you like to try again?</string>
     
     <string name="download_database_error_title">Database is too big</string>
     <string name="download_database_error_message">Error storage limit reached</string>
     
-    <string name="render_ui_failure_title">Error</string>
+    <string name="download_busy_module_error_title">Module caching in progress</string>
+    <string name="download_busy_module_error_message">Please wait until module has finished caching on the server and try again</string>
+    
+    <string name="load_module_title">Loading module</string>
+    <string name="load_module_message">please wait..</string>
+    
+    <string name="render_ui_failure_title">Loading error</string>
     <string name="render_ui_failure_message">Failed to load module</string>
     
     <string name="faims_fetch_module_list_title">Fetch Module List</string>
@@ -119,8 +119,7 @@
     <string name="gps_inactive">GPS disabled</string>
     <string name="action_gps_active_has_signal">GPS active has signal</string>
     <string name="action_gps_active_no_signal">GPS active no signal</string>
-    
-    
+       
     <string name="tracker_active_has_gps">Track log active, GPS connected</string>
     <string name="tracker_active_no_gps">Track log active, GPS not connected</string>
     <string name="tracker_inactive">Track log disabled</string>

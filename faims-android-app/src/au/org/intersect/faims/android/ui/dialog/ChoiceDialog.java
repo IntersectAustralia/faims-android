@@ -7,18 +7,22 @@ import au.org.intersect.faims.android.R;
 
 public class ChoiceDialog extends AlertDialog {
 	
-	public ChoiceDialog(Context context, String title, String message, final IDialogListener listener) {
+	public ChoiceDialog(Context context, String title, String message, IDialogListener listener) {
+		this(context, title, message, listener, context.getString(R.string.choice_negative_button), context.getString(R.string.choice_positive_button));
+	}
+	
+	public ChoiceDialog(Context context, String title, String message, final IDialogListener listener, final String noString, final String yesString) {
 		super(context);
 		setTitle(title);
 		setMessage(message);
-		setButton(BUTTON_NEGATIVE, context.getString(R.string.choice_negative_button), new DialogInterface.OnClickListener() {
+		setButton(BUTTON_NEGATIVE, noString, new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				listener.handleDialogResponse(DialogResultCode.SELECT_NO);
 			}
 		});
-		setButton(BUTTON_POSITIVE, context.getString(R.string.choice_positive_button), new DialogInterface.OnClickListener() {
+		setButton(BUTTON_POSITIVE, yesString, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				listener.handleDialogResponse(DialogResultCode.SELECT_YES);
