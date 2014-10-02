@@ -63,6 +63,7 @@ import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
+import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
@@ -278,6 +279,10 @@ public class MainActivity extends RoboActivity {
 		builder.create().show();
 	}
     
+    protected void removeModule() {
+    	FileUtil.delete(selectedDownloadModule.getDirectoryPath());
+    }
+    
     protected void downloadModule(final boolean overwrite) {
     	if (serverDiscovery.isServerHostValid()) {
     		showBusyDialog(Type.DOWNLOAD);
@@ -407,6 +412,10 @@ public class MainActivity extends RoboActivity {
 							} else if (type == Type.UPDATE_DATA) {
 								updateModuleData(false);
 							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
 						}
 					}
     		
@@ -471,6 +480,10 @@ public class MainActivity extends RoboActivity {
 							} else if (type == Type.UPDATE_DATA) {
 								updateModuleData(false);
 							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
 						}
 					}
     		
@@ -507,6 +520,10 @@ public class MainActivity extends RoboActivity {
 							} else if (type == Type.UPDATE_DATA) {
 								updateModuleData(false);
 							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
 						}
 					}
     		
@@ -542,6 +559,10 @@ public class MainActivity extends RoboActivity {
 								updateModuleSettings(false);
 							} else if (type == Type.UPDATE_DATA) {
 								updateModuleData(false);
+							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
 							}
 						}
 					}
@@ -595,7 +616,6 @@ public class MainActivity extends RoboActivity {
 					    		stopService(intent);
 							}
 						}
-						
 					}
 			
 		});
