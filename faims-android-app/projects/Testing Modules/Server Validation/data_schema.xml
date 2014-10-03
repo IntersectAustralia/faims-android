@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <dataSchema name="Record Operations" preparer="Vincent Tran">
   <ArchaeologicalElement name="Entity">
-    <property name="ID" type="freetext" isIdentifier="true">
+    <property name="ID" type="measure" isIdentifier="true">
       <description> Validation schema checks if this is blank </description>
     </property>
-    <property name="Description" type="freetext">
+    <property name="Description" type="measure">
       <description> Validation schema checks if everything is spelt properly </description>
     </property>
-    <property name="Height" type="freetext">
+    <property name="Height" type="measure">
       <description> Validation schema checks if this is a number </description>
     </property>
   </ArchaeologicalElement>
