@@ -155,6 +155,12 @@ public abstract class DownloadUploadService extends IntentService {
 				serviceResult = downloadResult;
 				return false;
 			}
+			
+			if (serviceInterrupted) {
+				FLog.d("download interrupted");
+				serviceResult = new Result(FAIMSClientResultCode.INTERRUPTED);
+				return false;
+			}
 	
 			// check if md5 hash matches
 			String md5checksum = fileInfo.md5;
