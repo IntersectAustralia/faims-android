@@ -108,7 +108,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 		if (adapter == null) {
 			beanShellLinker.showToast("Bluetooth is not supported on this device");
 		} else if (!adapter.isEnabled()) {
-			beanShellLinker.showToast("Please enable bootooth");
+			beanShellLinker.showToast("Please enable bluetooth");
 		} else {
 			// show dialog to connect to device
 			final Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
