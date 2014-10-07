@@ -63,18 +63,27 @@ import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
+import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
 
 public class MainActivity extends RoboActivity {
 	
-	public static class DownloadModuleHandler extends Handler {
+	enum Type {
+		DOWNLOAD,
+		UPDATE_SETTINGS,
+		UPDATE_DATA
+	}
+	
+	public static class DownloadUpdateModuleHandler extends Handler {
 		
 		private WeakReference<MainActivity> activityRef;
+		private Type type;
 
-		public DownloadModuleHandler(MainActivity activity) {
+		public DownloadUpdateModuleHandler(MainActivity activity, Type type) {
 			this.activityRef = new WeakReference<MainActivity>(activity);
+			this.type = type;
 		}
 		
 		public void handleMessage(Message message) {
@@ -93,88 +102,11 @@ public class MainActivity extends RoboActivity {
 				activity.readModules();
 			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
 					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.showBusyErrorDialog();
-				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showDownloadModuleErrorDialog();
-				} else {
-					activity.showDownloadModuleFailureDialog();
-				}
+				activity.showFailureDialog(result, type);
 			}
 		}
 		
 	};
-
-	public static class UpdateModuleSettingHandler extends Handler {
-		
-		private WeakReference<MainActivity> activityRef;
-
-		public UpdateModuleSettingHandler(MainActivity activity) {
-			this.activityRef = new WeakReference<MainActivity>(activity);
-		}
-		
-		public void handleMessage(Message message) {
-			MainActivity activity = activityRef.get();
-			if (activity == null) {
-				FLog.d("FetchModulesHandler cannot get activity");
-				return;
-			}
-			
-			activity.busyDialog.dismiss();
-			
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// Show module static panel
-				activity.openStaticModulePanel(activity.selectedDownloadModule.key);
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
-					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.showBusyErrorDialog();
-				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showUpdateModuleErrorDialog();
-				} else {
-					activity.showUpdateModuleSettingFailureDialog();
-				}
-			}
-		}
-		
-	};
-
-	public static class UpdateModuleDataHandler extends Handler {
-		
-		private WeakReference<MainActivity> activityRef;
-
-		public UpdateModuleDataHandler(MainActivity activity) {
-			this.activityRef = new WeakReference<MainActivity>(activity);
-		}
-		
-		public void handleMessage(Message message) {
-			MainActivity activity = activityRef.get();
-			if (activity == null) {
-				FLog.d("FetchModulesHandler cannot get activity");
-				return;
-			}
-			
-			activity.busyDialog.dismiss();
-			
-			Result result = (Result) message.obj;
-			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-				// Show module static panel
-				activity.openStaticModulePanel(activity.selectedDownloadModule.key);
-			} else if (result.resultCode == FAIMSClientResultCode.FAILURE ||
-					result.resultCode == FAIMSClientResultCode.INTERRUPTED) {
-				if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
-					activity.showBusyErrorDialog();
-				} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
-					activity.showUpdateModuleErrorDialog();
-				} else {
-					activity.showUpdateModuleDataFailureDialog();
-				}
-			}
-		}
-		
-	};
-
 	@Inject
 	FAIMSClient faimsClient;
 	
@@ -196,9 +128,9 @@ public class MainActivity extends RoboActivity {
 	
 	private AsyncTask<Void, Void, Void> locateTask;
 	
-	protected final DownloadModuleHandler downloadHandler = new DownloadModuleHandler(MainActivity.this);
-	protected final UpdateModuleSettingHandler updateModuleSettingHandler = new UpdateModuleSettingHandler(MainActivity.this);
-	protected final UpdateModuleDataHandler updateModuleDataHandler = new UpdateModuleDataHandler(MainActivity.this);
+	protected final DownloadUpdateModuleHandler downloadHandler = new DownloadUpdateModuleHandler(MainActivity.this, Type.DOWNLOAD);
+	protected final DownloadUpdateModuleHandler updateModuleSettingHandler = new DownloadUpdateModuleHandler(MainActivity.this, Type.UPDATE_SETTINGS);
+	protected final DownloadUpdateModuleHandler updateModuleDataHandler = new DownloadUpdateModuleHandler(MainActivity.this, Type.UPDATE_DATA);
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,8 +206,8 @@ public class MainActivity extends RoboActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				choiceDialog = new ChoiceDialog(MainActivity.this, 
-						getString(R.string.confirm_download_module_title),
-						getString(R.string.confirm_download_module_message) + " " + selectedItem + "?",
+						getString(R.string.confirm_restore_module_title),
+						getString(R.string.confirm_restore_module_message) + " " + selectedItem + "?",
 						new IDialogListener() {
 
 							@Override
@@ -294,7 +226,9 @@ public class MainActivity extends RoboActivity {
 														downloadModule(true);
 													}
 												}	
-									});
+									},
+									getString(R.string.confirm_restore_no),
+									getString(R.string.confirm_restore_yes));
 									choiceDialog.show();
 								}
 							}
@@ -317,8 +251,8 @@ public class MainActivity extends RoboActivity {
     
     protected void showUpdateModuleDialog(final String selectedItem) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle(R.string.select_update_module_title);
-		builder.setMessage(R.string.select_update_module_message);
+		builder.setTitle(R.string.confirm_update_module_title);
+		builder.setMessage(R.string.confirm_update_module_message);
 
 		builder.setPositiveButton("Cancel", new OnClickListener() {
 			
@@ -339,15 +273,19 @@ public class MainActivity extends RoboActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				updateModuleSettingArchive(true);
+				updateModuleSettings(true);
 			}
 		});
 		builder.create().show();
 	}
     
+    protected void removeModule() {
+    	FileUtil.delete(selectedDownloadModule.getDirectoryPath());
+    }
+    
     protected void downloadModule(final boolean overwrite) {
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyDownloadingModulesDialog();
+    		showBusyDialog(Type.DOWNLOAD);
     		
     		// start service
     		Intent intent = new Intent(MainActivity.this, DownloadModuleService.class);
@@ -378,10 +316,9 @@ public class MainActivity extends RoboActivity {
     	
     }
 
-	protected void updateModuleSettingArchive(final boolean overwrite) {
-    	
+	protected void updateModuleSettings(final boolean overwrite) {
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyUpdatingModuleSettingDialog();
+    		showBusyDialog(Type.UPDATE_SETTINGS);
     		
     		// start service
     		Intent intent = new Intent(MainActivity.this, UpdateModuleSettingService.class);
@@ -401,7 +338,7 @@ public class MainActivity extends RoboActivity {
     				MainActivity.this.busyDialog.dismiss();
     				
     				if ((Boolean) result) {
-    					updateModuleSettingArchive(overwrite);
+    					updateModuleSettings(overwrite);
     				} else {
     					showLocateServerDownloadArchiveFailureDialog(overwrite);
     				}
@@ -413,9 +350,8 @@ public class MainActivity extends RoboActivity {
     }
 
 	protected void updateModuleData(final boolean overwrite) {
-    	
     	if (serverDiscovery.isServerHostValid()) {
-    		showBusyUpdatingModuleDataDialog();
+    		showBusyDialog(Type.UPDATE_DATA);
     		
     		// start service
     		Intent intent = new Intent(MainActivity.this, UpdateModuleDataService.class);
@@ -445,17 +381,41 @@ public class MainActivity extends RoboActivity {
     	}
     	
     }
+	
+	private void showFailureDialog(Result result, Type type) {
+		if (result.errorCode == FAIMSClientErrorCode.BUSY_ERROR) {
+			showBusyErrorDialog(type);
+		} else if (result.errorCode == FAIMSClientErrorCode.STORAGE_LIMIT_ERROR) {
+			showStorageErrorDialog(type);
+		} else if (result.errorCode == FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR) {
+			showDownloadCorruptedDialog(type);
+		} else if (result.errorCode == FAIMSClientErrorCode.SERVER_ERROR) {
+			showServerErrorDialog(type);
+		} else {
+			showInterruptedDialog(type);
+		}
+	}
     
-    private void showLocateServerDownloadArchiveFailureDialog(final boolean overwrite) {
+    private void showBusyErrorDialog(final Type type) {
     	choiceDialog = new ChoiceDialog(MainActivity.this,
-				getString(R.string.locate_server_failure_title),
-				getString(R.string.locate_server_failure_message),
+				getBusyErrorTitle(type),
+				getBusyErrorMessage(type),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadModule(overwrite);
+							if (type == Type.DOWNLOAD) {
+								downloadModule(false);
+							} else if (type == Type.UPDATE_SETTINGS) {
+								updateModuleSettings(false);
+							} else if (type == Type.UPDATE_DATA) {
+								updateModuleData(false);
+							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
 						}
 					}
     		
@@ -463,27 +423,23 @@ public class MainActivity extends RoboActivity {
     	choiceDialog.show();
     }
     
-    private void showDownloadModuleFailureDialog() {
-    	choiceDialog = new ChoiceDialog(MainActivity.this,
-				getString(R.string.download_module_failure_title),
-				getString(R.string.download_module_failure_message),
-				new IDialogListener() {
+    private String getBusyErrorTitle(Type type) {
+    	return getString(R.string.busy_error_title);
+	}
 
-					@Override
-					public void handleDialogResponse(DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.SELECT_YES) {
-							downloadModule(false);
-						}
-					}
-    		
-    	});
-    	choiceDialog.show();
-    }
-    
-    private void showBusyErrorDialog() {
+	private String getBusyErrorMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_busy_error_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_busy_error_message);
+		case UPDATE_DATA: return getString(R.string.update_data_busy_error_message);
+		}
+    	return null;
+	}
+
+	private void showStorageErrorDialog(Type type) {
     	confirmDialog = new ConfirmDialog(MainActivity.this,
-				getString(R.string.download_busy_module_error_title),
-				getString(R.string.download_busy_module_error_message),
+				getStorageErrorTitle(type),
+				getStorageErrorMessage(type),
 				new IDialogListener() {
 
 					@Override
@@ -494,23 +450,192 @@ public class MainActivity extends RoboActivity {
     	});
     	confirmDialog.show();
     }
-    
-    private void showDownloadModuleErrorDialog() {
-    	confirmDialog = new ConfirmDialog(MainActivity.this,
-				getString(R.string.download_module_error_title),
-				getString(R.string.download_module_error_message),
+
+	private String getStorageErrorTitle(Type type) {
+		return getString(R.string.storage_error_title);
+	}
+	
+	private String getStorageErrorMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_storage_error_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_storage_error_message);
+		case UPDATE_DATA: return getString(R.string.update_data_storage_error_message);
+		}
+		return null;
+	}
+
+	private void showDownloadCorruptedDialog(final Type type) {
+    	choiceDialog = new ChoiceDialog(MainActivity.this,
+    			getDownloadCorruptedTitle(type),
+    			getDownloadCorruptedMessage(type),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
-						// do nothing
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							if (type == Type.DOWNLOAD) {
+								downloadModule(false);
+							} else if (type == Type.UPDATE_SETTINGS) {
+								updateModuleSettings(false);
+							} else if (type == Type.UPDATE_DATA) {
+								updateModuleData(false);
+							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
+						}
 					}
     		
     	});
-    	confirmDialog.show();
+    	choiceDialog.show();
     }
     
-    private void showBusyLocatingServerDialog() {
+    private String getDownloadCorruptedTitle(Type type) {
+    	return getString(R.string.corrupted_error_title);
+	}
+
+	private String getDownloadCorruptedMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_corrupted_error_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_corrupted_error_message);
+		case UPDATE_DATA: return getString(R.string.update_data_corrupted_error_message);
+		}
+    	return null;
+	}
+
+	private void showServerErrorDialog(final Type type) {
+    	choiceDialog = new ChoiceDialog(MainActivity.this,
+				getServerErrorTitle(type),
+				getServerErrorMessage(type),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							if (type == Type.DOWNLOAD) {
+								downloadModule(false);
+							} else if (type == Type.UPDATE_SETTINGS) {
+								updateModuleSettings(false);
+							} else if (type == Type.UPDATE_DATA) {
+								updateModuleData(false);
+							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
+						}
+					}
+    		
+    	});
+    	choiceDialog.show();
+    }
+    
+    private String getServerErrorTitle(Type type) {
+    	return getString(R.string.server_error_title);
+	}
+
+	private String getServerErrorMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_server_error_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_server_error_message);
+		case UPDATE_DATA: return getString(R.string.update_data_server_error_message);
+		}
+    	return null;
+	}
+
+	private void showInterruptedDialog(final Type type) {
+    	choiceDialog = new ChoiceDialog(MainActivity.this,
+				getInterruptedTitle(type),
+				getInterruptedMessage(type),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(DialogResultCode resultCode) {
+						if (resultCode == DialogResultCode.SELECT_YES) {
+							if (type == Type.DOWNLOAD) {
+								downloadModule(false);
+							} else if (type == Type.UPDATE_SETTINGS) {
+								updateModuleSettings(false);
+							} else if (type == Type.UPDATE_DATA) {
+								updateModuleData(false);
+							}
+						} else {
+							if (type == Type.DOWNLOAD) {
+								removeModule();
+							}
+						}
+					}
+    		
+    	});
+    	choiceDialog.show();
+    }
+    
+    private String getInterruptedTitle(Type type) {
+    	return getString(R.string.interrupted_title);
+	}
+
+	private String getInterruptedMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_interrupted_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_interrupted_message);
+		case UPDATE_DATA: return getString(R.string.update_data_interrupted_message);
+		}
+    	return null;
+	}
+
+	private void showBusyDialog(final Type type) {
+    	busyDialog = new BusyDialog(MainActivity.this, 
+				getBusyTitle(type),
+				getBusyMessage(type),
+				new IDialogListener() {
+
+					@Override
+					public void handleDialogResponse(
+							DialogResultCode resultCode) {
+						if (type == Type.DOWNLOAD) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								// stop service
+					    		Intent intent = new Intent(MainActivity.this, DownloadModuleService.class);
+					    		
+					    		stopService(intent);
+							}
+						} else if (type == Type.UPDATE_SETTINGS) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								// stop service
+					    		Intent intent = new Intent(MainActivity.this, UpdateModuleSettingService.class);
+					    		
+					    		stopService(intent);
+							}
+							
+						} else if (type == Type.UPDATE_DATA) {
+							if (resultCode == DialogResultCode.CANCEL) {
+								// stop service
+					    		Intent intent = new Intent(MainActivity.this, UpdateModuleDataService.class);
+					    		
+					    		stopService(intent);
+							}
+						}
+					}
+			
+		});
+	    busyDialog.show();
+    }
+    
+    private String getBusyTitle(Type type) {
+    	return getString(R.string.busy_title);
+	}
+
+	private String getBusyMessage(Type type) {
+		switch(type) {
+		case DOWNLOAD: return getString(R.string.download_busy_message);
+		case UPDATE_SETTINGS: return getString(R.string.update_settings_busy_message);
+		case UPDATE_DATA: return getString(R.string.update_data_busy_message);
+		}
+    	return null;
+	}
+
+	private void showBusyLocatingServerDialog() {
     	busyDialog = new BusyDialog(MainActivity.this, 
 				getString(R.string.locate_server_title),
 				getString(R.string.locate_server_message),
@@ -528,116 +653,21 @@ public class MainActivity extends RoboActivity {
 		busyDialog.show();
     }
     
-    private void showBusyDownloadingModulesDialog() {
-    	busyDialog = new BusyDialog(MainActivity.this, 
-				getString(R.string.download_module_title),
-				getString(R.string.download_module_message),
-				new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(
-							DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.CANCEL) {
-							// stop service
-				    		Intent intent = new Intent(MainActivity.this, DownloadModuleService.class);
-				    		
-				    		stopService(intent);
-						}
-					}
-			
-		});
-	    busyDialog.show();
-    }
-    
-    private void showBusyUpdatingModuleSettingDialog() {
-    	busyDialog = new BusyDialog(MainActivity.this, 
-				getString(R.string.update_module_title),
-				getString(R.string.update_module_message),
-				new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(
-							DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.CANCEL) {
-							// stop service
-				    		Intent intent = new Intent(MainActivity.this, UpdateModuleSettingService.class);
-				    		
-				    		stopService(intent);
-						}
-					}
-			
-		});
-	    busyDialog.show();
-    }
-
-    private void showBusyUpdatingModuleDataDialog() {
-    	busyDialog = new BusyDialog(MainActivity.this, 
-				getString(R.string.update_module_title),
-				getString(R.string.update_module_message),
-				new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(
-							DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.CANCEL) {
-							// stop service
-				    		Intent intent = new Intent(MainActivity.this, UpdateModuleDataService.class);
-				    		
-				    		stopService(intent);
-						}
-					}
-			
-		});
-	    busyDialog.show();
-    }
-
-    private void showUpdateModuleSettingFailureDialog() {
+    private void showLocateServerDownloadArchiveFailureDialog(final boolean overwrite) {
     	choiceDialog = new ChoiceDialog(MainActivity.this,
-				getString(R.string.update_module_failure_title),
-				getString(R.string.update_module_failure_message),
+				getString(R.string.locate_server_failure_title),
+				getString(R.string.locate_server_failure_message),
 				new IDialogListener() {
 
 					@Override
 					public void handleDialogResponse(DialogResultCode resultCode) {
 						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateModuleSettingArchive(false);
+							downloadModule(overwrite);
 						}
 					}
     		
     	});
     	choiceDialog.show();
-    }
-
-    private void showUpdateModuleDataFailureDialog() {
-    	choiceDialog = new ChoiceDialog(MainActivity.this,
-				getString(R.string.update_module_failure_title),
-				getString(R.string.update_module_failure_message),
-				new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(DialogResultCode resultCode) {
-						if (resultCode == DialogResultCode.SELECT_YES) {
-							updateModuleData(false);
-						}
-					}
-    		
-    	});
-    	choiceDialog.show();
-    }
-
-    private void showUpdateModuleErrorDialog() {
-    	confirmDialog = new ConfirmDialog(MainActivity.this,
-				getString(R.string.update_module_error_title),
-				getString(R.string.update_module_error_message),
-				new IDialogListener() {
-
-					@Override
-					public void handleDialogResponse(DialogResultCode resultCode) {
-						// do nothing
-					}
-    		
-    	});
-    	confirmDialog.show();
     }
     
     @Override

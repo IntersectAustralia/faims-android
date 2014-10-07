@@ -366,8 +366,8 @@ public class MainActivityTest {
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
 		assertTrue("Could not download module Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
-		assertEquals("Dialog title", activity.getString(R.string.download_module_failure_title), choiceDialog.getTitle());
-		assertEquals("Dialog message", activity.getString(R.string.download_module_failure_message), choiceDialog.getMessage());
+		assertEquals("Dialog title", activity.getString(R.string.server_error_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_server_error_message), choiceDialog.getMessage());
 
 	}
 	
@@ -400,8 +400,8 @@ public class MainActivityTest {
 		ShadowAlertDialog choiceDialog = Robolectric.shadowOf(activity.choiceDialog);
 		
 		assertTrue("Could not download module Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
-		assertEquals("Dialog title", activity.getString(R.string.download_module_failure_title), choiceDialog.getTitle());
-		assertEquals("Dialog message", activity.getString(R.string.download_module_failure_message), choiceDialog.getMessage());
+		assertEquals("Dialog title", activity.getString(R.string.corrupted_error_title), choiceDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_corrupted_error_message), choiceDialog.getMessage());
 	}
 	
 	@Test
@@ -433,8 +433,8 @@ public class MainActivityTest {
 		ShadowAlertDialog confirmDialog = Robolectric.shadowOf(activity.confirmDialog);
 		
 		assertTrue("Module is too big Dialog Showing",ShadowAlertDialog.getLatestAlertDialog().isShowing());
-		assertEquals("Dialog title", activity.getString(R.string.download_module_error_title), confirmDialog.getTitle());
-		assertEquals("Dialog message", activity.getString(R.string.download_module_error_message), confirmDialog.getMessage());
+		assertEquals("Dialog title", activity.getString(R.string.storage_error_title), confirmDialog.getTitle());
+		assertEquals("Dialog message", activity.getString(R.string.download_storage_error_message), confirmDialog.getMessage());
 		
 	}
 	

@@ -102,7 +102,7 @@
     <property name="List" type="enum">
       <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
       <lookup>
-        <term>Option A<description/></term>
+        <term>{OptionA}<description/></term>
         <term>Option B<description/></term>
         <term>Option C<description/></term>
         <term>Option D<description/></term>

@@ -159,10 +159,17 @@ public abstract class DownloadUploadService extends IntentService {
 			// check if md5 hash matches
 			String md5checksum = fileInfo.md5;
 			if (!FileUtil.generateMD5Hash(downloadFile).equals(md5checksum)) {
+				FileUtil.delete(downloadFile);
+				
+				if (serviceInterrupted) {
+					FLog.d("download interrupted");
+					serviceResult = new Result(FAIMSClientResultCode.INTERRUPTED);
+					return false;
+				}
+				
 				FLog.d("downloaded file failed because file is corrupted");
 				serviceResult = new Result(FAIMSClientResultCode.FAILURE,
 						FAIMSClientErrorCode.DOWNLOAD_CORRUPTED_ERROR);
-				FileUtil.delete(downloadFile);
 				return false;
 			}
 
