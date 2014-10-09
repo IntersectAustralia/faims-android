@@ -36,6 +36,7 @@
           </Entity>
         </faims>
       </instance>
+      <bind nodeset="/faims/Entity/Entity/ID" type="string"/>
       <bind nodeset="/faims/Entity/Entity/Description" type="string"/>
       <bind nodeset="/faims/Entity/Entity/Height" type="decimal"/>
     </model>

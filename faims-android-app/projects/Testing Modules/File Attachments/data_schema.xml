@@ -4,16 +4,16 @@
     <property name="ID" type="freetext" isIdentifier="true">
       <description>ID</description>
     </property>
-    <property name="Files" type="file">
+    <property name="Files" type="file" file="true">
       <description>Files</description>
     </property>
-    <property name="Photo" type="file" thumbnail="true">
+    <property name="Photo" type="file" thumbnail="true" file="true">
       <description>Photo</description>
     </property>
-    <property name="Audio" type="file" thumbnail="true">
+    <property name="Audio" type="file" file="true">
       <description>Audio</description>
     </property>
-    <property name="Video" type="file" thumbnail="true">
+    <property name="Video" type="file" thumbnail="true" file="true">
       <description>Video</description>
     </property>
   </ArchaeologicalElement>
