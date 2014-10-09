@@ -46,7 +46,11 @@ public class FileAttachmentLabelDialog extends LabelDialog {
 	@Override
 	protected void updateCertainty() {
 		if (index < view.getCertainties().size()) {
-			updateCertainty(Float.valueOf(view.getCertainties().get(index)));
+			if(view.getCertainties().get(index) != null) {
+				updateCertainty(Float.valueOf(view.getCertainties().get(index)));
+			} else {
+				updateCertainty(1.0F);
+			}
 		}
 	}
 	

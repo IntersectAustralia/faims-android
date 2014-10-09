@@ -160,6 +160,10 @@ public class FAIMSClient {
 				
 				return Result.SUCCESS;
 			} catch (Exception e) {
+				if (isInterrupted) {
+					FLog.d("download file interrupted");				
+					return Result.INTERRUPTED;
+				}
 				FLog.e("error downloading file", e);			
 				return Result.FAILURE;				
 			} finally {
@@ -210,6 +214,10 @@ public class FAIMSClient {
 				
 				return Result.SUCCESS;	
 			} catch (Exception e) {
+				if (isInterrupted) {
+					FLog.d("upload file interrupted");				
+					return Result.INTERRUPTED;
+				}
 				FLog.e("error uploading file", e);				
 				return Result.FAILURE;				
 			} finally {

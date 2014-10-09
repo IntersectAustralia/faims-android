@@ -56,24 +56,24 @@
     <string name="confirm_update_module_message">Do you want to update module settings or module data?</string>
 
     <string name="busy_error_title">Server Busy Error</string>
-    <string name="download_busy_error_message">Could not download module as server is busy. Please wait and try again.</string>
-    <string name="update_settings_busy_error_message">Could not update module settings as server is busy. Please wait and try again.</string>
-    <string name="update_data_busy_error_message">Could not update module maps as server is busy. Please wait and try again.</string>
+    <string name="download_busy_error_message">Could not download module as the server is busy. Please wait and try again later.</string>
+    <string name="update_settings_busy_error_message">Could not update module settings as the server is busy. Please wait and try again later.</string>
+    <string name="update_data_busy_error_message">Could not update module maps as the server is busy. Please wait and try again later.</string>
     
     <string name="storage_error_title">Storage Error</string>
-    <string name="download_storage_error_message">Could not download module because your device does not have enough disk space. Please clear some disk space and try again.</string>
-    <string name="update_settings_storage_error_message">Could not update module settings because your device does not have enough disk space. Please clear some disk space and try again.</string>
-    <string name="update_data_storage_error_message">Could not update module maps because your device does not have enough disk space. Please clear some disk space and try again.</string>
+    <string name="download_storage_error_message">Could not download module because your device does not have enough storage. Please clear some space and try again.</string>
+    <string name="update_settings_storage_error_message">Could not update module settings because your device does not have enough storage. Please clear some space and try again.</string>
+    <string name="update_data_storage_error_message">Could not update module maps because your device does not have enough storage. Please clear some space and try again.</string>
     
     <string name="corrupted_error_title">Download Corrupted Error</string>
-    <string name="download_corrupted_error_message">Could not download module because a file was corrupted on transfer from server to your device. Please try again.</string>
-    <string name="update_settings_corrupted_error_message">Could not update module settings because a file was corrupted on transfer from server to your device. Please try again.</string>
-    <string name="update_data_corrupted_error_message">Could not update module maps because a file was corrupted on transfer from server to your device. Please try again.</string>
+    <string name="download_corrupted_error_message">Could not download module because a file was corrupted during transfer from the server to your device. Please try again.</string>
+    <string name="update_settings_corrupted_error_message">Could not update module settings because a file was corrupted during transfer from the server to your device. Please try again.</string>
+    <string name="update_data_corrupted_error_message">Could not update module maps because a file was corrupted during transfer from the server to your device. Please try again.</string>
     
     <string name="server_error_title">Server Error</string>
-    <string name="download_server_error_message">Could not download module because there was a network error. Please check you can connect to the server and try again.</string>
-    <string name="update_settings_server_error_message">Could not update module settings because there was a network error. Please check you can connect to the server and try again.</string>
-    <string name="update_data_server_error_message">Could not update module maps because there was a network error. Please check you can connect to the server and try again.</string>
+    <string name="download_server_error_message">Could not download module because there was a network error. Please check your connection to the server and try again.</string>
+    <string name="update_settings_server_error_message">Could not update module settings because there was a network error. Please check your connection to the server and try again.</string>
+    <string name="update_data_server_error_message">Could not update module maps because there was a network error. Please check your connection to the server and try again.</string>
     
     <string name="interrupted_title">Cancelled</string>
     <string name="download_interrupted_message">Download module cancelled. Would you like to try again?</string>
