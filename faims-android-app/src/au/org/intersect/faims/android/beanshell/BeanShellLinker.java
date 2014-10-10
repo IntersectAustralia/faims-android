@@ -948,7 +948,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			return dialog;
 		} catch (Exception e) {
 			FLog.e("error showing warning", e);
-			showWarning("Logic Error", "Error show warning dialog");
 		}
 		return null;
 	}
