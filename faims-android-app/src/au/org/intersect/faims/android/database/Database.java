@@ -193,10 +193,12 @@ public class Database {
 						if (args[0] == null) {
 							String value = "";
 							for (int i = 1 ; i < args.length; i++) {
-								if (!"".equals(value)) {
-									value += ", ";
+								if (args[i] != null) {
+									if (!"".equals(value)) {
+										value += ", ";
+									}
+									value += args[i];
 								}
-								value += args[i];
 							}
 							fc.set_result(value);
 						} else {
