@@ -11,8 +11,8 @@
             </validator>
         </property>
         <property name='Height'>
-            <validator type='typechecker' datatype='float'>
-                <param type='field' value='measure' />
+            <validator type='typechecker' datatype='integer'>
+                <param type='field' value='freetext' />
             </validator>
         </property>
     </ArchaeologicalElement>
