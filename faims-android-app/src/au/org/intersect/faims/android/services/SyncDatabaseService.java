@@ -108,7 +108,7 @@ public class SyncDatabaseService extends UploadDatabaseService {
 		// update settings
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
 		jsonInfo = (JSONObject) serviceResult.data;
-		module.dbVersion = jsonInfo.getString("version");
+		module.dbVersion = jsonInfo.getString("dbVersion");
 		ModuleUtil.saveModule(module);
 	}
 

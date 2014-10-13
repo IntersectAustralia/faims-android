@@ -59,7 +59,7 @@ public class DownloadModuleService extends DownloadUploadService {
 		}
 		
 		Module module = ModuleUtil.getModule(serviceModule.key); // get the latest settings
-		module.dbVersion = jsonInfo.getString("version");
+		module.dbVersion = jsonInfo.getString("dbVersion");
 		module.timestamp = DateUtil.getCurrentTimestampGMT();
 		module.fileSyncTimeStamp = DateUtil.getCurrentTimestampGMT();
 		ModuleUtil.saveModule(module);
