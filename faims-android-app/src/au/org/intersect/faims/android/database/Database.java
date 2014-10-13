@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.Arrays;
 
 import jsqlite.Callback;
+import jsqlite.Function;
+import jsqlite.FunctionContext;
 import jsqlite.Stmt;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.formatter.StringFormatter;
 import au.org.intersect.faims.android.log.FLog;
 
 import com.google.inject.Inject;
@@ -109,6 +112,7 @@ public class Database {
 		jsqlite.Database db = new jsqlite.Database();
 		db.open(file.getPath(), type);
 		db.exec("PRAGMA temp_store = 2", null);
+		loadFunctions(db);
 		return db;
 	}
 	
@@ -175,6 +179,48 @@ public class Database {
 	protected String clean(String s) {
 		if (s != null && "".equals(s.trim())) return null;
 		return s;
+	}
+	
+	public void loadFunctions(jsqlite.Database db) throws jsqlite.Exception {
+		db.create_function("format",  -1, new Function() {
+
+			@Override
+			public void function(FunctionContext fc, String[] args) {
+				try {
+					if (args == null || args.length < 1) {
+						fc.set_result((String) null);
+					} else {
+						if (args[0] == null) {
+							String value = "";
+							for (int i = 1 ; i < args.length; i++) {
+								if (args[i] != null) {
+									if (!"".equals(value)) {
+										value += ", ";
+									}
+									value += args[i];
+								}
+							}
+							fc.set_result(value);
+						} else {
+							String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+							fc.set_result(new StringFormatter(args[0]).preCompute().evaluate(newArgs));
+						}
+					}
+				} catch (Exception e) {
+					FLog.e("Error trying to run formatter with arguments " + (args == null ? "" : args.toString()), e);
+					fc.set_error("Error trying to run formatter with arguments " + (args == null ? "" : args.toString()));
+				}
+			}
+
+			@Override
+			public void step(FunctionContext fc, String[] args) {
+			}
+
+			@Override
+			public void last_step(FunctionContext fc) {	
+			}
+			
+		});
 	}
 
 }

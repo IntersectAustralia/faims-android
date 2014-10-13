@@ -6,7 +6,7 @@ public final class DatabaseQueries {
 		"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, AEntTimestamp, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, aenttypeid, GeomFromText(?, 4326), ?, ? " +
 			"FROM aenttype " +
-			"WHERE aenttypename = ? COLLATE NOCASE;";
+			"WHERE aenttypename = ?;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_ARCHENTITY = 
 			"INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumn, parenttimestamp)\n" + 
@@ -17,19 +17,19 @@ public final class DatabaseQueries {
 		"SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;";
 	
 	public static final String GET_AENTVALUE_PARENT_TIMESTAMP =
-		"SELECT max(valuetimestamp) FROM aentvalue JOIN attributekey using (attributeid) WHERE uuid = ? and attributename = ? COLLATE NOCASE group by uuid, attributeid;";
+		"SELECT max(valuetimestamp) FROM aentvalue JOIN attributekey using (attributeid) WHERE uuid = ? and attributename = ? group by uuid, attributeid;";
 
 	public static final String INSERT_INTO_AENTVALUE = 
 		"INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, deleted, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, ?, attributeID, ?, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " +
-			"WHERE attributeName = ? COLLATE NOCASE;";
+			"WHERE attributeName = ?;";
 
 	public static final String INSERT_INTO_RELATIONSHIP = 
 		"INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumn, RelnTimestamp, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, relntypeid, GeomFromText(?, 4326), ?, ? " +
 			"FROM relntype " +
-			"WHERE relntypename = ? COLLATE NOCASE;";
+			"WHERE relntypename = ?;";
 	
 	public static final String INSERT_AND_UPDATE_INTO_RELATIONSHIP = 
 			"INSERT INTO Relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumn, parenttimestamp)\n" + 
@@ -40,23 +40,23 @@ public final class DatabaseQueries {
 		"SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;";
 	
 	public static final String GET_RELNVALUE_PARENT_TIMESTAMP =
-			"SELECT max(relnvaluetimestamp) FROM relnvalue JOIN attributekey using (attributeid) WHERE relationshipid = ? and attributename = ? COLLATE NOCASE group by relationshipid, attributeid;";
+			"SELECT max(relnvaluetimestamp) FROM relnvalue JOIN attributekey using (attributeid) WHERE relationshipid = ? and attributename = ? group by relationshipid, attributeid;";
 	
 	public static final String INSERT_INTO_RELNVALUE = 
 		"INSERT INTO RelnValue (RelationshipID, UserId, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, deleted, parenttimestamp) " +
 			"SELECT cast(? as integer), ?, ?, attributeId, ?, ?, ?, ?, ? " +
 			"FROM AttributeKey " +
-			"WHERE attributeName = ? COLLATE NOCASE;";
+			"WHERE attributeName = ?;";
 
 	public static final String CHECK_VALID_AENT = 
 		"SELECT count(AEntTypeName) " + 
 			"FROM IdealAEnt left outer join AEntType using (AEntTypeId) left outer join AttributeKey using (AttributeId) " + 
-			"WHERE AEntTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+			"WHERE AEntTypeName = ? and AttributeName = ?;";
 
 	public static final String CHECK_VALID_RELN = 
 		"SELECT count(RelnTypeName) " + 
 			"FROM IdealReln left outer join RelnType using (RelnTypeID) left outer join AttributeKey using (AttributeId) " + 
-			"WHERE RelnTypeName = ? COLLATE NOCASE and AttributeName = ? COLLATE NOCASE;";
+			"WHERE RelnTypeName = ? and AttributeName = ?;";
 	
 	public static final String GET_AENT_RELN_PARENT_TIMESTAMP =
 		"SELECT max(aentrelntimestamp) from aentreln where uuid = ? and relationshipid = ? group by uuid, relationshipid;";
@@ -95,7 +95,7 @@ public final class DatabaseQueries {
 				"	 									   vocabname, \n" + 
 				"	 									   freetext), ' | ') as response \n" + 
 				" 			FROM latestNonDeletedArchentIdentifiers\n" + 
-				"			WHERE lower(aenttypename) = lower('" + type + "')\n" + 
+				"			WHERE aenttypename = '" + type + "'\n" + 
 				" 			GROUP BY uuid;";
 	}
 
@@ -107,7 +107,7 @@ public final class DatabaseQueries {
 				" 													 vocabname, \n" + 
 				" 													 freetext), ' | ') as response \n" + 
 				" 		FROM latestNonDeletedRelnIdentifiers \n" + 
-				"		WHERE lower(relntypename) = lower('" + type + "')\n" + 
+				"		WHERE relntypename = '" + type + "'\n" + 
 				" 		GROUP BY relationshipid;";
 	}
 
@@ -173,13 +173,13 @@ public final class DatabaseQueries {
 	}
 	
 	public static final String COUNT_ENTITY_TYPE =
-		"select count(AEntTypeID) from AEntType where AEntTypeName = ? COLLATE NOCASE;";
+		"select count(AEntTypeID) from AEntType where AEntTypeName = ?;";
 
 	public static final String COUNT_ENTITY =
 		"select count(UUID) from ArchEntity where UUID = ?;";
 
 	public static final String COUNT_RELN_TYPE =
-		"select count(RelnTypeID) from RelnType where RelnTypeName = ? COLLATE NOCASE;";
+		"select count(RelnTypeID) from RelnType where RelnTypeName = ?;";
 
 	public static final String COUNT_RELN =
 		"select count(RelationshipID) from Relationship where RelationshipID = ?;";

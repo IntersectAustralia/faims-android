@@ -54,6 +54,7 @@ import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ShowModuleActivityData;
 import au.org.intersect.faims.android.database.DatabaseChangeListener;
 import au.org.intersect.faims.android.database.DatabaseManager;
+import au.org.intersect.faims.android.formatter.StringFormatter;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AsyncTaskManager;
@@ -380,7 +381,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		uiRenderer.init(this);
 		autoSaveManager.init(this);
 		asyncTaskManager.init();
-		
+		StringFormatter.init();
 	}
 
 	private void setupBeanshell() {
