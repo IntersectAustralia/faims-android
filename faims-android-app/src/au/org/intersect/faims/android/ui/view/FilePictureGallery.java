@@ -152,12 +152,14 @@ public class FilePictureGallery extends CustomFileList {
 		
 		NativeCSS.addCSSClass(galleryLayout, "file-gallery");
 		
+		LinearLayout headerContainer = new LinearLayout(galleriesLayout.getContext());
+		headerContainer.setOrientation(LinearLayout.VERTICAL);
+		
 		TextView textView = new TextView(
 				galleriesLayout.getContext());
 		String name = picture.getName() != null ? picture
 				.getName() : new File(path).getName();
 		textView.setText(name);
-		textView.setBackgroundResource(R.drawable.label_selector);
 		textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		textView.setTextSize(15);
 		textView.setWidth(GALLERY_SIZE);
@@ -183,7 +185,7 @@ public class FilePictureGallery extends CustomFileList {
 			dialog.addCertaintyTab();
 			certaintyIcons.add(certaintyImage);
 		}
-		textView.setOnLongClickListener(new OnLongClickListener() {
+		headerContainer.setOnLongClickListener(new OnLongClickListener() {
 			
 			@Override
 			public boolean onLongClick(View v) {
@@ -191,9 +193,12 @@ public class FilePictureGallery extends CustomFileList {
 				return true;
 			}
 		});
-		galleryContainer.addView(iconContainer);
 		
-		galleryLayout.addView(textView);
+		headerContainer.setBackgroundResource(R.drawable.label_selector);
+		headerContainer.addView(textView);
+		headerContainer.addView(iconContainer);
+		
+		galleryLayout.addView(headerContainer);
 		galleryLayout.addView(galleryContainer);
 		
 		galleryImages.add(gallery);
@@ -245,6 +250,14 @@ public class FilePictureGallery extends CustomFileList {
 	public void addFileView(String filePath) {
 		Picture picture = new Picture(filePath, null, filePath);
 		addGallery(picture);
+	}
+	
+	public void removeGalleryItem(CustomImageView view) {
+		int index = galleryImages.indexOf(view);
+		galleriesLayout.removeViewAt(index);
+		annotations.remove(index);
+		certainties.remove(index);
+		galleryImages.remove(view);
 	}
 
 }
