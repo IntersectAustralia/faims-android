@@ -94,7 +94,6 @@ public class Module implements Serializable {
 		if (object.has("permit_holder")) p.permitHolder = object.getString("permit_holder");
 		if (object.has("contact_address")) p.contactAndAddress = object.getString("contact_address");
 		if (object.has("participant")) p.participants = object.getString("participant");
-		if (object.has("dbVersion")) p.dbVersion = object.getString("dbVersion");
 		if (object.has("timestamp")) p.timestamp = object.getString("timestamp");
 		if (object.has("file_sync_timestamp")) p.fileSyncTimeStamp = object.getString("file_sync_timestamp");
 		if (object.has("srid")) p.srid = object.getString("srid");
@@ -104,6 +103,7 @@ public class Module implements Serializable {
 		if (object.has("client_sponsor")) p.clientSponsor = object.getString("client_sponsor");
 		if (object.has("land_owner")) p.landOwner = object.getString("land_owner");
 		if (object.has("has_sensitive_data")) p.hasSensitiveData = object.getString("has_sensitive_data");
+		if (object.has("dbVersion")) p.dbVersion = object.getString("dbVersion");
 		return p;
 	}
 
@@ -119,7 +119,6 @@ public class Module implements Serializable {
 		if (permitHolder != null) object.put("permit_holder", permitHolder);
 		if (contactAndAddress != null) object.put("contact_address", contactAndAddress);
 		if (participants != null) object.put("participant", participants);
-		if (dbVersion != null) object.put("dbVersion", dbVersion);
 		if (timestamp != null) object.put("timestamp", timestamp);
 		if (fileSyncTimeStamp != null) object.put("file_sync_timestamp", fileSyncTimeStamp);
 		if (srid != null) object.put("srid", srid);
@@ -129,6 +128,7 @@ public class Module implements Serializable {
 		if (clientSponsor != null) object.put("client_sponsor", clientSponsor);
 		if (landOwner != null) object.put("land_owner", landOwner);
 		if (hasSensitiveData != null) object.put("has_sensitive_data", hasSensitiveData);
+		if (dbVersion != null) object.put("dbVersion", dbVersion);
 		return object;	
 	}
 	

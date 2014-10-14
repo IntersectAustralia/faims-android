@@ -106,6 +106,8 @@ public class ModuleListAdapter extends ArrayAdapter<ModuleItem> {
 			moduleServer.setText("Server: " + items.get(position).getHost());
 			if (items.get(position).getVersion() != null && !items.get(position).getVersion().isEmpty()) {
 				moduleVersion.setText("Version: " + items.get(position).getVersion());
+			} else {
+				moduleVersion.setText("");
 			}
 			if (items.get(position).isLocal()) {
 				localIcon.setVisibility(View.VISIBLE);
