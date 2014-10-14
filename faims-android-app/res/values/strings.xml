@@ -28,6 +28,7 @@
     <string name="load_module">Load Module</string>
     <string name="version">Version</string>
     <string name="server">Server</string>
+    <string name="choose_arch16n">Choose Arch16n:</string>
     
     <string name="locate_server_title">Locating Server</string>
     <string name="locate_server_message">looking for server on network..</string>

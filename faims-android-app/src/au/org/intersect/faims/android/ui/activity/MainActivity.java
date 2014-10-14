@@ -33,10 +33,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -825,10 +828,12 @@ public class MainActivity extends RoboActivity {
 		return modules;
 	}
 	
-	public void loadModule(String key) {
+	public void loadModule(String key, String arch16n) {
 		Intent showModulesIntent = new Intent(MainActivity.this, ShowModuleActivity.class);
 		showModulesIntent.putExtra("key", key);
+		showModulesIntent.putExtra("arch16n", arch16n);
 		FAIMSApplication.getInstance().saveModuleKey(key);
+		FAIMSApplication.getInstance().saveModuleArch16n(arch16n);
 		startActivityForResult(showModulesIntent, 1);
 	}
 
@@ -837,12 +842,27 @@ public class MainActivity extends RoboActivity {
 		
 		updateStaticPanelData(module);
 		
+		TextView arch16nLabel = (TextView) findViewById(R.id.static_module_arch16n_label);
+		final Spinner arch16nSpinner = (Spinner) findViewById(R.id.module_arch16n_select);
+		final ArrayList<String> files = module.getArch16nFiles();
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, FileUtil.sortArch16nFiles(files));
+		arch16nSpinner.setAdapter(adapter);
+		if (files.size() > 1) {
+			arch16nSpinner.setVisibility(View.VISIBLE);
+			arch16nLabel.setVisibility(View.VISIBLE);
+		} else {
+			arch16nSpinner.setVisibility(View.GONE);
+			arch16nLabel.setVisibility(View.GONE);
+		}
+		
 		Button loadModule = (Button) findViewById(R.id.static_load_module);
 		loadModule.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				loadModule(key);
+				int position = arch16nSpinner.getSelectedItemPosition();
+				String arch16n = position == AdapterView.INVALID_POSITION ? "faims.properties" : files.get(position);
+				loadModule(key, arch16n);
 			}
 		});
 		

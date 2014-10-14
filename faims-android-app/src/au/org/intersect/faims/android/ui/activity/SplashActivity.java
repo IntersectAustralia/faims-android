@@ -98,6 +98,7 @@ public class SplashActivity extends Activity {
 		
 		Button continueSession = (Button) findViewById(R.id.splash_continue);
 		final String key = FAIMSApplication.getInstance().getSessionModuleKey();
+		final String arch16n = FAIMSApplication.getInstance().getSessionModuleArch16n();
 	    if (key != null && ModuleUtil.getModule(key) != null) {
 		    continueSession.setOnClickListener(new OnClickListener() {
 				
@@ -105,6 +106,7 @@ public class SplashActivity extends Activity {
 				public void onClick(View v) {
 					Intent showModuleIntent = new Intent(SplashActivity.this, ShowModuleActivity.class);
 					showModuleIntent.putExtra("key", key);
+					showModuleIntent.putExtra("arch16n", arch16n);
 					SplashActivity.this.startActivityForResult(showModuleIntent, 1);
 				}
 			});

@@ -238,6 +238,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		Intent data = getIntent();
 		moduleKey = data.getStringExtra("key");
 		module = ModuleUtil.getModule(moduleKey);
+		String arch16n = data.getStringExtra("arch16n");
 
 		// set file browser to reset last location when activity is created
 		DisplayPrefs.setLastLocation(ShowModuleActivity.this, module
@@ -245,7 +246,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 					
 		setupSync();
 		setupWifiBroadcast();
-		setupManagers();
+		setupManagers(arch16n);
 		
 		menuManager = new ShowModuleMenuManager(ShowModuleActivity.this);
 		navigationDrawer.init(this);
@@ -360,7 +361,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 
-	private void setupManagers() {
+	private void setupManagers(String arch16nFile) {
 		databaseManager.init(module.getDirectoryPath("db.sqlite"));
 		databaseManager.addListener(new DatabaseChangeListener() {
 
@@ -373,7 +374,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		});
 
-		arch16n.init(module.getDirectoryPath().getPath(), module.name);
+		arch16n.init(module.getDirectoryPath().getPath(), module.name, arch16nFile);
 		fileManager.init();
 		bluetoothManager.init(this);
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
