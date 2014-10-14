@@ -82,21 +82,17 @@ public final class DatabaseQueries {
 		"SELECT relationshipid, HEX(asBinary(geospatialColumn)) FROM latestNonDeletedRelationship WHERE relationshipid = ?;";
 
 	public static final String FETCH_ENTITY_LIST(String type) {
-		return "SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
-				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
-				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
-				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
-				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
-				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
-				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
-				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
-				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
-				"	 									   measure, \n" + 
-				"	 									   vocabname, \n" + 
-				"	 									   freetext), ' | ') as response \n" + 
-				" 			FROM latestNonDeletedArchentIdentifiers\n" + 
-				"			WHERE aenttypename = '" + type + "'\n" + 
-				" 			GROUP BY uuid;";
+		return 
+				"select uuid, group_concat(response, ' ')\n" + 
+				"from (select uuid, aenttimestamp\n" + 
+				"		from latestnondeletedarchent join aenttype using(aenttypeid)\n" + 
+				"	   where aenttypename='" + type + "'\n" + 
+				"	   order by uuid) \n" + 
+				"join latestNonDeletedArchEntFormattedIdentifiers using (uuid)\n" + 
+				"join createdModifiedAtBy using (uuid)    \n" + 
+				"group by uuid\n" + 
+				"order by createdAt\n" + 
+				";";
 	}
 
 	public static final String FETCH_RELN_LIST(String type){
@@ -112,27 +108,14 @@ public final class DatabaseQueries {
 	}
 
 	public static final String FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
-		return 
-			"SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)', \n" +
-			"                   measure   || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" +
-			"                   vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" +
-			"                   measure   || ' '  || vocabname  ||' ('|| (certainty * 100.0) || '% certain)',\n" +
-			"                   vocabname || ' (' || freetext || ')',\n" + 
-			"                   measure   || ' (' || freetext || ')', \n" +
-			"                   measure   || ' (' || (certainty * 100.0) || '% certain)', \n" +
-			"                   vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" +
-			"                   freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" +
-			"                   measure, \n" +
-			"                   vocabname, \n" +
-			"                   freetext), ' | ') as response, hex(asbinary(geospatialcolumn))\n" +
-			"FROM ( SELECT uuid, geospatialcolumn, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, archentity.rowid as arowid \n" +
-			"         FROM latestNonDeletedArchentIdentifiers join archentity using (uuid, aenttimestamp, geospatialcolumn)\n" +
- 			userQuery +
-			"       WHERE arowid in (SELECT pkid\n" +
-			"                          FROM idx_archentity_geospatialcolumn\n" +
-			"        			     WHERE pkid MATCH RTreeIntersects(?, ?, ?, ?))\n" +
-			"    ORDER BY uuid, attributename ASC, valuetimestamp desc)\n" +
-			"GROUP BY uuid limit ?;";
+		return
+			"select uuid, group_concat(response, ' '), hex(asbinary(geospatialcolumn)\n" + 
+			"  from latestnondeletedarchentidientifiers join latestnondeletedarchent using (uuid)\n" + 
+			"  WHERE arowid in (SELECT pkid\n" + 
+			"                     FROM idx_archentity_geospatialcolumn\n" + 
+			"                    WHERE pkid MATCH RTreeIntersects(?, ?, ?, ?))\n" + 
+			"                 ORDER BY uuid, attributename ASC, valuetimestamp desc)\n" + 
+			"                 GROUP BY uuid limit ?;";
 	}
 
 	public static final String GET_BOUNDARY_OF_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
