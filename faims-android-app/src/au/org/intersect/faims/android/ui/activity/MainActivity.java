@@ -844,8 +844,8 @@ public class MainActivity extends RoboActivity {
 		
 		TextView arch16nLabel = (TextView) findViewById(R.id.static_module_arch16n_label);
 		final Spinner arch16nSpinner = (Spinner) findViewById(R.id.module_arch16n_select);
-		final ArrayList<String> files = module.getArch16nFiles();
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, FileUtil.sortArch16nFiles(files));
+		final ArrayList<String> files = FileUtil.sortArch16nFiles(module.getArch16nFiles());
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, FileUtil.cleanArch16nFiles(files));
 		arch16nSpinner.setAdapter(adapter);
 		if (files.size() > 1) {
 			arch16nSpinner.setVisibility(View.VISIBLE);

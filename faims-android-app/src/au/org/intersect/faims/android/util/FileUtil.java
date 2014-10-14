@@ -335,32 +335,32 @@ public class FileUtil {
 	}
 
 	public static ArrayList<String> sortArch16nFiles(ArrayList<String> toSort) {
-		ArrayList<String> toReturn = new ArrayList<String>(toSort); 
-		// Remove .properties from all filenames
-		ListIterator<String> iterator = toReturn.listIterator();
-		while(iterator.hasNext()) {
-			String file = iterator.next();
-			iterator.set(file.substring(0, file.lastIndexOf(".")));
-		}
-		Collections.sort(toReturn, new Comparator<String>() {
+		Collections.sort(toSort, new Comparator<String>() {
 
 			@Override
 			public int compare(String lhs, String rhs) {
-				int leftIndex = lhs.lastIndexOf(".");
-				String leftSort = leftIndex == -1 ? "" : lhs.substring(leftIndex);
-				int rightIndex = rhs.lastIndexOf(".");
-				String rightSort = rightIndex == -1 ? "" : rhs.substring(rightIndex);
+				int leftIndex = lhs.replace(".properties", "").lastIndexOf(".");
+				String leftSort = leftIndex == -1 ? "" : lhs.substring(leftIndex, lhs.lastIndexOf("."));
+				int rightIndex = rhs.replace(".properties", "").lastIndexOf(".");
+				String rightSort = rightIndex == -1 ? "" : rhs.substring(rightIndex, rhs.lastIndexOf("."));
 				return leftSort.compareTo(rightSort);
 			}
 		});
-		
-		// Remove sort order from all filenames if exist
-		ListIterator<String> i = toReturn.listIterator();
-		while(i.hasNext()) {
-		    String file = i.next();
-		    if (file.lastIndexOf(".") != -1) {
-		    	i.set(file.substring(0, file.lastIndexOf(".")));
+		return toSort;
+	}
+	
+	public static ArrayList<String> cleanArch16nFiles(ArrayList<String> files) {
+		ArrayList<String> toReturn = new ArrayList<String>(files);
+		ListIterator<String> iterator = toReturn.listIterator();
+		while(iterator.hasNext()) {
+			String file = iterator.next();
+			// Remove .properties from all filenames
+			file = file.substring(0, file.lastIndexOf("."));
+			// Remove sort order from all filenames if exist
+			if (file.lastIndexOf(".") != -1) {
+		    	file = file.substring(0, file.lastIndexOf("."));
 		    }
+			iterator.set(file);
 		}
 		return toReturn;
 	}
