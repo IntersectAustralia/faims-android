@@ -307,8 +307,6 @@ public class FileUtil {
 		int index = originalName.indexOf('_');
 		if (index >= 0) {
 			filename = originalName.substring(index+1);
-		} else {
-			return filename;
 		}
 		// Remove file extension/s
 		index = filename.lastIndexOf('.');

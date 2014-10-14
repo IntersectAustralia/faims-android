@@ -189,7 +189,7 @@ public class FilePictureGallery extends CustomFileList {
 			
 			@Override
 			public boolean onLongClick(View v) {
-				dialog.show();
+				dialog.show(galleryImages.indexOf(gallery));
 				return true;
 			}
 		});
@@ -256,7 +256,9 @@ public class FilePictureGallery extends CustomFileList {
 		int index = galleryImages.indexOf(view);
 		galleriesLayout.removeViewAt(index);
 		annotations.remove(index);
+		annotationIcons.remove(index);
 		certainties.remove(index);
+		certaintyIcons.remove(index);
 		galleryImages.remove(view);
 	}
 

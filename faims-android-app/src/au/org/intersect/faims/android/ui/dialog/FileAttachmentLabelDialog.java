@@ -33,6 +33,11 @@ public class FileAttachmentLabelDialog extends LabelDialog {
 		setButton(DialogInterface.BUTTON_POSITIVE, getContext().getResources().getString(R.string.confirm_dialog_button), new FileLabelDialogClickListener());
 	}
 	
+	public void show(int index) {
+		this.index = index;
+		show();
+	}
+	
 	@Override
 	public void show() {
 		if (tabs.size() == 0) {
