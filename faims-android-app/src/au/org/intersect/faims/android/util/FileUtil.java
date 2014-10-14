@@ -301,6 +301,26 @@ public class FileUtil {
 		}
 	}
 	
+	public static String getStrippedFileAttachmentName(String originalName) {
+		String filename = originalName;
+		// Remove UUID
+		int index = originalName.indexOf('_');
+		if (index >= 0) {
+			filename = originalName.substring(index+1);
+		} else {
+			return filename;
+		}
+		// Remove file extension/s
+		index = filename.lastIndexOf('.');
+		if (index > 0) {
+			filename = filename.substring(0, index);
+		}
+		// Remove thumbnail extensions if exist
+		filename = filename.replace(ORIGINAL_EXT, "");
+		filename = filename.replace(THUMBNAIL_EXT, "");
+		return filename;
+	}
+	
 	public static File getThumbnailFileFor(File file) {
 		String filename = file.getPath().replace(ORIGINAL_EXT, THUMBNAIL_EXT);
 		int index = filename.lastIndexOf('.');

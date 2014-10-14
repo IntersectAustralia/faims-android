@@ -159,7 +159,7 @@ public class FilePictureGallery extends CustomFileList {
 				galleriesLayout.getContext());
 		String name = picture.getName() != null ? picture
 				.getName() : new File(path).getName();
-		textView.setText(name);
+		textView.setText(FileUtil.getStrippedFileAttachmentName(name));
 		textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		textView.setTextSize(15);
 		textView.setWidth(GALLERY_SIZE);
