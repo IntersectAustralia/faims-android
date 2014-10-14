@@ -1,8 +1,10 @@
 package au.org.intersect.faims.android.data;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,6 +69,17 @@ public class Module implements Serializable {
 	public String getCSS() {
 		String cssFilePath = getDirectoryPath("style.css").getPath();
 		return FileUtil.readFileIntoString(cssFilePath);
+	}
+	
+	public ArrayList<String> getArch16nFiles() {
+		String [] files = getDirectoryPath().list(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith(".properties");
+			}
+		});
+		return new ArrayList<String>(Arrays.asList(files));
 	}
 	
 	public static Module fromJson(JSONObject object) throws JSONException {

@@ -14,7 +14,10 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.compress.utils.IOUtils;
@@ -298,6 +301,24 @@ public class FileUtil {
 		}
 	}
 	
+	public static String getStrippedFileAttachmentName(String originalName) {
+		String filename = originalName;
+		// Remove UUID
+		int index = originalName.indexOf('_');
+		if (index >= 0) {
+			filename = originalName.substring(index+1);
+		}
+		// Remove file extension/s
+		index = filename.lastIndexOf('.');
+		if (index > 0) {
+			filename = filename.substring(0, index);
+		}
+		// Remove thumbnail extensions if exist
+		filename = filename.replace(ORIGINAL_EXT, "");
+		filename = filename.replace(THUMBNAIL_EXT, "");
+		return filename;
+	}
+	
 	public static File getThumbnailFileFor(File file) {
 		String filename = file.getPath().replace(ORIGINAL_EXT, THUMBNAIL_EXT);
 		int index = filename.lastIndexOf('.');
@@ -311,6 +332,37 @@ public class FileUtil {
 			}
 		} 
 		return null;
+	}
+
+	public static ArrayList<String> sortArch16nFiles(ArrayList<String> toSort) {
+		ArrayList<String> toReturn = new ArrayList<String>(toSort); 
+		// Remove .properties from all filenames
+		ListIterator<String> iterator = toReturn.listIterator();
+		while(iterator.hasNext()) {
+			String file = iterator.next();
+			iterator.set(file.substring(0, file.lastIndexOf(".")));
+		}
+		Collections.sort(toReturn, new Comparator<String>() {
+
+			@Override
+			public int compare(String lhs, String rhs) {
+				int leftIndex = lhs.lastIndexOf(".");
+				String leftSort = leftIndex == -1 ? "" : lhs.substring(leftIndex);
+				int rightIndex = rhs.lastIndexOf(".");
+				String rightSort = rightIndex == -1 ? "" : rhs.substring(rightIndex);
+				return leftSort.compareTo(rightSort);
+			}
+		});
+		
+		// Remove sort order from all filenames if exist
+		ListIterator<String> i = toReturn.listIterator();
+		while(i.hasNext()) {
+		    String file = i.next();
+		    if (file.lastIndexOf(".") != -1) {
+		    	i.set(file.substring(0, file.lastIndexOf(".")));
+		    }
+		}
+		return toReturn;
 	}
 	
 	// Tar Helpers

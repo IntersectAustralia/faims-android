@@ -30,7 +30,14 @@ public class UpdateModuleSettingService extends DownloadUploadService {
 
 	private void deleteSettingsFiles() {
 		for (String filename : Arrays.asList("ui_schema.xml", "ui_logic.bsh",
-				"module.settings", "faims.properties", "style.css")) {
+				"module.settings", "style.css")) {
+			File file = serviceModule.getDirectoryPath(filename);
+			if (file.exists()) {
+				FileUtil.delete(file);
+			}
+		}
+		// Find all arch16n files
+		for (String filename : serviceModule.getArch16nFiles()) {
 			File file = serviceModule.getDirectoryPath(filename);
 			if (file.exists()) {
 				FileUtil.delete(file);
