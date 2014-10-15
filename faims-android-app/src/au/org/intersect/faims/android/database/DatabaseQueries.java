@@ -83,14 +83,13 @@ public final class DatabaseQueries {
 
 	public static final String FETCH_ENTITY_LIST(String type) {
 		return 
-				"select uuid, group_concat(response, ' ')\n" + 
+				"select uuid, response\n" + 
 				"from (select uuid, aenttimestamp\n" + 
 				"		from latestnondeletedarchent join aenttype using(aenttypeid)\n" + 
 				"	   where aenttypename='" + type + "'\n" + 
 				"	   order by uuid) \n" + 
 				"join latestNonDeletedArchEntFormattedIdentifiers using (uuid)\n" + 
 				"join createdModifiedAtBy using (uuid)    \n" + 
-				"group by uuid\n" + 
 				"order by createdAt\n" + 
 				";";
 	}
@@ -109,7 +108,7 @@ public final class DatabaseQueries {
 
 	public static final String FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
 		return
-			"select uuid, group_concat(response, ' '), hex(asbinary(geospatialcolumn)\n" + 
+			"select uuid, response, hex(asbinary(geospatialcolumn)\n" + 
 			"  from latestnondeletedarchentidientifiers join latestnondeletedarchent using (uuid)\n" + 
 			"  WHERE arowid in (SELECT pkid\n" + 
 			"                     FROM idx_archentity_geospatialcolumn\n" + 
