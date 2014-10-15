@@ -20,3 +20,5 @@ local.properties
 
 # Mac OSX
 .DS_Store
+
+faims-appium-tests/

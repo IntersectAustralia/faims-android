@@ -17,6 +17,7 @@ public class FAIMSApplication {
 	
 	private static final String PAST_SESSIONS_PREF = "pref_previous_sessions";
 	private static final String MODULE_KEY_PREF = "module-key";
+	private static final String MODULE_ARCH16N_PREF = "module-arch16n";
 	
 	private static FAIMSApplication instance;
 	private Application application;
@@ -50,9 +51,20 @@ public class FAIMSApplication {
     	editor.apply();
 	}
 	
+	public void saveModuleArch16n(String arch16n) {
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext()).edit();
+    	editor.putString(MODULE_ARCH16N_PREF, arch16n);
+    	editor.apply();
+	}
+	
 	public String getSessionModuleKey() {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
 		return prefs.getString(MODULE_KEY_PREF, null);
+	}
+	
+	public String getSessionModuleArch16n() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
+		return prefs.getString(MODULE_ARCH16N_PREF, "faims.properties");
 	}
 
 	public void updateServerSettings(String host, String port, boolean autodiscover) {

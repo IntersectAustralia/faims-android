@@ -948,7 +948,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			return dialog;
 		} catch (Exception e) {
 			FLog.e("error showing warning", e);
-			showWarning("Logic Error", "Error show warning dialog");
 		}
 		return null;
 	}
@@ -3203,52 +3202,38 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		}
 	}
 	
-	public void showPreviewWarning(String title, File file) {
+	public String getPreviewText(String title, File file) {
 		if (file.getPath().contains("files/server")) {
 			if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
-				showWarning(
-						title,
-					"This image can only be viewed on the server.");
+				return "This image can only be viewed on the server.";
 			} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
-				showWarning(
-						title,
-					"This video can only be viewed on the server.");
+				return "This video can only be viewed on the server.";
 			} else {
-				showWarning(
-						title,
-					"This file can only be viewed on the server.");
+				return "This file can only be viewed on the server.";
 			}
 		} else {
 			if (file.getPath().contains(FileUtil.ORIGINAL_EXT)) {
 				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
-					showWarning(
-							title,
-						"Large image can only viewed on the server.");
+					return "Large image can be only viewed on the server.";
 				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
-					showWarning(
-							title,
-						"Entire video can only viewed on the server.");
+					return "Entire video can only be viewed on the server.";
 				} else {
-					showWarning(
-							title,
-						"Full file can only viewed on the server.");
+					return "Full file can only be viewed on the server.";
 				}
 			} else {
 				if (CameraPictureGallery.IMAGE_PREVIEW.equals(title)) {
-					showWarning(
-							title,
-						"The image has not completed syncing to your device.");
+					return "The image has not completed syncing to your device.";
 				} else if (VideoGallery.VIDEO_PREVIEW.equals(title)) {
-					showWarning(
-							title,
-						"The video has not completed syncing to your device.");
+					return "The video has not completed syncing to your device.";
 				} else {
-					showWarning(
-							title,
-						"The file has not completed syncing to your device.");
+					return "The file has not completed syncing to your device.";
 				}
 			}
 		}
+	}
+	
+	public void showPreviewWarning(String title, File file) {
+		showWarning(title, getPreviewText(title, file));
 	}
 
 	public Geometry createGeometryPoint(MapPos point) {
