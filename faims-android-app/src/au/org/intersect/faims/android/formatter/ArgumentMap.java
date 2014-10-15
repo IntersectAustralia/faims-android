@@ -22,7 +22,7 @@ public class ArgumentMap {
 	    if (arguments == null) return value;
 	    for (int i = 0; i < arguments.length; i++) {
 	    	String argument = arguments[i];
-	    	value = value.replaceAll("\\$" + (i + 1), argument);
+	    	value = value.replaceAll("\\$" + (i + 1), argument == null ? "" : argument);
 	    }
 		return value;
 	}
