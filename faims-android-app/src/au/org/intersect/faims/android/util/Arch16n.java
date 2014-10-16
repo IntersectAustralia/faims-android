@@ -20,16 +20,16 @@ public class Arch16n {
 	private String path;
 	private String moduleName;
 	
-	public void init(String path, String moduleName) {
+	public void init(String path, String moduleName, String propertiesFile) {
 		this.properties = new HashMap<String, String>();
 		this.path = path;
 		this.moduleName = moduleName;
-		generatePropertiesMap();
+		generatePropertiesMap(propertiesFile);
 	}
 
-	private void generatePropertiesMap() {
+	private void generatePropertiesMap(String propertiesFile) {
 		try {
-			FileInputStream fileInputStream = new FileInputStream(path+"/faims.properties");
+			FileInputStream fileInputStream = new FileInputStream(path+"/"+propertiesFile);
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
 			for(String s : propertyResourceBundle.keySet()){
 				properties.put(s, new String(propertyResourceBundle.getString(s).getBytes("ISO-8859-1"),"UTF-8"));

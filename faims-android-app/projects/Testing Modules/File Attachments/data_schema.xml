@@ -4,10 +4,10 @@
     <property name="ID" type="freetext" isIdentifier="true">
       <description>ID</description>
     </property>
-    <property name="Files" type="file" file="true">
+    <property name="Files" type="file" file="true" sync="true">
       <description>Files</description>
     </property>
-    <property name="Photo" type="file" thumbnail="true" file="true">
+    <property name="Photo" type="file" thumbnail="true" file="true" sync="true">
       <description>Photo</description>
     </property>
     <property name="Audio" type="file" file="true">

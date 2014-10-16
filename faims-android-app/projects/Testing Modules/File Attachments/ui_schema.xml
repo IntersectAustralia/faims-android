@@ -117,7 +117,7 @@
         <input ref="ID" faims_attribute_name="ID" faims_attribute_type="measure" faims_annotation="false" faims_certainty="false">
           <label> ID </label>
         </input>
-        <select ref="Files" faims_attribute_name="Files" faims_attribute_type="measure" faims_sync="false" type="file">
+        <select ref="Files" faims_attribute_name="Files" faims_attribute_type="measure" faims_sync="true" type="file">
             <label>Attached Files</label>
             <item>
                 <label>{None}</label>
