@@ -216,14 +216,12 @@ public abstract class DownloadUploadService extends IntentService {
 		ArrayList<FileInfo> files = databaseManager.fileRecord().getFilesToDownload(name);
 		for (FileInfo info : files) {
 			File file;
-			String originalFilename;
+			String originalFilename = info.filename;
 			if (info.thumbnailFilename == null) {
 				file = serviceModule.getDirectoryPath(info.filename);
-				originalFilename = info.filename;
 				info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
 			} else {
 				file = serviceModule.getDirectoryPath(info.thumbnailFilename);
-				originalFilename = info.thumbnailFilename;
 				info.filename = pathFromBaseDirectory(baseDirectory, file).getPath(); // filename needs to be relative to base directory when requesting file from webserver
 				info.size = info.thumbnailSize;
 				info.md5 = info.thumbnailMD5;

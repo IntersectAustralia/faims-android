@@ -327,6 +327,12 @@ public final class DatabaseQueries {
 	
 	public static String GET_DOWNLOAD_FILES = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where Type = ? and State is null;";
 	
+	public static String GET_ALL_SYNCED_FILES = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where (Type = 'server' or Type = 'app') " +
+			"and (State is null or State = 'downloaded');";
+	
+	public static String GET_ALL_SYNCED_FILES_WITH_THUMBNAILS = "select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where (Type = 'server' or Type = 'app') " +
+			"and ThumbnailFilename is NOT NULL and (State is null or State = 'downloaded');";
+	
 	public static String HAS_FILE_CHANGES = "select count(*) from file where state = 'attached';";
 	
 	public static String HAS_THUMBNAIL = "select count(*) from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 and attributename = ?";

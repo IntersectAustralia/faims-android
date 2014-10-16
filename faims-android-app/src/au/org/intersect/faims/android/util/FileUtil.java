@@ -28,8 +28,11 @@ import org.javarosa.form.api.FormEntryModel;
 import org.javarosa.xform.parse.XFormParseException;
 import org.javarosa.xform.util.XFormUtils;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 import android.os.StatFs;
+import au.org.intersect.faims.android.data.FileInfo;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 
 public class FileUtil {
@@ -363,6 +366,18 @@ public class FileUtil {
 			iterator.set(file);
 		}
 		return toReturn;
+	}
+	
+	@SuppressLint("DefaultLocale")
+	public static String calculateTotalFileSpace(Module module, ArrayList<FileInfo> files) {
+		float totalSize = 0;
+		for (FileInfo info : files) {
+			if (module.getDirectoryPath(info.filename).exists()) {
+				totalSize += info.size;
+			}
+		}
+		// Convert to MB
+		return String.format("%.2f", totalSize/1024/1024);
 	}
 	
 	// Tar Helpers

@@ -2318,6 +2318,13 @@ attachFile(String filePath, boolean sync, String dir, String callback, String at
 }
 
 /**
+  * Shows a dialog, displaying options to remove synced files to clean up space
+  */
+cleanSyncedFiles() {
+  linker.cleanSyncedFiles();
+}
+
+/**
   * List all attached files of an archaeological entity by providing the id of the entity.
   *
   * @param id the id of the entity

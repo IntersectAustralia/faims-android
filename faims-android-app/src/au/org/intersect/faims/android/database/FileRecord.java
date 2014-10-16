@@ -154,4 +154,36 @@ public class FileRecord extends Database {
 		}
 	}
 	
+	public ArrayList<FileInfo> getSyncedFiles(boolean withThumbnail) throws Exception {
+		ArrayList<FileInfo> files = new ArrayList<FileInfo>();
+		jsqlite.Database db = null;
+		Stmt st = null;
+		try {
+			db = openDB(jsqlite.Constants.SQLITE_OPEN_READWRITE);
+			beginTransaction(db);
+			st = db.prepare(withThumbnail ? DatabaseQueries.GET_ALL_SYNCED_FILES_WITH_THUMBNAILS : DatabaseQueries.GET_ALL_SYNCED_FILES);
+			while (st.step()) {
+				FileInfo info = new FileInfo();
+				info.filename = st.column_string(0);
+				info.md5 = st.column_string(1);
+				info.size = st.column_int(2);
+				info.type = st.column_string(3);
+				info.state = st.column_string(4);
+				info.timestamp = st.column_string(5);
+				info.deleted = "1".equals(st.column_string(6));
+				info.thumbnailFilename = st.column_string(7);
+				info.thumbnailMD5 = st.column_string(8);
+				info.thumbnailSize = st.column_int(9);
+				files.add(info);
+			}
+			st.close();
+			st = null;
+			commitTransaction(db);
+		} finally {
+			closeStmt(st);
+			closeDB(db);
+		}
+		return files;
+	}
+	
 }

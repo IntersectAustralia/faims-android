@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 
@@ -91,6 +92,15 @@ public class ModuleUtil {
 	    	writer.close();
 		} catch (Exception e) {
 			FLog.e("error saving module", e);
+		}
+	}
+	
+	public static void cleanSyncedFiles(Module module, ArrayList<FileInfo> files) {
+		for (FileInfo info : files) {
+			File fileToDelete = module.getDirectoryPath(info.filename);
+			if (fileToDelete.exists()) {
+				FileUtil.delete(fileToDelete);
+			}
 		}
 	}
 	

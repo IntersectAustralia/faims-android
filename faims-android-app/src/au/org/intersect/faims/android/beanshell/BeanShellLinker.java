@@ -25,6 +25,7 @@ import android.graphics.Typeface;
 import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -52,6 +53,7 @@ import au.org.intersect.faims.android.beanshell.callbacks.ViewTask;
 import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.EntityAttribute;
+import au.org.intersect.faims.android.data.FileInfo;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
@@ -107,6 +109,7 @@ import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.DateUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.GeometryUtil;
+import au.org.intersect.faims.android.util.ModuleUtil;
 import bsh.EvalError;
 import bsh.Interpreter;
 
@@ -3732,7 +3735,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			navigationDrawer.addNavigationAction(name, callback, type);
 		} catch (Exception e) {
-			reportError("Error tring to add navigation button action", e);
+			reportError("Error trying to add navigation button action", e);
 		}
 	}
 	
@@ -3740,8 +3743,66 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		try {
 			navigationDrawer.removeNavigationAction(name);
 		} catch (Exception e) {
-			reportError("Error tring to remove navigation button action", e);
+			reportError("Error trying to remove navigation button action", e);
 		}
 	}
 	
+	public Dialog cleanSyncedFiles() {
+		try {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this.activityRef.get());
+			
+			final ArrayList<FileInfo> filesWithThumbnails = databaseManager.fileRecord().getSyncedFiles(true);
+			final ArrayList<FileInfo> allFiles = databaseManager.fileRecord().getSyncedFiles(false);
+			
+			builder.setTitle("Clean Synced Files");
+			builder.setMessage("Deleting all synced files which have thumbnails will clean: " + FileUtil.calculateTotalFileSpace(module, filesWithThumbnails) + "MB" +
+					".\nDeleting all synced files will clean: " + FileUtil.calculateTotalFileSpace(module, allFiles) + "MB");
+			builder.setNeutralButton("Delete all synced files which have thumbnails", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					cleanFiles(filesWithThumbnails);
+				}
+			});
+			builder.setPositiveButton("Delete all synced files", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					cleanFiles(allFiles);
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// do nothing
+				}
+			});
+	
+			Dialog dialog = builder.create();
+			dialog.show();
+			return dialog;
+		} catch (Exception e) {
+			reportError("Error trying to show cleaning synced files dialog", e);
+		}
+		return null;
+	}
+	
+	private void cleanFiles(final ArrayList<FileInfo> files) {
+		final Dialog loading = showBusy("Deleting Files", "Deleting files");
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					ModuleUtil.cleanSyncedFiles(module, files);
+				} catch (Exception e) {
+					reportError("Error trying to clean out synced files", e);
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				if (loading != null) {
+					loading.dismiss();
+				}
+			}
+		}.execute();
+	}
 }
