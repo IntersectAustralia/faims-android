@@ -126,11 +126,8 @@ public class FetchRecord extends Database {
 			
 			String query = DatabaseQueries.FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(userQuery);
 			stmt = db.prepare(query);
-			stmt.bind(1, list.get(0).x);
-			stmt.bind(2, list.get(0).y);
-			stmt.bind(3, list.get(2).x);
-			stmt.bind(4, list.get(2).y);
-			stmt.bind(5, maxObjects);
+			stmt.bind(1, "polygon(("+list.get(0).x+" "+list.get(0).y+", "+list.get(2).x+" "+list.get(0).y+", "+list.get(2).x+" "+list.get(2).y+", "+list.get(0).x+" "+list.get(2).y+"))");
+			stmt.bind(2, maxObjects);
 			Vector<Geometry> results = new Vector<Geometry>();
 			while(stmt.step()){
 				String uuid = stmt.column_string(0);
