@@ -140,11 +140,8 @@ public class AttributeLabelDialog extends LabelDialog {
 	}
 	
 	private boolean hasDirtyReasonText() {
-		if (dirtyReasonText != null) {
-			String text = dirtyReasonText.getText().toString();
-			if (text != null && !text.isEmpty()) {
-				return true;
-			}
+		if (view != null) {
+			return view.getDirtyReason() != null && !view.getDirtyReason().isEmpty();
 		}
 		return false;
 	}
