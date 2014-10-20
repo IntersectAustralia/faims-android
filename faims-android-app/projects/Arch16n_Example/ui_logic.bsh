@@ -1,5 +1,5 @@
 populateListForUsers() {
-	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+	fetchAll("select userid, fname ||' ' || lname from user where userdeleted is NULL", new FetchCallback() {
 		onFetch(result) {
 			populateList("user/tab1/users", result);
 		}
