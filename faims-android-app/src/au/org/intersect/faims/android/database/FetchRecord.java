@@ -76,7 +76,7 @@ public class FetchRecord extends Database {
 	}
 
 	public ArrayList<User> fetchAllUser() throws Exception {
-		Collection<List<String>> users = fetchAll("select userid, fname, lname, email from user");
+		Collection<List<String>> users = fetchAll("select userid, fname, lname, email from user where userdeleted is NULL");
 		ArrayList<User> userList = new ArrayList<User>();
 		for(List<String> userData : users){
 			User user = new User(userData.get(0), userData.get(1), userData.get(2), userData.get(3));
