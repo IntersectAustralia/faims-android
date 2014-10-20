@@ -383,7 +383,7 @@ public class StatementParser extends Parser {
 				setState(65); ((Single_expressionContext)_localctx).r = literal();
 				setState(66); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  (((Single_expressionContext)_localctx).l.value == null && ((Single_expressionContext)_localctx).r.value == null) || ((Single_expressionContext)_localctx).l.value.equals(((Single_expressionContext)_localctx).r.value);
+				            ((Single_expressionContext)_localctx).value =  (((Single_expressionContext)_localctx).l.value == null && ((Single_expressionContext)_localctx).r.value == null) || (((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).l.value.equals(((Single_expressionContext)_localctx).r.value));
 				        
 				}
 				break;

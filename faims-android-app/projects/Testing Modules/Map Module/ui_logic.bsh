@@ -83,7 +83,7 @@ newTest(){
 	geom = getCreatedGeometry().get(0);
 	if (geom instanceof Point) {
 		showToast("Selected Point");
-		p = point.getMapPos();
+		p = geom.getMapPos();
 		setFieldValue("Test/Test/Long", "" + p.x);
 		setFieldValue("Test/Test/Lat", "" + p.y);
 	} else if (geom instanceof Line) {

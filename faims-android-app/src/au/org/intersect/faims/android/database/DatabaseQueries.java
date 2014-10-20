@@ -108,13 +108,18 @@ public final class DatabaseQueries {
 
 	public static final String FETCH_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
 		return
-			"select uuid, response, hex(asbinary(geospatialcolumn)\n" + 
-			"  from latestnondeletedarchentidientifiers join latestnondeletedarchent using (uuid)\n" + 
-			"  WHERE arowid in (SELECT pkid\n" + 
-			"                     FROM idx_archentity_geospatialcolumn\n" + 
-			"                    WHERE pkid MATCH RTreeIntersects(?, ?, ?, ?))\n" + 
-			"                 ORDER BY uuid, attributename ASC, valuetimestamp desc)\n" + 
-			"                 GROUP BY uuid limit ?;";
+				"select uuid, response, hex(asbinary(a.geospatialcolumn))\n" + 
+				"  from latestNonDeletedArchEntFormattedIdentifiers\n" + 
+				"  join latestnondeletedarchent using (uuid)\n" + 
+				"  join archentity a using (uuid, aenttimestamp)\n" + 
+				"  join createdModifiedAtBy using (uuid)\n" + 
+				" WHERE a.rowid in (SELECT rowid\n" + 
+				"                    FROM spatialindex\n" + 
+				"                   WHERE f_table_name = 'archentity'\n" + 
+				"                        and search_frame = polyfromtext(?, 4326)\n" + 
+				"                   )\n" + 
+				" order by createdAt\n" + 
+				" limit ?;";
 	}
 
 	public static final String GET_BOUNDARY_OF_ALL_VISIBLE_ENTITY_GEOMETRY(String userQuery){
