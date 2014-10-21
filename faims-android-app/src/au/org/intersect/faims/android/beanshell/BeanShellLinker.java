@@ -3755,9 +3755,9 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			final ArrayList<FileInfo> allFiles = databaseManager.fileRecord().getSyncedFiles(false);
 			
 			builder.setTitle("Clean Synced Files");
-			builder.setMessage("Deleting all synced files (" + filesWithThumbnails.size() + " file/s) which have thumbnails will clean approximately: " +
+			builder.setMessage("Deleting all synced files (" + FileUtil.calculateExistingFileCount(module, filesWithThumbnails) + " file/s) which have thumbnails will clean approximately: " +
 					FileUtil.calculateTotalFileSpace(module, filesWithThumbnails) + "MB" + ".\nDeleting all synced files (" +
-					allFiles.size() + " file/s) will clean approximately: " + FileUtil.calculateTotalFileSpace(module, allFiles) + "MB");
+					FileUtil.calculateExistingFileCount(module, allFiles) + " file/s) will clean approximately: " + FileUtil.calculateTotalFileSpace(module, allFiles) + "MB");
 			builder.setNeutralButton("Delete all synced files which have thumbnails", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					cleanFiles(filesWithThumbnails);

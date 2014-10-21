@@ -380,6 +380,16 @@ public class FileUtil {
 		return String.format("%.2f", totalSize/1024/1024);
 	}
 	
+	public static int calculateExistingFileCount(Module module, ArrayList<FileInfo> files) {
+		int count = 0;
+		for (FileInfo info : files) {
+			if (module.getDirectoryPath(info.filename).exists()) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
 	// Tar Helpers
 	
 //	public static TarArchiveOutputStream createTarOutputStream(String filename) throws IOException {
