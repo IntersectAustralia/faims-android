@@ -374,7 +374,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		});
 
-		arch16n.init(module.getDirectoryPath().getPath(), module.name, arch16nFile);
+		arch16n.init(module.getDirectoryPath().getPath(), arch16nFile);
 		fileManager.init();
 		bluetoothManager.init(this);
 		gpsDataManager.init((LocationManager) getSystemService(LOCATION_SERVICE), this);
