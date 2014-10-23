@@ -26,7 +26,7 @@ public class Arch16n {
 
 	private void generatePropertiesMap(String propertiesFile) {
 		try {
-			if (!new File(propertiesFile).exists()) return;
+			if (!new File(path+"/"+propertiesFile).exists()) return;
 			FileInputStream fileInputStream = new FileInputStream(path+"/"+propertiesFile);
 			PropertyResourceBundle propertyResourceBundle = new PropertyResourceBundle(fileInputStream);
 			for(String s : propertyResourceBundle.keySet()){
