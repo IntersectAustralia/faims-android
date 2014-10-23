@@ -9,9 +9,9 @@ public class ArgumentMap {
 
 	public static String getValue(String argument) {
 		String[] arguments = globalArguments;
-		if (arguments == null) return "";
+		if (arguments == null) return null;
 		int index = Integer.parseInt(argument.substring(1)) - 1;
-		if (index < 0 || index >= arguments.length) return "";
+		if (index < 0 || index >= arguments.length) return null;
 		return arguments[index];
     }
 

@@ -13,7 +13,6 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
-import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -85,12 +84,12 @@ public class CameraPictureGallery extends FilePictureGallery {
 		
 		if (annotationEnabled) {
 			String annotation = (getAnnotations().get(galleryImages.indexOf(selectedImageView)) == null ?
-					FaimsSettings.DEFAULT_ANNOTATION : getAnnotations().get(galleryImages.indexOf(selectedImageView)));
+					"": getAnnotations().get(galleryImages.indexOf(selectedImageView)));
 			metadata.add(new NameValuePair("Annotation", annotation));
 		}
 		if (certaintyEnabled) {
 			String certainty = (getCertainties().get(galleryImages.indexOf(selectedImageView)) == null ?
-					String.valueOf(FaimsSettings.DEFAULT_CERTAINTY) : getCertainties().get(galleryImages.indexOf(selectedImageView)));
+					"" : getCertainties().get(galleryImages.indexOf(selectedImageView)));
 			metadata.add(new NameValuePair("Certainty", certainty));
 		}
 		dialog.addFileMetadataTab(metadata);

@@ -260,6 +260,7 @@ public class FilePictureGallery extends CustomFileList {
 		certainties.remove(index);
 		certaintyIcons.remove(index);
 		galleryImages.remove(view);
+		notifySave();
 	}
 
 }
