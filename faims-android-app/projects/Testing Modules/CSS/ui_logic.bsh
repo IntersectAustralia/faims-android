@@ -418,7 +418,7 @@ getEntityIdentifier(Object result) {
 	if (entityId == null) {
 		attributes = createAttributeList();
 		entityCount = Integer.valueOf(result.get(0)) + 1;
-		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+		attributes.add(createEntityAttribute("entity", null, null, "Small " + entityCount, null));
 	}
 	return attributes;
 }
@@ -426,7 +426,7 @@ getEntityIdentifier(Object result) {
 getEntityIdentifierAlways(Object result) {
 	attributes = createAttributeList();
 	entityCount = Integer.valueOf(result.get(0)) + 1;
-	attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	attributes.add(createEntityAttribute("entity", null, null, "Small " + entityCount, null));
 	return attributes;
 }
 

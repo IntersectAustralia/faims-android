@@ -118,13 +118,13 @@ onEvent("main/gps/stopTrackLog", "click", "stopTrackingGPS()");
 
 saveTimeGPSTrack() {
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	attributes.add(createEntityAttribute("gps_type", null, null, "time", null));
 	saveGPSTrack(attributes);
 }
 
 saveDistanceGPSTrack() {
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	attributes.add(createEntityAttribute("gps_type", null, null, "distance", null));
 	saveGPSTrack(attributes);
 }
 
@@ -132,12 +132,12 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-	attributes.add(createEntityAttribute("gps_user", "" + userid, null, null, null));
-	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
-	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
-	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	attributes.add(createEntityAttribute("gps_user",null , null, "" + userid, null));
+	attributes.add(createEntityAttribute("gps_timestamp",null , null, "" + getCurrentTime(), null));
+	attributes.add(createEntityAttribute("gps_longitude",null , null, "" + position.getLongitude(), null));
+	attributes.add(createEntityAttribute("gps_latitude", null, null, "" + position.getLatitude(), null));
+	attributes.add(createEntityAttribute("gps_heading", null, null, "" + getGPSHeading(), null));
+	attributes.add(createEntityAttribute("gps_accuracy",null , null, "" + getGPSEstimatedAccuracy(), null));
 	
 	positionProj = getGPSPositionProjected();
 	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
