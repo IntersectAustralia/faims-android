@@ -1127,7 +1127,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 
 				float value = valueObj == null ? 0 : Float.valueOf(String.valueOf(valueObj));
 				
-				customView.setCertainty(value);				
+				customView.setCertainty(value);
 			} else {
 				FLog.w("cannot set field certainty to view with ref " + ref);
 				showWarning("Logic Error", "Cannot find view with ref " + ref);

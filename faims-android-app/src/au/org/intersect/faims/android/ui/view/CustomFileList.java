@@ -375,7 +375,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		reloadPairs = null;
 	}
 
-	public boolean hasFileAttributeChanges(Module module,
+	public boolean hasMultiAttributeChanges(Module module,
 			HashMap<String, ArrayList<Attribute>> attributes) {
 		return Compare.compareFileAttributeValues(this, attributes, module);
 	}

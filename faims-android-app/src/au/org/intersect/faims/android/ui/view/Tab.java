@@ -527,7 +527,7 @@ public class Tab {
 		    		
 		    		if(attribute.annotation && (isArchEnt || isRelationship)){
 		    			annotationImage = viewFactory.createAnnotationIcon();
-		    			if (!(view instanceof CustomFileList)) {
+		    			if (!(view instanceof CustomFileList) && !(view instanceof CustomCheckBoxGroup)) {
 		    				labelDialog.addAnnotationTab();
 		    				icons.addView(annotationImage);
 		    				customView.setAnnotationIcon(annotationImage);
@@ -536,7 +536,7 @@ public class Tab {
 		    		
 		    		if(attribute.certainty && (isArchEnt || isRelationship)){
 		    			certaintyImage = viewFactory.createCertaintyIcon();
-		    			if (!(view instanceof CustomFileList)) {
+		    			if (!(view instanceof CustomFileList) && !(view instanceof CustomCheckBoxGroup)) {
 		    				labelDialog.addCertaintyTab();
 		    				icons.addView(certaintyImage);
 		    				customView.setCertaintyIcon(certaintyImage);
@@ -830,6 +830,8 @@ public class Tab {
 				} else if (iview instanceof CustomCheckBoxGroup) {
 					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
 					data.pairs = check.getPairs();
+					data.annotations = check.getAllAnnotations();
+					data.certainties = check.getAllCertainties();
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					data.pairs = list.getPairs();
@@ -917,6 +919,9 @@ public class Tab {
 				} else if (iview instanceof CustomCheckBoxGroup) {
 					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
 					check.setPairs(data.pairs);
+					check.setAnnotations(data.annotations);
+					check.setCertainties(data.certainties);
+					check.updateIcons();
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					list.setPairs(data.pairs);
