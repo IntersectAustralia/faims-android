@@ -930,6 +930,7 @@ public class Tab {
 					fileList.setPairs(data.pairs);
 					fileList.setAnnotations(data.annotations);
 					fileList.setCertainties(data.certainties);
+					fileList.updateIcons();
 				}
 				
 				// load values
