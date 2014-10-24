@@ -125,9 +125,25 @@ String ENTITY_LIST = "SELECT uuid, group_concat(coalesce(measure   || ' '  || vo
         "       FROM latestNonDeletedArchentIdentifiers\n" + 
         "     WHERE aenttypename = 'small'\n" + 
         "       GROUP BY uuid limit ? offset ?;";
+        
+      //  String ENTITY_LIST = 
+      //  "select uuid, response\n" + 
+      //  "from (select uuid, aenttimestamp\n" + 
+      //  "   from latestnondeletedarchent join aenttype using(aenttypeid)\n" + 
+      //  "    where aenttypename='small'\n" + 
+      //  "    order by uuid) \n" + 
+      //  "join latestNonDeletedArchEntFormattedIdentifiers using (uuid)\n" + 
+      //  "join createdModifiedAtBy using (uuid)    \n" + 
+      //  "order by createdAt limit ? offset ?\n" + 
+      //  ";";
 
 loadEntities(tabgroup) {
-  populateCursorList(tabgroup + "/tab2/entities", ENTITY_LIST, 5);
+  //populateCursorList(tabgroup + "/tab2/entities", ENTITY_LIST, 5);
+  fetchEntityList("small", new FetchCallback() {
+          onFetch(result) {
+            populateList(tabgroup + "/tab2/entities", result);
+          }
+        });
 }
 
 saveEntity(tabgroup) {
@@ -172,7 +188,7 @@ getEntityIdentifier(Object result) {
 	if (entityId == null) {
 		attributes = createAttributeList();
 		entityCount = Integer.valueOf(result.get(0)) + 1;
-		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+		attributes.add(createEntityAttribute("entity", null, null, "Small " + entityCount, null));
 	}
 	return attributes;
 }

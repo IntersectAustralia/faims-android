@@ -27,13 +27,13 @@ onEvent("controls/tab1/stoptracking", "click", "stopTrackingGPS()");
 
 saveTimeGPSTrack() {
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "time", null, null, null));
+	attributes.add(createEntityAttribute("gps_type", null, null, "time", null));
 	saveGPSTrack(attributes);
 }
 
 saveDistanceGPSTrack() {
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("gps_type", "distance", null, null, null));
+	attributes.add(createEntityAttribute("gps_type",null, null,  "distance", null));
 	saveGPSTrack(attributes);
 }
 
@@ -41,12 +41,12 @@ saveGPSTrack(List attributes) {
 	position = getGPSPosition();
 	if (position == null) return;
 
-	attributes.add(createEntityAttribute("gps_user", "" + user.getUserId(), null, null, null));
-	attributes.add(createEntityAttribute("gps_timestamp", "" + getCurrentTime(), null, null, null));
-	attributes.add(createEntityAttribute("gps_longitude", "" + position.getLongitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_latitude", "" + position.getLatitude(), null, null, null));
-	attributes.add(createEntityAttribute("gps_heading", "" + getGPSHeading(), null, null, null));
-	attributes.add(createEntityAttribute("gps_accuracy", "" + getGPSEstimatedAccuracy(), null, null, null));
+	attributes.add(createEntityAttribute("gps_user",null , null, "" + user.getUserId(), null));
+	attributes.add(createEntityAttribute("gps_timestamp",null, null,  "" + getCurrentTime(), null));
+	attributes.add(createEntityAttribute("gps_longitude",null , null, "" + position.getLongitude(), null));
+	attributes.add(createEntityAttribute("gps_latitude",null , null, "" + position.getLatitude(), null));
+	attributes.add(createEntityAttribute("gps_heading", null, null, "" + getGPSHeading(), null));
+	attributes.add(createEntityAttribute("gps_accuracy",null , null, "" + getGPSEstimatedAccuracy(), null));
 	
 	positionProj = getGPSPositionProjected();
 	Point p = new Point(new MapPos(positionProj.getLongitude(), positionProj.getLatitude()), null, (PointStyle) null, null);
@@ -249,8 +249,8 @@ saveGPSEntity() {
 	}
 
 	List attributes = createAttributeList();
-	attributes.add(createEntityAttribute("entity", "GPS " + gpsEntityCount++, null, null, null));
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
+	attributes.add(createEntityAttribute("entity", null, null, "GPS " + gpsEntityCount++, null));
+	attributes.add(createEntityAttribute("name", null, null, getFieldValue("tabgroup1/tab1/name"), getFieldCertainty("tabgroup1/tab1/name")));
 	
 	saveArchEnt(null, "gpsentity", collection, attributes, new SaveCallback() {
 		onSave(uuid, newRecord) {
@@ -708,9 +708,9 @@ updateEntity(String entityId) {
 
 	List attributes = createAttributeList();
 	if (entityId == null) {
-		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+		attributes.add(createEntityAttribute("entity", null, null, "Simple " + entityCount++, null));
 	}
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, getFieldCertainty("tabgroup2/tab2/name")));
+	attributes.add(createEntityAttribute("name",null , null, getFieldValue("tabgroup2/tab2/name"), getFieldCertainty("tabgroup2/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup2/tab2/value"), null, getFieldValue("tabgroup2/tab2/value"), getFieldCertainty("tabgroup2/tab2/value")));
 	
 	List collection = null;
@@ -1064,9 +1064,9 @@ updateUIEntity(String entityId) {
 
 	List attributes = createAttributeList();
 	if (entityId == null) {
-		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+		attributes.add(createEntityAttribute("entity", null, null, "Simple " + entityCount++, null));
 	}
-	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
+	attributes.add(createEntityAttribute("name", null, null, getFieldValue("tabgroup5/tab2/name"), getFieldCertainty("tabgroup5/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
 	
 	

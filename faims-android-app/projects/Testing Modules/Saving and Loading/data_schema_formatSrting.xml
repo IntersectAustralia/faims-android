@@ -20,7 +20,7 @@
       An small entity
     </description>
     <property type="string" name="entity" isIdentifier="true">
-      <bundle>DOI</bundle>
+      <formatString><![CDATA[ {{ if $2 then " $2 : $3 : $4" }} ]]></formatString>
     </property>
     <property type="string" name="name">
       <description>This is a name.</description>
@@ -212,9 +212,10 @@
         <term>Type D</term>
       </lookup>
     </property>
-    <property type="string" name="location">
+    <property type="string" name="location" isIdentifier="true">
         <description>This is a location</description>
-      <bundle>DOI</bundle>
+        <formatString><![CDATA[ {{if $1 then "( $1 )" }} ]]></formatString>
+		<appendCharacterString><![CDATA[ & ]]></appendCharacterString>
       <lookup>
         <term>Location A</term>
         <term>Location B</term>
