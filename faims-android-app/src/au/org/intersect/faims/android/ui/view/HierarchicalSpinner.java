@@ -14,6 +14,7 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormInputDef;
+import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.Compare;
@@ -323,5 +324,14 @@ public class HierarchicalSpinner extends CustomSpinner {
 		dirtyReason = null;
 		
 		save();
+	}
+	
+	@Override
+	public void populate(List<NameValuePair> pairs) {
+		if (pairs == null) return;
+		ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
+				getContext(),
+				android.R.layout.simple_spinner_dropdown_item, pairs);
+		setAdapter(arrayAdapter, false);
 	}
 }
