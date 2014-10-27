@@ -521,6 +521,7 @@ public class Tab {
 		            fieldFrameLayout.addView(textView, params);
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
+		            NativeCSS.addCSSClass(icons, "label-icon");
 		            
 		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(arch16n.substituteValue(attribute.questionText));
