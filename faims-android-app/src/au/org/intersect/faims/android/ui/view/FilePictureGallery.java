@@ -97,6 +97,8 @@ public class FilePictureGallery extends CustomFileList {
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
 		ArrayList<Picture> pictures = new ArrayList<Picture>();
+		annotationIcons = new ArrayList<ImageView>();
+		certaintyIcons = new ArrayList<ImageView>();
 		for (NameValuePair pair : pairs) {
 			Picture picture = new Picture(pair.getName(), null, pair.getValue());
 			pictures.add(picture);
@@ -113,6 +115,7 @@ public class FilePictureGallery extends CustomFileList {
 		for (Picture picture : pictures) {
 			addFileView(picture.getUrl());
 		}
+		updateIcons();
 	}
 	
 	protected CustomImageView addGallery(Picture picture) {
