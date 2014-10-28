@@ -516,9 +516,13 @@ public class Tab {
 					fieldFrameLayout.addView(buttonOverlay);
 			    	
 		            TextView textView = viewFactory.createLabel(ref, attribute);
-		            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		    		params.gravity = Gravity.CENTER_VERTICAL;
-		            fieldFrameLayout.addView(textView, params);
+		    		LinearLayout labelContainer = new LinearLayout(fieldFrameLayout.getContext());
+		    		labelContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		    		labelContainer.setGravity(Gravity.CENTER_VERTICAL);
+		    		labelContainer.setOrientation(LinearLayout.HORIZONTAL);
+		    		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		    		params.weight = 0.80F;
+		    		labelContainer.addView(textView, params);
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
 		            NativeCSS.addCSSClass(icons, "label-icon");
@@ -558,9 +562,10 @@ public class Tab {
 			    		dirtyButtonMap.put(ref, dirtyImage);
 		    		}
 		    		
-		    		params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		    		params.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
-		    		fieldFrameLayout.addView(icons, params);
+		    		FrameLayout.LayoutParams iconParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		    		iconParams.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
+		    		labelContainer.addView(icons);
+		    		fieldFrameLayout.addView(labelContainer, iconParams);
 		    		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
 		    			
 		    			@Override
