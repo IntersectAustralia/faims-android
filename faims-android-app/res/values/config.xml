@@ -14,6 +14,6 @@
     <string name="server_dir">files/server</string>
     <string name="data_dir">files/data</string>
     <string name="demo_server_host">demo.fedarch.org</string>
-    <string name="demo_server_port">3000</string>
+    <string name="demo_server_port">80</string>
     
 </resources>
