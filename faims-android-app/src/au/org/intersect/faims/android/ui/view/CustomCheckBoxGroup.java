@@ -481,18 +481,18 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		innerLayout.addView(checkContainer, checkParams);
 		
 		final CheckBoxGroupLabelDialog dialog = new CheckBoxGroupLabelDialog(getContext(), this, index);
+		ImageView annotationImage = viewFactory.createAnnotationIcon();
 		if (annotationEnabled) {
-			ImageView annotationImage = viewFactory.createAnnotationIcon();
 			innerLayout.addView(annotationImage, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			dialog.addAnnotationTab();
-			annotationIcons.add(annotationImage);
 		}
+		annotationIcons.add(annotationImage);
+		ImageView certaintyImage = viewFactory.createCertaintyIcon();
 		if (certaintyEnabled) {
-			ImageView certaintyImage = viewFactory.createCertaintyIcon();
 			innerLayout.addView(certaintyImage, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 			dialog.addCertaintyTab();
-			certaintyIcons.add(certaintyImage);
 		}
+		certaintyIcons.add(certaintyImage);
 		layout.addView(innerLayout);
 		
 		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {

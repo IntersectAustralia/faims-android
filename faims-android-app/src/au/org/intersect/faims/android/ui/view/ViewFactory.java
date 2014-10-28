@@ -203,6 +203,7 @@ public class ViewFactory {
 	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
 	            choices.add(pair);
 	        }
+	        checkboxGroup.populate(choices);
         }
         
         return checkboxGroup;
