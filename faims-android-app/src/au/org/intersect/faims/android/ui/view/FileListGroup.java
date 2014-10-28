@@ -85,18 +85,18 @@ public class FileListGroup extends CustomFileList {
 		LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		textParams.weight = 0.80F;
 		innerLayout.addView(textView, textParams);
+		ImageView annotationImage = viewFactory.createAnnotationIcon();
 		if (annotation) {
-			ImageView annotationImage = viewFactory.createAnnotationIcon();
 			LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			innerLayout.addView(annotationImage, imageParams);
-			annotationIcons.add(annotationImage);
 		}
+		annotationIcons.add(annotationImage);
+		ImageView certaintyImage = viewFactory.createCertaintyIcon();
 		if (certainty) {
-			ImageView certaintyImage = viewFactory.createCertaintyIcon();
 			LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			innerLayout.addView(certaintyImage, imageParams);
-			certaintyIcons.add(certaintyImage);
 		}
+		certaintyIcons.add(certaintyImage);
 		layout.addView(innerLayout);
 		final FileAttachmentLabelDialog labelDialog = createLabelDialog(index);
 		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
@@ -126,9 +126,12 @@ public class FileListGroup extends CustomFileList {
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
 		removeAllViews();
+		annotationIcons = new ArrayList<ImageView>();
+		certaintyIcons = new ArrayList<ImageView>();
 		for (NameValuePair pair : pairs) {
 			addFileView(pair.getName());
 		}
+		updateIcons();
 	}
 	
 	@Override

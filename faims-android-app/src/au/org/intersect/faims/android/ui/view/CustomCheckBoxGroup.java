@@ -1,11 +1,15 @@
 package au.org.intersect.faims.android.ui.view;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import au.org.intersect.faims.android.R;
@@ -14,8 +18,12 @@ import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
+import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
+import au.org.intersect.faims.android.ui.dialog.CheckBoxGroupLabelDialog;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
@@ -41,14 +49,18 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Inject
 	BeanShellLinker linker;
 	
+	@Inject
+	Arch16n arch16n;
+	
 	private String ref;
 	private boolean dynamic;
 	
 	protected List<NameValuePair> currentValues;
-	protected float certainty;
-	protected float currentCertainty;
-	protected String annotation;
-	protected String currentAnnotation;
+	private List<String> currentCertainties;
+	private List<String> currentAnnotations;
+	private List<String> certainties;
+	private List<String> annotations;
+	
 	protected boolean dirty;
 	protected String dirtyReason;
 	protected boolean annotationEnabled;
@@ -62,8 +74,10 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	private String focusCallback;
 	private String blurCallback;
 	
-	private ImageView annotationIcon;
-	private ImageView certaintyIcon;
+	private List<ImageView> annotationIcons;
+	private List<ImageView> certaintyIcons;
+	
+	private ViewFactory viewFactory;
 
 	public CustomCheckBoxGroup(Context context) {
 		super(context);
@@ -85,6 +99,8 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		this.dynamic = dynamic;		
 	    this.customListener = new CheckBoxGroupOnClickListener();
 	    NativeCSS.addCSSClass(this, "checkbox-group");
+	    
+	    this.viewFactory = new ViewFactory(new WeakReference<ShowModuleActivity>(linker.getActivity()), arch16n);
 	    reset();
 	}
 
@@ -112,11 +128,10 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	public String getValue() {
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
-
-			if (view instanceof CustomCheckBox) {
-				CustomCheckBox cb = (CustomCheckBox) view;
-				if (cb.isChecked()) {
-					return cb.getValue();
+			if (view instanceof FrameLayout) {
+				CustomCheckBox checkbox = getItemCheckBoxView((FrameLayout) view);
+				if (checkbox.isChecked()) {
+					return checkbox.getValue();
 				}
 			}
 		}
@@ -127,12 +142,10 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	public void setValue(String value) {
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
-			if (view instanceof CustomCheckBox) {
-				CustomCheckBox cb = (CustomCheckBox) view;
-				if (cb.getValue()
-						.toString()
-						.equalsIgnoreCase(value)) {
-					cb.setChecked(true);
+			if (view instanceof FrameLayout) {
+				CustomCheckBox checkbox = getItemCheckBoxView((FrameLayout) view);
+				if (checkbox.getValue().toString().equalsIgnoreCase(value)) {
+					checkbox.setChecked(true);
 					break;
 				}
 			}
@@ -142,71 +155,165 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 
 	@Override
 	public float getCertainty() {
-		return certainty;
+		return 0;
 	}
 
 	@Override
 	public void setCertainty(float certainty) {
-		this.certainty = certainty;
-		updateCertaintyIcon(certainty);
-		notifySave();
-	}
-	
-	private void updateCertaintyIcon(float certainty) {
-		if (certaintyIcon != null) {
-			if (certainty != FaimsSettings.DEFAULT_CERTAINTY) {
-				certaintyIcon.setImageResource(R.drawable.certainty_entered);
-			} else {
-				certaintyIcon.setImageResource(R.drawable.certainty);
-			}
-		}
 	}
 	
 	@Override
 	public void setCertaintyIcon(ImageView certaintyIcon) {
-		this.certaintyIcon = certaintyIcon;
+	}
+	
+	public void setCertainties(List<String> certainties) {
+		this.certainties= certainties;
+	}
+	
+	public List<String> getCertainties() {
+		if (certainties == null) {
+			certainties = new ArrayList<String>();
+			return certainties;
+		}
+		List<String> values = new ArrayList<String>();
+
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+			
+			if (view instanceof FrameLayout) {
+				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
+				if (cb.isChecked()) {
+					values.add(certainties.get(i));
+				}
+			}
+		}
+		return values;
+	}
+	
+	public List<String> getAllCertainties() {
+		if (certainties == null) {
+			certainties = new ArrayList<String>();
+		}
+		return certainties;
+	}
+	
+	public void setCertainty(String certainty, int index) {
+		certainties.set(index, certainty);
+		updateCertaintyIcon(index);
+		notifySave();
+	}
+	
+	protected void updateCertaintyIcon(int index) {
+		if (index < certainties.size() && index < certaintyIcons.size()
+				&& certaintyIcons.get(index) != null) {
+			if (!String.valueOf(FaimsSettings.DEFAULT_CERTAINTY).equals(certainties.get(index))
+					&& certainties.get(index) != null) {
+				certaintyIcons.get(index).setImageResource(R.drawable.certainty_entered);
+			} else {
+				certaintyIcons.get(index).setImageResource(R.drawable.certainty);
+			}
+		}
 	}
 
 	@Override
 	public String getAnnotation() {
-		return annotation;
+		return null;
 	}
 
 	@Override
 	public void setAnnotation(String annotation) {
-		this.annotation = annotation;
-		updateAnnotationIcon(annotation);
-		notifySave();
-	}
-	
-	private void updateAnnotationIcon(String annotation) {
-		if (annotationIcon != null && annotation != null) {
-			if (!FaimsSettings.DEFAULT_ANNOTATION.equals(annotation)) {
-				annotationIcon.setImageResource(R.drawable.annotation_entered);
-			} else {
-				annotationIcon.setImageResource(R.drawable.annotation);
-			}
-		}
 	}
 	
 	@Override
 	public void setAnnotationIcon(ImageView annotationIcon) {
-		this.annotationIcon = annotationIcon;
+	}
+	
+	public void setAnnotations(List<String> annotations) {
+		this.annotations = annotations;
+	}
+	
+	public List<String> getAnnotations() {
+		if (annotations == null) {
+			annotations = new ArrayList<String>();
+			return annotations;
+		}
+		List<String> values = new ArrayList<String>();
+
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+			
+			if (view instanceof FrameLayout) {
+				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
+				if (cb.isChecked()) {
+					values.add(annotations.get(i));
+				}
+			}
+		}
+		return values;
+	}
+	
+	public List<String> getAllAnnotations() {
+		if (annotations == null) {
+			annotations = new ArrayList<String>();
+		}
+		return annotations;
+	}
+	
+	public void setAnnotation(String annotation, int index) {
+		annotations.set(index, annotation);
+		updateAnnotationIcon(index);
+		notifySave();
+	}
+	
+	protected void updateAnnotationIcon(int index) {
+		if (index < annotations.size() && index < annotationIcons.size()
+				&& annotationIcons.get(index) != null) {
+			if (!FaimsSettings.DEFAULT_ANNOTATION.equals(annotations.get(index)) && annotations.get(index) != null) {
+				annotationIcons.get(index).setImageResource(R.drawable.annotation_entered);
+			} else {
+				annotationIcons.get(index).setImageResource(R.drawable.annotation);
+			}
+		}
+	}
+	
+	public void setCheckBoxValue(String value, String annotation, String certainty) {
+		for (int i = 0; i < getChildCount(); ++i) {
+			View view = getChildAt(i);
+			
+			if (view instanceof FrameLayout) {
+				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
+				if (cb.getValue().toString().equalsIgnoreCase(value)) {
+					cb.setChecked(true);
+					annotations.set(i, annotation);
+					updateAnnotationIcon(i);
+					certainties.set(i, certainty);
+					updateCertaintyIcon(i);
+					notifySave();
+					break;
+				}
+			}
+		}
 	}
 
 	@Override
 	public void reset() {
 		dirty = false;
 		dirtyReason = null;
+		annotations = new ArrayList<String>();
+		certainties = new ArrayList<String>();
+		
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
-			if (view instanceof CustomCheckBox) {
-				CustomCheckBox cb = (CustomCheckBox) view;
-				cb.setChecked(false);
+			if (view instanceof FrameLayout) {
+				CustomCheckBox checkbox = getItemCheckBoxView((FrameLayout) view);
+				checkbox.setChecked(false);
+				annotations.add("");
+				annotationIcons.get(i).setImageResource(R.drawable.annotation);
+				certainties.add("1.0");
+				certaintyIcons.get(i) .setImageResource(R.drawable.certainty);
 			}
 		}
-		setCertainty(1);
-		setAnnotation("");
+		
 		save();
 	}
 	
@@ -234,16 +341,16 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Override
 	public boolean hasChanges() {
 		return !(Compare.compareValues((List<NameValuePair>) getValues(), currentValues)) || 
-				!Compare.equal(getAnnotation(), currentAnnotation) || 
-				!Compare.equal(getCertainty(), currentCertainty);
+				!(Compare.compareValues(currentAnnotations, annotations)) || 
+				!(Compare.compareValues(currentCertainties, certainties));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void save() {
 		currentValues = (List<NameValuePair>) getValues();
-		currentCertainty = getCertainty();
-		currentAnnotation = getAnnotation();
+		currentCertainties = getCertainties();
+		currentAnnotations = getAnnotations();
 	}
 
 	@Override
@@ -252,9 +359,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
-
-			if (view instanceof CustomCheckBox) {
-				CustomCheckBox cb = (CustomCheckBox) view;
+			
+			if (view instanceof FrameLayout) {
+				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
 				if (cb.isChecked()) {
 					values.add(new NameValuePair(cb.getValue(), "true"));
 				}
@@ -262,6 +369,28 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		}
 		
 		return values;
+	}
+	
+	private CustomCheckBox getItemCheckBoxView(FrameLayout frameLayout) {
+		for (int i = 0; i < frameLayout.getChildCount(); ++i) {
+			View view = frameLayout.getChildAt(i);
+			if (view instanceof LinearLayout) {
+				LinearLayout layout = (LinearLayout) view;
+				for (int j = 0; j < layout.getChildCount(); ++j) {
+					View layoutView = layout.getChildAt(j);
+					if (layoutView instanceof LinearLayout) {
+						LinearLayout checkContainer = (LinearLayout) layoutView;
+						for (int k = 0; k < checkContainer.getChildCount(); ++k) {
+							View check = checkContainer.getChildAt(j);
+							if (check instanceof CustomCheckBox) {
+								return (CustomCheckBox) check;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -272,8 +401,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		for (NameValuePair pair : pairs) {
 			for (int i = 0; i < getChildCount(); ++i) {
 				View view = getChildAt(i);
-				if (view instanceof CustomCheckBox) {
-					CustomCheckBox cb = (CustomCheckBox) view;
+				
+				if (view instanceof FrameLayout) {
+					CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
 					if (cb.getValue()
 							.toString()
 							.equalsIgnoreCase(pair.getName())) {
@@ -288,35 +418,93 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
 	public List<NameValuePair> getPairs() {
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-
 		for (int i = 0; i < getChildCount(); ++i) {
 			View view = getChildAt(i);
-
-			if (view instanceof CustomCheckBox) {
-				CustomCheckBox cb = (CustomCheckBox) view;
+			
+			if (view instanceof FrameLayout) {
+				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
 				String name = cb.getText().toString();
 				String value = cb.getValue();
 				pairs.add(new NameValuePair(name, value));
 			}
 		}
-		
 		return pairs;
 	}
 	
+	public void updateIcons() {
+		for(ImageView icon : annotationIcons) {
+			updateAnnotationIcon(annotationIcons.indexOf(icon));
+		}
+		for(ImageView icon : certaintyIcons) {
+			updateCertaintyIcon(certaintyIcons.indexOf(icon));
+		}
+	}
+
 	public void setPairs(List<NameValuePair> pairs) {
 		populate(pairs);
 	}
-
+	
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
+		annotations = new ArrayList<String>();
+		annotationIcons = new ArrayList<ImageView>();
+		certainties = new ArrayList<String>();
+		certaintyIcons = new ArrayList<ImageView>();
 		removeAllViews();
 		for (NameValuePair pair : pairs) {
-			CustomCheckBox checkBox = new CustomCheckBox(this.getContext());
-			checkBox.setText(pair.getName());
-			checkBox.setValue(pair.getValue());
-			checkBox.setOnClickListener(customListener);
-			addView(checkBox);
+			annotations.add("");
+			certainties.add("1.0");
+			FrameLayout layout = createGroupItem(pair, pairs.indexOf(pair));
+			addView(layout);
 		}
+	}
+	
+	private FrameLayout createGroupItem(NameValuePair item, int index) {
+		FrameLayout layout = new FrameLayout(getContext());
+		
+		Button buttonOverlay = new Button(getContext());
+		buttonOverlay.setBackgroundColor(Color.TRANSPARENT);
+		buttonOverlay.setBackgroundResource(R.drawable.label_selector);
+		layout.addView(buttonOverlay);
+		
+		LinearLayout innerLayout = new LinearLayout(getContext());
+
+		CustomCheckBox checkBox = new CustomCheckBox(this.getContext());
+		checkBox.setText(item.getName());
+		checkBox.setValue(item.getValue());
+		checkBox.setOnClickListener(customListener);
+		
+		LinearLayout checkContainer =  new LinearLayout(getContext());
+		checkContainer.addView(checkBox);
+		LinearLayout.LayoutParams checkParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		checkParams.weight = 0.80F;
+		innerLayout.addView(checkContainer, checkParams);
+		
+		final CheckBoxGroupLabelDialog dialog = new CheckBoxGroupLabelDialog(getContext(), this, index);
+		ImageView annotationImage = viewFactory.createAnnotationIcon();
+		if (annotationEnabled) {
+			innerLayout.addView(annotationImage, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+			dialog.addAnnotationTab();
+		}
+		annotationIcons.add(annotationImage);
+		ImageView certaintyImage = viewFactory.createCertaintyIcon();
+		if (certaintyEnabled) {
+			innerLayout.addView(certaintyImage, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+			dialog.addCertaintyTab();
+		}
+		certaintyIcons.add(certaintyImage);
+		layout.addView(innerLayout);
+		
+		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				dialog.show();
+				return false;
+			}
+		});
+		
+		return layout;
 	}
 
 	@Override
@@ -351,10 +539,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		}
 	}
 
-	@Override
-	public boolean hasAttributeChanges(
-			HashMap<String, ArrayList<Attribute>>  attributes) {
-		return Compare.compareAttributeValues(this, attributes);
+	public boolean hasMultiAttributeChanges(Module module,
+			HashMap<String, ArrayList<Attribute>> attributes) {
+		return Compare.compareMultiAttributeValues(this, attributes, module);
 	}
 
 	@Override
@@ -410,6 +597,12 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 				}
 			}
 		});
+	}
+
+	@Override
+	public boolean hasAttributeChanges(
+			HashMap<String, ArrayList<Attribute>> attributes) {
+		return Compare.compareAttributeValues(this, attributes);
 	}
 
 }

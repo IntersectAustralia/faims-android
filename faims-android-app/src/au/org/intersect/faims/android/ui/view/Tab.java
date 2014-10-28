@@ -516,18 +516,23 @@ public class Tab {
 					fieldFrameLayout.addView(buttonOverlay);
 			    	
 		            TextView textView = viewFactory.createLabel(ref, attribute);
-		            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		    		params.gravity = Gravity.CENTER_VERTICAL;
-		            fieldFrameLayout.addView(textView, params);
+		    		LinearLayout labelContainer = new LinearLayout(fieldFrameLayout.getContext());
+		    		labelContainer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+		    		labelContainer.setGravity(Gravity.CENTER_VERTICAL);
+		    		labelContainer.setOrientation(LinearLayout.HORIZONTAL);
+		    		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		    		params.weight = 0.80F;
+		    		labelContainer.addView(textView, params);
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
+		            NativeCSS.addCSSClass(icons, "label-icon");
 		            
 		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(arch16n.substituteValue(attribute.questionText));
 		    		
 		    		if(attribute.annotation && (isArchEnt || isRelationship)){
 		    			annotationImage = viewFactory.createAnnotationIcon();
-		    			if (!(view instanceof CustomFileList)) {
+		    			if (!(view instanceof CustomFileList) && !(view instanceof CustomCheckBoxGroup)) {
 		    				labelDialog.addAnnotationTab();
 		    				icons.addView(annotationImage);
 		    				customView.setAnnotationIcon(annotationImage);
@@ -536,7 +541,7 @@ public class Tab {
 		    		
 		    		if(attribute.certainty && (isArchEnt || isRelationship)){
 		    			certaintyImage = viewFactory.createCertaintyIcon();
-		    			if (!(view instanceof CustomFileList)) {
+		    			if (!(view instanceof CustomFileList) && !(view instanceof CustomCheckBoxGroup)) {
 		    				labelDialog.addCertaintyTab();
 		    				icons.addView(certaintyImage);
 		    				customView.setCertaintyIcon(certaintyImage);
@@ -557,9 +562,10 @@ public class Tab {
 			    		dirtyButtonMap.put(ref, dirtyImage);
 		    		}
 		    		
-		    		params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		    		params.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
-		    		fieldFrameLayout.addView(icons, params);
+		    		FrameLayout.LayoutParams iconParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		    		iconParams.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
+		    		labelContainer.addView(icons);
+		    		fieldFrameLayout.addView(labelContainer, iconParams);
 		    		buttonOverlay.setOnLongClickListener(new OnLongClickListener() {
 		    			
 		    			@Override
@@ -830,6 +836,8 @@ public class Tab {
 				} else if (iview instanceof CustomCheckBoxGroup) {
 					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
 					data.pairs = check.getPairs();
+					data.annotations = check.getAllAnnotations();
+					data.certainties = check.getAllCertainties();
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					data.pairs = list.getPairs();
@@ -917,6 +925,9 @@ public class Tab {
 				} else if (iview instanceof CustomCheckBoxGroup) {
 					CustomCheckBoxGroup check = (CustomCheckBoxGroup) iview;
 					check.setPairs(data.pairs);
+					check.setAnnotations(data.annotations);
+					check.setCertainties(data.certainties);
+					check.updateIcons();
 				} else if (iview instanceof CustomListView) {
 					CustomListView list = (CustomListView) iview;
 					list.setPairs(data.pairs);
@@ -925,6 +936,7 @@ public class Tab {
 					fileList.setPairs(data.pairs);
 					fileList.setAnnotations(data.annotations);
 					fileList.setCertainties(data.certainties);
+					fileList.updateIcons();
 				}
 				
 				// load values

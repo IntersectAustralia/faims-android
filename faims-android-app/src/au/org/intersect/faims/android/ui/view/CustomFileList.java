@@ -352,6 +352,15 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		this.reloadPairs = pairs;
 	}
 	
+	public void updateIcons() {
+		for(ImageView icon : annotationIcons) {
+			updateAnnotationIcon(annotationIcons.indexOf(icon));
+		}
+		for(ImageView icon : certaintyIcons) {
+			updateCertaintyIcon(certaintyIcons.indexOf(icon));
+		}
+	}
+	
 	public void reload() {
 		if (reloadPairs == null) return;
 		List<NameValuePair> pairs = getPairs();
@@ -375,7 +384,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		reloadPairs = null;
 	}
 
-	public boolean hasFileAttributeChanges(Module module,
+	public boolean hasMultiAttributeChanges(Module module,
 			HashMap<String, ArrayList<Attribute>> attributes) {
 		return Compare.compareFileAttributeValues(this, attributes, module);
 	}

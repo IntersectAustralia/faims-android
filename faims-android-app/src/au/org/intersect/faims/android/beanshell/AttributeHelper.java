@@ -147,6 +147,28 @@ public class AttributeHelper {
 						valuesByType.put(Attribute.CERTAINTY, new ArrayList<String>());
 					}
 					valuesByType.get(Attribute.CERTAINTY).addAll(fileList.getCertainties());
+				} else if (customView instanceof CustomCheckBoxGroup) {
+					// get values
+					CustomCheckBoxGroup checkBoxGroup = (CustomCheckBoxGroup) customView;
+					List<String> values = getViewValues(linker, checkBoxGroup);
+					
+					String type = checkBoxGroup.getAttributeType();
+					if (valuesByType.get(type) == null) {
+						valuesByType.put(type, new ArrayList<String>());
+					}
+					valuesByType.get(type).addAll(values);
+					
+					// get annotations
+					if (valuesByType.get(Attribute.FREETEXT) == null) {
+						valuesByType.put(Attribute.FREETEXT, new ArrayList<String>());
+					}
+					valuesByType.get(Attribute.FREETEXT).addAll(checkBoxGroup.getAnnotations());
+					
+					// get certainties
+					if (valuesByType.get(Attribute.CERTAINTY) == null) {
+						valuesByType.put(Attribute.CERTAINTY, new ArrayList<String>());
+					}
+					valuesByType.get(Attribute.CERTAINTY).addAll(checkBoxGroup.getCertainties());
 				} else {
 					List<String> values = getViewValues(linker, customView);
 					for (String value : values) {
@@ -213,7 +235,11 @@ public class AttributeHelper {
 				HashMap<String, ArrayList<Attribute>> cachedAttributes) {
 			for (ICustomView customView : views) {
 				if (customView instanceof CustomFileList) {
-					if (((CustomFileList) customView).hasFileAttributeChanges(linker.getModule(), cachedAttributes)) {
+					if (((CustomFileList) customView).hasMultiAttributeChanges(linker.getModule(), cachedAttributes)) {
+						return true;
+					}
+				} else if (customView instanceof CustomCheckBoxGroup) {
+					if (((CustomCheckBoxGroup) customView).hasMultiAttributeChanges(linker.getModule(), cachedAttributes)) {
 						return true;
 					}
 				} else if (customView.hasAttributeChanges(cachedAttributes)) {
@@ -306,6 +332,10 @@ public class AttributeHelper {
 				} else {
 					FLog.w("Null filename found for attribute " + attribute.getName());
 				}
+			} else if (customView instanceof CustomCheckBoxGroup) {
+				CustomCheckBoxGroup checkBoxGroup = (CustomCheckBoxGroup) customView;
+				String value = attribute.getValue(customView.getAttributeType());
+				checkBoxGroup.setCheckBoxValue(value, attribute.getAnnotation(checkBoxGroup.getAttributeType()), attribute.getCertainty());
 			} else {
 				linker.setFieldValue(customView.getRef(), attribute.getValue(customView.getAttributeType()));
 				if (!ignoreCertainty && customView.getCertaintyEnabled()) {

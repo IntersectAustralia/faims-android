@@ -3,28 +3,28 @@ package au.org.intersect.faims.android.ui.dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import au.org.intersect.faims.android.R;
-import au.org.intersect.faims.android.ui.view.CustomFileList;
+import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 
-public class FileAttachmentLabelDialog extends LabelDialog {
+public class CheckBoxGroupLabelDialog extends LabelDialog {
 	
 	class FileLabelDialogClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			if (certaintySeekBar != null) {
-				FileAttachmentLabelDialog.this.view.setCertainty(String.valueOf((float)certaintySeekBar.getProgress() / 100), index);
+				CheckBoxGroupLabelDialog.this.view.setCertainty(String.valueOf((float)certaintySeekBar.getProgress() / 100), index);
 			}
 			if (annotationText != null) {
-				FileAttachmentLabelDialog.this.view.setAnnotation(annotationText.getText().toString(), index);
+				CheckBoxGroupLabelDialog.this.view.setAnnotation(annotationText.getText().toString(), index);
 			}
 		}
 		
 	}
 
-	private CustomFileList view;
+	private CustomCheckBoxGroup view;
 	int index;
 	
-	public FileAttachmentLabelDialog(Context context, CustomFileList view, int index) {
+	public CheckBoxGroupLabelDialog(Context context, CustomCheckBoxGroup view, int index) {
 		super(context);
 		
 		this.view = view;
@@ -50,9 +50,9 @@ public class FileAttachmentLabelDialog extends LabelDialog {
 	
 	@Override
 	protected void updateCertainty() {
-		if (index < view.getCertainties().size()) {
-			if(view.getCertainties().get(index) != null) {
-				updateCertainty(Float.valueOf(view.getCertainties().get(index)));
+		if (index < view.getAllCertainties().size()) {
+			if(view.getAllCertainties().get(index) != null) {
+				updateCertainty(Float.valueOf(view.getAllCertainties().get(index)));
 			} else {
 				updateCertainty(1.0F);
 			}
@@ -61,8 +61,8 @@ public class FileAttachmentLabelDialog extends LabelDialog {
 	
 	@Override
 	protected void updateAnnotation() {
-		if (index < view.getAnnotations().size() && annotationText != null) {
-			annotationText.setText(view.getAnnotations().get(index));
+		if (index < view.getAllAnnotations().size() && annotationText != null) {
+			annotationText.setText(view.getAllAnnotations().get(index));
 		}
 	}
 

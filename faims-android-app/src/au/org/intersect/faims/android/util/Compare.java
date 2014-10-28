@@ -8,6 +8,7 @@ import java.util.List;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.ui.view.CustomCheckBoxGroup;
 import au.org.intersect.faims.android.ui.view.CustomFileList;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 
@@ -117,6 +118,46 @@ public class Compare {
 	@SuppressWarnings("unchecked")
 	public static boolean compareFileAttributeValues(
 			CustomFileList view,
+			HashMap<String, ArrayList<Attribute>> attributes, Module module) {
+		HashSet<NameValuePair> attributeValues = new HashSet<NameValuePair>();
+		HashSet<String> attributeAnnotations = new HashSet<String>();
+		HashSet<String> attributeCertainties = new HashSet<String>();
+		
+		if (attributes.get(view.getAttributeName()) != null) {
+			for (Attribute a : attributes.get(view.getAttributeName())) {
+				if (equal(a.getName(), view.getAttributeName())) {
+					attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
+					attributeAnnotations.add(a.getAnnotation(view.getAttributeType()));
+					attributeCertainties.add(a.getCertainty());
+				}
+			}
+		}
+		
+		boolean valuesEqual = compareValues(clean(attributeValues), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getValues()))));
+		if (!valuesEqual) return true;
+		
+		boolean annotationEqual;
+		if (view.getAnnotationEnabled()) {
+			annotationEqual = compareValues(clean(attributeAnnotations), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getAnnotations()))));
+		} else {
+			annotationEqual = true;
+		}
+		if (!annotationEqual) return true;
+		
+		boolean certaintyEqual;
+		if (view.getCertaintyEnabled()) {
+			certaintyEqual = compareValues(clean(attributeValues), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getCertainties()))));
+		} else {
+			certaintyEqual = true;
+		}
+		if (!certaintyEqual) return true;
+		
+		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static boolean compareMultiAttributeValues(
+			CustomCheckBoxGroup view,
 			HashMap<String, ArrayList<Attribute>> attributes, Module module) {
 		HashSet<NameValuePair> attributeValues = new HashSet<NameValuePair>();
 		HashSet<String> attributeAnnotations = new HashSet<String>();

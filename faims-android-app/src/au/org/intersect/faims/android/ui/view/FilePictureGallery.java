@@ -97,6 +97,8 @@ public class FilePictureGallery extends CustomFileList {
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
 		ArrayList<Picture> pictures = new ArrayList<Picture>();
+		annotationIcons = new ArrayList<ImageView>();
+		certaintyIcons = new ArrayList<ImageView>();
 		for (NameValuePair pair : pairs) {
 			Picture picture = new Picture(pair.getName(), null, pair.getValue());
 			pictures.add(picture);
@@ -113,6 +115,7 @@ public class FilePictureGallery extends CustomFileList {
 		for (Picture picture : pictures) {
 			addFileView(picture.getUrl());
 		}
+		updateIcons();
 	}
 	
 	protected CustomImageView addGallery(Picture picture) {
@@ -173,18 +176,18 @@ public class FilePictureGallery extends CustomFileList {
 		iconContainer.setGravity(Gravity.END);
 		iconContainer.setOrientation(LinearLayout.HORIZONTAL);
 		final FileAttachmentLabelDialog dialog = new FileAttachmentLabelDialog(getContext(), this, galleryImages.size());
+		ImageView annotationImage = viewFactory.createAnnotationIcon();
 		if (annotationEnabled) {
-			ImageView annotationImage = viewFactory.createAnnotationIcon();
 			iconContainer.addView(annotationImage);
 			dialog.addAnnotationTab();
-			annotationIcons.add(annotationImage);
 		}
+		annotationIcons.add(annotationImage);
+		ImageView certaintyImage = viewFactory.createCertaintyIcon();
 		if (certaintyEnabled) {
-			ImageView certaintyImage = viewFactory.createCertaintyIcon();
 			iconContainer.addView(certaintyImage);
 			dialog.addCertaintyTab();
-			certaintyIcons.add(certaintyImage);
 		}
+		certaintyIcons.add(certaintyImage);
 		headerContainer.setOnLongClickListener(new OnLongClickListener() {
 			
 			@Override
