@@ -81,7 +81,9 @@ public class StatementParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(16); ((ProgramContext)_localctx).s = statement();
-			 ((ProgramContext)_localctx).value =  ((ProgramContext)_localctx).s.value; 
+			 
+			            ((ProgramContext)_localctx).value =  ((ProgramContext)_localctx).s.value; 
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -143,7 +145,7 @@ public class StatementParser extends Parser {
 			}
 
 			 
-			            if (((StatementContext)_localctx).e.value == true)
+			            if (((StatementContext)_localctx).e.value != null && ((StatementContext)_localctx).e.value == true)
 			                ((StatementContext)_localctx).value =  ((StatementContext)_localctx).v.value;
 			            else if (((StatementContext)_localctx).s != null)
 			                ((StatementContext)_localctx).value =  ((StatementContext)_localctx).s.value;
@@ -214,7 +216,7 @@ public class StatementParser extends Parser {
 				}
 
 				 
-				            if (((Next_statementContext)_localctx).e.value == true)
+				            if (((Next_statementContext)_localctx).e.value != null && ((Next_statementContext)_localctx).e.value == true)
 				                ((Next_statementContext)_localctx).value =  ((Next_statementContext)_localctx).v.value;
 				            else if (((Next_statementContext)_localctx).s != null)
 				                ((Next_statementContext)_localctx).value =  ((Next_statementContext)_localctx).s.value;
@@ -287,7 +289,9 @@ public class StatementParser extends Parser {
 				setState(45); match(T__11);
 				setState(46); ((Multi_expressionContext)_localctx).r = multi_expression();
 				setState(47); match(T__13);
-				 ((Multi_expressionContext)_localctx).value =  ((Multi_expressionContext)_localctx).l.value && ((Multi_expressionContext)_localctx).r.value; 
+				 
+				            ((Multi_expressionContext)_localctx).value =  (((Multi_expressionContext)_localctx).l.value != null && ((Multi_expressionContext)_localctx).l.value) && (((Multi_expressionContext)_localctx).r.value != null && ((Multi_expressionContext)_localctx).r.value); 
+				        
 				}
 				break;
 			case T__17:
@@ -298,7 +302,9 @@ public class StatementParser extends Parser {
 				setState(52); match(T__11);
 				setState(53); ((Multi_expressionContext)_localctx).r = multi_expression();
 				setState(54); match(T__13);
-				 ((Multi_expressionContext)_localctx).value =  ((Multi_expressionContext)_localctx).l.value || ((Multi_expressionContext)_localctx).r.value; 
+				 
+				            ((Multi_expressionContext)_localctx).value =  (((Multi_expressionContext)_localctx).l.value != null && ((Multi_expressionContext)_localctx).l.value) || (((Multi_expressionContext)_localctx).r.value != null && ((Multi_expressionContext)_localctx).r.value); 
+				        
 				}
 				break;
 			case T__16:
@@ -396,7 +402,7 @@ public class StatementParser extends Parser {
 				setState(72); ((Single_expressionContext)_localctx).r = literal();
 				setState(73); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(((Single_expressionContext)_localctx).l.value) > Float.parseFloat(((Single_expressionContext)_localctx).r.value);
+				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) > Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).r.value));
 				        
 				}
 				break;
@@ -409,7 +415,7 @@ public class StatementParser extends Parser {
 				setState(79); ((Single_expressionContext)_localctx).r = literal();
 				setState(80); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(((Single_expressionContext)_localctx).l.value) >= Float.parseFloat(((Single_expressionContext)_localctx).r.value);
+				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) >= Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).r.value));
 				        
 				}
 				break;
@@ -422,7 +428,7 @@ public class StatementParser extends Parser {
 				setState(86); ((Single_expressionContext)_localctx).r = literal();
 				setState(87); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(((Single_expressionContext)_localctx).l.value) < Float.parseFloat(((Single_expressionContext)_localctx).r.value);
+				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) < Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).r.value));
 				        
 				}
 				break;
@@ -435,7 +441,7 @@ public class StatementParser extends Parser {
 				setState(93); ((Single_expressionContext)_localctx).r = literal();
 				setState(94); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(((Single_expressionContext)_localctx).l.value) <= Float.parseFloat(((Single_expressionContext)_localctx).r.value);
+				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).r.value != null && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) <= Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).r.value));
 				        
 				}
 				break;
@@ -450,7 +456,7 @@ public class StatementParser extends Parser {
 				setState(102); ((Single_expressionContext)_localctx).max = literal();
 				setState(103); match(T__13);
 
-				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).min.value != null && ((Single_expressionContext)_localctx).max.value != null && Float.parseFloat(((Single_expressionContext)_localctx).l.value) >= Float.parseFloat(((Single_expressionContext)_localctx).min.value) && Float.parseFloat(((Single_expressionContext)_localctx).l.value) <= Float.parseFloat(((Single_expressionContext)_localctx).max.value);
+				            ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).l.value != null && ((Single_expressionContext)_localctx).min.value != null && ((Single_expressionContext)_localctx).max.value != null && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) >= Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).min.value)) && Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).l.value)) <= Float.parseFloat(String.valueOf(((Single_expressionContext)_localctx).max.value));
 				        
 				}
 				break;
@@ -461,7 +467,7 @@ public class StatementParser extends Parser {
 				setState(107); ((Single_expressionContext)_localctx).e = single_expression();
 				setState(108); match(T__13);
 				 
-				            if (((Single_expressionContext)_localctx).e.value == true)
+				            if (((Single_expressionContext)_localctx).e.value != null && ((Single_expressionContext)_localctx).e.value == true)
 				                ((Single_expressionContext)_localctx).value =  false;
 				            else
 				                ((Single_expressionContext)_localctx).value =  true;
@@ -476,7 +482,7 @@ public class StatementParser extends Parser {
 				setState(113); match(T__11);
 				setState(114); ((Single_expressionContext)_localctx).items = list();
 				setState(115); match(T__13);
-				 ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).items.value.indexOf(((Single_expressionContext)_localctx).l.value) >= 0; 
+				 ((Single_expressionContext)_localctx).value =  ((Single_expressionContext)_localctx).items.value != null && ((Single_expressionContext)_localctx).items.value.indexOf(((Single_expressionContext)_localctx).l.value) >= 0; 
 				}
 				break;
 			case STRING:
