@@ -46,6 +46,7 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
+		solo.clickOnText("Save");
 		solo.clickOnText("Load Entity");
 		solo.clickOnView(solo.getView(HierarchicalSpinner.class, 0));
 		solo.clickOnView(solo.getView(CheckedTextView.class, 1));
@@ -100,7 +101,7 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
-		solo.clickOnView(solo.getView(CustomCheckBox.class, 2));
+		solo.clickOnView(solo.getView(CustomCheckBox.class, 0));
 		
 		assertTrue(solo.searchText("Checkbox click event"));
 	}
@@ -111,7 +112,7 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
-		solo.clickOnView(solo.getView(CustomRadioButton.class, 2));
+		solo.clickOnView(solo.getView(CustomRadioButton.class, 0));
 		
 		assertTrue(solo.searchText("Radiogroup select event"));
 	}
@@ -123,8 +124,8 @@ public class ShowModuleTest extends ActivityInstrumentationTestCase2<ShowModuleA
 		solo.clickOnText("Faims Admin");
 		solo.clickOnText("Create Entity");
 		solo.scrollToBottom();
-		solo.clickOnView(solo.getView(CustomButton.class, 6));
-		assertTrue(solo.searchText("added new record"));
+		solo.clickOnView(solo.getView(CustomButton.class, 7));
+		Thread.sleep(1000);
 		
 		TestModuleUtil.recreateActivity(getInstrumentation(), getActivity());
 		solo.clickOnText("Show Entity ID");

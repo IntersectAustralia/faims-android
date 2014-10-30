@@ -1193,7 +1193,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				ImageView dirtyButton = uiRenderer.getTabForView(ref).getDirtyButton(ref);
 				if (dirtyButton != null) {
-					dirtyButton.setVisibility(isViewDirty ? View.VISIBLE : View.GONE);
+					dirtyButton.setVisibility(isViewDirty ? View.VISIBLE : View.INVISIBLE);
 				}
 				
 				customView.setDirty(isViewDirty);

@@ -529,7 +529,7 @@ public class Tab {
 		            
 		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(arch16n.substituteValue(attribute.questionText));
-		    		
+		            
 		    		if(attribute.annotation && (isArchEnt || isRelationship)){
 		    			annotationImage = viewFactory.createAnnotationIcon();
 		    			if (!(view instanceof CustomFileList) && !(view instanceof CustomCheckBoxGroup)) {
@@ -555,11 +555,11 @@ public class Tab {
 		    		}
 		    		
 		    		if (isArchEnt || isRelationship) {
-			    		dirtyImage = viewFactory.createDirtyIcon();
-			    		dirtyImage.setVisibility(View.GONE);
-			    		labelDialog.addDirtyTab();
-			    		icons.addView(dirtyImage);
-			    		dirtyButtonMap.put(ref, dirtyImage);
+		    			dirtyImage = viewFactory.createDirtyIcon();
+		    			dirtyImage.setVisibility(View.INVISIBLE);
+		    			labelDialog.addDirtyTab();
+		    			icons.addView(dirtyImage, 0);
+		    			dirtyButtonMap.put(ref, dirtyImage);
 		    		}
 		    		
 		    		FrameLayout.LayoutParams iconParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -727,7 +727,7 @@ public class Tab {
 				ICustomView customView = (ICustomView) v;
 				customView.reset();
 				ImageView dirtyButton = dirtyButtonMap.get(customView.getRef());
-				if (dirtyButton != null) dirtyButton.setVisibility(View.GONE);
+				if (dirtyButton != null) dirtyButton.setVisibility(View.INVISIBLE);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 // USER
 
-login(){
+login() {
 	fetchOne("select userid, fname, lname, email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
 		onFetch(result) {
 			user = new User(result.get(0), result.get(1), result.get(2), result.get(3));
@@ -13,7 +13,7 @@ login(){
 onEvent("user/tab1/users", "click", "login()");
 
 loadUsers() {
-	fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+	fetchAll("select userid, fname ||' ' || lname from user where userdeleted is NULL", new FetchCallback() {
 		onFetch(result) {
 			populateList("user/tab1/users", result);
 		}
@@ -24,10 +24,10 @@ onEvent("user", "show", "loadUsers()");
 
 // CONTROLS
 
-createOption(id, name) {
+createOption(name, value) {
 	ArrayList option = new ArrayList();
-	option.add(id);
 	option.add(name);
+	option.add(value);
 	return option;
 }
 
@@ -35,6 +35,8 @@ options = new ArrayList();
 options.add(createOption("entity", "Create Entity"));
 options.add(createOption("relationship", "Create Relationship"));
 options.add(createOption("add", "Add Association"));
+options.add(createOption("table", "Table Example"));
+options.add(createOption("bluetooth", "Bluetooth Example"));
 options.add(createOption("controls", "Controls"));
 
 populateList("menu/tab1/options", options);
@@ -47,6 +49,10 @@ onClickOption() {
 		showTabGroup("tabgroup2");
 	} else if ("add".equals(value)) {
 		showTabGroup("tabgroup4");
+	} else if ("table".equals(value)) {
+		showTabGroup("tabgroup5");
+	} else if ("bluetooth".equals(value)) {
+		showTabGroup("tabgroup6");
 	} else {
 		showTabGroup("tabgroup3");
 	}
@@ -67,7 +73,9 @@ init() {
 	setSyncMinInterval(10.0f);
 	setSyncMaxInterval(20.0f);
 	setSyncDelay(5.0f);
-	startSync();
+	// reset ids
+	entityId = tableEntityId = null;
+	relationshipId = tableRelationshipId = null;
 }
 
 cleanup() {
@@ -83,9 +91,10 @@ onEvent("tabgroup3/tab1/stop", "click", "stopSync()");
 // ENTITY
 
 String entityId = null;
+String tableEntityId = null;
 
 initEntity() {
-	clearEntity();
+ 	clearEntity();
 }
 
 onEvent("tabgroup1", "show", "initEntity()");	
@@ -129,6 +138,8 @@ reloadEntity() {
 
 updateEntity() {
 	if (isNull(entityId)) entityId = null;
+
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
 	
 	attributes = null;
 	if (entityId == null) {
@@ -199,6 +210,11 @@ deleteEntity(){
 }
 
 onEvent("tabgroup1/tab1/textalert", "click", "showTextAlert(\"Alert\", \"Message here:\", \"showInput()\", \"showToast('Cancel')\")");
+showInput() {
+	input = getLastTextAlertInput();
+	showToast(input);
+}
+
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity()");
 onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
 onEvent("tabgroup1/tab2/load", "click", "loadEntity()");
@@ -213,14 +229,21 @@ onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
 
 onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
 
-showInput() {
-	input = getLastTextAlertInput();
-	showToast(input);
+onEvent("tabgroup1/tab1/location", "click", "clickEventToast(\"Checkbox click event\")");
+onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select event\")");
+onEvent("tabgroup1/tab1/type", "select", "clickEventToast(\"Hierarchical dropdown select event\")");
+onEvent("tabgroup1/tab1/gallery", "select", "clickEventToast(\"Gallery select event\")");
+onEvent("tabgroup1/tab1/rocks", "select", "clickEventToast(\"Hierarchical gallery select event\")");
+onEvent("tabgroup1/tab1/location2", "select", "clickEventToast(\"Radiogroup select event\")");
+
+clickEventToast(string) {
+	showToast(string);
 }
 
 // RELATIONSHIP
 
 String relationshipId = null;
+String tableRelationshipId = null;
 
 initRelationship() {
 	clearRelationship();
@@ -267,6 +290,8 @@ reloadRelationship() {
 
 updateRelationship() {
 	if (isNull(relationshipId)) relationshipId = null;
+
+	if (relationshipId == null && tableRelationshipId != null) relationshipId = tableRelationshipId;
 	
 	attributes = null;
 	if (relationshipId == null) {
@@ -314,7 +339,7 @@ clearRelationship() {
 			populatePictureGallery("tabgroup2/tab1/gallery", result);
 		}
 	});
-	
+
 	relationshipId = null;
 	
 	newTab("tabgroup2/tab1");
@@ -391,27 +416,271 @@ onAddMember() {
 	});
 }
 
-onEvent("tabgroup1/tab1/type", "select", "clickEventToast(\"Hierarchical dropdown select event\")");
+// TABLE View
 
-onEvent("tabgroup1/tab1/gallery", "select", "clickEventToast(\"Gallery select event\")");
+tableQuery = new ArrayList();
+tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
+				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
+				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure, \n" + 
+				"	 									   vocabname, \n" + 
+				"	 									   freetext), ' | ') as response, uuid \n" +
+				" 			FROM latestNonDeletedArchentIdentifiers\n" +
+				" 			GROUP BY uuid;");
+tableQuery.add("SELECT relationshipid, group_concat(coalesce(vocabname || ' (' || freetext  ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname || ' (' || freetext || ')', \n" + 
+				" 												 	 vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 freetext  || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				" 													 vocabname, \n" + 
+				" 													 freetext), ' | ') as response, relationshipid \n" +
+				" 		FROM latestNonDeletedRelnIdentifiers \n" +
+				" 		GROUP BY relationshipid;");
+tableQuery.add("select uuid, attributename, response\n" + 
+				"from (select attributename, attributeid\n" + 
+				"from attributekey join idealaent using (attributeid) join aenttype using (aenttypeid)\n" + 
+				"where aenttypename = 'small'), (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"left outer join \n" + 
+				"(select uuid, valuetimestamp, attributename, attributeid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||') '||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' ' || vocabname   ||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure,\n" + 
+				"                                                                                              vocabname,\n" + 
+				"                                                                                              freetext), ' | ') as response\n" + 
+				"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp          \n" + 
+				"          FROM latestnondeletedaentvalue join latestnondeletedarchent using (uuid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY uuid, attributename ASC)\n" + 
+				"group by uuid, attributeid) using (uuid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select uuid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, geospatialcolumn\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'username', fname || ' ' || lname\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, fname, lname\n" + 
+				"from latestnondeletedarchentidentifiers join user using (userid)\n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'action', uuid \n" + 
+				"from latestnondeletedarchent join aenttype using (aenttypeid) \n" + 
+				"where aenttypename = 'small' \n" + 
+				"group by uuid \n" + 
+				"order by uuid, attributename;");
+tableQuery.add("select relationshipid, attributename, response\n" + 
+				"from (select attributename, attributeid \n" + 
+				"from attributekey join idealreln using (attributeid) join relntype using (relntypeid)\n" + 
+				"where relntypename = 'AboveBelow'),\n" + 
+				"(select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename\n" + 
+				") left outer join (\n" + 
+				"select relationshipid, relnvaluetimestamp, attributename, attributeid, group_concat(coalesce(vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                         vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                         vocabname,\n" + 
+				"                                                                                         freetext), ' | ') as response\n" + 
+				"FROM (  SELECT relationshipid, attributeid, vocabid, attributename, vocabname,  freetext, certainty, attributetype, relnvaluetimestamp, relntimestamp\n" + 
+				"          FROM latestnondeletedrelnvalue join latestnondeletedrelationship using (relationshipid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY relationshipid, attributename ASC)\n" + 
+				"group by relationshipid, attributeid) using (relationshipid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select relationshipid, relntypename, relntypeid, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, geospatialcolumn\n" + 
+				"from latestNonDeletedRelnIdentifiers\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"union \n" + 
+				"select relationshipid, 'username', fname || ' ' || lname\n" + 
+				"from (select relationshipid, relntypeid, relntypename, relntimestamp, group_concat(coalesce(freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '')as isIdent, fname, lname\n" + 
+				"from latestNonDeletedRelnIdentifiers join user using (userid)\n" + 
+				"where relntypename = 'AboveBelow'\n" + 
+				"group by relationshipid\n" + 
+				"order by attributename)\n" + 
+				"union\n" + 
+				"select relationshipid, 'action', relationshipid \n" + 
+				"from latestNonDeletedRelnIdentifiers join relntype using (relntypeid) \n" + 
+				"where relntype.relntypename = 'AboveBelow' \n" + 
+				"group by relationshipid \n" + 
+				"order by relationshipid, attributename;");
 
-onEvent("tabgroup1/tab1/rocks", "select", "clickEventToast(\"Hierarchical gallery select event\")");
-
-onEvent("tabgroup1/tab2/entities", "select", "clickEventToast(\"Dropdown select event\")");
-
-onEvent("tabgroup1/tab1/location", "click", "clickEventToast(\"Checkbox click event\")");
-
-onEvent("tabgroup1/tab1/location2", "select", "clickEventToast(\"Radiogroup select event\")");
-
-clickEventToast(string) {
-	showToast(string);
+createTableHeaders(headers) {
+	ArrayList listHeaders = new ArrayList();
+	for (String header : headers) {
+		listHeaders.add(header);
+	}
+	return listHeaders;
 }
 
-captureHardware("Microsoft Wired Keyboard 600", "\n", "showHardwareBuffer()");
-// captureHardware("ﾩSymbol Technologies, Inc, 2002 Symbol Bar Code Scanner", "\n", "showHardwareBuffer()");
+tableHeaders = new ArrayList();
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "relationshipid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "relationship", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
 
+tableList = new ArrayList();
+tableList.add(createOption("entity", "Fetch Entities"));
+tableList.add(createOption("relationship", "Fetch Relationships"));
+tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
+tableList.add(createOption("relationship-pivot", "Fetch Relationship Attributes"));
 
-showHardwareBuffer() {
-	buffer = getHardwareBufferContents();
-	showToast(buffer);
+onEvent("tabgroup5", "load", "onLoadTable()");
+
+onLoadTable() {
+	populateDropDown("tabgroup5/tab1/queries", tableList);
+}
+
+onEvent("tabgroup5", "show", "refreshTable(\"tabgroup5/tab1/table\")");
+
+onEvent("tabgroup5/tab1/load", "click", "onLoadQuery()");
+onEvent("tabgroup5/tab1/top", "click", "onScrollTop()");
+onEvent("tabgroup5/tab1/bottom", "click", "onScrollBottom()");
+onEvent("tabgroup5/tab1/row", "click", "onScrollRow()");
+
+onLoadQuery() {
+	selectedItem = getFieldValue("tabgroup5/tab1/queries");
+	
+	index = getTableIndex(selectedItem);
+	if (index < 0) return;
+
+	headers = tableHeaders.get(index);
+	query = tableQuery.get(index);
+	if (index == 0) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowEntityRow()");
+	} else if (index == 1) {
+		populateTableRaw("tabgroup5/tab1/table", query, headers, "Show", 2, "onShowRelationshipRow()");
+	} else if (index == 2) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
+	} else if (index == 3) {
+		populateTablePivot("tabgroup5/tab1/table", query, headers, "Show", 15, "onShowRelationshipRow()");
+	}
+}
+
+onShowEntityRow() {
+	row = getTableRow();
+	value = getTableValue();
+
+	tableEntityId = value;
+	showTabGroup("tabgroup1", value);
+}
+
+onShowRelationshipRow() {
+	row = getTableRow();
+	value = getTableValue();
+
+	tableRelationshipId = value;
+	showTabGroup("tabgroup2", value);
+}
+
+getTableIndex(selectedItem) {
+	for (int i = 0; i < tableList.size(); i++) {
+		if (tableList.get(i).get(0).equals(selectedItem)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+onScrollTop() {
+	scrollTableToTop("tabgroup5/tab1/table");
+}
+
+onScrollBottom() {
+	scrollTableToBottom("tabgroup5/tab1/table");
+}
+
+onScrollRow() {
+	value = getFieldValue("tabgroup5/tab1/scrollRow");
+	row = 0;
+	if (value != null && !"".equals(value)) {
+		row = Integer.parseInt(value);
+	}
+	scrollTableToRow("tabgroup5/tab1/table", row);
+}
+
+// Bluetooth Test
+
+onEvent("tabgroup6/tab1/auto", "click", "onBluetoothStartAuto()");
+onEvent("tabgroup6/tab1/manual", "click", "onBluetoothStartManual()");
+onEvent("tabgroup6/tab1/stop", "click", "onBluetoothStop()");
+onEvent("tabgroup6/tab1/read", "click", "onBluetoothRead()");
+onEvent("tabgroup6/tab1/write", "click", "onBluetoothWrite()");
+onEvent("tabgroup6/tab1/clear", "click", "onBluetoothClear()");
+
+messageBuffer = new ArrayList();
+messageBufferSize = 5;
+addMessage(message) {
+	messageBuffer.add(message);
+	if (messageBuffer.size() > messageBufferSize) {
+		messageBuffer.remove(0);
+	}
+	value = "";
+	for (i = 0; i < messageBuffer.size(); i++) {
+		if (!value.isEmpty()) {
+			value += "\n";
+		}
+		value += messageBuffer.get(i);
+	}
+	setFieldValue("tabgroup6/tab1/input", value);
+}
+
+onBluetoothStartAuto() {
+	createBluetoothConnection("onBluetoothInput()", 1);
+}
+
+onBluetoothStartManual() {
+	createBluetoothConnection("onBluetoothInput()", 0);
+}
+
+onBluetoothStop() {
+	destroyBluetoothConnection();
+}
+
+onBluetoothRead() {
+	readBluetoothMessage();
+}
+
+onBluetoothWrite() {
+	writeBluetoothMessage(getFieldValue("tabgroup6/tab1/input"));
+}
+
+onBluetoothClear() {
+	messageBuffer = new ArrayList();
+	setFieldValue("tabgroup6/tab1/input", "");
+	clearBluetoothMessages();
+}
+
+onBluetoothInput() {
+	message = getBluetoothMessage();
+	addMessage(message);
 }
