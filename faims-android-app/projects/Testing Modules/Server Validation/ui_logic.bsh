@@ -33,7 +33,7 @@ loadEntityFrom(entid) {
 
 saveEntity() {
     if (!isNull(entity_id)) {
-        entity = fetchArchEnt(entity_id);
+        fetchArchEnt(entity_id,null);
     }
     saveTabGroup("Entity", entity_id, null, null, new SaveCallback() {
         onSave(uuid, newRecord) {
