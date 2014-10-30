@@ -63,6 +63,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	private String clickCallback;
 	private String focusCallback;
 	private String blurCallback;
+	private String selectCallback;
 	
 	private ImageView annotationIcon;
 	private ImageView certaintyIcon;
@@ -357,11 +358,19 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 
 	@Override
 	public String getSelectCallback() {
-		return null;
+		return selectCallback;
 	}
 
 	@Override
 	public void setSelectCallback(String code) {
+		selectCallback = code;
+		setOnCheckChangedListener(new RadioGroup.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				linker.execute(selectCallback);
+			}
+		});
 	}
 
 	@Override
