@@ -48,14 +48,14 @@
                   <attachaudio></attachaudio>
                   <viewattached></viewattached>
                   <scancode></scancode>
-                  <container2>
+                  <container>
                     <child1>
                       <save></save>
                     </child1>
                     <child2>
                       <clear></clear>
                     </child2>
-                  </container2>
+                  </container>
                   <showEntityId></showEntityId>
                   <entityID></entityID>
                   <delete></delete>
@@ -85,14 +85,14 @@
                   <attachaudio></attachaudio>
                   <viewattached></viewattached>
                   <scancode></scancode>
-                  <container2>
+                  <container>
                     <child1>
                       <save></save>
                     </child1>
                     <child2>
                       <clear></clear>
                     </child2>
-                  </container2>
+                  </container>
                   <delete></delete>
                   <close></close>
               </tab1>
@@ -115,11 +115,45 @@
                   <add></add>
               </tab1>
           </tabgroup4>
+          <tabgroup5>
+              <tab1>
+                  <queries></queries>
+                  <load></load>
+                  <table></table>
+                  <container>
+                      <child1>
+                      	<top></top>
+                      </child1>
+                      <child2>
+                      	<bottom></bottom>
+                      </child2>
+                      <child3>
+                      	<scrollRow></scrollRow>
+                      </child3>
+                      <child4>
+                      	<row></row>
+                      </child4>
+                  </container>
+              </tab1>
+          </tabgroup5>
+          <tabgroup6>
+              <tab1>
+                  <auto></auto>
+                  <manual></manual>
+                  <stop></stop>
+                  <input></input>
+                  <read></read>
+                  <write></write>
+                  <clear/>
+              </tab1>
+          </tabgroup6>
         </faims>
       </instance>
       
       <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
       <bind nodeset="/faims/tabgroup2/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup5/tab1/container/child3/scrollRow" type="decimal"/>
+      <bind nodeset="/faims/tabgroup6/tab1/input" type="string"/>
       
     </model>
   </h:head>
@@ -178,22 +212,22 @@
 	            <label>Value:</label>
 	        </input>
 	        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
-              <label>Timestamp:</label>
-            </input>
-            <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
-                <label>Location:</label>
-                <item>
-                	<label>dummy</label>
-                	<value>dummy</value>
-              	</item>
-            </select>
-            <select1 ref="location2" appearance="full">
+            <label>Timestamp:</label>
+          </input>
+          <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+              <label>Location:</label>
+              <item>
+              	<label>dummy</label>
+              	<value>dummy</value>
+            	</item>
+          </select>
+          <select1 ref="location2" appearance="full">
             <label>Location2:</label>
             <item>
               <label>dummy</label>
               <value>dummy</value>
             </item>
-         </select1>
+          </select1>
 	        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
 	            <label>Type:</label>
 	            <item>
@@ -264,7 +298,7 @@
           <trigger ref="scancode">
               <label>Scan Code</label>
           </trigger>
-	        <group ref="container2" faims_style="orientation">
+	        <group ref="container" faims_style="orientation">
 	          <label></label>
 	          <group ref="child1" faims_style="even">
 	            <label></label>
@@ -393,7 +427,7 @@
           <trigger ref="scancode">
               <label>Scan Code</label>
           </trigger>
-	        <group ref="container2" faims_style="orientation">
+	        <group ref="container" faims_style="orientation">
 	          <label></label>
 	          <group ref="child1" faims_style="even">
 	            <label></label>
@@ -465,6 +499,79 @@
             <trigger ref="add">
               <label>Add member</label>
           	</trigger>
+        </group>
+    </group>
+    <group ref="tabgroup5">
+      <label>Table View</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Table View</label>
+        <select1 ref="queries">
+            <label>Queries</label>
+            <item>
+	         	<label>dummy</label>
+	         	<value>dummy</value>
+	       	</item>
+        </select1>
+        <trigger ref="load">
+        	<label>Load Query</label>
+       	</trigger>
+       	<input ref="table" faims_table="true">
+        	<label></label>
+       	</input>
+       	<group ref="container" faims_style="orientation">
+        	<label></label>
+	        <group ref="child1" faims_style="even">
+	        	<label></label>
+	            <trigger ref="top">
+	              <label>Top</label>
+	            </trigger>
+	        </group>
+	        <group ref="child2" faims_style="even">
+	        	<label></label>
+	            <trigger ref="bottom">
+	              <label>Bottom</label>
+	            </trigger>
+	        </group>
+	        <group ref="child3" faims_style="even">
+	        	<label></label>
+	            <input ref="scrollRow">
+	                <label>Scroll Row:</label>
+	            </input>
+	        </group>
+	        <group ref="child4" faims_style="even">
+	        	<label></label>
+	            <trigger ref="row">
+	              <label>Row</label>
+	            </trigger>
+	        </group>
+	    </group>
+      </group>
+    </group>
+    <group ref="tabgroup6">
+        <label></label>
+        <group ref="tab1">
+            <label>Bluetooth</label>
+            <trigger ref="auto">
+                <label>Create Bluetooth Connection (Auto)</label>
+            </trigger>
+            <trigger ref="manual">
+                <label>Create Bluetooth Connection (Manual)</label>
+            </trigger>
+            <trigger ref="stop">
+                <label>Destroy Bluetooth Connection</label>
+            </trigger>
+            <input ref="input">
+                <label>Input</label>
+            </input>
+            <trigger ref="read">
+                <label>Read Message</label>
+            </trigger>
+            <trigger ref="write">
+                <label>Write Message</label>
+            </trigger>
+            <trigger ref="clear">
+                <label>Clear Messages</label>
+            </trigger>
         </group>
     </group>
   </h:body>
