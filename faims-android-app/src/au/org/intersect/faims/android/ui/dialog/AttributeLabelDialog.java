@@ -109,6 +109,7 @@ public class AttributeLabelDialog extends LabelDialog {
 		updateAnnotation();
 		updateCertainty();
 		updateDirtyReason();
+		tabHost.setCurrentTab(0);
 		super.show();
 	}
 	
