@@ -176,18 +176,18 @@ public class FilePictureGallery extends CustomFileList {
 		iconContainer.setGravity(Gravity.END);
 		iconContainer.setOrientation(LinearLayout.HORIZONTAL);
 		final FileAttachmentLabelDialog dialog = new FileAttachmentLabelDialog(getContext(), this, galleryImages.size());
+		ImageView annotationImage = viewFactory.createAnnotationIcon();
 		if (annotationEnabled) {
-			ImageView annotationImage = viewFactory.createAnnotationIcon();
 			iconContainer.addView(annotationImage);
 			dialog.addAnnotationTab();
-			annotationIcons.add(annotationImage);
 		}
+		annotationIcons.add(annotationImage);
+		ImageView certaintyImage = viewFactory.createCertaintyIcon();
 		if (certaintyEnabled) {
-			ImageView certaintyImage = viewFactory.createCertaintyIcon();
 			iconContainer.addView(certaintyImage);
 			dialog.addCertaintyTab();
-			certaintyIcons.add(certaintyImage);
 		}
+		certaintyIcons.add(certaintyImage);
 		headerContainer.setOnLongClickListener(new OnLongClickListener() {
 			
 			@Override

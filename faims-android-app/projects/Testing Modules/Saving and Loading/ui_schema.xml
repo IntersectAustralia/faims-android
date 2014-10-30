@@ -26,6 +26,7 @@
               <tab1>
                 <startsync/>
                 <stopsync/>
+                <clearSyncedData/>
                 <options></options>
               </tab1>
           </menu>
@@ -223,6 +224,9 @@
         </trigger>
         <trigger ref="stopsync">
           <label>Stop Syncing</label>
+        </trigger>
+        <trigger ref="clearSyncedData">
+          <label>Clear Synced Data</label>
         </trigger>
         <select1 ref="options" appearance="compact">
           <label>Options:</label>

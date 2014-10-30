@@ -28,6 +28,7 @@ onEvent("user/tab1/users", "click", "login()");
 
 onEvent("menu/tab1/startsync", "click", "startSync()");
 onEvent("menu/tab1/stopsync", "click", "stopSync()");
+onEvent("menu/tab1/clearSyncedData", "click", "cleanSyncedFiles()");
 
 setSyncMinInterval(10.0f);
 setSyncMaxInterval(20.0f);
