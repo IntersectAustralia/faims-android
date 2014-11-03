@@ -3033,13 +3033,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			 
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
+			
+			final String atttachFileFinal = attachFile;
+			final boolean syncFinal = sync;
+			final File fileFinal = file;
 
 			activityRef.get().copyFile(filePath, module.getDirectoryPath(attachFile).getPath(), new ShowModuleActivity.AttachFileListener() {
 
 						@Override
 						public void handleComplete() {
-							if (callback != null) {
-								execute(callback);
+							try {
+								// add file to database
+								databaseManager.fileRecord().insertFile(atttachFileFinal, syncFinal, fileFinal);
+								
+								if (callback != null) {
+									execute(callback);
+								}
+							} catch (Exception e) {
+								reportError(e);
 							}
 						}
 				
@@ -3048,9 +3059,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
 				activityRef.get().setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
-			
-			// add file to database
-			databaseManager.fileRecord().insertFile(attachFile, sync, file);
 			
 			return attachFile;
 		} catch (Exception e) {
