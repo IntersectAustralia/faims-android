@@ -30,8 +30,8 @@ initMap() {
 		"  where lower(aenttypename) = lower(?) \n" + 
 		"   group by uuid").addParameter("Type", "Structure"));
 		
-	addLegacySelectQueryBuilder("main/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "Geology100_Sydney", 
-		createLegacyQueryBuilder("Select PK_UID from Geology100_Sydney where PK_UID = ?").addParameter("ID", null));
+	addLegacySelectQueryBuilder("main/map/map", "Select geometry by id", "files/data/maps/sydney.sqlite", "geology100_sydney", 
+		createLegacyQueryBuilder("Select PK_UID from geology100_sydney where PK_UID = ?").addParameter("ID", null));
 					
 	// define database layer styles for points, lines, polygons and text
 	ps = createPointStyle(10, Color.BLUE, 0.2f, 0.5f);

@@ -1,9 +1,9 @@
 makeVocab(String attrib, FetchCallback callback){
-    fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ", callback);
+    fetchAll("select vocabid, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabcountorder;", callback);
 }
 
 makePictureGallery(String attrib, FetchCallback callback){
-    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabname;", callback);
+    fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = '" + attrib + "' order by vocabcountorder;", callback);
 }
 
 getAttributeName(String vocab) {
