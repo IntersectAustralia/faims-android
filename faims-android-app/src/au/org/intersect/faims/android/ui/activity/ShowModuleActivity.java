@@ -1208,10 +1208,14 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	private void updateSyncStatus() {
 		if (activityData.isSyncEnabled()) {
-			if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
-				setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+			if (syncStarted) {
+				setSyncStatus(SyncStatus.ACTIVE_SYNCING);
 			} else {
-				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+				if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
+					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				} else {
+					setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+				}
 			}
 		} else {
 			setSyncStatus(SyncStatus.INACTIVE);
