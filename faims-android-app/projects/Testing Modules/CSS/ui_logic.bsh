@@ -10,7 +10,7 @@ addActionBarItem("about", new ActionButtonCallback() {
 });
  
  
-Toggle item
+// Toggle item
 addActionBarItem("sync", new ToggleActionButtonCallback() {
     actionOnLabel() {
         "Turn Sync off";

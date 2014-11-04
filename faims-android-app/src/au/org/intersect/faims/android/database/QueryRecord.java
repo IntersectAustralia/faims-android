@@ -42,7 +42,7 @@ public class QueryRecord extends Database {
 		jsqlite.Database db = null;
 		Stmt stmt = null;
 		try {
-			db = openDB();
+			db = openDB(new File(dbPath), jsqlite.Constants.SQLITE_OPEN_READONLY);
 			
 			stmt = db.prepare(sql);
 			for (int i = 0; i < values.size(); i++) {
