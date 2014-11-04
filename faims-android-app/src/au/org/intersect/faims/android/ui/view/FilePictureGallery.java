@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.log.FLog;
@@ -113,7 +114,7 @@ public class FilePictureGallery extends CustomFileList {
 		galleryImages = new ArrayList<CustomImageView>();	
 		
 		for (Picture picture : pictures) {
-			addFileView(picture.getUrl());
+			addFile(picture.getUrl(), FaimsSettings.DEFAULT_ANNOTATION, String.valueOf(FaimsSettings.DEFAULT_CERTAINTY));
 		}
 		updateIcons();
 	}

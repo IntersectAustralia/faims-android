@@ -253,7 +253,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		String css = module.getCSS();
 		if (!css.isEmpty()) {
-			NativeCSS.styleWithCSS(css);
+			try {
+				NativeCSS.styleWithCSS(css);
+			} catch (Exception e) {
+				FLog.e("Couldn't style module with module CSS file", e);
+				NativeCSS.styleWithCSS("");
+			}
 		} else {
 			try {
 				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(getAssets().open("default.css")));
