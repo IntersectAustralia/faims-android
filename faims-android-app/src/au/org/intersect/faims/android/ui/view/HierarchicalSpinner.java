@@ -26,21 +26,18 @@ public class HierarchicalSpinner extends CustomSpinner {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
 		{
-			if (!ignoreSelectOnce) {
-				if (selectEnabled) {
-					if(hierarchicalSelectListener != null) {
-						hierarchicalSelectListener.onItemSelected(parent, view, position, id);
-					}
-					
-					if (listener != null) {
-						listener.onItemSelected(parent, view, position, id);
-					}
-					
-					notifySave();
+			if (selectEnabled) {
+				if(hierarchicalSelectListener != null) {
+					hierarchicalSelectListener.onItemSelected(parent, view, position, id);
 				}
-				selectEnabled = true;
+				
+				if (listener != null) {
+					listener.onItemSelected(parent, view, position, id);
+				}
+				
+				notifySave();
 			}
-			ignoreSelectOnce = false;
+			selectEnabled = true;
 		}
 
 		@Override
@@ -66,7 +63,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 	private HierarchicalOnItemSelectListener customListener;
 	
 	private boolean selectEnabled;
-	private boolean ignoreSelectOnce;
 
 	public HierarchicalSpinner(Context context) {
 		super(context);
@@ -89,11 +85,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 	public void setAdapter(SpinnerAdapter adapter) {
 		selectEnabled = false;
 		super.setAdapter(adapter);
-	}
-	
-	public void setAdapter(SpinnerAdapter adapter, boolean b) {
-		ignoreSelectOnce = b;
-		setAdapter(adapter);
 	}
 	
 	private void mapVocabToParent() {
@@ -332,6 +323,6 @@ public class HierarchicalSpinner extends CustomSpinner {
 		ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
 				getContext(),
 				android.R.layout.simple_spinner_dropdown_item, pairs);
-		setAdapter(arrayAdapter, false);
+		setAdapter(arrayAdapter);
 	}
 }
