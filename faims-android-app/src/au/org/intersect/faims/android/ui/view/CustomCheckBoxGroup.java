@@ -341,8 +341,8 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	@Override
 	public boolean hasChanges() {
 		return !(Compare.compareValues((List<NameValuePair>) getValues(), currentValues)) || 
-				!(Compare.compareValues(currentAnnotations, annotations)) || 
-				!(Compare.compareValues(currentCertainties, certainties));
+				!(Compare.compareValues(currentAnnotations, getAnnotations())) || 
+				!(Compare.compareValues(currentCertainties, getCertainties()));
 	}
 
 	@SuppressWarnings("unchecked")
