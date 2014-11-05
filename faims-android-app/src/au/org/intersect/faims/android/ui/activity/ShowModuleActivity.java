@@ -253,7 +253,12 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 		String css = module.getCSS();
 		if (!css.isEmpty()) {
-			NativeCSS.styleWithCSS(css);
+			try {
+				NativeCSS.styleWithCSS(css);
+			} catch (Exception e) {
+				FLog.e("Couldn't style module with module CSS file", e);
+				NativeCSS.styleWithCSS("");
+			}
 		} else {
 			try {
 				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(getAssets().open("default.css")));
@@ -1208,10 +1213,14 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	private void updateSyncStatus() {
 		if (activityData.isSyncEnabled()) {
-			if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
-				setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+			if (syncStarted) {
+				setSyncStatus(SyncStatus.ACTIVE_SYNCING);
 			} else {
-				setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+				if(hasDatabaseChanges() || (activityData.isFileSyncEnabled() && hasFileChanges())){
+					setSyncStatus(SyncStatus.ACTIVE_HAS_CHANGES);
+				} else {
+					setSyncStatus(SyncStatus.ACTIVE_NO_CHANGES);
+				}
 			}
 		} else {
 			setSyncStatus(SyncStatus.INACTIVE);

@@ -169,25 +169,7 @@ public class ViewFactory {
 	}
 	
 	protected HierarchicalSpinner createDropDown(FormInputDef attribute, String ref, boolean dynamic) {
-		HierarchicalSpinner spinner = new HierarchicalSpinner(context(), attribute, ref, dynamic);
-		
-        List<NameValuePair> choices = new ArrayList<NameValuePair>();
-        if (attribute.selectChoices != null && !attribute.selectChoices.isEmpty()) {
-	        for (final NameValuePair selectChoice : attribute.selectChoices) {
-	        	String innerText = selectChoice.getName();
-	        	innerText = arch16n.substituteValue(innerText);
-	        	NameValuePair pair = new NameValuePair(innerText, selectChoice.getValue());
-	            choices.add(pair);
-	        }
-	        
-	        ArrayAdapter<NameValuePair> arrayAdapter = new ArrayAdapter<NameValuePair>(
-	                context(),
-	                R.layout.multiline_spinner_dropdown_item,
-	                choices);
-	        spinner.setAdapter(arrayAdapter, true);
-	        spinner.reset();
-        }
-        
+		HierarchicalSpinner spinner = new HierarchicalSpinner(context(), attribute, ref, dynamic);        
         return spinner;
 	}
 	

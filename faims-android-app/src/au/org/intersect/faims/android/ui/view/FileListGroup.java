@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -129,7 +130,7 @@ public class FileListGroup extends CustomFileList {
 		annotationIcons = new ArrayList<ImageView>();
 		certaintyIcons = new ArrayList<ImageView>();
 		for (NameValuePair pair : pairs) {
-			addFileView(pair.getName());
+			addFile(pair.getName(), FaimsSettings.DEFAULT_ANNOTATION, String.valueOf(FaimsSettings.DEFAULT_CERTAINTY));
 		}
 		updateIcons();
 	}

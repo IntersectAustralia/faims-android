@@ -1343,6 +1343,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				} else {
 					spinner.populate(pairs);
 				}
+				spinner.save();
 			} else {
 				FLog.w("cannot populate drop down "
 						+ ref);
@@ -1388,6 +1389,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							} else {
 								spinner.setTerms(terms);
 							}
+							spinner.save();
 						}
 					}
 					
@@ -1472,6 +1474,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				PictureGallery gallery = (PictureGallery) obj;
 				gallery.populate(pictures);
+				gallery.save();
 			} else {
 				FLog.w("cannot populate picture gallery "
 						+ ref);
@@ -1516,6 +1519,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 							VocabularyTerm.applyProjectDir(terms, module.getDirectoryPath().getPath() + "/");
 							gallery.setTerms(terms);
 						}
+						gallery.save();
 					}
 					
 				};
@@ -1548,6 +1552,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				final FileListGroup fileList = (FileListGroup) obj;
 				fileList.populate(files);
+				fileList.save();
 			} else {
 				FLog.w("Cannot populate file list " + ref);
 				showWarning("Logic Error", "Cannot populate file list " + ref);
@@ -1575,6 +1580,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				final CameraPictureGallery gallery = (CameraPictureGallery) obj;
 				gallery.populateImages(pictures);
+				gallery.save();
 			} else {
 				FLog.w("Cannot populate camera picture gallery "
 						+ ref);
@@ -1604,6 +1610,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				
 				final VideoGallery gallery = (VideoGallery) obj;
 				gallery.populateImages(pictures);
+				gallery.save();
 			} else {
 				FLog.w("Cannot populate video gallery "
 						+ ref);
@@ -3033,13 +3040,24 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			 
 			// create random file path
 			attachFile += "/" + UUID.randomUUID() + "_" + name;
+			
+			final String atttachFileFinal = attachFile;
+			final boolean syncFinal = sync;
+			final File fileFinal = file;
 
 			activityRef.get().copyFile(filePath, module.getDirectoryPath(attachFile).getPath(), new ShowModuleActivity.AttachFileListener() {
 
 						@Override
 						public void handleComplete() {
-							if (callback != null) {
-								execute(callback);
+							try {
+								// add file to database
+								databaseManager.fileRecord().insertFile(atttachFileFinal, syncFinal, fileFinal);
+								
+								if (callback != null) {
+									execute(callback);
+								}
+							} catch (Exception e) {
+								reportError(e);
 							}
 						}
 				
@@ -3048,9 +3066,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			if(!activityRef.get().getSyncStatus().equals(SyncStatus.INACTIVE)){
 				activityRef.get().setSyncStatus(ShowModuleActivity.SyncStatus.ACTIVE_HAS_CHANGES);
 			}
-			
-			// add file to database
-			databaseManager.fileRecord().insertFile(attachFile, sync, file);
 			
 			return attachFile;
 		} catch (Exception e) {
