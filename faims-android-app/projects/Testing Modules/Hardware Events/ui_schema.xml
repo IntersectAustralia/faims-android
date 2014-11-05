@@ -90,27 +90,11 @@
             <value>0</value>
           </item>
         </select1>
-        <select1 ref="delimiters">
+        <select1 ref="delimiters" faims_attribute_name="dropdown" faims_attribute_type="vocab">
           <label>Choose a delimiter:</label>
           <item>
-            <label>A</label>
-            <value>A</value>
-          </item>
-          <item>
-            <label>!</label>
-            <value>!</value>
-          </item>
-          <item>
-            <label>\n</label>
-            <value>\n</value>
-          </item>
-          <item>
-            <label>Z</label>
-            <value>Z</value>
-          </item>
-          <item>
-            <label>+</label>
-            <value>+</value>
+            <label>Placeholder</label>
+            <value>Placeholder</value>
           </item>
         </select1>
         <input ref="text" faims_attribute_type="measure" faims_read_only="true">

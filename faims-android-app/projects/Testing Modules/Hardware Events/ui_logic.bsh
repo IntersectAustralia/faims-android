@@ -1,3 +1,6 @@
+makeVocab(String attrib, FetchCallback callback){
+    fetchAll("select vocabname, vocabname from vocabulary join attributekey using (attributeid) where attributename = '" + attrib + "' ", callback);
+}
 
 onEvent ("main/tab1", "show", "prepare ()");
 onEvent ("main/tab1/device1", "select", "direct ()");
@@ -10,6 +13,11 @@ void prepare () {
     populateDropDown ("main/tab1/device1", getHardwareDevices ());
     populateDropDown ("main/tab1/device2", getHardwareDevices ());
     populateDropDown ("main/tab1/device3", getHardwareDevices ());
+    makeVocab("dropdown", new FetchCallback() {
+    onFetch(result) {
+        populateDropDown("main/tab1/delimiters", result);
+    }
+});
     return;
 }
 
@@ -42,6 +50,7 @@ void delimiterListen () {
     if ("\\n".equals(delimiter)) {
         delimiter = "\n";
     }
+    showToast(delimiter);
     captureHardware (device3, delimiter, "finishDelimiterListen ()");
     return;
 }

@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSchema name="hardwaretest" preparer="Stanley Hon">
-
-
+<ArchaeologicalElement name="main">
+    <description></description>
+    <property name="dropdown" type="enum">
+      <description>You should not be here. Stop Procrastinating. You know well and good that button press was pointless.</description>
+      <lookup>
+        <term>A<description/></term>
+        <term>Z<description/></term>
+        <term>+<description/></term>
+        <term>!<description/></term>
+        <term>\n<description/></term>
+      </lookup>
+    </property>
+  </ArchaeologicalElement>
 </dataSchema>
