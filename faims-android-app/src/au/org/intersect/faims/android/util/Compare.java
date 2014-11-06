@@ -115,19 +115,18 @@ public class Compare {
 		return set;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static boolean compareFileAttributeValues(
 			CustomFileList view,
 			HashMap<String, ArrayList<Attribute>> attributes, Module module) {
-		HashSet<NameValuePair> attributeValues = new HashSet<NameValuePair>();
+		HashSet<String> attributeValues = new HashSet<String>();
 		HashSet<String> attributeAnnotations = new HashSet<String>();
 		HashSet<String> attributeCertainties = new HashSet<String>();
 		
 		if (attributes.get(view.getAttributeName()) != null) {
 			for (Attribute a : attributes.get(view.getAttributeName())) {
 				if (equal(a.getName(), view.getAttributeName())) {
-					attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
-					attributeAnnotations.add(a.getAnnotation(view.getAttributeType()));
+					attributeValues.add(a.getValue(view.getAttributeType()));
+					attributeAnnotations.add(a.getAnnotation(view.getAttributeType()) == null ? "" : a.getAnnotation(view.getAttributeType()));
 					attributeCertainties.add(a.getCertainty());
 				}
 			}
@@ -138,7 +137,7 @@ public class Compare {
 		
 		boolean annotationEqual;
 		if (view.getAnnotationEnabled()) {
-			annotationEqual = compareValues(clean(attributeAnnotations), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getAnnotations()))));
+			annotationEqual = compareValues(clean(attributeAnnotations), clean(convertToSet(view.getAnnotations())));
 		} else {
 			annotationEqual = true;
 		}
@@ -146,7 +145,7 @@ public class Compare {
 		
 		boolean certaintyEqual;
 		if (view.getCertaintyEnabled()) {
-			certaintyEqual = compareValues(clean(attributeValues), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getCertainties()))));
+			certaintyEqual = compareValues(clean(attributeCertainties), clean(convertToSet(view.getCertainties())));
 		} else {
 			certaintyEqual = true;
 		}
@@ -155,30 +154,29 @@ public class Compare {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static boolean compareMultiAttributeValues(
 			CustomCheckBoxGroup view,
 			HashMap<String, ArrayList<Attribute>> attributes, Module module) {
-		HashSet<NameValuePair> attributeValues = new HashSet<NameValuePair>();
+		HashSet<String> attributeValues = new HashSet<String>();
 		HashSet<String> attributeAnnotations = new HashSet<String>();
 		HashSet<String> attributeCertainties = new HashSet<String>();
 		
 		if (attributes.get(view.getAttributeName()) != null) {
 			for (Attribute a : attributes.get(view.getAttributeName())) {
 				if (equal(a.getName(), view.getAttributeName())) {
-					attributeValues.add(new NameValuePair(a.getValue(view.getAttributeType()), "true"));
-					attributeAnnotations.add(a.getAnnotation(view.getAttributeType()));
+					attributeValues.add(a.getValue(view.getAttributeType()));
+					attributeAnnotations.add(a.getAnnotation(view.getAttributeType()) == null ? "" : a.getAnnotation(view.getAttributeType()));
 					attributeCertainties.add(a.getCertainty());
 				}
 			}
 		}
 		
-		boolean valuesEqual = compareValues(clean(attributeValues), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getValues()))));
+		boolean valuesEqual = compareValues(clean(attributeValues), clean(convertToSet(view.getValues())));
 		if (!valuesEqual) return true;
 		
 		boolean annotationEqual;
 		if (view.getAnnotationEnabled()) {
-			annotationEqual = compareValues(clean(attributeAnnotations), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getAnnotations()))));
+			annotationEqual = compareValues(clean(attributeAnnotations), clean(convertToSet(view.getAnnotations())));
 		} else {
 			annotationEqual = true;
 		}
@@ -186,7 +184,7 @@ public class Compare {
 		
 		boolean certaintyEqual;
 		if (view.getCertaintyEnabled()) {
-			certaintyEqual = compareValues(clean(attributeValues), stripModulePath(module, (HashSet<String>) clean(convertToSet(view.getCertainties()))));
+			certaintyEqual = compareValues(clean(attributeCertainties), clean(convertToSet(view.getCertainties())));
 		} else {
 			certaintyEqual = true;
 		}
@@ -218,7 +216,7 @@ public class Compare {
 		return value;
 	}
 	
-	private static HashSet<?> clean(HashSet<?> values) {
+	private static HashSet<String> clean(HashSet<String> values) {
 		if (values != null && values.isEmpty()) {
 			return null;
 		}
