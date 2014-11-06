@@ -363,24 +363,8 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void reload() {
 		if (reloadPairs == null) return;
-		List<NameValuePair> pairs = getPairs();
-		List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
-		List<String> values = new ArrayList<String>();
-		for (NameValuePair p : pairs) {
-			boolean addedPair = false;
-			for (NameValuePair r : reloadPairs) {
-				if (Compare.equal(p.getName(), r.getName())) {
-					newPairs.add(new NameValuePair(r.getValue(), r.getValue()));
-					values.add(r.getValue());
-					addedPair = true;
-					break;
-				}
-			}
-			if (!addedPair) {
-				newPairs.add(p);
-			}
-		}
-		setPairs(newPairs);
+		setPairs(reloadPairs);
+		save();
 		reloadPairs = null;
 	}
 
