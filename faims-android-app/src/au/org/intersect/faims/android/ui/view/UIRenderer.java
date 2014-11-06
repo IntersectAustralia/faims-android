@@ -232,6 +232,8 @@ public class UIRenderer {
 	}
 	
 	private void saveTabGroups(Bundle savedInstanceState){
+		autoSaveManager.flush(false);
+		
 		for (TabGroup tabGroup : tabGroupList) {
 			tabGroup.saveTo(savedInstanceState);
 		}

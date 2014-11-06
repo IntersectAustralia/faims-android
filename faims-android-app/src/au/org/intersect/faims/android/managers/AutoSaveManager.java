@@ -140,24 +140,28 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	}
 
 	public synchronized void flush() {
-		autosave(true, true);
-		saveLock.release();
+		if (autosave(true, true)) {
+			saveLock.release();
+		}
 	}
 	
 	public synchronized void flush(boolean disableAutoSave) {
-		autosave(true, disableAutoSave);
-		saveLock.release();
+		if (autosave(true, disableAutoSave)) {
+			saveLock.release();
+		}
 	}
 
-	public synchronized void autosave(boolean blocking, boolean disableAutoSave) {
-		if (enabled) {
-			if (saveLock.tryAcquire()) {
-					
-				setStatus(Status.SAVING);
+	public synchronized boolean autosave(boolean blocking, boolean disableAutoSave) {
+		boolean lockAcquired = false;
+		
+		if (enabled) {			
+			setStatus(Status.SAVING);		
+			clearSaveCallbacks();
+			
+			if (pauseCounter == 0) {
+				lockAcquired = saveLock.tryAcquire();
 				
-				clearSaveCallbacks();
-				
-				if (pauseCounter == 0) {
+				if (lockAcquired) {
 					linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, new SaveCallback() {
 	
 						@Override
@@ -196,16 +200,17 @@ public class AutoSaveManager implements IFAIMSRestorable {
 						}
 						
 					}, newRecord, blocking);
-					
-				} else {
-					FLog.d("ignore autosave");
 				}
+			} else {
+				FLog.d("ignore autosave");
 			}
 			
 			if (disableAutoSave) {
 				disable(tabGroupRef);
 			}
 		}
+		
+		return lockAcquired;
 	}
 	
 	public void save() {
@@ -214,8 +219,10 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		}
 	}
 	
-	public void notifyError() {
+	public void reportError() {
 		if (enabled) {
+			saveLock.release();
+			
 			setStatus(Status.ERROR);
 		}
 	}

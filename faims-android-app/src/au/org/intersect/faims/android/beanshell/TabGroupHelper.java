@@ -52,7 +52,7 @@ public class TabGroupHelper {
 				@Override
 				public void onError(String message) {
 					if (autoSaveManager.isEnabled()) {
-						autoSaveManager.notifyError();
+						autoSaveManager.reportError();
 					} else {
 						TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
 					}
@@ -87,7 +87,7 @@ public class TabGroupHelper {
 		} catch (Exception e) {
 			FLog.e("error saving tab group in background", e);
 			if (autoSaveManager.isEnabled()) {
-				autoSaveManager.notifyError();
+				autoSaveManager.reportError();
 			} else {
 				onError(linker, callback, e, "Error saving tab group " + ref, "Error executing save tab group onerror callback");
 			}
@@ -167,7 +167,7 @@ public class TabGroupHelper {
 						@Override
 						public void onError(String message) {
 							if (autoSaveManager.isEnabled()) {
-								autoSaveManager.notifyError();
+								autoSaveManager.reportError();
 							} else {
 								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
 							}
@@ -182,7 +182,7 @@ public class TabGroupHelper {
 								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 							} catch (Exception e) {
 								if (autoSaveManager.isEnabled()) {
-									autoSaveManager.notifyError();
+									autoSaveManager.reportError();
 								} else {
 									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
 								}
@@ -196,7 +196,7 @@ public class TabGroupHelper {
 						@Override
 						public void onError(String message) {
 							if (autoSaveManager.isEnabled()) {
-								autoSaveManager.notifyError();
+								autoSaveManager.reportError();
 							} else {
 								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
 							}
@@ -211,7 +211,7 @@ public class TabGroupHelper {
 								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 							} catch (Exception e) {
 								if (autoSaveManager.isEnabled()) {
-									autoSaveManager.notifyError();
+									autoSaveManager.reportError();
 								} else {
 									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
 								}
