@@ -141,10 +141,12 @@ public class AutoSaveManager implements IFAIMSRestorable {
 
 	public void flush() {
 		autosave(true, true);
+		saveLock.release();
 	}
 	
 	public void flush(boolean disableAutoSave) {
 		autosave(true, disableAutoSave);
+		saveLock.release();
 	}
 
 	public void autosave(boolean blocking, boolean disableAutoSave) {
