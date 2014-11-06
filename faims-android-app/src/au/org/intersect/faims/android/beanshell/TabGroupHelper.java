@@ -223,6 +223,8 @@ public class TabGroupHelper {
 					throw new Exception("no type specified for tabgroup");
 				}
 			}
+		} else {
+			autoSaveManager.reportSaved();
 		}
 	}
 	
