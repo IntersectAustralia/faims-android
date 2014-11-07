@@ -335,6 +335,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		if (annotations == null) {
 			annotations = new ArrayList<String>();
 		}
+		annotation = annotation == null ? "" : annotation; 
 		annotations.add(annotation);
 		updateAnnotationIcon(annotations.indexOf(annotation));
 		if (certainties == null) {

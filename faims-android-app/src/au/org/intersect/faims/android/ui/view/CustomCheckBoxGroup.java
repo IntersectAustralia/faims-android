@@ -284,7 +284,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 				CustomCheckBox cb = getItemCheckBoxView((FrameLayout) view);
 				if (cb.getValue().toString().equalsIgnoreCase(value)) {
 					cb.setChecked(true);
-					annotations.set(i, annotation);
+					annotations.set(i, annotation == null ? "" : annotation);
 					updateAnnotationIcon(i);
 					certainties.set(i, certainty);
 					updateCertaintyIcon(i);
