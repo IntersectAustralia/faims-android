@@ -226,7 +226,7 @@
 		  </trigger>
       </group>
     </group>
-    <group ref="tabgroup2" faims_archent_type="simpleentity">
+    <group ref="tabgroup2" faims_archent_type="SimpleEntity">
       <label>Drawing Test</label>
       <group ref="tab1"  faims_scrollable="false">
         <label>Map</label>
@@ -376,7 +376,7 @@
         </input>
       </group>
     </group>
-    <group ref="tabgroup5" faims_archent_type="simpleentity">
+    <group ref="tabgroup5" faims_archent_type="SimpleEntity">
       <label>UI Test</label>
       <group ref="tab1" faims_scrollable="false">
         <label>Map</label>
