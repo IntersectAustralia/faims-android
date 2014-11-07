@@ -363,9 +363,7 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void saveTo(Bundle savedInstanceState){
-		if (tabHost != null) {
-			autoSaveManager.flush(false);
-			
+		if (tabHost != null) {			
 			savedInstanceState.putBoolean(getRef() + ":loaded", true);
 			
 			for (Tab tab : tabs) {

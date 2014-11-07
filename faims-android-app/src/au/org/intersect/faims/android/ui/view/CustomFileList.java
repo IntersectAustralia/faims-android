@@ -60,6 +60,10 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	protected ViewFactory viewFactory;
 	
 	private List<NameValuePair> reloadPairs;
+
+	private List<String> reloadAnnotations;
+
+	private List<String> reloadCertainties;
 	
 	public CustomFileList(Context context) {
 		super(context);
@@ -184,6 +188,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setAnnotations(List<String> annotations) {
 		this.annotations = annotations;
+		updateIcons();
 	}
 	
 	public List<String> getAnnotations() {
@@ -245,6 +250,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void setCertainties(List<String> certainties) {
 		this.certainties= certainties;
+		updateIcons();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -348,8 +354,10 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		}
 	}
 	
-	public void setReloadPairs(List<NameValuePair> pairs) {
+	public void setReloadPairs(List<NameValuePair> pairs, List<String> newAnnotations, List<String> newCertainties) {
 		this.reloadPairs = pairs;
+		this.reloadAnnotations = newAnnotations;
+		this.reloadCertainties = newCertainties;
 	}
 	
 	public void updateIcons() {
@@ -363,25 +371,13 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	public void reload() {
 		if (reloadPairs == null) return;
-		List<NameValuePair> pairs = getPairs();
-		List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
-		List<String> values = new ArrayList<String>();
-		for (NameValuePair p : pairs) {
-			boolean addedPair = false;
-			for (NameValuePair r : reloadPairs) {
-				if (Compare.equal(p.getName(), r.getName())) {
-					newPairs.add(new NameValuePair(r.getValue(), r.getValue()));
-					values.add(r.getValue());
-					addedPair = true;
-					break;
-				}
-			}
-			if (!addedPair) {
-				newPairs.add(p);
-			}
-		}
-		setPairs(newPairs);
+		setPairs(reloadPairs);
+		setAnnotations(reloadAnnotations);
+		setCertainties(reloadCertainties);
+		save();
 		reloadPairs = null;
+		reloadAnnotations = null;
+		reloadCertainties = null;
 	}
 
 	public boolean hasMultiAttributeChanges(Module module,

@@ -127,6 +127,8 @@ public class FileListGroup extends CustomFileList {
 	public void populate(List<NameValuePair> pairs) {
 		if (pairs == null) return;
 		removeAllViews();
+		annotations = null;
+		certainties = null;
 		annotationIcons = new ArrayList<ImageView>();
 		certaintyIcons = new ArrayList<ImageView>();
 		for (NameValuePair pair : pairs) {
