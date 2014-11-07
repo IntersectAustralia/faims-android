@@ -115,6 +115,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		this.pauseCounter = 0;
 		setStatus(Status.INACTIVE);
 		clearSaveCallbacks();
+		unlock();
 	}
 
 	public void enable(String tabGroupRef, String uuid, List<Geometry> geometry, List<? extends Attribute> attributes, SaveCallback callback, boolean newRecord) {
@@ -140,28 +141,21 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	}
 
 	public synchronized void flush() {
-		if (autosave(true, true)) {
-			saveLock.release();
-		}
+		autosave(true, true);
 	}
 	
 	public synchronized void flush(boolean disableAutoSave) {
-		if (autosave(true, disableAutoSave)) {
-			saveLock.release();
-		}
+		autosave(true, disableAutoSave);
 	}
 
-	public synchronized boolean autosave(boolean blocking, boolean disableAutoSave) {
-		boolean lockAcquired = false;
-		
+	public synchronized void autosave(boolean blocking, boolean disableAutoSave) {
 		if (enabled) {			
 			setStatus(Status.SAVING);		
 			clearSaveCallbacks();
 			
 			if (pauseCounter == 0) {
-				lockAcquired = saveLock.tryAcquire();
 				
-				if (lockAcquired) {
+				if (lock()) {
 					linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, new SaveCallback() {
 	
 						@Override
@@ -209,8 +203,6 @@ public class AutoSaveManager implements IFAIMSRestorable {
 				disable(tabGroupRef);
 			}
 		}
-		
-		return lockAcquired;
 	}
 	
 	public void save() {
@@ -219,17 +211,17 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		}
 	}
 	
-	public void reportError() {
+	public synchronized void reportError() {
 		if (enabled) {
-			saveLock.release();
+			unlock();
 			
 			setStatus(Status.ERROR);
 		}
 	}
 	
-	public void reportSaved() {
+	public synchronized void reportSaved() {
 		if (enabled) {
-			saveLock.release();
+			unlock();
 			
 			setStatus(Status.ACTIVE);
 		}
@@ -263,6 +255,17 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	
 	public boolean isEnabled() {
 		return enabled;
+	}
+	
+	private boolean lock() {
+		boolean lockAcquired = saveLock.tryAcquire();
+		return lockAcquired;
+	}
+	
+	private void unlock() {
+		if (saveLock.availablePermits() == 0) {
+			saveLock.release();
+		}
 	}
 	
 }
