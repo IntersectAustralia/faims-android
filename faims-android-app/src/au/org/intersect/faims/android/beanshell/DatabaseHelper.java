@@ -86,7 +86,12 @@ public class DatabaseHelper {
 			
 			return uuid;
 		} catch (Exception e) {
-			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
+			if (linker.autoSaveManager.isEnabled()) {
+				FLog.e("error saving arch entity", e);
+				linker.autoSaveManager.reportError();
+			} else {
+				onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
+			}
 		}
 		return null;
 	}
