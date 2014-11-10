@@ -1,0 +1,137 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <time></time>
+                  <type></type>
+                  <picture></picture>
+              </tab1>
+              <tab2>
+                  <location></location>
+                  <supervisor></supervisor>
+              </tab2>
+              <tab3>
+                  <entity></entity>
+                  <save></save>
+                  <update></update>
+                  <load></load>
+                  <clear></clear>
+              </tab3>
+          </tabgroup1>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+    </model>
+  </h:head>
+
+  
+  <h:body>
+      <group ref="user">
+      <label>User List</label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="tabgroup1" faims_archent_type="simpleentity">
+      <label>Simple Entity Example</label>
+      <group ref="tab1">
+        <label>Entity Tab1</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <label>Name:</label>
+        </input>
+        <input ref="time" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_certainty="false" faims_read_only="true">
+            <label>Time:</label>
+        </input>
+        <select1 ref="type" faims_attribute_name="type" faims_attribute_type="vocab">
+            <label>Type:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+        <select1 ref="picture" type="image" faims_attribute_name="picture" faims_attribute_type="vocab" faims_annotation="false">
+            <label>Picture:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select1>
+	  </group>
+      <group ref="tab2">
+        <label>Entity Tab2</label>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+                <label>dummy</label>
+                <value>dummy</value>
+            </item>
+        </select>
+        <select1 ref="supervisor" faims_attribute_name="supervisor" appearance="full" faims_attribute_type="freetext">
+            <label>Supervisor:</label>
+            <item>
+                <label>Super A</label>
+                <value>supera</value>
+            </item>
+            <item>
+                <label>Super B</label>
+                <value>superb</value>
+            </item>
+            <item>
+                <label>Super C</label>
+                <value>superc</value>
+            </item>
+            <item>
+                <label>Super D</label>
+                <value>superd</value>
+            </item>
+        </select1>
+      </group>
+      <group ref="tab3">
+        <label>Load</label>
+        <select1 ref="entity" faims_certainty="false">
+          <label>Entity:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+        <trigger ref="save">
+          <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+          <label>Update</label>
+        </trigger>
+        <trigger ref="load">
+          <label>Load</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+      </group>
+    </group>
+    
+  </h:body>
+</h:html>
