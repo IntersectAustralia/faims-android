@@ -28,6 +28,7 @@ public class DatabaseHelper {
 			final List<Geometry> geometry, final List<EntityAttribute> attributes, final SaveCallback callback, final boolean newEntity, boolean blocking) {
 		if (blocking) {
 			final String uuid = saveArchEnt(linker, entityId, entityType, geometry, attributes, callback, newEntity); 
+			if (uuid == null) return;
 			if (callback != null) {
 				linker.getActivity().runOnUiThread(new Runnable() {
 					
@@ -86,12 +87,7 @@ public class DatabaseHelper {
 			
 			return uuid;
 		} catch (Exception e) {
-			if (linker.autoSaveManager.isEnabled()) {
-				FLog.e("error saving arch entity", e);
-				linker.autoSaveManager.reportError();
-			} else {
-				onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
-			}
+			onError(linker, callback, e, "Error trying to save arch entity", "Error found when executing save arch enitty " + entityId + " onerror callback");
 		}
 		return null;
 	}
