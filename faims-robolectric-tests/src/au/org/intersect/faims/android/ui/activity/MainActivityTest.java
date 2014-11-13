@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.os.Message;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.ModuleItem;
 import au.org.intersect.faims.android.net.FAIMSClientErrorCode;
@@ -31,6 +30,7 @@ import au.org.intersect.faims.android.net.TestServerDiscovery;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
 import au.org.intersect.faims.android.services.DownloadModuleService;
 import au.org.intersect.faims.android.services.TestDownloadModuleService;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.util.ModuleUtil;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 

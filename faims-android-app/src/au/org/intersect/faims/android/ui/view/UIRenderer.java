@@ -20,7 +20,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.LinearLayout;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormInputDef;

@@ -18,7 +18,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.VideoView;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.util.ScaleUtil;
 

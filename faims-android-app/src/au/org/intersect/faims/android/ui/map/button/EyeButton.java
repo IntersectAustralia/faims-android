@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.widget.LinearLayout;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 
 public class EyeButton extends ToggleImageButton {
 

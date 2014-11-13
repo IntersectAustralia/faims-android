@@ -5,7 +5,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;

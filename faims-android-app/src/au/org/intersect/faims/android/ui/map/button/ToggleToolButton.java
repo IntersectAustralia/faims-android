@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToggleToolButton extends RelativeLayout {

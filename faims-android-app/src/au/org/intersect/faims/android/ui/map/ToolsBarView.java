@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;
 import au.org.intersect.faims.android.ui.map.button.ToolGroupButton;
 import au.org.intersect.faims.android.ui.map.tools.AreaTool;
