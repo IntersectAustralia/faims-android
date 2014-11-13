@@ -43,7 +43,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Module;
@@ -839,6 +839,21 @@ public class MainActivity extends RoboActivity {
 
 	public void openStaticModulePanel(final String key) {
 		Module module = ModuleUtil.getModule(key);
+		
+		if (module.isFAIMS13()) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(
+					MainActivity.this);
+			builder.setTitle(getString(R.string.faims_1_3_warning_title));
+			builder.setMessage(getString(R.string.faims_1_3_warning_message));
+			builder.setNeutralButton("OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int id) {
+						}
+					});
+			builder.create().show();
+			return;
+		}
 		
 		updateStaticPanelData(module);
 		

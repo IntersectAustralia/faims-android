@@ -43,7 +43,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.DeleteCallback;

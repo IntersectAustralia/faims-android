@@ -10,7 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.constants.FaimsSettings;

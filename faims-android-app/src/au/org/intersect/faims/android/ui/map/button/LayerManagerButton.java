@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.map.button;
 import android.content.Context;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout.LayoutParams;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.map.LayerBarView;
 import au.org.intersect.faims.android.util.ScaleUtil;
 

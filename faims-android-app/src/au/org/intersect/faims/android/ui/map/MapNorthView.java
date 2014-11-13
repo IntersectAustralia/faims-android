@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.ui.map;
 
 import android.content.Context;
 import android.widget.ImageButton;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 
 public class MapNorthView extends ImageButton {
 	

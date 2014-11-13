@@ -6,11 +6,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import jsqlite.Callback;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Environment;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.FileUtil;
 
 public class Module implements Serializable {
@@ -37,6 +40,8 @@ public class Module implements Serializable {
 	public String clientSponsor;
 	public String landOwner;
 	public String hasSensitiveData;
+
+	private boolean faims13result;
 	
 	public Module() {
 		
@@ -259,5 +264,43 @@ public class Module implements Serializable {
 		data.add(new NameValuePair("Land Owner", landOwner));	
 		data.add(new NameValuePair("Has Sensitive Data", hasSensitiveData));
 		return data;
+	}
+
+	public boolean isFAIMS13() {
+		faims13result = false;
+		jsqlite.Database db = null;
+		try {
+			File file = getDirectoryPath("db.sqlite");		
+			db = new jsqlite.Database();
+			db.open(file.getPath(), jsqlite.Constants.SQLITE_OPEN_READONLY);
+			db.exec("PRAGMA temp_store = 2", null);
+			db.exec("select 1 from file;", new Callback() {
+				@Override
+				public void columns(String[] coldata) {
+				}
+
+				@Override
+				public void types(String[] types) {
+				}
+
+				@Override
+				public boolean newrow(String[] rowdata) {
+					faims13result = false;
+					return false;
+				}
+			});
+		} catch (Exception e) {
+			faims13result = true;
+		} finally {
+			try {
+				if (db != null) {
+					db.close();
+					db = null;
+				}
+			} catch (Exception e) {
+				FLog.e("error closing database", e);
+			}
+		}
+		return faims13result;
 	}
 }

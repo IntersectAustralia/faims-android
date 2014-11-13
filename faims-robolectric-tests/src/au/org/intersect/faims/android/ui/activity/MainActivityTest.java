@@ -30,7 +30,7 @@ import au.org.intersect.faims.android.net.TestServerDiscovery;
 import au.org.intersect.faims.android.roboguice.TestFAIMSModule;
 import au.org.intersect.faims.android.services.DownloadModuleService;
 import au.org.intersect.faims.android.services.TestDownloadModuleService;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ModuleUtil;
 import au.org.intersect.faims.android.util.TestModuleUtil;
 

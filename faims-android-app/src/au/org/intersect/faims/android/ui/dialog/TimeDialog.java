@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.dialog;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.view.CustomTimePicker;
 
 public class TimeDialog extends AlertDialog {

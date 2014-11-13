@@ -45,7 +45,7 @@ import android.view.Menu;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;

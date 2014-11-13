@@ -4,7 +4,7 @@ import android.content.Context;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class ToolButton extends RelativeLayout {

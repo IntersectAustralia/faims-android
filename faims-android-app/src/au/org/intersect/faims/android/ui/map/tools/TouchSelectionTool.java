@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.map.tools;
 import java.util.ArrayList;
 
 import android.content.Context;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.GeometrySelection;
