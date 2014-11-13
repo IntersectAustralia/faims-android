@@ -150,5 +150,8 @@
     <string name="splash_continue">Continue Last Session</string>
     <string name="splash_connect_demo">Connect to Demo Server</string>
     <string name="splash_connect_server">Enter Server Details</string>
+    
+    <string name="faims_1_3_warning_title">Error Message</string>
+    <string name="faims_1_3_warning_message">Cannot open this module as it is for a previous version of FAIMS. Please contact enquiries@fedarch.org for assistance.</string>
 
 </resources>

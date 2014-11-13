@@ -840,6 +840,21 @@ public class MainActivity extends RoboActivity {
 	public void openStaticModulePanel(final String key) {
 		Module module = ModuleUtil.getModule(key);
 		
+		if (module.isFAIMS13()) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(
+					MainActivity.this);
+			builder.setTitle(getString(R.string.faims_1_3_warning_title));
+			builder.setMessage(getString(R.string.faims_1_3_warning_message));
+			builder.setNeutralButton("OK",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,
+								int id) {
+						}
+					});
+			builder.create().show();
+			return;
+		}
+		
 		updateStaticPanelData(module);
 		
 		TextView arch16nLabel = (TextView) findViewById(R.id.static_module_arch16n_label);
