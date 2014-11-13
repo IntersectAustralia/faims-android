@@ -16,7 +16,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
 import au.org.intersect.faims.android.beanshell.callbacks.ToggleActionButtonCallback;
@@ -263,7 +263,7 @@ public class ShowModuleMenuManager {
 						UnscaledBitmapLoader
 								.decodeResource(
 										activityRef.get().getResources(),
-										au.org.intersect.faims.android.R.drawable.arrow_valid));
+										au.org.intersect.faims.android.two.R.drawable.arrow_valid));
 			}
 			if (invalidArrow == null) {
 				invalidArrow = new BitmapDrawable(
@@ -271,7 +271,7 @@ public class ShowModuleMenuManager {
 						UnscaledBitmapLoader
 								.decodeResource(
 										activityRef.get().getResources(),
-										au.org.intersect.faims.android.R.drawable.arrow_invalid));
+										au.org.intersect.faims.android.two.R.drawable.arrow_invalid));
 			}
 
 			this.tempBitmap = BitmapUtil.rotateBitmap(

@@ -7,7 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;

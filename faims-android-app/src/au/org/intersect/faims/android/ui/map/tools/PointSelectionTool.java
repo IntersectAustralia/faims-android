@@ -10,7 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.dialog.SettingsDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;

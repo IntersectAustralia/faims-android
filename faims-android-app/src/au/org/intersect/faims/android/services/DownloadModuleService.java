@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.services;
 
 import org.json.JSONObject;
 
-import au.org.intersect.faims.android.R;
+import au.org.intersect.faims.android.two.R;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.Request;
