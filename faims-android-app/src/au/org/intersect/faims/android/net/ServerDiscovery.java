@@ -21,7 +21,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.util.JsonUtil;

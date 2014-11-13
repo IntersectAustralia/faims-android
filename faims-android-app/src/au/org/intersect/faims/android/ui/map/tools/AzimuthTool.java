@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.map.tools;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
 import au.org.intersect.faims.android.ui.map.button.ToolBarButton;

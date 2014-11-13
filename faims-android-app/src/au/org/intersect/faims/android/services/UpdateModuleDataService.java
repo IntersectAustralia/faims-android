@@ -2,7 +2,7 @@ package au.org.intersect.faims.android.services;
 
 import java.io.File;
 
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.Request;
 import au.org.intersect.faims.android.util.FileUtil;

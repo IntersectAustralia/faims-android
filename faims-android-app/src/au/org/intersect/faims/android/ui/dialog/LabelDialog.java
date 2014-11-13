@@ -15,7 +15,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
-import au.org.intersect.faims.android.two.R;
+import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class LabelDialog extends AlertDialog {

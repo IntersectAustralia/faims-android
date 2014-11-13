@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="au.org.intersect.faims.android.two"
-    android:versionCode="1"
+    package="au.org.intersect.faims.android"
+    android:versionCode="10"
     android:versionName="2.0.0" >
 
     <uses-sdk
