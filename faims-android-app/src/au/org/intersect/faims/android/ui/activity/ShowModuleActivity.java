@@ -640,12 +640,24 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event)
 	{
-		InputDevice device = event.getDevice();
-		if(this.hardwareDebugMode && event.getAction() == KeyEvent.ACTION_UP) {
-			this.beanShellLinker.showToast("Device Name: " + String.valueOf(device.getName()));
+		if(event == null) {
+			FLog.w("No keyboard event specified");
+			return super.dispatchKeyEvent(event);
 		}
 		
-		String deviceName = device.getName();
+		InputDevice device = event.getDevice();
+		String deviceName;
+		if (device == null) {
+			FLog.w("No device found");
+			deviceName = "No device found";
+		} else {
+			deviceName = device.getName();
+		}
+		
+		if(this.hardwareDebugMode && event.getAction() == KeyEvent.ACTION_UP) {
+			this.beanShellLinker.showToast("Device Name: " + deviceName);
+		}
+		
 		if(deviceName.equals(deviceToCapture)) {
 			if(event.getAction() == KeyEvent.ACTION_UP) {
 				if(deviceBuffer == null) {
