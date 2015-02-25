@@ -113,6 +113,7 @@ public final class DatabaseQueries {
 				"  join latestnondeletedarchent using (uuid)\n" + 
 				"  join archentity a using (uuid, aenttimestamp)\n" + 
 				"  join createdModifiedAtBy using (uuid)\n" + 
+				userQuery +
 				" WHERE a.rowid in (SELECT rowid\n" + 
 				"                    FROM spatialindex\n" + 
 				"                   WHERE f_table_name = 'archentity'\n" + 
