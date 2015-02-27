@@ -1466,7 +1466,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					} catch (Exception e) {
 						ArrayList<String> values = (ArrayList<String>) valuesObj;
 						for (String value : values) {
-							Picture picture = new Picture(null, null, value);
+							Picture picture = new Picture(value, null, value);
 							pictures.add(picture);
 						}
 					}

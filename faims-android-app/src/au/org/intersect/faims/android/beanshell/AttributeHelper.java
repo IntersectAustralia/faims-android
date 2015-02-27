@@ -101,12 +101,13 @@ public class AttributeHelper {
 					// attach files and reload file list
 					List<String> newValues = new ArrayList<String>();
 					List<NameValuePair> newPairs = new ArrayList<NameValuePair>();
+					List<NameValuePair> oldPairs = new ArrayList<NameValuePair>();
 					List<String> newAnnotations = new ArrayList<String>();
 					List<String> newCertainties = new ArrayList<String>();
 					@SuppressWarnings("unchecked")
 					List<NameValuePair> pairs = (List<NameValuePair>) customView.getValues();
-					List<String> annotations = ((CustomFileList) customView).getAnnotations();
-					List<String> certainties = ((CustomFileList) customView).getCertainties();
+					List<String> annotations = fileList.getAnnotations();
+					List<String> certainties = fileList.getCertainties();
 					if (pairs != null) {
 						for (int j = 0; j < pairs.size(); j++) {
 							NameValuePair pair = pairs.get(j);
@@ -129,13 +130,14 @@ public class AttributeHelper {
 								newValues.add(relativePath);
 								
 								String fullPath = linker.getModule().getDirectoryPath(relativePath).getPath();
+								oldPairs.add(pair);
 								newPairs.add(new NameValuePair(fullPath, fullPath));
 								newAnnotations.add(annotation);
 								newCertainties.add(certainty);
 							}
 						}
 						// reload new paths into file views
-						fileList.setReloadPairs(newPairs, newAnnotations, newCertainties);
+						fileList.setReloadPairs(oldPairs, newPairs, newAnnotations, newCertainties);
 					}
 					
 					String type = fileList.getAttributeType();

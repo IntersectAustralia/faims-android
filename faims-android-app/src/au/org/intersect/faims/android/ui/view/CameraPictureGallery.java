@@ -54,7 +54,7 @@ public class CameraPictureGallery extends FilePictureGallery {
 		final FileGalleryPreviewDialog dialog = new FileGalleryPreviewDialog(this.getContext());
 		
 		ArrayList<NameValuePair> metadata = new ArrayList<NameValuePair>();
-		metadata.add(new NameValuePair("File name", file.getName()));
+		metadata.add(new NameValuePair("File name", getGalleryFileName(selectedImageView)));
 		
 		if (file.exists()) {
 			ImageView imageView = new ImageView(getContext());

@@ -2,6 +2,8 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.io.Serializable;
 
+import au.org.intersect.faims.android.util.Compare;
+
 public class Picture implements Serializable{
 
 	private static final long serialVersionUID = -7547795077196975425L;
@@ -39,17 +41,7 @@ public class Picture implements Serializable{
 	public boolean equals(Object o) {
 		if (o instanceof Picture){
 			Picture other = (Picture) o;
-			boolean equal = false;
-			if(getId() != null){
-				equal = getId().equals(other.getId());
-			}
-			if(getName() != null){
-				equal = getName().equals(other.getName());
-			}
-			if(getUrl() != null){
-				equal = getUrl().equals(other.getUrl());
-			}
-			return equal;
+			return Compare.equal(getId(), other.getId());
 		}
 		return super.equals(o);
 	}

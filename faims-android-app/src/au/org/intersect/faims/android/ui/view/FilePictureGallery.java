@@ -115,7 +115,7 @@ public class FilePictureGallery extends CustomFileList {
 		annotationIcons = new ArrayList<ImageView>();
 		certaintyIcons = new ArrayList<ImageView>();
 		for (Picture picture : pictures) {
-			addFile(picture.getUrl(), FaimsSettings.DEFAULT_ANNOTATION, String.valueOf(FaimsSettings.DEFAULT_CERTAINTY));
+			addFilePicture(picture, FaimsSettings.DEFAULT_ANNOTATION, String.valueOf(FaimsSettings.DEFAULT_CERTAINTY));
 		}
 		updateIcons();
 	}
@@ -257,6 +257,11 @@ public class FilePictureGallery extends CustomFileList {
 		addGallery(picture);
 	}
 	
+	public void addFilePicture(Picture picture, String annotation, String certainty) {
+		addGallery(picture);
+		super.addFile(picture.getId(), annotation, certainty);
+	}
+	
 	public void removeGalleryItem(CustomImageView view) {
 		int index = galleryImages.indexOf(view);
 		galleriesLayout.removeViewAt(index);
@@ -266,6 +271,35 @@ public class FilePictureGallery extends CustomFileList {
 		certaintyIcons.remove(index);
 		galleryImages.remove(view);
 		notifySave();
+	}
+	
+	@Override
+	public void reload() {
+		if (reloadPairs == null) return;
+		populateAndKeepPictureURL(reloadOldPairs, reloadPairs);
+		setAnnotations(reloadAnnotations);
+		setCertainties(reloadCertainties);
+		save();
+		reloadOldPairs = null;
+		reloadPairs = null;
+		reloadAnnotations = null;
+		reloadCertainties = null;
+	}
+	
+	public void populateAndKeepPictureURL(List<NameValuePair> oldPairs, List<NameValuePair> newPairs) {
+		if (oldPairs == null) return;
+		ArrayList<Picture> pictures = new ArrayList<Picture>();
+		for (int i = 0; i < oldPairs.size(); i++) {
+			NameValuePair oldPair = oldPairs.get(i);
+			NameValuePair newPair = newPairs.get(i);
+			Picture picture = new Picture(newPair.getName(), null, oldPair.getValue());
+			pictures.add(picture);
+		}
+		populateImages(pictures);
+	}
+	
+	public String getGalleryFileName(CustomImageView gallery) {
+		return new File(gallery.getPicture().getId()).getName();
 	}
 
 }

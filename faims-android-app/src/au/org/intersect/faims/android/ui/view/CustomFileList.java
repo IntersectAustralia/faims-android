@@ -59,11 +59,10 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 	
 	protected ViewFactory viewFactory;
 	
-	private List<NameValuePair> reloadPairs;
-
-	private List<String> reloadAnnotations;
-
-	private List<String> reloadCertainties;
+	protected List<NameValuePair> reloadOldPairs;
+	protected List<NameValuePair> reloadPairs;
+	protected List<String> reloadAnnotations;
+	protected List<String> reloadCertainties;
 	
 	public CustomFileList(Context context) {
 		super(context);
@@ -355,8 +354,9 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		}
 	}
 	
-	public void setReloadPairs(List<NameValuePair> pairs, List<String> newAnnotations, List<String> newCertainties) {
-		this.reloadPairs = pairs;
+	public void setReloadPairs(List<NameValuePair> pairs, List<NameValuePair> newPairs, List<String> newAnnotations, List<String> newCertainties) {
+		this.reloadOldPairs = pairs;
+		this.reloadPairs = newPairs;
 		this.reloadAnnotations = newAnnotations;
 		this.reloadCertainties = newCertainties;
 	}
@@ -376,6 +376,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 		setAnnotations(reloadAnnotations);
 		setCertainties(reloadCertainties);
 		save();
+		reloadOldPairs = null;
 		reloadPairs = null;
 		reloadAnnotations = null;
 		reloadCertainties = null;
