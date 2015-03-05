@@ -292,7 +292,7 @@ public class FilePictureGallery extends CustomFileList {
 		for (int i = 0; i < oldPairs.size(); i++) {
 			NameValuePair oldPair = oldPairs.get(i);
 			NameValuePair newPair = newPairs.get(i);
-			Picture picture = new Picture(newPair.getName(), null, oldPair.getValue());
+			Picture picture = new Picture(newPair.getName(), null, oldPair.getName());
 			pictures.add(picture);
 		}
 		populateImages(pictures);
