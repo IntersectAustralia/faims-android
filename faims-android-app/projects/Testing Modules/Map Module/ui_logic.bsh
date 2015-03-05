@@ -12,6 +12,15 @@ initMap() {
 	queryName = "All entities";
 	querySQL = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEntIdentifiers";
 	addDatabaseLayerQuery("main/map/map", queryName, querySQL);
+	
+	specificEntityQueryName = "specific Entity";
+    specificEntityQuerySql = "SELECT uuid, aenttimestamp FROM latestNonDeletedArchEnt join aenttype using (aenttypeid) where aenttypename = 'Test1'";
+    specificEntityps = createPointStyle(10, Color.YELLOW, 0.2f, 0.5f);
+    ls = createLineStyle(10, Color.GREEN, 0.05f, 0.3f, null);
+    pos = createPolygonStyle(10, Color.parseColor("#440000FF"), createLineStyle(10, Color.parseColor("#AA000000"), 0.01f, 0.3f, null));
+    ts = createTextStyle(10, Color.BLACK, 40, Typeface.SANS_SERIF);
+    showDatabaseLayer("main/map/map", "Test1", isEntity, specificEntityQueryName, specificEntityQuerySql, specificEntityps, ls, pos, ts);
+	
 
 	addTrackLogLayerQuery("main/map/map", "track log entities", 
 		"SELECT uuid, max(aenttimestamp) as aenttimestamp\n" + 
@@ -46,6 +55,7 @@ initMap();
 
 onEvent("main/map/clear", "click", "onClearMap()");
 onEvent("main/map/create", "click", "onCreateMap()");
+onEvent("main/map/createTest1", "click", "onCreateMapTest1()");
 onEvent("main/map/data", "click", "setSelectedLayer(\"main/map/map\", DATA_ENTRY_LAYER_ID)");
 onEvent("main/map/entity", "click", "setSelectedLayer(\"main/map/map\", \"Entity Layer\")");
 onEvent("main/map/saveMap", "click", "onSaveMap()");
@@ -72,20 +82,31 @@ onCreateMap() {
 	} else if (geomList.size() > 1) {
 		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
 	} else {
-		newTest();
+		newTest("Test");
+	}
+}
+
+onCreateMapTest1() {
+	List geomList = getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID);
+	if (geomList == null || geomList.size() == 0) {
+		showWarning("Logic Error", "No geometry found on data entry layer");
+	} else if (geomList.size() > 1) {
+		showWarning("Logic Error", "Multiple geometry found on data entry layer. Please clear data entry layer and try again");
+	} else {
+		newTest("Test1");
 	}
 }
 
 String test_id = null;
 
-newTest(){	
-	newTabGroup("Test");
+newTest(tabToSave){	
+	newTabGroup(tabToSave);
 	geom = getCreatedGeometry().get(0);
 	if (geom instanceof Point) {
 		showToast("Selected Point");
 		p = geom.getMapPos();
-		setFieldValue("Test/Test/Long", "" + p.x);
-		setFieldValue("Test/Test/Lat", "" + p.y);
+		setFieldValue("" + tabToSave + "/" + tabToSave + "/Long", "" + p.x);
+		setFieldValue("" + tabToSave + "/" + tabToSave + "/Lat", "" + p.y);
 	} else if (geom instanceof Line) {
 		showToast("Selected Line");
 	} else if (geom instanceof Polygon) {
@@ -93,11 +114,13 @@ newTest(){
 	}
 }
 
-onEvent("Test/Test/Update", "delayclick", "saveTest()");
 
-saveTest(){
+
+onEvent("Test/Test/Update", "delayclick", "saveTest(\"Test\")");
+onEvent("Test1/Test1/Update", "delayclick", "saveTest(\"Test1\")");
+saveTest(tabToSave){
 	test_id = null;
-	saveTabGroup("Test", test_id, getCreatedGeometry(), null, new SaveCallback() {
+	saveTabGroup(tabToSave, test_id, getCreatedGeometry(), null, new SaveCallback() {
 		onSave(uuid, newRecord) {
 			test_id = uuid;
 			showToast("Saved Record");
@@ -105,6 +128,7 @@ saveTest(){
 		}
 	});
 }
+
 
 getCreatedGeometry() {
 	return getGeometryList("main/map/map", DATA_ENTRY_LAYER_ID);
