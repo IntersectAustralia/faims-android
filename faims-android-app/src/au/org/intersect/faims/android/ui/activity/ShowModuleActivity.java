@@ -88,7 +88,6 @@ import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.InputBuffer;
 import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
 import au.org.intersect.faims.android.util.ModuleUtil;
-import bsh.EvalError;
 
 import com.google.inject.Inject;
 import com.nativecss.NativeCSS;
@@ -408,7 +407,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		uiRenderer.restoreUI();
 	}
 	
-	private void restoreBeanshellLogic() throws EvalError {
+	private void restoreBeanshellLogic() throws Exception {
 		beanShellLinker.restoreTempBundle();
 	}
 

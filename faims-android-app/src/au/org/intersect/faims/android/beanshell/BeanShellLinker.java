@@ -216,7 +216,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		
 		try {
 			interpreter.set("linker", this);
-		} catch (EvalError e) {
+		} catch (Exception e) {
 			FLog.e("error setting linker", e);
 		}
 		
@@ -280,7 +280,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void set(String var, String value) {
 		try {
 			interpreter.set(var, value);
-		} catch (EvalError e) {
+		} catch (Exception e) {
 			FLog.i("error executing code", e);
 			showWarning("Logic Error", "Error encountered in logic script");
 		}
@@ -297,6 +297,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				} catch (EvalError e) {
 					FLog.i("error executing code", e);
 					showWarning("Logic Error", "Error encountered in logic script");
+				} catch (Exception e) {
+					FLog.e("error executing code", e);
 				}
 			}
 			
@@ -2679,7 +2681,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void executeCameraCallBack() {
 		try {
 			this.interpreter.eval(cameraCallBack);
-		} catch (EvalError e) {
+		} catch (Exception e) {
 			FLog.e("error when executing the callback for the camera", e);
 		}
 	}
@@ -2699,7 +2701,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void executeVideoCallBack() {
 		try {
 			this.interpreter.eval(videoCallBack);
-		} catch (EvalError e) {
+		} catch (Exception e) {
 			FLog.e("error when executing the callback for the video", e);
 		}
 	}
@@ -2785,7 +2787,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	public void executeAudioCallBack() {
 		try {
 			this.interpreter.eval(audioCallBack);
-		} catch (EvalError e) {
+		} catch (Exception e) {
 			FLog.e("error when executing the callback for the audio", e);
 		}
 	}
@@ -3540,14 +3542,14 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	@Override
-	public void saveTo(Bundle savedInstanceState) throws EvalError {
+	public void saveTo(Bundle savedInstanceState) throws Exception {
 		String persistedObjectName = getPersistedObjectName();
 		if (persistedObjectName != null) {
 			try {
 				Object persistedObject = interpreter.get(persistedObjectName);
 				savedInstanceState.putSerializable(persistedObjectName,
 						(Serializable) persistedObject);
-			} catch (EvalError e) {
+			} catch (Exception e) {
 				FLog.e("error storing bean shell data", e);
 			}
 		}
@@ -3617,13 +3619,13 @@ public class BeanShellLinker implements IFAIMSRestorable {
 					.getSerializable(persistedObjectName);
 			try {
 				interpreter.set(persistedObjectName, object);
-			} catch (EvalError e) {
+			} catch (Exception e) {
 				FLog.e("error restoring bean shell data", e);
 			}
 		}
 	}
 	
-	public void restoreTempBundle() throws EvalError {
+	public void restoreTempBundle() throws Exception {
 		if (beanshellVariables != null) {
 			for (String var: beanshellVariables.keySet()) {
 				interpreter.set(var, beanshellVariables.get(var));

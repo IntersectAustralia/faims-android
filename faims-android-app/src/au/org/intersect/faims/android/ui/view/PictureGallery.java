@@ -378,7 +378,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		for (CustomImageView imageView : galleryImages) {
 			String name = imageView.getPicture().getId();
-			String value = name; // id == url
+			String value = imageView.getPicture().getUrl();
 			pairs.add(new NameValuePair(name, value));
 		}
 		return pairs;
