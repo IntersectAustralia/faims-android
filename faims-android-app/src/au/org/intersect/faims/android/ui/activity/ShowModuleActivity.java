@@ -413,8 +413,15 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onResume() {
-		super.onResume();
-		NativeCSS.onActivityResumed(this);
+		try {
+			super.onResume();
+			NativeCSS.onActivityResumed(this);
+		} catch (Exception e) {
+			// NativeCSS is sometimes raising a exception
+			// java.lang.ClassNotFoundException: Didn't find class "com.android.internal.app.ActionBarImpl"
+			// TODO find out why?
+			FLog.e("onResume has failed", e);
+		}	
 
 		resume();
 		bluetoothManager.resume();
