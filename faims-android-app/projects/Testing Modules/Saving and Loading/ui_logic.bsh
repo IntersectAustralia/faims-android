@@ -174,11 +174,6 @@ loadEntityAuto(tabgroup) {
 	});
 }
 
-reloadEntity(tabgroup) {
-	if (isNull(entityId)) return;
-	
-	showTabGroup(tabgroup, entityId);
-}
 
 fetchEntityIdentifier(FetchCallback callback) {
 	fetchOne("select count(distinct(uuid)) from archentity;", callback);
@@ -204,7 +199,6 @@ updateEntity(tabgroup) {
 			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
 				onSave(uuid, newRecord) {
 					entityId = uuid;
-					reloadEntity(tabgroup);
 				}
 			});
 		}

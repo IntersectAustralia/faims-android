@@ -20,6 +20,7 @@
               <map/>
               <clear/>
               <create/>
+              <createTest1/>
               <data/>
               <entity/>
               <saveMap/>
@@ -43,6 +44,14 @@
               <Update/>
             </Test>
           </Test>
+          <Test1>
+            <Test1>
+              <ID/>
+              <Lat/>
+              <Long/>
+              <Update/>
+            </Test1>
+          </Test1>
         </faims>
       </instance>
     </model>
@@ -74,6 +83,9 @@
         </trigger>
         <trigger ref="create">
             <label>Create</label>
+        </trigger>
+        <trigger ref="createTest1">
+            <label>Create Test1 Entity</label>
         </trigger>
         <trigger ref="data">
             <label>Change to dataEntry layer</label>
@@ -117,6 +129,24 @@
     <group ref="Test" faims_archent_type="Test">
       <label/>
       <group ref="Test">
+        <label>Test</label>
+        <input ref="ID" faims_attribute_name="ID" faims_attribute_type="measure" faims_certainty="false">
+          <label>ID</label>
+        </input> 
+        <input ref="Lat" faims_attribute_name="Lat" faims_attribute_type="measure" faims_certainty="false" faims_read_only="true">
+          <label>Latitude</label>
+        </input>
+        <input ref="Long" faims_attribute_name="Long" faims_attribute_type="measure" faims_certainty="false" faims_read_only="true">
+          <label>Longitude</label>
+        </input>  
+        <trigger ref="Update">
+          <label>Save</label>
+        </trigger>
+      </group>
+    </group>
+     <group ref="Test1" faims_archent_type="Test1">
+      <label/>
+      <group ref="Test1">
         <label>Test</label>
         <input ref="ID" faims_attribute_name="ID" faims_attribute_type="measure" faims_certainty="false">
           <label>ID</label>

@@ -41,4 +41,13 @@
 	
 	    </property>
 	  </ArchaeologicalElement>
+	  <ArchaeologicalElement name="Test1">
+	  	<property type="text" name="ID" isIdentifier="true"><description>Hello!</description></property>
+		<property type="text" name="Lat" minCardinality="1" maxCardinality="n">
+	
+	    </property>
+	    <property type="text" name="Long" minCardinality="1" maxCardinality="n">
+	
+	    </property>
+	  </ArchaeologicalElement>
 </dataSchema>
