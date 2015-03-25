@@ -3689,6 +3689,16 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		});
 	}
 	
+	public boolean hasViewOrContainer(String ref) {
+		try {
+			Tab tab = getTabFromRef(ref);
+			return tab.hasViewOrContainer(ref);
+		} catch (Exception e) {
+			reportError("Error trying check if view or container exists" + ref, e);
+			return false;
+		}
+	}
+	
 	public void createView(String ref, FormInputDef inputDef, String containerRef) {
 		try {
 			TabGroup tabGroup = getTabGroupFromRef(ref);

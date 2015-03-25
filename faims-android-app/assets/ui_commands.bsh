@@ -30,12 +30,12 @@ import java.util.List;
 
 //========= Persist Functionality ==========
 /**
-  * When android runs low on resources the module activity can be destroyed if its in a 
+  * When android runs low on resources the module activity can be destroyed if its in a
   * suspended state and then restored when its resumed. This will result in a loss of
   * variable state in the logic script.
   *
-  * To restore variable state in the logic script use the following method to define 
-  * the name of a single object that will saved and restored when the activity 
+  * To restore variable state in the logic script use the following method to define
+  * the name of a single object that will saved and restored when the activity
   * is destroyed and restored.
   *
   * For more information on how to use this function please look at the cookbook.
@@ -77,7 +77,7 @@ showTabGroup(String ref){
 }
 
 /**
-  * Show the tab group with the following reference and load the values of the 
+  * Show the tab group with the following reference and load the values of the
   * supplied entity or relationship id into the tab group.
   *
   * @param ref the reference of the tab group
@@ -88,7 +88,7 @@ showTabGroup(String ref, String id){
 }
 
 /**
-  * Show the tab group with the following reference and load the values of the 
+  * Show the tab group with the following reference and load the values of the
   * supplied entity or relationship id into the tab group.
   *
   * @param ref the reference of the tab group
@@ -111,7 +111,7 @@ showTab(String ref) {
 }
 
 /**
-  * Show the tab with the following reference and load the values of the 
+  * Show the tab with the following reference and load the values of the
   * supplied entity or relationship id into the tab.
   *
   * @param ref the reference to the tab
@@ -122,7 +122,7 @@ showTab(String ref, String id) {
 }
 
 /**
-  * Show the tab with the following reference and load the values of the 
+  * Show the tab with the following reference and load the values of the
   * supplied entity or relationship id into the tab.
   *
   * @param ref the reference to the tab
@@ -216,7 +216,7 @@ boolean isAutosaveEnabled() {
 
 /**
   * Close the tab group with the following reference with an option to show
-  * a warning dialog if there are changes that haven't been saved. 
+  * a warning dialog if there are changes that haven't been saved.
   *
   * @param ref the reference to the tab group
   * @param warn set to true to show a warning dialog if there are changes that haven't been saved
@@ -227,7 +227,7 @@ cancelTabGroup(String ref, boolean warn){
 
 /**
   * Close the tab with the following reference with an option to show
-  * a warning dialog if there are changes that haven't been saved. 
+  * a warning dialog if there are changes that haven't been saved.
   *
   * @param ref the reference to the tab
   * @param warn set to true to show a warning dialog if there are changes that haven't been saved
@@ -245,13 +245,22 @@ refreshTabgroupCSS(String ref) {
   linker.refreshTabgroupCSS(ref);
 }
 
-/** 
+/**
   * Execute a view task to process view changes.
   *
   * @param task a view task to execute
   */
 executeViewTask(ViewTask task) {
   linker.executeViewTask(task);
+}
+
+/**
+  * Check is dynamic view exists.
+  *
+  * @param ref the reference to the view
+  */
+hasView(String ref) {
+  return linker.hasViewOrContainer(ref);
 }
 
 /**
@@ -282,6 +291,15 @@ createView(String ref, FormInputDef inputDef, String containerRef) {
   */
 removeView(String ref) {
   linker.removeView(ref);
+}
+
+/**
+  * Check is dynamic container exists.
+  *
+  * @param ref the reference to the container
+  */
+hasContainer(String ref) {
+  return linker.hasViewOrContainer(ref);
 }
 
 /**
@@ -535,7 +553,7 @@ clearFieldDirty(String ref) {
   * Binding an event to the field with the given reference.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param type the type of event, one of click, show, or load
   * @param callback the callback that is executed when the event is triggered
@@ -548,7 +566,7 @@ onEvent(String ref, String type, String callback) {
   * Binding a focus/blur event to the field with the given reference.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param focusCallback the callback that is executed when focus event is triggered
   * @param blurCallback the callback that is executed when blur event is triggered
@@ -761,7 +779,7 @@ createRelationshipAttribute(String name, String text, String vocab, String certa
   * Populate dropdown field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the dropdown with
   */
@@ -773,7 +791,7 @@ populateDropDown(String ref, Collection values){
   * Populate dropdown field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the dropdown with
   * @param hasNull set to true to populate the drop down with null value
@@ -786,7 +804,7 @@ populateDropDown(String ref, Collection values, boolean hasNull){
   * Populate dropdown field hierarchical vocab terms of the given attribute.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param attributeName the name of the attribute
   */
@@ -798,7 +816,7 @@ populateHierarchicalDropDown(String ref, String attributeName){
   * Populate dropdown field hierarchical vocab terms of the given attribute.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param attributeName the name of the attribute
   * @param hasNull set to true to populate the drop down with null value
@@ -811,7 +829,7 @@ populateHierarchicalDropDown(String ref, String attributeName, boolean hasNull){
   * Populate radio group field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the radio group with
   */
@@ -823,7 +841,7 @@ populateRadioGroup(String ref, Collection values) {
   * Populate checkbox group field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the checkbox group with
   */
@@ -835,7 +853,7 @@ populateCheckBoxGroup(String ref, Collection values) {
   * Populate list with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the list with
   */
@@ -847,7 +865,7 @@ populateList(String ref, Collection values){
   * Populate a scrolling list with a query, that dynamically adds items on scroll
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param query the query to extract data to populate the list
   * @param limit the limit for the original population and the number of items added
@@ -861,7 +879,7 @@ populateCursorList(String ref, String query, int limit) {
   * Populate table from a query.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param query the query to populate the table from
   * @param headers the columns used for the header of the table
@@ -877,7 +895,7 @@ populateTableRaw(String ref, String query, List headers, String actionName, int 
   * Populate table from a query by applying a pivot. The query should returns results as id, name, and value.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param query the query to populate the table from
   * @param headers the columns used for the header of the table
@@ -900,7 +918,7 @@ refreshTable(String ref){
   * Styles the table with the supplied css file.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param cssFile the css file to style the table with
   */
@@ -912,7 +930,7 @@ styleTable(String ref, String cssFile) {
   * Scroll table to top.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   */
 scrollTableToTop(String ref){
@@ -923,7 +941,7 @@ scrollTableToTop(String ref){
   * Scroll table to bottom.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   */
 scrollTableToBottom(String ref){
@@ -934,7 +952,7 @@ scrollTableToBottom(String ref){
   * Scroll table to top.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   */
 scrollTableToRow(String ref, int row){
@@ -972,7 +990,7 @@ String getListItemValue() {
   * Populate picture gallery field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the picture gallery with
   */
@@ -984,7 +1002,7 @@ populatePictureGallery(String ref, Collection values){
   * Populate hierarchical picture gallery field with the vocabulary in the given attribute name.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param attributeName the name of the attribute with the vocabulary
   */
@@ -996,7 +1014,7 @@ populateHierarchicalPictureGallery(String ref, String attributeName){
   * Populate file list field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the file list with
   */
@@ -1008,7 +1026,7 @@ populateFileList(String ref, Collection values) {
   * Populate camera picture gallery field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the camera picture gallery with
   */
@@ -1020,7 +1038,7 @@ populateCameraPictureGallery(String ref, Collection values){
   * Populate video gallery field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the video gallery with
   */
@@ -1032,7 +1050,7 @@ populateVideoGallery(String ref, Collection values){
   * Populate audio list field with the given collection of values.
   *
   * If the field reference is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param values the collection of values to populate the audio list with
   */
@@ -1044,7 +1062,7 @@ populateAudioList(String ref, Collection values){
   * Populate webview with the given html source file
   *
   * If the file is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param sourceFile the html file to render
   */
@@ -1056,7 +1074,7 @@ populateWebView(String ref, String sourceFile) {
   * Populate webview with the given html
   *
   * If the file is not found a logic error dialog will appear.
-  * 
+  *
   * @param ref the reference to the field
   * @param html the html to render
   */
@@ -1066,7 +1084,7 @@ populateWebViewHtml(String ref, String html) {
 
 /**
   * Back navigate webview if possible
-  * 
+  *
   * @param ref the reference to the field
   */
 navigateWebViewBack(String ref) {
@@ -1611,7 +1629,7 @@ drawPoint(String ref, int layerId, MapPos point, GeometryStyle style) {
 }
 
 /**
-  * Draw a line on the map view with the given reference by specifying the points and style. 
+  * Draw a line on the map view with the given reference by specifying the points and style.
   *
   * @param ref the reference to the map view
   * @param layerId the layerId to draw the point to, will show logic error dialog if not found
@@ -1623,7 +1641,7 @@ drawLine(String ref, int layerId, List points, GeometryStyle style) {
 }
 
 /**
-  * Draw a polygon on the map view with the given reference by specifying the points and style. 
+  * Draw a polygon on the map view with the given reference by specifying the points and style.
   *
   * @param ref the reference to the map view
   * @param layerId the layerId to draw the point to, will show logic error dialog if not found
@@ -1635,7 +1653,7 @@ drawPolygon(String ref, int layerId, List points, GeometryStyle style) {
 }
 
 /**
-  * Clear a geometry from the map view with the given reference by specifying the geometry id. 
+  * Clear a geometry from the map view with the given reference by specifying the geometry id.
   *
   * @param ref the reference to the map view
   * @param geomId the id of the geometry to be cleared, will show logic error dialog if not found
@@ -1709,7 +1727,7 @@ getGeometry(String ref, int geomId) {
 	return linker.getGeometry(ref, geomId);
 }
 
-/** 
+/**
   * Get the layer name of the associated geometry on a canvas layer.
   *
   * @param ref the reference to the map view
@@ -1941,8 +1959,8 @@ setToolsEnabled(String ref, boolean enabled) {
 	linker.setToolsEnabled(ref, enabled);
 }
 
-/** 
-  * Add tool specific events (create or load). 
+/**
+  * Add tool specific events (create or load).
   *
   * The create event is called when the create point, line or polygon
   * tools generate their geometry.
@@ -1953,7 +1971,7 @@ setToolsEnabled(String ref, boolean enabled) {
   * @param ref the reference to the map view
   * @param type the event type (create or load)
   * @callback the callback code to execute
-  */ 
+  */
 onToolEvent(String ref, String type, String callback) {
 	linker.bindToolEvent(ref, type, callback);
 }
