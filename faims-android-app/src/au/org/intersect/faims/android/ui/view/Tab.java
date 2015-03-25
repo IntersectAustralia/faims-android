@@ -217,8 +217,7 @@ public class Tab {
 	}
 	
 	public void removeCustomContainer(String ref) {
-		int index = getViewCreatorIndex(ref);
-		viewCreators.remove(index);
+		removeViewCreator(ref);
 		
 		CustomLinearLayout layout = containerMap.get(ref);
 		if (layout != null) {
@@ -399,8 +398,7 @@ public class Tab {
 	}
 	
 	public void removeCustomView(String ref) {
-		int index = getViewCreatorIndex(ref);
-		viewCreators.remove(index);
+		removeViewCreator(ref);
 		
 		// remove from view list and attribute map
 		for (int i = 0; i < viewList.size(); i++) {
@@ -1026,6 +1024,15 @@ public class Tab {
 		view.invalidate();
 	}
 	
+	private void removeViewCreator(String ref) {
+		int index = getViewCreatorIndex(ref);
+		if (index >= 0) {
+			viewCreators.remove(index);
+		} else {
+			FLog.w("Cannot remove creator as reference does not exist");
+		}
+	}
+	
 	private int getViewCreatorIndex(String ref) {
 		for (int i = 0; i < viewCreators.size(); i++) {
 			Creator c = viewCreators.get(i);
@@ -1037,6 +1044,6 @@ public class Tab {
 	}
 
 	public boolean hasViewOrContainer(String ref) {
-		return getViewCreatorIndex(ref) > 0;
+		return getViewCreatorIndex(ref) >= 0;
 	}
 }
