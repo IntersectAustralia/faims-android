@@ -217,13 +217,7 @@ public class Tab {
 	}
 	
 	public void removeCustomContainer(String ref) {
-		int index = 0;
-		for (Creator c : viewCreators) {
-			if (c.ref.equals(ref)) {
-				break;
-			}
-			index++;
-		}
+		int index = getViewCreatorIndex(ref);
 		viewCreators.remove(index);
 		
 		CustomLinearLayout layout = containerMap.get(ref);
@@ -405,13 +399,7 @@ public class Tab {
 	}
 	
 	public void removeCustomView(String ref) {
-		int index = 0;
-		for (Creator c : viewCreators) {
-			if (c.ref.equals(ref)) {
-				break;
-			}
-			index++;
-		}
+		int index = getViewCreatorIndex(ref);
 		viewCreators.remove(index);
 		
 		// remove from view list and attribute map
@@ -1036,5 +1024,19 @@ public class Tab {
 
 	public void invalidate() {
 		view.invalidate();
+	}
+	
+	private int getViewCreatorIndex(String ref) {
+		for (int i = 0; i < viewCreators.size(); i++) {
+			Creator c = viewCreators.get(i);
+			if (c.ref.equals(ref)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public boolean hasViewOrContainer(String ref) {
+		return getViewCreatorIndex(ref) > 0;
 	}
 }
