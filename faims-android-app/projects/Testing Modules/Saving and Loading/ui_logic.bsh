@@ -205,7 +205,19 @@ updateEntity(tabgroup) {
 	});
 }
 
-
+duplicateEntity(tabgroup) {
+	entityId = null;
+	
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			});
+		}
+	});
+}
 clearEntity(tabgroup) {
 	newEntity(tabgroup);
 	fetchEntityIdentifier(new FetchCallback() {
@@ -279,6 +291,7 @@ onCodeScan() {
 onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");  
 onEvent("tabgroup1", "show", "loadEntities(\"tabgroup1\")");	
 onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/duplicate", "delayclick", "duplicateEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
 onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");

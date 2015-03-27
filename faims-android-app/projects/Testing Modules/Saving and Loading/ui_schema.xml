@@ -58,6 +58,7 @@
                   <container>
                       <save></save>
                       <clear></clear>
+                      <duplicate></duplicate>
                   </container>
                   <delete></delete>
                   <close></close>
@@ -354,10 +355,13 @@
 	        <group ref="container" faims_style="orientation even">
 	          <label></label>
 	            <trigger ref="save">
-	              <label>Save</label>
+	              <label> Save </label>
 	            </trigger>
 	            <trigger ref="clear">
-	              <label>Clear</label>
+	              <label> Clear </label>
+	            </trigger>
+	            <trigger ref="duplicate">
+	              <label> Duplicate </label>
 	            </trigger>
 	        </group>
 	        <trigger ref="delete">
