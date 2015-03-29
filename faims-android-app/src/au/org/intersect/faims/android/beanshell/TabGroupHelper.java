@@ -332,7 +332,15 @@ public class TabGroupHelper {
 	private static void filterAttributes(
 			List<? extends Attribute> attributes,
 			List<? extends Attribute> excludeAttributes) {
-		
+		ArrayList<Attribute> subtractAttributes = new ArrayList<Attribute>();
+		for (Attribute a : attributes) {
+			for (Attribute ea : excludeAttributes) {
+				if (a.getName().equals(ea.getName())) {
+					subtractAttributes.add(a);
+				}
+			}
+		}
+		attributes.removeAll(subtractAttributes);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -625,7 +633,7 @@ public class TabGroupHelper {
 	}
 	
 	protected static void duplicateTabGroupInBackground(final BeanShellLinker linker, final String ref, final List<Geometry> geometry, 
-			final List<? extends Attribute> attributes, final SaveCallback callback, final List<? extends Attribute> excludeAttributes) {
+			final List<? extends Attribute> attributes, final List<? extends Attribute> excludeAttributes, final SaveCallback callback) {
 		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
 
 			@Override
