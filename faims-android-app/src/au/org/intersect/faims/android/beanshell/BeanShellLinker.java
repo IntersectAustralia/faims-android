@@ -744,6 +744,15 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			TabGroupHelper.saveTabGroupInBackground(this, ref, uuid, geometry, attributes, callback, uuid == null, false);
 		}
 	}
+	
+	public void duplicateTabGroup(String ref, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, List<? extends Attribute> excludeAttributes, SaveCallback callback) {
+		TabGroupHelper.duplicateTabGroupInBackground(this, ref, geometry, attributes, excludeAttributes, callback);
+	}
+	
+	public void disableAutoSave(String ref) {
+		autoSaveManager.disable(ref);
+	}
 
 	public void saveTab(String ref, String uuid, List<Geometry> geometry, 
 			List<? extends Attribute> attributes, SaveCallback callback) {

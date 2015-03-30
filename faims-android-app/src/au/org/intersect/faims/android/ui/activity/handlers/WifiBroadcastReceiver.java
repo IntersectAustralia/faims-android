@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
@@ -21,6 +22,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
 	public WifiBroadcastReceiver(ShowModuleActivity activity) {
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 
 	@Override

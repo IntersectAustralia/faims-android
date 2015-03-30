@@ -157,10 +157,8 @@ public class TabGroupHelper {
 	private static void checkTabGroupForChangesAndSaveTabGroup(final BeanShellLinker linker, final TabGroup tabGroup, final String uuid, final List<Geometry> geometry, 
 			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) throws Exception {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
-		if (newRecord) {
-			collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
-		} else if (tabGroup.hasChanges()) {
-			if (tabGroup.hasRecord(uuid)) {
+		if (tabGroup.hasChanges()) {
+			if (newRecord || tabGroup.hasRecord(uuid)) {
 				collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 			} else {
 				loadRecordAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
@@ -236,84 +234,113 @@ public class TabGroupHelper {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private static void collectAttributesAndSaveTabGroup(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
 			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord) throws Exception {
 		synchronized(TabGroupHelper.class) {
 			if (tabGroup.getArchEntType() != null) {
-				List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
-				if (attributes != null) {
-					entityAttributes.addAll((List<EntityAttribute>) attributes);
-				}
-				entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));	
-				
-				final List<EntityAttribute> updatedAttributes = entityAttributes;
-				if (geometry != null || !entityAttributes.isEmpty()) {
-					DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, new SaveCallback() {
-
-						@Override
-						public void onError(String message) {
-							callback.onError(message);
-						}
-
-						@Override
-						public void onSave(String uuid, boolean newRecord) {
-							// update cached entity
-							ArchEntity entity = tabGroup.getArchEntity();
-							if (entity != null) {
-								entity.updateAttributes(updatedAttributes);
-							}
-							callback.onSave(uuid, newRecord);
-						}
-
-						@Override
-						public void onSaveAssociation(String entityId,
-								String relationshpId) {
-						}
-						
-					}, newRecord, true);
-				} else {
-					callback.onSave(uuid,  newRecord);
-				}
+				collectEntityAttributesAndSaveEntity(linker, tabGroup, uuid, geometry, attributes, callback, newRecord, null);
 			} else if (tabGroup.getRelType() != null) {
-				List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
-				if (attributes != null) {
-					relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
-				}
-				relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
-				
-				final List<RelationshipAttribute> updatedAttributes = relationshipAttributes;
-				if (geometry != null || !relationshipAttributes.isEmpty()) {
-					DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, new SaveCallback() {
-
-						@Override
-						public void onError(String message) {
-							callback.onError(message);
-						}
-
-						@Override
-						public void onSave(String uuid, boolean newRecord) {
-							// update cached relationship
-							Relationship relationship = tabGroup.getRelationship();
-							if (relationship != null) {
-								relationship.updateAttributes(updatedAttributes);
-							}
-							callback.onSave(uuid, newRecord);
-						}
-
-						@Override
-						public void onSaveAssociation(String entityId,
-								String relationshpId) {
-						}
-						
-					}, newRecord, true);
-				} else {
-					callback.onSave(uuid,  newRecord);
-				}
+				collectRelationshipAttributesAndSaveRelationship(linker, tabGroup, uuid, geometry, attributes, callback, newRecord, null);
 			} else {
 				throw new Exception("no type specified for tabgroup");
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void collectEntityAttributesAndSaveEntity(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<? extends Attribute> excludeAttributes) {
+		List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
+		if (attributes != null) {
+			entityAttributes.addAll((List<EntityAttribute>) attributes);
+		}
+		entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));	
+		
+		filterAttributes(entityAttributes, excludeAttributes);
+		
+		final List<EntityAttribute> updatedAttributes = entityAttributes;
+		if (geometry != null || !entityAttributes.isEmpty()) {
+			DatabaseHelper.saveArchEnt(linker, uuid, tabGroup.getArchEntType(), geometry, entityAttributes, new SaveCallback() {
+
+				@Override
+				public void onError(String message) {
+					callback.onError(message);
+				}
+
+				@Override
+				public void onSave(String uuid, boolean newRecord) {
+					// update cached entity
+					ArchEntity entity = tabGroup.getArchEntity();
+					if (entity != null) {
+						entity.updateAttributes(updatedAttributes);
+					}
+					callback.onSave(uuid, newRecord);
+				}
+
+				@Override
+				public void onSaveAssociation(String entityId,
+						String relationshpId) {
+				}
+				
+			}, newRecord, true);
+		} else {
+			callback.onSave(uuid,  newRecord);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void collectRelationshipAttributesAndSaveRelationship(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<? extends Attribute> excludeAttributes) {
+		List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
+		if (attributes != null) {
+			relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
+		}
+		relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
+		
+		filterAttributes(relationshipAttributes, excludeAttributes);
+		
+		final List<RelationshipAttribute> updatedAttributes = relationshipAttributes;
+		if (geometry != null || !relationshipAttributes.isEmpty()) {
+			DatabaseHelper.saveRel(linker, uuid, tabGroup.getRelType(), geometry, relationshipAttributes, new SaveCallback() {
+
+				@Override
+				public void onError(String message) {
+					callback.onError(message);
+				}
+
+				@Override
+				public void onSave(String uuid, boolean newRecord) {
+					// update cached relationship
+					Relationship relationship = tabGroup.getRelationship();
+					if (relationship != null) {
+						relationship.updateAttributes(updatedAttributes);
+					}
+					callback.onSave(uuid, newRecord);
+				}
+
+				@Override
+				public void onSaveAssociation(String entityId,
+						String relationshpId) {
+				}
+				
+			}, newRecord, true);
+		} else {
+			callback.onSave(uuid,  newRecord);
+		}
+	}
+	
+	private static void filterAttributes(
+			List<? extends Attribute> attributes,
+			List<? extends Attribute> excludeAttributes) {
+		ArrayList<Attribute> subtractAttributes = new ArrayList<Attribute>();
+		for (Attribute a : attributes) {
+			for (Attribute ea : excludeAttributes) {
+				if (a.getName().equals(ea.getName())) {
+					subtractAttributes.add(a);
+				}
+			}
+		}
+		attributes.removeAll(subtractAttributes);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -603,6 +630,25 @@ public class TabGroupHelper {
 				
 			});
 		}
+	}
+	
+	protected static void duplicateTabGroupInBackground(final BeanShellLinker linker, final String ref, final List<Geometry> geometry, 
+			final List<? extends Attribute> attributes, final List<? extends Attribute> excludeAttributes, final SaveCallback callback) {
+		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					final TabGroup tabGroup = linker.getTabGroup(ref);
+					collectEntityAttributesAndSaveEntity(linker, tabGroup, null, geometry, attributes, callback, true, excludeAttributes);
+				} catch (Exception e) {
+					TabGroupHelper.onError(linker, callback, null, "Error duplicating tab group " + ref, "Error executing duplicate tab group onerror callback");
+				}
+				return null;
+			}
+			
+		};
+		task.execute();
 	}
 
 }
