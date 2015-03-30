@@ -47,7 +47,7 @@ public class TabGroupHelper {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
 		try {
 			final TabGroup tabGroup = linker.getTabGroup(ref);
-			saveTabGroup(linker, tabGroup, uuid, geometry, attributes, new SaveCallback() {
+			checkTabGroupForChangesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, new SaveCallback() {
 	
 				@Override
 				public void onError(String message) {
@@ -154,82 +154,90 @@ public class TabGroupHelper {
 		}
 	}
 	
-	private static void saveTabGroup(final BeanShellLinker linker, final TabGroup tabGroup, final String uuid, final List<Geometry> geometry, 
+	private static void checkTabGroupForChangesAndSaveTabGroup(final BeanShellLinker linker, final TabGroup tabGroup, final String uuid, final List<Geometry> geometry, 
 			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) throws Exception {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
-		if (tabGroup.hasChanges()) {
-			if (newRecord || tabGroup.hasRecord(uuid)) {
-				saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+		if (newRecord) {
+			collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+		} else if (tabGroup.hasChanges()) {
+			if (tabGroup.hasRecord(uuid)) {
+				collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 			} else {
-				if (tabGroup.getArchEntType() != null) {
-					linker.fetchArchEnt(uuid, new FetchCallback() {
-						
-						@Override
-						public void onError(String message) {
-							if (autoSaveManager.isEnabled()) {
-								autoSaveManager.reportError();
-							} else {
-								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
-							}
-						}
-			
-						@Override
-						public void onFetch(Object result) {
-							try {
-								ArchEntity entity = (ArchEntity) result;
-								// cache entity
-								tabGroup.setArchEntity(entity);
-								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
-							} catch (Exception e) {
-								if (autoSaveManager.isEnabled()) {
-									autoSaveManager.reportError();
-								} else {
-									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
-								}
-							}
-						}
-						
-					});
-				} else if (tabGroup.getRelType() != null) {
-					linker.fetchRel(uuid, new FetchCallback() {
-						
-						@Override
-						public void onError(String message) {
-							if (autoSaveManager.isEnabled()) {
-								autoSaveManager.reportError();
-							} else {
-								TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
-							}
-						}
-			
-						@Override
-						public void onFetch(Object result) {
-							try {
-								Relationship relationship = (Relationship) result;
-								// cache relationship
-								tabGroup.setRelationship(relationship);
-								saveTabGroupAttributes(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
-							} catch (Exception e) {
-								if (autoSaveManager.isEnabled()) {
-									autoSaveManager.reportError();
-								} else {
-									TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
-								}
-							}
-						}
-						
-					});
-				} else {
-					throw new Exception("no type specified for tabgroup");
-				}
+				loadRecordAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
 			}
 		} else {
 			autoSaveManager.reportSaved();
 		}
 	}
+		
+	private static void loadRecordAndSaveTabGroup(final BeanShellLinker linker, final TabGroup tabGroup, final String uuid, final List<Geometry> geometry, 
+			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) throws Exception {
+		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
+		if (tabGroup.getArchEntType() != null) {
+			linker.fetchArchEnt(uuid, new FetchCallback() {
+				
+				@Override
+				public void onError(String message) {
+					if (autoSaveManager.isEnabled()) {
+						autoSaveManager.reportError();
+					} else {
+						TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+					}
+				}
+	
+				@Override
+				public void onFetch(Object result) {
+					try {
+						ArchEntity entity = (ArchEntity) result;
+						// cache entity
+						tabGroup.setArchEntity(entity);
+						collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+					} catch (Exception e) {
+						if (autoSaveManager.isEnabled()) {
+							autoSaveManager.reportError();
+						} else {
+							TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+						}
+					}
+				}
+				
+			});
+		} else if (tabGroup.getRelType() != null) {
+			linker.fetchRel(uuid, new FetchCallback() {
+				
+				@Override
+				public void onError(String message) {
+					if (autoSaveManager.isEnabled()) {
+						autoSaveManager.reportError();
+					} else {
+						TabGroupHelper.onError(linker, callback, null, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+					}
+				}
+	
+				@Override
+				public void onFetch(Object result) {
+					try {
+						Relationship relationship = (Relationship) result;
+						// cache relationship
+						tabGroup.setRelationship(relationship);
+						collectAttributesAndSaveTabGroup(linker, tabGroup, uuid, geometry, attributes, callback, newRecord);
+					} catch (Exception e) {
+						if (autoSaveManager.isEnabled()) {
+							autoSaveManager.reportError();
+						} else {
+							TabGroupHelper.onError(linker, callback, e, "Error saving tab group " + tabGroup.getRef(), "Error executing save tab group onerror callback");
+						}
+					}
+				}
+				
+			});
+		} else {
+			throw new Exception("no type specified for tabgroup");
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
-	private static void saveTabGroupAttributes(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
+	private static void collectAttributesAndSaveTabGroup(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
 			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord) throws Exception {
 		synchronized(TabGroupHelper.class) {
 			if (tabGroup.getArchEntType() != null) {

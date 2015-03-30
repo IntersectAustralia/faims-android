@@ -156,7 +156,7 @@ public class AutoSaveManager implements IFAIMSRestorable {
 			if (pauseCounter == 0) {
 				
 				if (lock()) {
-					linker.autoSaveTabGroup(tabGroupRef, uuid, geometry, attributes, new SaveCallback() {
+					linker.saveTabGroupWithBlockingOption(tabGroupRef, uuid, geometry, attributes, new SaveCallback() {
 	
 						@Override
 						public void onError(String message) {

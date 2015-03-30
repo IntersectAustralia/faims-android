@@ -719,9 +719,10 @@ public class BeanShellLinker implements IFAIMSRestorable {
 		return null;
 	}
 	
-	public void autoSaveTabGroup(String tabGroupRef, String uuid,
-			List<Geometry> geometry, List<? extends Attribute> attributes,
-			SaveCallback callback, boolean newRecord, boolean blocking) {
+	// This method is used internally by the AutoSaveManager and not directly called by any logic API call
+	public void saveTabGroupWithBlockingOption(String tabGroupRef, String uuid, List<Geometry> geometry, 
+			List<? extends Attribute> attributes, SaveCallback callback, 
+			boolean newRecord, boolean blocking) {
 		TabGroupHelper.saveTabGroupInBackground(this, tabGroupRef, uuid, geometry, attributes, callback, newRecord, blocking);
 	}
 	
@@ -731,7 +732,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void saveTabGroup(String ref, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, SaveCallback callback, boolean enableAutoSave) {
+			List<? extends Attribute> attributes, SaveCallback callback, 
+			boolean enableAutoSave) {
 		if (enableAutoSave) {
 			boolean newRecord = uuid == null;
 			if (newRecord) {
