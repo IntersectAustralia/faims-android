@@ -332,6 +332,8 @@ public class TabGroupHelper {
 	private static void filterAttributes(
 			List<? extends Attribute> attributes,
 			List<? extends Attribute> excludeAttributes) {
+		if (attributes == null || excludeAttributes == null) return;
+		
 		ArrayList<Attribute> subtractAttributes = new ArrayList<Attribute>();
 		for (Attribute a : attributes) {
 			for (Attribute ea : excludeAttributes) {
