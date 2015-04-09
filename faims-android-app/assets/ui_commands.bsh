@@ -183,7 +183,7 @@ saveTabGroup(String ref, String id, List geometry, List attributes, SaveCallback
   * @param callback code to execute when saving is finished
   */
 duplicateTabGroup(String ref, List geometry, List attributes, List excludeAttributes, SaveCallback callback){
-  linker.duplicateTabGroup(ref, geometry, attributes, callback, excludeAttributes, callback);
+  linker.duplicateTabGroup(ref, geometry, attributes, excludeAttributes, callback);
 }
 
 /**
