@@ -249,14 +249,14 @@ public class TabGroupHelper {
 
 	@SuppressWarnings("unchecked")
 	private static void collectEntityAttributesAndSaveEntity(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<? extends Attribute> excludeAttributes) {
+			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<String> excludeAttributes) {
 		List<EntityAttribute> entityAttributes = new ArrayList<EntityAttribute>();
 		if (attributes != null) {
 			entityAttributes.addAll((List<EntityAttribute>) attributes);
 		}
 		entityAttributes.addAll(getEntityAttributesFromTabGroup(linker, tabGroup));	
 		
-		filterAttributes(entityAttributes, excludeAttributes);
+		makeExcludeAttributesBlankValues(entityAttributes, excludeAttributes);
 		
 		final List<EntityAttribute> updatedAttributes = entityAttributes;
 		if (geometry != null || !entityAttributes.isEmpty()) {
@@ -290,14 +290,14 @@ public class TabGroupHelper {
 
 	@SuppressWarnings("unchecked")
 	private static void collectRelationshipAttributesAndSaveRelationship(BeanShellLinker linker, final TabGroup tabGroup, String uuid, List<Geometry> geometry, 
-			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<? extends Attribute> excludeAttributes) {
+			List<? extends Attribute> attributes, final SaveCallback callback, boolean newRecord, List<String> excludeAttributes) {
 		List<RelationshipAttribute> relationshipAttributes = new ArrayList<RelationshipAttribute>();
 		if (attributes != null) {
 			relationshipAttributes.addAll((List<RelationshipAttribute>) attributes);
 		}
 		relationshipAttributes.addAll(getRelationshipAttributesFromTabGroup(linker, tabGroup));
 		
-		filterAttributes(relationshipAttributes, excludeAttributes);
+		makeExcludeAttributesBlankValues(relationshipAttributes, excludeAttributes);
 		
 		final List<RelationshipAttribute> updatedAttributes = relationshipAttributes;
 		if (geometry != null || !relationshipAttributes.isEmpty()) {
@@ -329,20 +329,18 @@ public class TabGroupHelper {
 		}
 	}
 	
-	private static void filterAttributes(
+	private static void makeExcludeAttributesBlankValues(
 			List<? extends Attribute> attributes,
-			List<? extends Attribute> excludeAttributes) {
+			List<String> excludeAttributes) {
 		if (attributes == null || excludeAttributes == null) return;
 		
-		ArrayList<Attribute> subtractAttributes = new ArrayList<Attribute>();
 		for (Attribute a : attributes) {
-			for (Attribute ea : excludeAttributes) {
-				if (a.getName().equals(ea.getName())) {
-					subtractAttributes.add(a);
+			for (String ea : excludeAttributes) {
+				if (a.getName().equals(ea)) {
+					a.blank();
 				}
 			}
 		}
-		attributes.removeAll(subtractAttributes);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -635,7 +633,7 @@ public class TabGroupHelper {
 	}
 	
 	protected static void duplicateTabGroupInBackground(final BeanShellLinker linker, final String ref, final List<Geometry> geometry, 
-			final List<? extends Attribute> attributes, final List<? extends Attribute> excludeAttributes, final SaveCallback callback) {
+			final List<? extends Attribute> attributes, final List<String> excludeAttributes, final SaveCallback callback) {
 		AsyncTask<Void,Void,Void> task = new AsyncTask<Void,Void,Void>() {
 
 			@Override
@@ -644,7 +642,7 @@ public class TabGroupHelper {
 					final TabGroup tabGroup = linker.getTabGroup(ref);
 					collectEntityAttributesAndSaveEntity(linker, tabGroup, null, geometry, attributes, callback, true, excludeAttributes);
 				} catch (Exception e) {
-					TabGroupHelper.onError(linker, callback, null, "Error duplicating tab group " + ref, "Error executing duplicate tab group onerror callback");
+					TabGroupHelper.onError(linker, callback, e, "Error duplicating tab group " + ref, "Error executing duplicate tab group onerror callback");
 				}
 				return null;
 			}

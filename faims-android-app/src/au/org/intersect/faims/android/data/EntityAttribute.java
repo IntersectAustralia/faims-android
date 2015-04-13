@@ -49,4 +49,10 @@ public class EntityAttribute extends RelationshipAttribute {
 	public String getAnnotation(String type) {
 		return text;
 	}
+	
+	@Override
+	public void blank() {
+		super.blank();
+		setMeasure(null);
+	}
 }

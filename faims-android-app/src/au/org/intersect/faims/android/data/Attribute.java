@@ -111,5 +111,12 @@ public abstract class Attribute implements Serializable {
 	public abstract String getValue(String type);
 	
 	public abstract String getAnnotation(String type);
+
+	public void blank() {
+		setText(null);
+		setVocab(null);
+		setCertainty(null);
+		setDeleted(false);
+	}
 	
 }
