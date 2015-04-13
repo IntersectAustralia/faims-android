@@ -195,9 +195,11 @@ public class TabGroup extends Fragment {
 			for (int i = 0; i < tabs.size(); i++) {
 				Tab tab = tabs.get(i);
 				if (tab.getName().equals(name)) {
-					TabWidget widget = tabHost.getTabWidget();
-					widget.getChildAt(i).setVisibility(View.VISIBLE);
 					tab.setHidden(false);
+					
+					TabWidget widget = tabHost.getTabWidget();
+					widget.getChildAt(i).setVisibility(View.VISIBLE);		
+					
 					tabHost.setCurrentTab(i);
 					if(tab.getScrollViewForTab() != null){
 						tab.getScrollViewForTab().scrollTo(0, 0);
@@ -214,6 +216,8 @@ public class TabGroup extends Fragment {
 			for (int i = 0; i < tabs.size(); i++) {
 				Tab tab = tabs.get(i);
 				if (tab.getName().equals(name)) {
+					tab.setHidden(true);
+					
 					TabWidget widget = tabHost.getTabWidget();
 					widget.getChildAt(i).setVisibility(View.GONE);
 				}
@@ -342,16 +346,20 @@ public class TabGroup extends Fragment {
     }
 	
 	private void resetTabGroupOnShow() {
-		if (tabHost != null) {
-			tabHost.setCurrentTab(0);
-			if(!getTabs().isEmpty()){
-				for (Tab tab : getTabs()) {
-					if(tab.getScrollViewForTab() != null){
-						tab.getScrollViewForTab().scrollTo(0, 0);
-					}
-				}
+		if (tabHost == null) return;
+		
+		int firstVisibleTab = -1;
+		for (int i = 0; i < tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			if (firstVisibleTab == -1 && !tab.getHidden()) {
+				firstVisibleTab = i;
+			}
+			
+			if(tab.getScrollViewForTab() != null){
+				tab.getScrollViewForTab().scrollTo(0, 0);
 			}
 		}
+		tabHost.setCurrentTab(firstVisibleTab);
 	}
 	
 	public void setOnShowTask(TabTask task) {
