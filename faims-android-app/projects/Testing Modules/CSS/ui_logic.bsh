@@ -1450,7 +1450,12 @@ setupDemo4() {
 	executeViewTask(new ViewTask() {
 		doTask() {
 			removeAllViewsAndContainers("tabgroup10");
-
+			if (hasContainer("tabgroup10/tab1/container") || hasView("tabgroup10/tab1/view")) {
+   				 showToast("Has Container still");
+			}
+			else {
+				showToast("No container or view yet ");
+			}
 			createContainer("tabgroup10/tab1/container", "orientation");
 			createDropDown("tabgroup10/tab1/num", "Num", null, null, "tabgroup10/tab1/container", false, false);
 			createButton("tabgroup10/tab1/count", "Count", "tabgroup10/tab1/container");
