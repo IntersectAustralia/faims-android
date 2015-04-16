@@ -128,6 +128,7 @@
                   <audios></audios>
                   <attachaudio></attachaudio>
                   <viewattached></viewattached>
+                  <duplicate></duplicate>
                    <clear></clear>
                   <delete></delete>
                   <close></close>
@@ -628,6 +629,9 @@
 	        </trigger>
 	        <trigger ref="clear">
 	            <label>Clear</label>
+	        </trigger>
+	        <trigger ref="duplicate">
+	            <label>Duplicate</label>
 	        </trigger>
 	        <trigger ref="delete">
 	          <label>Delete</label>
