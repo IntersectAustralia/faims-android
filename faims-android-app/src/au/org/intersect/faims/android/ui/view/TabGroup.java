@@ -304,13 +304,13 @@ public class TabGroup extends Fragment {
 	}
 	
 	public void onShowTabGroup() {
+		invalidateListViews();
+		resetTabGroupOnShow();
 		Tab tab = getCurrentTab();
 		if (tab != null && tab != lastTab) {
 			tab.onShowTab();
-			lastTab = getCurrentTab();
+			lastTab = tab;
 		}
-		invalidateListViews();
-		resetTabGroupOnShow();
 		isVisible = true;
 	}
 	
@@ -348,18 +348,12 @@ public class TabGroup extends Fragment {
 	private void resetTabGroupOnShow() {
 		if (tabHost == null) return;
 		
-		int firstVisibleTab = -1;
 		for (int i = 0; i < tabs.size(); i++) {
 			Tab tab = tabs.get(i);
-			if (firstVisibleTab == -1 && !tab.getHidden()) {
-				firstVisibleTab = i;
-			}
-			
 			if(tab.getScrollViewForTab() != null){
 				tab.getScrollViewForTab().scrollTo(0, 0);
 			}
 		}
-		tabHost.setCurrentTab(firstVisibleTab);
 	}
 	
 	public void setOnShowTask(TabTask task) {
