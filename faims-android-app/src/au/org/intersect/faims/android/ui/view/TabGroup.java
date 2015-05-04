@@ -151,16 +151,13 @@ public class TabGroup extends Fragment {
 				((ViewGroup) tabHost.getParent()).removeView(tabHost);
 			}
 			
+			// used with navigation drawer to stop running tab group on show commands, etc
 			if (popCounter > 0) {
 				popCounter--;
 				return tabHost;
 			}
 			
-			if(this.tempSavedInstanceState == null && this.onShowCommands.size() > 0){
-				executeCommands(this.onShowCommands);
-			}
-			
-			// execute a task after tabgroup is shown
+			// execute a task after tab group is shown
 			if (this.tempSavedInstanceState == null && showTask != null) {
 				showTask.onShow();
 				showTask = null;
@@ -168,7 +165,11 @@ public class TabGroup extends Fragment {
 			
 			onShowTabGroup();
 			
-			// restore after tabgroup is shown
+			if(this.tempSavedInstanceState == null && this.onShowCommands.size() > 0){
+				executeCommands(this.onShowCommands);
+			}
+			
+			// restore after tab group is shown
 			restoreFromTempBundle();
 			
 			return tabHost;
@@ -306,6 +307,7 @@ public class TabGroup extends Fragment {
 	public void onShowTabGroup() {
 		invalidateListViews();
 		resetTabGroupOnShow();
+		showFirstVisibleTab();
 		Tab tab = getCurrentTab();
 		if (tab != null && tab != lastTab) {
 			tab.onShowTab();
@@ -347,11 +349,22 @@ public class TabGroup extends Fragment {
 	
 	private void resetTabGroupOnShow() {
 		if (tabHost == null) return;
-		
 		for (int i = 0; i < tabs.size(); i++) {
 			Tab tab = tabs.get(i);
+
 			if(tab.getScrollViewForTab() != null){
 				tab.getScrollViewForTab().scrollTo(0, 0);
+			}
+		}
+	}
+	
+	private void showFirstVisibleTab() {
+		if (tabHost == null) return;
+		for (int i = 0; i < tabs.size(); i++) {
+			Tab tab = tabs.get(i);
+			if (!tab.getHidden()) {		
+				tabHost.setCurrentTab(i);
+				break;
 			}
 		}
 	}
