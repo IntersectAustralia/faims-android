@@ -189,6 +189,14 @@ getEntityIdentifier(Object result) {
 	return attributes;
 }
 
+getDupEntityIdentifier(Object result) {
+	attributes = null;
+		attributes = createAttributeList();
+		entityCount = Integer.valueOf(result.get(0)) + 1;
+		attributes.add(createEntityAttribute("entity", null, null, "DupSmall " + entityCount, null));
+	return attributes;
+}
+
 updateEntity(tabgroup) {
 	if (isNull(entityId)) entityId = null;
 
@@ -205,14 +213,48 @@ updateEntity(tabgroup) {
 	});
 }
 
-duplicateEntity(tabgroup) {
-	entityId = null;
-	
+duplicateEntityAuto(tabgroup) {
+	disableAutoSave(tabgroup);
+	geometry = null;
+	//extraAttributes = new ArrayList();
+	//extraAttributes.add(createEntityAttribute("entity", null, null, "DupSmall " , null));
+	excludeAttributes = new ArrayList();
+	excludeAttributes.add("description");
+	excludeAttributes.add("value");
 	fetchEntityIdentifier(new FetchCallback() {
 		onFetch(result) {
-			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+			duplicateTabGroup(tabgroup, geometry, getDupEntityIdentifier(result), excludeAttributes, new SaveCallback() {
 				onSave(uuid, newRecord) {
 					entityId = uuid;
+					saveTabGroup(tabgroup, uuid, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			}, true);
+				}
+				onError(message) {
+					showToast(message);
+				}
+			});
+		}
+	});
+}
+
+duplicateEntity(tabgroup) {
+	geometry = null;
+	//extraAttributes = new ArrayList();
+	//extraAttributes.add(createEntityAttribute("entity", null, null, "DupSmall " , null));
+	excludeAttributes = new ArrayList();
+	excludeAttributes.add("description");
+	excludeAttributes.add("value");
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			duplicateTabGroup(tabgroup, geometry, getDupEntityIdentifier(result), excludeAttributes, new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+				onError(message) {
+					showToast(message);
 				}
 			});
 		}
@@ -230,6 +272,7 @@ clearEntity(tabgroup) {
 		}
 	});
 }
+
 
 newEntity(tabgroup) {
 	newTabGroup(tabgroup);
@@ -320,8 +363,8 @@ onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity
 
 onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
 onEvent("tabgroup5", "show", "loadEntities(\"tabgroup5\")");  
-// onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/duplicate", "click", "duplicateEntityAuto(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
 onEvent("tabgroup5/tab2/entities", "click", "loadEntityAuto(\"tabgroup5\")");

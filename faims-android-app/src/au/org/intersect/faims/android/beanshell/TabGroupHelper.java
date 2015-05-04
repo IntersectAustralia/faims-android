@@ -172,7 +172,7 @@ public class TabGroupHelper {
 			final List<? extends Attribute> attributes, final SaveCallback callback, final boolean newRecord) throws Exception {
 		final AutoSaveManager autoSaveManager = linker.getAutoSaveManager();
 		if (tabGroup.getArchEntType() != null) {
-			linker.fetchArchEnt(uuid, new FetchCallback() {
+			DatabaseHelper.fetchArchEnt(linker, uuid, new FetchCallback() {
 				
 				@Override
 				public void onError(String message) {
@@ -199,9 +199,9 @@ public class TabGroupHelper {
 					}
 				}
 				
-			});
+			}, true);
 		} else if (tabGroup.getRelType() != null) {
-			linker.fetchRel(uuid, new FetchCallback() {
+			DatabaseHelper.fetchRel(linker, uuid, new FetchCallback() {
 				
 				@Override
 				public void onError(String message) {
@@ -228,7 +228,7 @@ public class TabGroupHelper {
 					}
 				}
 				
-			});
+			}, true);
 		} else {
 			throw new Exception("no type specified for tabgroup");
 		}
