@@ -1850,11 +1850,11 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 
 	public void fetchArchEnt(String entityId, FetchCallback callback) {
-		DatabaseHelper.fetchArchEnt(this, entityId, callback);
+		DatabaseHelper.fetchArchEnt(this, entityId, callback, false);
 	}
 
 	public void fetchRel(String relationshipId, FetchCallback callback) {
-		DatabaseHelper.fetchRel(this, relationshipId, callback);
+		DatabaseHelper.fetchRel(this, relationshipId, callback, false);
 	}
 
 	public void fetchOne(String query, FetchCallback callback) {
