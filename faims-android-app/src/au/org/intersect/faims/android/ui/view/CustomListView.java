@@ -50,6 +50,8 @@ public class CustomListView extends ListView implements IView {
 	private LinearLayout loadingView;
 	private Animation rotation;
 
+	private CancelableTask loadTask;
+
 	public CustomListView(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -108,7 +110,7 @@ public class CustomListView extends ListView implements IView {
 		arrayAdapter = new ArrayAdapter<NameValuePair>(this.getContext(),
 				android.R.layout.simple_list_item_1, pairs);
 		setAdapter(arrayAdapter);
-		NativeCSS.refreshCSSStyling(this);
+		updateAdapter();
 	}
 	
 	public void populateWithCursor(String query, int limit) throws Exception {
@@ -116,18 +118,23 @@ public class CustomListView extends ListView implements IView {
 		this.limit = limit;
 		this.disableLoad = false;
 		this.arrayAdapter = null;
+		this.items = new ArrayList<NameValuePair>();
 		
-		List<List<String>> values = databaseManager.fetchRecord().fetchCursorAll(query, limit, 0);
-		items = linker.convertToNameValuePairs(values);
-		updateAdapter();
+		if (loadTask != null && !loadTask.isCancelled()) {
+			loadTask.cancel(false);
+			loadTask = null;
+		}
 		
+		loadMoreItems();
+
 		setOnScrollListener(new OnScrollListener() {
 			
 			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
-				disableLoad = false;
-				loadMoreItems();
+				if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+					disableLoad = false;
+					loadMoreItems();
+				}
 			}
 			
 			@Override
@@ -135,54 +142,62 @@ public class CustomListView extends ListView implements IView {
 					int visibleItemCount, int totalItemCount) {
 				loadMoreItems();
 			}
+			
 		});
 	}
  
 	private void loadMoreItems() {
 		try {
 			if (disableLoad || getFooterViewsCount() > 0 || getLastVisiblePosition() < items.size() - 1) return;
-			addFooterView(loadingView);
-			loadingView.getChildAt(0).startAnimation(rotation);
-			CancelableTask task = new CancelableTask() {
-				
-				private List<List<String>> values;
+			
+			startSpinnerAnimation();
+			loadTask = new CancelableTask() {
 				
 				@Override
 				protected Void doInBackground(Void... params) {
 					try {
-						values = databaseManager.fetchRecord().fetchCursorAll(query, limit, items.size());
+						List<List<String>> values = databaseManager.fetchRecord().fetchCursorAll(query, limit, items.size());
+						items.addAll(linker.convertToNameValuePairs(values));
 						if (values.size() < limit) {
 							disableLoad = true;
 						}
 						FLog.d("loaded " + values.size() +" records");
 					} catch (Exception e) {
 						FLog.e("error updating cursor list " + ref, e);
-						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
-						disableLoad = true;
 					}
+					disableLoad = true;
 					return null;
 				}
 				
 				@Override
 				protected void onPostExecute(Void result) {
 					try {
-						items.addAll(linker.convertToNameValuePairs(values));
 						updateAdapter();
-						removeFooterView(loadingView);
-						loadingView.getChildAt(0).clearAnimation();
+						stopSpinnerAnimation();
 					} catch (Exception e) {
-						FLog.e("error updating cursor list " + ref, e);
-						linker.showWarning("Logic Error", "Error updating cursor list " + ref);
-						disableLoad = true;
-					}	
-					super.onPostExecute(result);
+						reportLoadError(e);
+					}
 				}
+				
+				@Override
+				protected void onCancelled() {
+					try {
+						stopSpinnerAnimation();
+					} catch (Exception e) {
+						reportLoadError(e);
+					}
+				}
+				
 			};
-			task.execute();
+			loadTask.execute();
 		} catch (Exception e) {
-			FLog.e("error updating cursor list " + ref, e);
-			linker.showWarning("Logic Error", "Error updating cursor list " + ref);
+			reportLoadError(e);
 		}
+	}
+	
+	private void reportLoadError(Exception e) {
+		FLog.e("error updating cursor list " + ref, e);
+		linker.showWarning("Logic Error", "Error updating cursor list " + ref);
 	}
 	
 	private void updateAdapter() {
@@ -257,5 +272,15 @@ public class CustomListView extends ListView implements IView {
 				}
 			}
 		});
+	}
+	
+	private void startSpinnerAnimation() {
+		addFooterView(loadingView);
+		loadingView.getChildAt(0).startAnimation(rotation);
+	}
+	
+	private void stopSpinnerAnimation() {
+		removeFooterView(loadingView);
+		loadingView.getChildAt(0).clearAnimation();
 	}
 }
