@@ -40,6 +40,7 @@ public class FormInputDef implements Serializable {
 	public boolean map;
 	public boolean table;
 	public boolean web;
+	public boolean htmlDescription;
 	public ArrayList<NameValuePair> selectChoices;
 	
 	public FormInputDef() {
@@ -203,6 +204,11 @@ public class FormInputDef implements Serializable {
 		return this;
 	}
 	
+	public FormInputDef setHTMLDescription(boolean htmlDescription) {
+		this.htmlDescription = htmlDescription;
+		return this;
+	}
+	
 	public FormInputDef addChoice(String name, String value) {
 		if (this.selectChoices == null) {
 			this.selectChoices = new ArrayList<NameValuePair>();
@@ -234,6 +240,8 @@ public class FormInputDef implements Serializable {
 		
 		inputDef.info = !"false".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_info"));
 		inputDef.readOnly = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_read_only"));
+		
+		inputDef.htmlDescription = "true".equalsIgnoreCase(input.getQuestion().getAdditionalAttribute(null, "faims_html_description"));
 		
 		Vector<SelectChoice> choices = input.getSelectChoices();
 		if (choices != null) {
