@@ -1,17 +1,20 @@
 package au.org.intersect.faims.android.ui.dialog;
 
 import java.util.ArrayList;
-
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.TabHost;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
@@ -19,6 +22,10 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 public class LabelDialog extends AlertDialog {
+	
+	private static final String ANNOTATION_TAB = "annotation";
+	private static final String CERTAINTY_TAB = "certainty";
+	private static final float SCALE = 0.9f;
 	
 	TabHost tabHost;
 
@@ -28,6 +35,7 @@ public class LabelDialog extends AlertDialog {
 
 	protected ArrayList<String> tabs;
 	
+	@SuppressLint("InflateParams")
 	public LabelDialog(Context context) {
 		super(context);
 		
@@ -52,13 +60,22 @@ public class LabelDialog extends AlertDialog {
 			
 			@Override
 			public void onTabChanged(String tabId) {
-				View focus = getCurrentFocus();
-				if (focus != null) {
-					InputMethodManager keyboard = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-			        keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
-				}
+				handleTabChange(tabId);
 			}
 		});
+	}
+	
+	private void handleTabChange(String tabId) {
+		View focus = getCurrentFocus();
+		if (focus != null) {
+			InputMethodManager keyboard = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+	        keyboard.hideSoftInputFromWindow(focus.getWindowToken(), 0);
+		}
+		onTabChanged(tabId);
+	}
+	
+	protected void onTabChanged(String tabId) {
+		
 	}
 	
 	protected void addTab(String id, String title, TabContentFactory content) {
@@ -70,7 +87,7 @@ public class LabelDialog extends AlertDialog {
 	}
 	
 	public void addCertaintyTab() {
-		addTab("certainty", "Certainty", new TabContentFactory() {
+		addTab(CERTAINTY_TAB, "Certainty", new TabContentFactory() {
 
 			@Override
 			public View createTabContent(String tag) {
@@ -108,7 +125,7 @@ public class LabelDialog extends AlertDialog {
 	}
 
 	public void addAnnotationTab() {
-		addTab("annotation", "Annotation", new TabContentFactory() {
+		addTab(ANNOTATION_TAB, "Annotation", new TabContentFactory() {
 
 			@Override
 			public View createTabContent(String tag) {
@@ -140,6 +157,20 @@ public class LabelDialog extends AlertDialog {
 			certaintySeekBar.setProgress((int) (certainty * 100));
 			certaintyText.setText("    Certainty: " + certainty);
 		}
+	}
+	
+	protected void fullScreen() {
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		getWindow().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		
+		WindowManager.LayoutParams params = getWindow().getAttributes();
+		params.width = (int) (displaymetrics.widthPixels * SCALE);
+		params.height = (int) (displaymetrics.heightPixels * SCALE);
+		getWindow().setAttributes(params);
+	}
+	
+	protected void defaultScreen() {
+		getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 	}
 	
 }

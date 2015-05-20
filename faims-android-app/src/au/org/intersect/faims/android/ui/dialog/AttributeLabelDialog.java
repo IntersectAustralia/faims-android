@@ -7,12 +7,15 @@ import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.ui.view.ICustomView;
 
 public class AttributeLabelDialog extends LabelDialog {
+	
+	private static final String INFO_TAB = "info";
+	private static final String DIRTY_TAB = "dirty";
 	
 	class AttributeLabelDialogClickListener implements OnClickListener {
 
@@ -30,7 +33,10 @@ public class AttributeLabelDialog extends LabelDialog {
 	
 	private ICustomView view;
 	
-	protected EditText dirtyReasonText;
+	private EditText dirtyReasonText;
+	private WebView infoWebView;
+	private String infoModuleDir;
+	private String infoDescription;
 	
 	public AttributeLabelDialog(Context context, ICustomView view) {
 		super(context);
@@ -41,23 +47,25 @@ public class AttributeLabelDialog extends LabelDialog {
 	}
 	
 	public void addInfoTab(final String description, final String moduleDir) {
-		addTab("info", "Info", new TabContentFactory() {
+		addTab(INFO_TAB, "Info", new TabContentFactory() {
 
 			@Override
 			public View createTabContent(String tag) {
-				ScrollView scrollView = new ScrollView(getContext());
 				LinearLayout layout = new LinearLayout(getContext());
-				WebView webView = new WebView(tabHost.getContext());
-				webView.loadDataWithBaseURL("file:///" + moduleDir + "/", description, "text/html", null, null);
-				layout.addView(webView);
-				scrollView.addView(layout);
-				return scrollView;
+				infoWebView = new WebView(tabHost.getContext());
+				infoWebView.getSettings().setBuiltInZoomControls(true);
+				infoWebView.getSettings().setDisplayZoomControls(false);
+				layout.addView(infoWebView);
+				infoDescription = description;
+				infoModuleDir = moduleDir;
+				updateInfo();
+				return layout;
 			}
 		});
 	}
 	
 	public void addDirtyTab() {
-		addTab("dirty", "Dirty", new TabContentFactory() {
+		addTab(DIRTY_TAB, "Dirty", new TabContentFactory() {
 
 			@Override
 			public View createTabContent(String tag) {
@@ -109,6 +117,7 @@ public class AttributeLabelDialog extends LabelDialog {
 		updateAnnotation();
 		updateCertainty();
 		updateDirtyReason();
+		updateInfo();
 		tabHost.setCurrentTab(0);
 		super.show();
 	}
@@ -131,6 +140,12 @@ public class AttributeLabelDialog extends LabelDialog {
 		}
 	}
 	
+	private void updateInfo() {
+		if (infoWebView != null) {
+			infoWebView.loadDataWithBaseURL("file:///" + infoModuleDir + "/", infoDescription, "text/html", null, null);
+		}
+	}
+	
 	private boolean hasNonDirtyTab() {
 		for (String tab : tabs) {
 			if (!"dirty".equals(tab)) {
@@ -145,6 +160,15 @@ public class AttributeLabelDialog extends LabelDialog {
 			return view.getDirtyReason() != null && !view.getDirtyReason().isEmpty();
 		}
 		return false;
+	}
+	
+	@Override 
+	public void onTabChanged(String tabId) {
+		if (INFO_TAB.equals(tabId)) {
+			fullScreen();
+		} else {
+			defaultScreen();
+		}
 	}
 	
 }

@@ -125,6 +125,8 @@ public class Tab {
 	
 	private static final int PADDING = 15;
 
+	private static final int VOCAB_IMAGE_SIZE = 100;
+
 	private ViewFactory viewFactory;
 	private ScrollView scrollView;
 	private LinearLayout linearLayout;
@@ -536,7 +538,7 @@ public class Tab {
 		    		
 		    		if(attribute.info && attribute.name != null && hasAttributeDescription(attribute.name)){
 		    			infoImage = viewFactory.createInfoIcon();
-		    			labelDialog.addInfoTab(getAttributeDescription(attribute.name), moduleDir);
+		    			labelDialog.addInfoTab(getAttributeDescription(attribute), moduleDir);
 		    			icons.addView(infoImage);
 		    		}
 		    		
@@ -585,7 +587,9 @@ public class Tab {
 			boolean termsEmpty = terms == null || terms.isEmpty();
 			boolean attributeDescriptionEmpty = attributeDescription == null || "".equals(attributeDescription);
 			
-			if(termsEmpty && attributeDescriptionEmpty) return false;
+			if (termsEmpty && attributeDescriptionEmpty) {
+				return false;
+			}
 			
 			return true;
 		} catch (Exception e) {
@@ -594,65 +598,102 @@ public class Tab {
 		}
 	}
 	
-	private String getAttributeDescription(String attributeName) {
+	private String getAttributeDescription(FormInputDef attribute) {
 		StringBuilder description = new StringBuilder();
 		try {
-			
-			String attributeDescription = databaseManager.attributeRecord().getAttributeDescription(attributeName);
-			
-			if(attributeDescription != null && !"".equals(attributeDescription)){
-				description.append("<p><i>Description:</i>");
-				description.append("<br/>");
-				description.append(arch16n.substituteValue(attributeDescription));
-				description.append("</p>");
-			}
-			
-			List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attributeName);
-			
-			if(terms != null && !terms.isEmpty()){
-				description.append("<p><i>Glossary:</i></p>");
-				VocabularyTerm.applyArch16n(terms, arch16n);
-				createVocabularyTermXML(description, terms);
-			}
-			
+			addAttributeDescription(attribute, description);
+			addVocabularyDescription(attribute, description);
 		} catch (Exception e) {
-			FLog.e("Cannot retrieve the description for attribute " + attributeName, e);
+			FLog.e("Cannot retrieve the description for attribute " + attribute.name, e);
 		}
 		return description.toString();
 	}
 	
-	private void createVocabularyTermXML(StringBuilder sb, List<VocabularyTerm> terms) {
-		sb.append("<ul>");
-		
-		for (VocabularyTerm term : terms) {
-			sb.append("<li>");
-			
-			if(term.description != null && !"".equals(term.description)){
-				sb.append("<p><b>");
-				sb.append(term.name);
-				sb.append("</b><br/>");
-				sb.append(term.description);
-				sb.append("</p>");
-			} else {
-				sb.append("<p><b>");
-				sb.append(term.name);
-				sb.append("</b></p>");
-			}
-			
-			if(term.pictureURL != null && !"".equals(term.pictureURL)){
-				sb.append("<img width=\"100\" height=\"100\" src=\"");
-				sb.append(term.pictureURL);
-				sb.append("\"/>");
-			}
-			
-			if (term.terms != null){
-				createVocabularyTermXML(sb, term.terms);
-			}
-			
-			sb.append("</li>");
+	private void addAttributeDescription(FormInputDef attribute, StringBuilder description) throws Exception {
+		String attributeDescription = databaseManager.attributeRecord().getAttributeDescription(attribute.name);
+		if (attributeDescription == null || "".equals(attributeDescription)) {
+			return;
 		}
 		
+		attributeDescription = arch16n.substituteValue(attributeDescription);
+		
+		if (attribute.htmlDescription) {
+			description.append(attributeDescription);
+		} else {
+			description.append("<p><i>Description:</i></p>");
+			description.append("<p>");
+			description.append(attributeDescription);
+			description.append("</p>");
+		}
+	}
+	
+	private void addVocabularyDescription(FormInputDef attribute, StringBuilder description) throws Exception {
+		List<VocabularyTerm> terms = databaseManager.attributeRecord().getVocabularyTerms(attribute.name);
+		if (terms == null || terms.isEmpty()) {
+			return;
+		}
+		
+		VocabularyTerm.applyArch16n(terms, arch16n);
+		String vocabularyDescription = generateVocabularyDescription(attribute, terms);
+		
+		if (attribute.htmlDescription) {
+			description.append(vocabularyDescription);
+		} else {
+			description.append("<p><i>Glossary:</i></p>");
+			description.append(vocabularyDescription);
+		}
+	}
+	
+	private String generateVocabularyDescription(FormInputDef attribute, List<VocabularyTerm> terms) {
+		if (terms == null) return "";
+		
+		StringBuilder termBuilder = new StringBuilder();
+		for (VocabularyTerm term : terms) {
+			String childrenDescription = generateVocabularyDescription(attribute, term.terms);
+			
+			if (attribute.htmlDescription) {
+				termBuilder.append(term.description);
+				termBuilder.append(childrenDescription);
+			} else {
+				termBuilder.append("<li>");
+				termBuilder.append(generateTermDescription(term));
+				termBuilder.append(childrenDescription);
+				termBuilder.append("</li>");
+			}
+		}
+		
+		if (attribute.htmlDescription) {
+			return termBuilder.toString();
+		}
+		
+		StringBuilder sb = new StringBuilder();		
+		sb.append("<ul>");
+		sb.append(termBuilder.toString());
 		sb.append("</ul>");
+		
+		return sb.toString();
+	}
+	
+	private String generateTermDescription(VocabularyTerm term) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("<p><b>");
+		sb.append(term.name);
+		sb.append("</b></p>");
+		
+		if (term.description != null && !"".equals(term.description)) {
+			sb.append("<p>");
+			sb.append(term.description);
+			sb.append("</p>");
+		}
+		
+		if (term.pictureURL != null && !"".equals(term.pictureURL)) {
+			sb.append("<img width=\"" + VOCAB_IMAGE_SIZE + "\" height=\"" + VOCAB_IMAGE_SIZE + "\" src=\"");
+			sb.append(term.pictureURL);
+			sb.append("\"/>");
+		}
+		
+		return sb.toString();
 	}
 	
 	public String getRef() {
