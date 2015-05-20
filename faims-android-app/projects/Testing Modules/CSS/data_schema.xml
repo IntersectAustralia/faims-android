@@ -212,23 +212,83 @@
       </lookup>
     </property>
     <property type="string" name="choice">
-        <description>This is a choice</description>
+         <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice</p>
+            <hr/>
+            </div>
+            ]]></description>
         <bundle>DOI</bundle>
         <lookup>
-            <term>Choice A</term>
-            <term>Choice B</term>
-            <term>Choice C</term>
-            <term>Choice D</term>
+            <term>Choice A <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice A</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice B <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice B</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice C<description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice C</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice D <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice D</p>
+            <hr/>
+            </div>
+            ]]></description></term>
         </lookup>
     </property>
    <property type="string" name="choice2">
-        <description>Dummy 2</description>
+         <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice 2</p>
+            <hr/>
+            </div>
+            ]]></description>
         <bundle>DOI</bundle>
         <lookup>
-            <term>Choice A 2</term>
-            <term>Choice B 2</term>
-            <term>Choice C 2</term>
-            <term>Choice D 2</term>
+            <term>Choice A 2<description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice A 2</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice B 2 <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice B 2</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice C 2 <description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice C 2</p>
+            <hr/>
+            </div>
+            ]]></description></term>
+            <term>Choice D 2<description> 
+            <![CDATA[
+            <div>
+            <p style="background-color:lightgrey">Choice D 2</p>
+            <hr/>
+            </div>
+            ]]></description></term>
         </lookup>
     </property>
     <property type="file" name="file">

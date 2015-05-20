@@ -178,7 +178,7 @@
       </group>
       <group ref="Selects">
         <label>Selects</label>
-        <select1 ref="Radio" appearance="full" faims_attribute_name="Radio" faims_certainty="true" faims_attribute_type="vocab">
+        <select1 ref="Radio" appearance="full" faims_attribute_name="Radio" faims_certainty="true" faims_attribute_type="vocab" faims_html_description="true">
           <label>Radio with annotations by default</label>
           <item>
             <label>placeholder</label>
@@ -213,7 +213,7 @@
             <value>placeholder</value>
           </item>
         </select1>
-        <select1 ref="HeirarchicalPictureGallery" faims_attribute_name="Hierarchical Picture Gallery" faims_certainty="true" faims_annotation="true" faims_attribute_type="vocab" type="image">
+        <select1 ref="HeirarchicalPictureGallery" faims_attribute_name="Hierarchical Picture Gallery" faims_certainty="true" faims_annotation="true" faims_attribute_type="vocab" type="image" faims_html_description="true">
           <label>Heirarchical Picture Gallery</label>
           <item>
             <label>placeholder</label>

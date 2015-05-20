@@ -170,7 +170,7 @@ createPictureGallery(String ref, String label, String name, String type) {
 }
 
 createRadioGroup(String ref, String label, String name, String type, String containerRef) {
-	radioDef = createViewDef().createRadioGroup().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true);
+	radioDef = createViewDef().createRadioGroup().setLabel(label).setAttributeName(name).setAttributeType(type).setAnnotationEnabled(true).setCertaintyEnabled(true).setInfoEnabled(true).setHTMLDescription(true);
 	createView(ref, radioDef, containerRef);
 }
 
