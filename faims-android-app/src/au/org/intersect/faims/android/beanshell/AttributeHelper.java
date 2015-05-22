@@ -245,6 +245,10 @@ public class AttributeHelper {
 
 		public boolean hasChanges(BeanShellLinker linker,
 				HashMap<String, ArrayList<Attribute>> cachedAttributes) {
+			if (!cachedAttributes.keySet().contains(name)) {
+				return true;
+			}
+			
 			for (ICustomView customView : views) {
 				if (customView instanceof CustomFileList) {
 					if (((CustomFileList) customView).hasMultiAttributeChanges(linker.getModule(), cachedAttributes)) {
@@ -258,6 +262,7 @@ public class AttributeHelper {
 					return true;
 				}
 			}
+			
 			return false;
 		}
 
