@@ -23,7 +23,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +38,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.data.User;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.exceptions.MapException;
@@ -2912,15 +2912,15 @@ public class CustomMapView extends MapView implements IView {
 		}
 	}
 
-	public void saveTo(Bundle savedInstanceState) {
+	public void saveTo(PersistentBundle bundle) {
 		JSONObject json = new JSONObject();
 		saveToJSON(json);
-		savedInstanceState.putString(getRef() + ":settings", json.toString());
+		bundle.putString(getRef() + ":settings", json.toString());
 	}
 	
-	public void restoreFrom(Bundle savedInstanceState) {
+	public void restoreFrom(PersistentBundle bundle) {
 		try {
-			JSONObject json = new JSONObject(savedInstanceState.getString(getRef() + ":settings"));
+			JSONObject json = new JSONObject(bundle.getString(getRef() + ":settings"));
 			loadFromJSON(json);
 		} catch (JSONException e) {
 			FLog.e("Couldn't parse JSON map config", e);

@@ -15,7 +15,6 @@ import org.javarosa.form.api.FormEntryCaption;
 import org.javarosa.form.api.FormEntryController;
 import org.javarosa.form.api.FormEntryPrompt;
 
-import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
@@ -24,6 +23,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormInputDef;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
@@ -71,7 +71,7 @@ public class UIRenderer {
 
 	private Map<String,Map<String,String>> styles;
 
-	private Bundle tempSavedInstanceState;
+	private PersistentBundle tempSavedInstanceState;
 	
 	public void init(ShowModuleActivity activity) {
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -211,7 +211,7 @@ public class UIRenderer {
 		return result;
 	}
 	
-	private void saveTabGroupStack(Bundle savedInstanceState){
+	private void saveTabGroupStack(PersistentBundle bundle){
 		FragmentManager fragmentManager = activityRef.get().getSupportFragmentManager();
 		indexes = new ArrayList<Integer>();
 		for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++){
@@ -219,11 +219,11 @@ public class UIRenderer {
 			indexes.add(tabGroupList.indexOf(tabGroup));
 		}
 		indexes.add(tabGroupList.indexOf(navigationDrawer.peekTabGroup()));
-		savedInstanceState.putIntegerArrayList(TAG + "indexes", (ArrayList<Integer>) indexes);
+		bundle.putIntegerArrayList(TAG + "indexes", (ArrayList<Integer>) indexes);
 	}
 
-	private void restoreTabGroupStack(Bundle savedInstanceState){
-		indexes = savedInstanceState.getIntegerArrayList(TAG + "indexes");
+	private void restoreTabGroupStack(PersistentBundle bundle){
+		indexes = bundle.getIntegerArrayList(TAG + "indexes");
 		if(indexes != null){
 			for(int i = 0; i < indexes.size(); i++) {
 				showTabGroup(indexes.get(i));
@@ -231,27 +231,27 @@ public class UIRenderer {
 		}
 	}
 	
-	private void saveTabGroups(Bundle savedInstanceState){
+	private void saveTabGroups(PersistentBundle bundle){
 		autoSaveManager.flush(false);
 		
 		for (TabGroup tabGroup : tabGroupList) {
-			tabGroup.saveTo(savedInstanceState);
+			tabGroup.saveTo(bundle);
 		}
 	}
 	
-	private void restoreTabGroups(Bundle savedInstanceState){
+	private void restoreTabGroups(PersistentBundle bundle){
 		for (TabGroup tabGroup : tabGroupList) {
-			tabGroup.restoreFrom(savedInstanceState);
+			tabGroup.restoreFrom(bundle);
 		}
 	}
 
-	public void saveTo(Bundle savedInstanceState) {
-		saveTabGroupStack(savedInstanceState);
-		saveTabGroups(savedInstanceState);
+	public void saveTo(PersistentBundle bundle) {
+		saveTabGroupStack(bundle);
+		saveTabGroups(bundle);
 	}
 
-	public void restoreFrom(Bundle savedInstanceState) {
-		tempSavedInstanceState = savedInstanceState;
+	public void restoreFrom(PersistentBundle bundle) {
+		tempSavedInstanceState = bundle;
 	}
 	
 	private void restoreFromTempBundle() {

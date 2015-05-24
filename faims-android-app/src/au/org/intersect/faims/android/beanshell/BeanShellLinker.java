@@ -26,7 +26,6 @@ import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -58,6 +57,7 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.data.RelationshipAttribute;
 import au.org.intersect.faims.android.data.User;
@@ -3553,12 +3553,12 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	@Override
-	public void saveTo(Bundle savedInstanceState) throws Exception {
+	public void saveTo(PersistentBundle bundle) throws Exception {
 		String persistedObjectName = getPersistedObjectName();
 		if (persistedObjectName != null) {
 			try {
 				Object persistedObject = interpreter.get(persistedObjectName);
-				savedInstanceState.putSerializable(persistedObjectName,
+				bundle.putSerializable(persistedObjectName,
 						(Serializable) persistedObject);
 			} catch (Exception e) {
 				FLog.e("error storing bean shell data", e);
@@ -3580,53 +3580,53 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 		}
 		
-		savedInstanceState.putSerializable(TAG + "beanshellVariables", beanshellVars);
+		bundle.putSerializable(TAG + "beanshellVariables", beanshellVars);
 		
 		// Beanshell linker variables
-		savedInstanceState.putString(TAG + "persistedObjectName", persistedObjectName);
-		savedInstanceState.putString(TAG + "lastFileBrowserCallback", lastFileBrowserCallback);
-		savedInstanceState.putDouble(TAG + "prevLong", prevLong);
-		savedInstanceState.putDouble(TAG + "prevLat", prevLat);
-		savedInstanceState.putString(TAG + "textAlertInput", textAlertInput);
-		savedInstanceState.putString(TAG + "datetAlertInput", dateAlertInput);
-		savedInstanceState.putString(TAG + "timeAlertInput", timeAlertInput);
-		savedInstanceState.putString(TAG + "cameraPicturepath", cameraPicturepath);
-		savedInstanceState.putString(TAG + "cameraCallBack", cameraCallBack);
-		savedInstanceState.putString(TAG + "videoCallBack", videoCallBack);
-		savedInstanceState.putString(TAG + "cameraVideoPath", cameraVideoPath);
-		savedInstanceState.putString(TAG + "audioFileNamePath", audioFileNamePath);
-		savedInstanceState.putString(TAG + "audioCallBack", audioCallBack);
-		savedInstanceState.putString(TAG + "scanContents", scanContents);
-		savedInstanceState.putString(TAG + "scanCallBack", scanCallBack);
-		savedInstanceState.putString(TAG + "hardwareBufferContents", hardwareBufferContents);
-		savedInstanceState.putString(TAG + "hardwareReadingCallBack", hardwareReadingCallBack);
+		bundle.putString(TAG + "persistedObjectName", persistedObjectName);
+		bundle.putString(TAG + "lastFileBrowserCallback", lastFileBrowserCallback);
+		bundle.putDouble(TAG + "prevLong", prevLong);
+		bundle.putDouble(TAG + "prevLat", prevLat);
+		bundle.putString(TAG + "textAlertInput", textAlertInput);
+		bundle.putString(TAG + "datetAlertInput", dateAlertInput);
+		bundle.putString(TAG + "timeAlertInput", timeAlertInput);
+		bundle.putString(TAG + "cameraPicturepath", cameraPicturepath);
+		bundle.putString(TAG + "cameraCallBack", cameraCallBack);
+		bundle.putString(TAG + "videoCallBack", videoCallBack);
+		bundle.putString(TAG + "cameraVideoPath", cameraVideoPath);
+		bundle.putString(TAG + "audioFileNamePath", audioFileNamePath);
+		bundle.putString(TAG + "audioCallBack", audioCallBack);
+		bundle.putString(TAG + "scanContents", scanContents);
+		bundle.putString(TAG + "scanCallBack", scanCallBack);
+		bundle.putString(TAG + "hardwareBufferContents", hardwareBufferContents);
+		bundle.putString(TAG + "hardwareReadingCallBack", hardwareReadingCallBack);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void restoreFrom(Bundle savedInstanceState) {
+	public void restoreFrom(PersistentBundle bundle) {
 		// Beanshell variables
-		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable(TAG + "beanshellVariables");
+		beanshellVariables = (HashMap<String, Object>) bundle.getSerializable(TAG + "beanshellVariables");
 		
 		// Beanshell linker variables
-		persistedObjectName = savedInstanceState.getString(TAG + "persistedObjectName");
-		lastFileBrowserCallback = savedInstanceState.getString(TAG + "lastFileBrowserCallback");
-		prevLong = savedInstanceState.getDouble(TAG + "prevLong");
-		prevLat = savedInstanceState.getDouble(TAG + "prevLat");
-		textAlertInput = savedInstanceState.getString(TAG + "textAlertInput");
-		cameraPicturepath = savedInstanceState.getString(TAG + "cameraPicturepath");
-		cameraCallBack = savedInstanceState.getString(TAG + "cameraCallBack");
-		videoCallBack = savedInstanceState.getString(TAG + "videoCallBack");
-		cameraVideoPath = savedInstanceState.getString(TAG + "cameraVideoPath");
-		audioFileNamePath = savedInstanceState.getString(TAG + "audioFileNamePath");
-		audioCallBack = savedInstanceState.getString(TAG + "audioCallBack");
-		scanContents = savedInstanceState.getString(TAG + "scanContents");
-		scanCallBack = savedInstanceState.getString(TAG + "scanCallBack");
-		hardwareBufferContents = savedInstanceState.getString(TAG + "hardwareBufferContents");
-		hardwareReadingCallBack = savedInstanceState.getString(TAG + "hardwareReadingCallBack");
+		persistedObjectName = bundle.getString(TAG + "persistedObjectName");
+		lastFileBrowserCallback = bundle.getString(TAG + "lastFileBrowserCallback");
+		prevLong = bundle.getDouble(TAG + "prevLong");
+		prevLat = bundle.getDouble(TAG + "prevLat");
+		textAlertInput = bundle.getString(TAG + "textAlertInput");
+		cameraPicturepath = bundle.getString(TAG + "cameraPicturepath");
+		cameraCallBack = bundle.getString(TAG + "cameraCallBack");
+		videoCallBack = bundle.getString(TAG + "videoCallBack");
+		cameraVideoPath = bundle.getString(TAG + "cameraVideoPath");
+		audioFileNamePath = bundle.getString(TAG + "audioFileNamePath");
+		audioCallBack = bundle.getString(TAG + "audioCallBack");
+		scanContents = bundle.getString(TAG + "scanContents");
+		scanCallBack = bundle.getString(TAG + "scanCallBack");
+		hardwareBufferContents = bundle.getString(TAG + "hardwareBufferContents");
+		hardwareReadingCallBack = bundle.getString(TAG + "hardwareReadingCallBack");
 		
 		if (persistedObjectName != null) {
-			Object object = savedInstanceState
+			Object object = bundle
 					.getSerializable(persistedObjectName);
 			try {
 				interpreter.set(persistedObjectName, object);

@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
@@ -51,6 +52,7 @@ import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.beanshell.callbacks.ActionButtonCallback;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.data.Module;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.data.ShowModuleActivityData;
 import au.org.intersect.faims.android.database.DatabaseChangeListener;
 import au.org.intersect.faims.android.database.DatabaseManager;
@@ -119,6 +121,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	public static final int SPATIAL_FILE_BROWSER_REQUEST_CODE = 4;
 	public static final int VIDEO_REQUEST_CODE = 5;
 	public static final int SCAN_CODE_CODE = 6;
+	private static final String BUNDLE_FILE = "/bundle.obj";
 
 	@Inject
 	ServerDiscovery serverDiscovery;
@@ -483,45 +486,58 @@ public class ShowModuleActivity extends FragmentActivity implements
 		destroy();
 		super.onDestroy();
 	}
+	
+	protected String getBundleFile() {
+		return Environment.getExternalStorageDirectory() + BUNDLE_FILE;
+	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.clear();
-		saveTo(outState);
-		super.onSaveInstanceState(outState);
+	protected void onSaveInstanceState(Bundle savedInstanceState) {
+		PersistentBundle bundle = new PersistentBundle();
+		saveTo(bundle);
+		PersistentBundle.save(getBundleFile(), bundle);
+		
+		savedInstanceState.clear();
+		savedInstanceState.putBoolean(BUNDLE_FILE, true);
+		super.onSaveInstanceState(savedInstanceState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		restoreFrom(savedInstanceState);
+		if (savedInstanceState.getBoolean(BUNDLE_FILE)) {
+			PersistentBundle bundle = PersistentBundle.load(getBundleFile());
+			if (bundle != null) {
+				restoreFrom(bundle);
+			}
+		}
 		super.onRestoreInstanceState(savedInstanceState);
 	}
-
+	
 	@Override
-	public void saveTo(Bundle savedInstanceState) {
+	public void saveTo(PersistentBundle bundle) {
 		try {
-			bluetoothManager.saveTo(savedInstanceState);
-			gpsDataManager.saveTo(savedInstanceState);
-			beanShellLinker.saveTo(savedInstanceState);
+			bluetoothManager.saveTo(bundle);
+			gpsDataManager.saveTo(bundle);
+			beanShellLinker.saveTo(bundle);
 			activityData.setUserId(databaseManager.getUserId());
-			activityData.saveTo(savedInstanceState);
-			uiRenderer.saveTo(savedInstanceState);
-			autoSaveManager.saveTo(savedInstanceState);
+			activityData.saveTo(bundle);
+			uiRenderer.saveTo(bundle);
+			autoSaveManager.saveTo(bundle);
 		} catch (Exception e) {
 			FLog.e("error saving bundle", e);
 		}
 	}
 
 	@Override
-	public void restoreFrom(Bundle savedInstanceState) {
+	public void restoreFrom(PersistentBundle bundle) {
 		try {
-			bluetoothManager.restoreFrom(savedInstanceState);
-			gpsDataManager.restoreFrom(savedInstanceState);
-			beanShellLinker.restoreFrom(savedInstanceState);
-			activityData.restoreFrom(savedInstanceState);
+			bluetoothManager.restoreFrom(bundle);
+			gpsDataManager.restoreFrom(bundle);
+			beanShellLinker.restoreFrom(bundle);
+			activityData.restoreFrom(bundle);
 			databaseManager.setUserId(activityData.getUserId());
-			uiRenderer.restoreFrom(savedInstanceState);
-			autoSaveManager.restoreFrom(savedInstanceState);
+			uiRenderer.restoreFrom(bundle);
+			autoSaveManager.restoreFrom(bundle);
 		} catch (Exception e) {
 			FLog.e("error restoring bundle", e);
 		}

@@ -13,12 +13,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
@@ -359,13 +359,13 @@ public class BluetoothManager implements IFAIMSRestorable {
 	}
 
 	@Override
-	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean(TAG + "isBluetoothConnected", isBluetoothConnected);
+	public void saveTo(PersistentBundle bundle) {
+		bundle.putBoolean(TAG + "isBluetoothConnected", isBluetoothConnected);
 	}
 
 	@Override
-	public void restoreFrom(Bundle savedInstanceState) {
-		isBluetoothConnected = savedInstanceState.getBoolean(TAG + "isBluetoothConnected");
+	public void restoreFrom(PersistentBundle bundle) {
+		isBluetoothConnected = bundle.getBoolean(TAG + "isBluetoothConnected");
 	}
 
 	@Override

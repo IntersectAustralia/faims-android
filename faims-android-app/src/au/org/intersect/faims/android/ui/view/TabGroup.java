@@ -19,6 +19,7 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.ArchEntity;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
@@ -62,7 +63,7 @@ public class TabGroup extends Fragment {
 	private ArchEntity loadedEntity;
 	private Relationship loadedRelationship;
 
-	private Bundle tempSavedInstanceState;
+	private PersistentBundle tempBundle;
 	private boolean isVisible;
 
 	private int popCounter;
@@ -121,7 +122,7 @@ public class TabGroup extends Fragment {
 					}
 				}
 				
-				if(this.tempSavedInstanceState == null && this.onLoadCommands.size() > 0){
+				if(this.tempBundle == null && this.onLoadCommands.size() > 0){
 					executeCommands(this.onLoadCommands);
 				}
 				
@@ -158,14 +159,14 @@ public class TabGroup extends Fragment {
 			}
 			
 			// execute a task after tab group is shown
-			if (this.tempSavedInstanceState == null && showTask != null) {
+			if (this.tempBundle == null && showTask != null) {
 				showTask.onShow();
 				showTask = null;
 			}
 			
 			onShowTabGroup();
 			
-			if(this.tempSavedInstanceState == null && this.onShowCommands.size() > 0){
+			if(this.tempBundle == null && this.onShowCommands.size() > 0){
 				executeCommands(this.onShowCommands);
 			}
 			
@@ -377,45 +378,45 @@ public class TabGroup extends Fragment {
 		}
 	}
 	
-	public void saveTo(Bundle savedInstanceState){
+	public void saveTo(PersistentBundle bundle){
 		if (tabHost != null) {			
-			savedInstanceState.putBoolean(getRef() + ":loaded", true);
+			bundle.putBoolean(getRef() + ":loaded", true);
 			
 			for (Tab tab : tabs) {
-				tab.saveTo(savedInstanceState);
+				tab.saveTo(bundle);
 			}
 			
 			Tab tab = getCurrentTab();
 			if (tab != null) {
 				String tabLabel = tab.getName();
-				savedInstanceState.putString(getRef() + ":currentTabLabel", tabLabel);
+				bundle.putString(getRef() + ":currentTabLabel", tabLabel);
 			}
 		}
 	}
 
-	public void restoreFrom(Bundle savedInstanceState){
-		if (savedInstanceState.getBoolean(getRef() + ":loaded")) {
-			tempSavedInstanceState = savedInstanceState;
+	public void restoreFrom(PersistentBundle bundle){
+		if (bundle.getBoolean(getRef() + ":loaded")) {
+			tempBundle = bundle;
 		}
 	}
 	
 	public void clearTempBundle() {
-		tempSavedInstanceState = null;
+		tempBundle = null;
 	}
 	
 	public void restoreFromTempBundle() {
-		if (tempSavedInstanceState != null) {
+		if (tempBundle != null) {
 			try {
 				autoSaveManager.pause();
 				for(Tab tab : tabs){
-					tab.restoreFrom(tempSavedInstanceState);
+					tab.restoreFrom(tempBundle);
 				}
 				
-				String tabLabel = tempSavedInstanceState.getString(getRef() + ":currentTabLabel");
+				String tabLabel = tempBundle.getString(getRef() + ":currentTabLabel");
 				if (tabLabel != null) {
 					setCurrentTab(getTab(tabLabel));
 				}
-				tempSavedInstanceState = null;
+				tempBundle = null;
 			} finally {
 				autoSaveManager.resume();
 			}

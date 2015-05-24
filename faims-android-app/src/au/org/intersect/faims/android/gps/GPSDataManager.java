@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import au.org.intersect.faims.android.data.ActivityData;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
@@ -414,23 +415,23 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	}
 
 	@Override
-	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putBoolean(TAG + "isExternalGPSStarted", isExternalGPSStarted);
-		savedInstanceState.putBoolean(TAG + "isInternalGPSStarted", isInternalGPSStarted);
-		savedInstanceState.putInt(TAG + "gpsUpdateInterval", gpsUpdateInterval);
-		savedInstanceState.putString(TAG + "trackingType", trackingType);
-		savedInstanceState.putInt(TAG + "trackingValue", trackingValue);
-		savedInstanceState.putString(TAG + "trackingExec", trackingExec);
+	public void saveTo(PersistentBundle bundle) {
+		bundle.putBoolean(TAG + "isExternalGPSStarted", isExternalGPSStarted);
+		bundle.putBoolean(TAG + "isInternalGPSStarted", isInternalGPSStarted);
+		bundle.putInt(TAG + "gpsUpdateInterval", gpsUpdateInterval);
+		bundle.putString(TAG + "trackingType", trackingType);
+		bundle.putInt(TAG + "trackingValue", trackingValue);
+		bundle.putString(TAG + "trackingExec", trackingExec);
 	}
 
 	@Override
-	public void restoreFrom(Bundle savedInstanceState) {
-		setExternalGPSStarted(savedInstanceState.getBoolean(TAG + "isExternalGPSStarted"));
-		setInternalGPSStarted(savedInstanceState.getBoolean(TAG + "isInternalGPSStarted"));
-		setGpsUpdateInterval(savedInstanceState.getInt(TAG + "gpsUpdateInterval"));
-		setTrackingType(savedInstanceState.getString(TAG + "trackingType"));
-		setTrackingValue(savedInstanceState.getInt(TAG + "trackingValue"));
-		setTrackingExec(savedInstanceState.getString(TAG + "trackingExec"));
+	public void restoreFrom(PersistentBundle bundle) {
+		setExternalGPSStarted(bundle.getBoolean(TAG + "isExternalGPSStarted"));
+		setInternalGPSStarted(bundle.getBoolean(TAG + "isInternalGPSStarted"));
+		setGpsUpdateInterval(bundle.getInt(TAG + "gpsUpdateInterval"));
+		setTrackingType(bundle.getString(TAG + "trackingType"));
+		setTrackingValue(bundle.getInt(TAG + "trackingValue"));
+		setTrackingExec(bundle.getString(TAG + "trackingExec"));
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import org.javarosa.core.model.Constants;
 
 import android.app.ActionBar.LayoutParams;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.View;
@@ -32,6 +31,7 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
@@ -47,7 +47,7 @@ import com.nativecss.NativeCSS;
 
 public class Tab {
 	
-	private static class Creator implements Serializable {
+	public static class Creator implements Serializable {
 		private static final long serialVersionUID = -7695642524796470211L;
 		
 		protected String ref;
@@ -57,7 +57,7 @@ public class Tab {
 		}
 	}
 	
-	private static class ContainerCreator extends Creator implements Serializable {
+	public static class ContainerCreator extends Creator implements Serializable {
 		private static final long serialVersionUID = -6316380182212646811L;
 		
 		private String style;
@@ -70,7 +70,7 @@ public class Tab {
 		}
 	}
 	
-	private static class ViewCreator extends Creator implements Serializable {
+	public static class ViewCreator extends Creator implements Serializable {
 		private static final long serialVersionUID = 127908031663861660L;
 		
 		private FormInputDef inputDef;
@@ -88,7 +88,7 @@ public class Tab {
 	}
 	
 	@SuppressWarnings("unused")
-	private static class ViewData implements Serializable {
+	public static class ViewData implements Serializable {
 		private static final long serialVersionUID = -3601918620845812810L;
 		
 		private List<NameValuePair> pairs;
@@ -821,7 +821,7 @@ public class Tab {
 		}
 	}
 	
-	public void saveTo(Bundle savedInstanceState) {
+	public void saveTo(PersistentBundle bundle) {
 		HashMap<String, ViewData> viewData = new HashMap<String, ViewData>();
 		for (View view : viewList) {
 			if (view instanceof IView) {
@@ -886,7 +886,7 @@ public class Tab {
 				// store map and callbacks
 				if (iview instanceof CustomMapView) {
 					CustomMapView map = (CustomMapView) iview;
-					map.saveTo(savedInstanceState);
+					map.saveTo(bundle);
 					data.mapClickCallback = map.getMapClickCallback();
 					data.mapSelectCallback = map.getMapSelectCallback();
 					data.toolCreateCallback = map.getCreateCallback();
@@ -894,17 +894,17 @@ public class Tab {
 				}
 			}
 		}
-		savedInstanceState.putSerializable(getRef() + ":viewData", (Serializable) viewData);
-		savedInstanceState.putSerializable(getRef() + ":viewCreators", (Serializable) viewCreators);
-		savedInstanceState.putBoolean(getRef() + ":tabShown", tabShown);
-		savedInstanceState.putBoolean(getRef() + ":hidden", hidden);
+		bundle.putSerializable(getRef() + ":viewData", (Serializable) viewData);
+		bundle.putSerializable(getRef() + ":viewCreators", (Serializable) viewCreators);
+		bundle.putBoolean(getRef() + ":tabShown", tabShown);
+		bundle.putBoolean(getRef() + ":hidden", hidden);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void restoreFrom(Bundle savedInstanceState) {
-		HashMap<String, ViewData> viewData = (HashMap<String, ViewData>) savedInstanceState.getSerializable(getRef() + ":viewData");
+	public void restoreFrom(PersistentBundle bundle) {
+		HashMap<String, ViewData> viewData = (HashMap<String, ViewData>) bundle.getSerializable(getRef() + ":viewData");
 		try {
-			ArrayList<Creator> viewCreators = (ArrayList<Creator>) savedInstanceState.getSerializable(getRef() + ":viewCreators");
+			ArrayList<Creator> viewCreators = (ArrayList<Creator>) bundle.getSerializable(getRef() + ":viewCreators");
 			if (viewCreators != null) {
 				for (Creator c : viewCreators) {
 					if (c instanceof ContainerCreator) {
@@ -977,15 +977,15 @@ public class Tab {
 				// load map
 				if (iview instanceof CustomMapView) {
 					CustomMapView map = (CustomMapView) iview;
-					map.restoreFrom(savedInstanceState);
+					map.restoreFrom(bundle);
 					map.setMapCallbacks(data.mapClickCallback, data.mapSelectCallback);
 					map.setCreateCallback(data.toolCreateCallback);
 					map.setLoadCallback(data.toolLoadCallback);
 				}
 			}
 		}
-		tabShown = savedInstanceState.getBoolean(getRef() + ":tabShown");
-		hidden = savedInstanceState.getBoolean(getRef() + ":hidden");
+		tabShown = bundle.getBoolean(getRef() + ":tabShown");
+		hidden = bundle.getBoolean(getRef() + ":hidden");
 	}
 
 	public void keepChanges() {

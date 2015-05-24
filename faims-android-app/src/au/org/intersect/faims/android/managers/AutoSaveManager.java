@@ -4,13 +4,13 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import android.os.Bundle;
 import android.os.Handler;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.beanshell.callbacks.SaveCallback;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
+import au.org.intersect.faims.android.data.PersistentBundle;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 
@@ -67,17 +67,17 @@ public class AutoSaveManager implements IFAIMSRestorable {
 	}
 
 	@Override
-	public void saveTo(Bundle savedInstanceState) {
-		savedInstanceState.putString(TAG + "tabGroupRef", tabGroupRef);
-		savedInstanceState.putString(TAG + "uuid", uuid);
-		savedInstanceState.putBoolean(TAG + "newRecord", newRecord);
+	public void saveTo(PersistentBundle bundle) {
+		bundle.putString(TAG + "tabGroupRef", tabGroupRef);
+		bundle.putString(TAG + "uuid", uuid);
+		bundle.putBoolean(TAG + "newRecord", newRecord);
 	}
 
 	@Override
-	public void restoreFrom(Bundle savedInstanceState) {
-		tabGroupRef = savedInstanceState.getString(TAG + "tabGroupRef");
-		uuid = savedInstanceState.getString(TAG + "uuid");
-		newRecord = savedInstanceState.getBoolean(TAG + "newRecord");
+	public void restoreFrom(PersistentBundle bundle) {
+		tabGroupRef = bundle.getString(TAG + "tabGroupRef");
+		uuid = bundle.getString(TAG + "uuid");
+		newRecord = bundle.getBoolean(TAG + "newRecord");
 	}
  
 	@Override
