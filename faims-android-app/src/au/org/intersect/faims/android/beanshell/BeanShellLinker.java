@@ -74,6 +74,7 @@ import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.nutiteq.GeometryData;
 import au.org.intersect.faims.android.nutiteq.GeometryStyle;
 import au.org.intersect.faims.android.nutiteq.GeometryTextStyle;
+import au.org.intersect.faims.android.serializer.BeanShellSerializer;
 import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity.SyncStatus;
@@ -162,7 +163,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	private static final String TAG = "beanshell_linker:";
 	
-	private HashMap<String, Object> beanshellVariables;
+	private HashMap<String, Serializable> beanshellVariables;
 	
 	private String persistedObjectName;
 	
@@ -3565,22 +3566,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 			}
 		}
 		
-		// Beanshell variables
-		HashMap<String, Serializable> beanshellVars = new HashMap<String, Serializable>();
-		String[] variables = (String[]) interpreter.eval("this.variables");
-		
-		for (String var: variables) {
-			if (interpreter.get(var) != BeanShellLinker.this) {
-				Object obj =  interpreter.get(var);
-				if(obj instanceof Serializable) {					
-					beanshellVars.put(var, (Serializable) obj);
-				} else {
-					FLog.d("Cannot serialize " + obj);
-				}
-			}
-		}
-		
-		savedInstanceState.putSerializable(TAG + "beanshellVariables", beanshellVars);
+		BeanShellSerializer serializer = new BeanShellSerializer(interpreter);
+		savedInstanceState.putSerializable(TAG + "beanshellVariables", serializer.getVariables());
 		
 		// Beanshell linker variables
 		savedInstanceState.putString(TAG + "persistedObjectName", persistedObjectName);
@@ -3606,7 +3593,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	@Override
 	public void restoreFrom(Bundle savedInstanceState) {
 		// Beanshell variables
-		beanshellVariables = (HashMap<String, Object>) savedInstanceState.getSerializable(TAG + "beanshellVariables");
+		beanshellVariables = (HashMap<String, Serializable>) savedInstanceState.getSerializable(TAG + "beanshellVariables");
 		
 		// Beanshell linker variables
 		persistedObjectName = savedInstanceState.getString(TAG + "persistedObjectName");
@@ -3638,9 +3625,8 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	public void restoreTempBundle() throws Exception {
 		if (beanshellVariables != null) {
-			for (String var: beanshellVariables.keySet()) {
-				interpreter.set(var, beanshellVariables.get(var));
-			}
+			BeanShellSerializer serializer = new BeanShellSerializer(interpreter);
+			serializer.setVariables(beanshellVariables);;
 		}
 	}
 	
