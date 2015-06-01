@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import au.org.intersect.faims.android.log.FLog;
 import bsh.Interpreter;
-import bsh.NameSpace;
 import bsh.This;
 
 public class BeanShellSerializer {
@@ -28,10 +27,7 @@ public class BeanShellSerializer {
 			
 			Object obj = interpreter.get(var);
 			if (isBeanShellScriptedObject(obj)) {
-				This thisObj = (This) obj;
-				NameSpace namespace = thisObj.getNameSpace();
-				namespace.prune();
-				vars.put(var, thisObj);
+				FLog.d("Ignore serializing scripted object");
 			} else if (isSerializable(obj)) {
 				vars.put(var, (Serializable) obj);
 			} else {
@@ -44,12 +40,7 @@ public class BeanShellSerializer {
 	public void setVariables(HashMap<String, Serializable> vars) throws Exception {
 		for (String var: vars.keySet()) {
 			Object obj = vars.get(var);
-			if (isBeanShellScriptedObject(obj)) {
-				This thisObj = (This) obj;
-				NameSpace namespace = thisObj.getNameSpace();
-				This.bind(thisObj, namespace, interpreter);
-				interpreter.set(var, thisObj);
-			} else if (isSerializable(obj)) {
+			if (isSerializable(obj)) {
 				interpreter.set(var, obj);
 			} else {
 				FLog.d("Cannot deserialize " + var);
