@@ -59,7 +59,7 @@ public class CameraPictureGallery extends FilePictureGallery {
 		if (file.exists()) {
 			ImageView imageView = new ImageView(getContext());
 			
-			imageView.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), 500, 500));
+			imageView.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), PREVIEW_IMAGE_SIZE, PREVIEW_IMAGE_SIZE));
 			dialog.addCameraPreview(imageView);
 			
 			metadata.add(new NameValuePair("File size", file.length() + "bytes"));

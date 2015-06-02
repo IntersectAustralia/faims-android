@@ -29,8 +29,9 @@ import com.nativecss.NativeCSS;
 
 public class FilePictureGallery extends CustomFileList {
 
+	protected static final int PREVIEW_IMAGE_SIZE = 500;
 	protected static final int GALLERY_SIZE = 400;
-	private static final int GALLERY_ITEM_PADDING = 10;
+	protected static final int GALLERY_ITEM_PADDING = 10;
 	
 	protected ArrayList<CustomImageView> galleryImages;
 	protected LinearLayout galleriesLayout;
