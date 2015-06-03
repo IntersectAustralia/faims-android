@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -18,10 +17,12 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.constants.FaimsSettings;
+import au.org.intersect.faims.android.constants.PictureConstants;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.BitmapManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
@@ -61,8 +62,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	@Inject
 	BeanShellLinker linker;
 	
-	protected static final int GALLERY_SIZE = 400;
-	private static final int GALLERY_ITEM_PADDING = 10;
+	@Inject
+	BitmapManager bitmapManager;
 	
 	private String ref;
 	private boolean dynamic;
@@ -416,11 +417,11 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 				galleriesLayout.getContext());
 		
 		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-				GALLERY_SIZE, GALLERY_SIZE);
+				PictureConstants.GALLERY_SIZE, PictureConstants.GALLERY_SIZE);
 		
 		setGalleryImage(gallery, path);
 		
-		int padding = (int) ScaleUtil.getDip(galleriesLayout.getContext(), GALLERY_ITEM_PADDING);
+		int padding = (int) ScaleUtil.getDip(galleriesLayout.getContext(), PictureConstants.GALLERY_ITEM_PADDING);
 		gallery.setPadding(padding, padding, padding, padding);
 		gallery.setLayoutParams(layoutParams);
 		gallery.setPicture(picture);
@@ -444,7 +445,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		textView.setText(name);
 		textView.setGravity(Gravity.CENTER_HORIZONTAL);
 		textView.setTextSize(15);
-		textView.setWidth(GALLERY_SIZE);
+		textView.setWidth(PictureConstants.GALLERY_SIZE);
 		textView.setPadding(padding, padding, padding, padding);
 		galleryLayout.addView(textView);
 		
@@ -488,7 +489,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 
 	protected void setGalleryImage(CustomImageView gallery, String path) {
 		if(path != null && new File(path).exists()) {
-			gallery.setImageURI(Uri.parse(path));
+			gallery.setImageBitmap(bitmapManager.createBitmap(path, PictureConstants.THUMBNAIL_IMAGE_SIZE, PictureConstants.THUMBNAIL_IMAGE_SIZE));
 		}
 	}
 	

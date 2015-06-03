@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,10 +14,13 @@ import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.constants.PictureConstants;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.BitmapManager;
 import au.org.intersect.faims.android.ui.dialog.FileGalleryPreviewDialog;
+import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
@@ -30,6 +34,9 @@ public class CameraPictureGallery extends FilePictureGallery {
 
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	BitmapManager bitmapManager;
 	
 	public CameraPictureGallery(Context context) {
 		super(context);
@@ -59,7 +66,11 @@ public class CameraPictureGallery extends FilePictureGallery {
 		if (file.exists()) {
 			ImageView imageView = new ImageView(getContext());
 			
-			imageView.setImageBitmap(decodeFile(new File(selectedImageView.getPicture().getUrl()), PREVIEW_IMAGE_SIZE, PREVIEW_IMAGE_SIZE));
+			// add bitmap to manager
+			Bitmap bitmap = BitmapUtil.decodeFile(new File(path), PictureConstants.PREVIEW_IMAGE_SIZE, PictureConstants.PREVIEW_IMAGE_SIZE);
+			bitmapManager.addBitmap("cameraPreview", bitmap);
+			imageView.setImageBitmap(bitmap);
+			
 			dialog.addCameraPreview(imageView);
 			
 			metadata.add(new NameValuePair("File size", file.length() + "bytes"));

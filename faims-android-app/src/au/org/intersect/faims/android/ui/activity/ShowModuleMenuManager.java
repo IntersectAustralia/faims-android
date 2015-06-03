@@ -273,7 +273,9 @@ public class ShowModuleMenuManager {
 										activityRef.get().getResources(),
 										au.org.intersect.faims.android.R.drawable.arrow_invalid));
 			}
-
+			if (tempBitmap != null) {
+				tempBitmap.recycle();
+			}
 			this.tempBitmap = BitmapUtil.rotateBitmap(
 					pathValid ? validArrow.getBitmap() : invalidArrow.getBitmap(),
 					pathBearing - pathHeading);

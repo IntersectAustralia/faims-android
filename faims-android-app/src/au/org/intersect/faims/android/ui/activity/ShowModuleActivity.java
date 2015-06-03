@@ -59,6 +59,7 @@ import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AsyncTaskManager;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.BitmapManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.net.ServerDiscovery;
@@ -152,6 +153,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	@Inject
 	NavigationDrawer navigationDrawer;
+	
+	@Inject
+	BitmapManager bitmapManager;
 	
 	private WifiBroadcastReceiver broadcastReceiver;
 
@@ -386,6 +390,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		uiRenderer.init(this);
 		autoSaveManager.init(this);
 		asyncTaskManager.init();
+		bitmapManager.init();
 		StringFormatter.init();
 	}
 
@@ -480,6 +485,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		autoSaveManager.destroy();
 		uiRenderer.destroy();
 		asyncTaskManager.destroy();
+		bitmapManager.destroy();
 		destroy();
 		super.onDestroy();
 	}
