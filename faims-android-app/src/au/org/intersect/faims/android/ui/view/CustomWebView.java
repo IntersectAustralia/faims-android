@@ -2,15 +2,17 @@ package au.org.intersect.faims.android.ui.view;
 
 import java.util.Stack;
 
-import com.nativecss.NativeCSS;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import au.org.intersect.faims.android.app.FAIMSApplication;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.FileUtil;
+
+import com.google.inject.Inject;
 
 public class CustomWebView extends WebView implements IView {
 	
@@ -27,6 +29,9 @@ public class CustomWebView extends WebView implements IView {
 			this.failUrl = failUrl;
 		}
 	}
+	
+	@Inject
+	CSSManager cssManager;
 
 	private Stack<WebPage> webPageStack;
 	
@@ -37,10 +42,12 @@ public class CustomWebView extends WebView implements IView {
 
 	public CustomWebView(final Context context) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public CustomWebView(final Context context, String ref, boolean dynamic) {
 		super(context);
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		this.ref = ref;
 		this.dynamic = dynamic;
@@ -61,7 +68,7 @@ public class CustomWebView extends WebView implements IView {
 				}
 		    }
 		});
-		NativeCSS.addCSSClass(this, "web-view");
+		cssManager.addCSS(this, "web-view");
 	}
 	
 	public boolean isDynamic() {

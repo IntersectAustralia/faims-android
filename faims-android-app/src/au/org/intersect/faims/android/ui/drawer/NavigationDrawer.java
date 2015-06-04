@@ -3,7 +3,7 @@ package au.org.intersect.faims.android.ui.drawer;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Stack;
-
+import android.annotation.SuppressLint;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,10 +22,10 @@ import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.view.TabGroup;
 import au.org.intersect.faims.android.ui.view.UIRenderer;
 import au.org.intersect.faims.android.util.Arch16n;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+@SuppressLint("InflateParams")
 @Singleton
 public class NavigationDrawer {
 	
@@ -74,6 +74,20 @@ public class NavigationDrawer {
 		
 		setupExitAction();
 		setupHomeAction();
+	}
+	
+	public void destroy() {
+		activityRef = null;
+		
+		naviationDrawerLayout = null;
+		
+		moduleNameText = null;
+		moduleDescriptionText = null;
+		navigationStackLayout = null;
+		navigationButtonsLayout = null;
+		
+		tabGroupStack = null;
+		actionButtons = null;
 	}
 	
 	public void pushTabGroup(TabGroup tabGroup) {

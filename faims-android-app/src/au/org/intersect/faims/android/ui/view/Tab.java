@@ -35,6 +35,7 @@ import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.data.VocabularyTerm;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.dialog.AttributeLabelDialog;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -43,7 +44,6 @@ import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class Tab {
 	
@@ -122,6 +122,9 @@ public class Tab {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private static final int PADDING = 15;
 
@@ -316,7 +319,7 @@ public class Tab {
 	                		container.addView(view);
 	                	} else {
 	                		view = viewFactory.createTextField(-1, inputDef, ref, dynamic);
-	                		NativeCSS.addCSSClass(view, "input-field");
+	                		cssManager.addCSS(view, "input-field");
 	                		setupView(container, view, inputDef, ref, isArchEnt, isRelationship);
 	                	}
 	                    break;
@@ -383,9 +386,9 @@ public class Tab {
         viewList.add(view);
         
         if (inputDef.styleClass != null) {
-			NativeCSS.addCSSClass(view, inputDef.styleClass);
+			cssManager.addCSS(view, inputDef.styleClass);
 		}
-		NativeCSS.setCSSId(view, ref);
+		cssManager.setCSSID(view, ref);
         
         if(inputDef.name != null){
         	addViewMappings(inputDef.name, view);
@@ -513,7 +516,7 @@ public class Tab {
 		    		labelContainer.addView(textView, params);
 		            
 		            LinearLayout icons = new LinearLayout(fieldFrameLayout.getContext());
-		            NativeCSS.addCSSClass(icons, "label-icon");
+		            cssManager.addCSS(icons, "label-icon");
 		            
 		            final AttributeLabelDialog labelDialog = new AttributeLabelDialog(linearLayout.getContext(), customView);
 		            labelDialog.setTitle(arch16n.substituteValue(attribute.questionText));
@@ -1018,7 +1021,7 @@ public class Tab {
 			@Override
 			public void run() {
 				if (beanShellLinker.getActivity() != null) {
-					NativeCSS.refreshCSSStyling(view);
+					cssManager.refreshCSS(view);
 					for (View v : getViews()) {
 						if (v instanceof PictureGallery) {
 							((PictureGallery) v).updateImages();

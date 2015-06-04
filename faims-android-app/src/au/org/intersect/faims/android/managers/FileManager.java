@@ -20,6 +20,10 @@ public class FileManager {
 		listeners = new SparseArray<FileManagerListener>();
 	}
 	
+	public void destroy() {
+		listeners = null;
+	}
+	
 	public void addListener(int code, FileManagerListener listener) {
 		listeners.put(code, listener);
 	}

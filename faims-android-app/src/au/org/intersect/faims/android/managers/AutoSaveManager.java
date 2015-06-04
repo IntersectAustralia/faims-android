@@ -65,6 +65,22 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		this.delayAutoSaveRunnable = new DelayAutoSave();
 		this.activityRef = new WeakReference<ShowModuleActivity>(activity);
 	}
+	
+	@Override
+	public void destroy() {
+		clear();
+		this.tabGroupRef = null;
+		this.uuid = null;
+		this.geometry = null;
+		this.attributes = null;
+		this.callback = null;
+		this.newRecord = false;
+		this.enabled = false;
+		this.pauseCounter = 0;
+		this.handler = null;
+		this.delayAutoSaveRunnable = null;
+		this.activityRef = null;
+	}
 
 	@Override
 	public void saveTo(Bundle savedInstanceState) {
@@ -95,13 +111,6 @@ public class AutoSaveManager implements IFAIMSRestorable {
 		if (enabled) {
 			this.pauseCounter++;
 		}
-	}
-
-	@Override
-	public void destroy() {
-		clear();
-		this.handler = null;
-		this.delayAutoSaveRunnable = null;
 	}
 	
 	private void clear() {

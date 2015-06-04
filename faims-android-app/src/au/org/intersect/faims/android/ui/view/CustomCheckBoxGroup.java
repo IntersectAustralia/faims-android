@@ -21,13 +21,13 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.Module;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.dialog.CheckBoxGroupLabelDialog;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
@@ -51,6 +51,9 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 	
 	@Inject
 	Arch16n arch16n;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private String ref;
 	private boolean dynamic;
@@ -98,7 +101,7 @@ public class CustomCheckBoxGroup extends LinearLayout implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;		
 	    this.customListener = new CheckBoxGroupOnClickListener();
-	    NativeCSS.addCSSClass(this, "checkbox-group");
+	    cssManager.addCSS(this, "checkbox-group");
 	    
 	    this.viewFactory = new ViewFactory(new WeakReference<ShowModuleActivity>(linker.getActivity()), arch16n);
 	    reset();

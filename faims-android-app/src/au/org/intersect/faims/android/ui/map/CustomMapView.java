@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.microedition.khronos.opengles.GL10;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -45,6 +43,7 @@ import au.org.intersect.faims.android.exceptions.MapException;
 import au.org.intersect.faims.android.gps.GPSDataManager;
 import au.org.intersect.faims.android.gps.GPSLocation;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.nutiteq.CanvasLayer;
 import au.org.intersect.faims.android.nutiteq.CustomGdalMapLayer;
 import au.org.intersect.faims.android.nutiteq.CustomOgrLayer;
@@ -82,9 +81,7 @@ import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.GeometryUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 import au.org.intersect.faims.android.util.SpatialiteUtil;
-
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 import com.nutiteq.MapView;
 import com.nutiteq.components.Bounds;
 import com.nutiteq.components.Components;
@@ -110,6 +107,7 @@ import com.nutiteq.ui.MapListener;
 import com.nutiteq.utils.UnscaledBitmapLoader;
 import com.nutiteq.vectorlayers.MarkerLayer;
 
+@SuppressLint("ClickableViewAccessibility")
 public class CustomMapView extends MapView implements IView {
 	
 	private static final int MAP_OVERLAY_DELAY = 500;
@@ -217,6 +215,9 @@ public class CustomMapView extends MapView implements IView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 
 	// TODO what is this?
 	private static int cacheId = 9991;
@@ -457,7 +458,7 @@ public class CustomMapView extends MapView implements IView {
 		getConstraints().setRotatable(true);
 //		getConstraints().setZoomRange(new Range(0, FaimsSettings.MAX_ZOOM));
 		
-		NativeCSS.addCSSClass(this, "map-view");
+		cssManager.addCSS(this, "map-view");
 	}
 
 	public CustomMapView(Context context) {

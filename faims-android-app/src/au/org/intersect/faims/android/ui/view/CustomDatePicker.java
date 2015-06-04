@@ -15,11 +15,11 @@ import au.org.intersect.faims.android.constants.FaimsSettings;
 import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.DateUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomDatePicker extends DatePicker implements ICustomView {
 	
@@ -38,6 +38,9 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 
 	private String ref;
 	private boolean dynamic;
@@ -76,7 +79,7 @@ public class CustomDatePicker extends DatePicker implements ICustomView {
 		customChangeListener = new CustomDatePickerOnDateChangedListener();
 		init(0, 0, 0, customChangeListener);
 		DateUtil.setDatePicker(this);
-		NativeCSS.addCSSClass(this, "date-picker");
+		cssManager.addCSS(this, "date-picker");
 	}
 
 	@Override

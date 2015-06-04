@@ -33,5 +33,9 @@ public class InputBuffer {
 	private void clearBuffer() {
 		buffer = new StringBuffer();
 	}
+	
+	public void destroy() {
+		this.listener = null;
+	}
 
 }

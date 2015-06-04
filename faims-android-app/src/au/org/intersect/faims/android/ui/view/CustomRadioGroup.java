@@ -19,10 +19,10 @@ import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
@@ -43,6 +43,9 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 
 	private String ref;
 	private boolean dynamic;
@@ -87,7 +90,7 @@ public class CustomRadioGroup extends LinearLayout implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;
 		this.customListener = new RadioGroupOnChangeListener();
-		NativeCSS.addCSSClass(this, "radio-group");
+		cssManager.addCSS(this, "radio-group");
 		reset();
 	}
 

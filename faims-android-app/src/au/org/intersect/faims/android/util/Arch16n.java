@@ -23,6 +23,11 @@ public class Arch16n {
 		this.path = path;
 		generatePropertiesMap(propertiesFile);
 	}
+	
+	public void destroy() {
+		this.properties = null;
+		this.path = null;
+	}
 
 	private void generatePropertiesMap(String propertiesFile) {
 		try {

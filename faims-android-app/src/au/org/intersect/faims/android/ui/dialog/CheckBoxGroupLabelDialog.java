@@ -40,12 +40,12 @@ public class CheckBoxGroupLabelDialog extends LabelDialog {
 	
 	@Override
 	public void show() {
+		super.show();
 		if (tabs.size() == 0) {
 			return;
 		}
 		updateCertainty();
 		updateAnnotation();
-		super.show();
 	}
 	
 	@Override

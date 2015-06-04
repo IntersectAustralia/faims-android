@@ -89,6 +89,28 @@ public class UIRenderer {
         this.styles = new HashMap<String, Map<String,String>>();
     }
 	
+	public void destroy() {
+		if (tempSavedInstanceState != null) {
+			tempSavedInstanceState = null;
+			for (TabGroup tabGroup : tabGroupList) {
+				tabGroup.clearTempBundle();
+			}
+		}
+		
+		this.fem = null;
+        this.activityRef = null;
+        this.tabGroupGeneratorList = null;
+        this.tabGroupList = null;
+        this.tabGroupMap = null;
+        this.tabList = null;
+        this.tabMap = null;
+        this.viewList = null;
+        this.viewMap = null;
+        this.viewTabMap = null;
+        this.indexes = null;
+        this.styles = null;
+	}
+	
 	public void navigateToTabGroup(int index) {
 		try {
 			FragmentManager fm = activityRef.get().getSupportFragmentManager();
@@ -259,15 +281,6 @@ public class UIRenderer {
 			restoreTabGroupStack(tempSavedInstanceState);
 			restoreTabGroups(tempSavedInstanceState);
 			tempSavedInstanceState = null;
-		}
-	}
-	
-	public void destroy() {
-		if (tempSavedInstanceState != null) {
-			tempSavedInstanceState = null;
-			for (TabGroup tabGroup : tabGroupList) {
-				tabGroup.clearTempBundle();
-			}
 		}
 	}
 	

@@ -233,6 +233,34 @@ public class BeanShellLinker implements IFAIMSRestorable {
 				});
 	}
 
+	@Override
+	public void destroy() {
+		stopTrackingGPS();
+		if (this.recorder != null) {
+			this.recorder.release();
+		}
+		
+		this.interpreter = null;
+		this.activityRef = null;
+		this.module = null;
+		this.persistedObjectName = null;
+		this.beanshellVariables = null; 
+		this.lastFileBrowserCallback = null;
+		this.trackingTask = null;
+		this.prevLong = 0d;
+		this.prevLat = 0d;
+		this.textAlertInput = null;
+		this.cameraPicturepath = null;
+		this.cameraCallBack = null;
+		this.videoCallBack = null;
+		this.cameraVideoPath = null;
+		this.audioFileNamePath = null;
+		this.recorder = null;
+		this.audioCallBack = null;
+		this.scanContents = null;
+		this.scanCallBack = null;
+	}
+
 	public void sourceFromAssets(String filename) {
 		try {
 			interpreter.eval(FileUtil.convertStreamToString(this.activityRef.get().getAssets().open(filename)));
@@ -3636,11 +3664,6 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	
 	@Override
 	public void resume() {
-	}
-	
-	@Override
-	public void destroy() {
-		stopTrackingGPS();
 	}
 
 	public void debugHardwareDevices(boolean enabled) {

@@ -5,14 +5,17 @@ import android.view.View;
 import android.widget.Button;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
+import au.org.intersect.faims.android.managers.CSSManager;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomButton extends Button implements IView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 
 	private static final long DELAY = 1000;
 	
@@ -36,7 +39,7 @@ public class CustomButton extends Button implements IView {
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.ref = ref;
 		this.dynamic = dynamic;
-		NativeCSS.addCSSClass(this, "button");
+		cssManager.addCSS(this, "button");
 	}
 	
 	@Override

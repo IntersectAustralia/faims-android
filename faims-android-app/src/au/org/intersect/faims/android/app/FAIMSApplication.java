@@ -45,6 +45,11 @@ public class FAIMSApplication {
 		RoboGuice.getBaseApplicationInjector(application).injectMembers(obj);
 	}
 	
+	public void destroyInjector() {
+		RoboGuice.destroyInjector(application);
+		RoboGuice.util.reset();
+	}
+	
 	public void saveModuleKey(String key) {
     	SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext()).edit();
     	editor.putString(MODULE_KEY_PREF, key);

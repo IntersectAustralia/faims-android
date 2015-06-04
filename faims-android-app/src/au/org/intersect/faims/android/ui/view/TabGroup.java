@@ -22,11 +22,11 @@ import au.org.intersect.faims.android.data.ArchEntity;
 import au.org.intersect.faims.android.data.Relationship;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 @SuppressLint("ValidFragment")
 public class TabGroup extends Fragment {
@@ -43,6 +43,9 @@ public class TabGroup extends Fragment {
 	
 	@Inject 
 	AutoSaveManager autoSaveManager;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private static final int PADDING = 5;
 	
@@ -68,6 +71,7 @@ public class TabGroup extends Fragment {
 	private int popCounter;
 	
 	public TabGroup() {
+		FAIMSApplication.getInstance().injectMembers(this);
 	}
 	
 	public TabGroup(String ref, String name, String label, String archEntType, String relType) {
@@ -469,7 +473,7 @@ public class TabGroup extends Fragment {
 				@Override
 				public void run() {
 					if (getActivity() != null) {
-						NativeCSS.refreshCSSStyling(getActivity().findViewById(R.id.fragment_content));
+						cssManager.refreshCSS(getActivity().findViewById(R.id.fragment_content));
 					}
 				}
 				

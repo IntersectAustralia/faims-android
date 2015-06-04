@@ -103,6 +103,18 @@ public class BluetoothManager implements IFAIMSRestorable {
 		bluetoothStatus = BluetoothStatus.DISCONNECTED;
 	}
 	
+	@Override
+	public void destroy() {
+		destroyConnection();
+		activityRef = null;
+		postInterval = 0;
+		repeatable = false;
+		outputMessage = null;
+		clearInputOnRead = false;
+		isBluetoothConnected = false;
+		bluetoothStatus = BluetoothStatus.DISCONNECTED;
+	}
+	
 	public void showConnectionDialog() {
 		BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 		if (adapter == null) {
@@ -380,11 +392,6 @@ public class BluetoothManager implements IFAIMSRestorable {
 		if (!(gpsDataManager.isTrackingStarted() && gpsDataManager.isExternalGPSStarted())) {
 			pauseConnection();
 		}
-	}
-
-	@Override
-	public void destroy() {
-		destroyConnection();
 	}
 	
 	private boolean isEndOfLine(char c) {

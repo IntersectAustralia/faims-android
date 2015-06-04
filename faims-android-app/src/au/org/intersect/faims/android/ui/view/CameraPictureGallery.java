@@ -68,7 +68,6 @@ public class CameraPictureGallery extends FilePictureGallery {
 			
 			// add bitmap to manager
 			Bitmap bitmap = BitmapUtil.decodeFile(new File(path), PictureConstants.PREVIEW_IMAGE_SIZE, PictureConstants.PREVIEW_IMAGE_SIZE);
-			bitmapManager.addBitmap("cameraPreview", bitmap);
 			imageView.setImageBitmap(bitmap);
 			
 			dialog.addCameraPreview(imageView);

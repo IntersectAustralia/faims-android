@@ -18,10 +18,10 @@ import au.org.intersect.faims.android.data.Attribute;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.Compare;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomSpinner extends Spinner implements ICustomView {
 	
@@ -30,6 +30,9 @@ public class CustomSpinner extends Spinner implements ICustomView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 
 	private String ref;
 	private boolean dynamic;
@@ -63,7 +66,7 @@ public class CustomSpinner extends Spinner implements ICustomView {
 		this.ref = ref;
 		this.dynamic = dynamic;
 		reset();
-		NativeCSS.addCSSClass(this, "dropdown");
+		cssManager.addCSS(this, "dropdown");
 	}
 	
 	@Override

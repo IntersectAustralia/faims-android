@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.ActivityData;
 import au.org.intersect.faims.android.data.IFAIMSRestorable;
 import au.org.intersect.faims.android.log.FLog;
@@ -21,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class GPSDataManager implements BluetoothManager.BluetoothListener, LocationListener, ActivityData, IFAIMSRestorable {
+public class GPSDataManager implements BluetoothManager.BluetoothListener, ActivityData, IFAIMSRestorable {
 
 	private static final String TAG = "gpsmanager:";
 	
@@ -56,15 +57,56 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	private boolean isTrackingStarted;
 
 	private WeakReference<ShowModuleActivity> activityRef;
+
+	private MyLocationListener locationListener;
+	
+	public static class MyLocationListener implements LocationListener {
+		
+		@Inject
+		GPSDataManager gpsDataManager;
+		
+		public MyLocationListener() {
+			FAIMSApplication.getInstance().injectMembers(this);
+		}
+
+		@Override
+		public void onLocationChanged(Location location) {
+			gpsDataManager.setAccuracy(location.getAccuracy());
+			gpsDataManager.setLocation(location);
+			gpsDataManager.setInternalGPSTimestamp(System.currentTimeMillis());
+			if (!gpsDataManager.hasValidInternalGPSSignal()) {
+				gpsDataManager.setHasValidInternalGPSSignal(true);
+			}
+		}
+
+		@Override
+		public void onProviderDisabled(String provider) {
+			gpsDataManager.setAccuracy(0.0f);
+			gpsDataManager.setLocation(null);
+			gpsDataManager.setInternalGPSTimestamp(System.currentTimeMillis());
+			if(gpsDataManager.hasValidInternalGPSSignal()){
+				gpsDataManager.setHasValidInternalGPSSignal(false);
+			}
+		}
+
+		@Override
+		public void onProviderEnabled(String provider) {
+		}
+
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+		
+	}
 	
 	public void init(LocationManager manager, ShowModuleActivity activity){
+		locationManager = manager;
 		GGAMessage = null;
 		BODMessage = null;
 		accuracy = 0;
 		location = null;
 		externalGPSTimestamp = 0;
 		internalGPSTimestamp = 0;
-		locationManager = manager;
 		gpsUpdateInterval = 10;
 		isExternalGPSStarted = false;
 		isInternalGPSStarted = false;
@@ -74,7 +116,31 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 		trackingValue = 0;
 		trackingExec = null;
 		isTrackingStarted = false;
+		locationListener = new MyLocationListener();
 		activityRef = new WeakReference<ShowModuleActivity>(activity);
+	}
+	
+	@Override
+	public void destroy() {
+		destroyListener();
+		locationManager = null;
+		GGAMessage = null;
+		BODMessage = null;
+		accuracy = 0;
+		location = null;
+		externalGPSTimestamp = 0;
+		internalGPSTimestamp = 0;
+		gpsUpdateInterval = 0;
+		isExternalGPSStarted = false;
+		isInternalGPSStarted = false;
+		hasValidExternalGPSSignal = false;
+		hasValidInternalGPSSignal = false;
+		trackingType = null;
+		trackingValue = 0;
+		trackingExec = null;
+		isTrackingStarted = false;
+		locationListener = null;
+		activityRef = null;
 	}
 	
     @Override
@@ -136,34 +202,6 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
         	return false;
         }
     }
-
-    @Override
-	public void onLocationChanged(Location location) {
-		setAccuracy(location.getAccuracy());
-		setLocation(location);
-		setInternalGPSTimestamp(System.currentTimeMillis());
-		if (!hasValidInternalGPSSignal()) {
-			setHasValidInternalGPSSignal(true);
-		}
-	}
-
-	@Override
-	public void onProviderDisabled(String provider) {
-		setAccuracy(0.0f);
-		setLocation(null);
-		setInternalGPSTimestamp(System.currentTimeMillis());
-		if(hasValidInternalGPSSignal()){
-			setHasValidInternalGPSSignal(false);
-		}
-	}
-
-	@Override
-	public void onProviderEnabled(String provider) {
-	}
-
-	@Override
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-	}
 	
 	public void startInternalGPSListener(){
 		startInternalGPSListener(true);
@@ -173,7 +211,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 		if (destroyListener) {
 			destroyInternalGPSListener();
 		}
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, this);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, getGpsUpdateInterval() * 1000, 0, locationListener);
 		setInternalGPSStarted(true);
 	}
 	
@@ -214,7 +252,7 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 	
 	public void pauseInternalGPSListener() {
 		if (locationManager != null) {
-			locationManager.removeUpdates(this);
+			locationManager.removeUpdates(locationListener);
 		}
 	}
 	
@@ -449,11 +487,6 @@ public class GPSDataManager implements BluetoothManager.BluetoothListener, Locat
 		if (!isTrackingStarted()) {
 			pauseListener();
 		}
-	}
-
-	@Override
-	public void destroy() {
-		destroyListener();
 	}
 
 }

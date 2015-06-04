@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -20,13 +19,12 @@ import au.org.intersect.faims.android.constants.PictureConstants;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.BitmapManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.ui.dialog.FileAttachmentLabelDialog;
-import au.org.intersect.faims.android.util.BitmapUtil;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class FilePictureGallery extends CustomFileList {
 	
@@ -36,6 +34,9 @@ public class FilePictureGallery extends CustomFileList {
 	@Inject
 	BitmapManager bitmapManager;
 	
+	@Inject
+	CSSManager cssManager;
+	
 	public FilePictureGallery(Context context) {
 		super(context);
 		FAIMSApplication.getInstance().injectMembers(this);
@@ -43,6 +44,7 @@ public class FilePictureGallery extends CustomFileList {
 	
 	public FilePictureGallery(Context context, FormInputDef attribute, String ref, boolean dynamic, boolean sync) {
 		super(context, attribute, ref, dynamic, sync);
+		FAIMSApplication.getInstance().injectMembers(this);
 		
 		HorizontalScrollView scrollView = new HorizontalScrollView(this.getContext());
 		galleriesLayout = new LinearLayout(this.getContext());
@@ -51,7 +53,7 @@ public class FilePictureGallery extends CustomFileList {
 	    scrollView.addView(galleriesLayout);
 	    addView(scrollView);
 	    
-		NativeCSS.addCSSClass(this, "file-gallery");
+		cssManager.addCSS(this, "file-gallery");
 		reset();
 	}
 	
@@ -156,7 +158,7 @@ public class FilePictureGallery extends CustomFileList {
 			}
 		});
 		
-		NativeCSS.addCSSClass(galleryLayout, "file-gallery");
+		cssManager.addCSS(galleryLayout, "file-gallery");
 		
 		LinearLayout headerContainer = new LinearLayout(galleriesLayout.getContext());
 		headerContainer.setOrientation(LinearLayout.VERTICAL);
@@ -172,7 +174,7 @@ public class FilePictureGallery extends CustomFileList {
 		textView.setPadding(padding, padding, padding, padding);
 		
 		FrameLayout galleryContainer = new FrameLayout(galleriesLayout.getContext());
-		NativeCSS.addCSSClass(galleryContainer, "file-gallery-item");
+		cssManager.addCSS(galleryContainer, "file-gallery-item");
 		galleryContainer.addView(gallery);
 		
 		LinearLayout iconContainer = new LinearLayout(galleriesLayout.getContext());

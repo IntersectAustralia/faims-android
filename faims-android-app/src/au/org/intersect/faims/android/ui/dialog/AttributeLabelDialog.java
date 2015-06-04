@@ -108,6 +108,7 @@ public class AttributeLabelDialog extends LabelDialog {
 	
 	@Override
 	public void show() {
+		super.show();
 		if (!hasNonDirtyTab() && !hasDirtyReasonText()) {
 			return;
 		}
@@ -119,7 +120,6 @@ public class AttributeLabelDialog extends LabelDialog {
 		updateDirtyReason();
 		updateInfo();
 		tabHost.setCurrentTab(0);
-		super.show();
 	}
 	
 	@Override

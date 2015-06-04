@@ -61,6 +61,7 @@ import au.org.intersect.faims.android.managers.AsyncTaskManager;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BitmapManager;
 import au.org.intersect.faims.android.managers.BluetoothManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.managers.FileManager;
 import au.org.intersect.faims.android.net.ServerDiscovery;
 import au.org.intersect.faims.android.services.DownloadDatabaseService;
@@ -91,7 +92,6 @@ import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class ShowModuleActivity extends FragmentActivity implements
 		IFAIMSRestorable {
@@ -156,6 +156,9 @@ public class ShowModuleActivity extends FragmentActivity implements
 	
 	@Inject
 	BitmapManager bitmapManager;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private WifiBroadcastReceiver broadcastReceiver;
 
@@ -255,21 +258,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		navigationDrawer.init(this);
 
 		String css = module.getCSS();
-		if (!css.isEmpty()) {
-			try {
-				NativeCSS.styleWithCSS(css);
-			} catch (Exception e) {
-				FLog.e("Couldn't style module with module CSS file", e);
-				NativeCSS.styleWithCSS("");
-			}
-		} else {
-			try {
-				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(getAssets().open("default.css")));
-			} catch (Exception e) {
-				FLog.e("Couldn't style module with default styling", e);
-				NativeCSS.styleWithCSS("");
-			}
-		}
+		cssManager.init(css, this);
 		
 		startLoadTask();
 	}
@@ -418,15 +407,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onResume() {
-		try {
-			super.onResume();
-			NativeCSS.onActivityResumed(this);
-		} catch (Exception e) {
-			// NativeCSS is sometimes raising a exception
-			// java.lang.ClassNotFoundException: Didn't find class "com.android.internal.app.ActionBarImpl"
-			// TODO find out why?
-			FLog.e("onResume has failed", e);
-		}	
+		super.onResume();
 
 		resume();
 		bluetoothManager.resume();
@@ -457,7 +438,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 			@Override
 			public void run() {
 				updateActionBarTitle();
-				NativeCSS.refreshCSSStyling(findViewById(R.id.fragment_content));
+				cssManager.refreshCSS(findViewById(R.id.fragment_content));
 			}
 		}, 500);
 	}
@@ -478,14 +459,20 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	protected void onDestroy() {
-		NativeCSS.onActivityDestroyed(this);
+		cssManager.destroy();
+		navigationDrawer.destroy();
+		autoSaveManager.destroy();
+		beanShellLinker.destroy();
 		bluetoothManager.destroy();
 		gpsDataManager.destroy();
-		beanShellLinker.destroy();
-		autoSaveManager.destroy();
+		databaseManager.destroy();
+		fileManager.destroy();
 		uiRenderer.destroy();
 		asyncTaskManager.destroy();
 		bitmapManager.destroy();
+		serverDiscovery.clearListeners();
+		arch16n.destroy();
+		FAIMSApplication.getInstance().destroyInjector();
 		destroy();
 		super.onDestroy();
 	}
@@ -562,20 +549,33 @@ public class ShowModuleActivity extends FragmentActivity implements
 
 	@Override
 	public void destroy() {
+		syncLock = null;
+		if (deviceBuffer != null) {
+			deviceBuffer.destroy();
+			deviceBuffer = null;
+		}
 		if (locateTask != null) {
 			locateTask.cancel(true);
+			locateTask = null;
 		}
 		if (broadcastReceiver != null) {
 			unregisterReceiver(broadcastReceiver);
+			broadcastReceiver = null;
 		}
 		if (busyDialog != null) {
 			busyDialog.dismiss();
+			busyDialog = null;
 		}
 		if (confirmDialog != null) {
 			confirmDialog.dismiss();
+			confirmDialog = null;
 		}
 		if (choiceDialog != null) {
 			confirmDialog.dismiss();
+			confirmDialog = null;
+		}
+		if (listeners != null) {
+			listeners = null;
 		}
 		// kill all services
 		Intent uploadIntent = new Intent(ShowModuleActivity.this,
@@ -647,8 +647,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}
 	}
 	
-	
-
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event)
 	{

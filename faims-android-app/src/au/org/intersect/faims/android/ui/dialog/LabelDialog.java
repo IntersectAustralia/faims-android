@@ -1,6 +1,7 @@
 package au.org.intersect.faims.android.ui.dialog;
 
 import java.util.ArrayList;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.util.ScaleUtil;
@@ -30,16 +32,18 @@ public class LabelDialog extends AlertDialog {
 	TabHost tabHost;
 
 	protected SeekBar certaintySeekBar;
-	private TextView certaintyText;
+	protected TextView certaintyText;
 	protected EditText annotationText;
 
 	protected ArrayList<String> tabs;
+	protected ArrayList<TabSpec> tabSpecs;
 	
 	@SuppressLint("InflateParams")
 	public LabelDialog(Context context) {
 		super(context);
 		
 		tabs = new ArrayList<String>();
+		tabSpecs = new ArrayList<TabHost.TabSpec>();
 		
 		setButton(DialogInterface.BUTTON_NEGATIVE, getContext().getResources().getString(R.string.cancel_dialog_button),
 				new OnClickListener() {
@@ -79,11 +83,11 @@ public class LabelDialog extends AlertDialog {
 	}
 	
 	protected void addTab(String id, String title, TabContentFactory content) {
-		tabs.add(id);
 		TabHost.TabSpec tab = tabHost.newTabSpec(id);
 		tab.setIndicator(title);
 		tab.setContent(content);
-		tabHost.addTab(tab);
+		tabs.add(id);
+		tabSpecs.add(tab);
 	}
 	
 	public void addCertaintyTab() {
@@ -171,6 +175,17 @@ public class LabelDialog extends AlertDialog {
 	
 	protected void defaultScreen() {
 		getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+	}
+	
+	@Override
+	public void show() {
+		super.show();
+		if (tabSpecs != null) {
+			for (TabHost.TabSpec tab : tabSpecs) {
+				tabHost.addTab(tab);
+			}
+			tabSpecs = null;
+		}
 	}
 	
 }

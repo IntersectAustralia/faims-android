@@ -23,14 +23,13 @@ import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.managers.AutoSaveManager;
 import au.org.intersect.faims.android.managers.BitmapManager;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.util.Compare;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class PictureGallery extends HorizontalScrollView implements ICustomView {
-
 
 	class PictureGalleryOnClickListener implements OnClickListener {
 
@@ -64,6 +63,9 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 	
 	@Inject
 	BitmapManager bitmapManager;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private String ref;
 	private boolean dynamic;
@@ -101,7 +103,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		FAIMSApplication.getInstance().injectMembers(this);
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
-		NativeCSS.addCSSClass(this, "gallery");
+		cssManager.addCSS(this, "gallery");
 	}
 
 	public PictureGallery(Context context, FormInputDef inputDef, String ref, boolean dynamic, boolean isMulti) {
@@ -119,7 +121,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		addView(galleriesLayout);		
 		this.internalListener = new PictureGalleryInternalOnClickListener();
 		this.customListener = new PictureGalleryOnClickListener();
-		NativeCSS.addCSSClass(this, "gallery");
+		cssManager.addCSS(this, "gallery");
 		reset();
 	}
 
@@ -435,8 +437,8 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 			}
 		});
 		
-		NativeCSS.addCSSClass(galleryLayout, "gallery");
-		NativeCSS.addCSSClass(gallery, "gallery-item");
+		cssManager.addCSS(galleryLayout, "gallery");
+		cssManager.addCSS(gallery, "gallery-item");
 		
 		TextView textView = new TextView(
 				galleriesLayout.getContext());
@@ -450,7 +452,7 @@ public class PictureGallery extends HorizontalScrollView implements ICustomView 
 		galleryLayout.addView(textView);
 		
 		FrameLayout imageContainer = new FrameLayout(galleriesLayout.getContext());
-		NativeCSS.addCSSClass(imageContainer, "gallery-item");
+		cssManager.addCSS(imageContainer, "gallery-item");
 		
 		imageContainer.addView(gallery);
 		View border = new View(galleriesLayout.getContext());

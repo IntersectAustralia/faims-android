@@ -20,11 +20,11 @@ import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.data.NameValuePair;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.util.ScaleUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 public class CustomListView extends ListView implements IView {
 	
@@ -33,6 +33,9 @@ public class CustomListView extends ListView implements IView {
 	
 	@Inject
 	BeanShellLinker linker;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private String ref;
 	private boolean dynamic;
@@ -63,7 +66,7 @@ public class CustomListView extends ListView implements IView {
 		this.ref = ref;
 		this.dynamic = dynamic;
 		setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-		NativeCSS.addCSSClass(this, "list");
+		cssManager.addCSS(this, "list");
 		setupLoadingSpinner();
 	}
 	
@@ -208,7 +211,7 @@ public class CustomListView extends ListView implements IView {
 		} else {
 			arrayAdapter.notifyDataSetChanged();
 		}
-		NativeCSS.refreshCSSStyling(this);
+		cssManager.refreshCSS(this);
 	}
 
 	@Override

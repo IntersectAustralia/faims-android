@@ -17,11 +17,12 @@ import au.org.intersect.faims.android.R;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.data.FormInputDef;
 import au.org.intersect.faims.android.data.NameValuePair;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.ui.activity.ShowModuleActivity;
 import au.org.intersect.faims.android.ui.map.MapLayout;
 import au.org.intersect.faims.android.util.Arch16n;
 
-import com.nativecss.NativeCSS;
+import com.google.inject.Inject;
 
 public class ViewFactory {
 
@@ -41,6 +42,9 @@ public class ViewFactory {
 		
 	}
 	
+	@Inject
+	CSSManager cssManager;
+	
 	private WeakReference<ShowModuleActivity> contextRef;
 	private Arch16n arch16n;
 	
@@ -55,10 +59,10 @@ public class ViewFactory {
         String inputText = attribute.questionText;
         inputText = arch16n.substituteValue(inputText);
         textView.setText(inputText);
-        NativeCSS.addCSSClass(textView, "label");
-        NativeCSS.setCSSId(textView, ref + "-label");
+        cssManager.addCSS(textView, "label");
+        cssManager.setCSSID(textView, ref + "-label");
         if (attribute.styleClass != null) {
-        	NativeCSS.addCSSClass(textView, attribute.styleClass + "-label");
+        	cssManager.addCSS(textView, attribute.styleClass + "-label");
         }
         return textView;
 	}
@@ -103,7 +107,7 @@ public class ViewFactory {
     	}
     	if (type >= 0) {
     		text.setInputType(type);
-    		NativeCSS.addCSSClass(text, "input-field");
+    		cssManager.addCSS(text, "input-field");
     	}
     	return text;
 	}
@@ -125,7 +129,7 @@ public class ViewFactory {
 	protected CustomEditText createTextArea(FormInputDef attribute, String ref, boolean dynamic) {
 		CustomEditText text = createTextField(-1, attribute, ref, dynamic);
     	text.setLines(TEXT_AREA_SIZE);
-    	NativeCSS.addCSSClass(text, "text-area");
+    	cssManager.addCSS(text, "text-area");
     	return text;
 	}
 	

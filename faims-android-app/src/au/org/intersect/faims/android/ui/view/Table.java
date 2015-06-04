@@ -16,12 +16,12 @@ import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.beanshell.BeanShellLinker;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.tasks.CancelableTask;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.StringUtil;
 
 import com.google.inject.Inject;
-import com.nativecss.NativeCSS;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class Table extends WebView implements IView {
@@ -60,6 +60,9 @@ public class Table extends WebView implements IView {
 	
 	@Inject
 	BeanShellLinker beanShellLinker;
+	
+	@Inject
+	CSSManager cssManager;
 	
 	private String query;
 	private String actionName;
@@ -100,7 +103,7 @@ public class Table extends WebView implements IView {
 		
 		// add java interface
 		addJavascriptInterface(new TableInterface(), "Android");
-		NativeCSS.addCSSClass(this, "table-view");
+		cssManager.addCSS(this, "table-view");
 	}
 	
 	@Override
