@@ -1,5 +1,6 @@
 package au.org.intersect.faims.android.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import au.org.intersect.faims.android.util.ModuleUtil;
 
 public class SplashActivity extends Activity {
 
+	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
