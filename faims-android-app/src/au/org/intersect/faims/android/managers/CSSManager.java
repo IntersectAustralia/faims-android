@@ -19,17 +19,17 @@ public class CSSManager {
 		this.viewCSS = new HashMap<View, String>();
 		if (!css.isEmpty()) {
 			try {
-//				NativeCSS.styleWithCSS(css);
+				NativeCSS.styleWithCSS(css);
 			} catch (Exception e) {
 				FLog.e("Couldn't style module with module CSS file", e);
-//				NativeCSS.styleWithCSS("");
+				NativeCSS.styleWithCSS("");
 			}
 		} else {
 			try {
-//				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(activity.getAssets().open("default.css")));
+				NativeCSS.styleWithCSS(FileUtil.convertStreamToString(activity.getAssets().open("default.css")));
 			} catch (Exception e) {
 				FLog.e("Couldn't style module with default styling", e);
-//				NativeCSS.styleWithCSS("");
+				NativeCSS.styleWithCSS("");
 			}
 		}
 	}
@@ -37,7 +37,7 @@ public class CSSManager {
 	public void destroy() {
 		if (viewCSS != null) {
 			for (View view : viewCSS.keySet()) {
-//				NativeCSS.removeCSSClass(view, viewCSS.get(view));
+				NativeCSS.removeCSSClass(view, viewCSS.get(view));
 			}
 			this.viewCSS = null;
 		}
@@ -46,22 +46,22 @@ public class CSSManager {
 	public void addCSS(View view, String cssClass) {
 		removeCSS(view);
 		viewCSS.put(view, cssClass);
-//		NativeCSS.addCSSClass(view, cssClass);
+		NativeCSS.addCSSClass(view, cssClass);
 	}
 	
 	public void removeCSS(View view) {
 		if (viewCSS.containsKey(view)) {
-//			NativeCSS.removeCSSClass(view, viewCSS.get(view));
+			NativeCSS.removeCSSClass(view, viewCSS.get(view));
 			viewCSS.remove(view);
 		}
 	}
 
 	public void refreshCSS(View view) {
-//		NativeCSS.refreshCSSStyling(view);
+		NativeCSS.refreshCSSStyling(view);
 	}
 
 	public void setCSSID(View view, String id) {
-//		NativeCSS.setCSSId(view, id);
+		NativeCSS.setCSSId(view, id);
 	}
 	
 }
