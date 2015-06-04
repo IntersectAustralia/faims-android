@@ -104,6 +104,9 @@
     <string name="download_busy_module_error_title">Module caching in progress</string>
     <string name="download_busy_module_error_message">Please wait until module has finished caching on the server and try again</string>
     
+    <string name="memory_low_title">Low Memory Error</string>
+    <string name="memory_low_message">The application has detected it is running low on memory and needs to be restarted.\nNote: Your data will not be effected in any way.\n\nPlease follow these instructions to restart the application:\n1) Please exit the application by going to the home screen.\n2) Find the application in your recently used apps.\n3) Swipe the application from the recently used apps to remove it from memory.</string>
+    
     <string name="load_module_title">Loading module</string>
     <string name="load_module_message">please wait..</string>
     

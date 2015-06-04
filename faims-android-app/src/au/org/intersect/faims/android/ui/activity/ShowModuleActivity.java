@@ -17,6 +17,7 @@ import java.util.concurrent.Semaphore;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -80,6 +81,7 @@ import au.org.intersect.faims.android.ui.dialog.BusyDialog;
 import au.org.intersect.faims.android.ui.dialog.ChoiceDialog;
 import au.org.intersect.faims.android.ui.dialog.ConfirmDialog;
 import au.org.intersect.faims.android.ui.dialog.DialogResultCode;
+import au.org.intersect.faims.android.ui.dialog.ErrorDialog;
 import au.org.intersect.faims.android.ui.dialog.IDialogListener;
 import au.org.intersect.faims.android.ui.drawer.NavigationDrawer;
 import au.org.intersect.faims.android.ui.map.CustomMapView;
@@ -89,6 +91,7 @@ import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.InputBuffer;
 import au.org.intersect.faims.android.util.InputBuffer.InputBufferListener;
+import au.org.intersect.faims.android.util.MemoryUtil;
 import au.org.intersect.faims.android.util.ModuleUtil;
 
 import com.google.inject.Inject;
@@ -191,6 +194,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	private Character hardwareDelimiter;
 	private InputBuffer deviceBuffer;
 	private ShowModuleMenuManager menuManager;
+	private ErrorDialog memoryLowDialog;
 
 	public String getModuleKey() {
 		return moduleKey;
@@ -227,6 +231,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		FAIMSApplication.getInstance().setApplication(getApplication());
 		FAIMSApplication.getInstance().injectMembers(this);
 		
@@ -260,7 +265,11 @@ public class ShowModuleActivity extends FragmentActivity implements
 		String css = module.getCSS();
 		cssManager.init(css, this);
 		
-		startLoadTask();
+		if (MemoryUtil.isMemoryLow(this)) {
+			showMemoryLowDialog();
+		} else {
+			startLoadTask();
+		}
 	}
 
 	private void startLoadTask() {
@@ -443,6 +452,18 @@ public class ShowModuleActivity extends FragmentActivity implements
 		}, 500);
 	}
 	
+	private void showMemoryLowDialog() {
+		memoryLowDialog = new ErrorDialog(this, getString(R.string.memory_low_title), getString(R.string.memory_low_message));
+		memoryLowDialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				ShowModuleActivity.this.finish();
+			}
+		});
+		memoryLowDialog.show();
+	}
+	
 	private void showBusyDialog() {
 		busyDialog = new BusyDialog(this,
 				getString(R.string.load_module_title),
@@ -561,6 +582,10 @@ public class ShowModuleActivity extends FragmentActivity implements
 		if (broadcastReceiver != null) {
 			unregisterReceiver(broadcastReceiver);
 			broadcastReceiver = null;
+		}
+		if (memoryLowDialog != null) {
+			memoryLowDialog.dismiss();
+			memoryLowDialog = null;
 		}
 		if (busyDialog != null) {
 			busyDialog.dismiss();
