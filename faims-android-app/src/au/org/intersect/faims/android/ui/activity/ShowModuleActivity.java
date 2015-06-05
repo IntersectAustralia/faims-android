@@ -265,7 +265,7 @@ public class ShowModuleActivity extends FragmentActivity implements
 		String css = module.getCSS();
 		cssManager.init(css, this);
 		
-		if (MemoryUtil.isMemoryLow(this)) {
+		if (MemoryUtil.isMemoryLow()) {
 			showMemoryLowDialog();
 		} else {
 			startLoadTask();
