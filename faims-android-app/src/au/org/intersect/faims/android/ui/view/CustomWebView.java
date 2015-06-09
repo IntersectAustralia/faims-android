@@ -10,6 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.managers.CSSManager;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.FileUtil;
 
 import com.google.inject.Inject;
@@ -32,6 +33,9 @@ public class CustomWebView extends WebView implements IView {
 	
 	@Inject
 	CSSManager cssManager;
+	
+	@Inject
+	Arch16n arch16n;
 
 	private Stack<WebPage> webPageStack;
 	
@@ -80,7 +84,7 @@ public class CustomWebView extends WebView implements IView {
 	}
 
 	public void loadDataWithBaseURL(String data, String mimeType, String encoding, String failUrl) {
-		WebPage webPage = new WebPage(data, mimeType, encoding, failUrl);
+		WebPage webPage = new WebPage(arch16n.substituteValue(data), mimeType, encoding, failUrl);
 		webPageStack.push(webPage);
 		loadWebPage();
 	}

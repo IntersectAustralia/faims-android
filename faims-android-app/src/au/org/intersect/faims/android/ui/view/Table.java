@@ -18,6 +18,7 @@ import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
 import au.org.intersect.faims.android.managers.CSSManager;
 import au.org.intersect.faims.android.tasks.CancelableTask;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.FileUtil;
 import au.org.intersect.faims.android.util.StringUtil;
 
@@ -63,6 +64,9 @@ public class Table extends WebView implements IView {
 	
 	@Inject
 	CSSManager cssManager;
+	
+	@Inject
+	Arch16n arch16n;
 	
 	private String query;
 	private String actionName;
@@ -138,7 +142,7 @@ public class Table extends WebView implements IView {
 			@Override
 			protected Void doInBackground(Void... params) {
 				try {
-					table = generateTable();
+					table = arch16n.substituteValue(generateTable());
 					return null;
 				} catch (Exception e) {
 					FLog.e("Error trying to load table", e);
