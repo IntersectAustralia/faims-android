@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import au.org.intersect.faims.android.app.FAIMSApplication;
 import au.org.intersect.faims.android.database.DatabaseManager;
 import au.org.intersect.faims.android.log.FLog;
+import au.org.intersect.faims.android.util.Arch16n;
 import au.org.intersect.faims.android.util.GeometryUtil;
 
 import com.google.inject.Inject;
@@ -28,6 +29,9 @@ public class DatabaseTextLayer extends TextLayer {
 	
 	@Inject
 	DatabaseManager databaseManager;
+	
+	@Inject
+	Arch16n arch16n;
 	
 	private DatabaseLayer databaseLayer;
 	private GeometryTextStyle textStyle;
@@ -75,7 +79,7 @@ public class DatabaseTextLayer extends TextLayer {
 		    for(Geometry geom: geometries){
 		        
 				GeometryData userData = (GeometryData) geom.userData;
-		        String label = userData.label;
+		        String label = arch16n.substituteValue(userData.label);
 		        
 		        MapPos topRight = null;
 		        if (geom instanceof Point) {
