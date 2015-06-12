@@ -493,7 +493,6 @@ public class ShowModuleActivity extends FragmentActivity implements
 		bitmapManager.destroy();
 		serverDiscovery.clearListeners();
 		arch16n.destroy();
-		FAIMSApplication.getInstance().destroyInjector();
 		destroy();
 		super.onDestroy();
 	}
