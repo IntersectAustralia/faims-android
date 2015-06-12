@@ -179,13 +179,13 @@ public class LabelDialog extends AlertDialog {
 	
 	@Override
 	public void show() {
-		super.show();
 		if (tabSpecs != null) {
 			for (TabHost.TabSpec tab : tabSpecs) {
 				tabHost.addTab(tab);
 			}
 			tabSpecs = null;
 		}
+		super.show();
 	}
 	
 }
