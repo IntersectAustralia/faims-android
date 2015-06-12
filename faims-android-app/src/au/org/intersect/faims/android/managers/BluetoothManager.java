@@ -123,7 +123,7 @@ public class BluetoothManager implements IFAIMSRestorable {
 			beanShellLinker.showToast("Please enable bluetooth");
 		} else {
 			// show dialog to connect to device
-			final Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+			final ArrayList<BluetoothDevice> pairedDevices = getPairedDevices(adapter);
 			if (pairedDevices.size() > 0) {
 				final ArrayList<CharSequence> sequences = new ArrayList<CharSequence>();
 				
@@ -152,6 +152,17 @@ public class BluetoothManager implements IFAIMSRestorable {
 		}
 	}
 	
+	private ArrayList<BluetoothDevice> getPairedDevices(BluetoothAdapter adapter) {
+		Set<BluetoothDevice> devices = adapter.getBondedDevices();
+		ArrayList<BluetoothDevice> pairedDevices = new ArrayList<BluetoothDevice>();
+		for (BluetoothDevice device : devices) {
+			if (device.getName() != null) {
+				pairedDevices.add(device);
+			}
+		}
+		return pairedDevices;
+	}
+
 	public void resetConnection() {
 		destroyConnection();
 		this.bluetoothDevice = null;
