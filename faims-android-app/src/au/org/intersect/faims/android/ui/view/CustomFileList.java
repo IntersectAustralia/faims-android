@@ -341,7 +341,7 @@ public abstract class CustomFileList extends LinearLayout implements ICustomView
 			certainties = new ArrayList<String>();
 		}
 		certainties.add(certainty);
-		updateCertaintyIcon(certainties.indexOf(certainty));
+		updateCertaintyIcon(certainties.size() - 1);
 		notifySave();
 	}
 	
