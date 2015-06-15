@@ -780,7 +780,7 @@ public class BeanShellLinker implements IFAIMSRestorable {
 	}
 	
 	public void disableAutoSave(String ref) {
-		autoSaveManager.disable(ref);
+		autoSaveManager.flush(true);
 	}
 
 	public void saveTab(String ref, String uuid, List<Geometry> geometry, 
