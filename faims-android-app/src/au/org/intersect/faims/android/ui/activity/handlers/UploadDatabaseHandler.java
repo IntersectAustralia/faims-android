@@ -27,12 +27,14 @@ public class UploadDatabaseHandler extends ShowModuleActivityHandler {
 		activity.hideBusyDialog();
 
 		Result result = (Result) message.obj;
-		if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
-			beanShellLinker.execute(callback);
-		} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
-			activity.showUploadDatabaseFailureDialog(callback);
-		} else {
-			// ignore
+		if (result != null) {			
+			if (result.resultCode == FAIMSClientResultCode.SUCCESS) {
+				beanShellLinker.execute(callback);
+			} else if (result.resultCode == FAIMSClientResultCode.FAILURE) {
+				activity.showUploadDatabaseFailureDialog(callback);
+			} else {
+				// ignore
+			}
 		}
 	}
 
