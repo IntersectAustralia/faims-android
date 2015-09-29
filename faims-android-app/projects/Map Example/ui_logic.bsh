@@ -708,7 +708,7 @@ updateEntity(String entityId) {
 
 	List attributes = createAttributeList();
 	if (entityId == null) {
-		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+		attributes.add(createEntityAttribute("entity", "simpleentity" + entityCount++, null, null, null));
 	}
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup2/tab2/name"), null, null, getFieldCertainty("tabgroup2/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup2/tab2/value"), null, getFieldValue("tabgroup2/tab2/value"), getFieldCertainty("tabgroup2/tab2/value")));
@@ -1060,7 +1060,7 @@ updateUIEntity(String entityId) {
 
 	List attributes = createAttributeList();
 	if (entityId == null) {
-		attributes.add(createEntityAttribute("entity", "Simple " + entityCount++, null, null, null));
+		attributes.add(createEntityAttribute("entity", "simpleentity " + entityCount++, null, null, null));
 	}
 	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup5/tab2/name"), null, null, getFieldCertainty("tabgroup5/tab2/name")));
 	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup5/tab2/value"), null, getFieldValue("tabgroup5/tab2/value"), getFieldCertainty("tabgroup5/tab2/value")));
