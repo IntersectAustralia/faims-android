@@ -24,7 +24,7 @@ String entity_id;
 int entityCount;
 
 initialise() {
-	fetchEntityList("simple", new FetchCallback() {
+	fetchEntityList("Simple", new FetchCallback() {
 		onFetch(result) {
 			entityCount = result.size() + 1;
 		}
@@ -74,7 +74,7 @@ updateEntity(entity_id) {
 	
 	attributes.add(createEntityAttribute("supervisor", getFieldValue("tabgroup1/tab2/supervisor"), null, null, getFieldCertainty("tabgroup1/tab2/supervisor")));
 	
-	saveArchEnt(entity_id, "simple", null, attributes, new SaveCallback() {
+	saveArchEnt(entity_id, "Simple", null, attributes, new SaveCallback() {
 		onSave(uuid, newRecord) {
 			entity_id = uuid;
 			refreshEntities();
@@ -84,7 +84,7 @@ updateEntity(entity_id) {
 }
 
 refreshEntities() {
-	fetchEntityList("simple", new FetchCallback() {
+	fetchEntityList("Simple", new FetchCallback() {
 		onFetch(result) {		
 			populateDropDown("tabgroup1/tab3/entity", result);
 		}
