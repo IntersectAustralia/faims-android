@@ -372,7 +372,7 @@ loadMembers() {
 		}
 	});
 	
-	fetchRelationshipList("abovebelow", new FetchCallback() {
+	fetchRelationshipList("AboveBelow", new FetchCallback() {
 		onFetch(result) {
 			populateDropDown("tabgroup4/tab1/relationships", result);
 		}
